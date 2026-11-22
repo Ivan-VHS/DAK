@@ -3,7 +3,7 @@ project('duckos-compositor', 'c',
   default_options: ['c_std=c11', 'warning_level=2'])
 
 wayland_server = dependency('wayland-server')
-wlroots = dependency('wlroots-0.18', version: '>=0.18.0')
+wlroots = dependency('wlroots-0.19', version: '>=0.19.2')
 threads = dependency('threads')
 
 executable('duckos-compositor',
