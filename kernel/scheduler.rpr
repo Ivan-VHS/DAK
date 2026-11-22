@@ -1,0 +1,55 @@
+# Priority-ordered queue with explicit round-robin time-slice accounting.
+
+import "process.rpr" as process
+
+export craft create_queue(processes, quantum_ticks) {
+    assert(kind(quantum_ticks) == "number" and quantum_ticks > 0
+        and quantum_ticks % 1 == 0, "time slice must be a positive whole number")
+    yield [process["schedule"](processes), quantum_ticks, 0]
+}
+
+export craft is_valid(queue) {
+    when kind(queue) != "list" { yield false }
+    when size(queue) != 3 { yield false }
+    when kind(queue[0]) != "list" { yield false }
+    when kind(queue[1]) != "number" or queue[1] <= 0 { yield false }
+    when queue[1] % 1 != 0 { yield false }
+    when kind(queue[2]) != "number" or queue[2] < 0 { yield false }
+    yield true
+}
+
+export craft queue_length(queue) {
+    assert(is_valid(queue), "invalid scheduler queue")
+    yield size(queue[0])
+}
+
+export craft current(queue) {
+    assert(is_valid(queue), "invalid scheduler queue")
+    when size(queue[0]) == 0 { yield [] }
+    yield first(queue[0])
+}
+
+export craft advance(queue, ticks) {
+    assert(is_valid(queue), "invalid scheduler queue")
+    assert(kind(ticks) == "number" and ticks >= 0 and ticks % 1 == 0,
+        "elapsed ticks must be a non-negative whole number")
+    yield [queue[0], queue[1], queue[2] + ticks]
+}
+
+export craft expired(queue) {
+    assert(is_valid(queue), "invalid scheduler queue")
+    yield queue[2] >= queue[1]
+}
+
+export craft remaining(queue) {
+    assert(is_valid(queue), "invalid scheduler queue")
+    when expired(queue) { yield 0 }
+    yield queue[1] - queue[2]
+}
+
+export craft rotate(queue) {
+    assert(is_valid(queue), "invalid scheduler queue")
+    when size(queue[0]) < 2 { yield [queue[0], queue[1], 0] }
+    make rotated := push(rest(queue[0]), first(queue[0]))
+    yield [rotated, queue[1], 0]
+}
