@@ -78,9 +78,9 @@ static DuckAbiStatus runtime_call(
 ) {
     if (runtime == NULL || runtime->transport == NULL || result == NULL)
         return DUCK_STATUS_INVALID_POINTER;
-    if (argument_count > DUCK_ABI_MAX_ARGUMENTS ||
+    if (argument_count > UINT32_MAX ||
         (argument_count != 0U && arguments == NULL))
-        return DUCK_STATUS_TOO_MANY_ARGUMENTS;
+        return DUCK_STATUS_BAD_ARGUMENT_LAYOUT;
 
     DuckCallFrame frame __attribute__((aligned(16))) = {
         DUCK_ABI_MAGIC,
@@ -110,8 +110,7 @@ static DuckAbiStatus runtime_call(
 
     status = duck_abi_validate_result(&local_result, &error);
     if (status != DUCK_STATUS_OK) return status;
-    if (local_result.value.kind > DUCK_VALUE_ERROR ||
-        (local_result.value.flags & ~(DUCK_VALUE_BORROWED |
+    if ((local_result.value.flags & ~(DUCK_VALUE_BORROWED |
             DUCK_VALUE_OWNED | DUCK_VALUE_READ_ONLY)) != 0U ||
         ((local_result.value.flags & DUCK_VALUE_BORROWED) != 0U &&
          (local_result.value.flags & DUCK_VALUE_OWNED) != 0U)) {
@@ -140,7 +139,6 @@ DuckAbiStatus duck_runtime_write(
 ) {
     if (written == NULL || (length != 0U && buffer == NULL))
         return DUCK_STATUS_INVALID_POINTER;
-    if (length > UINT64_MAX) return DUCK_STATUS_BAD_FRAME_SIZE;
 
     DuckValue arguments[3] __attribute__((aligned(16))) = {
         unsigned_value(handle),
