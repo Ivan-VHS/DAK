@@ -1,0 +1,40 @@
+name: DuckOS Reaper CI
+
+on:
+  push:
+    branches: [main, "reaper/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  reaper-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out DuckOS
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the Reaper reference runtime
+        run: |
+          git clone --depth 1 https://github.com/Ivan-VHS/Reaper.git ../Reaper
+          python -m pip install -e ../Reaper
+
+      - name: Check Reaper modules
+        run: |
+          python -m reaper --check duckos.rpr
+          python -m reaper --check tests/smoke.rpr
+
+      - name: Run DuckOS boot path
+        run: python -m reaper duckos.rpr
+
+      - name: Run Reaper smoke contracts
+        run: python -m reaper tests/smoke.rpr
+
+      - name: Test function registry
+        run: |
+          python -m unittest discover -s tests -v
+          python tools/catalog.py --offset 87955 --limit 10
