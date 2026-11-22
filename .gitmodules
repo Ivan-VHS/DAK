@@ -1,0 +1,16 @@
+[submodule "federation/Pytyliki"]
+	path = federation/Pytyliki
+	url = https://github.com/Ivan-VHS/Pytyliki.git
+	branch = main
+[submodule "federation/Reaper"]
+	path = federation/Reaper
+	url = https://github.com/Ivan-VHS/Reaper.git
+	branch = main
+[submodule "federation/OPlague"]
+	path = federation/OPlague
+	url = https://github.com/Ivan-VHS/OPlague.git
+	branch = main
+[submodule "federation/VentuSample"]
+	path = federation/VentuSample
+	url = https://github.com/Ivan-VHS/VentuSample.git
+	branch = main

@@ -1,0 +1,51 @@
+{
+  "schema": "duckos.federation.v1",
+  "policy": {
+    "integration": "git-submodule",
+    "sourceOfTruth": "upstream-repository",
+    "allowRuntimeCodeLoading": false,
+    "preserveProjectLicenses": true
+  },
+  "projects": [
+    {
+      "id": "pytyliki",
+      "path": "federation/Pytyliki",
+      "repository": "https://github.com/Ivan-VHS/Pytyliki",
+      "branch": "main",
+      "role": "processor-and-resource-workstation",
+      "owns": ["cpu-inventory", "memory-analysis", "bounded-benchmarks", "processor-diagnostics"],
+      "integration": "read-only discovery and explicit local CLI invocation",
+      "license": "MIT"
+    },
+    {
+      "id": "reaper",
+      "path": "federation/Reaper",
+      "repository": "https://github.com/Ivan-VHS/Reaper",
+      "branch": "main",
+      "role": "language-and-developer-toolchain",
+      "owns": ["reaper-language", "reference-runtime", "compiler-tooling", "studio"],
+      "integration": "explicit local CLI/editor launch",
+      "license": "Apache-2.0"
+    },
+    {
+      "id": "oplague",
+      "path": "federation/OPlague",
+      "repository": "https://github.com/Ivan-VHS/OPlague",
+      "branch": "main",
+      "role": "device-and-driver-inspection",
+      "owns": ["read-only-device-inventory", "inf-metadata-review", "package-integrity-evidence"],
+      "integration": "read-only device inventory and user-selected metadata inspection",
+      "license": "Apache-2.0"
+    },
+    {
+      "id": "ventusample",
+      "path": "federation/VentuSample",
+      "repository": "https://github.com/Ivan-VHS/VentuSample",
+      "branch": "main",
+      "role": "offline-audio-workstation",
+      "owns": ["sample-generation", "wav-processing", "offline-dsp"],
+      "integration": "explicit local application launch and file handoff",
+      "license": "Apache-2.0"
+    }
+  ]
+}

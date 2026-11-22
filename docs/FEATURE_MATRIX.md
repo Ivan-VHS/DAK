@@ -1,0 +1,33 @@
+# Матрица готовности
+
+Статус отражает файлы этого релизного кандидата, а не идеи в каталоге.
+
+| Подсистема | Статус | Что доступно сейчас |
+|---|---|---|
+| Desktop shell | Implemented preview | окна, dock, поиск, настройки, темы, уведомления |
+| Responsive layout | Implemented | широкие и узкие экраны |
+| Reduced motion | Implemented | системная настройка демо-интерфейса |
+| Resource dashboard | Demo only | демонстрационные графики, явно маркированные |
+| CLI package | Implemented | Python package и entry point |
+| sysmon-pulse | Implemented, Linux | CPU delta, RAM, swap, interrupt rate |
+| fd-watch | Implemented, Linux | FD по PID с типом file/socket/pipe |
+| mmap-bench | Implemented | последовательный/случайный доступ, page fault delta |
+| dir-tree-diff | Implemented | SHA-256, права, размер, время изменения |
+| inotify-exec | Implemented, Linux | прямое наблюдение каталога, glob и argv без shell |
+| proc-env-dump | Implemented, Linux | cmdline и environment с маскированием секретов |
+| disk-hotspots | Implemented | размер логический/занятый, дедупликация hard links |
+| mount-audit | Implemented, Linux | проверка noexec/nosuid/nodev |
+| oom-score-map | Implemented, Linux | oom_score и oom_score_adj |
+| irq-balance-check | Implemented, Linux | распределение счётчиков по CPU |
+| clock-jitter | Implemented | измерение отклонений sleep/monotonic |
+| entropy-gauge | Implemented, Linux | entropy_avail из procfs |
+| sysinfo-snapshot | Implemented | ограниченный JSON snapshot |
+| atomic-write | Implemented | temp + fsync + replace + directory fsync |
+| symlink-loop-find | Implemented | broken links и циклы |
+| file-age-hist | Implemented | возраст файлов по mtime |
+| page-size-probe | Implemented | системная страница и hugepages |
+| Kernel / bootloader | Not implemented | отдельный проектный этап |
+| Wayland compositor | Not implemented | shell preview не является compositor |
+| Driver installation | Out of scope | OPlague остаётся read-only |
+| AI agent with host access | Not implemented | нужен отдельный permission broker и audit log |
+| Native GPU telemetry | Not implemented | браузерный dashboard показывает только demo |
