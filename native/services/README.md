@@ -9,6 +9,9 @@ Run commands from the repository root:
     PYTHONPATH=native/services python -m duckos_services audio ports outputs
     PYTHONPATH=native/services python -m duckos_services theme audit --name high-contrast
     PYTHONPATH=native/services python -m duckos_services snapshot save --label "Before editing"
+    PYTHONPATH=native/services python -m duckos_services po search snapshot
+    PYTHONPATH=native/services python -m duckos_services shortcuts bind editor Ctrl+K po.open
+    PYTHONPATH=native/services python -m duckos_services shortcuts dispatch Ctrl+K --context editor
 
 Run tests:
 

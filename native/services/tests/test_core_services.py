@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-import hashlib
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 
+from duckos_services.cli import main as cli_main
 from duckos_services.cockos import PipeWireAudioBus
 from duckos_services.common import ServiceError
 from duckos_services.events import EventBus
@@ -189,6 +191,52 @@ class UnifyTests(unittest.TestCase):
             restored = hub.restore_snapshot(checkpoint["id"])
             self.assertEqual(restored["profile"], "balanced")
             self.assertEqual(restored["layout"], "main-stack")
+
+
+class CliTests(unittest.TestCase):
+    def test_po_search_lists_registered_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = cli_main([
+                    "--state-dir", temporary, "po", "search", "snapshot",
+                ])
+
+        self.assertEqual(result, 0)
+        self.assertIn('"id": "snapshot.create"', output.getvalue())
+        self.assertIn('"id": "snapshot.restore"', output.getvalue())
+
+    def test_po_restore_is_blocked_without_confirmation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = cli_main([
+                    "--state-dir", temporary,
+                    "po", "run", "snapshot.restore",
+                    "--arguments", '{"id":"not-a-real-snapshot"}',
+                ])
+
+        self.assertEqual(result, 0)
+        self.assertIn('"status": "confirmation-required"', output.getvalue())
+
+    def test_shortcut_binding_survives_new_cli_session(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            with redirect_stdout(io.StringIO()):
+                bind_result = cli_main([
+                    "--state-dir", temporary,
+                    "shortcuts", "bind", "editor", "Ctrl+O", "po.open",
+                ])
+
+            output = io.StringIO()
+            with redirect_stdout(output):
+                dispatch_result = cli_main([
+                    "--state-dir", temporary,
+                    "shortcuts", "dispatch", "Ctrl+O", "--context", "editor",
+                ])
+
+        self.assertEqual(bind_result, 0)
+        self.assertEqual(dispatch_result, 0)
+        self.assertEqual(output.getvalue().strip(), '"po.open"')
 
 
 if __name__ == "__main__":

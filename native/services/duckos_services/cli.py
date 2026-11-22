@@ -65,6 +65,26 @@ def _parser() -> argparse.ArgumentParser:
     select = profile_commands.add_parser("set")
     select.add_argument("name", choices=tuple(PROFILES))
 
+    po = commands.add_parser("po", help="search and run registered DuckOS commands")
+    po_commands = po.add_subparsers(dest="po_command", required=True)
+    search = po_commands.add_parser("search")
+    search.add_argument("query", nargs="?", default="")
+    run = po_commands.add_parser("run")
+    run.add_argument("command_id")
+    run.add_argument("--arguments", default="{}", help="JSON object passed to the handler")
+    run.add_argument("--confirm", action="store_true", help="confirm a destructive action")
+
+    shortcuts = commands.add_parser("shortcuts", help="inspect and route Ka-bon shortcuts")
+    shortcut_commands = shortcuts.add_subparsers(dest="shortcut_command", required=True)
+    shortcut_commands.add_parser("list")
+    bind = shortcut_commands.add_parser("bind")
+    bind.add_argument("context")
+    bind.add_argument("chord")
+    bind.add_argument("action")
+    dispatch = shortcut_commands.add_parser("dispatch")
+    dispatch.add_argument("chord")
+    dispatch.add_argument("--context", default="global")
+
     return parser
 
 
@@ -111,6 +131,30 @@ def main(argv: list[str] | None = None) -> int:
                 _print(PROFILES)
             else:
                 _print(hub.switch_profile(args.name))
+        elif args.command == "po":
+            if args.po_command == "search":
+                _print(hub.commands.search(args.query))
+            else:
+                arguments = json.loads(args.arguments)
+                if not isinstance(arguments, dict):
+                    raise ServiceError("Po command arguments must be a JSON object")
+                _print(hub.run_command(
+                    args.command_id,
+                    arguments,
+                    confirmed=args.confirm,
+                ))
+        elif args.command == "shortcuts":
+            if args.shortcut_command == "list":
+                _print(hub.input.export())
+            elif args.shortcut_command == "bind":
+                hub.bind_shortcut(args.context, args.chord, args.action)
+                _print(hub.input.export())
+            else:
+                _print(hub.dispatch_shortcut(args.chord, args.context) or {
+                    "status": "unbound",
+                    "chord": args.chord,
+                    "context": args.context,
+                })
         return 0
     except (ServiceError, OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         print(f"duckos-services: {error}")
