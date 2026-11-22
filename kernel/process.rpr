@@ -1,0 +1,71 @@
+# Process records: [pid, name, priority, state, memory_bytes].
+
+export craft create(pid, name, priority, state, memory_bytes) {
+    yield [pid, name, priority, state, memory_bytes]
+}
+
+export craft is_valid(process) {
+    when kind(process) != "list" { yield false }
+    when size(process) != 5 { yield false }
+    when kind(process[0]) != "number" or process[0] <= 0 { yield false }
+    when kind(process[1]) != "text" or size(process[1]) == 0 { yield false }
+    when kind(process[2]) != "number" or process[2] < 0 { yield false }
+    when kind(process[3]) != "text" { yield false }
+    when kind(process[4]) != "number" or process[4] < 0 { yield false }
+    yield true
+}
+
+craft invalid_process(process) {
+    yield not is_valid(process)
+}
+
+export craft all_valid(processes) {
+    yield size(keep(processes, invalid_process)) == 0
+}
+
+craft ready_process(process) {
+    yield is_valid(process) and process[3] == "ready"
+}
+
+export craft ready_queue(processes) {
+    yield keep(processes, ready_process)
+}
+
+craft priority_value(process) {
+    yield process[2]
+}
+
+export craft schedule(processes) {
+    yield sort_by(ready_queue(processes), priority_value, "desc")
+}
+
+export craft next_process(processes) {
+    make ready := schedule(processes)
+    when size(ready) == 0 { yield [] }
+    yield first(ready)
+}
+
+craft matches_state(process) {
+    yield process[3] == expected_state
+}
+
+export craft by_state(processes, expected_state) {
+    yield keep(processes, matches_state)
+}
+
+export craft count_state(processes, expected_state) {
+    yield size(by_state(processes, expected_state))
+}
+
+craft add_process_memory(total, process) {
+    yield total + process[4]
+}
+
+export craft total_memory(processes) {
+    yield fold(processes, 0, add_process_memory)
+}
+
+export craft stop(process) {
+    assert(is_valid(process), "cannot stop an invalid process record")
+    yield [process[0], process[1], process[2], "stopped", process[4]]
+}
