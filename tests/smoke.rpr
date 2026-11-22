@@ -8,6 +8,10 @@ import "../kernel/devices.rpr" as devices
 import "../kernel/monitor.rpr" as monitor
 import "../kernel/services.rpr" as services
 import "../kernel/catalog.rpr" as catalog
+import "../kernel/scheduler.rpr" as scheduler
+import "../kernel/storage.rpr" as storage
+import "../kernel/shell.rpr" as shell
+import "../kernel/clock.rpr" as clock
 
 make jobs := [
     process["create"](10, "worker-a", 10, "ready", 1024),
@@ -52,6 +56,30 @@ make service := services["start"](services["create_service"]("logger", "stopped"
 assert(services["is_running"](service))
 assert(services["restart"](service)[2] == 1)
 assert(services["event_count"](services["push_event"]([], "test", "payload", 1)) == 1)
+
+make run_queue := scheduler["create_queue"](jobs, 8)
+assert(scheduler["current"](run_queue)[0] == 11)
+assert(scheduler["remaining"](scheduler["advance"](run_queue, 3)) == 5)
+assert(scheduler["expired"](scheduler["advance"](run_queue, 8)))
+assert(scheduler["current"](scheduler["rotate"](run_queue))[0] == 10)
+
+make volume := storage["create_volume"](16384, 4096, 1024)
+assert(storage["free_bytes"](volume) == 12288)
+assert(storage["free_bytes"](storage["write"](volume, 2048)) == 10240)
+assert(storage["used_blocks"](storage["remove"](volume, 1024)) == 3)
+assert(storage["pressure"](volume) == "normal")
+
+make tokens := shell["parse_line"]("ps  --all")
+assert(tokens == ["ps", "--all"])
+assert(shell["command_record"]("mem --brief")[0] == "mem")
+assert(shell["is_builtin"](tokens))
+assert(not shell["is_builtin"](shell["parse_line"]("format /dev/sda")))
+
+assert(clock["milliseconds_to_ticks"](150, 100) == 15)
+assert(clock["ticks_to_milliseconds"](12, 100) == 120)
+assert(clock["ticks_remaining"](12, 30) == 18)
+assert(clock["deadline_reached"](30, 30))
+assert(clock["elapsed_ticks"](10, 25) == 15)
 
 assert(catalog["target_count"]() == 87965)
 emit "DuckOS Reaper smoke tests passed."
