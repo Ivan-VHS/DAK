@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 add_library(duckos_abi STATIC src/abi.c)
-target_include_directories(duckos_abi PUBLIC \${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(duckos_abi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(MSVC)
     target_compile_options(duckos_abi PRIVATE /W4)
