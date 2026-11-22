@@ -1,0 +1,31 @@
+name: DuckOS bootstrap checks
+
+on:
+  push:
+    branches: [main, "integration/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: duckos-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout pinned source graph
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+      - name: Validate ecosystem registry
+        run: python3 tools/validate_ecosystem.py
+      - name: Run registry and security tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Verify Beelzebul policy
+        run: python3 tools/beelzebul.py --json --output "${{ runner.temp }}/duckos-beelzebul.json"

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/duckos.ecosystem.v1.schema.json",
+  "title": "DuckOS ecosystem registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "system",
+    "projects",
+    "interfaces",
+    "policies"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.ecosystem.v1"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "system": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "status",
+        "repository",
+        "submodule_strategy",
+        "statement"
+      ],
+      "properties": {
+        "id": {
+          "const": "duckos"
+        },
+        "name": {
+          "const": "DuckOS"
+        },
+        "status": {
+          "enum": [
+            "bootstrap",
+            "development",
+            "bootable",
+            "release"
+          ]
+        },
+        "repository": {
+          "type": "string"
+        },
+        "submodule_strategy": {
+          "const": "pinned_gitlinks"
+        },
+        "statement": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "projects": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role",
+          "status",
+          "repository"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "repository": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "transport",
+          "owner"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
