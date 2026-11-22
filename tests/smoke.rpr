@@ -1,13 +1,13 @@
 # Executable contracts for the DuckOS Reaper modules.
 
-import "kernel/process.rpr" as process
-import "kernel/memory.rpr" as memory
-import "kernel/security.rpr" as security
-import "kernel/vfs.rpr" as vfs
-import "kernel/devices.rpr" as devices
-import "kernel/monitor.rpr" as monitor
-import "kernel/services.rpr" as services
-import "kernel/catalog.rpr" as catalog
+import "../kernel/process.rpr" as process
+import "../kernel/memory.rpr" as memory
+import "../kernel/security.rpr" as security
+import "../kernel/vfs.rpr" as vfs
+import "../kernel/devices.rpr" as devices
+import "../kernel/monitor.rpr" as monitor
+import "../kernel/services.rpr" as services
+import "../kernel/catalog.rpr" as catalog
 
 make jobs := [
     process["create"](10, "worker-a", 10, "ready", 1024),
