@@ -1,0 +1,15 @@
+# The full registry is paginated by tools/catalog.py.
+# Only exported Reaper crafts are marked implemented.
+
+export craft target_count() {
+    yield 87965
+}
+
+export craft catalogue_name() {
+    yield "DuckOS Function Registry"
+}
+
+export craft catalogue_contract() {
+    yield ["duckos.function-registry.v1", target_count(),
+        "implemented and reserved entries are distinct"]
+}
