@@ -10,6 +10,10 @@ import "kernel/devices.rpr" as devices
 import "kernel/monitor.rpr" as monitor
 import "kernel/services.rpr" as services
 import "kernel/catalog.rpr" as catalog
+import "kernel/scheduler.rpr" as scheduler
+import "kernel/storage.rpr" as storage
+import "kernel/shell.rpr" as shell
+import "kernel/clock.rpr" as clock
 
 make boot := system["boot_report"]()
 emit boot[0] ++ " " ++ boot[1] ++ " — " ++ boot[2]
@@ -23,15 +27,25 @@ assert(process["all_valid"](process_table), "process table validation failed")
 
 make ready := process["schedule"](process_table)
 make next := process["next_process"](process_table)
+make run_queue := scheduler["create_queue"](process_table, 5)
+make after_rotation := scheduler["rotate"](run_queue)
+make after_two_ticks := scheduler["advance"](run_queue, 2)
+assert(scheduler["current"](after_rotation)[0] == 2, "round-robin rotation failed")
+assert(scheduler["remaining"](after_two_ticks) == 3, "scheduler tick accounting failed")
 emit "Processes: " ++ text(size(process_table))
 emit "Ready queue: " ++ text(size(ready))
 emit "Next process: " ++ next[1]
+emit "Scheduler quantum remaining: " ++ text(scheduler["remaining"](after_two_ticks))
 
 make heap := memory["create_pool"](1048576, 262144)
 make heap_after_start := memory["allocate"](heap, 65536)
 assert(memory["is_valid"](heap_after_start), "memory accounting failed")
 emit "Memory free: " ++ text(memory["available"](heap_after_start)) ++ " bytes"
 emit "Memory pressure: " ++ memory["pressure"](heap_after_start)
+
+make volume := storage["create_volume"](1048576, 262144, 4096)
+make volume_after_write := storage["write"](volume, 8192)
+emit "Storage free: " ++ text(storage["free_bytes"](volume_after_write)) ++ " bytes"
 
 make granted := ["process.read", "memory.read", "device.inspect"]
 make requested := ["process.read", "device.inspect"]
@@ -61,15 +75,27 @@ make services_table := [
 make event_queue := services["push_event"]([], "system.boot", "ready", 1)
 emit "Running services: " ++ text(services["running_count"](services_table))
 emit "Queued events: " ++ text(services["event_count"](event_queue))
+
+make command := shell["command_record"]("ps --all")
+assert(command[0] == "ps", "shell command parsing failed")
+assert(shell["is_builtin"](shell["parse_line"]("ps")), "built-in command lookup failed")
+
+make boot_ticks := clock["milliseconds_to_ticks"](150, 100)
+assert(boot_ticks == 15, "clock conversion failed")
+emit "Boot timer: " ++ text(boot_ticks) ++ " ticks"
 emit "Function registry target: " ++ text(catalog["target_count"]())
 
 make boot_record := [
     boot,
     ["processes", size(process_table), "ready", size(ready)],
+    ["scheduler", scheduler["queue_length"](run_queue), scheduler["remaining"](after_two_ticks)],
     ["memory", memory["capacity"](heap_after_start), memory["used"](heap_after_start)],
+    ["storage", storage["free_bytes"](volume_after_write)],
     ["devices", size(device_table), devices["online_count"](device_table)],
     ["health", health[3]],
     ["services", services["running_count"](services_table)],
+    ["shell", command[0]],
+    ["clock", boot_ticks],
     ["catalogue_target", catalog["target_count"]()]
 ]
 write_json("var/boot-report.json", boot_record)
