@@ -64,7 +64,7 @@ def validate_manifest(manifest: Any, root: str | Path, *, verify_files: bool = T
         raise ManifestError("system version must contain 1..64 characters")
     if not isinstance(kernel_abi, str) or not kernel_abi.strip() or len(kernel_abi) > 128:
         raise ManifestError("kernel_abi must be non-empty text of at most 128 characters")
-    if architecture not in _ARCHITECTURES:
+    if not isinstance(architecture, str) or architecture not in _ARCHITECTURES:
         raise ManifestError(f"architecture must be one of {sorted(_ARCHITECTURES)}")
 
     components = manifest.get("components")
