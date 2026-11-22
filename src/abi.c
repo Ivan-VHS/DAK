@@ -104,6 +104,8 @@ const char *duck_abi_status_name(DuckAbiStatus status) {
     case DUCK_STATUS_NOT_FOUND: return "not-found";
     case DUCK_STATUS_CANCELLED: return "cancelled";
     case DUCK_STATUS_INTERNAL_ERROR: return "internal-error";
+    case DUCK_STATUS_ARITHMETIC_OVERFLOW: return "arithmetic-overflow";
+    case DUCK_STATUS_DIVISION_BY_ZERO: return "division-by-zero";
     default: return "unknown-status";
     }
 }
