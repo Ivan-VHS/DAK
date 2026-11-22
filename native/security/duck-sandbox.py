@@ -40,18 +40,16 @@ def build_command(args: argparse.Namespace, workspace: Path, home: Path) -> list
         "--dir", "/home",
         "--bind", str(home), "/home/agent",
         "--ro-bind", "/usr", "/usr",
-        "--symlink", "usr/bin", "/bin",
-        "--symlink", "usr/sbin", "/sbin",
-        "--symlink", "usr/lib", "/lib",
+        "--ro-bind-try", "/bin", "/bin",
+        "--ro-bind-try", "/sbin", "/sbin",
+        "--ro-bind-try", "/lib", "/lib",
+        "--ro-bind-try", "/lib64", "/lib64",
         "--dir", "/etc",
         "--ro-bind-try", "/etc/ld.so.cache", "/etc/ld.so.cache",
         "--ro-bind-try", "/etc/nsswitch.conf", "/etc/nsswitch.conf",
         "--ro-bind-try", "/etc/passwd", "/etc/passwd",
         "--ro-bind-try", "/etc/group", "/etc/group",
     ]
-
-    if Path("/usr/lib64").exists():
-        command.extend(["--symlink", "usr/lib64", "/lib64"])
 
     if args.read_only:
         command.extend(["--ro-bind", str(workspace), "/workspace"])
