@@ -1,0 +1,54 @@
+# Path policy helpers for POSIX-style virtual paths; host I/O stays explicit.
+
+export craft is_safe(path) {
+    when kind(path) != "text" or size(path) == 0 { yield false }
+    when contains(split(path, "/"), "..") { yield false }
+    when contains(path, "\\") { yield false }
+    yield true
+}
+
+export craft is_absolute(path) {
+    yield starts_with(path, "/")
+}
+
+export craft normalize(path) {
+    assert(is_safe(path), "unsafe virtual path")
+    vary result := ""
+    each part in split(path, "/") {
+        when part != "" and part != "." {
+            when result == "" {
+                change result := part
+            } otherwise {
+                change result := result ++ "/" ++ part
+            }
+        }
+    }
+    when is_absolute(path) { yield "/" ++ result }
+    yield result
+}
+
+export craft join(parent, child) {
+    assert(is_safe(parent) and is_safe(child), "unsafe virtual path")
+    assert(not is_absolute(child), "child path must be relative")
+    yield normalize(parent ++ "/" ++ child)
+}
+
+export craft basename(path) {
+    assert(is_safe(path), "unsafe virtual path")
+    make parts := split(path, "/")
+    yield parts[size(parts) - 1]
+}
+
+export craft extension(path) {
+    make file_name := basename(path)
+    make parts := split(file_name, ".")
+    when size(parts) < 2 { yield "" }
+    yield parts[size(parts) - 1]
+}
+
+export craft stays_under(root, path) {
+    make clean_root := normalize(root)
+    make clean_path := normalize(path)
+    when clean_root == "/" { yield is_absolute(clean_path) }
+    yield clean_path == clean_root or starts_with(clean_path, clean_root ++ "/")
+}

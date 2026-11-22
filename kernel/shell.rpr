@@ -1,0 +1,37 @@
+# Minimal shell-line parsing. Quotes and command execution are intentionally
+# left to a later interactive shell implementation.
+
+export craft line_is_valid(line) {
+    yield kind(line) == "text" and size(line) <= 4096
+}
+
+export craft parse_line(line) {
+    assert(line_is_valid(line), "shell input must be text no longer than 4096 characters")
+    make clean := trim(line)
+    when size(clean) == 0 { yield [] }
+    craft non_empty(part) {
+        yield size(part) > 0
+    }
+    yield keep(split(clean, " "), non_empty)
+}
+
+export craft command(tokens) {
+    when size(tokens) == 0 { yield "" }
+    yield first(tokens)
+}
+
+export craft arguments(tokens) {
+    when size(tokens) == 0 { yield [] }
+    yield rest(tokens)
+}
+
+export craft is_builtin(tokens) {
+    make verb := command(tokens)
+    yield contains(["help", "clear", "status", "ps", "mem", "devices", "exit"], verb)
+}
+
+export craft command_record(line) {
+    make tokens := parse_line(line)
+    when size(tokens) == 0 { yield ["", []] }
+    yield [first(tokens), rest(tokens)]
+}

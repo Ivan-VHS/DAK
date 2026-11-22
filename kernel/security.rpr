@@ -1,0 +1,38 @@
+# Capability checks are explicit and deny by default.
+
+export craft has(granted, requested) {
+    yield contains(granted, requested)
+}
+
+export craft missing(granted, requested) {
+    craft permission_missing(permission) {
+        yield not contains(granted, permission)
+    }
+    yield keep(requested, permission_missing)
+}
+
+export craft allows_all(granted, requested) {
+    yield size(missing(granted, requested)) == 0
+}
+
+export craft allows_any(granted, requested) {
+    craft permission_present(permission) {
+        yield contains(granted, permission)
+    }
+    yield size(keep(requested, permission_present)) > 0
+}
+
+export craft capability_report(granted, requested) {
+    make absent := missing(granted, requested)
+    yield [size(granted), size(requested), size(absent), size(absent) == 0]
+}
+
+export craft require_all(granted, requested) {
+    assert(allows_all(granted, requested), "required capability is not granted")
+    yield true
+}
+
+export craft deny_by_default(granted, requested) {
+    when kind(granted) != "list" or kind(requested) != "list" { yield false }
+    yield allows_all(granted, requested)
+}

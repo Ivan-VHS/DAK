@@ -1,0 +1,44 @@
+# Device inventory and health metadata, not physical driver bindings.
+
+export craft create(device_id, name, device_type, state, firmware) {
+    yield [device_id, name, device_type, state, firmware]
+}
+
+export craft is_valid(device) {
+    when kind(device) != "list" { yield false }
+    when size(device) != 5 { yield false }
+    when kind(device[0]) != "number" or device[0] <= 0 { yield false }
+    when kind(device[1]) != "text" or size(device[1]) == 0 { yield false }
+    when kind(device[2]) != "text" { yield false }
+    when kind(device[3]) != "text" { yield false }
+    when kind(device[4]) != "text" { yield false }
+    yield true
+}
+
+export craft is_online(device) {
+    yield is_valid(device) and device[3] == "online"
+}
+
+craft online_device(device) {
+    yield is_online(device)
+}
+
+export craft online_list(devices) {
+    yield keep(devices, online_device)
+}
+
+export craft online_count(devices) {
+    yield size(online_list(devices))
+}
+
+craft invalid_device(device) {
+    yield not is_valid(device)
+}
+
+export craft all_valid(devices) {
+    yield size(keep(devices, invalid_device)) == 0
+}
+
+export craft all_online(devices) {
+    yield size(devices) == online_count(devices)
+}

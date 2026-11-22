@@ -1,0 +1,40 @@
+# Tick conversion helpers. The caller supplies the clock reading and tick rate.
+
+export craft valid_tick(value) {
+    yield kind(value) == "number" and value >= 0 and value % 1 == 0
+}
+
+export craft milliseconds_to_ticks(milliseconds, ticks_per_second) {
+    assert(kind(milliseconds) == "number" and milliseconds >= 0,
+        "milliseconds must be non-negative")
+    assert(kind(ticks_per_second) == "number" and ticks_per_second > 0
+        and ticks_per_second % 1 == 0, "tick rate must be a positive whole number")
+    make scaled := milliseconds * ticks_per_second
+    make whole_ticks := scaled // 1000
+    when scaled % 1000 > 0 { yield whole_ticks + 1 }
+    yield whole_ticks
+}
+
+export craft ticks_to_milliseconds(ticks, ticks_per_second) {
+    assert(valid_tick(ticks), "ticks must be a non-negative whole number")
+    assert(kind(ticks_per_second) == "number" and ticks_per_second > 0,
+        "tick rate must be positive")
+    yield ticks * 1000 / ticks_per_second
+}
+
+export craft deadline_reached(now_tick, deadline_tick) {
+    assert(valid_tick(now_tick) and valid_tick(deadline_tick), "clock values must be whole ticks")
+    yield now_tick >= deadline_tick
+}
+
+export craft ticks_remaining(now_tick, deadline_tick) {
+    assert(valid_tick(now_tick) and valid_tick(deadline_tick), "clock values must be whole ticks")
+    when now_tick >= deadline_tick { yield 0 }
+    yield deadline_tick - now_tick
+}
+
+export craft elapsed_ticks(start_tick, end_tick) {
+    assert(valid_tick(start_tick) and valid_tick(end_tick), "clock values must be whole ticks")
+    assert(end_tick >= start_tick, "clock cannot move backwards")
+    yield end_tick - start_tick
+}
