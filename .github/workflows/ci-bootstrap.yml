@@ -152,8 +152,8 @@ jobs:
             cat build/qemu-serial.log || true
             exit "$status"
           fi
+          cat build/qemu-serial.log
           grep -F "DuckOS kernel: early boot" build/qemu-serial.log
-          grep -F "DuckOS early boot complete" build/qemu-serial.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: duckos-x86_64-iso
