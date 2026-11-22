@@ -80,6 +80,23 @@ static bool validate_one(const uint8_t *name, uint32_t name_size,
     return actual == expected && (!actual || entries == 1);
 }
 
+
+static bool validate_symlink(const uint8_t *target, uint32_t target_size,
+                             bool expected)
+{
+    static const uint8_t link_name[] = "bin/sh";
+    uint64_t entries = 0;
+    used = 0;
+
+    if (!append_entry(link_name, sizeof(link_name), 0120777u,
+                      target, target_size) || !finish_archive()) {
+        return false;
+    }
+
+    const bool actual = initramfs_validate(archive, used, &entries);
+    return actual == expected && (!actual || entries == 1);
+}
+
 int main(void)
 {
     static const uint8_t regular_name[] = "init";
@@ -87,6 +104,20 @@ int main(void)
     static const uint8_t absolute_name[] = "/etc/passwd";
     static const uint8_t repeated_slash_name[] = "etc//passwd";
     static const uint8_t embedded_nul_name[] = {'i', 'n', 0, 'i', 't', 0};
+    static const uint8_t safe_link_target[] = "busybox";
+    static const uint8_t escaping_link_target[] = "../../etc/passwd";
+
+    if (!validate_symlink(safe_link_target, sizeof(safe_link_target) - 1, true)) {
+        fputs("safe relative symlink was rejected
+", stderr);
+        return 1;
+    }
+
+    if (!validate_symlink(escaping_link_target, sizeof(escaping_link_target) - 1, false)) {
+        fputs("escaping symlink target was accepted
+", stderr);
+        return 1;
+    }
 
     if (!validate_one(regular_name, sizeof(regular_name), 0100755u, true)) {
         fputs("valid regular-file archive was rejected\n", stderr);
