@@ -8,7 +8,7 @@ The target architecture is one of x86_64, aarch64, riscv64 or i686. The kernel A
 
 ## Image layout
 
-The planner uses byte offsets and exclusive end positions. Default partition alignment is 1 MiB with 512-byte sectors. Every region is aligned, non-overlapping and bounded by the 64 GiB planner limit. The result is metadata only and cannot write to a disk.
+The planner uses byte offsets and exclusive end positions. Default partition alignment is 1 MiB with 512-byte sectors. Every region is aligned, non-overlapping and bounded by the 64 GiB planner limit. The result is metadata only and cannot write to a disk. The output contract is `duckos.image-layout.v1`, described by `schemas/image-layout.v1.schema.json`.
 
 ## Driver module ABI
 
