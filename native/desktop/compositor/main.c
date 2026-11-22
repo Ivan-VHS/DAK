@@ -72,17 +72,23 @@ static void new_output(struct wl_listener *listener, void *data)
     }
 
     struct wlr_output_mode *mode = wlr_output_preferred_mode(wlr_output);
+    struct wlr_output_state state;
+    wlr_output_state_init(&state);
+    wlr_output_state_set_enabled(&state, true);
+
     if (mode != NULL) {
-        wlr_output_set_mode(wlr_output, mode);
+        wlr_output_state_set_mode(&state, mode);
     }
 
-    wlr_output_enable(wlr_output, true);
-    if (!wlr_output_commit(wlr_output)) {
+    const bool output_ready = wlr_output_commit_state(wlr_output, &state);
+    wlr_output_state_finish(&state);
+
+    if (!output_ready) {
         wlr_log(WLR_ERROR, "could not enable output %s", wlr_output->name);
         return;
     }
 
-    wlr_output_create_global(wlr_output);
+    wlr_output_create_global(wlr_output, server->display);
 
     struct duckos_output *output = calloc(1, sizeof(*output));
     if (output == NULL) {
