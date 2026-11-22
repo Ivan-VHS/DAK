@@ -95,13 +95,52 @@ jobs:
         working-directory: duckos
         shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y build-essential python3 curl xorriso qemu-system-x86
 
           # The verified source bundle may not preserve the helper's executable bit.
           chmod +x tools/build-iso.sh
 
-          make clean all test iso
+          make clean all test
+
+          iso_log="$RUNNER_TEMP/duckos-iso-build.log"
+          if make iso >"$iso_log" 2>&1; then
+            cat "$iso_log"
+          else
+            iso_status=$?
+            if ! grep -Fq "Limine installer binary not found" "$iso_log"; then
+              cat "$iso_log"
+              exit "$iso_status"
+            fi
+
+            # Limine's binary release ships the Unix host tool as source.
+            # Build it from the already downloaded and checksum-verified package.
+            limine_source="$(find .limine -type f -name limine.c -print -quit)"
+            if [[ -z "$limine_source" ]]; then
+              cat "$iso_log"
+              echo "Limine host-tool source was not present in the verified package." >&2
+              exit "$iso_status"
+            fi
+
+            limine_dir="$(dirname "$limine_source")"
+            echo "Building Limine's host installer from the verified local source package."
+            make -C "$limine_dir"
+
+            limine_tool="$limine_dir/limine"
+            if [[ ! -x "$limine_tool" ]]; then
+              limine_tool="$(find "$limine_dir" -maxdepth 2 -type f -name limine -perm -u+x -print -quit)"
+            fi
+            if [[ -z "$limine_tool" || ! -x "$limine_tool" ]]; then
+              echo "Limine host-tool build completed without producing an executable." >&2
+              exit 1
+            fi
+
+            export LIMINE_TOOL="$limine_tool"
+            export PATH="$(dirname "$limine_tool"):$PATH"
+            make iso
+          fi
+
           set +e
           timeout 18s qemu-system-x86_64 \
             -machine q35 -m 512M -cdrom build/duckos.iso -boot d \
