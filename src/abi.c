@@ -106,6 +106,7 @@ const char *duck_abi_status_name(DuckAbiStatus status) {
     case DUCK_STATUS_INTERNAL_ERROR: return "internal-error";
     case DUCK_STATUS_ARITHMETIC_OVERFLOW: return "arithmetic-overflow";
     case DUCK_STATUS_DIVISION_BY_ZERO: return "division-by-zero";
+    case DUCK_STATUS_BAD_ARGUMENT_LAYOUT: return "bad-argument-layout";
     default: return "unknown-status";
     }
 }
