@@ -83,6 +83,32 @@ class FilesystemToolTests(unittest.TestCase):
             self.assertIn("до 1 дня", output.getvalue())
             self.assertIn("старше года", output.getvalue())
 
+    def test_symlink_loop_find_includes_directory_links(self) -> None:
+        if not hasattr(os, "symlink"):
+            self.skipTest("symlinks are not supported")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "folder"
+            target.mkdir()
+            (target / "note.txt").write_text("hello", encoding="utf-8")
+            loop = root / "folder-loop"
+            broken = root / "broken-link"
+            try:
+                loop.symlink_to("folder-loop", target_is_directory=True)
+                broken.symlink_to("missing-target")
+            except OSError:
+                self.skipTest("creating symlinks is not permitted")
+
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                filesystem.symlink_loop_find(temporary)
+
+            rendered = output.getvalue()
+            self.assertIn("LOOP", rendered)
+            self.assertIn("folder-loop", rendered)
+            self.assertIn("BROKEN", rendered)
+            self.assertIn("broken-link", rendered)
+
 
 class SystemToolTests(unittest.TestCase):
     def test_secret_arguments_are_masked(self) -> None:
