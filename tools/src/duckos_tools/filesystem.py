@@ -16,11 +16,17 @@ from typing import Any
 def _walk_files(root: Path):
     for current, directories, files in os.walk(root, topdown=True, followlinks=False):
         current_path = Path(current)
+        symlink_directories = sorted(
+            name for name in directories
+            if (current_path / name).is_symlink()
+        )
         directories[:] = sorted(
             name for name in directories
-            if not (current_path / name).is_symlink()
+            if name not in symlink_directories
         )
         for name in sorted(files):
+            yield current_path / name
+        for name in symlink_directories:
             yield current_path / name
         for name in sorted(directories):
             yield current_path / name
@@ -273,24 +279,20 @@ def symlink_loop_find(directory: str) -> None:
         raise ValueError("нужен существующий каталог")
 
     findings = 0
-    for current, directories, files in os.walk(root, topdown=True, followlinks=False):
-        current_path = Path(current)
-        names = list(directories) + list(files)
-        for name in names:
-            link = current_path / name
-            if not link.is_symlink():
-                continue
-            try:
-                link.resolve(strict=True)
-            except RuntimeError:
-                print(f"LOOP    {link.relative_to(root)}")
-                findings += 1
-            except FileNotFoundError:
-                print(f"BROKEN  {link.relative_to(root)} -> {os.readlink(link)}")
-                findings += 1
-            except OSError as error:
-                print(f"ERROR   {link.relative_to(root)}: {error}")
-                findings += 1
+    for link in _walk_files(root):
+        if not link.is_symlink():
+            continue
+        try:
+            link.resolve(strict=True)
+        except RuntimeError:
+            print(f"LOOP    {link.relative_to(root)}")
+            findings += 1
+        except FileNotFoundError:
+            print(f"BROKEN  {link.relative_to(root)} -> {os.readlink(link)}")
+            findings += 1
+        except OSError as error:
+            print(f"ERROR   {link.relative_to(root)}: {error}")
+            findings += 1
     print(f"Найдено проблемных ссылок: {findings}")
 
 
