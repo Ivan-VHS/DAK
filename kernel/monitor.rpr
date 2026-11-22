@@ -1,0 +1,35 @@
+# Threshold checks. Inputs are percentages from zero to one hundred.
+
+export craft classify_usage(percent) {
+    assert(kind(percent) == "number" and percent >= 0 and percent <= 100,
+        "usage must be between 0 and 100")
+    when percent >= 95 { yield "critical" }
+    when percent >= 80 { yield "warning" }
+    yield "normal"
+}
+
+export craft system_health(cpu_percent, memory_percent, disk_percent) {
+    make cpu := classify_usage(cpu_percent)
+    make memory := classify_usage(memory_percent)
+    make disk := classify_usage(disk_percent)
+    when cpu == "critical" or memory == "critical" or disk == "critical" {
+        yield "critical"
+    }
+    when cpu == "warning" or memory == "warning" or disk == "warning" {
+        yield "warning"
+    }
+    yield "healthy"
+}
+
+export craft needs_attention(status) {
+    yield status == "warning" or status == "critical"
+}
+
+export craft average_usage(values) {
+    assert(size(values) > 0, "cannot average an empty usage list")
+    yield sum(values) / size(values)
+}
+
+export craft health_snapshot(cpu, memory, disk) {
+    yield [cpu, memory, disk, system_health(cpu, memory, disk)]
+}
