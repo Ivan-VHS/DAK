@@ -1,0 +1,53 @@
+# Service and event metadata. This does not spawn host processes.
+
+export craft create_service(name, state, restart_count) {
+    yield [name, state, restart_count]
+}
+
+export craft service_is_valid(service) {
+    when kind(service) != "list" { yield false }
+    when size(service) != 3 { yield false }
+    when kind(service[0]) != "text" or size(service[0]) == 0 { yield false }
+    when kind(service[1]) != "text" { yield false }
+    when kind(service[2]) != "number" or service[2] < 0 { yield false }
+    yield true
+}
+
+export craft is_running(service) {
+    yield service_is_valid(service) and service[1] == "running"
+}
+
+export craft start(service) {
+    assert(service_is_valid(service), "invalid service record")
+    yield [service[0], "running", service[2]]
+}
+
+export craft stop(service) {
+    assert(service_is_valid(service), "invalid service record")
+    yield [service[0], "stopped", service[2]]
+}
+
+export craft restart(service) {
+    assert(service_is_valid(service), "invalid service record")
+    yield [service[0], "running", service[2] + 1]
+}
+
+craft running_service(service) {
+    yield is_running(service)
+}
+
+export craft running_count(services) {
+    yield size(keep(services, running_service))
+}
+
+export craft create_event(name, payload, sequence) {
+    yield [name, payload, sequence]
+}
+
+export craft push_event(queue, name, payload, sequence) {
+    yield push(queue, create_event(name, payload, sequence))
+}
+
+export craft event_count(queue) {
+    yield size(queue)
+}
