@@ -1,0 +1,61 @@
+# Bounded memory accounting. This does not allocate host or physical pages.
+
+export craft create_pool(total_bytes, used_bytes) {
+    assert(kind(total_bytes) == "number" and total_bytes > 0, "memory capacity must be positive")
+    assert(kind(used_bytes) == "number" and used_bytes >= 0 and used_bytes <= total_bytes,
+        "used memory must fit inside the pool")
+    yield [total_bytes, used_bytes]
+}
+
+export craft is_valid(pool) {
+    when kind(pool) != "list" { yield false }
+    when size(pool) != 2 { yield false }
+    when kind(pool[0]) != "number" or pool[0] <= 0 { yield false }
+    when kind(pool[1]) != "number" or pool[1] < 0 { yield false }
+    when pool[1] > pool[0] { yield false }
+    yield true
+}
+
+export craft capacity(pool) {
+    assert(is_valid(pool), "invalid memory pool")
+    yield pool[0]
+}
+
+export craft used(pool) {
+    assert(is_valid(pool), "invalid memory pool")
+    yield pool[1]
+}
+
+export craft available(pool) {
+    assert(is_valid(pool), "invalid memory pool")
+    yield pool[0] - pool[1]
+}
+
+export craft used_percent(pool) {
+    assert(is_valid(pool), "invalid memory pool")
+    yield pool[1] * 100 / pool[0]
+}
+
+export craft can_allocate(pool, bytes) {
+    assert(is_valid(pool), "invalid memory pool")
+    yield kind(bytes) == "number" and bytes >= 0 and bytes <= available(pool)
+}
+
+export craft allocate(pool, bytes) {
+    assert(can_allocate(pool, bytes), "memory allocation exceeds available capacity")
+    yield [pool[0], pool[1] + bytes]
+}
+
+export craft release(pool, bytes) {
+    assert(is_valid(pool), "invalid memory pool")
+    assert(kind(bytes) == "number" and bytes >= 0 and bytes <= pool[1],
+        "release exceeds currently used memory")
+    yield [pool[0], pool[1] - bytes]
+}
+
+export craft pressure(pool) {
+    make percent := used_percent(pool)
+    when percent >= 95 { yield "critical" }
+    when percent >= 80 { yield "high" }
+    yield "normal"
+}
