@@ -8,6 +8,10 @@ STAGING="$BUILD_ROOT/iso-root"
 WORK_ROOT="$(mktemp -d /tmp/duckos-iso.XXXXXX)"
 trap 'rm -rf "$WORK_ROOT"' EXIT
 
+LIMINE_DIR="${LIMINE_DIR:-}"
+LIMINE_TOOL="${LIMINE_TOOL:-}"
+BUSYBOX_STATIC="${BUSYBOX_STATIC:-}"
+
 if [[ -z "$LIMINE_DIR" ]]; then
     echo "build-iso: set LIMINE_DIR to the directory containing Limine boot assets" >&2
     exit 1
@@ -20,7 +24,9 @@ for tool in make python3 xorriso; do
     }
 done
 
-LIMINE_TOOL="$(command -v limine || true)"
+if [[ -z "$LIMINE_TOOL" ]]; then
+    LIMINE_TOOL="$(command -v limine || true)"
+fi
 if [[ -z "$LIMINE_TOOL" && -x "$LIMINE_DIR/../bin/limine" ]]; then
     LIMINE_TOOL="$LIMINE_DIR/../bin/limine"
 fi
@@ -47,6 +53,7 @@ done
 
 make -C "$NATIVE_ROOT/kernel" CC=clang LD=ld.lld
 
+rm -rf "$STAGING"
 mkdir -p "$BUILD_ROOT" "$STAGING/boot/EFI/BOOT"
 cp "$NATIVE_ROOT/kernel/build/kernel.elf" "$STAGING/boot/kernel.elf"
 cp "$LIMINE_DIR/limine-bios.sys" "$STAGING/boot/limine-bios.sys"
