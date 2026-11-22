@@ -1,0 +1,87 @@
+# DuckOS integration contract suite.
+# Run with Reaper's tree-walk engine and VM.
+
+import "duckos/kernel/boot.rpr" as boot
+import "duckos/kernel/memory.rpr" as memory
+import "duckos/kernel/scheduler.rpr" as scheduler
+import "duckos/kernel/ipc.rpr" as ipc
+import "duckos/security/capabilities.rpr" as capabilities
+import "duckos/drivers/abi.rpr" as drivers
+import "duckos/services/supervisor.rpr" as supervisor
+import "duckos/storage/hypergraph.rpr" as storage
+import "duckos/system/three_media.rpr" as media
+import "duckos/ui/theme.rpr" as theme
+
+make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
+assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
+assert(boot["transition_valid"]("memory", "interrupts"), "memory must precede interrupt setup")
+assert(not boot["transition_valid"]("drivers", "scheduler"), "boot must reject skipped phases")
+assert(boot["failure_action"](0) == "continue", "successful phase must continue")
+assert(boot["failure_action"](1) == "recovery", "failed phase must enter recovery")
+
+assert(memory["align_up"](17, 16) == 32, "arena alignment")
+assert(memory["align_up"](32, 16) == 32, "aligned address must remain unchanged")
+assert(memory["region_fits"](4096, 1024, 8192, 4096), "valid aligned region")
+assert(not memory["region_fits"](4097, 1024, 8192, 4096), "unaligned region must be rejected")
+assert(memory["ranges_overlap"](100, 40, 120, 10), "overlapping ranges")
+assert(not memory["ranges_overlap"](100, 20, 120, 10), "adjacent ranges do not overlap")
+assert(memory["arena_reserve"](100, 20, 256, 16) == [132, true], "bounded arena reservation")
+assert(memory["arena_reserve"](240, 32, 256, 16) == [240, false], "arena must reject overflow")
+
+make tasks := [
+    ["idle", 0, 100, "ready"],
+    ["audio", 8, 40, "ready"],
+    ["desktop", 8, 30, "ready"],
+    ["blocked", 99, 1, "blocked"]
+]
+assert(scheduler["pick_ready"](tasks) == "desktop", "scheduler priority/deadline ordering")
+assert(scheduler["pick_ready"]([["sleeping", 7, 1, "blocked"]]) == "", "blocked task must not run")
+
+make sent := ipc["send"]([1, 2], 3, 3)
+assert(sent == ["sent", [1, 2, 3]], "queue accepts data below capacity")
+make full := ipc["send"]([1, 2], 2, 3)
+assert(full == ["backpressure", [1, 2]], "full queue must remain unchanged")
+assert(ipc["receive"]([]) == ["empty", [], nothing], "empty receive")
+assert(ipc["receive"]([4, 5]) == ["received", [5], 4], "FIFO receive order")
+
+make grants := ["read.device", "telemetry.publish", "memory.map"]
+assert(capabilities["permits"](grants, "read.device"), "declared capability is available")
+assert(not capabilities["permits"](grants, "write.firmware"), "undeclared capability is denied")
+assert(capabilities["child_is_subset"](grants, ["read.device"]), "child may retain a subset")
+assert(not capabilities["child_is_subset"](grants, ["read.device", "write.firmware"]), "child cannot amplify authority")
+
+make valid_driver := ["nvme.sample", 1, "pci", ["read.device", "memory.map"]]
+make bad_driver := ["unknown.sample", 2, "mystery", ["write.firmware"]]
+make privileged_driver := ["flash.writer", 1, "pci", ["write.firmware"]]
+assert(drivers["descriptor_valid"](valid_driver, 1, ["pci", "usb", "acpi"]), "valid driver descriptor")
+assert(not drivers["descriptor_valid"](bad_driver, 1, ["pci", "usb", "acpi"]), "unsupported descriptor rejected")
+assert(drivers["load_policy"](valid_driver, 1, ["pci", "usb"], grants) == "descriptor-approved", "driver policy accepts declared safe descriptor")
+assert(drivers["load_policy"](privileged_driver, 1, ["pci", "usb"], grants) == "reject", "driver cannot request an ungranted capability")
+assert(drivers["load_policy"](bad_driver, 1, ["pci", "usb"], grants) == "reject", "driver policy rejects unsafe descriptor")
+
+assert(supervisor["decide"](0, 0, 3) == ["stopped", 0], "clean stop is not restarted")
+assert(supervisor["decide"](1, 1, 3) == ["restart", 2], "crashed service receives bounded retry")
+assert(supervisor["decide"](1, 3, 3) == ["failed", 3], "restart budget is finite")
+
+make known := ["blake3:aaa", "blake3:bbb"]
+assert(storage["node_valid"](["blake3:ccc", "record", ["blake3:aaa"]], known), "graph node may reference known content")
+assert(not storage["node_valid"](["blake3:aaa", "record", []], known), "known hash cannot be reused as a new node")
+assert(not storage["node_valid"](["blake3:ddd", "record", ["blake3:missing"]], known), "unknown dependency is rejected")
+make journal := storage["journal_append"]([], "boot.started", "firmware")
+make journal2 := storage["journal_append"](journal, "memory.ready", "arena0")
+assert(storage["journal_valid"](journal2), "event journal sequence")
+assert(not storage["journal_valid"]([[2, "bad.sequence", "x"]]), "event journal rejects gaps")
+
+assert(media["choose_medium"](512, 2, true, true) == "land", "small scalar work stays on CPU")
+assert(media["choose_medium"](4096, 16, true, false) == "water", "dense batch may select accelerator")
+assert(media["choose_medium"](9000, 4, false, true) == "sky", "large batch may select node mesh")
+assert(media["backpressure"](10, 10, 5, 2) == "pause", "full pipeline pauses producer")
+assert(media["backpressure"](9, 12, 8, 2) == "slow-producer", "near-full pipeline applies pressure")
+assert(media["thermal_profile"](91, 80) == "conserve", "thermal safety takes priority")
+
+assert(theme["palette_valid"](theme["palette_ratios"]()), "DuckOS palette proportions")
+assert(theme["palette_color"]("navigation") == "#0052CC", "navigation uses cobalt")
+assert(theme["palette_color"]("alert") == "#E62E2D", "alerts use vermilion")
+assert(theme["motion_profile"](true) == "static", "reduced-motion preference is respected")
+
+emit "DUCKOS_REAPER_CONTRACTS_OK"

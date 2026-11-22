@@ -1,0 +1,45 @@
+name: Reaper contract tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out DuckOS
+        uses: actions/checkout@v4
+        with:
+          path: DuckOS
+
+      - name: Check out pinned Reaper toolchain
+        uses: actions/checkout@v4
+        with:
+          repository: Ivan-VHS/Reaper
+          ref: 348a084efbbc2b712d63fcfcda5df0419bbbcf3c
+          path: Reaper
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check every Reaper source file
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' source; do
+            PYTHONPATH="$GITHUB_WORKSPACE/Reaper" python -m reaper --check "$source"
+          done < <(find "$GITHUB_WORKSPACE/DuckOS/duckos" -type f -name '*.rpr' -print0)
+
+      - name: Run contract suite with tree-walk engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/Reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+
+      - name: Run contract suite with VM engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/Reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"

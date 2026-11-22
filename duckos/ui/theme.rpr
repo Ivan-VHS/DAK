@@ -1,0 +1,33 @@
+# Tri-Color Duck UI design tokens.
+# White/porcelain 65%, cobalt 25%, vermilion 10%.
+
+export craft palette_ratios() {
+    yield [65, 25, 10]
+}
+
+export craft palette_valid(ratios) {
+    when size(ratios) != 3 {
+        yield false
+    }
+    yield ratios[0] + ratios[1] + ratios[2] == 100 and ratios[0] >= ratios[1] and ratios[1] >= ratios[2]
+}
+
+export craft palette_color(role) {
+    when role == "surface" {
+        yield "#F4F7FB"
+    }
+    when role == "navigation" {
+        yield "#0052CC"
+    }
+    when role == "alert" {
+        yield "#E62E2D"
+    }
+    yield "#FFFFFF"
+}
+
+export craft motion_profile(reduced_motion) {
+    when reduced_motion {
+        yield "static"
+    }
+    yield "fluid"
+}

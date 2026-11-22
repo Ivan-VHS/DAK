@@ -1,0 +1,35 @@
+# CPU / accelerator / node-mesh selection and explicit backpressure policy.
+# A selected medium is a policy result, not a hardware dispatch.
+
+export craft choose_medium(items, flops_per_byte, accelerator_ready, node_ready) {
+    when items >= 8192 and node_ready {
+        yield "sky"
+    }
+    when items >= 2048 and flops_per_byte >= 12 and accelerator_ready {
+        yield "water"
+    }
+    yield "land"
+}
+
+export craft backpressure(queue_size, capacity, producer_rate, consumer_rate) {
+    when capacity <= 0 {
+        yield "invalid"
+    }
+    when queue_size >= capacity {
+        yield "pause"
+    }
+    when producer_rate > consumer_rate and queue_size * 4 >= capacity * 3 {
+        yield "slow-producer"
+    }
+    yield "accept"
+}
+
+export craft thermal_profile(temperature_c, battery_percent) {
+    when temperature_c >= 85 or battery_percent <= 10 {
+        yield "conserve"
+    }
+    when temperature_c >= 75 or battery_percent <= 25 {
+        yield "balanced"
+    }
+    yield "full"
+}

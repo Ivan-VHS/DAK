@@ -1,0 +1,59 @@
+# Semantic graph and event journal contracts.
+# Content hashes are supplied by a cryptographic platform primitive.
+# This module validates references; it does not implement BLAKE3 or durable storage.
+
+export craft node_valid(node, known_hashes) {
+    when size(node) != 3 {
+        yield false
+    }
+    when node[0] == "" or node[1] == "" {
+        yield false
+    }
+    when hash_known(known_hashes, node[0]) {
+        yield false
+    }
+
+    each dependency in node[2] {
+        when dependency == node[0] {
+            yield false
+        }
+        when not hash_known(known_hashes, dependency) {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft hash_known(known_hashes, sought) {
+    vary found := false
+    each digest in known_hashes {
+        when digest == sought {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft event_valid(event, expected_sequence) {
+    when size(event) != 3 {
+        yield false
+    }
+    yield event[0] == expected_sequence and event[1] != ""
+}
+
+export craft journal_append(events, event_kind, payload) {
+    make next_sequence := size(events) + 1
+    make event := [next_sequence, event_kind, payload]
+    yield push(events, event)
+}
+
+export craft journal_valid(events) {
+    vary expected := 1
+    each event in events {
+        when not event_valid(event, expected) {
+            yield false
+        }
+        change expected := expected + 1
+    }
+    yield true
+}

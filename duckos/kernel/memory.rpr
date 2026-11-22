@@ -1,0 +1,44 @@
+# Memory arithmetic contract.
+# The limit is an exclusive upper bound.
+
+export craft align_up(address, alignment) {
+    when address < 0 or alignment <= 0 {
+        yield -1
+    }
+    make remainder := address % alignment
+    when remainder == 0 {
+        yield address
+    }
+    yield address + alignment - remainder
+}
+
+export craft region_fits(base, bytes, limit, alignment) {
+    when base < 0 or bytes <= 0 or alignment <= 0 {
+        yield false
+    }
+    when base % alignment != 0 or base > limit {
+        yield false
+    }
+    yield bytes <= limit - base
+}
+
+export craft ranges_overlap(left_base, left_bytes, right_base, right_bytes) {
+    when left_bytes <= 0 or right_bytes <= 0 {
+        yield false
+    }
+    yield left_base < right_base + right_bytes and right_base < left_base + left_bytes
+}
+
+export craft arena_reserve(cursor, bytes, limit, alignment) {
+    when bytes <= 0 {
+        yield [-1, false]
+    }
+    make start := align_up(cursor, alignment)
+    when start < 0 or start > limit {
+        yield [-1, false]
+    }
+    when bytes > limit - start {
+        yield [start, false]
+    }
+    yield [start + bytes, true]
+}

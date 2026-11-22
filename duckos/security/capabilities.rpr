@@ -1,0 +1,21 @@
+# Capabilities are explicit grants, not ambient authority.
+
+export craft permits(granted, requested) {
+    vary allowed := false
+    each capability in granted {
+        when capability == requested {
+            change allowed := true
+        }
+    }
+    yield allowed
+}
+
+export craft child_is_subset(parent_grants, child_grants) {
+    vary allowed := true
+    each requested in child_grants {
+        when not permits(parent_grants, requested) {
+            change allowed := false
+        }
+    }
+    yield allowed
+}

@@ -1,0 +1,24 @@
+# Bounded FIFO channel contract.
+# A full queue never grows implicitly: it reports backpressure.
+
+export craft send(queue, capacity, value) {
+    when capacity <= 0 {
+        yield ["invalid", queue]
+    }
+    when size(queue) >= capacity {
+        yield ["backpressure", queue]
+    }
+    yield ["sent", push(queue, value)]
+}
+
+export craft receive(queue) {
+    when size(queue) == 0 {
+        yield ["empty", queue, nothing]
+    }
+
+    vary remaining := []
+    each index in range(1, size(queue)) {
+        change remaining := push(remaining, queue[index])
+    }
+    yield ["received", remaining, queue[0]]
+}
