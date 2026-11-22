@@ -4,7 +4,7 @@
 
 DuckOS is a Reaper-first operating-system implementation. Reaper owns the source-language semantics and system policy. Native platform code is a narrow, auditable boundary for operations that require privilege or architecture-specific instructions.
 
-The first milestone is deliberately a contract kernel: real Reaper code defines and tests the ordering, limits and decisions that a later native backend must preserve.
+The first milestone is a contract kernel: real Reaper code defines and tests startup ordering, resource limits, scheduling decisions, trust policy and data-flow behavior that a later native backend must preserve.
 
 ## Layer model
 
@@ -12,15 +12,16 @@ The first milestone is deliberately a contract kernel: real Reaper code defines 
 |---|---|---|
 | Reaper language core | system policy, service logic, deterministic decisions | executable on reference runtime |
 | Boot contract | ordered startup phases and recovery transitions | implemented as Reaper contract |
-| Memory contract | range validation, alignment and bounded arena reservation | implemented as Reaper contract; not a physical allocator |
-| Scheduler policy | stable priority then deadline selection | implemented as Reaper contract; no context switch |
-| IPC | bounded queues, empty/full results and backpressure | implemented as Reaper contract; process transport pending |
-| Capability forge | explicit grants and attenuation | implemented as Reaper contract; kernel enforcement pending |
-| Driver boundary | ABI version, bus allowlist and required capabilities | descriptor validation implemented; device discovery/loading pending |
+| Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | implemented as Reaper contract; not a physical allocator |
+| Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
+| IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
+| Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
+| DuckDriver boundary | driver ABI, package metadata and resource-conflict policy | descriptor policy implemented; signature verifier and device discovery pending |
 | Service supervisor | finite restart budget | policy implemented; process manager pending |
-| Semantic store | externally supplied content hashes, dependency validation and ordered journal | contract implemented; BLAKE3/CRDT storage pending |
-| Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; backends pending |
-| Desktop | palette and motion policy | design tokens implemented; compositor/renderer pending |
+| Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
+| Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
+| Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
+| Desktop | Tri-Color Duck palette, reduced-motion and frame-budget policy | design policy implemented; compositor/renderer pending |
 
 ## Startup contract
 
@@ -30,49 +31,49 @@ The required sequence is:
 
 An out-of-order transition is rejected. A failed phase enters recovery policy instead of being silently treated as successful. This is a validation contract; it does not yet execute UEFI or initialise physical hardware.
 
-## Memory contract
+## Memory habitats and SoA
 
-The initial memory model exposes three operations:
+The memory contract uses an exclusive upper bound and validates ranges before a future native allocator may touch memory. The arena model stores:
 
-- align a requested address without allowing invalid alignment;
-- check that a range is positive, aligned and contained in the declared limit;
-- reserve an aligned span from a bounded linear arena.
+`[base, cursor, limit, generation]`
 
-The contract uses an exclusive upper bound. Arithmetic and ranges are validated before a future native allocator is allowed to touch memory. Page tables, MMIO mapping, DMA pinning, NUMA allocation and real reclamation remain native-backend work.
+A new frame or event transaction reserves aligned spans and resets the cursor as one state transition. The current policy uses a 64-byte alignment boundary, matching the source specification's cache-line target. SoA layout computes padding to a supplied lane width and checks the resulting byte budget.
 
-## Scheduling and flow control
+These are arithmetic and lifecycle contracts, not physical page allocation. Page tables, MMIO mapping, DMA pinning, NUMA allocation, static ownership analysis, FBIP reuse and actual reclamation remain native-backend work.
 
-Tasks are represented as `[id, priority, deadline, state]`. The policy chooses the highest priority runnable task and uses the earliest deadline as a deterministic tie-breaker. This is not a preemptive scheduler.
+## Scheduling, flock and flow control
 
-IPC queues have a caller-supplied capacity. A full queue returns `backpressure` and leaves the queue unchanged. The sender never grows the queue implicitly. Future process IPC must preserve this contract while adding ownership, wakeups and cancellation.
+Tasks use `[id, priority, deadline, state]`. The policy chooses the highest-priority runnable task and uses the earliest deadline as a deterministic tie-breaker. A separate flock selector chooses the least-loaded eligible worker by comparing load/capacity ratios without floating-point division. Neither function starts a thread, preempts a task or steals a live stack.
 
-## Security and drivers
+IPC queues have a caller-supplied capacity. A full queue returns `backpressure` and leaves state unchanged. The UDB byte-stream contract accounts capacity, occupied bytes, producer/consumer sequence and a high watermark. It models admission and release only; there is no shared-memory mapping or zero-copy transfer yet.
 
-A capability is an explicit string token in the current contract model. A child capability set is valid only when every requested capability is already held by the parent. Driver descriptors declare:
+## Security and DuckDriver
 
-`[driver_id, abi_version, bus, required_capabilities]`
+A capability is an explicit string token in the current reference contract. Child grants must be a subset of the parent's grants. External input moves from `untrusted` to `validated` only after an explicit successful validation result; a failed check moves it to `quarantined`. Even validated data still needs the requested capability.
 
-A descriptor is accepted only when its identity is present, its ABI matches, its bus is allowlisted and every required capability is granted. The check does not load code or install a driver.
+DuckDriver device descriptors record a device identity, bus, resource range, IRQ and IRQ sharing policy. The orchestrator rejects overlapping resource ranges and conflicting exclusive IRQ assignments. Driver packages are approved only when metadata matches the device bus, target architecture, ABI and granted capabilities.
 
-## Storage and determinism
+**Signature boundary:** the current package record contains a boolean supplied by the caller to represent a signature-verification result. DuckOS does not yet perform cryptographic verification, scan PCI/USB/ACPI, parse platform driver packages, load modules or modify the host driver store.
 
-A graph node is represented as:
+## Semantic storage and deterministic merge
 
-`[content_hash, payload_kind, dependencies]`
+A graph node is represented as `[content_hash, payload_kind, dependencies]`. The module validates that the new hash is not already present and that dependencies reference known nodes. Event records use monotonically increasing sequence numbers.
 
-The hash must be supplied by a trusted hashing boundary; this Reaper slice does not pretend to implement BLAKE3. Dependencies must point to already-known nodes and may not point to the node itself. Event records carry monotonically increasing sequence numbers. Durable persistence, merge semantics, cryptographic verification and crash recovery are future stages.
+The CRDT module currently implements one narrowly defined operation: a last-writer-wins register ordered by Lamport clock, actor ID and deterministic textual tie-break. It is not a complete CRDT hypergraph, and it does not provide durable storage, structural sharing, BLAKE3 hashing or general multi-user synchronization.
 
-## Three execution media
+## Three execution media and telemetry
 
 - **Land / CPU:** predictable scalar and branch-heavy work.
 - **Water / accelerator:** large, dense batches when an accelerator is available.
 - **Sky / node mesh:** only when a remote worker is explicitly available.
 
-The selector is policy only. It does not submit GPU work, serialize a graph, open a socket or migrate an executing task.
+The selector is policy only. It does not submit GPU work, serialize a graph, open a socket or migrate an executing task. Telemetry validates externally supplied samples, keeps a bounded history and classifies values against caller-supplied warning/critical thresholds. It does not read thermal, power, DPC/ISR or device sensors.
 
-## Desktop contract
+## Tri-Color Duck desktop contract
 
-Tri-Color Duck UI uses the specification's 65/25/10 balance: porcelain surface, cobalt navigation and vermilion alerts. The current Reaper module defines tokens and motion preference only. It is not a window manager, compositor or GPU renderer.
+The UI policy uses the source's 65/25/10 balance: porcelain surface, cobalt navigation and vermilion alerts. Reduced-motion preference overrides animation. A frame-time classifier reports whether a supplied frame duration meets its budget (16 ms by default in the integration tests).
+
+This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS guarantee. Rendering, input handling, font shaping and accessibility integration require native desktop modules.
 
 ## Native bring-up gates
 
@@ -81,9 +82,10 @@ Tri-Color Duck UI uses the specification's 65/25/10 balance: porcelain surface, 
 3. UEFI application and serial-console boot target.
 4. Page allocator, interrupt descriptors and timer source.
 5. Context-switching scheduler and process address spaces.
-6. Capability-enforced IPC and driver isolation.
-7. Block device and verified package store.
-8. Graphics backend and compositor.
-9. Reproducible installer and bootable image.
+6. Capability-enforced IPC, shared-page transport and driver isolation.
+7. Device enumeration, signature verification and verified package store.
+8. Persistent semantic graph and crash-safe event journal.
+9. Graphics backend and compositor.
+10. Reproducible installer and bootable image.
 
 Each gate needs a conformance suite and target hardware or emulator evidence. Do not skip a gate by relabelling a reference-runtime test as a hardware test.

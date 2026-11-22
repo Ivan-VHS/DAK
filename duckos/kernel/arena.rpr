@@ -1,0 +1,46 @@
+# Lexical frame arenas and SoA layout policy.
+# This is allocator policy; it does not touch physical memory.
+
+import "memory.rpr" as memory
+
+export craft create(base, limit) {
+    when base < 0 or limit <= base or base % 64 != 0 {
+        yield ["invalid", []]
+    }
+    yield ["ready", [base, base, limit, 0]]
+}
+
+export craft reserve(arena, bytes) {
+    when size(arena) != 4 {
+        yield ["invalid", arena, -1]
+    }
+
+    make allocation := memory["arena_reserve"](arena[1], bytes, arena[2], 64)
+    when not allocation[1] {
+        yield ["full", arena, -1]
+    }
+
+    make address := memory["align_up"](arena[1], 64)
+    yield ["reserved", [arena[0], allocation[0], arena[2], arena[3]], address]
+}
+
+export craft reset(arena) {
+    when size(arena) != 4 or arena[0] < 0 or arena[2] <= arena[0] {
+        yield ["invalid", arena]
+    }
+    yield ["reset", [arena[0], arena[0], arena[2], arena[3] + 1]]
+}
+
+export craft soa_layout(count, element_bytes, lane_width, budget_bytes) {
+    when count < 0 or element_bytes <= 0 or lane_width <= 0 or budget_bytes < 0 {
+        yield ["invalid", 0, 0, 0]
+    }
+
+    make padding := (lane_width - count % lane_width) % lane_width
+    make padded_count := count + padding
+    make total_bytes := padded_count * element_bytes
+    when total_bytes > budget_bytes {
+        yield ["over-budget", padded_count, total_bytes, padding]
+    }
+    yield ["ready", padded_count, total_bytes, padding]
+}

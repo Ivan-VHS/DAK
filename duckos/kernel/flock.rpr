@@ -1,0 +1,32 @@
+# Deterministic work assignment over an explicitly supplied worker set.
+# Worker shape: [id, queued_cost, capacity, online].
+# This chooses a worker; it does not create threads or steal live stacks.
+
+export craft choose_worker(workers, required_cost) {
+    when required_cost <= 0 {
+        yield ["invalid", "", 0]
+    }
+
+    vary found := false
+    vary selected_id := ""
+    vary selected_load := 0
+    vary selected_capacity := 1
+
+    each worker in workers {
+        when size(worker) == 4 and worker[3] == true and worker[2] > 0 and worker[1] >= 0 {
+            when required_cost <= worker[2] - worker[1] {
+                when not found or worker[1] * selected_capacity < selected_load * worker[2] {
+                    change found := true
+                    change selected_id := worker[0]
+                    change selected_load := worker[1]
+                    change selected_capacity := worker[2]
+                }
+            }
+        }
+    }
+
+    when not found {
+        yield ["backpressure", "", 0]
+    }
+    yield ["assigned", selected_id, selected_load + required_cost]
+}

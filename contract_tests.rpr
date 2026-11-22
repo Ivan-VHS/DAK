@@ -3,14 +3,22 @@
 
 import "duckos/kernel/boot.rpr" as boot
 import "duckos/kernel/memory.rpr" as memory
+import "duckos/kernel/arena.rpr" as arena
 import "duckos/kernel/scheduler.rpr" as scheduler
+import "duckos/kernel/flock.rpr" as flock
 import "duckos/kernel/ipc.rpr" as ipc
+import "duckos/kernel/zero_copy_bus.rpr" as bus
 import "duckos/security/capabilities.rpr" as capabilities
+import "duckos/security/trust.rpr" as trust
 import "duckos/drivers/abi.rpr" as drivers
+import "duckos/drivers/orchestrator.rpr" as orchestrator
 import "duckos/services/supervisor.rpr" as supervisor
 import "duckos/storage/hypergraph.rpr" as storage
+import "duckos/storage/crdt.rpr" as crdt
 import "duckos/system/three_media.rpr" as media
+import "duckos/system/telemetry.rpr" as telemetry
 import "duckos/ui/theme.rpr" as theme
+import "duckos/ui/motion.rpr" as motion
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -31,6 +39,15 @@ assert(not memory["ranges_overlap"](-1, 5, 1, 2), "negative physical addresses m
 assert(memory["arena_reserve"](100, 20, 256, 16) == [132, true], "bounded arena reservation")
 assert(memory["arena_reserve"](240, 32, 256, 16) == [240, false], "arena must reject overflow")
 
+make frame := arena["create"](4096, 8192)
+assert(frame == ["ready", [4096, 4096, 8192, 0]], "frame arena starts at its aligned base")
+make first_frame_allocation := arena["reserve"](frame[1], 100)
+assert(first_frame_allocation == ["reserved", [4096, 4196, 8192, 0], 4096], "frame arena reserves an aligned span")
+make reset_frame := arena["reset"](first_frame_allocation[1])
+assert(reset_frame == ["reset", [4096, 4096, 8192, 1]], "frame arena resets in constant-size state")
+assert(arena["soa_layout"](17, 4, 8, 128) == ["ready", 24, 96, 7], "SoA lanes are padded to vector width")
+assert(arena["soa_layout"](17, 4, 8, 64)[0] == "over-budget", "SoA layout respects the declared budget")
+
 make tasks := [
     ["idle", 0, 100, "ready"],
     ["audio", 8, 40, "ready"],
@@ -39,6 +56,9 @@ make tasks := [
 ]
 assert(scheduler["pick_ready"](tasks) == "desktop", "scheduler priority/deadline ordering")
 assert(scheduler["pick_ready"]([["sleeping", 7, 1, "blocked"]]) == "", "blocked task must not run")
+make workers := [["cpu0", 8, 10, true], ["cpu1", 1, 4, true], ["offline", 0, 64, false]]
+assert(flock["choose_worker"](workers, 1) == ["assigned", "cpu1", 2], "flock chooses the least-loaded eligible worker")
+assert(flock["choose_worker"]([["full", 4, 4, true]], 1) == ["backpressure", "", 0], "flock refuses a saturated worker")
 
 make sent := ipc["send"]([1, 2], 3, 3)
 assert(sent == ["sent", [1, 2, 3]], "queue accepts data below capacity")
@@ -47,11 +67,25 @@ assert(full == ["backpressure", [1, 2]], "full queue must remain unchanged")
 assert(ipc["receive"]([]) == ["empty", [], nothing], "empty receive")
 assert(ipc["receive"]([4, 5]) == ["received", [5], 4], "FIFO receive order")
 
-make grants := ["read.device", "telemetry.publish", "memory.map"]
+make shared_bus := bus["create"](1024, 75)
+make published_a := bus["publish"](shared_bus[1], 512)
+make published_b := bus["publish"](published_a[1], 256)
+assert(published_a == ["published", [1024, 512, 1, 0, 75], 1], "bus publication reserves bounded capacity")
+assert(bus["pressured"](published_b[1]), "bus raises pressure at its high watermark")
+assert(bus["publish"](published_b[1], 300)[0] == "backpressure", "bus refuses a payload larger than remaining capacity")
+make consumed := bus["consume"](published_b[1], 256)
+assert(consumed == ["consumed", [1024, 512, 2, 1, 75]], "consumer releases accounted bytes")
+
+make grants := ["read.device", "telemetry.publish", "memory.map", "sanitize"]
 assert(capabilities["permits"](grants, "read.device"), "declared capability is available")
 assert(not capabilities["permits"](grants, "write.firmware"), "undeclared capability is denied")
 assert(capabilities["child_is_subset"](grants, ["read.device"]), "child may retain a subset")
 assert(not capabilities["child_is_subset"](grants, ["read.device", "write.firmware"]), "child cannot amplify authority")
+assert(trust["promote"]("untrusted", true) == "validated", "validated input may leave the untrusted state")
+assert(trust["promote"]("untrusted", false) == "quarantined", "failed validation enters quarantine")
+assert(not trust["effect_allowed"]("untrusted", grants, "read.device"), "untrusted data cannot exercise device access")
+assert(trust["effect_allowed"]("untrusted", grants, "sanitize"), "untrusted data may only cross the sanitizer boundary")
+assert(trust["effect_allowed"]("validated", grants, "read.device"), "validated data still requires a granted capability")
 
 make valid_driver := ["nvme.sample", 1, "pci", ["read.device", "memory.map"]]
 make bad_driver := ["unknown.sample", 2, "mystery", ["write.firmware"]]
@@ -61,6 +95,19 @@ assert(not drivers["descriptor_valid"](bad_driver, 1, ["pci", "usb", "acpi"]), "
 assert(drivers["load_policy"](valid_driver, 1, ["pci", "usb"], grants) == "descriptor-approved", "driver policy accepts declared safe descriptor")
 assert(drivers["load_policy"](privileged_driver, 1, ["pci", "usb"], grants) == "reject", "driver cannot request an ungranted capability")
 assert(drivers["load_policy"](bad_driver, 1, ["pci", "usb"], grants) == "reject", "driver policy rejects unsafe descriptor")
+
+make device_a := ["nvme0", "pci", 4096, 256, 11, true]
+make device_b := ["gpu0", "pci", 4200, 128, 11, false]
+make device_c := ["audio0", "usb", 8192, 256, 5, false]
+assert(orchestrator["device_valid"](device_a), "device descriptor shape")
+assert(orchestrator["resources_conflict"](device_a, device_b), "overlapping device resources are reported")
+assert(not orchestrator["resources_conflict"](device_a, device_c), "independent device resources do not conflict")
+make signed_package := ["nvme.safe", 1, "pci", "x86_64", ["read.device"], true]
+make unsigned_package := ["nvme.unsigned", 1, "pci", "x86_64", ["read.device"], false]
+make wrong_arch_package := ["nvme.arm", 1, "pci", "aarch64", ["read.device"], true]
+assert(orchestrator["package_policy"](signed_package, device_a, "x86_64", 1, ["pci", "usb"], grants) == "approved", "signed package descriptor passes policy")
+assert(orchestrator["package_policy"](unsigned_package, device_a, "x86_64", 1, ["pci", "usb"], grants) == "reject", "unsigned package is rejected")
+assert(orchestrator["package_policy"](wrong_arch_package, device_a, "x86_64", 1, ["pci", "usb"], grants) == "reject", "package for a different architecture is rejected")
 
 assert(supervisor["decide"](0, 0, 3) == ["stopped", 0], "clean stop is not restarted")
 assert(supervisor["decide"](1, 1, 3) == ["restart", 2], "crashed service receives bounded retry")
@@ -74,6 +121,12 @@ make journal := storage["journal_append"]([], "boot.started", "firmware")
 make journal2 := storage["journal_append"](journal, "memory.ready", "arena0")
 assert(storage["journal_valid"](journal2), "event journal sequence")
 assert(not storage["journal_valid"]([[2, "bad.sequence", "x"]]), "event journal rejects gaps")
+make register_left := ["old", 4, "actor-a"]
+make register_right := ["new", 5, "actor-b"]
+assert(crdt["merge_register"](register_left, register_right) == register_right, "CRDT merge chooses the newer Lamport value")
+assert(crdt["merge_register"](register_right, register_left) == register_right, "CRDT merge is independent of arrival order")
+assert(crdt["merge_register"](["alpha", 7, "actor-a"], ["zeta", 7, "actor-b"]) == ["alpha", 7, "actor-a"], "actor id breaks equal-clock ties")
+assert(crdt["merge_register"](["alpha", 7, "actor-a"], ["zeta", 7, "actor-a"]) == ["zeta", 7, "actor-a"], "canonical value text breaks duplicate actor ties")
 
 assert(media["choose_medium"](512, 2, true, true) == "land", "small scalar work stays on CPU")
 assert(media["choose_medium"](4096, 16, true, false) == "water", "dense batch may select accelerator")
@@ -82,9 +135,25 @@ assert(media["backpressure"](10, 10, 5, 2) == "pause", "full pipeline pauses pro
 assert(media["backpressure"](9, 12, 8, 2) == "slow-producer", "near-full pipeline applies pressure")
 assert(media["thermal_profile"](91, 80) == "conserve", "thermal safety takes priority")
 
+make sample_a := [1, "cpu.load", 24, "percent", 100]
+make sample_b := [2, "cpu.load", 84, "percent", 200]
+make sample_c := [3, "cpu.load", 96, "percent", 300]
+assert(telemetry["sample_valid"](sample_a), "telemetry sample contract")
+assert(telemetry["alert_level"](24, 70, 90) == "normal", "telemetry normal band")
+assert(telemetry["alert_level"](84, 70, 90) == "warning", "telemetry warning band")
+assert(telemetry["alert_level"](96, 70, 90) == "critical", "telemetry critical band")
+make window_a := telemetry["append_window"]([], sample_a, 2)
+make window_b := telemetry["append_window"](window_a[1], sample_b, 2)
+make window_c := telemetry["append_window"](window_b[1], sample_c, 2)
+assert(window_c[1] == [sample_b, sample_c], "telemetry history remains bounded")
+assert(telemetry["sequence_valid"](window_c[1]), "telemetry sequence is monotonic")
+
 assert(theme["palette_valid"](theme["palette_ratios"]()), "DuckOS palette proportions")
 assert(theme["palette_color"]("navigation") == "#0052CC", "navigation uses cobalt")
 assert(theme["palette_color"]("alert") == "#E62E2D", "alerts use vermilion")
 assert(theme["motion_profile"](true) == "static", "reduced-motion preference is respected")
+assert(motion["frame_state"](15900, 16000, false) == "within-budget", "frame stays within 16 ms budget")
+assert(motion["frame_state"](17000, 16000, false) == "late", "late frame is observable")
+assert(motion["frame_state"](17000, 16000, true) == "static", "reduced motion takes precedence")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"

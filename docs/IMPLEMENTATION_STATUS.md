@@ -5,32 +5,38 @@ Updated: 2026-11-22
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.
-- [x] Memory alignment, containment, overlap and bounded linear reservation policy.
-- [x] Deterministic ready-task choice by priority and deadline.
-- [x] Bounded FIFO channel model with explicit empty/full/backpressure states.
+- [x] Signed-address range arithmetic, 64-byte frame arena and SoA budget calculations.
+- [x] Deterministic ready-task selection by priority and deadline.
+- [x] Deterministic least-loaded worker selection with bounded capacity.
+- [x] Bounded FIFO message queue with explicit empty/full/backpressure states.
+- [x] Byte-accounted UDB publication/consumption policy and high watermark.
 - [x] Capability membership and child-set attenuation.
-- [x] Driver descriptor validation against ABI, bus allowlist and grants.
+- [x] Untrusted/validated/quarantined input labels and effect-boundary policy.
+- [x] Driver ABI descriptor, package metadata and resource/IRQ conflict policy.
 - [x] Service restart decision with finite budget.
-- [x] Content-addressed graph node shape and dependency-reference checks.
+- [x] Content-addressed graph-reference shape and dependency validation.
 - [x] Monotonic event journal sequence contract.
-- [x] CPU / accelerator / node-mesh policy selector.
-- [x] Tri-Color Duck palette ratios and reduced-motion preference.
-- [x] Reaper contract suite for both tree-walk and VM execution.
+- [x] Deterministic last-writer-wins register merge.
+- [x] CPU / accelerator / node-mesh policy selector and thermal profile.
+- [x] Bounded telemetry history and warning/critical classification.
+- [x] Tri-Color Duck palette, reduced-motion policy and frame-budget classification.
+- [x] Reaper contract suite for tree-walk and VM execution, wired into GitHub Actions.
 
-## Not implemented yet
+## Partial or external boundaries
 
+- [ ] Real frame/page allocator, page tables, MMIO and DMA.
+- [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
+- [ ] Shared-memory zero-copy IPC, wakeups and cancellation.
+- [ ] PCI/PCIe/USB/ACPI enumeration and driver package parsing.
+- [ ] Cryptographic driver signature verification and isolated driver loading.
+- [ ] Sensor collection, hardware telemetry and DPC/ISR tracing.
+- [ ] BLAKE3 hashing, persistent semantic graph, structural sharing and general CRDT synchronization.
+- [ ] GPU command submission and accelerated compositor.
 - [ ] Freestanding native Reaper compiler/backend and self-hosted compiler.
 - [ ] UEFI/BIOS bootloader, kernel entry point and bootable ISO/USB image.
-- [ ] Real page allocator, virtual memory, page tables and MMIO.
-- [ ] Interrupt handlers, timer hardware and context switching.
 - [ ] Process model, syscall ABI and kernel-enforced capabilities.
-- [ ] Real cross-process IPC, zero-copy shared-memory transport and backpressure wakeups.
-- [ ] PCI/PCIe/USB/ACPI enumeration, signed driver loading and driver sandbox.
-- [ ] GPU command submission and accelerated compositor.
-- [ ] Semantic graph persistence, BLAKE3 implementation and CRDT merge.
 - [ ] Package manager, init process tree, filesystem and installer.
 - [ ] Audio engine, Wayland-compatible compositor and native settings applications.
-- [ ] Hardware telemetry and energy/thermal sensors.
 
 ## Evidence policy
 
