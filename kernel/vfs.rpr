@@ -49,5 +49,6 @@ export craft extension(path) {
 export craft stays_under(root, path) {
     make clean_root := normalize(root)
     make clean_path := normalize(path)
+    when clean_root == "/" { yield is_absolute(clean_path) }
     yield clean_path == clean_root or starts_with(clean_path, clean_root ++ "/")
 }
