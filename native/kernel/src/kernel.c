@@ -129,8 +129,7 @@ static void report_memory_map(void)
     serial_write("\n");
 }
 
-__attribute__((noreturn))
-void kmain(void)
+_Noreturn void kmain(void)
 {
     serial_init();
     serial_write("\nDuckOS kernel bring-up\n");
