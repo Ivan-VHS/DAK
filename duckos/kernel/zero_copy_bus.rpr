@@ -32,7 +32,8 @@ export craft consume(bus, payload_bytes) {
         yield ["invalid-size", bus]
     }
 
-    yield ["consumed", [bus[0], bus[1] - payload_bytes, bus[2], bus[3] + 1, bus[4]]]
+    make updated := [bus[0], bus[1] - payload_bytes, bus[2], bus[3] + 1, bus[4]]
+    yield ["consumed", updated]
 }
 
 export craft pressured(bus) {
