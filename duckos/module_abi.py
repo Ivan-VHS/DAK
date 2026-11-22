@@ -29,7 +29,8 @@ def validate_module(manifest: Any, *, architecture: str, kernel_abi: str) -> dic
         raise ModuleABIError("module version must be non-empty text")
     if not isinstance(entry, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,127}", entry):
         raise ModuleABIError("entry_symbol is not a valid symbol name")
-    if manifest.get("architecture") not in _ARCHITECTURES or manifest["architecture"] != architecture:
+    module_architecture = manifest.get("architecture")
+    if not isinstance(module_architecture, str) or module_architecture not in _ARCHITECTURES or module_architecture != architecture:
         raise ModuleABIError("module architecture does not match the target")
     if manifest.get("kernel_abi") != kernel_abi:
         raise ModuleABIError("module kernel ABI does not match the target")
