@@ -15,6 +15,8 @@ DuckOS is the OS-development integration target in the Ivan-VHS project family. 
 
 The tooling uses the Python standard library and works offline.
 
+See [Build contracts](docs/BUILD_CONTRACTS.md) and the [catalogue adoption map](docs/PROGRAM_CATALOG_1000.md) for details and implementation boundaries.
+
 ## Quick start
 
 From the repository root:
