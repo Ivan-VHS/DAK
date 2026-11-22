@@ -1,0 +1,21 @@
+# DuckOS identity and boot metadata.
+
+export craft name() {
+    yield "DuckOS"
+}
+
+export craft version() {
+    yield "0.1.0"
+}
+
+export craft release_track() {
+    yield "Reaper user-space kernel foundation"
+}
+
+export craft boot_report() {
+    yield [name(), version(), release_track(), "ready"]
+}
+
+export craft version_matches(required) {
+    yield required == version()
+}
