@@ -46,9 +46,13 @@ class SystemManifestTests(unittest.TestCase):
         with self.assertRaises(ManifestError):
             validate_manifest(manifest, self.root)
 
-    def test_requires_all_boot_components_and_rejects_symlink(self):
+    def test_requires_all_boot_components_and_rejects_malformed_component_names(self):
         manifest = self.make_manifest()
         manifest["components"].pop()
+        with self.assertRaises(ManifestError):
+            validate_manifest(manifest, self.root)
+        manifest = self.make_manifest()
+        manifest["components"][0]["name"] = []
         with self.assertRaises(ManifestError):
             validate_manifest(manifest, self.root)
 
