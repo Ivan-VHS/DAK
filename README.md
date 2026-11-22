@@ -96,7 +96,7 @@ duckos file-age-hist DIRECTORY
 |---|---|---|
 | Kernel / Limine | Freestanding x86-64 ELF, ранняя serial-консоль, карта памяти, framebuffer, обнаружение и проверка initramfs | Аллокаторы, IDT/APIC, прерывания, процессы, планировщик, VFS и драйверы |
 | Boot / initramfs | Конфигурация Limine, newc CPIO-сборщик, ранний init и валидация архива | Распаковка в RAM и запуск PID 1 ядром |
-| Wayland | Отдельный compositor bring-up на wlroots и Mesa EGL/GLES | Input seat, фокус, полноценная оболочка и ускорение на собственном kernel |
+| Wayland | wlroots compositor bring-up и отдельный EGL/GLES shell-клиент с опросом GL_RENDERER | Input seat, фокус, полная логика оболочки и GPU-драйверы собственного kernel |
 | Packages / driver ABI | Локальный SHA-256-проверяющий пакетный store и версия ABI 1.0 | Подписанные репозитории, зависимости, модульный загрузчик и kernel device model |
 | AI sandbox | Linux-обёртка Bubblewrap с отдельными namespace и лимитами | Собственный syscall policy и изоляция на уровне DuckOS kernel |
 | ISO | Скрипт подготовки BIOS/UEFI boot-test image | Установщик разделов, recovery/rollback и проверенный desktop boot |
