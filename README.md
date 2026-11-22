@@ -3,9 +3,9 @@
 A small, executable operating-environment foundation written in **Reaper** source files.
 
 > **Honest scope:** this is a Reaper-hosted user-space OS foundation and simulator, not a bootable
-> bare-metal kernel. Process scheduling, memory accounting, virtual-path policy, device inventory,
-> service state and capability checks are implemented as executable Reaper code. They do not
-> replace OS syscalls, hardware drivers, physical memory management or real process creation.
+> bare-metal kernel. Process scheduling, memory accounting, virtual-path policy, storage quotas,
+> device inventory, service state, shell parsing and capability checks are executable Reaper code.
+> They do not replace OS syscalls, physical memory management, real process creation or hardware drivers.
 
 ## Run it
 
@@ -31,13 +31,17 @@ The boot path writes a JSON report to var/boot-report.json.
 | Module | Responsibilities |
 |---|---|
 | kernel/system.rpr | OS identity, version and boot metadata |
-| kernel/process.rpr | Process records, validation, state filtering, priority ordering and memory totals |
+| kernel/process.rpr | Process records, validation, state filtering, priority ordering and process-memory totals |
+| kernel/scheduler.rpr | Priority-ordered ready queue, round-robin rotation and tick-based time slices |
 | kernel/memory.rpr | Bounded memory-pool accounting, allocation/release checks and pressure levels |
+| kernel/storage.rpr | Volume capacity, block alignment, free-space and quota accounting |
 | kernel/security.rpr | Explicit capability checks, missing-grant reports and deny-by-default policy |
 | kernel/vfs.rpr | POSIX-style path validation, normalization, joining, extension and root-containment checks |
 | kernel/devices.rpr | Device inventory records, validation and online-device discovery |
 | kernel/monitor.rpr | CPU/memory/disk threshold classification and health snapshots |
 | kernel/services.rpr | Service lifecycle metadata and event-queue records |
+| kernel/shell.rpr | Bounded command-line tokenization and built-in command lookup |
+| kernel/clock.rpr | Caller-supplied tick validation and time-unit conversion |
 | kernel/catalog.rpr | Versioned function-catalogue contract |
 
 The modules are Reaper source. Python is used only for the registry generator and automated
@@ -81,7 +85,7 @@ python -m unittest discover -s tests -v
 
 1. Replace the current process and memory models with explicit host adapters behind the same Reaper interfaces.
 2. Add persistent filesystem metadata and a permission-aware VFS mount table.
-3. Add a scheduler service with time slices, queues and measured telemetry.
+3. Add measured scheduler telemetry and priority inheritance.
 4. Add device-driver adapters only where the host platform exposes a real supported interface.
 5. Promote reserved catalogue slots to implemented functions only alongside source, tests and documented runtime boundaries.
 
