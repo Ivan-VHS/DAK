@@ -51,7 +51,7 @@ static bool safe_archive_name(const uint8_t *name, uint64_t name_size)
         const bool at_end = i == name_size - 1;
         const uint8_t ch = name[i];
 
-        if (ch == '\\') {
+        if ((ch == '\\') || (ch == 0 && !at_end)) {
             return false;
         }
 
