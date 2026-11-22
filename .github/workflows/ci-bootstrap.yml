@@ -1,0 +1,118 @@
+name: DuckOS bootstrap validation
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Materialize source for validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/duckos"
+          if [[ -f artifacts/source-bundle/part00 ]]; then
+            cat artifacts/source-bundle/part0[0-4] | base64 --decode > "$RUNNER_TEMP/duckos-source.tar.xz"
+            echo "5e2368c939097f6e01e15547a0ebce7b803615ccd257fc4c216389d8e314aaa7  $RUNNER_TEMP/duckos-source.tar.xz" | sha256sum --check
+            tar -xJf "$RUNNER_TEMP/duckos-source.tar.xz" --strip-components=1 -C "$RUNNER_TEMP/duckos"
+          else
+            git archive HEAD | tar -x -C "$RUNNER_TEMP/duckos"
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: duckos-source
+          path: ${{ runner.temp }}/duckos
+          if-no-files-found: error
+
+  kernel:
+    needs: prepare-source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: duckos-source
+          path: duckos
+      - name: Build freestanding kernel
+        working-directory: duckos
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils
+          make clean kernel
+          file build/duckos.elf
+          readelf -h build/duckos.elf
+
+  initramfs:
+    needs: prepare-source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: duckos-source
+          path: duckos
+      - name: Validate initramfs reader
+        working-directory: duckos
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3
+          make initramfs
+          cc -std=c11 -Wall -Wextra -Werror -Iinclude tests/test_initramfs_parser.c kernel/boot/initramfs.c -o /tmp/test-initramfs
+          /tmp/test-initramfs build/initramfs.cpio
+
+  tooling:
+    needs: prepare-source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: duckos-source
+          path: duckos
+      - name: Test package manager, archive builder and driver ABI
+        working-directory: duckos
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3
+          python3 -m compileall -q tools tests
+          python3 -m unittest discover -s tests -v
+          cc -std=c11 -Wall -Wextra -Werror -Iinclude tests/test_driver_abi.c kernel/drivers/registry.c -o /tmp/test-driver-abi
+          /tmp/test-driver-abi
+          bash -n tools/build-iso.sh tools/dak-agent-sandbox desktop/start-dak-session
+
+  boot-image:
+    needs: prepare-source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: duckos-source
+          path: duckos
+      - name: Build ISO and smoke-test the BIOS path
+        working-directory: duckos
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 curl xorriso qemu-system-x86
+          make clean all test iso
+          set +e
+          timeout 18s qemu-system-x86_64 \
+            -machine q35 -m 512M -cdrom build/duckos.iso -boot d \
+            -display none -monitor none -serial file:build/qemu-serial.log \
+            -no-reboot -no-shutdown
+          status=$?
+          set -e
+          if [[ "$status" -ne 124 && "$status" -ne 0 ]]; then
+            cat build/qemu-serial.log || true
+            exit "$status"
+          fi
+          grep -F "DuckOS kernel: early boot" build/qemu-serial.log
+          grep -F "DuckOS early boot complete" build/qemu-serial.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: duckos-x86_64-iso
+          path: duckos/build/duckos.iso
+          if-no-files-found: error
