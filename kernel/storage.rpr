@@ -1,0 +1,62 @@
+# Storage-volume capacity and block accounting model; no raw-device writes.
+
+export craft create_volume(capacity_bytes, used_bytes, block_bytes) {
+    assert(kind(capacity_bytes) == "number" and capacity_bytes > 0,
+        "volume capacity must be positive")
+    assert(kind(used_bytes) == "number" and used_bytes >= 0 and used_bytes <= capacity_bytes,
+        "used space must fit inside the volume")
+    assert(kind(block_bytes) == "number" and block_bytes > 0,
+        "block size must be positive")
+    assert(capacity_bytes % block_bytes == 0 and used_bytes % block_bytes == 0,
+        "volume sizes must align to the block size")
+    yield [capacity_bytes, used_bytes, block_bytes]
+}
+
+export craft is_valid(volume) {
+    when kind(volume) != "list" { yield false }
+    when size(volume) != 3 { yield false }
+    when kind(volume[0]) != "number" or volume[0] <= 0 { yield false }
+    when kind(volume[1]) != "number" or volume[1] < 0 or volume[1] > volume[0] { yield false }
+    when kind(volume[2]) != "number" or volume[2] <= 0 { yield false }
+    yield volume[0] % volume[2] == 0 and volume[1] % volume[2] == 0
+}
+
+export craft free_bytes(volume) {
+    assert(is_valid(volume), "invalid storage volume")
+    yield volume[0] - volume[1]
+}
+
+export craft used_blocks(volume) {
+    assert(is_valid(volume), "invalid storage volume")
+    yield volume[1] / volume[2]
+}
+
+export craft can_write(volume, bytes) {
+    assert(is_valid(volume), "invalid storage volume")
+    yield kind(bytes) == "number" and bytes >= 0
+        and bytes % volume[2] == 0 and bytes <= free_bytes(volume)
+}
+
+export craft write(volume, bytes) {
+    assert(can_write(volume, bytes), "write exceeds free space or is not block-aligned")
+    yield [volume[0], volume[1] + bytes, volume[2]]
+}
+
+export craft remove(volume, bytes) {
+    assert(is_valid(volume), "invalid storage volume")
+    assert(kind(bytes) == "number" and bytes >= 0 and bytes <= volume[1]
+        and bytes % volume[2] == 0, "remove must be non-negative, available and block-aligned")
+    yield [volume[0], volume[1] - bytes, volume[2]]
+}
+
+export craft usage_percent(volume) {
+    assert(is_valid(volume), "invalid storage volume")
+    yield volume[1] * 100 / volume[0]
+}
+
+export craft pressure(volume) {
+    make percent := usage_percent(volume)
+    when percent >= 95 { yield "critical" }
+    when percent >= 80 { yield "high" }
+    yield "normal"
+}
