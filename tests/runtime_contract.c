@@ -156,12 +156,12 @@ static void test_runtime_memory_and_thread_wrappers(void) {
 static void test_failures_never_overwrite_outputs(void) {
     FakeKernel kernel = {
         DUCK_SYS_CLOCK_MONOTONIC, 0U, NULL, 0U,
-        77U, DUCK_VALUE_U64, DUCK_STATUS_ACCESS_DENIED, 0U
+        77U, DUCK_VALUE_U64, DUCK_STATUS_NOT_IMPLEMENTED, 0U
     };
     DuckRuntime runtime;
     duck_runtime_init_transport(&runtime, fake_transport, &kernel);
     uint64_t now = 123U;
-    assert(duck_runtime_clock_monotonic(&runtime, &now) == DUCK_STATUS_ACCESS_DENIED);
+    assert(duck_runtime_clock_monotonic(&runtime, &now) == DUCK_STATUS_NOT_IMPLEMENTED);
     assert(now == 123U);
 
     kernel.response_status = DUCK_STATUS_OK;
