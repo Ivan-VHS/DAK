@@ -45,3 +45,14 @@ jobs:
         run: meson setup native/desktop/shell/build native/desktop/shell
       - name: Build native EGL shell
         run: meson compile -C native/desktop/shell/build
+
+  wlroots-compositor:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install wlroots 0.18 development packages
+        run: sudo apt-get update && sudo apt-get install -y meson ninja-build pkg-config libwlroots-0.18-dev libwayland-dev libwayland-server0 wayland-protocols
+      - name: Configure wlroots compositor
+        run: meson setup native/desktop/compositor/build native/desktop/compositor
+      - name: Build wlroots compositor
+        run: meson compile -C native/desktop/compositor/build
