@@ -33,7 +33,7 @@ shell:
 	meson compile -C desktop/shell/build
 
 iso:
-	./scripts/build-iso.sh
+	bash scripts/build-iso.sh
 
 test:
 	$(PYTHON) -m unittest discover -s tests -v
