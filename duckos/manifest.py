@@ -68,12 +68,13 @@ def validate_manifest(manifest: Any, root: str | Path, *, verify_files: bool = T
         raise ManifestError(f"architecture must be one of {sorted(_ARCHITECTURES)}")
 
     components = manifest.get("components")
-    if not isinstance(components, list) or not _REQUIRED <= {
-        item.get("name") for item in components if isinstance(item, dict)
-    }:
+    if not isinstance(components, list) or not 1 <= len(components) <= MAX_COMPONENTS:
+        raise ManifestError(f"components must be a list with 1..{MAX_COMPONENTS} entries")
+    if any(not isinstance(item, dict) for item in components):
+        raise ManifestError("each component must be an object")
+    component_names = [item.get("name") for item in components]
+    if not _REQUIRED <= {name for name in component_names if isinstance(name, str)}:
         raise ManifestError("components must include bootloader, kernel, initramfs and rootfs")
-    if not 1 <= len(components) <= MAX_COMPONENTS:
-        raise ManifestError(f"component count must be between 1 and {MAX_COMPONENTS}")
 
     supplied_root = Path(root).expanduser()
     if supplied_root.is_symlink():
