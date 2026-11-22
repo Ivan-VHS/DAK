@@ -1,0 +1,57 @@
+# Executable contracts for the DuckOS Reaper modules.
+
+import "kernel/process.rpr" as process
+import "kernel/memory.rpr" as memory
+import "kernel/security.rpr" as security
+import "kernel/vfs.rpr" as vfs
+import "kernel/devices.rpr" as devices
+import "kernel/monitor.rpr" as monitor
+import "kernel/services.rpr" as services
+import "kernel/catalog.rpr" as catalog
+
+make jobs := [
+    process["create"](10, "worker-a", 10, "ready", 1024),
+    process["create"](11, "worker-b", 20, "ready", 2048),
+    process["create"](12, "worker-c", 5, "sleeping", 512)
+]
+assert(process["all_valid"](jobs))
+assert(process["count_state"](jobs, "ready") == 2)
+assert(process["next_process"](jobs)[0] == 11)
+assert(process["total_memory"](jobs) == 3584)
+
+make pool := memory["create_pool"](8192, 4096)
+assert(memory["available"](pool) == 4096)
+assert(memory["available"](memory["allocate"](pool, 1024)) == 3072)
+assert(memory["used"](memory["release"](pool, 512)) == 3584)
+assert(memory["pressure"](pool) == "normal")
+
+assert(security["allows_all"](["fs.read", "proc.list"], ["fs.read"]))
+assert(not security["allows_all"](["fs.read"], ["fs.read", "fs.write"]))
+assert(security["missing"](["fs.read"], ["fs.read", "fs.write"]) == ["fs.write"])
+
+assert(vfs["is_safe"]("/system/config.json"))
+assert(not vfs["is_safe"]("/system/../secret"))
+assert(vfs["join"]("/system", "logs/boot.txt") == "/system/logs/boot.txt")
+assert(vfs["extension"]("/system/logs/boot.txt") == "txt")
+assert(vfs["stays_under"]("/system", "/system/logs/boot.txt"))
+assert(not vfs["stays_under"]("/system", "/system-old/file.txt"))
+
+make table := [
+    devices["create"](1, "console", "terminal", "online", "1.0"),
+    devices["create"](2, "network", "adapter", "offline", "1.0")
+]
+assert(devices["all_valid"](table))
+assert(devices["online_count"](table) == 1)
+assert(not devices["all_online"](table))
+
+assert(monitor["system_health"](25, 44, 61) == "healthy")
+assert(monitor["system_health"](25, 84, 61) == "warning")
+assert(monitor["system_health"](25, 84, 96) == "critical")
+
+make service := services["start"](services["create_service"]("logger", "stopped", 0))
+assert(services["is_running"](service))
+assert(services["restart"](service)[2] == 1)
+assert(services["event_count"](services["push_event"]([], "test", "payload", 1)) == 1)
+
+assert(catalog["target_count"]() == 87965)
+emit "DuckOS Reaper smoke tests passed."
