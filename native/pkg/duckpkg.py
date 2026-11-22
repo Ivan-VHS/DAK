@@ -13,13 +13,15 @@ import sys
 import tarfile
 import tempfile
 from pathlib import Path, PurePosixPath
-from typing import BinaryIO
 
 
 _NAME_RE = re.compile(r"^[a-z0-9][a-z0-9._+-]{0,63}$")
 _VERSION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _MAX_MANIFEST_BYTES = 1024 * 1024
+_MAX_PACKAGE_FILES = 10000
+_MAX_PACKAGE_BYTES = 512 * 1024 * 1024
+_MAX_FILE_BYTES = 256 * 1024 * 1024
 
 
 class PackageError(Exception):
@@ -28,12 +30,13 @@ class PackageError(Exception):
 
 def safe_relative_path(value: str) -> PurePosixPath:
     path = PurePosixPath(value)
+    raw_parts = value.split("/")
     if (
         not value
         or "\\" in value
         or "\0" in value
         or path.is_absolute()
-        or any(part in ("", ".", "..") for part in path.parts)
+        or any(part in ("", ".", "..") for part in raw_parts)
     ):
         raise PackageError(f"unsafe package path: {value!r}")
     return path
@@ -55,15 +58,21 @@ def read_registry(path: Path) -> dict:
 
 def write_registry(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
     encoded = json.dumps(data, indent=2, sort_keys=True) + "\n"
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    temporary = Path(temporary_name)
 
-    with temporary.open("w", encoding="utf-8", newline="\n") as stream:
-        stream.write(encoded)
-        stream.flush()
-        os.fsync(stream.fileno())
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
 
-    os.replace(temporary, path)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _read_manifest(archive: tarfile.TarFile) -> dict:
@@ -161,22 +170,39 @@ def install_package(archive_path: Path, root: Path) -> Path:
         members = archive.getmembers()
         names: set[str] = set()
 
+        payload_bytes = 0
         for member in members:
             if member.name in names:
                 raise PackageError(f"duplicate archive entry: {member.name}")
             names.add(member.name)
 
-            if member.name != "manifest.json":
-                if not member.name.startswith("payload/"):
-                    raise PackageError(f"unexpected archive entry: {member.name}")
-                payload_name = member.name[len("payload/"):]
-                safe_relative_path(payload_name)
-
             if member.issym() or member.islnk() or member.isdev() or member.isfifo():
                 raise PackageError(f"links and special files are not allowed: {member.name}")
 
+            if member.name != "manifest.json":
+                if member.name in ("payload", "payload/"):
+                    if not member.isdir():
+                        raise PackageError("payload root must be a directory")
+                elif member.name.startswith("payload/"):
+                    relative = member.name[len("payload/"):]
+                    if member.isdir() and relative.endswith("/"):
+                        relative = relative[:-1]
+                    safe_relative_path(relative)
+                else:
+                    raise PackageError(f"unexpected archive entry: {member.name}")
+
+                if member.isfile():
+                    if member.size < 0 or member.size > _MAX_FILE_BYTES:
+                        raise PackageError(f"payload file is too large: {member.name}")
+                    payload_bytes += member.size
+                    if payload_bytes > _MAX_PACKAGE_BYTES:
+                        raise PackageError("package exceeds the 512 MiB unpacked size limit")
+
         manifest = _read_manifest(archive)
         expected = manifest["files"]
+        if len(expected) > _MAX_PACKAGE_FILES:
+            raise PackageError(f"package exceeds the {_MAX_PACKAGE_FILES} file limit")
+
         payload_members: dict[str, tarfile.TarInfo] = {}
 
         for member in members:
@@ -261,7 +287,11 @@ def verify_package(root: Path, name: str) -> list[str]:
             try:
                 if not file_path.is_file() or file_path.is_symlink():
                     raise OSError("not a regular file")
-                digest = hashlib.sha256(file_path.read_bytes()).hexdigest()
+                hasher = hashlib.sha256()
+                with file_path.open("rb") as stream:
+                    while chunk := stream.read(1024 * 1024):
+                        hasher.update(chunk)
+                digest = hasher.hexdigest()
                 if digest != expected:
                     raise OSError("digest mismatch")
             except OSError as error:
