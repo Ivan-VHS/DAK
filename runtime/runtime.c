@@ -60,11 +60,11 @@ static DuckValue unsigned_value(uint64_t value) {
 }
 
 static DuckValue borrowed_buffer(const void *buffer, int read_only) {
-    uint32_t flags = DUCK_VALUE_BORROWED;
-    if (read_only) flags |= DUCK_VALUE_READ_ONLY;
+    uint32_t flags = buffer == NULL ? 0U : DUCK_VALUE_BORROWED;
+    if (read_only && buffer != NULL) flags |= DUCK_VALUE_READ_ONLY;
     return (DuckValue){
         (uint64_t)(uintptr_t)buffer,
-        DUCK_VALUE_BYTES,
+        DUCK_VALUE_POINTER,
         flags
     };
 }
