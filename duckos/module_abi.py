@@ -62,13 +62,18 @@ def validate_module(manifest: Any, *, architecture: str, kernel_abi: str) -> dic
 
 
 def resolve_load_order(modules: list[dict[str, Any]]) -> list[str]:
+    """Return a deterministic dependency-first order without recursive traversal."""
+    import heapq
+
     if not isinstance(modules, list) or len(modules) > MAX_MODULES:
         raise ModuleABIError(f"module list must contain at most {MAX_MODULES} items")
-    by_name = {}
+    by_name: dict[str, set[str]] = {}
     for item in modules:
-        if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+        if not isinstance(item, dict):
             raise ModuleABIError("each module needs a name and dependency list")
-        name = item["name"]
+        name = item.get("name")
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", name):
+            raise ModuleABIError("module name must be a lowercase identifier")
         if name in by_name:
             raise ModuleABIError(f"duplicate module: {name}")
         dependencies = item.get("dependencies")
@@ -80,6 +85,7 @@ def resolve_load_order(modules: list[dict[str, Any]]) -> list[str]:
         if len(set(dependencies)) != len(dependencies):
             raise ModuleABIError(f"{name}: duplicate dependency")
         by_name[name] = set(dependencies)
+
     edge_count = sum(len(value) for value in by_name.values())
     if edge_count > MAX_DEPENDENCIES:
         raise ModuleABIError("module dependency graph exceeds its edge limit")
@@ -88,22 +94,24 @@ def resolve_load_order(modules: list[dict[str, Any]]) -> list[str]:
         if missing:
             raise ModuleABIError(f"{name}: missing dependencies {sorted(missing)}")
 
-    order = []
-    temporary = set()
-    permanent = set()
-
-    def visit(name: str) -> None:
-        if name in permanent:
-            return
-        if name in temporary:
-            raise ModuleABIError(f"dependency cycle detected at {name}")
-        temporary.add(name)
-        for dependency in sorted(by_name[name]):
-            visit(dependency)
-        temporary.remove(name)
-        permanent.add(name)
+    # Kahn's algorithm produces a stable topological order and avoids recursion
+    # even for a maximum-sized module list.
+    remaining = {name: len(dependencies) for name, dependencies in by_name.items()}
+    dependents: dict[str, list[str]] = {name: [] for name in by_name}
+    for name, dependencies in by_name.items():
+        for dependency in dependencies:
+            dependents[dependency].append(name)
+    ready = [name for name, count in remaining.items() if count == 0]
+    heapq.heapify(ready)
+    order: list[str] = []
+    while ready:
+        name = heapq.heappop(ready)
         order.append(name)
-
-    for name in sorted(by_name):
-        visit(name)
+        for dependent in sorted(dependents[name]):
+            remaining[dependent] -= 1
+            if remaining[dependent] == 0:
+                heapq.heappush(ready, dependent)
+    if len(order) != len(by_name):
+        cyclic = sorted(name for name, count in remaining.items() if count > 0)
+        raise ModuleABIError(f"dependency cycle detected among {cyclic}")
     return order
