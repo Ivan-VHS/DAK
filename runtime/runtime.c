@@ -82,22 +82,18 @@ static DuckAbiStatus runtime_call(
         (argument_count != 0U && arguments == NULL))
         return DUCK_STATUS_BAD_ARGUMENT_LAYOUT;
 
-    DuckCallFrame frame __attribute__((aligned(16))) = {
-        DUCK_ABI_MAGIC,
-        DUCK_ABI_MAJOR,
-        DUCK_ABI_MINOR,
-        sizeof(DuckCallFrame),
-        (uint32_t)argument_count,
-        0U,
-        0U,
-        0U,
-        0U,
-        arguments,
-        NULL
-    };
-    DuckCallResult local_result __attribute__((aligned(16))) = {
-        { 0U, DUCK_VALUE_UNIT, 0U }
-    };
+    DuckCallFrame frame __attribute__((aligned(16)));
+    memset(&frame, 0, sizeof frame);
+    frame.magic = DUCK_ABI_MAGIC;
+    frame.abi_major = DUCK_ABI_MAJOR;
+    frame.abi_minor = DUCK_ABI_MINOR;
+    frame.byte_size = (uint32_t)sizeof frame;
+    frame.argument_count = (uint32_t)argument_count;
+    frame.arguments = arguments;
+
+    DuckCallResult local_result __attribute__((aligned(16)));
+    memset(&local_result, 0, sizeof local_result);
+    local_result.value.kind = DUCK_VALUE_UNIT;
 
     DuckAbiError error;
     DuckAbiStatus status = duck_abi_validate_frame(
