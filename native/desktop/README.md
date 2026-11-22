@@ -4,7 +4,7 @@ The native desktop contains a wlroots compositor and a separate Wayland EGL/GLES
 
 ## Compositor
 
-The compositor uses wlroots 0.18 to create a Wayland server, initialize output rendering and manage xdg-shell surfaces. It delegates DRM/KMS and input backends to wlroots on the host.
+The compositor uses wlroots 0.19 to create a Wayland server, initialize output rendering and manage xdg-shell surfaces. It delegates DRM/KMS and input backends to wlroots on the host.
 
     meson setup native/desktop/compositor/build native/desktop/compositor
     meson compile -C native/desktop/compositor/build
