@@ -9,6 +9,9 @@
 ├─────────────────────────────────────────────────────────────┤
 │ DuckOS Session / App Launcher                               │
 │ app manifests · command dispatch · user preferences         │
+├─────────────────────────────────────────────────────────────┤
+│ DuckOS Core Services (user space)                            │
+│ Cockos · Kavun · Ka-bon · Gloverty · Po · Illidia · Unify    │
 ├───────────────────────────┬─────────────────────────────────┤
 │ DuckOS Tools               │ Ivan-VHS Federation             │
 │ procfs · mmap · filesystem │ Pytyliki · Reaper · OPlague     │
@@ -38,6 +41,8 @@ DuckOS владеет оболочкой, сессией, каталогом п�
 Каталог tools — Python 3.10+ пользовательские CLI-команды. Linux-интеграции читают procfs/sysfs и возвращают понятную ошибку при отсутствии интерфейса. Команды не требуют root для обычного сценария и не поднимают привилегии сами.
 
 Каталог federation — Git submodules с upstream commit pins. Исходники и лицензии остаются в своих репозиториях.
+
+Каталог native/services — отдельный Python user-space слой: управление связями PipeWire, планировщик геометрии окон, маршрутизатор аккордов ввода, семантические темы, реестр команд, контрольные точки сессии и общий event/config hub. Он не загружается в freestanding kernel; адаптеры для Wayland seat/compositor и аутентифицированного IPC остаются следующим шагом.
 
 ## Следующий архитектурный шаг
 

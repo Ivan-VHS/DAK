@@ -9,6 +9,7 @@ From this directory:
     make kernel
     make initramfs
     make test
+    make services-test
     make shell
     make compositor
     LIMINE_DIR=/path/to/limine/share make iso
@@ -30,6 +31,13 @@ Build output is written to ../build/native, outside this source tree.
 | GPU acceleration | Host integration only | wlroots/Mesa EGL-GLES renderer path; no GPU driver or DRM subsystem in the DuckOS kernel |
 | AI sandbox | Linux host wrapper | Bubblewrap namespaces, network isolation, reduced filesystem view and resource limits; not a kernel security boundary |
 | Installer image | Builder integrated | Hybrid BIOS/UEFI ISO staging; it currently boots the bring-up kernel, not a complete desktop installation |
+| Core services | User-space prototype | Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify; see ../docs/CORE_SERVICES.md |
+
+## Core services
+
+The Python package in services/duckos_services provides the Cockos PipeWire graph adapter, Kavun layout planner, Ka-bon shortcut router, Gloverty palette audit, Po command registry, Illidia session snapshot store and Unify profile/event hub. It uses only the Python standard library. PipeWire routing additionally needs pw-link on the host. Run make services-test to execute its unit tests.
+
+These services run in host user space. Kavun does not yet control compositor surfaces, Ka-bon does not capture system-wide input, and Unify's event bus is in-process rather than an authenticated IPC transport.
 
 ## Kernel handoff
 

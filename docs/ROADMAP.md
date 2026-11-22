@@ -20,6 +20,9 @@
 
 ## 0.2.x — Linux session prototype
 
+- [x] User-space contracts for Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify
+- [x] Core service CLI, settings persistence and unit tests
+- [ ] Bind service APIs to the Wayland compositor/seat and authenticated local IPC
 - [ ] Нативный session manager и compositor spike
 - [ ] App lifecycle, focus, workspaces, clipboard permissions
 - [ ] Permission broker и журналы чувствительных действий

@@ -1,0 +1,121 @@
+"""Command-line entry point for DuckOS user-space services."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Any
+
+from .common import ServiceError
+from .gloverty import audit_palette
+from .kavun import compute_layout
+from .unify import PROFILES, DuckOSHub
+
+
+def _print(value: Any) -> None:
+    print(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True))
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--state-dir",
+        type=Path,
+        default=Path.home() / ".local" / "state" / "duckos",
+        help="directory for DuckOS session state",
+    )
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    commands.add_parser("status", help="show subsystem availability")
+
+    audio = commands.add_parser("audio", help="inspect and manage PipeWire links")
+    audio_commands = audio.add_subparsers(dest="audio_command", required=True)
+    ports = audio_commands.add_parser("ports")
+    ports.add_argument("direction", choices=("outputs", "inputs", "links"), default="outputs", nargs="?")
+    connect = audio_commands.add_parser("connect")
+    connect.add_argument("output")
+    connect.add_argument("input")
+    disconnect = audio_commands.add_parser("disconnect")
+    disconnect.add_argument("output")
+    disconnect.add_argument("input")
+
+    layout = commands.add_parser("layout", help="compute a Kavun screen layout")
+    layout.add_argument("--width", type=int, required=True)
+    layout.add_argument("--height", type=int, required=True)
+    layout.add_argument("--mode", choices=("main-stack", "columns", "grid", "floating"), default="main-stack")
+    layout.add_argument("--windows", required=True, help="JSON array of window objects")
+    layout.add_argument("--ratio", type=float, default=0.62)
+
+    theme = commands.add_parser("theme", help="inspect Gloverty palettes")
+    theme.add_argument("action", choices=("audit",))
+    theme.add_argument("--name", choices=("dark", "light", "high-contrast"), default="dark")
+
+    snapshot = commands.add_parser("snapshot", help="manage Illidia session checkpoints")
+    snapshot_commands = snapshot.add_subparsers(dest="snapshot_command", required=True)
+    save = snapshot_commands.add_parser("save")
+    save.add_argument("--label", default="CLI checkpoint")
+    snapshot_commands.add_parser("list")
+    restore = snapshot_commands.add_parser("restore")
+    restore.add_argument("snapshot_id")
+
+    profile = commands.add_parser("profile", help="switch coordinated workspace profiles")
+    profile_commands = profile.add_subparsers(dest="profile_command", required=True)
+    profile_commands.add_parser("list")
+    select = profile_commands.add_parser("set")
+    select.add_argument("name", choices=tuple(PROFILES))
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _parser()
+    args = parser.parse_args(argv)
+
+    try:
+        if args.command == "theme":
+            _print(audit_palette(args.name))
+            return 0
+
+        if args.command == "layout":
+            windows = json.loads(args.windows)
+            _print(compute_layout(
+                args.width,
+                args.height,
+                windows,
+                mode=args.mode,
+                ratio=args.ratio,
+            ))
+            return 0
+
+        hub = DuckOSHub(args.state_dir)
+
+        if args.command == "status":
+            _print(hub.status())
+        elif args.command == "audio":
+            if args.audio_command == "ports":
+                _print(hub.audio.list(args.direction))
+            elif args.audio_command == "connect":
+                _print(hub.audio.connect(args.output, args.input))
+            else:
+                _print(hub.audio.disconnect(args.output, args.input))
+        elif args.command == "snapshot":
+            if args.snapshot_command == "save":
+                _print(hub.create_snapshot(args.label))
+            elif args.snapshot_command == "list":
+                _print(hub.snapshots.list())
+            else:
+                _print(hub.restore_snapshot(args.snapshot_id))
+        elif args.command == "profile":
+            if args.profile_command == "list":
+                _print(PROFILES)
+            else:
+                _print(hub.switch_profile(args.name))
+        return 0
+    except (ServiceError, OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        print(f"duckos-services: {error}")
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

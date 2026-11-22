@@ -4,7 +4,7 @@ PYTHON ?= python3
 CC = clang
 LD = ld.lld
 
-.PHONY: all kernel initramfs compositor shell iso test clean
+.PHONY: all kernel initramfs compositor shell iso test services-test clean
 all: kernel initramfs
 
 kernel:
@@ -37,6 +37,9 @@ iso:
 
 test:
 	$(PYTHON) -m unittest discover -s tests -v
+
+services-test:
+	PYTHONPATH=services $(PYTHON) -m unittest discover -s services/tests -v
 
 clean:
 	$(MAKE) -C kernel clean
