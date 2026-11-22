@@ -1,0 +1,153 @@
+{
+  "schema": "duckos.ecosystem.v1",
+  "version": "0.1.0",
+  "system": {
+    "id": "duckos",
+    "name": "DuckOS",
+    "status": "bootstrap",
+    "repository": "Ivan-VHS/DuckOS",
+    "submodule_strategy": "pinned_gitlinks",
+    "statement": "Bootstrap only; no bootable kernel or userspace is present yet."
+  },
+  "projects": [
+    {
+      "id": "duckos",
+      "name": "DuckOS",
+      "role": "operating_system_core",
+      "status": "bootstrap",
+      "repository": "Ivan-VHS/DuckOS",
+      "ownership": "kernel, boot chain, initramfs, userspace, compositor, system packaging and installer"
+    },
+    {
+      "id": "pytyliki",
+      "name": "Pytyliki",
+      "role": "processor_analysis",
+      "status": "integrated_submodule",
+      "repository": "Ivan-VHS/Pytyliki",
+      "path": "ecosystem/Pytyliki",
+      "commit": "5b96e2f17959eb8a6c739bbe4b072a01873c6a55",
+      "contracts": [
+        "pytyliki.c-abi.v1"
+      ],
+      "boundaries": [
+        "read-only processor discovery and bounded analysis",
+        "no scheduler, frequency, voltage, firmware or register writes",
+        "no audio/DSP ownership"
+      ]
+    },
+    {
+      "id": "reaper",
+      "name": "Reaper",
+      "role": "language_toolchain",
+      "status": "integrated_submodule",
+      "repository": "Ivan-VHS/Reaper",
+      "path": "ecosystem/Reaper",
+      "commit": "bc6363aabd588c6216140fe0a40c11fc623a9544",
+      "contracts": [
+        "reaper.oplage-comparison.v1"
+      ],
+      "boundaries": [
+        "Python reference runtime remains compatibility oracle",
+        "native C17 implementation is partial",
+        "not a freestanding kernel compiler",
+        "execution quotas are not a sandbox"
+      ]
+    },
+    {
+      "id": "oplague",
+      "name": "OPlague",
+      "role": "driver_inspection",
+      "status": "integrated_submodule",
+      "repository": "Ivan-VHS/OPlague",
+      "path": "ecosystem/OPlague",
+      "commit": "83e6396fde04eef7224bcfe38dd872086ce4d39c",
+      "contracts": [
+        "oplage.device-snapshot.v1",
+        "udrv.v1"
+      ],
+      "boundaries": [
+        "read-only device and package inspection",
+        "no driver install, load, extraction or execution",
+        "candidate match is not compatibility or trust certification"
+      ]
+    },
+    {
+      "id": "ventusample",
+      "name": "VentuSample",
+      "role": "offline_audio",
+      "status": "integrated_submodule",
+      "repository": "Ivan-VHS/VentuSample",
+      "path": "ecosystem/VentuSample",
+      "commit": "307cfd4ba2257c960ca8a5009cfb3b427b8d84ee",
+      "contracts": [
+        "ventusample.pack.v1",
+        "ventusample.pack.v2"
+      ],
+      "boundaries": [
+        "all audio, sample and DSP processing stays here",
+        "offline rendering by default",
+        "not a system audio driver"
+      ]
+    },
+    {
+      "id": "beelzebul",
+      "name": "Веельзевул",
+      "role": "security_gate",
+      "status": "integrated",
+      "repository": "Ivan-VHS/Pytyliki",
+      "path": "tools/beelzebul.py",
+      "contracts": [
+        "beelzebul.security.v1"
+      ],
+      "policy": "security/beelzebul.v1.json",
+      "rules": 66,
+      "boundary": "read-only development-time repository scan"
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "beelzebul.security.v1",
+      "status": "integrated",
+      "transport": "local scanner and JSON policy",
+      "owner": "beelzebul"
+    },
+    {
+      "id": "pytyliki.c-abi.v1",
+      "status": "available_opt_in",
+      "transport": "explicit trusted native library path",
+      "owner": "pytyliki"
+    },
+    {
+      "id": "oplage.device-snapshot.v1",
+      "status": "available_read_only",
+      "transport": "versioned JSON",
+      "owner": "oplague"
+    },
+    {
+      "id": "udrv.v1",
+      "status": "inspection_only",
+      "transport": "manifest and bounded payload hashes",
+      "owner": "oplague"
+    },
+    {
+      "id": "reaper.oplage-comparison.v1",
+      "status": "available_report_only",
+      "transport": "versioned JSON",
+      "owner": "reaper"
+    },
+    {
+      "id": "ventusample.pack.v2",
+      "status": "available_offline",
+      "transport": "JSON manifest plus WAV assets",
+      "owner": "ventusample"
+    }
+  ],
+  "policies": [
+    "Specialist projects stay in separate repositories and are pinned to immutable commits.",
+    "Cross-project exchange uses versioned contracts and explicit opt-in.",
+    "No external project source or plugin is implicitly executed or loaded.",
+    "Unknown hardware and capabilities remain unknown; no synthetic telemetry or compatibility verdicts.",
+    "DuckOS owns kernel code and privileged operations.",
+    "CPU analysis belongs to Pytyliki; language tooling to Reaper; driver inspection to OPlague; sound/DSP to VentuSample."
+  ]
+}

@@ -1,0 +1,19 @@
+[submodule "ecosystem/Pytyliki"]
+	path = ecosystem/Pytyliki
+	url = https://github.com/Ivan-VHS/Pytyliki.git
+	branch = main
+
+[submodule "ecosystem/Reaper"]
+	path = ecosystem/Reaper
+	url = https://github.com/Ivan-VHS/Reaper.git
+	branch = main
+
+[submodule "ecosystem/OPlague"]
+	path = ecosystem/OPlague
+	url = https://github.com/Ivan-VHS/OPlague.git
+	branch = main
+
+[submodule "ecosystem/VentuSample"]
+	path = ecosystem/VentuSample
+	url = https://github.com/Ivan-VHS/VentuSample.git
+	branch = main

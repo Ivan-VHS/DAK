@@ -1,0 +1,10 @@
+/build/
+/dist/
+*.iso
+*.img
+*.qcow2
+*.log
+__pycache__/
+*.py[cod]
+.venv/
+venv/
