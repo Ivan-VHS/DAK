@@ -39,6 +39,17 @@ class ModuleABITests(unittest.TestCase):
         with self.assertRaises(ModuleABIError):
             resolve_load_order([{"name": "usb", "dependencies": ["bus"]}])
 
+    def test_unhashable_dependency_values_are_rejected_cleanly(self):
+        manifest = {
+            "schema": SCHEMA, "name": "usb", "version": "0.1",
+            "architecture": "x86_64", "kernel_abi": "abi-1",
+            "entry_symbol": "usb_init", "dependencies": [{}], "capabilities": [],
+        }
+        with self.assertRaises(ModuleABIError):
+            validate_module(manifest, architecture="x86_64", kernel_abi="abi-1")
+        with self.assertRaises(ModuleABIError):
+            resolve_load_order([{"name": "usb", "dependencies": [[]]}])
+
 
 if __name__ == "__main__":
     unittest.main()
