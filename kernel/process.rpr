@@ -45,11 +45,10 @@ export craft next_process(processes) {
     yield first(ready)
 }
 
-craft matches_state(process) {
-    yield process[3] == expected_state
-}
-
 export craft by_state(processes, expected_state) {
+    craft matches_state(process) {
+        yield process[3] == expected_state
+    }
     yield keep(processes, matches_state)
 }
 
