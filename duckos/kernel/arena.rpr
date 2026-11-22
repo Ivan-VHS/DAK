@@ -5,7 +5,7 @@ import "memory.rpr" as memory
 
 export craft create(base, limit) {
     when base < 0 or limit <= base or base % 64 != 0 {
-        yield ["invalid", []]
+        yield ["invalid", nothing]
     }
     yield ["ready", [base, base, limit, 0]]
 }

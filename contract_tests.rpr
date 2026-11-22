@@ -115,7 +115,8 @@ assert(supervisor["decide"](1, 3, 3) == ["failed", 3], "restart budget is finite
 
 make known := ["blake3:aaa", "blake3:bbb"]
 assert(storage["node_valid"](["blake3:ccc", "record", ["blake3:aaa"]], known), "graph node may reference known content")
-assert(not storage["node_valid"](["blake3:aaa", "record", []], known), "known hash cannot be reused as a new node")
+make no_dependencies := []
+assert(not storage["node_valid"](["blake3:aaa", "record", no_dependencies], known), "known hash cannot be reused as a new node")
 assert(not storage["node_valid"](["blake3:ddd", "record", ["blake3:missing"]], known), "unknown dependency is rejected")
 make journal := storage["journal_append"]([], "boot.started", "firmware")
 make journal2 := storage["journal_append"](journal, "memory.ready", "arena0")

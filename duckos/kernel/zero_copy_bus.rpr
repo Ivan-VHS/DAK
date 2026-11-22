@@ -3,7 +3,7 @@
 
 export craft create(capacity_bytes, high_watermark_percent) {
     when capacity_bytes <= 0 or high_watermark_percent <= 0 or high_watermark_percent > 100 {
-        yield ["invalid", []]
+        yield ["invalid", nothing]
     }
     yield ["ready", [capacity_bytes, 0, 0, 0, high_watermark_percent]]
 }
