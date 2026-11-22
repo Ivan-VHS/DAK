@@ -9,10 +9,11 @@ From this directory:
     make kernel
     make initramfs
     make test
+    make shell
     make compositor
     LIMINE_DIR=/path/to/limine/share make iso
 
-The kernel build needs Clang/LLD. The compositor build needs Meson, Wayland server headers and wlroots 0.18 development files. ISO creation additionally needs xorriso, the Limine host tool and the Limine BIOS/UEFI assets. BUSYBOX_STATIC may point to a trusted static BusyBox binary to populate the early userspace.
+The kernel build needs Clang/LLD. The compositor build needs Meson, Wayland server headers and wlroots 0.18 development files. The native EGL shell client needs Wayland client/wayland-egl, wayland-protocols, EGL and GLESv2 development files. ISO creation additionally needs xorriso, the Limine host tool and the Limine BIOS/UEFI assets. BUSYBOX_STATIC may point to a trusted static BusyBox binary to populate the early userspace.
 
 Build output is written to ../build/native, outside this source tree.
 
