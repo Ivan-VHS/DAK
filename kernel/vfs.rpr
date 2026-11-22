@@ -1,9 +1,9 @@
-# Path policy helpers for virtual paths; host I/O stays explicit.
+# Path policy helpers for POSIX-style virtual paths; host I/O stays explicit.
 
 export craft is_safe(path) {
     when kind(path) != "text" or size(path) == 0 { yield false }
     when contains(split(path, "/"), "..") { yield false }
-    when contains(path, "\\n") { yield false }
+    when contains(path, "\\") { yield false }
     yield true
 }
 
