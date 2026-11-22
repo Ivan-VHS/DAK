@@ -20,7 +20,7 @@ static DuckAbiStatus native_transport(
         "syscall"
         : "+a"(status)
         : "D"(frame_register), "S"(result_register)
-        : "rcx", "r11", "memory"
+        : "rcx", "r11", "cc", "memory"
     );
     return (DuckAbiStatus)status;
 }
