@@ -30,3 +30,14 @@ jobs:
         run: python -m compileall -q native
       - name: Run native tests
         run: python -m unittest discover -s native/tests -v
+
+  wayland-egl-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Wayland and Mesa build tools
+        run: sudo apt-get update && sudo apt-get install -y meson ninja-build pkg-config libwayland-dev libwayland-bin wayland-protocols libegl-dev libgles2-mesa-dev
+      - name: Configure native EGL shell
+        run: meson setup native/desktop/shell/build native/desktop/shell
+      - name: Build native EGL shell
+        run: meson compile -C native/desktop/shell/build
