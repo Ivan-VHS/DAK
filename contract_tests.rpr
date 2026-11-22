@@ -21,10 +21,13 @@ assert(boot["failure_action"](1) == "recovery", "failed phase must enter recover
 
 assert(memory["align_up"](17, 16) == 32, "arena alignment")
 assert(memory["align_up"](32, 16) == 32, "aligned address must remain unchanged")
+assert(memory["align_up"](9223372036854775800, 16) == -1, "alignment must reject signed address overflow")
 assert(memory["region_fits"](4096, 1024, 8192, 4096), "valid aligned region")
 assert(not memory["region_fits"](4097, 1024, 8192, 4096), "unaligned region must be rejected")
 assert(memory["ranges_overlap"](100, 40, 120, 10), "overlapping ranges")
 assert(not memory["ranges_overlap"](100, 20, 120, 10), "adjacent ranges do not overlap")
+assert(memory["ranges_overlap"](9223372036854775800, 10, 9223372036854775805, 1), "overlap check must avoid end-address overflow")
+assert(not memory["ranges_overlap"](-1, 5, 1, 2), "negative physical addresses must be rejected")
 assert(memory["arena_reserve"](100, 20, 256, 16) == [132, true], "bounded arena reservation")
 assert(memory["arena_reserve"](240, 32, 256, 16) == [240, false], "arena must reject overflow")
 

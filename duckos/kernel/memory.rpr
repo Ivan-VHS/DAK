@@ -1,15 +1,23 @@
 # Memory arithmetic contract.
-# The limit is an exclusive upper bound.
+# Addresses and limits are unsigned 63-bit values represented as Reaper integers.
+# The upper limit of a region is exclusive.
 
 export craft align_up(address, alignment) {
-    when address < 0 or alignment <= 0 {
+    make max_address := 9223372036854775807
+    when address < 0 or address > max_address or alignment <= 0 {
         yield -1
     }
+
     make remainder := address % alignment
     when remainder == 0 {
         yield address
     }
-    yield address + alignment - remainder
+
+    make increment := alignment - remainder
+    when increment > max_address - address {
+        yield -1
+    }
+    yield address + increment
 }
 
 export craft region_fits(base, bytes, limit, alignment) {
@@ -23,16 +31,20 @@ export craft region_fits(base, bytes, limit, alignment) {
 }
 
 export craft ranges_overlap(left_base, left_bytes, right_base, right_bytes) {
-    when left_bytes <= 0 or right_bytes <= 0 {
+    when left_base < 0 or right_base < 0 or left_bytes <= 0 or right_bytes <= 0 {
         yield false
     }
-    yield left_base < right_base + right_bytes and right_base < left_base + left_bytes
+    when left_base <= right_base {
+        yield right_base - left_base < left_bytes
+    }
+    yield left_base - right_base < right_bytes
 }
 
 export craft arena_reserve(cursor, bytes, limit, alignment) {
-    when bytes <= 0 {
+    when bytes <= 0 or limit < 0 {
         yield [-1, false]
     }
+
     make start := align_up(cursor, alignment)
     when start < 0 or start > limit {
         yield [-1, false]
