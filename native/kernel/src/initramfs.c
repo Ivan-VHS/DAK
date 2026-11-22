@@ -73,6 +73,41 @@ static bool safe_archive_name(const uint8_t *name, uint64_t name_size)
     return true;
 }
 
+
+static bool safe_symlink_target(const uint8_t *target, uint64_t target_size)
+{
+    if (target == 0 || target_size == 0 || target[0] == '/') {
+        return false;
+    }
+
+    uint64_t component_start = 0;
+
+    for (uint64_t i = 0; i <= target_size; ++i) {
+        const bool at_end = i == target_size;
+        const uint8_t ch = at_end ? '/' : target[i];
+
+        if (ch == 0 || ch == '\\') {
+            return false;
+        }
+
+        if (ch != '/' && !at_end) {
+            continue;
+        }
+
+        const uint64_t component_length = i - component_start;
+        if (component_length == 0 ||
+            (component_length == 1 && target[component_start] == '.') ||
+            (component_length == 2 && target[component_start] == '.' &&
+             target[component_start + 1] == '.')) {
+            return false;
+        }
+
+        component_start = i + 1;
+    }
+
+    return true;
+}
+
 static bool align4(uint64_t value, uint64_t *aligned)
 {
     if (value > UINT64_MAX - 3) {
@@ -155,7 +190,9 @@ bool initramfs_validate(const void *archive, uint64_t archive_size,
         const uint64_t file_type = mode & 0170000u;
         if (!safe_archive_name(name, name_size) ||
             (file_type != 0100000u && file_type != 0040000u &&
-             file_type != 0120000u)) {
+             file_type != 0120000u) ||
+            (file_type == 0120000u &&
+             !safe_symlink_target(bytes + data_offset, file_size))) {
             return false;
         }
 
