@@ -4,7 +4,7 @@ PYTHON ?= python3
 CC = clang
 LD = ld.lld
 
-.PHONY: all kernel initramfs compositor iso test clean
+.PHONY: all kernel initramfs compositor shell iso test clean
 all: kernel initramfs
 
 kernel:
@@ -24,6 +24,14 @@ compositor:
 	fi
 	meson compile -C desktop/compositor/build
 
+shell:
+	if [ -d desktop/shell/build/meson-private ]; then \
+		meson setup --reconfigure desktop/shell/build desktop/shell; \
+	else \
+		meson setup desktop/shell/build desktop/shell; \
+	fi
+	meson compile -C desktop/shell/build
+
 iso:
 	./scripts/build-iso.sh
 
@@ -32,4 +40,4 @@ test:
 
 clean:
 	$(MAKE) -C kernel clean
-	rm -rf $(BUILD) desktop/compositor/build
+	rm -rf $(BUILD) desktop/compositor/build desktop/shell/build
