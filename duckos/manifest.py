@@ -115,7 +115,12 @@ def validate_manifest(manifest: Any, root: str | Path, *, verify_files: bool = T
                 resolved = candidate.resolve(strict=True)
             except OSError as error:
                 raise ManifestError(f"missing component: {relative}") from error
-            if candidate.is_symlink() or not resolved.is_relative_to(base) or not resolved.is_file():
+            current = base
+            for part in PurePosixPath(relative).parts:
+                current = current / part
+                if current.is_symlink():
+                    raise ManifestError(f"symbolic-link component paths are not allowed: {relative}")
+            if not resolved.is_relative_to(base) or not resolved.is_file():
                 raise ManifestError(f"component is not a regular file inside root: {relative}")
             actual_size, actual_hash = _hash_file(resolved)
             if actual_size != size:
