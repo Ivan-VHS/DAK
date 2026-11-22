@@ -58,6 +58,7 @@ static void output_destroy(struct wl_listener *listener, void *data)
 
     wl_list_remove(&output->frame.link);
     wl_list_remove(&output->destroy.link);
+    wlr_scene_output_destroy(output->scene_output);
     free(output);
 }
 
