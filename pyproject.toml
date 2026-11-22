@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "duckos-build-tools"
+version = "0.1.0"
+description = "Offline validation and planning tools for DuckOS system images and module ABI."
+requires-python = ">=3.10"
+
+[project.scripts]
+duckos = "duckos.cli:main"
+
+[tool.setuptools]
+packages = ["duckos"]
