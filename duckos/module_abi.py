@@ -37,10 +37,10 @@ def validate_module(manifest: Any, *, architecture: str, kernel_abi: str) -> dic
     capabilities = manifest.get("capabilities")
     if not isinstance(dependencies, list) or len(dependencies) > MAX_DEPENDENCIES:
         raise ModuleABIError("dependencies must be a bounded array")
-    if len(set(dependencies)) != len(dependencies) or any(
-        not isinstance(item, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", item)
-        for item in dependencies
-    ):
+    if any(not isinstance(item, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", item)
+           for item in dependencies):
+        raise ModuleABIError("dependencies must be module identifiers")
+    if len(set(dependencies)) != len(dependencies):
         raise ModuleABIError("dependencies must be unique module identifiers")
     if not isinstance(capabilities, list) or len(capabilities) > 64:
         raise ModuleABIError("capabilities must be a bounded array")
@@ -71,8 +71,13 @@ def resolve_load_order(modules: list[dict[str, Any]]) -> list[str]:
         if name in by_name:
             raise ModuleABIError(f"duplicate module: {name}")
         dependencies = item.get("dependencies")
-        if not isinstance(dependencies, list):
-            raise ModuleABIError(f"{name}: dependencies must be an array")
+        if not isinstance(dependencies, list) or any(
+            not isinstance(dep, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", dep)
+            for dep in dependencies
+        ):
+            raise ModuleABIError(f"{name}: dependencies must be an array of module identifiers")
+        if len(set(dependencies)) != len(dependencies):
+            raise ModuleABIError(f"{name}: duplicate dependency")
         by_name[name] = set(dependencies)
     edge_count = sum(len(value) for value in by_name.values())
     if edge_count > MAX_DEPENDENCIES:
