@@ -39,6 +39,17 @@ class ModuleABITests(unittest.TestCase):
         with self.assertRaises(ModuleABIError):
             resolve_load_order([{"name": "usb", "dependencies": ["bus"]}])
 
+    def test_long_dependency_chain_uses_iterative_ordering(self):
+        modules = [
+            {"name": f"m{index:04d}",
+             "dependencies": [f"m{index - 1:04d}"] if index else []}
+            for index in range(1024)
+        ]
+        result = resolve_load_order(modules)
+        self.assertEqual(len(result), 1024)
+        self.assertEqual(result[0], "m0000")
+        self.assertEqual(result[-1], "m1023")
+
     def test_unhashable_dependency_values_are_rejected_cleanly(self):
         manifest = {
             "schema": SCHEMA, "name": "usb", "version": "0.1",
