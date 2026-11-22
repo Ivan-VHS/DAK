@@ -1,0 +1,45 @@
+name: Prepare DuckOS source-tree pull request
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'artifacts/source-bundle/part04'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-source-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Expand the verified source snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat artifacts/source-bundle/part0[0-4] | base64 --decode > "$RUNNER_TEMP/duckos-source.tar.xz"
+          echo "5e2368c939097f6e01e15547a0ebce7b803615ccd257fc4c216389d8e314aaa7  $RUNNER_TEMP/duckos-source.tar.xz" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/duckos-source"
+          tar -xJf "$RUNNER_TEMP/duckos-source.tar.xz" --strip-components=1 -C "$RUNNER_TEMP/duckos-source"
+
+          branch="chore/duckos-source-tree-${GITHUB_RUN_NUMBER}"
+          git switch -c "$branch"
+          cp -a "$RUNNER_TEMP/duckos-source/." .
+          rm -rf artifacts/source-bundle
+          rm -f .github/workflows/materialize-source.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: materialize the DuckOS source tree"
+          git push --set-upstream origin "$branch"
+
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "DuckOS: add the complete initial source tree" \
+            --body "This PR expands the SHA-256-verified bootstrap snapshot into the normal DuckOS source layout. The companion DuckOS bootstrap validation workflow builds the kernel, validates initramfs and package tooling, and attempts an ISO/QEMU boot smoke test."
