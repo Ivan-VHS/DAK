@@ -1,5 +1,5 @@
-CC ?= clang
-LD ?= ld.lld
+CC = clang
+LD = ld.lld
 BUILD_DIR := build
 INCLUDES := -Iinclude
 CFLAGS := --target=x86_64-unknown-none-elf -std=c11 -O2 -Wall -Wextra -Werror \
@@ -8,7 +8,7 @@ CFLAGS := --target=x86_64-unknown-none-elf -std=c11 -O2 -Wall -Wextra -Werror \
 	-mno-red-zone -mcmodel=kernel -mno-mmx -mno-sse -mno-sse2
 LDFLAGS := -nostdlib -static -no-pie -z max-page-size=0x1000 -T linker.ld
 
-SOURCES := src/kernel.c src/serial.c
+SOURCES := src/kernel.c src/serial.c src/initramfs.c
 OBJECTS := $(patsubst src/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 
 .PHONY: all clean
