@@ -6,6 +6,7 @@
 #include <limine.h>
 
 #include "serial.h"
+#include "initramfs.h"
 
 __attribute__((used, section(".limine_requests")))
 static volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
@@ -159,9 +160,27 @@ void kmain(void)
     report_memory_map();
 
     if (module_request.response != NULL) {
+        const struct limine_module_response *modules = module_request.response;
         serial_write("[initramfs] boot modules: ");
-        serial_write_dec(module_request.response->module_count);
+        serial_write_dec(modules->module_count);
         serial_write("\n");
+
+        if (modules->module_count > 0 && modules->modules != NULL &&
+            modules->modules[0] != NULL) {
+            const struct limine_file *archive = modules->modules[0];
+            uint64_t entry_count = 0;
+
+            if (archive->address != NULL &&
+                initramfs_validate(archive->address, archive->size, &entry_count)) {
+                serial_write("[initramfs] newc archive validated; entries: ");
+                serial_write_dec(entry_count);
+                serial_write("\n");
+            } else {
+                serial_write("[initramfs] first module is not a valid newc archive\n");
+            }
+        } else {
+            serial_write("[initramfs] module list is empty\n");
+        }
     } else {
         serial_write("[initramfs] no boot modules supplied\n");
     }
