@@ -205,6 +205,8 @@ def main(argv: list[str] | None = None) -> int:
         "install", "launch", "download", "backup", "transfer", "stream",
         "capture_screenshot", "capture_recording", "redistribute", "modify",
     ), default="launch", help="required content right (defaults to launch)")
+    package_check.add_argument("--audit-log", type=Path,
+                               help="append the combined decision to the local rights audit log")
 
     content_check = rights_commands.add_parser(
         "verify-content", help="verify publisher signature and the exact package file set"
@@ -341,7 +343,7 @@ def main(argv: list[str] | None = None) -> int:
                 offline=args.offline,
                 required_action=args.action,
             )
-            RightsAuditLog().append(
+            RightsAuditLog(args.audit_log).append(
                 action="licensed-content.verify",
                 content_id=result.get("entitlement_decision", {}).get("content_id"),
                 entitlement_id=result.get("entitlement_decision", {}).get("entitlement_id"),
