@@ -36,12 +36,16 @@ class ApplicationCatalogTests(unittest.TestCase):
         self.assertEqual(actual, expected)
         self.assertEqual(len(self.catalog["applications"]), 20)
 
-    def test_native_and_browser_maturity_are_not_conflated(self) -> None:
+    def test_native_shell_and_application_maturity_are_not_conflated(self) -> None:
         self.assertEqual(self.catalog["maturity_status"], "specified")
-        self.assertEqual(self.catalog["prototype"]["maturity_status"], "partial")
+        native_shell = self.catalog["native_shell"]
+        self.assertEqual(native_shell["maturity_status"], "implemented")
+        self.assertEqual(native_shell["runtime"], "python-tk")
+        self.assertIn("not the DuckOS compositor", native_shell["scope"])
         for app in self.catalog["applications"]:
             self.assertEqual(app["maturity_status"], "specified")
-            self.assertEqual(app["prototype_status"], "partial")
+            self.assertNotIn("prototype_status", app)
+            self.assertNotIn("prototype_evidence", app)
 
     def test_every_workflow_has_valid_endpoints_and_user_consent(self) -> None:
         app_ids = {item["id"] for item in self.catalog["applications"]}
@@ -62,9 +66,12 @@ class ApplicationCatalogTests(unittest.TestCase):
         self.assertEqual(contract["max_package_bytes"], 20 * 1024 * 1024)
         self.assertEqual(contract["max_clip_bytes"], 12 * 1024 * 1024)
 
-    def test_prototype_and_documentation_targets_exist(self) -> None:
+    def test_native_shell_files_and_documentation_targets_exist(self) -> None:
         expected_paths = [
-            "prototype/mora-home.html",
+            "duckos/mora/native_ui.py",
+            "duckos/mora/model.py",
+            "duckos/mora/data/apps.json",
+            "duckos/mora/data/commons-catalog.json",
             "docs/PREINSTALLED_APPLICATIONS.md",
             "docs/UNIFY_TRANSFER_FORMAT_V1.md",
             "schemas/unify.transfer.v1.schema.json",
@@ -74,26 +81,27 @@ class ApplicationCatalogTests(unittest.TestCase):
             with self.subTest(path=relative):
                 self.assertTrue((ROOT / relative).is_file(), relative)
 
-    def test_browser_prototype_mentions_all_application_names(self) -> None:
-        html = (ROOT / "prototype/mora-home.html").read_text(encoding="utf-8")
-        for name in ("Cockos", "Kavun", "Ka-bon", "Gloverty", "Po", "Illidia", "Unify"):
-            with self.subTest(app=name):
-                self.assertIn(name, html)
-        self.assertIn("mora.local-suite.v1", html)
-        self.assertIn("IndexedDB", html)
-
-    def test_extended_app_panels_are_registered_in_mora(self) -> None:
-        desktop = (ROOT / "mora/index.html").read_text(encoding="utf-8")
-        app_source = (ROOT / "mora/app.js").read_text(encoding="utf-8")
+    def test_native_launcher_registry_mentions_all_application_names(self) -> None:
+        registry = load_json("mora/apps.json")
+        expected = {item["id"] for item in self.catalog["applications"]}
+        actual = {item["id"] for item in registry["built_in_apps"]}
+        self.assertTrue(expected.issubset(actual))
+        self.assertTrue(all(item.get("runtime") == "native-tk" for item in registry["built_in_apps"]))
+        native_source = (ROOT / "duckos/mora/native_ui.py").read_text(encoding="utf-8")
+        self.assertIn("tk.Tk()", native_source)
         for name in (
+            "Cockos", "Kavun", "Ka-bon", "Gloverty", "Po", "Illidia", "Unify",
             "Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
             "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2",
             "Po-2", "GameCharager", "EXEdotEXE",
         ):
             with self.subTest(app=name):
-                self.assertIn(name, desktop + app_source)
-        self.assertIn('id="extension-app-grid"', desktop)
-        self.assertIn("EXTENSION_STORAGE_PREFIX", app_source)
+                self.assertIn(name, native_source + json.dumps(registry, ensure_ascii=False))
+
+    def test_retired_html_entry_points_are_absent(self) -> None:
+        self.assertFalse((ROOT / "mora/index.html").exists())
+        self.assertFalse((ROOT / "prototype/mora-home.html").exists())
+        self.assertTrue((ROOT / "duckos/mora/native_ui.py").is_file())
 
     def test_dak_catalog_is_present_and_remains_design_only(self) -> None:
         catalog = (ROOT / "catalogs/dak-base-applications.v1.yaml").read_text(encoding="utf-8")
