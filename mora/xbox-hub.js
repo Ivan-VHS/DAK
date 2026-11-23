@@ -693,7 +693,7 @@ export function initializeXboxHub() {
       if (!state.open) return;
       const pressed = new Set();
       let action = "";
-      for (const pad of navigator.getGamepads()) {
+      for (const pad of (navigator.getGamepads() || [])) {
         if (!pad || !pad.connected) continue;
         for (let index = 0; index < pad.buttons.length; index += 1) {
           if (pad.buttons[index]?.pressed) pressed.add(pad.index + ":" + index);
@@ -821,14 +821,15 @@ export function initializeXboxHub() {
   openButton.setAttribute("aria-controls", "xbox-hub-root");
   openButton.setAttribute("aria-expanded", "false");
 
+  function updateGamepadStatus(connected) {
+    $("[data-hub-gamepad-status]").textContent = state.language === "ua"
+      ? (connected ? "Геймпад підключено · D-pad / A" : "Клавіатура · миша · геймпад")
+      : (connected ? "Геймпад подключён · D-pad / A" : "Клавиатура · мышь · геймпад");
+  }
+
   if (typeof window !== "undefined") {
-    window.addEventListener("gamepadconnected", () => {
-      $("[data-hub-gamepad-status]").textContent = state.language === "ua"
-        ? "Геймпад підключено · D-pad / A" : "Геймпад подключён · D-pad / A";
-    });
-    window.addEventListener("gamepaddisconnected", () => {
-      $("[data-hub-gamepad-status]").textContent = "Клавиатура · мышь · геймпад";
-    });
+    window.addEventListener("gamepadconnected", () => updateGamepadStatus(true));
+    window.addEventListener("gamepaddisconnected", () => updateGamepadStatus(false));
   }
 
   renderAll();
