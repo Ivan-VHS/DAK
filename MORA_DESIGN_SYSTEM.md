@@ -82,3 +82,7 @@ The CSS stacks reference locally installed font families and do not fetch Google
 
 Mora remains a browser desktop shell, not a native process launcher. Native application capabilities and security boundaries remain owned by their respective projects; a permissioned launcher/IPC layer must be implemented and verified separately.
 
+The optional TV mode adds geometry-based focus movement, browser Gamepad API input (D-pad/left stick and A/B/X/Y), large-card scaling, a high-contrast focus ring and short synthesized audio cues. It is not a native controller daemon, compositor or console firmware.
+
+Rights Center previews metadata only. Signed entitlements, publisher content manifests, SHA-256 package checks, save attribution, transfer metadata and hash-chained audit events are verified through the native CLI when an explicit trusted public key is supplied. A trusted launch gate, device attestation, store account/revocation service and system-wide capture enforcement remain native work. See [Console navigation and content rights](docs/CONSOLE_AND_CONTENT_RIGHTS.md) for the exact maturity boundary.
+
