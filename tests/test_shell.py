@@ -36,14 +36,19 @@ class ShellHostTests(unittest.TestCase):
         self.assertGreaterEqual(report["count"], 14)
         self.assertEqual(names["illidia"], "Illidia")
         self.assertIn("workspace", names)
+        self.assertEqual(len(report["system_services"]), 8)
 
     def test_invalid_or_duplicate_catalogue_entries_are_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "apps.json"
-            path.write_text(json.dumps([
-                {"id": "same", "name": "One", "category": "system", "panel": "mora/a"},
-                {"id": "same", "name": "Two", "category": "system", "panel": "mora/b"},
-            ]), encoding="utf-8")
+            path.write_text(json.dumps({
+                "schema_version": "test",
+                "built_in_apps": [
+                    {"id": "same", "name": "One", "category": "system", "panel": "mora/a"},
+                    {"id": "same", "name": "Two", "category": "system", "panel": "mora/b"},
+                ],
+                "system_services": [],
+            }), encoding="utf-8")
             with self.assertRaises(ShellError):
                 read_app_catalog(path)
 
