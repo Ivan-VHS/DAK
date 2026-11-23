@@ -176,7 +176,8 @@ def _entry_fields(entry: ET.Element, atom: bool) -> dict[str, str]:
     if atom:
         links = [child for child in list(entry) if _tag_name(child.tag) == "link"]
         preferred = next((item for item in links if item.attrib.get("rel", "alternate") == "alternate"), None)
-        link = (preferred or (links[0] if links else ET.Element("link"))).attrib.get("href", "")
+        selected_link = preferred if preferred is not None else (links[0] if links else None)
+        link = selected_link.attrib.get("href", "") if selected_link is not None else ""
     else:
         link = _element_text(entry, {"link"})
     description = _element_text(entry, {"summary", "description", "encoded", "content"})
@@ -365,7 +366,10 @@ class NewsService:
         if term:
             items = [
                 item for item in items
-                if term in (item.get("title", "") + " " + item.get("summary", "") + " " + item.get("source", "")).casefold()
+                if term in " ".join((
+                    item.get("title", ""), item.get("summary", ""), item.get("source", ""),
+                    item.get("author", ""),
+                )).casefold()
             ]
         items.sort(key=lambda item: item.get("published_at") or "", reverse=True)
         return {
