@@ -8,6 +8,7 @@ const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
 const nativeDesktop = await readFile(new URL("../duckos/desktop/native_ui.py", import.meta.url), "utf8");
+const legacyPrototype = await readFile(new URL("../prototype/mora-home.html", import.meta.url), "utf8");
 
 const coreAppIds = ["cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"];
 const extensionAppIds = [
@@ -166,6 +167,12 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(nativeDesktop.includes('"info": "#5CE1E6"'));
   assert.ok(nativeDesktop.includes('tag_configure("safe"'));
   assert.ok(nativeDesktop.includes('tag_configure("enabled"'));
+  assert.ok(legacyPrototype.includes("--duck-page:#080808"));
+  assert.ok(legacyPrototype.includes("background:#FFD400"));
+  assert.ok(legacyPrototype.includes(".btn.danger"));
+  assert.ok(!/#(?:24234F|775EE9|9B8BFF|755BE7|5A36D6|FF9AB6|FF6FA3|C2335F|9A7DFF|5FB2FF|2058D8|4FE0E0|1590A8|E8EDFF|9AA8E6|AD3A62AA|FFF3D0)/i.test(legacyPrototype));
+  assert.ok(byDesignTokensAreUsed(css, theme));
+
 
   const allowedColors = new Set([
     ...Object.values(theme.colorScale.base),
@@ -181,7 +188,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v8-duck-semantic-palette"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
