@@ -1,0 +1,33 @@
+name: Program adoption manifest
+
+on:
+  push:
+    paths:
+      - "manifests/ivan-vhs-program-adoption.v1.json"
+      - "schemas/ivan-vhs-program-adoption.v1.schema.json"
+      - "tools/validate_program_adoption.py"
+      - "tests/test_program_adoption.py"
+      - ".github/workflows/program-adoption.yml"
+  pull_request:
+    paths:
+      - "manifests/ivan-vhs-program-adoption.v1.json"
+      - "schemas/ivan-vhs-program-adoption.v1.schema.json"
+      - "tools/validate_program_adoption.py"
+      - "tests/test_program_adoption.py"
+      - ".github/workflows/program-adoption.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run manifest tests
+        run: python -m unittest discover -s tests -p "test_program_adoption.py" -v
+      - name: Validate current ownership map
+        run: python tools/validate_program_adoption.py
