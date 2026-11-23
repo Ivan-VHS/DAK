@@ -25,6 +25,7 @@ from .hardware_inventory import collect_host_inventory
 from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
+from .shell import host_status as shell_host_status, read_app_catalog, readiness_report
 
 
 def _load(path: Path) -> Any:
@@ -159,6 +160,16 @@ def main(argv: list[str] | None = None) -> int:
     illidia_launch.add_argument("--no-fsync", action="store_true", help="disable Proton fsync")
     illidia_launch.add_argument("--wait", action="store_true", help="wait for the game and return its exit code")
 
+    shell = commands.add_parser(
+        "shell", help="inspect the Mora desktop shell and current host without changing the system"
+    )
+    shell_commands = shell.add_subparsers(dest="shell_command", required=True)
+    shell_commands.add_parser("status", help="show real host information and native desktop boundaries")
+    shell_commands.add_parser("apps", help="list the local Mora application catalogue")
+    shell_verify = shell_commands.add_parser("verify", help="check shell source wiring and Reaper runtime availability")
+    shell_verify.add_argument("--root", type=Path, help="DuckOS project root")
+    shell_verify.add_argument("--catalogue", type=Path, help="alternate Mora app catalogue JSON")
+
     try:
         args = parser.parse_args(argv)
         if args.command == "validate-manifest":
@@ -226,6 +237,12 @@ def main(argv: list[str] | None = None) -> int:
                 use_wined3d=args.wined3d, disable_esync=args.no_esync,
                 disable_fsync=args.no_fsync, wait=args.wait,
             )
+        elif args.command == "shell" and args.shell_command == "status":
+            result = shell_host_status()
+        elif args.command == "shell" and args.shell_command == "apps":
+            result = read_app_catalog()
+        elif args.command == "shell" and args.shell_command == "verify":
+            result = readiness_report(project_root=args.root, catalogue_path=args.catalogue)
         else:
             result = compatibility_status()
         _print_result(result)
