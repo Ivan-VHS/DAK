@@ -22,7 +22,7 @@ from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .terminal import TerminalService, run_interactive
-from .gaming import assess_capabilities, detect_game_processes, load_game_profiles, plan_session_transition
+from .gaming import assess_capability_document, detect_game_processes, load_game_profiles, plan_session_transition
 
 
 def _load(path: Path) -> Any:
@@ -241,9 +241,7 @@ def main(argv: list[str] | None = None) -> int:
             result = detect_game_processes(profiles)
         elif args.command == "gaming-assess":
             payload = _load(args.capabilities) if args.capabilities else {}
-            if isinstance(payload, dict) and "capabilities" in payload:
-                payload = payload["capabilities"]
-            result = assess_capabilities(payload)
+            result = assess_capability_document(payload)
         elif args.command == "gaming-transition":
             result = plan_session_transition(
                 args.state, args.event,
