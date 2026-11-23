@@ -1,0 +1,80 @@
+{
+  "schema": "duckos.mora.system.v1",
+  "product": "DuckOS",
+  "desktop": "Mora",
+  "version": 1,
+  "principles": [
+    "The shell never executes arbitrary commands or manifest-provided shell strings.",
+    "Intent actions are limited to a reviewed local allowlist and require explicit approval.",
+    "Unconfigured capabilities default to denied in the shell preference profile.",
+    "File inspection and hashing run locally; uploads are not performed by the shell.",
+    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected."
+  ],
+  "capabilities": {
+    "desktop": {
+      "maturity": "implemented",
+      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and six system tools"
+    },
+    "intent_ui": {
+      "maturity": "partial",
+      "scope": "offline allowlisted actions, preview and explicit confirmation"
+    },
+    "local_ai_and_npu": {
+      "maturity": "planned",
+      "scope": "no local model runtime, NPU enumeration or kernel scheduling"
+    },
+    "approval_zones": {
+      "maturity": "partial",
+      "scope": "Mora intent actions only; system-level approvals require native broker"
+    },
+    "immutable_updates": {
+      "maturity": "planned",
+      "scope": "shell settings snapshot only; no atomic OS image updater"
+    },
+    "app_sandboxing": {
+      "maturity": "planned",
+      "scope": "policy documented; browser prototype does not sandbox native processes"
+    },
+    "zero_trust_permissions": {
+      "maturity": "partial",
+      "scope": "deny-by-default shell preferences; no kernel enforcement"
+    },
+    "provenance": {
+      "maturity": "partial",
+      "scope": "local SHA-256; C2PA signature and manifest verification absent"
+    },
+    "adaptive_workspace": {
+      "maturity": "partial",
+      "scope": "responsive browser layout and reduced motion; no XR session transfer"
+    },
+    "multimodal_input": {
+      "maturity": "planned",
+      "scope": "keyboard, pointer and touch; no voice or spatial input service"
+    },
+    "material_interface": {
+      "maturity": "implemented",
+      "scope": "Mora glass surfaces, explicit borders, motion and contrast states"
+    },
+    "compatibility": {
+      "maturity": "partial",
+      "scope": "PE/ELF header inspection only; no Win32, DirectX, Vulkan or anti-cheat runtime"
+    },
+    "declarative_configuration": {
+      "maturity": "partial",
+      "scope": "versioned local shell preferences; no full OS desired-state manager"
+    },
+    "accessibility": {
+      "maturity": "partial",
+      "scope": "reduced-motion controls and responsive layout; more contrast and assistive profiles remain"
+    },
+    "energy_awareness": {
+      "maturity": "partial",
+      "scope": "user-selectable shell preference only; no CPU/GPU power scheduler or VRR control"
+    }
+  },
+  "not_in_scope_as_implemented_features": [
+    "neural or thought-controlled input",
+    "self-modifying kernel and runtime-generated drivers",
+    "temporal or quantum rollback"
+  ]
+}

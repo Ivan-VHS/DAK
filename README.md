@@ -1,62 +1,69 @@
-# DuckOS — Mora desktop shell
+# DuckOS — Mora unified desktop
 
-Mora is the first desktop home screen for DuckOS: a quiet, glass-styled workspace with seven built-in app panels, desktop widgets and a dock.
+**DuckOS** is the operating-system project. **Mora** is its unified desktop shell and visual language: one home screen, one app surface, one control center and one consistent interaction model.
 
-## Current implementation
+The desktop keeps the existing indigo-to-rose sunset, layered hills, warm glass panels and compact dock. The seven original first-party apps remain in place; six system tools extend the same environment.
 
-The initial shell is a self-contained HTML/CSS/JavaScript application under \`mora/\`.
+## What is implemented in the shell
 
-- Sunset-over-hills wallpaper with an indigo, rose and gold palette.
-- Live local clock and date, desktop status row and glass dock.
-- Seven app launchers: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify.
-- Ka-bon spending and Unify device-status widgets that open their corresponding apps.
-- Movable app windows, close controls, Escape-to-close and running indicators in the dock.
-- Working demo controls: audio sliders and recording state, photo selection, expense bars, scenario switches, compass tabs, game progress and device toggles.
-- Responsive desktop/tablet/mobile layout and reduced-motion support.
+- **Mora desktop:** live local clock, status bar, responsive workspace, wallpaper, app grid, widgets, dock, draggable windows and running indicators.
+- **Seven applications:** Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify.
+- **Mora AI:** an offline intent planner for a small allowlist of local settings and app-opening actions. It previews the plan and waits for explicit approval. It is not an LLM and does not execute shell commands.
+- **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. They are stored in the shell profile; a native capability broker is still required to enforce them for OS processes.
+- **Restore:** versioned local snapshot and restore of Mora preferences, plus an A/B update plan preview. It does not update or roll back the OS image.
+- **Bridge:** local PE and ELF header inspection, including common x86, x64 and ARM64 machine identifiers. It never executes the selected file.
+- **Control:** persistent Mora focus, motion and resource-profile preferences. These do not change kernel scheduling or hardware power states.
+- **Proof:** local SHA-256 calculation for a selected file. C2PA signatures and provenance manifests are not yet verified.
+- **Keyboard access:** Ctrl+K opens Mora AI; Escape closes the top window.
 
-**Data boundary:** all balances, photos, progress values, device records, connection states and audio levels are fictional demo data. The frontend does not connect to payment accounts, external APIs, sensors, audio hardware or real device services.
+## Start and test
 
-## Run
+Open **mora/index.html** in a modern browser. No network service or package install is required for the shell.
 
-Open \`mora/index.html\` directly in a modern browser. The shell has no external runtime dependencies, package installation step or network requirement.
+Run **npm test** with Node.js 18 or newer. Tests cover the desktop contract, preference validation, intent allowlisting, recovery snapshots and PE header inspection. They are not a substitute for browser automation, kernel tests or boot-image validation.
 
-Run the contract tests with Node.js 18 or newer:
+## System direction
 
-\`\`\`sh
-npm test
-\`\`\`
+The shell presents the 2026 OS design directions as explicit service contracts, not as fictional hardware access. The status of each capability is recorded in **mora/system-policy.json**.
 
-The tests check the shell markup, seven-app registry, expected interactive controls and self-contained asset policy. They are not a substitute for browser automation or native OS testing.
+| Area | Current shell state | Native work still required |
+|---|---|---|
+| AI-native scheduling and local NPU models | Not connected | model runtime, hardware discovery and kernel resource scheduler |
+| Intent UI and approval zones | Limited local planner with preview/approval | privileged action broker, policy audit and rollback |
+| Immutable updates | Local settings snapshot only | signed image pipeline, A/B slots, boot verification and recovery |
+| Sandboxing and zero trust | Shell preference profile only | process isolation, capabilities, syscall policy and device broker |
+| Provenance | SHA-256 only | C2PA parsing, signer trust and verification chain |
+| Adaptive workspace | Responsive browser layout | native compositor, display migration and XR runtime |
+| Multimodal input | Keyboard, pointer and touch | speech, gesture, accessibility and permission services |
+| Compatibility | PE/ELF inspection | Win32/NT, graphics translation, audio, anti-cheat and launcher integration |
+| Declarative configuration | Versioned shell preference object | package, service and system desired-state engine |
+| Energy awareness | Selectable UI profile | CPU/GPU/NPU scheduling, thermal policy and VRR |
+
+No browser feature is described as a kernel, driver or hardware implementation. In particular, EXE inspection is not EXE execution, a visual permission switch is not process isolation, and a settings snapshot is not an immutable OS rollback.
 
 ## Project structure
 
-| Path | Purpose |
+| Path | Responsibility |
 |---|---|
-| \`mora/index.html\` | Desktop structure and launch surfaces |
-| \`mora/styles.css\` | Wallpaper, glass surfaces, app windows and responsive layout |
-| \`mora/app.js\` | Clock, window manager, panels and demo interactions |
-| \`mora/apps.json\` | Canonical seven-app and widget registry |
-| \`mora/app-manifest.schema.json\` | External application manifest contract |
-| \`docs/MORA_INTEGRATION.md\` | Architecture, security boundary and native integration requirements |
-| \`tests/mora-contract.test.mjs\` | Dependency-free contract checks |
+| mora/index.html | Desktop structure and app launchers |
+| mora/styles.css | Mora visual system and responsive layout |
+| mora/app.js | Window manager, app panels and shell interactions |
+| mora/core.js | Validated preferences, intent allowlist, PE/ELF inspection and hashing |
+| mora/apps.json | First-party app and system-tool registry |
+| mora/system-policy.json | Capability maturity and native-service boundaries |
+| mora/app-manifest.schema.json | External app manifest contract |
+| docs/MORA_INTEGRATION.md | Security and native integration requirements |
+| tests/ | Dependency-free contract and core tests |
 
-## Integration with the other Ivan-VHS projects
+## Native integration sequence
 
-Reaper, Pytyliki, OPlague and VentuSample can each publish an \`integrations/mora/manifest.json\` file. It records the real project entry point and platform requirements. These manifests are opt-in declarations only: the current browser shell does not launch native processes.
-
-A future native launcher must validate the manifest, resolve paths under a trusted installation root, start a process without shell interpolation and request explicit user approval before first launch. See [Mora integration contract](docs/MORA_INTEGRATION.md).
-
-## Implementation status
-
-| Capability | Maturity | Boundary |
-|---|---|---|
-| Desktop layout and seven built-in panels | \`implemented\` | Browser-hosted first shell |
-| Clock, movable windows and Escape handling | \`implemented\` | Local frontend state |
-| Dashboard widgets and dock indicators | \`implemented\` | Fictional data |
-| External app manifest | \`specified\` | Schema and declarations only |
-| Native process launcher / OS session manager | \`planned\` | Not present in this repository yet |
-| Hardware, audio and payment integrations | \`not_applicable\` to this demo UI | No live access is attempted |
+1. Bind Mora windows to the DuckOS session manager and compositor.
+2. Implement the capability broker and per-process sandbox before granting native app permissions.
+3. Connect signed package metadata, an immutable system slot and a tested recovery path.
+4. Connect the compatibility runtime only after Win32, graphics, audio and prefix contracts pass.
+5. Attach local inference and resource scheduling through versioned kernel/service APIs.
+6. Add C2PA verification and device-level power controls with auditable provider results.
 
 ## Attribution
 
-Project author/developer: **Ivan-VHS**. Existing contributor and third-party attributions must remain intact as the project grows.
+Project author/developer: **Ivan-VHS**. Preserve the authorship and license notices of all existing contributors and dependencies.
