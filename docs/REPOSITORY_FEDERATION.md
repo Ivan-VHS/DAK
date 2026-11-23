@@ -41,12 +41,18 @@ The registry is machine-readable at `federation/repositories.v1.json`; its contr
 
 ## How projects fit together
 
-- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. DuckOS should call narrow versioned interfaces or consume JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.
-- **Reaper** is the user-space language and toolchain. Its federation status is `native-workbench`: Duck Desktop and the `duckos reaper` CLI can launch Studio or request static checks through a bounded subprocess bridge. It can implement system policy and developer tools, but imported interpreters, plugins and programs never become kernel code.
-- **OPlague** provides read-only device, package and driver evidence. Device matches are candidates, not permission to install a driver.
-- **VentuSample** owns audio generation and offline DSP. Its CMake project supports an optional local Reaper source path; this is recorded as an optional dependency, not a mandatory boot dependency. Real-time audio and device access need a separate service design.
+- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. Its Win32 GUI is launched as a separate native window when the pinned checkout contains the built target. DuckOS consumes only reviewed versioned interfaces or JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.
+- **Reaper** is the user-space language and toolchain. Its federation status is `native-workbench`: Mora, Duck Desktop and the `duckos reaper` CLI can launch Studio or request static checks through a bounded subprocess bridge. Imported interpreters, plugins and programs never become kernel code.
+- **OPlague** provides read-only device, package and driver evidence. Its Python/Tk workbench has a native launcher; live Plug and Play inventory remains Windows-only. Device matches are candidates, not permission to install a driver.
+- **VentuSample** owns audio generation and offline DSP. Its Qt 6 / C++20 workstation is launched when a built native target is available. Its CMake project supports an optional local Reaper source path; this is recorded as an optional dependency, not a mandatory boot dependency. Real-time audio and device access need a separate service design.
 
 Preferred integration order is versioned JSON first, narrow C ABI second, and IPC only after DuckOS has a process model, capabilities, resource quotas, cancellation and audit. Keep the upstream projects separate; use adapters under DuckOS rather than copying source files into kernel or Mora directories.
+
+## Native application launcher
+
+The native Mora Qt shell lists all four specialist projects in the same searchable application catalogue. A fixed DuckOS launcher resolves the registered project paths under `projects/`, checks the platform and documented entry point, then starts a separate user-space process only after the user selects Open. The CLI exposes the same registry through `duckos apps list` and `duckos apps open <id>`.
+
+The registry distinguishes source checkout, runtime readiness and native build availability. Pytyliki is Windows-only; OPlague requires Python 3.10+ and Tkinter; VentuSample requires a platform-specific Qt 6 build; Reaper uses its existing Studio bridge. A missing executable is reported as unavailable instead of triggering an implicit build. See [Native specialist applications](NATIVE_PROJECT_APPLICATIONS.md) for commands, build instructions, platform limitations and verification.
 
 ## Reproducibility and safety
 
