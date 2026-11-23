@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/hardware-performance-suite.v1.schema.json",
+  "title": "DuckOS hardware and gaming performance suite v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "operating_system",
+    "maturity_status",
+    "distribution_intent",
+    "maintainer",
+    "agent",
+    "applications",
+    "integration"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "duckos.hardware-performance-suite.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "operating_system": {
+      "const": "DuckOS"
+    },
+    "maturity_status": {
+      "enum": [
+        "specified",
+        "planned",
+        "partial",
+        "implemented",
+        "verified"
+      ]
+    },
+    "distribution_intent": {
+      "enum": [
+        "preinstalled",
+        "optional",
+        "downloadable"
+      ]
+    },
+    "maintainer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "note": {
+      "type": "string"
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "entrypoint",
+        "runtime",
+        "platforms",
+        "privilege_model"
+      ],
+      "properties": {
+        "id": {
+          "const": "duckos.hardware-agent.v1"
+        },
+        "entrypoint": {
+          "type": "string"
+        },
+        "runtime": {
+          "type": "string"
+        },
+        "platforms": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "privilege_model": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "applications": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "domain",
+          "role",
+          "description",
+          "maturity_status",
+          "prototype_status",
+          "entrypoint",
+          "native_agent_required",
+          "data_sources",
+          "operation_mode",
+          "capabilities",
+          "safety_boundaries"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "domain": {
+            "const": "hardware_performance"
+          },
+          "role": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "maturity_status": {
+            "enum": [
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified"
+            ]
+          },
+          "prototype_status": {
+            "enum": [
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified"
+            ]
+          },
+          "entrypoint": {
+            "type": "string"
+          },
+          "native_agent_required": {
+            "type": "boolean"
+          },
+          "data_sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "operation_mode": {
+            "enum": [
+              "read-only",
+              "export-only",
+              "network-read",
+              "explicit-apply",
+              "profile-only"
+            ]
+          },
+          "capabilities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "safety_boundaries": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mora_theme",
+        "driver_inspection",
+        "cpu_and_sensor_analysis",
+        "snapshot_schema",
+        "local_import_only",
+        "network_runtime_required"
+      ],
+      "properties": {
+        "mora_theme": {
+          "type": "string"
+        },
+        "driver_inspection": {
+          "type": "string",
+          "format": "uri"
+        },
+        "cpu_and_sensor_analysis": {
+          "type": "string",
+          "format": "uri"
+        },
+        "snapshot_schema": {
+          "type": "string"
+        },
+        "local_import_only": {
+          "type": "boolean"
+        },
+        "network_runtime_required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
