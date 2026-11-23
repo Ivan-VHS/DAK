@@ -3,6 +3,23 @@
   "name": "Mora",
   "version": 1,
   "palettes": {
+    "amber": {
+      "page": "#211913",
+      "surface": "#33261D",
+      "elevated": "#493326",
+      "text": "#FFF3E2",
+      "secondary": "#E7D2B8",
+      "muted": "#C4A98A",
+      "brand": "#D58B3D",
+      "brandHover": "#EAA653",
+      "onBrand": "#211913",
+      "secondaryAccent": "#6F8062",
+      "onSecondaryAccent": "#FFF3E2",
+      "border": "#75543A",
+      "selection": "#60442E",
+      "danger": "#B64A40",
+      "onDanger": "#FFF3E2"
+    },
     "dark": {
       "page": "#10142A",
       "surface": "#191E39",
