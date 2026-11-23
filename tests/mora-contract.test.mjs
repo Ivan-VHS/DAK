@@ -118,6 +118,7 @@ test("Mora exposes one accessible black, white and yellow DuckOS palette", () =>
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
   assert.equal(manifest.theme_color, "#FFD400");
   assert.equal(manifest.background_color, "#080808");
+  assert.ok(html.includes('name="theme-color" content="#FFD400"'));
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
   assert.ok(html.includes('Единая палитра DuckOS'));
