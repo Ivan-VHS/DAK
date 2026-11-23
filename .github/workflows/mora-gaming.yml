@@ -11,6 +11,7 @@ on:
       - "tests/test_gaming_detection.py"
       - "docs/GAMING_POLICY_66.md"
       - "docs/GAMING_PROCESS_DETECTION.md"
+      - "docs/GAMING_FEDERATION_CONTRACT.md"
       - "examples/game-profiles.example.json"
       - "docs/GAMING_PERFORMANCE_INTEGRATION.md"
       - "scripts/validate_mora_gaming.py"
