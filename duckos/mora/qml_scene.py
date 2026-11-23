@@ -86,7 +86,7 @@ ApplicationWindow {
                 }
             }
 
-            Item { Layout.fillHeight: true }
+            Item { height: 12 }
 
             Text {
                 text: "Qt Quick · native scene · user-space"
