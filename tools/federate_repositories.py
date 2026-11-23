@@ -107,8 +107,8 @@ def validate_manifest(data: Any) -> list[str]:
             "pytyliki": "native-app-launcher",
             "oplague": "native-app-launcher",
             "ventusample": "native-app-launcher",
-        }[project_id]
-        if item.get("integration_status") != expected_status:
+        }.get(project_id)
+        if expected_status is not None and item.get("integration_status") != expected_status:
             errors.append(f"{project_id}: integration_status must be {expected_status!r}")
         if item.get("auto_build") is not False or item.get("auto_execute") is not False:
             errors.append(f"{project_id}: automatic build and execution must remain disabled")
