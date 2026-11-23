@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and seven system tools"
+      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and eight system tools"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -57,7 +57,7 @@
     },
     "compatibility": {
       "maturity": "partial",
-      "scope": "Read-only PE32/PE32+ header, section and import-DLL inspection; isolated prefix scaffolding and CLI launch diagnostics; no native NT/Win32 process runtime, DirectX translation or Windows execution"
+      "scope": "PE inspection in Bridge plus Linux host CLI for installed Wine/Proton/DOSBox, managed Wine prefixes, allowlisted Winetricks components, external manager launch and user-supplied ReactOS QEMU guests. Mora copies commands to the terminal; no browser host execution, process sandbox, anti-cheat bypass or Windows kernel-driver support."
     },
     "declarative_configuration": {
       "maturity": "partial",
