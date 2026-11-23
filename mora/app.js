@@ -37,35 +37,35 @@ const paletteDefinitions = [
   },
   {
     id: "amber",
-    name: "Mora Amber",
-    description: "Орех · песок · медь",
+    name: "Graphite Gold",
+    description: "Графит · холодный белый · золотистый жёлтый",
     glyph: "A",
-    page: "#211913",
-    swatches: ["#211913", "#FFF3E2", "#D58B3D", "#526347"]
+    page: "#101113",
+    swatches: ["#101113", "#F5F5F2", "#E7B93E", "#B0B0AA"]
   },
   {
     id: "arctic",
-    name: "Arctic Glass",
-    description: "Лёд · графит · глубокий циан",
-    glyph: "❄",
-    page: "#EAF3F8",
-    swatches: ["#EAF3F8", "#102C3A", "#006A93", "#147D75"]
+    name: "Ivory Signal",
+    description: "Светлая кость · угольный · охристый жёлтый",
+    glyph: "❖",
+    page: "#F7F7F4",
+    swatches: ["#F7F7F4", "#161719", "#8A6500", "#C7C7C0"]
   },
   {
     id: "amethyst",
-    name: "Amethyst Night",
-    description: "Слива · лаванда · мята",
+    name: "Carbon Signal",
+    description: "Глубокий чёрный · серебро · лимонный жёлтый",
     glyph: "✦",
-    page: "#14111F",
-    swatches: ["#14111F", "#F5F0FF", "#B49AF7", "#70D6C2"]
+    page: "#191919",
+    swatches: ["#191919", "#F8F8F8", "#FFD400", "#A7A7A7"]
   },
   {
     id: "jade",
-    name: "Forest Jade",
-    description: "Хвоя · кремовый · нефрит",
+    name: "Slate Signal",
+    description: "Сланцевый графит · белый · приглушённый жёлтый",
     glyph: "◈",
-    page: "#0E1915",
-    swatches: ["#0E1915", "#EEF7F0", "#7FC49A", "#E0B86E"]
+    page: "#202326",
+    swatches: ["#202326", "#F1F3F4", "#D8AD33", "#9FA4A9"]
   }
 ];
 
