@@ -1687,6 +1687,42 @@ document.addEventListener("click", (event) => {
     toggleFlyout("notifications", false);
   }
 
+  const consoleModeToggle = event.target.closest("[data-console-mode-toggle]");
+  if (consoleModeToggle) {
+    setConsoleMode(!consoleMode);
+    return;
+  }
+  const consoleAudioToggle = event.target.closest("[data-console-audio-toggle]");
+  if (consoleAudioToggle) {
+    consoleAudioEnabled = !consoleAudioEnabled;
+    try { localStorage.setItem("duckos.mora.console-audio.v1", String(consoleAudioEnabled)); } catch {}
+    consoleAudioToggle.setAttribute("aria-pressed", String(consoleAudioEnabled));
+    consoleAudioToggle.textContent = consoleAudioEnabled ? "Включено" : "Выключено";
+    showToast(consoleAudioEnabled ? "Аудиосигналы включены." : "Аудиосигналы выключены.");
+    return;
+  }
+  const consoleTab = event.target.closest("[data-console-target]");
+  if (consoleTab) {
+    const target = document.getElementById(consoleTab.dataset.consoleTarget);
+    if (target) {
+      document.querySelectorAll("[data-console-target]").forEach((item) => {
+        const active = item === consoleTab;
+        item.classList.toggle("is-active", active);
+        if (active) item.setAttribute("aria-current", "page");
+        else item.removeAttribute("aria-current");
+      });
+      target.scrollIntoView({ behavior: consoleMode && !document.documentElement.classList.contains("reduce-motion") ? "smooth" : "auto", block: "start" });
+      playConsoleCue("select");
+    }
+    return;
+  }
+  const demoGame = event.target.closest("[data-demo-game]");
+  if (demoGame) {
+    const selected = demoGame.getAttribute("aria-pressed") !== "true";
+    demoGame.setAttribute("aria-pressed", String(selected));
+    demoGame.classList.toggle("is-selected", selected);
+    return;
+  }
   const contextAction = event.target.closest("[data-context-action]");
   if (contextAction) {
     handleContextAction(contextAction.dataset.contextAction);
@@ -1995,6 +2031,7 @@ document.addEventListener("keydown", (event) => {
       toggleFlyout("start", false);
       toggleFlyout("quick", false);
       toggleFlyout("notifications", false);
+      toggleFlyout("clock", false);
       return;
     }
     closeTopWindow();
