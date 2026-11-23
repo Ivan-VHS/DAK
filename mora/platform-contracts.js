@@ -142,19 +142,23 @@ export function createAtomicUpdatePlan({
   activeSlot = "A",
   signatureVerified = false,
   compatible = false,
-  availableBytes = 0,
-  requiredBytes = 0
+  availableBytes,
+  requiredBytes
 } = {}) {
   if (!["A", "B"].includes(activeSlot)) throw new TypeError("Active update slot must be A or B.");
-  if (!Number.isSafeInteger(availableBytes) || availableBytes < 0 ||
-      !Number.isSafeInteger(requiredBytes) || requiredBytes < 0) {
+  const hasCapacityData = availableBytes !== undefined && requiredBytes !== undefined;
+  if ((availableBytes === undefined) !== (requiredBytes === undefined)) {
+    throw new TypeError("Both availableBytes and requiredBytes are required together.");
+  }
+  if (hasCapacityData && (!Number.isSafeInteger(availableBytes) || availableBytes < 0 ||
+      !Number.isSafeInteger(requiredBytes) || requiredBytes < 0)) {
     throw new RangeError("Update capacity values must be non-negative safe integers.");
   }
 
   const checks = {
     signatureVerified: signatureVerified === true,
     compatible: compatible === true,
-    capacityAvailable: availableBytes >= requiredBytes
+    capacityAvailable: hasCapacityData && availableBytes >= requiredBytes
   };
   const ready = Object.values(checks).every(Boolean);
   return {
