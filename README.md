@@ -60,3 +60,21 @@ A future native launcher must validate the manifest, resolve paths under a trust
 ## Attribution
 
 Project author/developer: **Ivan-VHS**. Existing contributor and third-party attributions must remain intact as the project grows.
+
+## Native application manager and command console
+
+DuckOS now includes **Serein**, a native C++20 application manager and purpose-built command console. It validates Mora v1 application manifests, registers explicitly trusted installation roots, confines application paths to those roots, and starts supported applications through native process APIs without invoking a command shell.
+
+Build and test:
+
+~~~sh
+cmake -S . -B build -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release --parallel
+ctest --test-dir build -C Release --output-on-failure
+~~~
+
+Run **serein** to open the Serein Console. Its commands include **serein apps**, **serein register MANIFEST --root DIR**, **serein inspect APP_ID**, **serein run APP_ID**, **serein ps** and **serein stop PID**. Registration and launch require an explicit confirmation; non-interactive calls must pass **--confirm**.
+
+Serein supports direct native executables and the allowlisted runtimes **python3**, **python** and **node**. Arguments remain separate argv values. The browser-hosted Mora page can show the Serein guide but cannot invoke native processes; use the installed **serein** executable from the system terminal. See [Serein documentation](docs/SEREIN.md).
+
+The process manager supervises only top-level processes launched by Serein under the current user. It is not yet a privileged daemon, system service, compositor or sandbox.
