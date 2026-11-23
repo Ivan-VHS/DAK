@@ -46,7 +46,7 @@
     "ecoVisualsMaxMs": 80
   },
   "typography": {
-    "ui": "Segoe UI",
+    "ui": "Segoe UI",\n    "uiFallbacks": ["Noto Sans", "Arial", "sans-serif"],\n    "cyrillicCoverage": ["ru", "uk"],
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },
