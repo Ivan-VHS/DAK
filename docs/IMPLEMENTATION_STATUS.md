@@ -120,7 +120,7 @@ These were partial browser-shell features. The native Mora launcher now exposes 
 - [ ] Native process manager, tray/notification services, capability broker and kernel-enforced resource scheduling.
 - [ ] MacOS LaunchAgents integration and machine-wide/service startup management (intentionally outside this module's scope).
 
-The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
+The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel invokes the dedicated DuckOS user-space audit function; it does not route host access through a browser runtime. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
 
 ## Mora native desktop — 2026-11-23
 
