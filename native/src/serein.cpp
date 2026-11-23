@@ -332,7 +332,7 @@ bool readRequiredString(const JsonValue::Object& object,
         return false;
     }
     const auto* value = asString(it->second);
-    if (!value || value->empty() || value->size() > maxLength) {
+    if (!value || value->empty() || value->size() > maxLength || value->find('\0') != std::string::npos) {
         error = "Property '" + key + "' must be a non-empty string no longer than " + std::to_string(maxLength) + " bytes";
         return false;
     }
@@ -348,7 +348,7 @@ bool readOptionalString(const JsonValue::Object& object,
     const auto it = object.find(key);
     if (it == object.end()) return true;
     const auto* value = asString(it->second);
-    if (!value || value->size() > maxLength) {
+    if (!value || value->size() > maxLength || value->find('\0') != std::string::npos) {
         error = "Property '" + key + "' must be a string no longer than " + std::to_string(maxLength) + " bytes";
         return false;
     }
@@ -399,7 +399,7 @@ bool readStringArray(const JsonValue::Object& object,
     std::set<std::string> seen;
     for (const auto& item : *array) {
         const auto* text = asString(item);
-        if (!text || text->empty() || text->size() > maxLength) {
+        if (!text || text->empty() || text->size() > maxLength || text->find('\0') != std::string::npos) {
             error = "Every entry in '" + key + "' must be a non-empty string no longer than " + std::to_string(maxLength) + " bytes";
             return false;
         }
@@ -1255,7 +1255,7 @@ bool parseManifestText(const std::string& source, Manifest& manifest, std::strin
         }
         for (const auto& [platform, path] : *entrypoints) {
             const auto* value = asString(path);
-            if (!isOneOf(platform, {"windows", "linux", "macos"}) || !value || value->empty() || value->size() > 240) {
+            if (!isOneOf(platform, {"windows", "linux", "macos"}) || !value || value->empty() || value->size() > 240 || value->find('\0') != std::string::npos) {
                 error = "Invalid platform-specific entry point";
                 return false;
             }
@@ -1361,7 +1361,16 @@ bool resolveAppPath(const fs::path& installRoot,
 
     std::error_code ec;
     const fs::path root = fs::canonical(installRoot, ec);
-    if (ec || !fs::is_directory(root, ec) || ec) {
+    if (ec) {
+        error = "The supplied installation root is not an existing directory";
+        return false;
+    }
+    const std::string rootText = pathToUtf8(root);
+    if (rootText.find_first_of("\r\n\t") != std::string::npos) {
+        error = "Installation paths containing tabs or line breaks cannot be registered";
+        return false;
+    }
+    if (!fs::is_directory(root, ec) || ec) {
         error = "Application installation root is not an available directory";
         return false;
     }
