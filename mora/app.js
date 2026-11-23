@@ -689,9 +689,13 @@ function updateClock() {
   const timeUk = new Intl.DateTimeFormat("uk-UA", timeOptions).format(now);
   const dateRu = new Intl.DateTimeFormat("ru-RU", dateOptions).format(now);
   const dateUk = new Intl.DateTimeFormat("uk-UA", dateOptions).format(now);
-  const timeElement = document.getElementById("hero-time");
+  for (const timeElement of [
+    document.getElementById("status-time"),
+    document.getElementById("hero-clock")
+  ]) {
+    setLocalizedText(timeElement, timeRu, { ru: timeRu, uk: timeUk });
+  }
   const dateElement = document.getElementById("hero-date");
-  setLocalizedText(timeElement, timeRu, { ru: timeRu, uk: timeUk });
   setLocalizedText(dateElement, dateRu.charAt(0).toLocaleUpperCase("ru-RU") + dateRu.slice(1), {
     ru: dateRu.charAt(0).toLocaleUpperCase("ru-RU") + dateRu.slice(1),
     uk: dateUk.charAt(0).toLocaleUpperCase("uk-UA") + dateUk.slice(1)
