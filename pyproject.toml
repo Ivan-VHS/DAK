@@ -14,6 +14,7 @@ plots = ["PySide6>=6.10,<6.12", "pyqtgraph>=0.13.7"]
 gpu-tools = ["dearpygui>=2.0"]
 terminal-ui = ["textual>=1.0", "rich>=13.9", "prompt-toolkit>=3.0"]
 windows-native = ["pywin32>=306; platform_system == 'Windows'"]
+macos-native = ["pyobjc-framework-Cocoa>=10; platform_system == 'Darwin'"]
 native-ffi = ["cffi>=1.16"]
 
 [project.scripts]
@@ -22,6 +23,7 @@ duckos-mora = "duckos.mora.native_ui:main"
 duckos-mora-tui = "duckos.mora.tui:main"
 duckos-mora-gpu = "duckos.mora.gpu_tools:main"
 duckos-mora-plot = "duckos.mora.plotting:main"
+duckos-mora-scene = "duckos.mora.qml_scene:main"
 
 [tool.setuptools.packages.find]
 include = ["duckos*"]
