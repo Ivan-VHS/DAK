@@ -374,10 +374,32 @@ def process_is_running(pid: int) -> bool:
     return True
 
 
+def process_group_is_running(process_group: int) -> bool:
+    if os.name == "nt" or process_group <= 0:
+        return False
+    try:
+        os.killpg(process_group, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
 def refresh_sessions(library: IllidiaLibrary) -> list[dict[str, Any]]:
     sessions = library.list_launches()
     for session in sessions:
-        if session["status"] == "running" and session["pid"] and not process_is_running(session["pid"]):
+        if session["status"] != "running":
+            continue
+        process_group = session["process_group"]
+        alive = (
+            process_group_is_running(process_group)
+            if os.name != "nt" and process_group
+            else process_is_running(session["pid"] or 0)
+        )
+        if not alive:
             library.update_launch(session["id"], status="exited", exit_code=None)
             session["status"] = "exited"
     return sessions
@@ -392,11 +414,19 @@ def stop_launch(library: IllidiaLibrary, launch_id: str, *, force: bool = False)
             "This session was delegated to a store client. Stop the game through that store; the URI handler is not the game process."
         )
     pid = session["pid"]
-    if not pid or not process_is_running(pid):
+    process_group = session["process_group"]
+    alive = (
+        process_group_is_running(process_group)
+        if os.name != "nt" and process_group
+        else process_is_running(pid or 0)
+    )
+    if not alive:
         library.update_launch(launch_id, status="exited", exit_code=None)
         return {"launch_id": launch_id, "status": "already_exited"}
 
     if os.name == "nt":
+        if not pid:
+            raise LaunchError("The Windows process identifier is unavailable.")
         command = ["taskkill.exe", "/PID", str(pid), "/T"]
         if force:
             command.append("/F")
@@ -404,7 +434,6 @@ def stop_launch(library: IllidiaLibrary, launch_id: str, *, force: bool = False)
         if result.returncode != 0:
             raise LaunchError((result.stderr or result.stdout).strip() or "taskkill failed")
     else:
-        process_group = session["process_group"] or pid
-        os.killpg(process_group, signal.SIGKILL if force else signal.SIGTERM)
+        os.killpg(process_group or pid, signal.SIGKILL if force else signal.SIGTERM)
     library.update_launch(launch_id, status="stop_requested", exit_code=None)
     return {"launch_id": launch_id, "status": "stop_requested", "force": force}
