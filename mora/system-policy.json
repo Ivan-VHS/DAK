@@ -48,8 +48,8 @@
       "scope": "responsive browser layout, persisted Amber/Dark/Light palettes and reduced motion; native XR session transfer remains absent"
     },
     "multimodal_input": {
-      "maturity": "planned",
-      "scope": "keyboard, pointer and touch; no voice or spatial input service"
+      "maturity": "partial",
+      "scope": "keyboard, pointer, touch and browser Gamepad API in optional TV mode; no native controller service or voice/spatial input"
     },
     "material_interface": {
       "maturity": "implemented",
@@ -86,11 +86,26 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "console_mode": {
+      "maturity": "partial",
+      "scope": "Mora TV mode with spatial focus navigation, D-pad/left-stick and A/B/X/Y mapping; browser Gamepad API only"
+    },
+    "content_rights": {
+      "maturity": "partial",
+      "scope": "Ed25519 entitlement verification, SHA-256 content manifests, profile/home-device scopes, offline-validity window, attribution records and transfer metadata through native CLI; no store account or trusted launch gate"
+    },
+    "capture_enforcement": {
+      "maturity": "specified",
+      "scope": "Signed capture-policy metadata and fail-closed decision contract; native compositor/capture broker enforcement is not connected"
     }
   },
   "not_in_scope_as_implemented_features": [
     "neural or thought-controlled input",
     "self-modifying kernel and runtime-generated drivers",
-    "temporal or quantum rollback"
+    "temporal or quantum rollback",
+    "publisher store account authentication and license revocation synchronization",
+    "hardware-attested home-device identity",
+    "kernel- or compositor-enforced global capture blocking"
   ]
 }
