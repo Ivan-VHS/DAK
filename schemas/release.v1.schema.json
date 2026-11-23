@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/release.v1.schema.json",
+  "title": "DuckOS component release metadata v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "name",
+    "version",
+    "architecture",
+    "kernel_abi",
+    "manifest_sha256",
+    "component_count",
+    "release_kind",
+    "signature_algorithm",
+    "artifacts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.release.v1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "architecture": {
+      "enum": [
+        "x86_64",
+        "aarch64",
+        "riscv64",
+        "i686"
+      ]
+    },
+    "kernel_abi": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "component_count": {
+      "type": "integer",
+      "minimum": 4,
+      "maximum": 64
+    },
+    "release_kind": {
+      "const": "component-bundle"
+    },
+    "signature_algorithm": {
+      "oneOf": [
+        {
+          "const": "Ed25519"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component_bundle",
+        "bootable_iso_created",
+        "bootable_usb_created",
+        "cloud_image_converted",
+        "firmware_boot_verified",
+        "disk_writes_performed"
+      ],
+      "properties": {
+        "component_bundle": {
+          "const": true
+        },
+        "bootable_iso_created": {
+          "const": false
+        },
+        "bootable_usb_created": {
+          "const": false
+        },
+        "cloud_image_converted": {
+          "const": false
+        },
+        "firmware_boot_verified": {
+          "const": false
+        },
+        "disk_writes_performed": {
+          "const": false
+        }
+      }
+    }
+  }
+}
