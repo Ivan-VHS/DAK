@@ -24,11 +24,12 @@ class MemoryStorage {
   }
 }
 
-test("the shell registry exposes the seven user apps and seven system tools", () => {
-  assert.equal(APP_IDS.length, 14);
+test("the shell registry exposes the seven user apps and eight system tools", () => {
+  assert.equal(APP_IDS.length, 15);
   assert.ok(APP_IDS.includes("mora-ai"));
   assert.ok(APP_IDS.includes("security"));
   assert.ok(APP_IDS.includes("runtime"));
+  assert.ok(APP_IDS.includes("compatibility"));
 });
 
 test("intent plans only describe whitelisted local actions", () => {
@@ -45,6 +46,12 @@ test("opening an app is restricted to the built-in application list", () => {
   assert.equal(plan.actions[0].type, "open-app");
   assert.equal(plan.actions[0].appId, "security");
   assert.equal(buildIntentPlan("запусти powershell").ok, false);
+});
+
+test("Windows compatibility centre can be opened through the bounded intent allowlist", () => {
+  const plan = buildIntentPlan("открой центр совместимости");
+  assert.equal(plan.ok, true);
+  assert.deepEqual(plan.actions.map((action) => action.appId), ["compatibility"]);
 });
 
 test("Mora Boost can be opened through the bounded intent allowlist", () => {

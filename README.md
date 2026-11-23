@@ -10,7 +10,7 @@ The default application suite contains seven first-party apps: Cockos, Kavun, Ka
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and eight system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
 The system tools are:
 
@@ -18,6 +18,7 @@ The system tools are:
 - **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
 - **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
 - **Bridge:** local PE/ELF header inspection. It does not load or launch executables.
+- **Compatibility:** a Mora centre for the Linux host runtime CLI. It discovers installed Wine/Proton/DOSBox and external managers, creates Wine prefixes, installs allowlisted Winetricks components, starts selected files through an explicit runtime and can boot a user-supplied ReactOS guest in QEMU. Mora copies commands to the terminal; it does not execute host processes.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
@@ -71,7 +72,7 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 | Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
 | Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
 | Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
-| Windows/Linux compatibility | PE32/PE32+ header, section and import inspection; prefix scaffolding and CLI diagnostics | native executable loader, Win32/NT APIs, graphics/audio translation and launcher integration |
+| Windows/Linux compatibility | PE inspection and prefix metadata; Linux host CLI for installed Wine/Proton/DOSBox, managed Wine prefixes, allowlisted Winetricks components, external manager launch and isolated ReactOS QEMU guest | native in-DuckOS NT/Win32 process runtime, host sandbox, kernel drivers, anti-cheat compatibility, complete graphics/audio/input integration and per-game verification |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
 | Hardware inventory | Read-only PCI/USB (Linux) and PnP (Windows) snapshot | PCI/USB/ACPI enumeration in kernel, signed driver installation and device recovery |
@@ -80,7 +81,7 @@ No browser control is described as a native kernel, driver, sandbox, updater or 
 
 ## Windows application compatibility
 
-DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for commands, scope and the 66-point implementation map.
+DuckOS includes a read-only PE32/PE32+ inspection engine and an optional Linux host integration for upstream Wine, Proton and DOSBox. This host layer can launch programs through those installed engines, but it is not a native DuckOS NT/Win32 runtime or a sandbox. Whisky, Kegworks, PlayOnMac and Apple's Game Porting Toolkit remain macOS-only; ReactOS runs as a separate QEMU guest. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for commands, scope and the 66-point implementation map.
 
 ## Documentation
 

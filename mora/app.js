@@ -9,6 +9,7 @@ import {
   savePreferences,
   validateRecoverySnapshot
 } from "./core.js";
+import { buildCompatibilityCommand, compatibilityPanelMarkup } from "./compatibility.js";
 
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#BDA27D", glyph: "∿" },
@@ -22,6 +23,7 @@ const appDefinitions = {
   security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
+  compatibility: { name: "Compatibility", subtitle: "Windows и DOS", color: "#C49B66", glyph: "↔" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
@@ -273,8 +275,11 @@ function panelMarkup(appId) {
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div></div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DuckOS ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
-        '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Нативный NT/Win32 runtime DuckOS остаётся отдельной незавершённой работой. Для запуска выбранного файла через установленный Wine, Proton или DOSBox откройте host compatibility backend.</span></div>' +
+        '<button class="wide-action" data-app="compatibility">Открыть центр совместимости</button>' +
+        '<p class="window-copy">PE-инспекция и native runtime foundation сохранены. Linux host backend использует upstream Wine/Proton/DOSBox; это не эквивалент нативному Windows kernel runtime.</p>';
+    case "compatibility":
+      return compatibilityPanelMarkup();
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
@@ -292,6 +297,20 @@ function panelMarkup(appId) {
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }
+}
+
+function copyCompatibilityText(command, status) {
+  if (!command) return;
+  if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+    status.textContent = "Команда готова. Выделите и скопируйте её из поля выше вручную.";
+    return;
+  }
+  navigator.clipboard.writeText(command).then(() => {
+    status.textContent = "Команда скопирована. Она ещё не выполнялась — запустите её в терминале.";
+    showToast("Команда скопирована");
+  }).catch(() => {
+    status.textContent = "Не удалось получить доступ к буферу обмена. Скопируйте команду вручную.";
+  });
 }
 
 function updateClock() {
@@ -474,6 +493,53 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const compatibilityAction = event.target.closest("[data-compat-action]");
+  if (compatibilityAction) {
+    const owner = compatibilityAction.closest(".app-window");
+    const value = (selector) => owner.querySelector(selector)?.value || "";
+    try {
+      const action = compatibilityAction.dataset.compatAction;
+      const command = buildCompatibilityCommand(action, {
+        architecture: value("[data-compat-arch]"),
+        engine: value("[data-compat-engine]"),
+        prefix: action === "install-component"
+          ? value("[data-compat-prefix-component]")
+          : action === "launch"
+            ? value("[data-compat-prefix-launch]")
+            : value("[data-compat-prefix]"),
+        compatData: value("[data-compat-compatdata]"),
+        executable: value("[data-compat-executable]"),
+        component: value("[data-compat-component]"),
+        manager: value("[data-compat-manager]"),
+        diskPath: value("[data-compat-reactos-disk]"),
+        sizeGiB: value("[data-compat-reactos-size]"),
+        reactosDisk: value("[data-compat-reactos-disk]"),
+        reactosIso: value("[data-compat-reactos-iso]"),
+        reactosMemory: value("[data-compat-reactos-memory]"),
+        reactosCpus: value("[data-compat-reactos-cpus]")
+      });
+      const output = owner.querySelector("[data-compat-command-output]");
+      const status = owner.querySelector("[data-compat-status]");
+      const copyButton = owner.querySelector("[data-compat-copy]");
+      output.value = command;
+      copyButton.disabled = false;
+      status.textContent = "Команда сформирована. Выполните её в терминале DuckOS после проверки параметров.";
+      copyCompatibilityText(command, status);
+    } catch (error) {
+      owner.querySelector("[data-compat-status]").textContent =
+        error.message || "Не удалось сформировать команду.";
+    }
+    return;
+  }
+
+  const compatibilityCopy = event.target.closest("[data-compat-copy]");
+  if (compatibilityCopy) {
+    const owner = compatibilityCopy.closest(".app-window");
+    const output = owner.querySelector("[data-compat-command-output]");
+    copyCompatibilityText(output.value, owner.querySelector("[data-compat-status]"));
+    return;
+  }
+
   const gameMode = event.target.closest('[data-action="game-mode"]');
   if (gameMode) {
     const enabled = gameMode.dataset.enabled !== "true";
@@ -615,6 +681,14 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const compatibilityEngine = event.target.closest("[data-compat-engine]");
+  if (compatibilityEngine) {
+    const panel = compatibilityEngine.closest(".app-window");
+    panel.querySelector("[data-compat-prefix-wrap]").hidden = compatibilityEngine.value !== "wine";
+    panel.querySelector("[data-compat-compatdata-wrap]").hidden = compatibilityEngine.value !== "proton";
+    return;
+  }
+
   const executableInput = event.target.closest("[data-executable-file]");
   if (executableInput) {
     const report = executableInput.closest(".app-window").querySelector("[data-runtime-report]");

@@ -77,6 +77,13 @@
       "maturity": "partial_pe_cli_and_prefix_foundation"
     },
     {
+      "id": "compatibility",
+      "name": "Compatibility",
+      "category": "compatibility",
+      "panel": "mora/app.js#compatibility",
+      "maturity": "partial_host_runtime"
+    },
+    {
       "id": "workspace",
       "name": "Control",
       "category": "workspace",
@@ -133,8 +140,8 @@
     },
     {
       "id": "compat-runtime",
-      "maturity": "partial",
-      "scope": "PE32/PE32+ headers, sections and import DLL inspection; isolated prefix scaffold and CLI diagnostics; no native process execution"
+      "maturity": "partial_host_runtime",
+      "scope": "PE32/PE32+ inspection remains available in Bridge; Linux host CLI detects and starts installed Wine/Proton/DOSBox, manages real Wine prefixes, installs allowlisted Winetricks components, opens external managers and starts user-supplied ReactOS QEMU guests. Mora copies CLI commands and does not execute host processes."
     },
     {
       "id": "provenance-verifier",
@@ -155,6 +162,11 @@
       "id": "theme-adapter",
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "compatibility-command-centre",
+      "maturity": "partial",
+      "scope": "Mora UI and bounded command builder; commands require explicit copy and terminal invocation; no browser-to-host IPC"
     }
   ]
 }
