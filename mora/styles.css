@@ -1320,3 +1320,297 @@ a:hover, .text-link:hover, .widget-link:hover { color:var(--mora-info); }
   .blade-dialog-actions { flex-direction:column-reverse; }
   .blade-dialog-primary,.blade-dialog-secondary { width:100%; }
 }
+
+
+/* Responsive workspace profiles: compact screens, classic desktop, 4K and 8K. */
+@media (min-width:761px) and (min-width:1151px) {
+  .desktop { min-height:100svh; }
+  .statusbar {
+    min-height:58px;
+    height:auto;
+    padding:10px clamp(20px,2.2vw,46px);
+    font-size:clamp(12px,.68vw,15px);
+  }
+  .brand { gap:11px; font-size:clamp(14px,.8vw,17px); }
+  .brand-mark { width:29px; height:29px; border-radius:9px; font-size:21px; }
+  .system-status { gap:clamp(12px,1vw,22px); }
+  .status-control { min-height:34px; padding:7px 13px; font-size:clamp(10px,.52vw,13px); }
+  .desktop-content {
+    width:min(92vw,1840px);
+    min-height:calc(100svh - 118px);
+    padding:clamp(40px,5.4vh,88px) 0 clamp(105px,10vh,150px);
+    grid-template-columns:minmax(230px,.82fr) minmax(620px,1.6fr) minmax(230px,.82fr);
+    gap:clamp(28px,2.15vw,66px);
+  }
+  .app-area { max-height:calc(100svh - 190px); }
+  .hero-clock { font-size:clamp(72px,4.4vw,132px); }
+  .hero-date { font-size:clamp(17px,1.05vw,23px); }
+  .welcome-note { max-width:280px; font-size:clamp(12px,.65vw,15px); }
+  .section-heading h1 { font-size:clamp(25px,1.35vw,34px); }
+  .tiny-counter { font-size:clamp(8px,.42vw,11px); }
+  .blade-launcher { padding:clamp(18px,1.15vw,30px); }
+  .blade-heading { font-size:clamp(21px,1.15vw,29px); }
+  .blade-channel { min-height:38px; padding:8px 14px; font-size:clamp(10px,.52vw,13px); }
+  .blade-strip { gap:clamp(12px,.8vw,22px); padding:clamp(14px,.9vw,24px) 4px clamp(22px,1.3vw,34px); }
+  .blade-card { flex-basis:clamp(218px,12.5vw,300px); min-height:clamp(174px,12vh,230px); padding:clamp(14px,.8vw,22px); }
+  .blade-card.is-selected { flex-basis:clamp(250px,15vw,350px); min-height:clamp(198px,14vh,260px); }
+  .blade-card-glyph { width:clamp(48px,2.5vw,68px); height:clamp(48px,2.5vw,68px); font-size:clamp(23px,1.2vw,32px); }
+  .blade-card-copy strong { font-size:clamp(15px,.8vw,20px); }
+  .blade-card-copy span { font-size:clamp(10px,.52vw,13px); }
+  .blade-card-state,.blade-card-index { font-size:clamp(8px,.42vw,11px); }
+  .blade-toolbar { padding-top:16px; }
+  .blade-counter { font-size:clamp(11px,.58vw,14px); }
+  .blade-status,.blade-action { font-size:clamp(9px,.48vw,12px); }
+  .blade-key { width:25px; height:25px; font-size:11px; }
+  .widgets { gap:clamp(15px,1vw,24px); }
+  .widget-card { padding:clamp(19px,1.15vw,28px); }
+  .widget-title { font-size:clamp(16px,.82vw,21px); }
+  .widget-amount { font-size:clamp(25px,1.3vw,34px); }
+  .widget-caption,.widget-foot,.device-mini-list { font-size:clamp(8px,.44vw,11px); }
+  .dock-wrap { bottom:clamp(18px,2.2vh,34px); }
+  .dock { gap:11px; padding:10px 15px; }
+  .dock-item { width:48px; height:48px; border-radius:15px; }
+  .dock-glyph { font-size:27px; }
+  .window-layer { inset:58px 0 0; }
+  .app-window {
+    width:min(760px,calc(100vw - 64px));
+    max-height:calc(100svh - 130px);
+    border-radius:22px;
+  }
+  .window-titlebar { min-height:60px; padding:0 21px; }
+  .window-title { font-size:15px; }
+  .window-body { padding:clamp(22px,1.2vw,30px); }
+  .window-heading { font-size:clamp(24px,1.25vw,32px); }
+  .window-copy { font-size:clamp(12px,.62vw,15px); }
+  .toast { bottom:110px; padding:12px 17px; font-size:13px; }
+}
+
+/* 16:10, 3:2 and classic 4:3 desktops get a calmer two-column layout. */
+@media (min-width:761px) and (min-width:1151px) and (max-aspect-ratio:16/10) {
+  .desktop-content {
+    grid-template-columns:minmax(220px,.72fr) minmax(0,1.75fr);
+    gap:clamp(28px,3vw,56px);
+    align-items:center;
+  }
+  .time-panel { grid-column:1; grid-row:1 / span 2; }
+  .app-area { grid-column:2; grid-row:1; }
+  .widgets {
+    grid-column:2;
+    grid-row:2;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-self:start;
+  }
+  .app-area { max-height:calc(100svh - 160px); }
+}
+
+/* Short wide monitors and laptop panels: protect the central workspace height. */
+@media (min-width:1151px) and (max-height:900px) {
+  .desktop-content {
+    min-height:calc(100svh - 92px);
+    padding-top:clamp(22px,3.8vh,44px);
+    padding-bottom:clamp(88px,9vh,112px);
+  }
+  .time-panel { padding-bottom:12px; }
+  .welcome-note { margin-top:clamp(18px,3vh,34px); }
+  .app-area { max-height:calc(100svh - 132px); }
+  .blade-launcher { margin-top:10px; }
+  .blade-strip { padding-top:10px; padding-bottom:18px; }
+  .blade-card { min-height:150px; }
+  .blade-card.is-selected { min-height:174px; }
+  .widget-card { padding:15px; }
+  .dock-wrap { bottom:12px; }
+  .app-window { max-height:calc(100svh - 98px); }
+}
+
+/* UHD / DCI and 4K displays. */
+@media (min-width:2560px) {
+  .desktop-content { width:min(88vw,3000px); }
+  .hero-clock { font-size:clamp(120px,4vw,172px); }
+  .blade-card { flex-basis:clamp(260px,5.4vw,360px); }
+  .blade-card.is-selected { flex-basis:clamp(310px,6.2vw,420px); }
+  .app-window { width:min(1080px,78vw); max-height:calc(100svh - 150px); }
+}
+
+/* 4K / 5K studio displays and the wider 8K 16:9 work area. */
+@media (min-width:3840px) {
+  .statusbar { min-height:74px; padding:14px clamp(42px,2.1vw,100px); font-size:17px; }
+  .brand { font-size:19px; }
+  .brand-mark { width:36px; height:36px; font-size:25px; }
+  .desktop-content {
+    width:min(86vw,3600px);
+    min-height:calc(100svh - 145px);
+    padding:clamp(64px,5.2vh,190px) 0 clamp(140px,7vh,230px);
+    grid-template-columns:minmax(340px,.82fr) minmax(1450px,1.72fr) minmax(360px,.82fr);
+    gap:clamp(58px,2vw,120px);
+  }
+  .window-layer { inset:74px 0 0; }
+  .hero-clock { font-size:clamp(160px,4.1vw,196px); }
+  .hero-date { font-size:25px; }
+  .welcome-note { max-width:360px; font-size:17px; }
+  .section-heading h1 { font-size:40px; }
+  .tiny-counter { font-size:12px; padding:9px 13px; }
+  .blade-launcher { margin-top:24px; padding:32px; border-radius:26px; }
+  .blade-heading { font-size:34px; }
+  .blade-channels { gap:11px; margin-top:26px; }
+  .blade-channel { min-height:48px; padding:12px 20px; font-size:15px; }
+  .blade-strip { gap:23px; padding:23px 6px 36px; }
+  .blade-card { flex-basis:clamp(320px,5.3vw,390px); min-height:250px; padding:24px; border-radius:18px; }
+  .blade-card.is-selected { flex-basis:clamp(380px,6.1vw,450px); min-height:290px; }
+  .blade-card-glyph { width:76px; height:76px; font-size:36px; }
+  .blade-card-copy strong { font-size:23px; }
+  .blade-card-copy span { font-size:15px; }
+  .blade-card-state,.blade-card-index { font-size:12px; }
+  .blade-toolbar { padding-top:22px; }
+  .blade-counter { font-size:17px; }
+  .blade-status,.blade-action { font-size:14px; }
+  .blade-key { width:34px; height:34px; font-size:15px; }
+  .blade-actions { gap:25px; }
+  .widgets { gap:22px; }
+  .widget-card { padding:30px; border-radius:25px; }
+  .widget-icon { width:40px; height:40px; font-size:21px; }
+  .widget-title { font-size:23px; }
+  .widget-caption,.widget-foot,.device-mini-list { font-size:12px; }
+  .widget-amount { font-size:36px; }
+  .dock-wrap { bottom:30px; }
+  .dock { gap:14px; padding:13px 18px; border-radius:28px; }
+  .dock-item { width:60px; height:60px; border-radius:18px; }
+  .dock-glyph { font-size:33px; }
+  .app-window { width:min(1200px,76vw); max-height:calc(100svh - 180px); border-radius:26px; }
+  .window-titlebar { min-height:72px; padding:0 26px; }
+  .window-title { font-size:19px; }
+  .window-close { width:38px; height:38px; font-size:25px; }
+  .window-body { padding:38px; }
+  .window-heading { font-size:38px; }
+  .window-kicker { font-size:14px; }
+  .window-copy { font-size:17px; }
+  .control-copy strong { font-size:17px; }
+  .control-copy span,.value-label { font-size:14px; }
+  .toast { bottom:128px; padding:16px 22px; font-size:16px; }
+}
+
+@media (min-width:5120px) {
+  .desktop-content {
+    width:min(82vw,4200px);
+    grid-template-columns:minmax(460px,.8fr) minmax(1850px,1.75fr) minmax(450px,.8fr);
+    gap:clamp(82px,1.9vw,170px);
+  }
+  .hero-clock { font-size:clamp(190px,2.7vw,228px); }
+  .hero-date { font-size:29px; }
+  .welcome-note { max-width:420px; font-size:19px; }
+  .section-heading h1 { font-size:46px; }
+  .blade-launcher { padding:40px; }
+  .blade-heading { font-size:40px; }
+  .blade-card { flex-basis:clamp(360px,5vw,440px); min-height:280px; padding:29px; }
+  .blade-card.is-selected { flex-basis:clamp(420px,6vw,510px); min-height:325px; }
+  .blade-card-glyph { width:88px; height:88px; font-size:40px; }
+  .blade-card-copy strong { font-size:27px; }
+  .blade-card-copy span { font-size:17px; }
+  .blade-card-state,.blade-card-index { font-size:14px; }
+  .blade-channel { min-height:54px; padding:14px 24px; font-size:17px; }
+  .blade-counter { font-size:19px; }
+  .blade-status,.blade-action { font-size:16px; }
+  .blade-key { width:40px; height:40px; font-size:17px; }
+  .widget-title { font-size:27px; }
+  .widget-amount { font-size:42px; }
+  .app-window { width:min(1450px,76vw); }
+  .window-heading { font-size:43px; }
+  .window-copy { font-size:19px; }
+}
+
+/* Tablet and touch-first layouts. */
+@media (min-width:761px) and (max-width:1150px) {
+  .statusbar { padding-left:22px; padding-right:22px; }
+  .desktop-content { width:calc(100% - 48px); gap:26px; }
+  .blade-launcher { padding:16px; }
+  .blade-card { flex-basis:clamp(190px,23vw,240px); }
+  .blade-card.is-selected { flex-basis:clamp(220px,27vw,270px); }
+  .blade-toolbar { align-items:flex-start; flex-direction:column; }
+  .blade-actions { justify-content:flex-start; }
+  .app-window { width:min(680px,calc(100vw - 40px)); max-height:calc(100dvh - 96px); }
+}
+@media (pointer:coarse) {
+  button:where(:not(.blade-card)) { -webkit-tap-highlight-color:transparent; }
+  .blade-channel,.blade-action,.status-control,.dock-item,.window-close { min-height:44px; }
+  .blade-channel { padding-left:15px; padding-right:15px; }
+}
+
+/* Phones, portrait screens and compact landscape devices. */
+@media (max-width:760px) {
+  .statusbar {
+    padding-left:max(12px,env(safe-area-inset-left));
+    padding-right:max(12px,env(safe-area-inset-right));
+  }
+  .desktop-content { width:calc(100% - 28px); padding-bottom:calc(120px + env(safe-area-inset-bottom)); }
+  .blade-launcher { padding:14px; }
+  .blade-topline { align-items:center; }
+  .blade-profile { max-width:48%; }
+  .blade-card { flex-basis:clamp(168px,54vw,220px); min-height:156px; }
+  .blade-card.is-selected { flex-basis:clamp(204px,66vw,252px); min-height:180px; }
+  .blade-toolbar { gap:10px; }
+  .blade-actions { width:100%; justify-content:space-between; gap:8px; }
+  .blade-action { min-height:40px; }
+  .blade-dialog { width:calc(100vw - 24px); max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+  .window-layer { inset:48px 0 0; }
+  .app-window {
+    left:12px !important;
+    width:calc(100vw - 24px);
+    max-height:calc(100dvh - 76px - env(safe-area-inset-bottom));
+  }
+  .window-body { padding:clamp(15px,4vw,22px); }
+  .dock-wrap { bottom:max(10px,env(safe-area-inset-bottom)); }
+  .toast { bottom:calc(92px + env(safe-area-inset-bottom)); max-width:calc(100vw - 32px); text-align:center; }
+}
+@media (max-width:480px) {
+  .statusbar { gap:8px; }
+  .system-status { gap:8px; font-size:9px; }
+  .status-item.battery,.theme-control { display:none; }
+  .status-control { min-height:32px; padding:5px 9px; font-size:9px; }
+  .desktop-content { gap:24px; }
+  .section-heading { align-items:flex-start; gap:8px; }
+  .section-heading h1 { font-size:22px; }
+  .tiny-counter { max-width:124px; white-space:normal; text-align:right; line-height:1.35; }
+  .blade-topline { gap:8px; }
+  .blade-heading { font-size:17px; }
+  .blade-profile { gap:6px; max-width:52%; padding:6px; }
+  .blade-avatar { width:30px; height:30px; }
+  .blade-profile-copy strong { max-width:116px; font-size:9px; }
+  .blade-profile-copy small { font-size:8px; }
+  .blade-profile-mark { display:none; }
+  .blade-channel { min-height:38px; padding:8px 10px; font-size:9px; }
+  .blade-strip { gap:9px; }
+  .blade-card { flex-basis:180px; min-height:150px; }
+  .blade-card.is-selected { flex-basis:214px; min-height:172px; }
+  .blade-card-copy strong { font-size:14px; }
+  .blade-actions { gap:5px; }
+  .blade-action { gap:5px; font-size:9px; }
+  .blade-key { width:20px; height:20px; }
+  .dock { max-width:calc(100vw - 24px); gap:3px; padding:6px; }
+  .dock-item { width:36px; height:36px; }
+  .app-window { top:4%; }
+}
+@media (max-width:360px) {
+  .brand { font-size:12px; }
+  .brand-mark { width:21px; height:21px; }
+  .system-status { gap:6px; }
+  .blade-launcher { padding:11px; }
+  .blade-profile-copy { max-width:90px; }
+  .blade-profile-copy strong { max-width:90px; }
+  .blade-card { flex-basis:164px; }
+  .blade-card.is-selected { flex-basis:198px; }
+  .blade-action span:last-child { font-size:8px; }
+  .dock-item { width:33px; height:33px; }
+}
+/* Laptop portrait and rotated tablet height constraints. */
+@media (max-width:1150px) and (max-height:520px) and (orientation:landscape) {
+  body { overflow:auto; }
+  .desktop { min-height:100svh; overflow:auto; }
+  .desktop-content { padding-top:18px; padding-bottom:105px; gap:18px; }
+  .time-panel { padding-bottom:0; }
+  .hero-clock { font-size:clamp(42px,9vw,66px); }
+  .welcome-note { margin-top:10px; }
+  .blade-card { min-height:126px; }
+  .blade-card.is-selected { min-height:148px; }
+  .dock-wrap { position:fixed; }
+  .app-window { max-height:calc(100dvh - 62px); }
+}
