@@ -31,6 +31,22 @@ The system tools are:
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
 
+## Native Reaper workbench
+
+Reaper is integrated into the native **Duck Desktop** maintenance workspace as a first-class developer tool. It discovers the pinned `projects/reaper` checkout, opens Reaper Studio in its own process and delegates static checks to Reaper's own CLI. It does not embed a second language runtime into DuckOS.
+
+Initialize the specialist checkout and inspect the integration:
+
+```sh
+git submodule update --init projects/reaper
+duckos reaper status
+duckos reaper studio
+duckos reaper check ./examples/program.rpr
+duckos reaper typecheck ./examples/program.rpr
+```
+
+The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+
 ## Visual system and offline support
 
 The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The service worker is scoped to the Mora directory, caches only Mora shell assets and removes only older caches named with the `mora-shell-` prefix.
