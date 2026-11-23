@@ -1,4 +1,4 @@
-"""DuckOS offline build-contract and Windows-compatibility tools."""
+"""DuckOS offline build-contract, hardware-inventory and compatibility tools."""
 from __future__ import annotations
 
 import argparse
@@ -10,6 +10,7 @@ from .compat import (
     compatibility_status, create_prefix, diagnose_binary,
     inspect_pe_file, plan_launch, read_prefix,
 )
+from .hardware_inventory import collect_host_inventory
 from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
@@ -31,7 +32,7 @@ def _print_result(value: Any) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="duckos", description="DuckOS build, ABI and compatibility tools.")
+    parser = argparse.ArgumentParser(prog="duckos", description="DuckOS build, ABI, hardware-inventory and compatibility tools.")
     commands = parser.add_subparsers(dest="command", required=True)
 
     validate = commands.add_parser("validate-manifest", help="verify a system manifest and component hashes")
@@ -45,6 +46,12 @@ def main(argv: list[str] | None = None) -> int:
 
     modules = commands.add_parser("module-order", help="resolve static driver module dependencies")
     modules.add_argument("modules", type=Path)
+
+    inventory = commands.add_parser(
+        "hardware-inventory", help="collect a read-only PCI/USB (Linux) or PnP (Windows) inventory"
+    )
+    inventory.add_argument("--output", type=Path, help="write the versioned JSON snapshot to this path")
+    inventory.add_argument("--sysfs-root", type=Path, help="Linux sysfs root (defaults to /sys; useful for tests)")
 
     inspect = commands.add_parser("inspect-pe", help="inspect a PE32/PE32+ file without executing it")
     inspect.add_argument("file", type=Path)
@@ -83,6 +90,14 @@ def main(argv: list[str] | None = None) -> int:
                 "load_order": resolve_load_order(items),
                 "modules_loaded": False,
             }
+        elif args.command == "hardware-inventory":
+            result = collect_host_inventory(sysfs_root=args.sysfs_root)
+            encoded = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+            if args.output:
+                args.output.write_text(encoded, encoding="utf-8", newline="\n")
+            else:
+                print(encoded, end="")
+            return 0
         elif args.command == "inspect-pe":
             result = inspect_pe_file(args.file)
         elif args.command == "prefix-create":
