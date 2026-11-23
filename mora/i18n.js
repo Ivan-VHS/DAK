@@ -145,9 +145,11 @@ function renderTextNode(node) {
   }
 
   const original = state.source;
-  const leading = original.match(/^\\s*/)?.[0] || "";
-  const trailing = original.match(/\\s*$/)?.[0] || "";
-  const value = original.slice(leading.length, original.length - trailing.length);
+  const leadingLength = original.length - original.trimStart().length;
+  const trailingStart = original.trimEnd().length;
+  const leading = original.slice(0, leadingLength);
+  const trailing = original.slice(trailingStart);
+  const value = original.slice(leadingLength, trailingStart);
   const next = leading + localizedValue(value, activeLocale) + trailing;
   state.rendered = next;
   if (node.nodeValue !== next) node.nodeValue = next;
