@@ -892,7 +892,7 @@ input[type="range"] { accent-color: #FFD400; }
 @keyframes window-out { to { opacity:0; transform:translateY(13px) scale(.94); } }
 .app-window.is-closing { animation:window-out .16s ease-in forwards; pointer-events:none; }
 .app-window.is-minimizing { opacity:0; transform:translateY(35px) scale(.84); pointer-events:none; }
-.app-window.is-maximized { top:62px !important; left:16px !important; width:calc(100vw - 32px) !important; height:calc(100vh - 154px) !important; max-height:none; border-radius:15px; }
+.app-window.is-maximized { top:10px !important; left:16px !important; width:calc(100vw - 32px) !important; height:calc(100vh - 120px) !important; max-height:none; border-radius:15px; }
 .app-window[hidden] { display:none !important; }
 .window-titlebar { cursor:grab; }
 .window-titlebar-actions { display:flex; align-items:center; gap:5px; }
@@ -954,6 +954,13 @@ input[type="range"] { accent-color: #FFD400; }
 }
 @media (max-width:760px) {
   .top-launchers { display:none; }
+  .statusbar { gap:8px; padding-inline:10px; }
+  .system-status { gap:6px; font-size:9px; }
+  .system-status > .status-item,
+  .system-status > [data-app="workspace"],
+  .system-status > .theme-control { display:none; }
+  .system-status [data-panel-toggle="quick"] { width:31px; min-width:31px; padding:5px; overflow:hidden; font-size:0; text-align:center; }
+  .system-status [data-panel-toggle="quick"]::before { content:"•••"; font-size:12px; letter-spacing:1px; }
   .system-status .notification-trigger { display:inline-flex; }
   .system-overview { width:100%; }
   .workspace-switcher { margin-top:18px; }
@@ -961,7 +968,11 @@ input[type="range"] { accent-color: #FFD400; }
   .files-sidebar { flex-direction:row; flex-wrap:wrap; padding:0 0 8px; border-right:0; border-bottom:1px solid rgba(255,255,255,.09); }
   .files-sidebar button { width:auto; }
   .desktop-flyout { top:55px; right:8px; width:calc(100vw - 16px); }
-  .app-window.is-maximized { top:52px !important; left:6px !important; width:calc(100vw - 12px) !important; height:calc(100dvh - 112px) !important; }
+  .app-window.is-maximized { top:4px !important; left:6px !important; width:calc(100vw - 12px) !important; height:calc(100dvh - 112px) !important; }
+}
+@media (max-width:900px) and (min-width:761px) {
+  .top-launchers { display:none; }
+  .statusbar { padding-inline:18px; }
 }
 @media (max-height:740px) and (min-width:761px) {
   .desktop-content { padding-top:30px; padding-bottom:95px; }
@@ -971,4 +982,13 @@ input[type="range"] { accent-color: #FFD400; }
 }
 @media (prefers-reduced-motion:reduce) {
   .wallpaper,.app-window,.files-item,.workspace-pill,.files-shortcut { transition:none !important; animation:none !important; }
+}
+
+.files-footnote.is-ephemeral { color:#ffd400; }
+.app-window:focus-within { outline:none; }
+.app-window button:focus-visible,
+.app-window input:focus-visible,
+.app-window select:focus-visible {
+  outline:2px solid #ffd400;
+  outline-offset:2px;
 }
