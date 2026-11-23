@@ -1,6 +1,6 @@
 # DuckBridge
 
-DuckBridge is the runtime discovery and launch-planning front end for DuckOS Windows compatibility. It builds on the existing PE32/PE32+ inspection, prefix metadata and compatibility diagnostics instead of maintaining a second PE parser.
+DuckBridge is the runtime discovery, launch-planning and process-orchestration layer for DuckOS compatibility. Illidia is its game-library and launcher experience. Both reuse the existing PE32/PE32+ inspection and prefix tooling instead of maintaining a second PE parser.
 
 ## Commands
 
@@ -48,7 +48,7 @@ Append target arguments as separate values:
 duckos bridge plan ./setup.exe --backend wine --arg /quiet --arg "path with spaces"
 ~~~
 
-All commands return machine-readable JSON. The versioned launch-plan contract is defined in schemas/duckbridge-plan.v1.schema.json.
+All commands return machine-readable JSON. The versioned launch-plan contract is defined in schemas/duckbridge-plan.v1.schema.json. Use `duckos illidia` to register and launch games; see [Illidia](ILLIDIA.md) for the full workflow.
 
 ## Runtime inventory
 
@@ -83,6 +83,26 @@ Arguments are represented as a structured argv array; the planner never builds o
 - Mora is a browser shell and cannot inspect installed host programs directly; use the native DuckOS CLI.
 
 DuckBridge is an orchestration and planning tool, not a PE loader, NT process manager, Win32 subsystem, Wine replacement, DirectX/Vulkan translation layer, sandbox or production launcher. Those native execution layers remain explicitly unimplemented in the Windows compatibility status report.
+
+
+
+## Illidia game launch
+
+Illidia adds a local game library and an explicit launch operation:
+
+~~~sh
+duckos illidia add ./game.exe --name "My Game" --backend auto
+duckos illidia list
+duckos illidia launch my-game --gamemode --mangohud
+duckos illidia launch my-game --wait
+duckos illidia remove my-game
+~~~
+
+Game entries are stored in a versioned per-user JSON library. Wine and Proton receive a per-game compatibility-data directory; CrossOver and Bottles use an existing named bottle. Native ELF targets can be started directly when the host architecture matches.
+
+The launcher passes an argv array to `subprocess.Popen` with `shell=False`, uses the game's directory as its working directory and records the launch result. GameMode and MangoHud wrappers are optional and must already be installed. Proton-only switches can request WineD3D or disable esync/fsync.
+
+Illidia does not download games or runtimes, install DLLs or drivers, patch anti-cheat/DRM, or promise that a particular game will work. A successful process start only confirms that the external process was created. See [Illidia](ILLIDIA.md) for exact behavior and current limitations.
 
 ## Verification
 
