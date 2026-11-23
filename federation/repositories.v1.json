@@ -26,7 +26,7 @@
       "build_system": "CMake / C11",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "source-pinned-only",
+      "integration_status": "native-workbench",
       "auto_build": false,
       "auto_execute": false
     },
@@ -36,12 +36,14 @@
       "url": "https://github.com/Ivan-VHS/Reaper.git",
       "path": "projects/reaper",
       "default_branch": "main",
-      "pinned_commit": "02a1008bb071de50f2890d3f045aef0d50b9dc04",
+      "pinned_commit": "cd84d347959f9b6cf60d87ab3d36bc94e05fd80f",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "language-and-toolchain",
-      "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser and native toolchain contracts.",
+      "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser, static type diagnostics and native toolchain contracts.",
       "integration_mode": [
+        "native Duck Desktop workbench",
+        "bounded user-space subprocess bridge",
         "user-space CLI",
         "versioned JSON protocol",
         "sandboxed extension ABI"
@@ -110,6 +112,7 @@
     "Do not copy upstream source files into DuckOS directories; preserve repository history, license files and notices.",
     "Do not automatically build, load, launch or execute imported project content.",
     "Reaper tools and extensions run only in user space with explicit filesystem scope, capabilities, quotas and audit.",
+    "The native Duck Desktop Reaper workbench uses a bounded subprocess bridge; it does not grant kernel, driver, administrator or ambient FFI privileges.",
     "Pytyliki and OPlague hardware inspection remains read-only; no clock, voltage, firmware, device or driver writes.",
     "VentuSample processing is offline by default; real-time audio and device access need a separate reviewed OS service contract.",
     "Validate licenses, provenance, schema versions and dependency boundaries before creating a native cross-project link.",
