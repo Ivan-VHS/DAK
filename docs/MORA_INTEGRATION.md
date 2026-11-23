@@ -16,6 +16,7 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 | Sentinel | Show and store capability preferences | No native process enforcement |
 | Restore | Save/restore shell settings and preview an update sequence | No OS image update/rollback |
 | Bridge | Inspect PE/ELF headers and open the compatibility centre | Browser shell does not load or launch executables |
+| Compatibility | Build commands for host Wine/Proton/DOSBox operations; copy to terminal | No browser-to-host execution or Wine sandbox |
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 
