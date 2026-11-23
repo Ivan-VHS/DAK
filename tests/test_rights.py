@@ -229,6 +229,10 @@ class RightsVerificationTests(unittest.TestCase):
                 "size_bytes": binary.stat().st_size,
                 "sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
             }],
+            "capture_policy": {
+                "allowed_actions": ["screenshot"],
+                "denied_actions": ["recording", "streaming"],
+            },
         })
         manifest_digest = hashlib.sha256(canonical(manifest)).hexdigest()
         token = self.entitlement(manifest_sha256=manifest_digest)
@@ -243,6 +247,26 @@ class RightsVerificationTests(unittest.TestCase):
         self.assertEqual(verified["reason_code"], "verified")
         self.assertEqual(verified["manifest_sha256"], manifest_digest)
         self.assertFalse(verified["native_launch_enforcement"])
+
+        capture_token = self.entitlement(
+            manifest_sha256=manifest_digest,
+            rights=["launch", "capture_recording", "stream"],
+        )
+        denied_recording = verify_licensed_content(
+            capture_token, manifest, package, self.trusted_keys,
+            profile_id="profile-ivan", home_device_id=None,
+            required_action="capture_recording", now=1_700_000_100,
+        )
+        denied_streaming = verify_licensed_content(
+            capture_token, manifest, package, self.trusted_keys,
+            profile_id="profile-ivan", home_device_id=None,
+            required_action="stream", now=1_700_000_100,
+        )
+        self.assertFalse(denied_recording["allowed"])
+        self.assertEqual(denied_recording["reason_code"], "capture_restricted")
+        self.assertFalse(denied_recording["native_enforcement"])
+        self.assertFalse(denied_streaming["allowed"])
+        self.assertEqual(denied_streaming["reason_code"], "capture_restricted")
 
         changed_document = dict(manifest)
         changed_document.pop("signature")
