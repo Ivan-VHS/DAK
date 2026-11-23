@@ -20,7 +20,7 @@ The system tools are:
 - **Bridge:** local PE/ELF header inspection. It does not load or launch executables.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
-- **Compatibility:** Windows/DOS compatibility centre. Mora builds explicit CLI commands; the Linux host backend detects Wine/Proton/DOSBox, manages Wine prefixes, installs selected Winetricks components and launches chosen executables after a terminal command is run.
+- **Compatibility:** Windows/DOS compatibility centre. Mora builds explicit CLI commands; the Linux host backend detects Wine/Proton/DOSBox and external launchers, manages Wine prefixes, installs selected Winetricks components, launches chosen executables and opens ReactOS QEMU guests after a terminal command is run.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
 
