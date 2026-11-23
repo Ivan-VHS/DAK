@@ -870,3 +870,6 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   .suite-form-grid {grid-template-columns:minmax(0,1fr)}
   .suite-cross-link {align-items:flex-start;flex-direction:column}
 }
+
+.suite-profile-field {display:flex;align-items:center;gap:10px;color:var(--mora-muted);font-size:10px}
+.suite-profile-field input {flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:9px;color:var(--mora-text);background:var(--mora-page);font:inherit;font-size:11px}

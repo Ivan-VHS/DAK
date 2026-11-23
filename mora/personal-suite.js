@@ -408,7 +408,7 @@ export function renderPersonalApp(appId) {
   const profileName = state.profile.displayName || "Личный профиль";
   return '<div class="personal-suite-panel" data-suite-app="' + appId + '">' +
     '<div class="suite-topline"><span>MORA PERSONAL SUITE · ' + app.group.toUpperCase() + '</span><span><b data-suite-total>' + totalRecords(state) + '</b> общих записей</span></div>' +
-    '<p class="suite-profile-label">Профиль: ' + escapeHTML(profileName) + '</p>' +
+    '<label class="suite-profile-field"><span>Общий профиль Mora</span><input data-suite-profile maxlength="48" placeholder="Мой профиль" value="' + escapeHTML(state.profile.displayName) + '" /></label>' +
     '<p class="suite-description">' + escapeHTML(app.description) + '</p>' +
     renderSummary(app, records) +
     renderQuickTools(app, state) +
@@ -633,12 +633,35 @@ function handleQuickAction(button) {
 export function installPersonalSuite() {
   if (window.__moraPersonalSuiteInstalled) return;
   window.__moraPersonalSuiteInstalled = true;
+  window.addEventListener("mora:personal-suite-updated", (event) => {
+    const appId = event.detail && event.detail.appId;
+    if (!appId || appId === "profile") return;
+    const host = document.querySelector('.app-window[data-window="' + appId + '"] [data-suite-app]');
+    if (host) host.innerHTML = renderPersonalApp(appId);
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key !== STORE_KEY) return;
+    cachedState = undefined;
+    document.querySelectorAll("[data-suite-app]").forEach((host) => {
+      host.innerHTML = renderPersonalApp(host.dataset.suiteApp);
+    });
+  });
   document.addEventListener("submit", handleSubmit);
   document.addEventListener("click", (event) => {
     const button = event.target.closest?.("[data-suite-action], [data-suite-open]");
     if (button && handleQuickAction(button)) event.stopPropagation();
   });
   document.addEventListener("change", (event) => {
+    const profile = event.target.closest?.("[data-suite-profile]");
+    if (profile) {
+      const name = profile.value.trim().slice(0, 48);
+      loadState().profile.displayName = name;
+      const saved = saveState();
+      document.querySelectorAll("[data-suite-profile]").forEach((input) => { input.value = name; });
+      announceChange("profile");
+      setStatus(profile.closest("[data-suite-app]"), saved ? "Общий профиль сохранён." : "Не удалось сохранить профиль.");
+      return;
+    }
     const input = event.target.closest?.("[data-suite-import]");
     if (input) importSection(input);
   });
