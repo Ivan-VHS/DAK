@@ -683,12 +683,20 @@ function panelMarkup(appId) {
 
 function updateClock() {
   const now = new Date();
-  const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
-  const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(now);
-  const date = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now);
-  document.getElementById("hero-clock").textContent = time;
-  document.getElementById("status-time").textContent = time;
-  document.getElementById("hero-date").textContent = date.charAt(0).toLocaleUpperCase(locale) + date.slice(1);
+  const timeOptions = { hour: "2-digit", minute: "2-digit" };
+  const dateOptions = { weekday: "long", day: "numeric", month: "long", year: "numeric" };
+  const timeRu = new Intl.DateTimeFormat("ru-RU", timeOptions).format(now);
+  const timeUk = new Intl.DateTimeFormat("uk-UA", timeOptions).format(now);
+  const dateRu = new Intl.DateTimeFormat("ru-RU", dateOptions).format(now);
+  const dateUk = new Intl.DateTimeFormat("uk-UA", dateOptions).format(now);
+  const timeElement = document.getElementById("hero-time");
+  const dateElement = document.getElementById("hero-date");
+  setLocalizedText(timeElement, timeRu, { ru: timeRu, uk: timeUk });
+  setLocalizedText(dateElement, dateRu.charAt(0).toLocaleUpperCase("ru-RU") + dateRu.slice(1), {
+    ru: dateRu.charAt(0).toLocaleUpperCase("ru-RU") + dateRu.slice(1),
+    uk: dateUk.charAt(0).toLocaleUpperCase("uk-UA") + dateUk.slice(1)
+  });
+
 }
 
 function showToast(message) {
@@ -701,7 +709,7 @@ function showToast(message) {
 function updateActiveApp() {
   const windows = Array.from(windowLayer.querySelectorAll(".app-window"));
   if (windows.length === 0) {
-    activeAppLabel.textContent = translate("Рабочий стол");
+    setLocalizedText(activeAppLabel, "Рабочий стол");
   } else {
     windows.sort((a, b) => Number(b.style.zIndex) - Number(a.style.zIndex));
     const topWindow = windows[0];
