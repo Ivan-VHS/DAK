@@ -404,6 +404,94 @@ Object.assign(translations, {
   ]
 });
 
+Object.assign(translations, {
+  "TV · ВЫКЛ": ["TV · ВИМК", "TV · OFF"],
+  "TV · ВКЛ": ["TV · УВІМК", "TV · ON"],
+  "Главная": ["Головна", "Home"],
+  "Игры и коллекция": ["Ігри й колекція", "Games and collection"],
+  "Медиа и виджеты": ["Медіа й віджети", "Media and widgets"],
+  "D-pad / левый стик · A выбрать · B назад · X детали · Y поиск": [
+    "D-pad / лівий стик · A вибрати · B назад · X деталі · Y пошук",
+    "D-pad / left stick · A select · B back · X details · Y search"
+  ],
+  "Режим ТВ включён · D-pad / A / B / X / Y": [
+    "Режим ТВ увімкнено · D-pad / A / B / X / Y",
+    "TV mode enabled · D-pad / A / B / X / Y"
+  ],
+  "Обычный режим Mora": ["Звичайний режим Mora", "Mora desktop mode"],
+  "Аудиосигналы включены.": ["Аудіосигнали увімкнено.", "Audio cues enabled."],
+  "Аудиосигналы выключены.": ["Аудіосигнали вимкнено.", "Audio cues disabled."],
+  "Геймпад обнаружен · можно управлять DuckOS": [
+    "Геймпад виявлено · можна керувати DuckOS",
+    "Gamepad detected · DuckOS is ready for controller input"
+  ],
+  "Rights Center": ["Центр прав", "Rights Center"],
+  "Лицензии и происхождение": ["Ліцензії та походження", "Licenses and provenance"],
+  "Доверенные издатели": ["Довірені видавці", "Trusted publishers"],
+  "НЕ НАСТРОЕНО": ["НЕ НАЛАШТОВАНО", "NOT CONFIGURED"],
+  "Ключи издателей не встроены и не выдумываются.": [
+    "Ключі видавців не вбудовано й не вигадується.",
+    "Publisher keys are not bundled or invented."
+  ],
+  "Нативная проверка": ["Нативна перевірка", "Native verification"],
+  "Офлайн-доступ": ["Офлайн-доступ", "Offline access"],
+  "Журнал прав": ["Журнал прав", "Rights journal"],
+  "НЕ ПРОВЕРЕНО": ["НЕ ПЕРЕВІРЕНО", "NOT VERIFIED"],
+  "Проверить метаданные": ["Перевірити метадані", "Inspect metadata"],
+  "Выберите токен лицензии или манифест контента. Браузер покажет только поля документа — статус всегда останется «НЕ ПРОВЕРЕНО».": [
+    "Виберіть токен ліцензії або маніфест контенту. Браузер покаже лише поля документа — статус завжди залишатиметься «НЕ ПЕРЕВІРЕНО».",
+    "Select a license token or content manifest. The browser displays document fields only; status always remains NOT VERIFIED."
+  ],
+  "Entitlement JSON": ["JSON ліцензії", "Entitlement JSON"],
+  "Content manifest JSON": ["JSON маніфесту контенту", "Content manifest JSON"],
+  "Документ не выбран": ["Документ не вибрано", "No document selected"],
+  "Источник, издатель, владелец профиля/устройства, срок действия и права появятся здесь после чтения метаданных.": [
+    "Джерело, видавець, власник профілю/пристрою, строк дії та права з’являться тут після читання метаданих.",
+    "Source, publisher, profile/device owner, expiry and rights appear here after metadata is read."
+  ],
+  "Просмотр JSON не проверяет подпись. Не используйте этот экран как доказательство покупки или разрешение на запуск.": [
+    "Перегляд JSON не перевіряє підпис. Не використовуйте цей екран як доказ придбання чи дозвіл на запуск.",
+    "Viewing JSON does not verify signatures. Do not treat this screen as proof of purchase or launch permission."
+  ],
+  "Разделение прав": ["Розділення прав", "Separating rights"],
+  "Профиль": ["Профіль", "Profile"],
+  "Домашнее устройство": ["Домашній пристрій", "Home device"],
+  "Сохранения и пользовательские ассеты": ["Збереження й користувацькі ресурси", "Saves and user assets"],
+  "Перенос": ["Перенесення", "Transfer"],
+  "Захват экрана и клипы": ["Знімки екрана й кліпи", "Screenshots and clips"],
+  "Нативные команды проверки": ["Нативні команди перевірки", "Native verification commands"],
+  "До подключения доверенного launcher и compositor результат проверки не является системным запретом обходного запуска или записи сторонним приложением.": [
+    "Поки не підключено довірений launcher і compositor, результат перевірки не блокує обхідний запуск або запис стороннім застосунком на рівні системи.",
+    "Until a trusted launcher and compositor are connected, verification results do not enforce launch or capture denial against other applications."
+  ],
+  "Просмотр JSON не проверяет подпись.": ["Перегляд JSON не перевіряє підпис.", "Viewing JSON does not verify signatures."],
+  "Документ превышает лимит 2 MiB.": ["Документ перевищує ліміт 2 MiB.", "Document exceeds the 2 MiB limit."],
+  "Корневой элемент должен быть JSON-объектом.": ["Кореневий елемент має бути JSON-об’єктом.", "The root must be a JSON object."],
+  "Не удалось прочитать JSON: ": ["Не вдалося прочитати JSON: ", "Could not read JSON: "],
+  "неизвестный": ["невідомий", "unknown"],
+  "не указан": ["не вказано", "not provided"],
+  "не привязан": ["не прив’язано", "not bound"],
+  "не привязано": ["не прив’язано", "not bound"],
+  "не указана": ["не вказана", "not provided"],
+  "не указаны": ["не вказано", "not provided"],
+  "Файл": ["Файл", "File"],
+  "Тип документа": ["Тип документа", "Document type"],
+  "Контент": ["Контент", "Content"],
+  "Тип контента": ["Тип контенту", "Content type"],
+  "Издатель / подписант": ["Видавець / підписант", "Publisher / signer"],
+  "Область лицензии": ["Область ліцензії", "License scope"],
+  "Права": ["Права", "Rights"],
+  "Срок": ["Строк", "Expiry"],
+  "Создатель": ["Автор", "Creator"],
+  "Источник": ["Джерело", "Source"],
+  "Состояние лицензий": ["Стан ліцензій", "License status"],
+  "Демо-карточки не представляют реальные покупки или исполняемые игры.": [
+    "Демо-картки не є реальними придбаннями чи виконуваними іграми.",
+    "Demo cards are not real purchases or executable games."
+  ],
+  "DEMO · НЕТ ЛИЦЕНЗИИ": ["ДЕМО · НЕМАЄ ЛІЦЕНЗІЇ", "DEMO · NO LICENSE"]
+});
+
 export function detectLocale(savedLocale, browserLanguage = globalThis.navigator?.language ?? "ru") {
   if (SUPPORTED_LOCALES.includes(savedLocale)) return savedLocale;
   const language = String(browserLanguage).toLowerCase();
