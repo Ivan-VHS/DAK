@@ -151,6 +151,12 @@ class MoraHostTests(unittest.TestCase):
         self.assertTrue(handler._origin_allowed())
         handler.headers["Origin"] = "http://localhost:43860"
         self.assertFalse(handler._origin_allowed())
+        handler.headers["Host"] = "localhost:43860"
+        self.assertTrue(handler._origin_allowed())
+        handler.headers["Host"] = "evil.example"
+        handler.headers["Origin"] = "http://evil.example"
+        self.assertFalse(handler._origin_allowed())
+        handler.headers["Host"] = "127.0.0.1:43860"
         handler.headers["Origin"] = "https://127.0.0.1:43860"
         self.assertFalse(handler._origin_allowed())
 
