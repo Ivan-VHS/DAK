@@ -170,12 +170,12 @@ function localizedValue(source, locale) {
   if (locale !== "uk") return source;
   if (UKRAINIAN[source]) return UKRAINIAN[source];
 
-  const intentSummary = source.match(/^План содержит (\\d+) действие\\(й\\)\\. Ничего не изменится до вашего подтверждения\\.$/);
+  const intentSummary = source.match(/^План содержит (\d+) действие\(й\)\. Ничего не изменится до вашего подтверждения\.$/);
   if (intentSummary) {
     return "План містить " + intentSummary[1] + " дію(ї). Нічого не зміниться без вашого підтвердження.";
   }
 
-  const branch = source.match(/^Создана ветка (.+) · ревизия (\\d+)(?: · родитель (.+)| · корневая ветка)$/);
+  const branch = source.match(/^Создана ветка (.+) · ревизия (\d+)(?: · родитель (.+)| · корневая ветка)$/);
   if (branch) {
     return "Створено гілку " + branch[1] + " · ревізія " + branch[2] +
       (branch[3] ? " · батьківська " + branch[3] : " · коренева гілка");
@@ -185,7 +185,7 @@ function localizedValue(source, locale) {
   if (deepTime) return deepTime[1] + " років · окрема шкала BigInt, а не системний годинник";
 
   if (source.startsWith("A/B-план · текущий слот ")) {
-    return source.split("\\n").map((line) => {
+    return source.split("\n").map((line) => {
       if (line.startsWith("A/B-план · текущий слот ")) {
         return line.replace("A/B-план · текущий слот ", "A/B-план · поточний слот ")
           .replace(" · целевой слот ", " · цільовий слот ");
@@ -196,9 +196,9 @@ function localizedValue(source, locale) {
         .replace(/^Свободное место:/, "Вільне місце:")
         .replace(": не проверено", ": не перевірено")
         .replace(/^Этапы:/, "Етапи:")
-        .replace(/^Не переключайте записи загрузки, пока все условия не подтверждены\\.$/,
+        .replace(/^Не переключайте записи загрузки, пока все условия не подтверждены\.$/,
           "Не перемикайте записи завантаження, доки всі умови не підтверджено.");
-    }).join("\\n");
+    }).join("\n");
   }
 
   return source;
