@@ -203,12 +203,17 @@ function panelMarkup(appId) {
         '<div class="compass-layout"><div class="compass-rose"><span class="compass-north">N</span><span class="compass-needle">✦</span></div><div class="compass-details"><strong data-direction>Северо-восток</strong><span data-bearing>Азимут 045°</span><div class="compass-tabs"><button class="compass-tab active" data-direction-tab="Северо-восток" data-bearing-value="045">Северо-восток</button><button class="compass-tab" data-direction-tab="Юго-восток" data-bearing-value="135">Юго-восток</button><button class="compass-tab" data-direction-tab="Юго-запад" data-bearing-value="225">Юго-запад</button><button class="compass-tab" data-direction-tab="Северо-запад" data-bearing-value="315">Северо-запад</button></div></div></div>' +
         '<p class="window-copy">Направления иллюстративные. Геолокация и датчики компаса не используются.</p>';
     case "illidia":
-      return '<p class="window-kicker">БИБЛИОТЕКА · ДЕМО</p><h2 class="window-heading">Продолжить приключение</h2>' +
+      return '<p class="window-kicker">ILLIDIA · NATIVE GAME LIBRARY</p><h2 class="window-heading">Ваша игровая библиотека</h2>' +
         '<div class="game-list">' +
-        '<div class="game-card"><div class="game-top"><strong>Echoes of Aster</strong><span>68%</span></div><div class="progress-track"><i style="width:68%"></i></div><div class="game-bottom"><span>Последняя игра: вчера</span><span>Глава 08</span></div></div>' +
-        '<div class="game-card"><div class="game-top"><strong>Moonfall Keep</strong><span>34%</span></div><div class="progress-track"><i style="width:34%"></i></div><div class="game-bottom"><span>Сохранение найдено</span><span>Глава 03</span></div></div>' +
-        '<div class="game-card"><div class="game-top"><strong>Wild Meridian</strong><span>12%</span></div><div class="progress-track"><i style="width:12%"></i></div><div class="game-bottom"><span>Новое приключение</span><span>Глава 01</span></div></div>' +
-        '</div><div class="control-row"><div class="control-copy"><strong>Игровой режим</strong><span>Профиль производительности (демо)</span></div><button class="action-button" data-action="game-mode">Включить</button></div>';
+        '<div class="game-card"><div class="game-top"><strong>Добавить локальную игру</strong><span>01</span></div><div class="game-bottom"><span>PE и ELF исполняемые файлы</span><span>duckos illidia add</span></div></div>' +
+        '<div class="game-card"><div class="game-top"><strong>Управление совместимостью</strong><span>02</span></div><div class="game-bottom"><span>Wine · Proton · CrossOver · Bottles</span><span>раздельные профили</span></div></div>' +
+        '<div class="game-card"><div class="game-top"><strong>Игровые инструменты</strong><span>03</span></div><div class="game-bottom"><span>GameMode · MangoHud</span><span>по запросу</span></div></div>' +
+        '</div>' +
+        '<div class="control-row"><div class="control-copy"><strong>Открыть список игр</strong><span>Каталог хранится в профиле пользователя</span></div><span class="device-state">NATIVE CLI</span></div>' +
+        '<p class="window-copy">Добавить игру: <code>duckos illidia add ./game.exe --name "My Game"</code></p>' +
+        '<p class="window-copy">Посмотреть каталог: <code>duckos illidia list</code></p>' +
+        '<p class="window-copy">Запустить игру: <code>duckos illidia launch my-game</code></p>' +
+        '<p class="window-copy">Этот Mora-панель пока не подключён к привилегированному локальному сервису. Запуск выполняется через DuckOS CLI; браузер не запускает программы напрямую.</p>';
     case "unify":
       return '<p class="window-kicker">ПОДКЛЮЧЕНИЯ · ДЕМО</p><h2 class="window-heading">Ваши устройства</h2>' +
         '<div class="device-list">' +
