@@ -505,8 +505,8 @@ class MoraWindow(QMainWindow):
 
         open_button = QPushButton(name)
         open_button.setStyleSheet(
-            f"text-align: left; background: transparent; border: none; "
-            f"padding: 2px; font-size: {scaled(12)}; font-weight: 700;"
+            "text-align: left; background: transparent; border: none; "
+            "padding: 2px; font-weight: 700;"
         )
         open_button.clicked.connect(lambda _checked=False, selected=app_id: self.open_app(selected))
         layout.addWidget(open_button)
