@@ -805,3 +805,258 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   :root[data-theme="amber"] .desktop-content {gap:26px}
   :root[data-theme="amber"] .dock-wrap {padding-bottom:14px}
 }
+
+
+/* Five selectable Mora palettes. Semantic tokens drive every desktop surface. */
+:root[data-theme="solar"] {
+  color-scheme:dark;
+  --mora-page:#080A0D; --mora-surface:#14181D; --mora-elevated:#20262D;
+  --mora-text:#F6F7F8; --mora-secondary:#D8DDE2; --mora-muted:#AAB3BC;
+  --mora-brand:#F2C94C; --mora-brand-hover:#FFDC73; --mora-on-brand:#17130A;
+  --mora-secondary-accent:#AEB8C2; --mora-on-secondary-accent:#101418;
+  --mora-border:#46505A; --mora-selection:#463A16; --mora-danger:#FF6B6B;
+  --mora-on-danger:#200A0A; --mora-focus:#FFDC73;
+  --ink:var(--mora-text); --muted:var(--mora-muted);
+  --glass:rgba(20,24,29,.76); --line:rgba(170,179,188,.24);
+  --panel:rgba(8,10,13,.96);
+  --mora-wallpaper:radial-gradient(ellipse at 50% 42%,#252B32 0%,#101419 48%,#050608 100%);
+}
+:root[data-theme="arctic"] {
+  color-scheme:light;
+  --mora-page:#EAF3F8; --mora-surface:#F8FCFF; --mora-elevated:#DCEAF2;
+  --mora-text:#102C3A; --mora-secondary:#345668; --mora-muted:#526F80;
+  --mora-brand:#006A93; --mora-brand-hover:#005777; --mora-on-brand:#FFFFFF;
+  --mora-secondary-accent:#147D75; --mora-on-secondary-accent:#FFFFFF;
+  --mora-border:#B8CFDA; --mora-selection:#CBE8F5; --mora-danger:#B42338;
+  --mora-on-danger:#FFFFFF; --mora-focus:#005777;
+  --ink:var(--mora-text); --muted:var(--mora-muted);
+  --glass:rgba(248,252,255,.78); --line:rgba(52,86,104,.22);
+  --panel:rgba(248,252,255,.97);
+  --mora-wallpaper:radial-gradient(ellipse at 48% 35%,#FFFFFF 0%,#DCEAF2 48%,#AFCBD9 100%);
+}
+:root[data-theme="amethyst"] {
+  color-scheme:dark;
+  --mora-page:#14111F; --mora-surface:#211B31; --mora-elevated:#302744;
+  --mora-text:#F5F0FF; --mora-secondary:#D9CDED; --mora-muted:#B6A8D1;
+  --mora-brand:#B49AF7; --mora-brand-hover:#CDBAFF; --mora-on-brand:#241B3C;
+  --mora-secondary-accent:#70D6C2; --mora-on-secondary-accent:#0C2722;
+  --mora-border:#514366; --mora-selection:#3C3154; --mora-danger:#FF829B;
+  --mora-on-danger:#340E1C; --mora-focus:#CDBAFF;
+  --ink:var(--mora-text); --muted:var(--mora-muted);
+  --glass:rgba(33,27,49,.78); --line:rgba(217,205,237,.22);
+  --panel:rgba(20,17,31,.96);
+  --mora-wallpaper:radial-gradient(ellipse at 52% 42%,#45355F 0%,#211B31 45%,#100D18 100%);
+}
+:root[data-theme="jade"] {
+  color-scheme:dark;
+  --mora-page:#0E1915; --mora-surface:#172720; --mora-elevated:#22382E;
+  --mora-text:#EEF7F0; --mora-secondary:#C9DDCF; --mora-muted:#A5C1AE;
+  --mora-brand:#7FC49A; --mora-brand-hover:#9AD9B0; --mora-on-brand:#10271A;
+  --mora-secondary-accent:#E0B86E; --mora-on-secondary-accent:#2C1F0C;
+  --mora-border:#3D5B4B; --mora-selection:#294537; --mora-danger:#F17C72;
+  --mora-on-danger:#35110E; --mora-focus:#9AD9B0;
+  --ink:var(--mora-text); --muted:var(--mora-muted);
+  --glass:rgba(23,39,32,.78); --line:rgba(201,221,207,.2);
+  --panel:rgba(14,25,21,.96);
+  --mora-wallpaper:radial-gradient(ellipse at 50% 42%,#294536 0%,#172720 48%,#09110E 100%);
+}
+
+/* Surface, text and focus treatments shared by all five palettes. */
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) body {
+  background:var(--mora-page); color:var(--mora-text);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .wallpaper {
+  background:var(--mora-wallpaper);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .wallpaper svg {
+  opacity:0;
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .wallpaper::after {
+  background:
+    radial-gradient(ellipse 44% 42% at 50% 46%,transparent 0%,color-mix(in srgb,var(--mora-page) 22%,transparent) 72%,color-mix(in srgb,var(--mora-page) 50%,transparent) 100%),
+    linear-gradient(180deg,transparent 48%,color-mix(in srgb,var(--mora-page) 58%,transparent) 100%);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .statusbar {
+  color:var(--mora-text);
+  background:color-mix(in srgb,var(--mora-page) 88%,transparent);
+  border-bottom-color:var(--line);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .active-app,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .system-status,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .hero-date,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .welcome-note {
+  color:var(--mora-secondary);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .eyebrow {
+  color:var(--mora-muted);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .hero-clock,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .section-heading h1,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .system-section-heading h2 {
+  color:var(--mora-text);
+  text-shadow:none;
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .sun-glyph {
+  color:var(--mora-brand);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .tiny-counter {
+  color:var(--mora-muted);
+  border-color:var(--mora-border);
+  background:color-mix(in srgb,var(--mora-surface) 82%,transparent);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .app-tile {
+  color:var(--mora-text);
+  border-color:var(--mora-border);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--mora-elevated) 88%,transparent),color-mix(in srgb,var(--mora-surface) 78%,transparent));
+  box-shadow:0 12px 34px color-mix(in srgb,var(--mora-page) 22%,transparent);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .app-tile:hover {
+  border-color:var(--mora-brand);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--mora-elevated) 96%,transparent),var(--mora-surface));
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .app-name {
+  color:var(--mora-text);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .app-subtitle {
+  color:var(--mora-secondary);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .widget-card,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .app-window,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .dock {
+  color:var(--mora-text);
+  border-color:var(--mora-border);
+  background:color-mix(in srgb,var(--mora-surface) 94%,transparent);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .widget-card {
+  box-shadow:0 18px 45px color-mix(in srgb,var(--mora-page) 24%,transparent);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .widget-title,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .window-heading,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .window-title,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .setting-block strong,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .permission-copy strong,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .control-copy strong {
+  color:var(--mora-text);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .widget-caption,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .widget-link,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .widget-foot,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .device-mini-list span,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .window-copy,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .permission-copy span,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .control-copy span {
+  color:var(--mora-secondary);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .window-titlebar,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .permission-row,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .widget-foot {
+  border-color:var(--line);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .dock-item {
+  color:var(--mora-text);
+  background:color-mix(in srgb,var(--mora-elevated) 80%,transparent);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .status-control,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .subtle-button,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .wide-action,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .profile-choice,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .permission-toggle {
+  color:var(--mora-text);
+  border-color:var(--mora-border);
+  background:color-mix(in srgb,var(--mora-surface) 82%,transparent);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .action-button {
+  color:var(--mora-on-brand);
+  background:var(--mora-brand);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .action-button:hover {
+  background:var(--mora-brand-hover);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .intent-input-row input,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .inspection-report {
+  color:var(--mora-text);
+  border-color:var(--mora-border);
+  background:var(--mora-surface);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) button:focus-visible {
+  outline-color:var(--mora-focus);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .status-dot {
+  background:var(--mora-secondary-accent);
+  box-shadow:0 0 9px color-mix(in srgb,var(--mora-secondary-accent) 54%,transparent);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .battery-shape {
+  border-color:var(--mora-secondary);
+}
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .battery-shape::after,
+:root:is([data-theme="solar"],[data-theme="arctic"],[data-theme="amethyst"],[data-theme="jade"]) .battery-shape i {
+  background:var(--mora-secondary-accent);
+}
+
+/* Palette chooser: previews show the actual page, text and accent colors. */
+.palette-options {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:13px;
+}
+.palette-choice {
+  min-width:0;
+  min-height:84px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--mora-border);
+  border-radius:13px;
+  color:var(--mora-text);
+  background:var(--mora-surface);
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+.palette-choice:hover {
+  border-color:var(--mora-brand);
+  transform:translateY(-2px);
+}
+.palette-choice[aria-pressed="true"] {
+  border-color:var(--mora-brand);
+  box-shadow:inset 0 0 0 1px var(--mora-brand);
+  background:var(--mora-elevated);
+}
+.palette-choice-copy {
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.palette-choice-copy strong {
+  color:var(--mora-text);
+  font-size:12px;
+  font-weight:700;
+}
+.palette-choice-copy small {
+  color:var(--mora-secondary);
+  font-size:10px;
+  line-height:1.35;
+}
+.palette-swatches {
+  flex:0 0 auto;
+  display:flex;
+  gap:4px;
+}
+.palette-swatch {
+  width:11px;
+  height:28px;
+  border:1px solid color-mix(in srgb,var(--mora-text) 22%,transparent);
+  border-radius:8px;
+  background:var(--swatch-color);
+}
+@media (max-width:560px) {
+  .palette-options { grid-template-columns:1fr; }
+  .palette-choice { min-height:70px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .palette-choice { transition:none; }
+}
