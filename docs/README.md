@@ -24,6 +24,8 @@
 
 [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
 
+[Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) defines the 20-domain evidence-led improvement model. [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) preserves the 20 requested directions and maps them to testable engineering outcomes across all five repositories. The canonical manifest and schema are [`engineering-evolution.v1.json`](../engineering-evolution.v1.json) and [`engineering-evolution.v1.schema.json`](../schemas/engineering-evolution.v1.schema.json).
+
 ## Documentation rules
 
 Describe current behavior from the source, build configuration and tests. Mark designs and future work as specified or planned; do not present them as implemented. Keep kernel, boot, driver, runtime, graphics and desktop claims tied to concrete source paths and reproducible verification evidence.
