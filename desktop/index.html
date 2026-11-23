@@ -60,6 +60,9 @@
         <button class="nav-item" data-app="Файлы" data-description="Файловые пространства и последние документы">
           <span class="nav-icon">▤</span><span>Файлы</span>
         </button>
+        <button class="nav-item" data-app="Новости" data-description="Вечерний курьер — актуальные публикации из открытых RSS/Atom-источников">
+          <span class="nav-icon">▤</span><span>Новости</span><span class="nav-count">LIVE</span>
+        </button>
         <button class="nav-item" data-app="Приложения" data-description="Каталог приложений федерации Ivan-VHS">
           <span class="nav-icon">▦</span><span>Приложения</span><span class="nav-count">4</span>
         </button>
@@ -233,6 +236,7 @@
         <button class="dock-app" data-app="OPlague" data-description="Устройства и драйверы" aria-label="OPlague">O</button>
         <button class="dock-app" data-app="VentuSample" data-description="Аудио и DSP" aria-label="VentuSample">V</button>
         <span class="dock-separator"></span>
+        <button class="dock-app" data-app="Новости" data-description="Вечерний курьер — живая новостная лента" aria-label="Новости">📰</button>
         <button class="dock-app" id="dockSearch" aria-label="Поиск">⌕</button>
       </div>
 
@@ -243,12 +247,14 @@
   <dialog class="app-dialog" id="appDialog" aria-labelledby="dialogTitle">
     <div class="dialog-top"><span class="dialog-mark">🦆</span><div><strong id="dialogTitle">DuckOS</strong><small id="dialogSubtitle">Приложение</small></div><button class="dialog-close" id="dialogClose" aria-label="Закрыть">×</button></div>
     <div class="dialog-body"><div class="dialog-illustration">◈</div><h2 id="dialogHeading">Рабочее пространство</h2><p id="dialogDescription">Локальный запуск приложения.</p><div class="dialog-note">Эта сборка показывает оболочку и точки интеграции. Запуск нативного приложения выполняется установленной системой, а не браузерным preview.</div><button class="primary-button dialog-ok" id="dialogOk">Понятно <b>✓</b></button></div>
+    <div class="newsroom-frame" id="newsroomFrame" hidden><iframe src="newsroom/index.html" title="Вечерний курьер — новостная лента DuckOS" loading="lazy"></iframe></div>
   </dialog>
 
   <dialog class="command-dialog" id="commandDialog" aria-labelledby="commandTitle">
     <div class="command-head"><span>⌕</span><input id="commandInput" type="search" placeholder="Найти приложение или команду..." autocomplete="off" aria-label="Поиск приложений и команд"><kbd>ESC</kbd></div>
     <div class="command-label" id="commandTitle">БЫСТРЫЙ ПОИСК</div>
     <div class="command-results" id="commandResults">
+      <button data-app="Новости" data-description="Вечерний курьер — живая лента новостей"><span>📰</span><strong>Вечерний курьер</strong><small>Открытые RSS/Atom-источники</small><kbd>↵</kbd></button>
       <button data-app="Файлы" data-description="Файловое пространство"><span>▤</span><strong>Файлы</strong><small>Открыть приложение</small><kbd>↵</kbd></button>
       <button data-app="Система" data-description="Диагностика системы"><span>◈</span><strong>Система</strong><small>Открыть приложение</small><kbd>↵</kbd></button>
       <button data-app="Настройки" data-description="Настройки DuckOS"><span>⚙</span><strong>Настройки</strong><small>Открыть приложение</small><kbd>↵</kbd></button>
