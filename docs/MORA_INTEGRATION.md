@@ -15,7 +15,8 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 | Mora AI | Parse safe local intents, preview plan, request approval | Allowlisted rules, no model or shell |
 | Sentinel | Show and store capability preferences | No native process enforcement |
 | Restore | Save/restore shell settings and preview an update sequence | No OS image update/rollback |
-| Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
+| Bridge | Inspect PE/ELF file headers and architecture | No executable loading; static diagnostics only |
+| Compatibility | Build bounded Wine/Proton/DOSBox, Winetricks, manager and ReactOS QEMU CLI commands | Commands are copied for explicit terminal use; no browser process execution |
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 | Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
@@ -52,7 +53,11 @@ The future updater should download signed metadata, verify the complete payload,
 
 Bridge reads a user-selected local file and inspects PE or ELF headers without executing it or uploading it. Detecting an x86/x64/ARM64 machine value is not evidence that the corresponding ABI or graphics stack can run.
 
-A native compatibility environment still needs PE loading, Win32/NT services, process and memory mapping, API translation, DirectX/Vulkan/OpenGL support, audio, input, prefixes, launchers and a clear anti-cheat compatibility policy. Anti-cheat bypass is not part of this design.
+The separate Compatibility panel prepares bounded commands for the Linux host CLI. The CLI can use separately installed Wine, Steam Proton and DOSBox; manage Wine prefixes; install a small Winetricks allowlist; open installed CrossOver/Bottles/Lutris/Heroic/PortProton/PlayOnLinux managers; and start a user-supplied ReactOS disk as a QEMU guest. Mora only copies these commands. The user runs them in a terminal.
+
+This host integration is not a native DuckOS NT/Win32 process runtime. Wine/Proton applications inherit the current user's permissions and are not sandboxed by this subsystem. macOS-only tools remain outside the Linux build. Kernel-driver loading and anti-cheat bypass are not part of this design.
+
+A native compatibility environment still needs PE loading, Win32/NT services, process and memory mapping, API translation, DirectX/Vulkan/OpenGL support, audio, input, a capability-enforced sandbox and per-game compatibility validation.
 
 ## Provenance
 
