@@ -135,19 +135,43 @@ function localizedValue(source, locale) {
   return locale === "uk" ? (UKRAINIAN[source] || source) : source;
 }
 
-function originalText(node) {
-  if (!sourceText.has(node)) sourceText.set(node, node.nodeValue);
-  return sourceText.get(node);
+function renderTextNode(node) {
+  let state = sourceText.get(node);
+  if (!state) {
+    state = { source: node.nodeValue, rendered: node.nodeValue };
+    sourceText.set(node, state);
+  } else if (node.nodeValue !== state.rendered) {
+    state.source = node.nodeValue;
+  }
+
+  const original = state.source;
+  const leading = original.match(/^\\s*/)?.[0] || "";
+  const trailing = original.match(/\\s*$/)?.[0] || "";
+  const value = original.slice(leading.length, original.length - trailing.length);
+  const next = leading + localizedValue(value, activeLocale) + trailing;
+  state.rendered = next;
+  if (node.nodeValue !== next) node.nodeValue = next;
 }
 
-function originalAttribute(element, name) {
+function renderAttribute(element, name) {
   let values = sourceAttributes.get(element);
   if (!values) {
     values = new Map();
     sourceAttributes.set(element, values);
   }
-  if (!values.has(name)) values.set(name, element.getAttribute(name));
-  return values.get(name);
+
+  const current = element.getAttribute(name);
+  let state = values.get(name);
+  if (!state) {
+    state = { source: current, rendered: current };
+    values.set(name, state);
+  } else if (current !== state.rendered) {
+    state.source = current;
+  }
+
+  const next = localizedValue(state.source, activeLocale);
+  state.rendered = next;
+  if (current !== next) element.setAttribute(name, next);
 }
 
 export function getLocale() {
@@ -168,12 +192,7 @@ export function applyLocale(root = globalThis.document) {
   while (node) {
     const parentName = node.parentElement?.tagName;
     if (parentName !== "SCRIPT" && parentName !== "STYLE" && parentName !== "TEXTAREA") {
-      const original = originalText(node);
-      const leading = original.match(/^\s*/)?.[0] || "";
-      const trailing = original.match(/\s*$/)?.[0] || "";
-      const content = original.slice(leading.length, original.length - trailing.length);
-      const next = leading + localizedValue(content, activeLocale) + trailing;
-      if (node.nodeValue !== next) node.nodeValue = next;
+      renderTextNode(node);
     }
     node = walker.nextNode();
   }
@@ -181,9 +200,7 @@ export function applyLocale(root = globalThis.document) {
   for (const element of root.querySelectorAll("[placeholder], [aria-label], [title]")) {
     for (const name of ["placeholder", "aria-label", "title"]) {
       if (!element.hasAttribute(name)) continue;
-      const original = originalAttribute(element, name);
-      const next = localizedValue(original, activeLocale);
-      if (element.getAttribute(name) !== next) element.setAttribute(name, next);
+      renderAttribute(element, name);
     }
   }
 }
@@ -205,22 +222,10 @@ if (typeof document !== "undefined" && typeof MutationObserver !== "undefined" &
     for (const record of records) {
       for (const added of record.addedNodes) {
         if (added.nodeType === 1) applyLocale(added);
-        else if (added.nodeType === 3) {
-          const original = originalText(added);
-          const leading = original.match(/^\s*/)?.[0] || "";
-          const trailing = original.match(/\s*$/)?.[0] || "";
-          const content = original.slice(leading.length, original.length - trailing.length);
-          const next = leading + localizedValue(content, activeLocale) + trailing;
-          if (added.nodeValue !== next) added.nodeValue = next;
-        }
+        else if (added.nodeType === 3) renderTextNode(added);
       }
       if (record.type === "characterData" && record.target.nodeType === 3) {
-        const original = originalText(record.target);
-        const leading = original.match(/^\s*/)?.[0] || "";
-        const trailing = original.match(/\s*$/)?.[0] || "";
-        const content = original.slice(leading.length, original.length - trailing.length);
-        const next = leading + localizedValue(content, activeLocale) + trailing;
-        if (record.target.nodeValue !== next) record.target.nodeValue = next;
+        renderTextNode(record.target);
       }
     }
   });
