@@ -11,7 +11,9 @@
     "maturity_status",
     "distribution_intent",
     "applications",
-    "workflows"
+    "workflows",
+    "prototype",
+    "interfaces"
   ],
   "properties": {
     "schema": {
@@ -238,6 +240,57 @@
         },
         "app_boundaries": {
           "type": "object"
+        }
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "transport",
+          "status",
+          "schema",
+          "max_package_bytes",
+          "max_clip_bytes",
+          "scope"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "schema": {
+            "type": "string"
+          },
+          "max_package_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_clip_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "scope": {
+            "type": "string"
+          }
         }
       }
     }
