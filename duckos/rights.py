@@ -250,7 +250,9 @@ def verify_entitlement(
 
     token_region = license_data.get("region")
     if token_region is not None:
-        token_region = str(token_region).strip().upper()
+        if not isinstance(token_region, str):
+            raise RightsError("license.region must be text or null")
+        token_region = token_region.strip().upper()
         if not token_region or len(token_region) > 16:
             raise RightsError("license.region must be a short region code or null")
 
@@ -267,19 +269,29 @@ def verify_entitlement(
         "offline_check": offline,
     }
     if not signature_valid:
-        reason = (
-            "untrusted_issuer" if signature_status == "untrusted_issuer"
-            else "signature_invalid"
-        )
-        message = (
-            "The signing key is not in the local trust store."
-            if reason == "untrusted_issuer"
-            else "The entitlement signature is missing, unsupported or invalid."
-        )
-        next_step = (
-            "Install the publisher's verified public key through the DuckOS trust service."
-            if reason == "untrusted_issuer"
-            else "Obtain a fresh entitlement from the original publisher or store."
+        reason = signature_status
+        messages = {
+            "untrusted_issuer": (
+                "The signing key is not in the local trust store.",
+                "Install the publisher's verified public key through the DuckOS trust service.",
+            ),
+            "signature_missing": (
+                "The entitlement has no publisher signature.",
+                "Obtain a signed entitlement from the original publisher or store.",
+            ),
+            "unsupported_signature": (
+                "The entitlement uses an unsupported signature algorithm.",
+                "Obtain a new entitlement signed with Ed25519.",
+            ),
+            "signature_invalid": (
+                "The entitlement signature does not match its signed contents.",
+                "Obtain a fresh entitlement from the original publisher or store.",
+            ),
+        }
+        message, next_step = messages.get(
+            reason,
+            ("The entitlement signature could not be verified.",
+             "Obtain a fresh entitlement from the original publisher or store."),
         )
         return _blocked(reason, message, next_step, **details)
 
@@ -312,7 +324,12 @@ def verify_entitlement(
             "Re-authorize the home device through the original publisher.", **details,
         )
     requested_region = region.strip().upper() if isinstance(region, str) else None
-    if token_region not in {None, "WW"} and requested_region and requested_region != token_region:
+    if token_region not in {None, "WW"} and not requested_region:
+        return _blocked(
+            "region_unknown", "The entitlement is region-restricted, but no current region was supplied.",
+            "Supply the current account or device region before using this entitlement.", **details,
+        )
+    if token_region not in {None, "WW"} and requested_region != token_region:
         return _blocked(
             "region_restricted", "This entitlement is not valid in the current region.",
             "Check the publisher's regional terms or use an eligible account region.", **details,
@@ -766,7 +783,10 @@ class RightsAuditLog:
             view = memoryview(data)
             while view:
                 written = os.write(descriptor, view)
+                if written <= 0:
+                    raise RightsError("could not append the rights audit record")
                 view = view[written:]
+            os.fsync(descriptor)
         finally:
             os.close(descriptor)
         return record
