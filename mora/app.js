@@ -327,9 +327,11 @@ function initializeCommonsPanel(appWindow) {
       const appId = favorite.dataset.commonsFavorite;
       if (commonsFavorites.has(appId)) commonsFavorites.delete(appId);
       else commonsFavorites.add(appId);
-      saveCommonsFavorites();
+      const saved = saveCommonsFavorites();
       renderGrid();
-      showToast(commonsFavorites.has(appId) ? "Добавлено в избранное" : "Убрано из избранного");
+      if (saved) {
+        showToast(commonsFavorites.has(appId) ? "Добавлено в избранное" : "Убрано из избранного");
+      }
       return;
     }
 
