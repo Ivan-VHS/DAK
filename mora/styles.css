@@ -1,26 +1,74 @@
 :root {
-  color-scheme: dark;
-  font-family: Inter, "Segoe UI", system-ui, sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  --mora-page: var(--duck-page);
-  --mora-surface: var(--duck-page);
-  --mora-elevated: var(--duck-dark-ochre);
-  --mora-text: #ffffff;
-  --mora-secondary: var(--duck-yellow);
-  --mora-muted: var(--duck-yellow);
-  --mora-brand: var(--duck-yellow);
-  --mora-brand-hover: var(--duck-yellow);
-  --mora-secondary-accent: var(--duck-dark-ochre);
-  --mora-border: var(--duck-dark-ochre);
-  --mora-selection: var(--duck-dark-ochre);
-  --mora-danger: var(--duck-yellow);
-  --ink: var(--mora-text);
-  --muted: rgba(255,212,0, .72);
-  --glass: rgba(8,8,8, .5);
-  --line: rgba(255,212,0, .24);
-  --panel: rgba(8,8,8, .94);
+  color-scheme:dark;
+  font-family:Inter, "Segoe UI", "Noto Sans", Arial, system-ui, sans-serif;
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+
+  --duck-page:#080808;
+  --duck-white:#FFFFFF;
+  --duck-yellow:#FFD400;
+  --duck-coal-abyss:#040404;
+  --duck-graphite-layer:#111111;
+  --duck-raised-graphite:#1A1A1A;
+  --duck-dark-slate:#262626;
+  --duck-technical-gray:#3A3A3A;
+  --duck-muted-steel:#5E5E5E;
+  --duck-cold-ash:#888888;
+  --duck-light-silver:#B8B8B8;
+  --duck-soft-ivory:#E6E6DF;
+  --duck-warm-milk:#F5F3E6;
+  --duck-lemon-highlight:#FFF066;
+  --duck-sun-amber:#E6B800;
+  --duck-deep-saffron:#B38600;
+  --duck-dark-ochre:#5C4400;
+  --duck-warm-honey:#FFC42E;
+  --duck-signal-red:#FF473A;
+  --duck-neon-lime:#8CE63C;
+  --duck-deep-pine:#2E5918;
+  --duck-ice-cyan:#5CE1E6;
+  --duck-cobalt:#3B82F6;
+  --duck-night-sapphire:#16294A;
+  --duck-storm-graphite:#1F2633;
+
+  --duck-yellow-rgb:255,212,0;
+  --duck-red-rgb:255,71,58;
+  --duck-cyan-rgb:92,225,230;
+  --duck-lime-rgb:140,230,60;
+
+  --mora-page:var(--duck-page);
+  --mora-surface:var(--duck-graphite-layer);
+  --mora-elevated:var(--duck-raised-graphite);
+  --mora-text:var(--duck-white);
+  --mora-secondary:var(--duck-soft-ivory);
+  --mora-muted:var(--duck-light-silver);
+  --mora-disabled:var(--duck-muted-steel);
+  --mora-brand:var(--duck-yellow);
+  --mora-brand-hover:var(--duck-lemon-highlight);
+  --mora-brand-strong:var(--duck-sun-amber);
+  --mora-brand-shadow:var(--duck-deep-saffron);
+  --mora-brand-subtle:var(--duck-dark-ochre);
+  --mora-secondary-accent:var(--duck-dark-ochre);
+  --mora-border:var(--duck-technical-gray);
+  --mora-selection:var(--duck-dark-ochre);
+  --mora-danger:var(--duck-signal-red);
+  --mora-warning:var(--duck-warm-honey);
+  --mora-success:var(--duck-neon-lime);
+  --mora-success-surface:var(--duck-deep-pine);
+  --mora-info:var(--duck-ice-cyan);
+  --mora-link:var(--duck-cobalt);
+  --mora-inspector-surface:var(--duck-night-sapphire);
+  --mora-cool-surface:var(--duck-storm-graphite);
+  --mora-focus:var(--duck-lemon-highlight);
+  --mora-on-brand:var(--duck-page);
+
+  --ink:var(--mora-text);
+  --muted:var(--duck-light-silver);
+  --glass:rgba(17,17,17,.82);
+  --line:rgba(255,212,0,.22);
+  --panel:rgba(4,4,4,.96);
 }
+
+
 
 
 * { box-sizing: border-box; }
@@ -102,7 +150,7 @@ button:focus-visible { outline: 2px solid var(--duck-yellow); outline-offset: 4p
 .window-app-icon { width:27px; height:27px; display:grid; place-items:center; border-radius:9px; color:var(--accent); background:color-mix(in srgb,var(--accent) 19%,transparent); font-size:15px; }
 .window-title { flex:1; font-size:13px; font-weight:650; }
 .window-close { width:27px; height:27px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.14); border-radius:9px; background:rgba(255,255,255,.08); color:rgba(255,255,255,.75); font-size:18px; line-height:1; cursor:pointer; }
-.window-close:hover { color:#ffffff; background:rgba(255,212,0,.35); }
+.window-close:hover { color:var(--duck-white); background:rgba(255,212,0,.35); }
 .window-body { padding:22px; overflow:auto; }
 .window-kicker { margin:0 0 7px; color:rgba(255,255,255,.48); font-size:9px; letter-spacing:.14em; font-weight:700; }
 .window-heading { margin:0 0 18px; font-size:24px; font-weight:550; letter-spacing:-.045em; }
@@ -135,7 +183,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 .scene-row strong { display:block; font-size:11px; font-weight:550; }
 .scene-row small { color:rgba(255,255,255,.48); font-size:9px; }
 .switch { width:38px; height:22px; padding:3px; border:0; border-radius:20px; background:rgba(255,255,255,.18); cursor:pointer; transition:background .18s; }
-.switch::after { content:""; display:block; width:16px; height:16px; border-radius:50%; background:#ffffff; transition:transform .18s; }
+.switch::after { content:""; display:block; width:16px; height:16px; border-radius:50%; background:var(--duck-white); transition:transform .18s; }
 .switch[aria-checked="true"] { background:var(--duck-yellow); }
 .switch[aria-checked="true"]::after { transform:translateX(16px); }
 .compass-layout { display:grid; grid-template-columns:170px 1fr; align-items:center; gap:22px; }
@@ -148,7 +196,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 .compass-details span { display:block; margin-top:5px; color:rgba(255,255,255,.55); font-size:10px; }
 .compass-tabs { display:flex; flex-direction:column; gap:6px; margin-top:14px; }
 .compass-tab { padding:9px 11px; border:1px solid transparent; border-radius:9px; background:transparent; color:rgba(255,255,255,.65); text-align:left; font-size:10px; cursor:pointer; }
-.compass-tab.active { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.1); color:#ffffff; }
+.compass-tab.active { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.1); color:var(--duck-white); }
 .game-list { display:grid; gap:10px; }
 .game-card { padding:13px; border:1px solid rgba(255,255,255,.1); border-radius:13px; background:rgba(255,255,255,.045); }
 .game-top { display:flex; justify-content:space-between; gap:12px; align-items:center; }
@@ -166,7 +214,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 .device-state { color:var(--duck-yellow); font-size:8px; letter-spacing:.08em; }
 .device-state.offline { color:var(--duck-cold-ash); }
 .po-card { min-width:0; }
-.toast { position:fixed; left:50%; bottom:100px; z-index:10; padding:10px 14px; border:1px solid rgba(255,255,255,.16); border-radius:12px; background:rgba(8,8,8,.86); color:#ffffff; font-size:11px; opacity:0; transform:translate(-50%,8px); pointer-events:none; transition:opacity .2s,transform .2s; backdrop-filter:blur(18px); }
+.toast { position:fixed; left:50%; bottom:100px; z-index:10; padding:10px 14px; border:1px solid rgba(255,255,255,.16); border-radius:12px; background:rgba(8,8,8,.86); color:var(--duck-white); font-size:11px; opacity:0; transform:translate(-50%,8px); pointer-events:none; transition:opacity .2s,transform .2s; backdrop-filter:blur(18px); }
 .toast.visible { opacity:1; transform:translate(-50%,0); }
 @media (max-width:1150px) {
   .desktop-content { width:calc(100% - 56px); grid-template-columns:minmax(185px,.72fr) minmax(350px,1.4fr); gap:34px; padding-top:65px; }
@@ -239,7 +287,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 .intent-form { margin:18px 0 10px; }
 .intent-form label, .file-picker { display:block; margin-bottom:8px; color:rgba(255,255,255,.8); font-size:11px; font-weight:600; }
 .intent-input-row { display:flex; align-items:center; gap:8px; }
-.intent-input-row input { min-width:0; flex:1; height:40px; padding:0 12px; border:1px solid rgba(255,255,255,.16); border-radius:11px; outline:none; color:#ffffff; background:rgba(255,255,255,.08); font:inherit; font-size:11px; }
+.intent-input-row input { min-width:0; flex:1; height:40px; padding:0 12px; border:1px solid rgba(255,255,255,.16); border-radius:11px; outline:none; color:var(--duck-white); background:rgba(255,255,255,.08); font:inherit; font-size:11px; }
 .intent-input-row input:focus { border-color:rgba(255,212,0,.65); }
 .intent-status { margin:10px 0; color:rgba(255,255,255,.61); font-size:10px; line-height:1.55; }
 .intent-preview { margin-top:14px; padding:14px; border:1px solid rgba(255,212,0,.24); border-radius:14px; background:rgba(255,212,0,.06); }
@@ -257,7 +305,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 .permission-copy strong { color:rgba(255,255,255,.88); font-size:11px; }
 .permission-copy span { color:rgba(255,255,255,.5); font-size:9px; line-height:1.45; }
 .permission-toggle { flex:0 0 auto; min-width:112px; min-height:31px; padding:6px 9px; border:1px solid rgba(255,255,255,.15); border-radius:9px; color:rgba(255,255,255,.69); background:rgba(255,255,255,.05); font:inherit; font-size:9px; cursor:pointer; }
-.permission-toggle[aria-pressed="true"] { color:#ffffff; border-color:rgba(255,212,0,.3); background:rgba(255,212,0,.12); }
+.permission-toggle[aria-pressed="true"] { color:var(--duck-white); border-color:rgba(255,212,0,.3); background:rgba(255,212,0,.12); }
 .update-state { flex-direction:row; align-items:center; gap:12px; }
 .update-state > div { display:flex; flex-direction:column; gap:5px; }
 .state-mark { display:grid; place-items:center; width:38px; height:38px; flex:0 0 38px; border-radius:12px; color:var(--duck-yellow) !important; background:rgba(255,212,0,.12); font-size:22px !important; }
@@ -334,11 +382,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 
 
 /* Duck palette — final visual pass on the live desktop shell. */
-:root {
-  --mora-secondary-accent:var(--duck-dark-ochre);
-  --mora-focus:var(--duck-yellow);
-  --line:rgba(255,212,0,.22);
-}
+
 
 
 
@@ -508,7 +552,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
   font-size: 10px;
   cursor: pointer;
 }
-.extension-entry-remove:hover { border-color: var(--mora-danger); color: #ffffff; }
+.extension-entry-remove:hover { border-color: var(--mora-danger); color: var(--duck-white); }
 .extension-empty {
   padding: 13px;
   border: 1px dashed rgba(255,255,255,.18);
@@ -617,7 +661,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
   height: 42px;
   border: 0;
   outline: 0;
-  color: var(--mora-text, #ffffff);
+  color: var(--mora-text, var(--duck-white));
   background: transparent;
   font: inherit;
   font-size: 11px;
@@ -695,7 +739,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 .commons-favorite[aria-pressed="true"] { color: var(--mora-brand-hover, var(--duck-yellow)); }
 .commons-card h3 {
   margin: 0;
-  color: var(--mora-text, #ffffff);
+  color: var(--mora-text, var(--duck-white));
   font-size: 12px;
   font-weight: 650;
   overflow-wrap: anywhere;
@@ -718,7 +762,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
   min-height: 36px;
   border: 1px solid var(--line, rgba(255,255,255,.15));
   border-radius: 10px;
-  color: var(--mora-text, #ffffff);
+  color: var(--mora-text, var(--duck-white));
   background: rgba(255,255,255,.06);
   font: inherit;
   font-size: 9px;
@@ -750,7 +794,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 }
 .commons-detail h3 {
   margin: 0;
-  color: var(--mora-text, #ffffff);
+  color: var(--mora-text, var(--duck-white));
   font-size: 14px;
 }
 .commons-detail p,
@@ -770,7 +814,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
   min-height: 34px;
   border: 1px solid var(--line, rgba(255,255,255,.15));
   border-radius: 9px;
-  color: var(--mora-text, #ffffff);
+  color: var(--mora-text, var(--duck-white));
   background: rgba(255,255,255,.06);
   cursor: pointer;
 }
@@ -779,27 +823,7 @@ input[type="range"] { width:160px; accent-color:var(--duck-yellow); cursor:point
 
 
 /* DuckOS single palette: black structure, white content and yellow action. */
-:root {
-  color-scheme: dark;
-  --mora-page: var(--duck-page);
-  --mora-surface: var(--duck-graphite-layer);
-  --mora-elevated: var(--duck-dark-slate);
-  --mora-text: #FFFFFF;
-  --mora-secondary: var(--duck-soft-ivory);
-  --mora-muted: var(--duck-cold-ash);
-  --mora-brand: var(--duck-yellow);
-  --mora-brand-hover: var(--duck-lemon-highlight);
-  --mora-secondary-accent: var(--duck-yellow);
-  --mora-border: var(--duck-technical-gray);
-  --mora-selection: var(--duck-dark-ochre);
-  --mora-danger: var(--duck-yellow);
-  --mora-focus: var(--duck-lemon-highlight);
-  --ink: #FFFFFF;
-  --muted: var(--duck-cold-ash);
-  --glass: rgba(21,21,21,.78);
-  --line: rgba(255,212,0,.22);
-  --panel: rgba(8,8,8,.96);
-}
+
 :root[data-theme="duck"] { color-scheme: dark; }
 .wallpaper { background: radial-gradient(ellipse at 50% 46%, var(--duck-dark-slate) 0%, var(--duck-graphite-layer) 38%, var(--duck-page) 78%); }
 .wallpaper svg { opacity: .34; }
@@ -824,67 +848,7 @@ input[type="range"] { accent-color: var(--duck-yellow); }
 
 
 /* DuckOS 25-color semantic palette. One fixed palette, several clear functional roles. */
-:root {
-  --duck-page:#080808;
-  --duck-white:#FFFFFF;
-  --duck-yellow:#FFD400;
-  --duck-coal-abyss:#040404;
-  --duck-graphite-layer:#111111;
-  --duck-raised-graphite:#1A1A1A;
-  --duck-dark-slate:#262626;
-  --duck-technical-gray:#3A3A3A;
-  --duck-muted-steel:#5E5E5E;
-  --duck-cold-ash:#888888;
-  --duck-light-silver:#B8B8B8;
-  --duck-soft-ivory:#E6E6DF;
-  --duck-warm-milk:#F5F3E6;
-  --duck-lemon-highlight:#FFF066;
-  --duck-sun-amber:#E6B800;
-  --duck-deep-saffron:#B38600;
-  --duck-dark-ochre:#5C4400;
-  --duck-warm-honey:#FFC42E;
-  --duck-signal-red:#FF473A;
-  --duck-neon-lime:#8CE63C;
-  --duck-deep-pine:#2E5918;
-  --duck-ice-cyan:#5CE1E6;
-  --duck-cobalt:#3B82F6;
-  --duck-night-sapphire:#16294A;
-  --duck-storm-graphite:#1F2633;
-  --duck-yellow-rgb:255,212,0;
-  --duck-red-rgb:255,71,58;
-  --duck-cyan-rgb:92,225,230;
-  --duck-lime-rgb:140,230,60;
-  --mora-page:var(--duck-page);
-  --mora-surface:var(--duck-graphite-layer);
-  --mora-elevated:var(--duck-raised-graphite);
-  --mora-text:var(--duck-white);
-  --mora-secondary:var(--duck-soft-ivory);
-  --mora-muted:var(--duck-light-silver);
-  --mora-disabled:var(--duck-muted-steel);
-  --mora-brand:var(--duck-yellow);
-  --mora-brand-hover:var(--duck-lemon-highlight);
-  --mora-brand-strong:var(--duck-sun-amber);
-  --mora-brand-shadow:var(--duck-deep-saffron);
-  --mora-brand-subtle:var(--duck-dark-ochre);
-  --mora-secondary-accent:var(--duck-dark-ochre);
-  --mora-border:var(--duck-technical-gray);
-  --mora-selection:var(--duck-dark-ochre);
-  --mora-danger:var(--duck-signal-red);
-  --mora-warning:var(--duck-warm-honey);
-  --mora-success:var(--duck-neon-lime);
-  --mora-success-surface:var(--duck-deep-pine);
-  --mora-info:var(--duck-ice-cyan);
-  --mora-link:var(--duck-cobalt);
-  --mora-inspector-surface:var(--duck-night-sapphire);
-  --mora-cool-surface:var(--duck-storm-graphite);
-  --mora-focus:var(--duck-lemon-highlight);
-  --mora-on-brand:var(--duck-page);
-  --ink:var(--mora-text);
-  --muted:var(--duck-light-silver);
-  --glass:rgba(17,17,17,.82);
-  --line:rgba(255,212,0,.22);
-  --panel:rgba(4,4,4,.96);
-}
+
 
 :root[data-theme="duck"] { color-scheme:dark; }
 button:focus-visible,
@@ -904,7 +868,8 @@ a:hover, .text-link:hover, .widget-link:hover { color:var(--mora-info); }
   background:var(--mora-success);
   box-shadow:0 0 10px rgba(140,230,60,.52);
 }
-.device-mini-list i, .device-state { color:var(--mora-success); background-color:var(--mora-success); }
+.device-mini-list i { background-color:var(--mora-success); }
+.device-state { color:var(--mora-success); }
 .device-mini-list.muted i { background-color:var(--duck-muted-steel); }
 .device-mini-list.muted b, .device-state.offline { color:var(--duck-cold-ash); }
 .device-icon, .device-symbol { color:var(--mora-info); }
