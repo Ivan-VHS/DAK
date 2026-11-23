@@ -1,4 +1,4 @@
-"""DuckOS offline build-contract command line."""
+"""DuckOS offline build-contract and hardware-inventory command line."""
 from __future__ import annotations
 
 import argparse
@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .hardware_inventory import collect_host_inventory
 from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
@@ -23,7 +24,7 @@ def _load(path: Path) -> Any:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="duckos", description="DuckOS local image and module planning tools.")
+    parser = argparse.ArgumentParser(prog="duckos", description="DuckOS local image, driver and host-inventory tools.")
     commands = parser.add_subparsers(dest="command", required=True)
 
     validate = commands.add_parser("validate-manifest", help="verify a system manifest and component hashes")
@@ -38,6 +39,12 @@ def main(argv: list[str] | None = None) -> int:
     modules = commands.add_parser("module-order", help="resolve static driver module dependencies")
     modules.add_argument("modules", type=Path)
 
+    inventory = commands.add_parser(
+        "hardware-inventory", help="collect a read-only PCI/USB (Linux) or PnP (Windows) inventory"
+    )
+    inventory.add_argument("--output", type=Path, help="write the versioned JSON snapshot to this path")
+    inventory.add_argument("--sysfs-root", type=Path, help="Linux sysfs root (defaults to /sys; useful for tests)")
+
     try:
         args = parser.parse_args(argv)
         if args.command == "validate-manifest":
@@ -46,13 +53,19 @@ def main(argv: list[str] | None = None) -> int:
             payload = _load(args.components)
             items = payload.get("components") if isinstance(payload, dict) else payload
             result = plan_image(items, alignment_bytes=args.alignment)
-        else:
+        elif args.command == "module-order":
             payload = _load(args.modules)
             items = payload.get("modules") if isinstance(payload, dict) else payload
             result = {"schema": "duckos.module-order.v1",
                       "load_order": resolve_load_order(items),
                       "modules_loaded": False}
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        else:
+            result = collect_host_inventory(sysfs_root=args.sysfs_root)
+        encoded = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+        if getattr(args, "output", None):
+            args.output.write_text(encoded, encoding="utf-8", newline="\n")
+        else:
+            print(encoded, end="")
         return 0
     except (OSError, TypeError, ValueError) as error:
         parser.exit(2, f"DuckOS check failed: {error}\n")

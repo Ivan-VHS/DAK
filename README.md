@@ -27,9 +27,19 @@ The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is re
 
 The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The service worker is scoped to the Mora directory, caches only Mora shell assets and removes only older caches named with the `mora-shell-` prefix.
 
+## Hardware inventory and driver audit
+
+Collect a bounded, read-only snapshot of PCI/USB devices on Linux or present Plug-and-Play devices on Windows:
+
+```sh
+duckos hardware-inventory --output hardware-inventory.json
+```
+
+The versioned [hardware inventory contract](schemas/hardware-inventory.v1.schema.json) records detected bus IDs, driver binding state and privacy-preserving per-snapshot identity hashes. It does not install, update, enable or unload drivers. Use the Reaper read-only audit command to validate the snapshot and produce a diagnostic report; actual device support, signed driver packages and kernel enforcement remain native DuckOS work.
+
 ## Run and validate
 
-Open **mora/index.html** in a modern browser. The shell has no external runtime dependencies. A secure browser context may be needed for Web Crypto file hashing.
+Open **mora/index.html** in a modern browser. The shell has no external runtime dependencies.
 
 Run the JavaScript contract tests with Node.js 18 or newer:
 
@@ -63,6 +73,7 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 | Windows/Linux compatibility | PE/ELF header inspection | executable loader, Win32/NT, graphics/audio translation and launcher integration |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
+| Hardware inventory | Read-only PCI/USB (Linux) and PnP (Windows) snapshot | PCI/USB/ACPI enumeration in kernel, signed driver installation and device recovery |
 
 No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
 
