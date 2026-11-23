@@ -223,3 +223,35 @@ Names in this catalog are working product names. Cockos requires an explicit nam
 - [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md)
 - [DuckOS documentation index](README.md)
 - [Machine-readable application catalog](../catalogs/preinstalled-applications.v1.json)
+
+## 8. Interactive browser prototype
+
+A runnable browser prototype is maintained at [`prototype/mora-home.html`](../prototype/mora-home.html). It provides a local interaction layer for all seven application concepts and demonstrates selected cross-app flows.
+
+The catalogue deliberately keeps two maturity values separate:
+
+- `maturity_status: specified` describes the intended native DuckOS applications. This repository does not yet contain seven native application packages, OS services, package manifests or a bootable distribution.
+- `prototype_status: partial` describes the interactive browser implementation. It is useful for exercising local workflows, but it is not equivalent to a native OS application.
+
+### Implemented in the browser prototype
+
+| Application | Working local behavior | Still requires native DuckOS services or external providers |
+|---|---|---|
+| Cockos | Microphone recording when permitted, local audio-file import, track playback and offline WAV mixdown | System-wide per-process volume control and integration with other applications' audio sessions |
+| Kavun | Local image/video import, event slices, metadata search, non-destructive image filters and PNG export | Automatic visual recognition, semantic image search and automatic location intelligence |
+| Ka-bon | Expense ledger, category totals, receipt-photo attachment, subscription reminders and local family-member entries | Receipt OCR, bank connections, cloud synchronization and shared multi-user accounts |
+| Gloverty | Local rule creation, enable/disable controls and manual execution of supported actions | Background scheduler, OS event bus, global shortcuts and touchpad/touchscreen gesture service |
+| Po | Local tab list, external navigation, address commands and a reading view for pasted text | Native browser engine, isolated tab processes, network-level tracker filtering and download management |
+| Illidia | Local game library, progress and achievement entries, user-authorized screen recording and clip export | Launching installed executables, cloud saves, provider-backed achievements and OS-level Do Not Disturb |
+| Unify | Browser clipboard access where permitted and manual JSON export/import for tabs, clips and selected settings | Authenticated pairing, live device sync, phone notifications and lost-device discovery |
+
+The prototype stores app metadata in browser `localStorage` and media blobs in `IndexedDB`. Data is local to the browser profile and is not shared automatically between devices. Microphone and screen capture use browser permission prompts and may require HTTPS or localhost. External links open in the host browser.
+
+### Prototype cross-app workflows
+
+- Gloverty can prepare a local Ka-bon weekly summary when the user manually runs an enabled rule.
+- A Cockos recording can be added to Kavun's local media collection and assigned to an event slice.
+- Po can export selected tab metadata in a Unify transfer package.
+- Illidia can export selected clips in a Unify transfer package within the documented per-file limit.
+
+These are local prototype workflows. They do not establish a system-wide event bus, automatic schedules, authenticated device transport or cloud synchronization.
