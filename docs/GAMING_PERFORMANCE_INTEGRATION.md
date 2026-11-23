@@ -4,7 +4,7 @@
 
 Mora has a dedicated Gaming Performance workspace in its application catalogue. It explains and links to OPlague's native gaming workbench, documentation and release page. The two projects share the same product vocabulary and a versioned capability contract.
 
-OPlague implements the local operations: hardware and signed-driver metadata inventory, exact hardware/driver fingerprinting, atomic configuration snapshots, reversible Windows power-plan sessions, frame-time CSV analysis and operator-validated profile caching.
+OPlague implements the local operations: hardware and signed-driver metadata inventory, exact hardware/driver fingerprinting, atomic configuration snapshots, reversible Windows power-plan sessions, optional NVIDIA sensor readings through nvidia-smi, read-only WHEA/Display recovery-event collection, frame-time CSV analysis and operator-validated profile caching. Unsupported telemetry providers remain explicitly unavailable.
 
 ## What the browser shell cannot do
 
