@@ -8,6 +8,15 @@ Mora is a normal host desktop process. It uses Qt Widgets directly and does not 
 
 This does not make Mora the DuckOS compositor. The production compositor, window manager, virtual workspaces, system notification service, process manager and kernel-enforced capability broker remain separate system components. Mora does not claim to boot DuckOS or replace the host desktop.
 
+
+
+## Native interaction and materials
+
+- App panels are independent, non-modal top-level Qt windows. The host window manager owns dragging, resize, minimize, maximize, activation and z-order; Mora re-activates an existing panel instead of opening duplicates. Window content is bounded to the active screen, and a failed panel build is reported inside its own window.
+- All range controls should use the shared `MoraSlider` from `duckos.mora.controls`. It combines a draggable Qt slider with an exact numeric field, bounded values, wheel movement, coarse arrow steps and Shift-modified fine steps. Numeric output reserves a fixed width to avoid layout jitter.
+- The shared surface material uses a high-opacity translucent fill and a thin border. An opaque surface is declared first as the rendering fallback. Cross-platform backdrop blur is not claimed: Qt Widgets does not provide a consistent native blur-behind-window API across supported compositors, so the UI remains legible without it.
+- Interface scale is a persisted user preference from 80% through 140%; it previews live and is normalized when loaded. Intent input accepts the supported Russian and Ukrainian phrases. Enter prepares a preview; applying it still requires explicit approval.
+
 ## Included native surfaces
 
 - PySide6 launcher with search, category filtering, responsive app cards and dedicated app dialogs.
