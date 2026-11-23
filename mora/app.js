@@ -9,6 +9,7 @@ import {
   savePreferences,
   validateRecoverySnapshot
 } from "./core.js";
+import { buildCompatibilityCommand, compatibilityPanelMarkup } from "./compatibility.js";
 
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#BDA27D", glyph: "∿" },
@@ -22,6 +23,7 @@ const appDefinitions = {
   security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#948F7D", glyph: "⇄" },
+  compatibility: { name: "Compatibility", subtitle: "Windows и DOS", color: "#C49B66", glyph: "↔" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" }
 };
@@ -253,7 +255,10 @@ function panelMarkup(appId) {
         '<p class="window-copy">Выберите локальный EXE, DLL или ELF. Mora проверит заголовок и разрядность, не запуская файл и не отправляя его в сеть.</p>' +
         '<label class="file-picker">Выбрать файл<input type="file" data-executable-file accept=".exe,.dll,.so"></label>' +
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Запуск Windows-программ, DirectX/Vulkan translation и античитов через этот браузерный интерфейс невозможен. Native runtime пока не подключён.</span></div>';
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Для реального запуска используйте центр совместимости и системный CLI DuckOS. Этот инспектор сам файлы не запускает.</span></div>' +
+        '<button class="wide-action" data-app="compatibility">Открыть центр совместимости</button>';
+    case "compatibility":
+      return compatibilityPanelMarkup();
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
@@ -271,6 +276,20 @@ function panelMarkup(appId) {
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }
+}
+
+function copyCompatibilityText(command, status) {
+  if (!command) return;
+  if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+    status.textContent = "Команда готова. Выделите и скопируйте её из поля выше вручную.";
+    return;
+  }
+  navigator.clipboard.writeText(command).then(() => {
+    status.textContent = "Команда скопирована. Она ещё не выполнялась — запустите её в терминале.";
+    showToast("Команда скопирована");
+  }).catch(() => {
+    status.textContent = "Не удалось получить доступ к буферу обмена. Скопируйте команду вручную.";
+  });
 }
 
 function updateClock() {
@@ -453,6 +472,45 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const compatibilityAction = event.target.closest("[data-compat-action]");
+  if (compatibilityAction) {
+    const owner = compatibilityAction.closest(".app-window");
+    const value = (selector) => owner.querySelector(selector)?.value || "";
+    try {
+      const command = buildCompatibilityCommand(compatibilityAction.dataset.compatAction, {
+        prefix: value("[data-compat-prefix]"),
+        architecture: value("[data-compat-arch]"),
+        engine: value("[data-compat-engine]"),
+        prefix: compatibilityAction.dataset.compatAction === "install-component"
+          ? value("[data-compat-prefix-component]")
+          : compatibilityAction.dataset.compatAction === "launch"
+            ? value("[data-compat-prefix-launch]")
+            : value("[data-compat-prefix]"),
+        compatData: value("[data-compat-compatdata]"),
+        executable: value("[data-compat-executable]"),
+        component: value("[data-compat-component]")
+      });
+      const output = owner.querySelector("[data-compat-command-output]");
+      const status = owner.querySelector("[data-compat-status]");
+      const copyButton = owner.querySelector("[data-compat-copy]");
+      output.value = command;
+      copyButton.disabled = false;
+      status.textContent = "Команда сформирована. Выполните её в терминале DuckOS после проверки параметров.";
+      copyCompatibilityText(command, status);
+    } catch (error) {
+      owner.querySelector("[data-compat-status]").textContent = error.message || "Не удалось сформировать команду.";
+    }
+    return;
+  }
+
+  const compatibilityCopy = event.target.closest("[data-compat-copy]");
+  if (compatibilityCopy) {
+    const owner = compatibilityCopy.closest(".app-window");
+    const output = owner.querySelector("[data-compat-command-output]");
+    copyCompatibilityText(output.value, owner.querySelector("[data-compat-status]"));
+    return;
+  }
+
   const gameMode = event.target.closest('[data-action="game-mode"]');
   if (gameMode) {
     const enabled = gameMode.dataset.enabled !== "true";
@@ -594,6 +652,14 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const compatibilityEngine = event.target.closest("[data-compat-engine]");
+  if (compatibilityEngine) {
+    const panel = compatibilityEngine.closest(".app-window");
+    panel.querySelector("[data-compat-prefix-wrap]").hidden = compatibilityEngine.value !== "wine";
+    panel.querySelector("[data-compat-compatdata-wrap]").hidden = compatibilityEngine.value !== "proton";
+    return;
+  }
+
   const executableInput = event.target.closest("[data-executable-file]");
   if (executableInput) {
     const report = executableInput.closest(".app-window").querySelector("[data-runtime-report]");
