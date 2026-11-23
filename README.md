@@ -107,6 +107,16 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 
 No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
 
+## DuckOS Extended Terminal
+
+The separate user-space extended terminal is available through `duckos terminal`. It provides an allowlisted command registry for existing hardware, desktop, DuckBridge, compatibility and module diagnostics, plus local aliases, bounded history, prompt settings and an explicit extension API. It does not launch a host shell, execute arbitrary commands or load third-party extensions automatically. See [Extended Terminal](docs/EXTENDED_TERMINAL.md) for commands, state handling, security boundaries and tests.
+
+~~~sh
+duckos terminal
+duckos terminal run "hardware inventory"
+duckos terminal run "bridge runtimes"
+~~~
+
 ## Native Duck Desktop optimizer
 
 The native user-space maintenance utility complements the Mora browser shell. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
