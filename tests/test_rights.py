@@ -275,7 +275,7 @@ class RightsVerificationTests(unittest.TestCase):
         self.assertTrue(log.verify()["valid"])
         record = json.loads(path.read_text(encoding="utf-8"))
         record["status"] = "allowed"
-        path.write_text(json.dumps(record) + "\\n", encoding="utf-8")
+        path.write_text(json.dumps(record) + "\n", encoding="utf-8")
         self.assertFalse(log.verify()["valid"])
         with self.assertRaises(RightsError):
             log.append(
