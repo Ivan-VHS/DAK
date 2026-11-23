@@ -38,6 +38,7 @@ DuckOS должна стать цельной локальной вычисли�
 - [Foundation Architecture](docs/FOUNDATION_ARCHITECTURE.md) — границы подсистем, ABI, безопасность и вертикальные срезы.
 - [Engineering Profile](docs/IVAN_VHS_ENGINEERING_PROFILE.md) — стиль реализации, критерии качества и порядок релизов.
 - [Boot Handoff Contract v1](docs/BOOT_INFO_V1.md) — версия структуры загрузочной информации, карта памяти и проверка диапазонов.
+- [Thirteen-wave implementation record](docs/THIRTEEN_WAVES_IMPLEMENTATION.md) — список внедрённых изменений по пяти репозиториям и границы их текущего статуса.
 
 
 ## Foundation build and tests
