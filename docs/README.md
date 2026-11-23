@@ -2,7 +2,7 @@
 
 ## Desktop and application interfaces
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract. [Illidia](ILLIDIA.md) documents the local game catalogue, external runtime launch and current compatibility boundaries.
+[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. [Mora shell implementation](MORA_SHELL.md) documents Reaper desktop policy, virtual workspaces, command palette, host inspection and native boundaries. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract. [Illidia](ILLIDIA.md) documents the local game catalogue, external runtime launch and current compatibility boundaries.
 
 [Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
