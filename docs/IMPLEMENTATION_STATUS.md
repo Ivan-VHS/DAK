@@ -36,7 +36,7 @@ Updated: 2026-11-23
 - [ ] UEFI/BIOS bootloader, kernel entry point and bootable ISO/USB image.
 - [ ] Process model, syscall ABI and kernel-enforced capabilities.
 - [ ] Package manager, init process tree, filesystem and installer.
-- [ ] Audio engine, Wayland-compatible compositor and native settings applications.
+- [ ] Audio engine and Wayland-compatible compositor; the native Tk settings panel remains a user-space utility, not a compositor-integrated system settings service.
 
 ## Evidence policy
 
@@ -121,3 +121,22 @@ These are partial browser-shell features. The new DAK package catalog remains at
 - [ ] MacOS LaunchAgents integration and machine-wide/service startup management (intentionally outside this module's scope).
 
 The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
+
+## Deep settings and user-space tool suite — 2026-11-23
+
+- [x] Versioned user-scoped settings store with atomic JSON replacement and validation.
+- [x] Four independently configurable starter profiles and active-profile selection.
+- [x] Bounded settings snapshots, audit journal, JSON import/export and rollback API.
+- [x] Native Duck Desktop Settings tab with network, power, appearance, profile and history pages.
+- [x] Searchable setting index with breadcrumb paths, scrollable category pages and live accent preview.
+- [x] Draft-versus-saved state, field-group validation, apply/cancel/default actions and unsaved-change prompt.
+- [x] IPv4/IPv6, prefix/netmask, gateway, DNS, DoH/DoT, proxy and MTU profile validation.
+- [x] Read-only DNS and TCP connectivity test.
+- [x] User-space toolbox: CSPRNG secret generation, text statistics, CSV inspection, encoding conversion, JSON/XML conversion, unit conversion, TLS verification, RSS/Atom parsing, SHA-256 and listening TCP-port inventory.
+- [x] CLI entry points for settings profiles, export/import, network checks and toolbox utilities.
+- [ ] Live host network adapter changes, temporary network apply/rollback and IP conflict detection.
+- [ ] Hardware-backed battery health, charge limits, thermal policy, sleep and wake-lock control.
+- [ ] Global theme/compositor integration, DPI enforcement and contrast certification.
+- [ ] EFI/boot manager, filesystem repair, kernel updates, privileged driver/device control, packet capture, firewall/tunnel management, kernel-enforced sandboxing and secure free-space erase.
+
+These settings are saved as desired user preferences only. The settings-store operation reports system_changes_performed=false. The project does not claim that saving a DHCP/static profile changes the host adapter, that saving a power profile changes the CPU/GPU, or that saved appearance tokens restyle the host compositor. See [Deep settings and user-space tools](DEEP_SETTINGS_AND_USERLAND_TOOLS.md).
