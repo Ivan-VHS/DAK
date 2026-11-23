@@ -16,6 +16,10 @@
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
+## Command-line tools
+
+[DuckOS Extended Terminal](EXTENDED_TERMINAL.md) documents the separate allowlisted user-space command environment, command registry, local configuration, bounded history, extension contract and security boundaries.
+
 ## Desktop optimization
 
 [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.
