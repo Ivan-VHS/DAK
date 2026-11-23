@@ -56,7 +56,7 @@ test("third-party managers and ReactOS QEMU commands are allowlisted", () => {
   }), /qcow2/);
   assert.throws(() => buildCompatibilityCommand("launch-reactos", {
     reactosDisk: "/tmp/reactos.qcow2", reactosMemory: 512, reactosCpus: 2
-  }), /память ReactOS/);
+  }), /Память ReactOS/);
 });
 
 test("launch paths are shell-quoted and engine-specific prefix arguments are required", () => {
