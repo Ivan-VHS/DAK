@@ -19,6 +19,9 @@ import "duckos/system/three_media.rpr" as media
 import "duckos/system/telemetry.rpr" as telemetry
 import "duckos/ui/theme.rpr" as theme
 import "duckos/ui/motion.rpr" as motion
+import "duckos/ui/window_manager.rpr" as windows
+import "duckos/ui/desktop.rpr" as desktop
+import "duckos/ui/notifications.rpr" as notifications
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -156,5 +159,60 @@ assert(theme["motion_profile"](true) == "static", "reduced-motion preference is 
 assert(motion["frame_state"](15900, 16000, false) == "within-budget", "frame stays within 16 ms budget")
 assert(motion["frame_state"](17000, 16000, false) == "late", "late frame is observable")
 assert(motion["frame_state"](17000, 16000, true) == "static", "reduced motion takes precedence")
+
+# Mora / DuckOS desktop shell policy.
+make home_window := ["window-1", "illidia", 100, 80, 800, 600, 4, "normal", "play"]
+make second_window := ["window-2", "workspace", 40, 48, 640, 480, 7, "minimized", "home"]
+make desktop_windows := [home_window, second_window]
+assert(windows["window_valid"](home_window, 1920, 1080), "window record fits the active display")
+assert(not windows["window_valid"](["bad", "illidia", 1800, 100, 800, 600, 4, "normal", "play"], 1920, 1080), "window may not extend beyond the display")
+assert(windows["transition_valid"]("normal", "minimized"), "normal window can be minimized")
+assert(windows["transition_valid"]("maximized", "normal"), "maximized window can be restored")
+assert(not windows["transition_valid"]("closed", "normal"), "closed window cannot be restored in place")
+assert(windows["visible_on_workspace"](home_window, "play"), "visible window belongs to selected workspace")
+assert(not windows["visible_on_workspace"](second_window, "home"), "minimized window stays hidden")
+assert(windows["focus_candidate"](desktop_windows, "window-1", "play") == ["focused", "window-1", 4], "focus resolves only a visible window in the active workspace")
+assert(windows["focus_candidate"](desktop_windows, "window-2", "home")[0] == "not-found", "minimized window cannot receive focus")
+assert(windows["next_z_order"](desktop_windows) == 8, "new window receives the next z-order")
+assert(windows["geometry_state"](10, 10, 800, 600, 1920, 1080) == "valid", "window geometry is inside the work area")
+assert(windows["geometry_state"](0, 0, 2200, 600, 1920, 1080) == "oversized", "oversized window is rejected")
+assert(windows["geometry_state"](1800, 0, 400, 600, 1920, 1080) == "outside", "off-screen window is rejected")
+assert(windows["window_limit_valid"](4, 12), "desktop window count is within its limit")
+assert(not windows["window_limit_valid"](13, 12), "desktop window count cannot exceed its limit")
+
+make workspaces := [["home", "Работа", 0], ["play", "Игры", 1], ["studio", "Студия", 2]]
+assert(desktop["workspace_valid"](workspaces[0]), "workspace descriptor is valid")
+assert(desktop["workspace_switch"]("home", "play", workspaces) == ["switched", "play"], "workspace switch resolves a known target")
+assert(desktop["workspace_switch"]("home", "unknown", workspaces) == ["unknown-workspace", "home"], "unknown workspace leaves current state unchanged")
+make desktop_session := ["session-1", "home", "amber", false, true, false, 2]
+assert(desktop["session_valid"](desktop_session, workspaces, 12), "desktop session metadata is valid")
+assert(not desktop["session_valid"](["session-1", "lost", "amber", false, true, false, 2], workspaces, 12), "desktop session must reference an existing workspace")
+assert(desktop["session_transition_valid"]("running", "suspended"), "running desktop session may be suspended")
+assert(not desktop["session_transition_valid"]("stopped", "running"), "stopped desktop session requires a fresh startup")
+make desktop_apps := ["illidia", "workspace", "runtime"]
+make workspace_ids := ["home", "play", "studio"]
+assert(desktop["command_policy"](["help"], desktop_apps, workspace_ids) == "allowed", "shell help command is allowlisted")
+assert(desktop["command_policy"](["open", "illidia"], desktop_apps, workspace_ids) == "allowed", "known application may be opened")
+assert(desktop["command_policy"](["open", "unknown"], desktop_apps, workspace_ids) == "unknown-app", "unknown application is rejected")
+assert(desktop["command_policy"](["workspace", "play"], desktop_apps, workspace_ids) == "allowed", "known workspace may be selected")
+assert(desktop["command_policy"](["theme", "amber"], desktop_apps, workspace_ids) == "allowed", "known theme is allowed")
+assert(desktop["command_policy"](["theme", "shell"], desktop_apps, workspace_ids) == "invalid-theme", "unknown theme is rejected")
+assert(desktop["command_policy"](["exec", "rm", "-rf"], desktop_apps, workspace_ids) == "denied", "arbitrary host command is denied")
+assert(desktop["command_policy"](["open", "illidia", "--shell"], desktop_apps, workspace_ids) == "denied", "unexpected command arguments are denied")
+make launch_descriptor := ["illidia", "Illidia", "games", ["process.spawn"]]
+assert(desktop["app_launch_allowed"](launch_descriptor, ["app.read", "process.spawn"], "validated"), "launch requires validation and granted capabilities")
+assert(not desktop["app_launch_allowed"](launch_descriptor, ["app.read"], "validated"), "app launch cannot amplify capabilities")
+assert(not desktop["app_launch_allowed"](launch_descriptor, ["app.read", "process.spawn"], "untrusted"), "untrusted app metadata cannot start a process")
+
+make notify_a := ["n-1", "Game started", "Illidia started a game", "info", 100, false]
+make notify_b := ["n-2", "Low memory", "Memory pressure is high", "warning", 200, false]
+make notify_c := ["n-3", "Service failed", "Audio service stopped", "critical", 300, true]
+assert(notifications["notification_valid"](notify_a), "notification record is valid")
+make notify_window_a := notifications["append"]([], notify_a, 2)
+make notify_window_b := notifications["append"](notify_window_a[1], notify_b, 2)
+make notify_window_c := notifications["append"](notify_window_b[1], notify_c, 2)
+assert(notify_window_c == ["appended", [notify_b, notify_c]], "notification history remains bounded")
+assert(notifications["sequence_valid"](notify_window_c[1]), "notification timestamps are monotonic")
+assert(notifications["unread_count"](notify_window_c[1]) == 1, "read state is counted accurately")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"
