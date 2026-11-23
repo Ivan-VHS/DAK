@@ -21,7 +21,7 @@ from .bridge import DuckBridgeError, build_launch_plan, inspect_binary
 SCHEMA_LIBRARY = "duckos.illidia-library.v1"
 SCHEMA_LAUNCH = "duckos.illidia-launch.v1"
 MAX_LIBRARY_BYTES = 4 * 1024 * 1024
-_GAME_ID = re.compile(r"[a-z0-9][a-z0-9-]{0,47}\\Z")
+_GAME_ID = re.compile(r"[a-z0-9][a-z0-9-]{0,47}\Z")
 _BACKENDS = {"auto", "wine", "proton", "crossover", "bottles"}
 
 
