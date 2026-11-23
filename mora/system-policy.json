@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and six system tools"
+      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and seven system tools"
     },
     "intent_ui": {
       "maturity": "partial",
