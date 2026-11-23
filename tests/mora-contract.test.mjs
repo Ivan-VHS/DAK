@@ -131,7 +131,7 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(css.includes(".dock-wrap::before"));
   assert.ok(css.includes("#526347"));
   assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v5-amber"));
+  assert.ok(serviceWorker.includes("mora-shell-v6-duck-desktop-commons"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
