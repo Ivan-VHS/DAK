@@ -1,0 +1,71 @@
+name: DuckOS native bring-up
+
+on:
+  push:
+    branches: [main, "release/**", "work/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freestanding-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native build tools
+        run: sudo apt-get update && sudo apt-get install -y clang lld make
+      - name: Build x86-64 kernel
+        run: make -C native/kernel CC=clang LD=ld.lld
+
+  python-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile native Python tools
+        run: python -m compileall -q native
+      - name: Run native tests
+        run: python -m unittest discover -s native/tests -v
+      - name: Run DuckOS core service tests
+        run: PYTHONPATH=native/services python -m unittest discover -s native/services/tests -v
+      - name: Check ISO builder shell syntax
+        run: bash -n native/scripts/build-iso.sh
+      - name: Check public driver ABI header
+        run: printf '#include "native/abi/include/duckos/driver.h"\nint main(void) { return 0; }\n' | clang -std=c11 -Wall -Wextra -Werror -x c -fsyntax-only -
+
+  wayland-egl-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Wayland and Mesa build tools
+        run: sudo apt-get update && sudo apt-get install -y meson ninja-build pkg-config libwayland-dev libwayland-bin wayland-protocols libegl-dev libgles2-mesa-dev
+      - name: Configure native EGL shell
+        run: meson setup native/desktop/shell/build native/desktop/shell
+      - name: Build native EGL shell
+        run: meson compile -C native/desktop/shell/build
+
+  wlroots-compositor:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install wlroots 0.19 development packages
+        run: sudo apt-get update && sudo apt-get install -y meson ninja-build pkg-config libwlroots-0.19-dev libwayland-dev libwayland-server0 wayland-protocols
+      - name: Configure wlroots compositor
+        run: meson setup native/desktop/compositor/build native/desktop/compositor
+      - name: Build wlroots compositor
+        run: meson compile -C native/desktop/compositor/build
+
+  windows-compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Windows compatibility runtime
+        run: cmake -S native/compat -B build/compat -DDUCKOS_COMPAT_BUILD_TESTS=ON
+      - name: Build os-run and compatibility tests
+        run: cmake --build build/compat --parallel
+      - name: Run PE and Wine prefix tests
+        run: ctest --test-dir build/compat --output-on-failure

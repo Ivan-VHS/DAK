@@ -3,7 +3,7 @@
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
-    "data_policy": "fictional_demo_data"
+    "data_policy": "local_service_data_with_attributed_news_and_fictional_demo_content"
   },
   "built_in_apps": [
     {
@@ -74,7 +74,7 @@
       "name": "Bridge",
       "category": "compatibility",
       "panel": "mora/app.js#runtime",
-      "maturity": "header_inspection_only"
+      "maturity": "header_inspection_plus_wine_os_run_cli"
     },
     {
       "id": "workspace",
@@ -89,6 +89,20 @@
       "category": "provenance",
       "panel": "mora/app.js#provenance",
       "maturity": "sha256_only"
+    },
+    {
+      "id": "newsroom",
+      "name": "Вечерний курьер",
+      "category": "news",
+      "panel": "mora/app.js#newsroom",
+      "maturity": "local_rss_service"
+    },
+    {
+      "id": "horizon",
+      "name": "Horizon",
+      "category": "system",
+      "panel": "mora/app.js#horizon",
+      "maturity": "feature_status_dashboard"
     }
   ],
   "widgets": [
@@ -127,7 +141,7 @@
     {
       "id": "compat-runtime",
       "maturity": "partial",
-      "scope": "PE and ELF header inspection; no process execution"
+      "scope": "PE/ELF inspection plus Wine-backed argv os-run CLI on supported POSIX hosts; no Win32 kernel or bundled graphics translation"
     },
     {
       "id": "provenance-verifier",
@@ -148,6 +162,11 @@
       "id": "theme-adapter",
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "newsroom-feed",
+      "maturity": "implemented",
+      "scope": "fixed HTTPS RSS/Atom publishers through loopback API; attribution preserved"
     }
   ]
 }

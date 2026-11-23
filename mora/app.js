@@ -23,7 +23,9 @@ const appDefinitions = {
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#efad9a", glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#aebcf0", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#e9a4cd", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" }
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" },
+  newsroom: { name: "Вечерний курьер", subtitle: "Актуальная лента", color: "#d99b55", glyph: "▤" },
+  horizon: { name: "Horizon", subtitle: "Возможности DuckOS", color: "#c9a16d", glyph: "◉" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -165,6 +167,117 @@ function updateWorkspacePanel() {
   });
 }
 
+
+const NEWS_API = "http://127.0.0.1:8765/api/news";
+const NEWS_HOSTS = new Set(["bbci.co.uk", "bbc.com", "bbc.co.uk", "kyivindependent.com"]);
+
+async function loadNewsroom(appWindow, refresh = false) {
+  const status = appWindow.querySelector("[data-news-status]");
+  const list = appWindow.querySelector("[data-news-list]");
+  if (!status || !list) return;
+
+  status.textContent = refresh ? "Обновляю источники…" : "Подключаю локальную службу новостей…";
+  list.replaceChildren();
+
+  try {
+    if (refresh) {
+      const refreshed = await fetch(NEWS_API + "/refresh", {
+        method: "POST",
+        headers: { "Accept": "application/json" },
+        cache: "no-store"
+      });
+      if (!refreshed.ok) throw new Error("Служба отклонила обновление");
+    }
+
+    const response = await fetch(NEWS_API + "?limit=12", {
+      headers: { "Accept": "application/json" },
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Служба новостей ответила с ошибкой");
+
+    const payload = await response.json();
+    if (!Array.isArray(payload.items)) throw new Error("Неверный формат новостной ленты");
+
+    for (const item of payload.items) {
+      if (!item || typeof item.title !== "string") continue;
+      const card = document.createElement("article");
+      card.className = "news-card";
+
+      const heading = document.createElement("h3");
+      heading.textContent = item.title;
+      card.appendChild(heading);
+
+      if (typeof item.summary === "string" && item.summary) {
+        const summary = document.createElement("p");
+        summary.textContent = item.summary;
+        card.appendChild(summary);
+      }
+
+      const meta = document.createElement("div");
+      meta.className = "news-meta";
+      const source = document.createElement("span");
+      source.textContent = [item.source, item.category, item.published_at].filter(Boolean).join(" · ");
+      meta.appendChild(source);
+
+      try {
+        const url = new URL(item.url);
+        const trusted = url.protocol === "https:" &&
+          Array.from(NEWS_HOSTS).some(host => url.hostname === host || url.hostname.endsWith("." + host));
+        if (trusted) {
+          const link = document.createElement("a");
+          link.href = url.href;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "Читать у издателя ↗";
+          meta.appendChild(link);
+        }
+      } catch {
+        // Invalid publisher URLs are left as plain text, never made clickable.
+      }
+
+      card.appendChild(meta);
+      list.appendChild(card);
+    }
+
+    status.textContent = payload.items.length
+      ? "Материалов: " + payload.total + " · обновлено " + (payload.updated_at || "недавно")
+      : "Лента пока пуста. Нажмите «Обновить», чтобы запросить источники.";
+  } catch {
+    status.textContent = "Локальная служба новостей недоступна. Запустите её командой из README или docs/NEWSROOM.md.";
+  }
+}
+
+const horizonFeatures = [
+  ["Нативная загрузка", "Частично", "Limine и ранний x86-64 kernel bring-up; планировщик, VFS и процессная модель ещё впереди"],
+  ["Mora Desktop", "Работает", "Единая оболочка, окна, dock, локальные настройки и управление рабочим пространством"],
+  ["Core Services", "Работает", "Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia и Unify как пользовательские службы"],
+  ["Newsroom", "Работает", "RSS/Atom backend с ограниченным списком HTTPS-источников и локальным API"],
+  ["Windows compatibility", "Частично", "PE-инспектор и Wine-backed os-run; DirectX/Proton и античит не обещаны"],
+  ["Безопасность приложений", "Частично", "Bubblewrap host wrapper и deny-by-default настройки Mora; kernel sandbox ещё не готов"],
+  ["Разрешения", "Частично", "Профиль Sentinel хранит предпочтения, но пока не ограничивает нативные процессы"],
+  ["Пакеты", "Частично", "Локальная проверка хеша и безопасная staging-установка; подписи и системный updater впереди"],
+  ["Восстановление", "Частично", "Снимки пользовательской сессии и настроек; A/B rollback системы не реализован"],
+  ["Проверка происхождения", "Частично", "SHA-256 работает локально; доверенные подписи и C2PA ещё не подключены"],
+  ["AI и NPU", "План", "Mora использует локальные правила с подтверждением; локальная модель и NPU runtime не подключены"],
+  ["Планировщик ресурсов", "План", "Профили Mora пока меняют оболочку, а не CPU/GPU/NPU scheduler ядра"],
+  ["Голос и пространственный ввод", "План", "Есть клавиатура, мышь и touch; voice/gesture/XR сервисы не реализованы"],
+  ["Доступность", "Частично", "Есть reduced motion и контрастные палитры сервиса Gloverty; единый native provider впереди"],
+  ["Федерация приложений", "Частично", "Pytyliki, Reaper, OPlague и VentuSample подключаются отдельно с сохранением их лицензий"],
+  ["Reaper-native contracts", "Частично", "Контракты памяти, IPC, планирования, доверия и драйверов существуют как исходные спецификации, а не как загружаемое ядро"],
+  ["Build manifest tooling", "Работает", "Python CLI проверяет системные манифесты, размещение образа и зависимости модулей; установщик ОС ещё не реализован"]
+];
+
+function horizonMarkup() {
+  const rows = horizonFeatures.map(([name, state, detail]) =>
+    '<article class="feature-row"><div class="feature-row-top"><strong>' + name +
+    '</strong><span class="feature-state">' + state + '</span></div><p>' + detail + '</p></article>'
+  ).join("");
+  return '<p class="window-kicker">DUCKOS · SYSTEM MAP</p>' +
+    '<h2 class="window-heading">Что уже работает и что ещё строится</h2>' +
+    '<p class="window-copy">Сводка отражает код и пользовательские службы в этом репозитории. «Частично» означает реальный ограниченный компонент, а не готовую функцию всей ОС.</p>' +
+    '<div class="feature-list">' + rows + '</div>';
+}
+
 function panelMarkup(appId) {
   switch (appId) {
     case "cockos":
@@ -251,7 +364,7 @@ function panelMarkup(appId) {
         '<p class="window-copy">Выберите локальный EXE, DLL или ELF. Mora проверит заголовок и разрядность, не запуская файл и не отправляя его в сеть.</p>' +
         '<label class="file-picker">Выбрать файл<input type="file" data-executable-file accept=".exe,.dll,.so"></label>' +
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Запуск Windows-программ, DirectX/Vulkan translation и античитов через этот браузерный интерфейс невозможен. Native runtime пока не подключён.</span></div>';
+        '<div class="system-notice"><span class="notice-dot"></span><span>Для реального запуска используйте Wine-backed команду os-run после сборки: make -C native compat-test. Префиксы отделяют конфигурацию приложений, но не являются песочницей. DXVK/VKD3D и Wine устанавливаются отдельно; kernel-mode anti-cheat не поддерживается.</span></div>';
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
@@ -265,7 +378,13 @@ function panelMarkup(appId) {
         '<p class="window-copy">SHA-256 вычисляется локально в браузере. Это помогает сравнить контрольные суммы, но не подтверждает автора или подлинность содержимого.</p>' +
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>'; 
+    case "newsroom":
+      return '<div class="news-header"><div><p class="window-kicker">ВЕЧЕРНИЙ КУРЬЕР · RSS / ATOM</p><h2 class="window-heading">Главное в ленте</h2></div><button class="subtle-button" data-action="refresh-news">Обновить</button></div>' +
+        '<p class="news-status" data-news-status>Подключаю локальную службу…</p><div class="news-list" data-news-list></div>' +
+        '<p class="window-copy">Заголовки и краткие описания показываются с атрибуцией. Полные публикации открываются на сайтах издателей.</p>';
+    case "horizon":
+      return horizonMarkup();
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }
@@ -327,6 +446,7 @@ function openApp(appId) {
     '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
+  if (appId === "newsroom") void loadNewsroom(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
@@ -389,6 +509,12 @@ document.addEventListener("click", (event) => {
     preferences.appearance.theme = preferences.appearance.theme === "light" ? "dark" : "light";
     persistPreferences();
     showToast(preferences.appearance.theme === "light" ? "Светлая тема включена" : "Тёмная тема включена");
+    return;
+  }
+
+  const refreshNews = event.target.closest('[data-action="refresh-news"]');
+  if (refreshNews) {
+    void loadNewsroom(refreshNews.closest(".app-window"), true);
     return;
   }
 

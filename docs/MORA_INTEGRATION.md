@@ -4,7 +4,7 @@
 
 DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
 
-The shell reuses the original indigo, rose and gold sunset wallpaper, layered hills, glass panels, explicit fine borders and compact dock. Existing app IDs remain stable.
+The shell uses Mora Amber: folded amber/ochre drapery at the edges, a shaded radial workspace, walnut/graphite surfaces, restrained warm highlights and critical red. The existing dark/light theme preference remains persisted. Seven first-party app IDs and six system-tool IDs remain stable; Newsroom and Horizon extend the launcher without replacing them.
 
 ## Shell components
 
@@ -88,3 +88,28 @@ A native launcher must discover manifests only in trusted installation roots, va
 - **Verified:** reserved for a feature with repeatable tests and evidence at the layer being claimed.
 
 Never promote a feature to native/verified status because its UI panel exists.
+
+
+## Mora Amber, Newsroom and Horizon
+
+The unified shell loads `mora/amber.css` after the shared responsive layout. `mora/wallpaper.svg` carries the curtain-fold material; `mora/theme.json` defines matching dark and light semantic palettes. The service worker was versioned and precaches both Amber assets. A theme switch remains available in the status bar and retains the user's light/dark choice.
+
+The launcher now includes **Вечерний курьер** and **Horizon** as the fourteenth and fifteenth built-in entries. Newsroom reads only the local API at `http://127.0.0.1:8765/api/news`; refresh uses its explicit `POST /api/news/refresh` route. It renders feed content via `textContent`, accepts only publisher URLs using HTTPS and the built-in host allow-list, and never renders remote HTML. The Python backend restricts serving to loopback addresses, bounds feed sizes and refresh rates, and keeps cached results when refresh fails.
+
+Horizon is a status board, not a claim of native completion. It labels the native boot track, Reaper contracts, Windows runtime, services, application isolation, updates, provenance, AI/NPU and multimodal input according to their present maturity.
+
+## User-space services and compatibility runtime
+
+The existing seven Python services are retained as host user-space prototypes. They are not kernel modules and do not yet have authenticated IPC to the compositor or kernel. The separate Newsroom service is exposed through the loopback API.
+
+The C++20 compatibility CLI lives under `native/compat`. It parses PE32/PE32+ as data, creates per-application Wine prefixes and starts Wine using an argv vector, not a shell command string. Install Wine and graphics translation dependencies separately on a POSIX host. A Wine prefix does not restrict filesystem/network access; kernel-mode anti-cheat and a complete DirectX/Proton stack are not claimed.
+
+The main repository also contains Reaper source contracts for memory, scheduling, IPC, security, storage and driver orchestration, plus Python build-manifest/image-layout/driver-module validators. Those contracts and validators are not a running kernel or an installer.
+
+## Maturity boundary
+
+- **Implemented:** the Mora browser shell, Newsroom loopback backend and tested host-side service utilities within their stated scope.
+- **Partial:** the early Limine kernel bring-up, native graphics preview, package staging, Bubblewrap wrapper, Wine compatibility runner and the Reaper contract layer.
+- **Planned:** a complete scheduler/process ABI/VFS/driver stack, native capability enforcement, signed A/B OS updates, signer/C2PA verification, local LLM/NPU runtime, voice/XR input and hardware resource scheduling.
+
+The test ISO remains a boot test image, not an installer. The app shell does not make host-side permissions or kernel capabilities enforceable.

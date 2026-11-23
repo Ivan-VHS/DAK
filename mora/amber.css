@@ -1,0 +1,351 @@
+:root {
+  color-scheme: dark;
+  --mora-page: #211913;
+  --mora-surface: #33261d;
+  --mora-elevated: #493326;
+  --mora-text: #fff3e2;
+  --mora-secondary: #e7d2b8;
+  --mora-muted: #c4a98a;
+  --mora-brand: #d58b3d;
+  --mora-brand-hover: #eaa653;
+  --mora-accent: #8a6242;
+  --mora-danger: #b64a40;
+  --mora-border: #75543a;
+  --mora-selection: #60442e;
+  --ink: var(--mora-text);
+  --muted: rgba(231, 210, 184, .72);
+  --glass: rgba(43, 31, 22, .58);
+  --line: rgba(190, 144, 91, .25);
+  --panel: rgba(37, 27, 20, .96);
+}
+
+html, body {
+  color: var(--mora-text);
+  background: var(--mora-page);
+}
+
+.wallpaper {
+  background: var(--mora-page) url("./wallpaper.svg") center / cover no-repeat;
+}
+
+.wallpaper > svg {
+  display: none;
+}
+
+.wallpaper::after {
+  background:
+    radial-gradient(ellipse at 52% 52%, rgba(25, 19, 15, .14), rgba(25, 19, 15, .45) 54%, rgba(17, 13, 10, .76)),
+    linear-gradient(90deg, rgba(20, 15, 11, .18), transparent 48%, rgba(20, 15, 11, .24));
+}
+
+.statusbar {
+  border-bottom-color: rgba(196, 151, 103, .22);
+  background: rgba(32, 24, 18, .58);
+  color: var(--mora-text);
+}
+
+.brand-mark {
+  color: #2b1d12;
+  background: linear-gradient(145deg, #f5c985, #c27b35);
+  box-shadow: 0 3px 14px rgba(213, 139, 61, .22);
+}
+
+.active-app, .system-status {
+  color: rgba(255, 243, 226, .82);
+}
+
+.eyebrow, .tiny-counter, .system-section-note {
+  color: rgba(231, 210, 184, .76);
+}
+
+.tiny-counter {
+  border-color: rgba(190, 144, 91, .34);
+  background: rgba(38, 28, 20, .32);
+}
+
+.app-tile, .widget-card {
+  border-color: rgba(196, 151, 103, .28);
+  background: linear-gradient(145deg, rgba(91, 64, 43, .58), rgba(43, 31, 23, .72));
+  box-shadow: 0 15px 38px rgba(12, 8, 5, .22), inset 0 1px rgba(255, 237, 210, .07);
+}
+
+.app-tile:hover, .widget-card:hover {
+  border-color: rgba(229, 175, 111, .48);
+  background: linear-gradient(145deg, rgba(115, 79, 49, .62), rgba(55, 38, 27, .82));
+  box-shadow: 0 18px 40px rgba(12, 8, 5, .3), inset 0 1px rgba(255, 237, 210, .1);
+}
+
+.app-icon {
+  border-color: rgba(228, 178, 119, .22);
+  background: linear-gradient(145deg, rgba(244, 203, 145, .18), rgba(99, 67, 42, .24));
+  color: #f4c88e;
+}
+
+.app-name, .widget-title, .section-heading h1, .system-section-heading h2 {
+  color: var(--mora-text);
+}
+
+.app-subtitle, .widget-caption, .widget-foot, .widget-link {
+  color: rgba(231, 210, 184, .74);
+}
+
+.widget-card { color: var(--mora-text); }
+
+.dock {
+  border-color: rgba(196, 151, 103, .28);
+  background: rgba(34, 25, 18, .78);
+  box-shadow: 0 16px 48px rgba(10, 7, 4, .4), inset 0 1px rgba(255, 236, 208, .09);
+}
+
+.dock-item { color: #edd2ad; }
+.dock-item:hover { background: rgba(213, 139, 61, .2); }
+
+.app-window {
+  border-color: rgba(196, 151, 103, .35);
+  background: var(--panel);
+  box-shadow: 0 28px 90px rgba(9, 6, 3, .56), inset 0 1px rgba(255, 238, 215, .08);
+}
+
+.window-titlebar {
+  border-bottom-color: rgba(196, 151, 103, .2);
+  background: linear-gradient(90deg, rgba(96, 66, 43, .56), rgba(51, 37, 27, .5));
+}
+
+.window-app-icon { color: #e8b875; }
+.window-title, .window-heading { color: var(--mora-text); }
+.window-kicker, .window-copy { color: rgba(231, 210, 184, .76); }
+
+.action-button {
+  border-color: rgba(225, 170, 105, .42);
+  color: #fff2df;
+  background: linear-gradient(135deg, rgba(213, 139, 61, .35), rgba(138, 98, 66, .3));
+}
+
+.action-button:hover {
+  border-color: rgba(234, 166, 83, .72);
+  background: rgba(213, 139, 61, .24);
+}
+
+.subtle-button, .wide-action, .permission-toggle, .profile-choice {
+  border-color: rgba(196, 151, 103, .25);
+  color: rgba(255, 243, 226, .84);
+  background: rgba(116, 79, 49, .16);
+}
+
+.profile-choice.active, .permission-toggle[aria-pressed="true"] {
+  border-color: rgba(234, 166, 83, .48);
+  color: #ffe3b8;
+  background: rgba(213, 139, 61, .16);
+}
+
+.system-notice, .security-summary, .update-state, .recovery-card, .setting-block,
+.feature-row, .news-card {
+  border-color: rgba(196, 151, 103, .23);
+  background: rgba(92, 63, 40, .16);
+}
+
+.system-notice.warning {
+  border-color: rgba(182, 74, 64, .38);
+  background: rgba(182, 74, 64, .1);
+}
+
+.toast {
+  border-color: rgba(196, 151, 103, .3);
+  background: rgba(37, 27, 20, .96);
+  color: var(--mora-text);
+}
+
+button:focus-visible, input:focus-visible, a:focus-visible {
+  outline: 2px solid var(--mora-brand-hover);
+  outline-offset: 3px;
+}
+
+.news-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.news-header .window-heading { margin-bottom: 8px; }
+.news-status {
+  margin: 8px 0 14px;
+  color: var(--mora-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.news-list, .feature-list { display: grid; gap: 9px; }
+.news-card, .feature-row {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--mora-border);
+  border-radius: 13px;
+}
+.news-card h3 {
+  margin: 0;
+  color: var(--mora-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.news-card p, .feature-row p {
+  margin: 7px 0 0;
+  color: rgba(231, 210, 184, .78);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.news-meta, .feature-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--mora-muted);
+  font-size: 9px;
+}
+.news-meta a { color: #efbf7d; text-decoration: none; }
+.news-meta a:hover { color: #ffd69a; text-decoration: underline; }
+.feature-row-top { margin: 0; font-size: 11px; }
+.feature-state {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border: 1px solid rgba(213, 139, 61, .28);
+  border-radius: 999px;
+  color: #eac18b;
+  background: rgba(213, 139, 61, .1);
+  font-size: 9px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --mora-page: #fbf5ec;
+  --mora-surface: #fff9f0;
+  --mora-elevated: #f2e3d1;
+  --mora-text: #241b14;
+  --mora-secondary: #5c4632;
+  --mora-muted: #765e47;
+  --mora-brand: #8a4f1c;
+  --mora-brand-hover: #704018;
+  --mora-accent: #385b49;
+  --mora-danger: #a4352e;
+  --mora-border: #c8ae90;
+  --mora-selection: #f4dec0;
+  --ink: var(--mora-text);
+  --muted: rgba(92, 70, 50, .78);
+  --glass: rgba(255, 249, 240, .74);
+  --line: rgba(117, 82, 49, .22);
+  --panel: rgba(255, 249, 240, .97);
+}
+
+:root[data-theme="light"] body { background: var(--mora-page); color: var(--mora-text); }
+:root[data-theme="light"] .wallpaper::after {
+  background:
+    radial-gradient(ellipse at 52% 52%, rgba(255, 249, 240, .32), rgba(255, 249, 240, .16) 55%, rgba(55, 36, 21, .14)),
+    linear-gradient(90deg, rgba(75, 48, 25, .05), transparent 48%, rgba(75, 48, 25, .08));
+}
+:root[data-theme="light"] .statusbar {
+  color: var(--mora-text);
+  background: rgba(255, 249, 240, .76);
+  border-bottom-color: var(--line);
+}
+:root[data-theme="light"] .active-app,
+:root[data-theme="light"] .system-status { color: var(--mora-secondary); }
+:root[data-theme="light"] .eyebrow,
+:root[data-theme="light"] .tiny-counter,
+:root[data-theme="light"] .system-section-note { color: var(--mora-muted); }
+:root[data-theme="light"] .app-tile,
+:root[data-theme="light"] .widget-card {
+  color: var(--mora-text);
+  border-color: var(--line);
+  background: linear-gradient(145deg, rgba(255, 249, 240, .94), rgba(242, 227, 209, .78));
+  box-shadow: 0 12px 34px rgba(55, 36, 21, .1);
+}
+:root[data-theme="light"] .app-tile:hover,
+:root[data-theme="light"] .widget-card:hover {
+  border-color: rgba(138, 79, 28, .42);
+  background: linear-gradient(145deg, #fffaf2, #f4e4d1);
+}
+:root[data-theme="light"] .app-name,
+:root[data-theme="light"] .widget-title,
+:root[data-theme="light"] .section-heading h1,
+:root[data-theme="light"] .system-section-heading h2 { color: var(--mora-text); }
+:root[data-theme="light"] .app-subtitle,
+:root[data-theme="light"] .widget-caption,
+:root[data-theme="light"] .widget-foot,
+:root[data-theme="light"] .widget-link { color: var(--mora-muted); }
+:root[data-theme="light"] .dock {
+  border-color: var(--line);
+  background: rgba(255, 249, 240, .9);
+  box-shadow: 0 16px 42px rgba(55, 36, 21, .2);
+}
+:root[data-theme="light"] .dock-item { background: rgba(138, 79, 28, .08); }
+:root[data-theme="light"] .dock-item:hover { background: rgba(138, 79, 28, .16); }
+:root[data-theme="light"] .app-window {
+  color: var(--mora-text);
+  border-color: var(--line);
+  background: var(--panel);
+  box-shadow: 0 28px 80px rgba(55, 36, 21, .22);
+}
+:root[data-theme="light"] .window-titlebar {
+  border-bottom-color: var(--line);
+  background: linear-gradient(90deg, rgba(242, 227, 209, .86), rgba(255, 249, 240, .7));
+}
+:root[data-theme="light"] .window-title,
+:root[data-theme="light"] .window-heading,
+:root[data-theme="light"] .control-copy strong,
+:root[data-theme="light"] .permission-copy strong,
+:root[data-theme="light"] .news-card h3 { color: var(--mora-text); }
+:root[data-theme="light"] .window-kicker,
+:root[data-theme="light"] .window-copy,
+:root[data-theme="light"] .control-copy span,
+:root[data-theme="light"] .permission-copy span,
+:root[data-theme="light"] .news-card p { color: var(--mora-secondary); }
+:root[data-theme="light"] .action-button {
+  color: #fffaf2;
+  border-color: rgba(112, 64, 24, .4);
+  background: linear-gradient(135deg, #9b5b24, #75451f);
+}
+:root[data-theme="light"] .subtle-button,
+:root[data-theme="light"] .wide-action,
+:root[data-theme="light"] .permission-toggle,
+:root[data-theme="light"] .profile-choice {
+  color: var(--mora-text);
+  border-color: var(--line);
+  background: rgba(255, 249, 240, .8);
+}
+:root[data-theme="light"] .profile-choice.active,
+:root[data-theme="light"] .permission-toggle[aria-pressed="true"] {
+  border-color: rgba(138, 79, 28, .4);
+  color: #64370f;
+  background: rgba(213, 139, 61, .17);
+}
+:root[data-theme="light"] .system-notice,
+:root[data-theme="light"] .security-summary,
+:root[data-theme="light"] .update-state,
+:root[data-theme="light"] .recovery-card,
+:root[data-theme="light"] .setting-block,
+:root[data-theme="light"] .feature-row,
+:root[data-theme="light"] .news-card {
+  color: var(--mora-text);
+  border-color: var(--line);
+  background: rgba(242, 227, 209, .52);
+}
+:root[data-theme="light"] .toast {
+  border-color: var(--line);
+  background: rgba(255, 249, 240, .97);
+  color: var(--mora-text);
+}
+:root[data-theme="light"] .news-meta,
+:root[data-theme="light"] .feature-row-top,
+:root[data-theme="light"] .news-status { color: var(--mora-muted); }
+:root[data-theme="light"] .news-meta a { color: #754018; }
+
+@media (max-width: 760px) {
+  .statusbar { padding-inline: 14px; background: rgba(32, 24, 18, .82); }
+  .app-window { border-color: rgba(196, 151, 103, .4); }
+  :root[data-theme="light"] .statusbar { background: rgba(255, 249, 240, .9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wallpaper::after { animation: none !important; transition: none !important; }
+  .app-tile, .dock-item, .action-button { transition: none !important; }
+}
