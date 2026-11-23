@@ -23,7 +23,7 @@ The standard workspace remains visually stable at the centre. Secondary content 
 | Brand | `#D58B3D` | Normal action and progress |
 | Brand hover / focus | `#EAA653` / `#F3C16B` | Hover and keyboard focus |
 | Brand text | `#211913` | Text on amber |
-| Secondary accent | `#6F8062` | Subdued olive / glass |
+| Secondary accent | `#526347` | Subdued olive / glass |
 | Border | `#75543A` | Warm structural edge |
 | Selection | `#60442E` | Selected content |
 | Critical | `#B64A40` | Destructive state / progress marker |
