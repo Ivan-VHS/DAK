@@ -25,10 +25,11 @@ class MemoryStorage {
 }
 
 test("the shell registry exposes the seven user apps and six system tools", () => {
-  assert.equal(APP_IDS.length, 13);
+  assert.equal(APP_IDS.length, 14);
   assert.ok(APP_IDS.includes("mora-ai"));
   assert.ok(APP_IDS.includes("security"));
   assert.ok(APP_IDS.includes("runtime"));
+  assert.ok(APP_IDS.includes("katyuhen"));
 });
 
 test("intent plans only describe whitelisted local actions", () => {
@@ -45,6 +46,9 @@ test("opening an app is restricted to the built-in application list", () => {
   assert.equal(plan.actions[0].type, "open-app");
   assert.equal(plan.actions[0].appId, "security");
   assert.equal(buildIntentPlan("запусти powershell").ok, false);
+  const ecosystemPlan = buildIntentPlan("открой экосистему проектов");
+  assert.equal(ecosystemPlan.ok, true);
+  assert.equal(ecosystemPlan.actions[0].appId, "katyuhen");
 });
 
 test("preferences are validated and saved without trusting arbitrary values", () => {
