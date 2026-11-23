@@ -124,7 +124,7 @@ class MoraRegistryTests(unittest.TestCase):
     def test_packaged_registry_has_the_expected_native_inventory(self):
         root = Path(__file__).resolve().parents[1] / "duckos" / "mora" / "data"
         registry = json.loads((root / "apps.json").read_text(encoding="utf-8"))
-        self.assertEqual(registry["schema_version"], "1.3.0")
+        self.assertEqual(registry["schema_version"], "1.4.0")
         self.assertGreaterEqual(len(registry["built_in_apps"]), 29)
         self.assertTrue(all(app.get("runtime") == "pyside6" for app in registry["built_in_apps"]))
         self.assertTrue(all("panel" not in app for app in registry["built_in_apps"]))
