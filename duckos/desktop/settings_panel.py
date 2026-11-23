@@ -15,11 +15,12 @@ from ..settings import SettingsStore, default_profile, network_probe, settings_s
 
 
 class SettingsPanel(ttk.Frame):
-    SECTIONS = ("network", "power", "appearance", "profiles", "history")
+    SECTIONS = ("network", "power", "appearance", "security", "profiles", "history")
     TITLES = {
         "network": "Сеть",
         "power": "Питание",
         "appearance": "Внешний вид",
+        "security": "Безопасность",
         "profiles": "Профили",
         "history": "История и диагностика",
     }
@@ -87,6 +88,7 @@ class SettingsPanel(ttk.Frame):
         self._build_network(self.pages["network"])
         self._build_power(self.pages["power"])
         self._build_appearance(self.pages["appearance"])
+        self._build_security(self.pages["security"])
         self._build_profiles(self.pages["profiles"])
         self._build_history(self.pages["history"])
 
@@ -193,6 +195,23 @@ class SettingsPanel(ttk.Frame):
         self.preview = ttk.Label(page, text="Duck · пример интерфейса · акцент #FFD400")
         self.preview.pack(anchor="w", pady=(16, 0))
 
+    def _build_security(self, page: ttk.Frame) -> None:
+        ttk.Label(
+            page,
+            text="Параметры сеанса сохраняются как профиль пользователя. Фактическая блокировка экрана и защита сеанса должны выполняться системной службой Duck.",
+            wraplength=850,
+        ).pack(anchor="w", pady=(0, 10))
+        form = ttk.Frame(page)
+        form.pack(fill="x")
+        form.columnconfigure(1, weight=1)
+        self._row(form, "Автоблокировка · минут (0 = выключена)", "security.auto_lock_minutes", 5, 0)
+        self._toggle(form, "Требовать блокировку при переходе в сон", "security.lock_on_sleep", True, 1)
+        ttk.Label(
+            page,
+            text="Это сохранённая политика предпочтений, а не действующий механизм аутентификации или блокировки.",
+            wraplength=850,
+        ).pack(anchor="w", pady=(12, 0))
+
     def _build_profiles(self, page: ttk.Frame) -> None:
         ttk.Label(page, text="Профили — это согласованные наборы пользовательских предпочтений, а не переключатели драйверов.", wraplength=850).pack(anchor="w", pady=(0, 10))
         row = ttk.Frame(page)
@@ -231,7 +250,7 @@ class SettingsPanel(ttk.Frame):
             if prefix != section:
                 continue
             value = variable.get()
-            if key.endswith("_enabled") or key.endswith("_only_on_battery") or key.endswith("_motion"):
+            if key.endswith("_enabled") or key.endswith("_only_on_battery") or key.endswith("_motion") or key.endswith("_on_sleep"):
                 value = bool(value)
             elif key.endswith("_prefix") or key.endswith("_threshold") or key.endswith("_limit") or key.endswith("_timeout_ac") or key.endswith("_timeout_battery") or key.endswith("_minutes") or key.endswith(".mtu"):
                 try:
@@ -367,8 +386,8 @@ class SettingsPanel(ttk.Frame):
 
     def _reset_current(self) -> None:
         section = self._current_section()
-        if section not in {"network", "power", "appearance"}:
-            self.status.set("Сброс доступен для сети, питания и оформления.")
+        if section not in {"network", "power", "appearance", "security"}:
+            self.status.set("Сброс доступен для сети, питания, оформления и предпочтений сеанса.")
             return
         if not messagebox.askyesno("Сброс раздела", f"Вернуть только раздел «{self.TITLES[section]}» к значениям по умолчанию?", parent=self.winfo_toplevel()):
             return
