@@ -300,7 +300,7 @@ input[type="range"] { width:160px; accent-color:#F8E68F; cursor:pointer; }
 
 
 
-/* Mora Amber — final visual pass on the live desktop shell. */
+/* DuckOS black, white and yellow palette — final desktop styling. */
 :root {
   --mora-secondary-accent:#A0870A;
   --mora-focus:#F5DE69;
