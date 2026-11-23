@@ -72,7 +72,7 @@ test("Mora layout scales across 8K, 5K, 4K, standard desktop, tablets and phones
     "@media (max-width:760px)",
     "@media (max-width:480px)",
     "@media (max-width:360px)",
-    "@media (max-height:900px)",
+    "and (max-height:900px)",
     "max-aspect-ratio:16/10",
     "env(safe-area-inset-bottom)",
     "100svh",
