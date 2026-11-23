@@ -97,3 +97,8 @@ The DuckBridge tests use synthetic PE/ELF headers and temporary executable stubs
 ## Attribution
 
 Project author/developer: **Ivan-VHS**. Existing contributor credits and third-party copyright notices remain unchanged.
+
+
+## Illidia launcher integration
+
+Illidia consumes runtime discovery and compatibility profiles but owns the game-library model, source adapters, trust review and play-session records. The current local host tool can launch configured Wine/Proton commands with explicit argv and prefixes. It does not turn a DuckBridge dry-run plan into a native process, and it does not inherit kernel sandbox enforcement. See [Illidia universal game library and launcher](ILLIDIA_GAME_LAUNCHER.md).
