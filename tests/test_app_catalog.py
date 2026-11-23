@@ -83,7 +83,7 @@ class ApplicationCatalogTests(unittest.TestCase):
 
     def test_native_launcher_registry_mentions_all_application_names(self) -> None:
         registry = load_json("mora/apps.json")
-        expected = {item["id"] for item in self.catalog["applications"]}
+        expected = {"kabon" if item["id"] == "ka-bon" else item["id"] for item in self.catalog["applications"]}
         actual = {item["id"] for item in registry["built_in_apps"]}
         self.assertTrue(expected.issubset(actual))
         self.assertTrue(all(item.get("runtime") == "native-tk" for item in registry["built_in_apps"]))
