@@ -1,7 +1,8 @@
 # Repository-wide implementation directives
 
 **Machine-readable contract:** [engineering-evolution.v1.json](../engineering-evolution.v1.json)  
-**Validator:** [validate_engineering_evolution.py](../tools/validate_engineering_evolution.py)
+**Validator:** [validate_engineering_evolution.py](../tools/validate_engineering_evolution.py)  
+**Repository-wide plan lifecycle:** [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md)
 
 This document translates the 20 requested directions into shared engineering rules for DuckOS, OPlague, Reaper, VentuSample and Pytyliki. It supplements each project's architecture and product contracts; it does not claim every possible capability is already implemented.
 
@@ -69,3 +70,9 @@ A change is ready to be adopted only when the applicable items are satisfied:
 Use the shared adoption sequence **Inventory → Model → Pilot → Verify → Adopt → Measure**. The sequence permits parallel inventory and independent design, but shared interfaces, state migrations, builds, merges and releases remain dependency-ordered. A status may be called `implemented` only when repository-specific code and reproducible evidence support it.
 
 No project should add kernel/BIOS writes, firmware flashing, driver installation, unbounded extraction, arbitrary shell execution or implicit native-library loading merely to satisfy a broad modernization phrase.
+
+## Documentation and roadmap alignment
+
+The 20 directives above remain the canonical wording and engineering interpretation. The [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) applies them to every maintained Markdown file and project plan in DuckOS, defines the dependency-aware execution lifecycle and records the document ownership map. Do not create a competing list or re-interpret the same directions in individual feature plans.
+
+A project plan records intended scope, baseline, dependencies, work packages, acceptance criteria, verification and recovery. The [Implementation Status](IMPLEMENTATION_STATUS.md) records only source-backed present capability. These documents must never be treated as interchangeable.
