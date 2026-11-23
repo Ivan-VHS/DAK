@@ -33,3 +33,9 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Windows application compatibility
 
 [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics, the current non-executing boundary and implementation status against the 66-point specification.
+
+
+## Cross-project engineering
+
+- [Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — shared machine-readable 20-domain contract, 40 practices and 20 execution directives.
+- [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) — the 20 requested directions, their engineering meaning and acceptance rules.
