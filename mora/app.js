@@ -1375,6 +1375,114 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 }
 
 document.addEventListener("click", (event) => {
+  const panelToggle = event.target.closest("[data-panel-toggle]");
+  if (panelToggle) {
+    toggleFlyout(panelToggle.dataset.panelToggle);
+    return;
+  }
+  const panelClose = event.target.closest("[data-panel-close]");
+  if (panelClose) {
+    toggleFlyout("quick", false);
+    toggleFlyout("notifications", false);
+    return;
+  }
+  if (!event.target.closest(".desktop-flyout")) {
+    toggleFlyout("quick", false);
+    toggleFlyout("notifications", false);
+  }
+
+  const contextAction = event.target.closest("[data-context-action]");
+  if (contextAction) {
+    handleContextAction(contextAction.dataset.contextAction);
+    return;
+  }
+
+  const workspaceButton = event.target.closest("[data-workspace-select]");
+  if (workspaceButton) {
+    switchWorkspace(Number(workspaceButton.dataset.workspaceSelect));
+    return;
+  }
+
+  const windowAction = event.target.closest("[data-window-action]");
+  if (windowAction) {
+    const owner = windowAction.closest(".app-window");
+    if (windowAction.dataset.windowAction === "minimize") minimizeWindow(owner);
+    else if (windowAction.dataset.windowAction === "maximize") maximizeWindow(owner);
+    return;
+  }
+
+  const filesFolder = event.target.closest("[data-files-folder]");
+  if (filesFolder) {
+    const owner = filesFolder.closest(".app-window");
+    const root = owner?.querySelector("[data-files-root]");
+    if (root?._filesState) navigateFiles(root, filesFolder.dataset.filesFolder);
+    return;
+  }
+
+  const filesAction = event.target.closest("[data-files-action]");
+  if (filesAction) {
+    handleFilesAction(filesAction);
+    return;
+  }
+
+  const fileOpen = event.target.closest("[data-file-open]");
+  if (fileOpen) {
+    const owner = fileOpen.closest(".app-window");
+    const root = owner?.querySelector("[data-files-root]");
+    const item = virtualWorkspace.get(fileOpen.dataset.fileOpen);
+    if (root?._filesState && item) {
+      if (item.type === "folder") navigateFiles(root, item.id);
+      else {
+        root._filesState.selectedId = item.id;
+        renderFileManager(root);
+        setFilesStatus(owner, "Выбран файл: " + item.name);
+      }
+    }
+    return;
+  }
+
+  const quickToggle = event.target.closest("[data-quick-id]");
+  if (quickToggle) {
+    const id = quickToggle.dataset.quickId;
+    const enabled = quickToggle.getAttribute("aria-pressed") !== "true";
+    quickState[id] = enabled;
+    quickToggle.setAttribute("aria-pressed", String(enabled));
+    quickToggle.classList.toggle("is-on", enabled);
+    if (id === "focus") {
+      preferences.focusMode = enabled;
+      persistPreferences();
+      updateWorkspacePanel();
+    }
+    showToast(id === "focus" ? "Режим фокуса оболочки обновлён." :
+      "Изменён локальный индикатор " + id + ". Нативное устройство не переключалось.");
+    return;
+  }
+
+  const notificationAction = event.target.closest("[data-notification-action]");
+  if (notificationAction) {
+    if (notificationAction.dataset.notificationAction === "read") {
+      notifications.forEach((item) => { item.read = true; });
+    } else if (notificationAction.dataset.notificationAction === "clear") {
+      notifications.splice(0, notifications.length);
+    }
+    persistNotifications();
+    renderNotifications();
+    return;
+  }
+
+  const notificationOpen = event.target.closest("[data-notification-open]");
+  if (notificationOpen) {
+    const item = notifications.find((entry) => entry.id === notificationOpen.dataset.notificationOpen);
+    if (item) {
+      item.read = true;
+      persistNotifications();
+      renderNotifications();
+      toggleFlyout("notifications", false);
+      openApp(item.app);
+    }
+    return;
+  }
+
   const setupComplete = event.target.closest('[data-action="setup-complete"]');
   if (setupComplete) {
     const status = setupComplete.closest(".app-window").querySelector("[data-setup-status]");
@@ -1506,6 +1614,12 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const quickRange = event.target.closest("[data-quick-range]");
+  if (quickRange) {
+    const output = document.querySelector('[data-quick-value="' + quickRange.dataset.quickRange + '"]');
+    if (output) output.textContent = quickRange.value + "%";
+    return;
+  }
   const beatRange = event.target.closest("[data-beat-range]");
   if (beatRange) {
     const output = beatRange.closest(".extension-range-row").querySelector('[data-beat-value="' + beatRange.dataset.beatRange + '"]');
@@ -1527,10 +1641,60 @@ windowLayer.addEventListener("pointerdown", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (event.altKey && !event.ctrlKey && !event.metaKey && ["1", "2", "3"].includes(event.key)) {
+    event.preventDefault();
+    switchWorkspace(Number(event.key));
+    return;
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
+    event.preventDefault();
+    openApp("files");
+    window.setTimeout(() => windowLayer.querySelector('[data-window="files"] [data-files-search]')?.focus(), 80);
+    return;
+  }
   if (event.key === "Escape") {
+    const menu = document.getElementById("desktop-context-menu");
+    if (menu && !menu.hidden) { menu.hidden = true; return; }
+    if (!document.getElementById("quick-panel").hidden || !document.getElementById("notification-panel").hidden) {
+      toggleFlyout("quick", false);
+      toggleFlyout("notifications", false);
+      return;
+    }
     closeTopWindow();
   }
 });
+document.addEventListener("contextmenu", (event) => {
+  const fileItem = event.target.closest("[data-file-id]");
+  if (fileItem) {
+    event.preventDefault();
+    contextTargetFile = fileItem.dataset.fileId;
+    contextOwnerPanel = fileItem.closest("[data-files-root]");
+    const item = virtualWorkspace.get(contextTargetFile);
+    const actions = [{ action: "open", label: item?.type === "folder" ? "Открыть папку" : "Предпросмотр" },
+      { action: "rename", label: "Переименовать", disabled: item?.readonly },
+      { action: "delete", label: "Удалить", disabled: item?.readonly },
+      { action: "download", label: "Скачать", disabled: item?.type !== "file" }];
+    renderDesktopContextMenu(event.clientX, event.clientY, actions);
+    return;
+  }
+  if (event.target.closest(".desktop") && !event.target.closest(".app-window,.desktop-flyout,.desktop-context-menu,button,input,textarea,select")) {
+    event.preventDefault();
+    contextTargetFile = null;
+    contextOwnerPanel = null;
+    renderDesktopContextMenu(event.clientX, event.clientY, [
+      { action: "files", label: "Открыть Duck Files" },
+      { action: "terminal", label: "Открыть Terminal" },
+      { action: "settings", label: "Настройки" },
+      { action: "new-folder", label: "Создать папку в Home" }
+    ]);
+  }
+});
+
+document.addEventListener("click", (event) => {
+  const menu = document.getElementById("desktop-context-menu");
+  if (menu && !menu.hidden && !event.target.closest(".desktop-context-menu")) menu.hidden = true;
+});
+
 
 
 document.addEventListener("submit", (event) => {
@@ -1620,6 +1784,11 @@ document.addEventListener("click", (event) => {
     }
     persistPreferences();
     updateWorkspacePanel();
+    const settingsWindow = windowLayer.querySelector('[data-window="settings"]');
+    if (settingsWindow) {
+      settingsWindow.querySelector(".window-body").innerHTML = settingsPanelMarkup();
+      applyTranslations(settingsWindow, currentLocale);
+    }
     showToast("Настройки рабочего пространства сохранены");
     return;
   }
@@ -1666,6 +1835,50 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const localeSelect = event.target.closest("[data-locale-select]");
+  if (localeSelect) {
+    const nextLocale = localeSelect.value;
+    if (!["ru", "uk", "en"].includes(nextLocale)) return;
+    currentLocale = nextLocale;
+    try { localStorage.setItem(LOCALE_STORAGE_KEY, currentLocale); } catch {}
+    applyTranslations(document, currentLocale);
+    updateClock();
+    renderNotifications();
+    document.querySelectorAll('[data-window="settings"]').forEach((appWindow) => {
+      const select = appWindow.querySelector("[data-locale-select]");
+      if (select) select.value = currentLocale;
+    });
+    showToast("Язык интерфейса изменён.");
+    return;
+  }
+
+  const workspaceUpload = event.target.closest("[data-files-upload]");
+  if (workspaceUpload) {
+    const owner = workspaceUpload.closest(".app-window");
+    const root = owner?.querySelector("[data-files-root]");
+    const files = Array.from(workspaceUpload.files || []);
+    if (!root?._filesState || !files.length) return;
+    for (const file of files) {
+      const extension = file.name.split(".").pop().toLowerCase();
+      const allowed = ["txt", "md", "json", "rpr", "duck", "csv", "log", "xml", "html", "css", "js"];
+      if (!allowed.includes(extension) || file.size > MAX_WORKSPACE_FILE_BYTES) {
+        setFilesStatus(owner, "Не добавлен " + file.name + ": поддерживаются текстовые файлы до 2 MiB.");
+        continue;
+      }
+      try {
+        const content = await file.text();
+        const item = virtualWorkspace.createFile(file.name, content, root._filesState.currentFolder, file.type || "text/plain");
+        root._filesState.selectedId = item.id;
+        setFilesStatus(owner, "Файл добавлен в виртуальное пространство.");
+      } catch (error) {
+        setFilesStatus(owner, error.message);
+      }
+    }
+    workspaceUpload.value = "";
+    renderFileManager(root);
+    return;
+  }
+
   const archiveInput = event.target.closest("[data-archive-file]");
   if (archiveInput) {
     const report = archiveInput.closest(".app-window").querySelector("[data-archive-report]");
@@ -1728,9 +1941,29 @@ document.addEventListener("keydown", (event) => {
 });
 
 applyPreferences();
+switchWorkspace(activeWorkspace);
 updateClock();
 window.setInterval(updateClock, 1000);
+updateDemoMetrics();
+window.setInterval(updateDemoMetrics, 2200);
+renderNotifications();
 updateActiveApp();
+
+applyTranslations(document, currentLocale);
+if (typeof MutationObserver !== "undefined") {
+  const translationObserver = new MutationObserver((records) => {
+    for (const record of records) {
+      record.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) applyTranslations(node, currentLocale);
+        else if (node.nodeType === 3 && node.parentElement) {
+          const next = translateText(node.nodeValue, currentLocale);
+          if (next !== node.nodeValue) node.nodeValue = next;
+        }
+      });
+    }
+  });
+  translationObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+}
 
 if ("serviceWorker" in navigator &&
     (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
