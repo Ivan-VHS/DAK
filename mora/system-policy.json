@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and six system tools"
+      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and seven system tools"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -45,7 +45,7 @@
     },
     "adaptive_workspace": {
       "maturity": "partial",
-      "scope": "responsive browser layout, persisted light/dark palette and reduced motion; native XR session transfer remains absent"
+      "scope": "responsive browser layout, persisted Amber/Dark/Light palettes and reduced motion; native XR session transfer remains absent"
     },
     "multimodal_input": {
       "maturity": "planned",
@@ -53,11 +53,11 @@
     },
     "material_interface": {
       "maturity": "implemented",
-      "scope": "Mora glass surfaces, explicit borders, motion and contrast states"
+      "scope": "Mora Amber drapery rhythm, graphite/walnut surfaces, muted olive secondary accent, restrained critical red, with Dark and Light alternate palettes"
     },
     "compatibility": {
       "maturity": "partial",
-      "scope": "PE/ELF header inspection only; no Win32, DirectX, Vulkan or anti-cheat runtime"
+      "scope": "Read-only PE32/PE32+ header, section and import-DLL inspection; isolated prefix scaffolding and CLI launch diagnostics; no native NT/Win32 process runtime, DirectX translation or Windows execution"
     },
     "declarative_configuration": {
       "maturity": "partial",
@@ -73,11 +73,15 @@
     },
     "shared_design_system": {
       "maturity": "implemented",
-      "scope": "shared semantic palette and theme tokens in the Mora browser shell; native adapters remain distinct"
+      "scope": "versioned Amber/Dark/Light semantic palette, geometry, spacing, typography and motion tokens; native adapters remain distinct"
     },
     "installable_workspace": {
       "maturity": "partial",
       "scope": "web manifest and scoped offline cache; not an OS installer"
+    },
+    "gaming_performance": {
+      "maturity": "partial",
+      "scope": "Mora Boost links to OPlague's Windows workbench; no direct browser PCI, GPU, driver or power-plan access"
     }
   },
   "not_in_scope_as_implemented_features": [

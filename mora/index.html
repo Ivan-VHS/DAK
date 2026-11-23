@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#10142a">
+  <meta name="theme-color" content="#211913">
   <meta name="description" content="Mora — единый рабочий стол DuckOS">
   <title>Mora — DuckOS</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -15,34 +15,54 @@
 <body>
   <main class="desktop" id="desktop">
     <div class="wallpaper" aria-hidden="true">
-      <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+      <svg id="mora-folds" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="presentation">
         <defs>
-          <linearGradient id="sky" x2="0" y2="1">
-            <stop offset="0" stop-color="#171a42"/>
-            <stop offset=".42" stop-color="#76527f"/>
-            <stop offset=".72" stop-color="#d77b79"/>
-            <stop offset="1" stop-color="#f3b66f"/>
+          <linearGradient id="mora-cloth" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#382216"/>
+            <stop offset=".07" stop-color="#805133"/>
+            <stop offset=".15" stop-color="#CAA071"/>
+            <stop offset=".22" stop-color="#9C6038"/>
+            <stop offset=".31" stop-color="#45291A"/>
+            <stop offset=".40" stop-color="#B67B49"/>
+            <stop offset=".48" stop-color="#DFC093"/>
+            <stop offset=".55" stop-color="#875533"/>
+            <stop offset=".65" stop-color="#392318"/>
+            <stop offset=".75" stop-color="#A66D42"/>
+            <stop offset=".84" stop-color="#D0A271"/>
+            <stop offset=".92" stop-color="#5B3824"/>
+            <stop offset="1" stop-color="#2D1C13"/>
           </linearGradient>
-          <radialGradient id="sun">
-            <stop offset="0" stop-color="#ffe8b0" stop-opacity=".98"/>
-            <stop offset=".55" stop-color="#ffc47e" stop-opacity=".55"/>
-            <stop offset="1" stop-color="#f7a777" stop-opacity="0"/>
+          <pattern id="mora-fold-pattern" width="320" height="1000" patternUnits="userSpaceOnUse">
+            <rect width="320" height="1000" fill="url(#mora-cloth)"/>
+            <path d="M20 0 C52 250 2 650 26 1000 M77 0 C102 270 62 650 93 1000 M155 0 C131 300 187 700 160 1000 M235 0 C260 270 219 690 248 1000 M300 0 C286 260 330 650 310 1000"
+              fill="none" stroke="#F6DDBB" stroke-opacity=".23" stroke-width="7"/>
+            <path d="M42 0 C60 260 32 670 53 1000 M112 0 C88 290 132 680 115 1000 M198 0 C220 260 184 660 209 1000 M276 0 C254 290 286 680 274 1000"
+              fill="none" stroke="#24140B" stroke-opacity=".52" stroke-width="15"/>
+            <path d="M63 0 C79 280 53 650 70 1000 M250 0 C231 290 262 670 252 1000"
+              fill="none" stroke="#F0C792" stroke-opacity=".11" stroke-width="3"/>
+          </pattern>
+          <linearGradient id="mora-room-shade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#23160E" stop-opacity=".12"/>
+            <stop offset=".58" stop-color="#1B120C" stop-opacity=".20"/>
+            <stop offset="1" stop-color="#100B07" stop-opacity=".84"/>
+          </linearGradient>
+          <radialGradient id="mora-core">
+            <stop offset="0" stop-color="#0D0906" stop-opacity=".98"/>
+            <stop offset=".68" stop-color="#17100B" stop-opacity=".96"/>
+            <stop offset="1" stop-color="#24180F" stop-opacity="0"/>
           </radialGradient>
-          <linearGradient id="hillA" x2="0" y2="1">
-            <stop stop-color="#51406c"/><stop offset="1" stop-color="#24243f"/>
-          </linearGradient>
-          <linearGradient id="hillB" x2="0" y2="1">
-            <stop stop-color="#373451"/><stop offset="1" stop-color="#171b34"/>
+          <linearGradient id="mora-floor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2A1D14" stop-opacity=".05"/>
+            <stop offset="1" stop-color="#100B08" stop-opacity=".96"/>
           </linearGradient>
         </defs>
-        <rect width="1600" height="1000" fill="url(#sky)"/>
-        <circle cx="1130" cy="490" r="330" fill="url(#sun)"/>
-        <circle cx="1130" cy="490" r="100" fill="#ffe0a1" opacity=".7"/>
-        <path d="M0 570 C210 470 345 520 510 590 S830 660 1010 560 1360 450 1600 570 V1000 H0Z" fill="#93708c" opacity=".45"/>
-        <path d="M0 655 C200 510 375 590 540 665 S850 755 1035 635 1360 525 1600 660 V1000 H0Z" fill="url(#hillA)"/>
-        <path d="M0 760 C240 625 440 700 630 770 S920 845 1120 730 1430 670 1600 760 V1000 H0Z" fill="#302c4b"/>
-        <path d="M0 830 C240 740 410 790 620 850 S1030 910 1230 800 1470 785 1600 835 V1000 H0Z" fill="url(#hillB)"/>
-        <path d="M0 920 C260 850 470 890 700 930 S1110 950 1320 890 1500 880 1600 900 V1000 H0Z" fill="#131a32"/>
+        <rect width="1600" height="1000" fill="url(#mora-fold-pattern)"/>
+        <rect width="1600" height="1000" fill="url(#mora-room-shade)"/>
+        <ellipse cx="800" cy="505" rx="500" ry="405" fill="url(#mora-core)"/>
+        <path d="M0 858 C310 835 570 876 800 852 C1060 828 1330 866 1600 842 V1000 H0Z"
+          fill="url(#mora-floor)"/>
+        <path d="M0 855 C310 832 570 873 800 849 C1060 825 1330 863 1600 839"
+          fill="none" stroke="#D5AA75" stroke-opacity=".24" stroke-width="2"/>
       </svg>
     </div>
 
@@ -72,34 +92,34 @@
       <section class="app-area" aria-label="Приложения">
         <div class="section-heading">
           <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1>Приложения</h1></div>
-          <span class="tiny-counter">13 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
+          <span class="tiny-counter">15 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
         </div>
         <div class="app-grid" id="app-grid">
-          <button class="app-tile" data-app="cockos" style="--accent:#78c9d1">
+          <button class="app-tile" data-app="cockos" style="--accent:#BDA27D">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M5 25h5l4-11 7 23 7-30 7 27 4-9h4" /></svg></span>
             <span class="app-name">Cockos</span><span class="app-subtitle">Звук и запись</span>
           </button>
-          <button class="app-tile" data-app="kavun" style="--accent:#f17b79">
+          <button class="app-tile" data-app="kavun" style="--accent:#AF806B">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M24 7c-3-5-10-5-13 0M24 7c3-5 10-5 13 0"/><path d="M24 8C12 8 5 17 7 28c2 10 10 15 17 15s15-5 17-15C43 17 36 8 24 8Z"/><path d="M24 10v31M11 18l24 16M37 18 13 34"/></svg></span>
             <span class="app-name">Kavun</span><span class="app-subtitle">Фотографии</span>
           </button>
-          <button class="app-tile" data-app="kabon" style="--accent:#e9bb72">
+          <button class="app-tile" data-app="kabon" style="--accent:#D58B3D">
             <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M29 16c-1.5-2-9-3-10 2-1.1 5 12 3 11 9-.8 5-9 6-13 2M24 11v26"/></svg></span>
             <span class="app-name">Ka-bon</span><span class="app-subtitle">Финансы</span>
           </button>
-          <button class="app-tile" data-app="gloverty" style="--accent:#e9a0cf">
+          <button class="app-tile" data-app="gloverty" style="--accent:#A78A8A">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M27 4 10 27h12l-2 17 18-25H25Z"/></svg></span>
             <span class="app-name">Gloverty</span><span class="app-subtitle">Сценарии</span>
           </button>
-          <button class="app-tile" data-app="po" style="--accent:#a8b6ee">
+          <button class="app-tile" data-app="po" style="--accent:#AAA18A">
             <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="m30 13-4 13-13 9 4-13Z"/><circle cx="24" cy="24" r="2"/></svg></span>
             <span class="app-name">Po</span><span class="app-subtitle">Компас</span>
           </button>
-          <button class="app-tile" data-app="illidia" style="--accent:#9dce9b">
+          <button class="app-tile" data-app="illidia" style="--accent:#82916F">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M15 15h18c6 0 10 6 11 15 1 8-5 10-10 3l-4-5H18l-4 5c-5 7-11 5-10-3 1-9 5-15 11-15Z"/><path d="M15 20v10M10 25h10M32 22h.1M37 28h.1"/></svg></span>
             <span class="app-name">Illidia</span><span class="app-subtitle">Игры</span>
           </button>
-          <button class="app-tile" data-app="unify" style="--accent:#9bd8c5">
+          <button class="app-tile" data-app="unify" style="--accent:#7C9387">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M19 29 14 34a9 9 0 0 1-13-13l8-8a9 9 0 0 1 13 0l3 3M29 19l5-5a9 9 0 0 1 13 13l-8 8a9 9 0 0 1-13 0l-3-3M16 32l16-16"/></svg></span>
             <span class="app-name">Unify</span><span class="app-subtitle">Устройства</span>
           </button>
@@ -109,12 +129,14 @@
           <span class="system-section-note">Локальные функции и центры управления</span>
         </div>
         <div class="system-app-grid" id="system-app-grid">
-          <button class="app-tile" data-app="mora-ai" style="--accent:#f2c58d"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
-          <button class="app-tile" data-app="security" style="--accent:#92d7c5"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Sentinel</span><span class="app-subtitle">Права и доверие</span></button>
-          <button class="app-tile" data-app="updates" style="--accent:#efad9a"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
-          <button class="app-tile" data-app="runtime" style="--accent:#aebcf0"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
-          <button class="app-tile" data-app="workspace" style="--accent:#e9a4cd"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
-          <button class="app-tile" data-app="provenance" style="--accent:#d7c2f0"><span class="app-icon"><span class="system-glyph">⌁</span></span><span class="app-name">Proof</span><span class="app-subtitle">Файлы и SHA-256</span></button>
+          <button class="app-tile" data-app="mora-ai" style="--accent:#C19A6A"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
+          <button class="app-tile" data-app="security" style="--accent:#829078"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Sentinel</span><span class="app-subtitle">Права и доверие</span></button>
+          <button class="app-tile" data-app="updates" style="--accent:#A97866"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
+          <button class="app-tile" data-app="runtime" style="--accent:#948F7D"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
+          <button class="app-tile" data-app="workspace" style="--accent:#A08B98"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
+          <button class="app-tile" data-app="provenance" style="--accent:#8A8A76"><span class="app-icon"><span class="system-glyph">⌁</span></span><span class="app-name">Proof</span><span class="app-subtitle">Файлы и SHA-256</span></button>
+          <button class="app-tile" data-app="mora-boost" style="--accent:#A6A17D"><span class="app-icon"><span class="system-glyph">⚡</span></span><span class="app-name">Mora Boost</span><span class="app-subtitle">Игровая производительность</span></button>
+          <button class="app-tile" data-app="mora-commons" style="--accent:#D58B3D"><span class="app-icon"><span class="system-glyph">✣</span></span><span class="app-name">Mora Commons</span><span class="app-subtitle">Единый каталог приложений</span></button>
         </div>
       </section>
 

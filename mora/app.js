@@ -1,3 +1,5 @@
+import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+
 import {
   RECOVERY_KEY,
   buildIntentPlan,
@@ -11,19 +13,21 @@ import {
 } from "./core.js";
 
 const appDefinitions = {
-  cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#78c9d1", glyph: "∿" },
-  kavun: { name: "Kavun", subtitle: "Фотографии", color: "#f17b79", glyph: "◒" },
-  kabon: { name: "Ka-bon", subtitle: "Финансы", color: "#e9bb72", glyph: "₴" },
-  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: "#e9a0cf", glyph: "ϟ" },
-  po: { name: "Po", subtitle: "Компас", color: "#a8b6ee", glyph: "⌖" },
-  illidia: { name: "Illidia", subtitle: "Игры", color: "#9dce9b", glyph: "⌘" },
-  unify: { name: "Unify", subtitle: "Устройства", color: "#9bd8c5", glyph: "∞" },
-  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#f2c58d", glyph: "✦" },
-  security: { name: "Sentinel", subtitle: "Права и доверие", color: "#92d7c5", glyph: "◇" },
-  updates: { name: "Restore", subtitle: "Обновления и откат", color: "#efad9a", glyph: "↶" },
-  runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#aebcf0", glyph: "⇄" },
-  workspace: { name: "Control", subtitle: "Среда и питание", color: "#e9a4cd", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" }
+  cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#BDA27D", glyph: "∿" },
+  kavun: { name: "Kavun", subtitle: "Фотографии", color: "#AF806B", glyph: "◒" },
+  kabon: { name: "Ka-bon", subtitle: "Финансы", color: "#D58B3D", glyph: "₴" },
+  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: "#A78A8A", glyph: "ϟ" },
+  po: { name: "Po", subtitle: "Компас", color: "#AAA18A", glyph: "⌖" },
+  illidia: { name: "Illidia", subtitle: "Игры", color: "#82916F", glyph: "⌘" },
+  unify: { name: "Unify", subtitle: "Устройства", color: "#7C9387", glyph: "∞" },
+  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#C19A6A", glyph: "✦" },
+  security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
+  updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
+  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
+  workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
+  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: "#D58B3D", glyph: "✣" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -44,10 +48,12 @@ function applyPreferences() {
 
   const themeButton = document.querySelector('[data-action="toggle-theme"]');
   if (themeButton) {
-    const isLight = preferences.appearance.theme === "light";
-    themeButton.textContent = isLight ? "☾" : "☼";
-    themeButton.setAttribute("aria-pressed", String(isLight));
-    themeButton.setAttribute("aria-label", isLight ? "Включить тёмную тему" : "Включить светлую тему");
+    const currentTheme = preferences.appearance.theme;
+    const labels = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
+    themeButton.textContent = currentTheme === "amber" ? "A" : currentTheme === "dark" ? "◐" : "☼";
+    themeButton.setAttribute("aria-pressed", String(currentTheme !== "amber"));
+    themeButton.setAttribute("aria-label", "Текущая тема: " + labels[currentTheme] + ". Нажмите, чтобы переключить.");
+    themeButton.title = "Тема: " + labels[currentTheme];
   }
 }
 
@@ -165,6 +171,186 @@ function updateWorkspacePanel() {
   });
 }
 
+function commonsPanelMarkup() {
+  const filters = MORA_COMMONS_CATEGORIES.map((category) =>
+    '<button class="commons-filter" type="button" data-commons-filter="' + category.id +
+    '" aria-pressed="false">' + category.title + '</button>'
+  ).join("");
+
+  return '<p class="window-kicker">MORA COMMONS · ЕДИНЫЙ КАТАЛОГ</p>' +
+    '<h2 class="window-heading">Пространство возможностей</h2>' +
+    '<p class="commons-intro">Пятнадцать направлений собраны по задачам, а не по полу. Каждый инструмент открыт каждому пользователю. Настраивайте каталог под свои интересы.</p>' +
+    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Mora Commons"></label>' +
+    '<div class="commons-filters" data-commons-filters aria-label="Категории приложений">' +
+    '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
+    filters +
+    '</div>' +
+    '<p class="commons-count" data-commons-count aria-live="polite">Показано 15 приложений</p>' +
+    '<div class="commons-grid" data-commons-grid></div>' +
+    '<section class="commons-detail" data-commons-detail aria-live="polite" hidden></section>' +
+    '<p class="window-copy">Каталог и избранное работают локально. Карточки описывают спецификации новых продуктов; отдельные исполняемые модули ещё не подключены.</p>';
+}
+
+function loadCommonsFavorites() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("mora.commons.favorites.v1") || "[]");
+    const knownIds = new Set(MORA_COMMONS_APPS.map((app) => app.id));
+    return new Set(Array.isArray(stored) ? stored.filter((id) => knownIds.has(id)) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+let commonsFavorites = loadCommonsFavorites();
+
+function saveCommonsFavorites() {
+  try {
+    localStorage.setItem("mora.commons.favorites.v1", JSON.stringify([...commonsFavorites]));
+    return true;
+  } catch {
+    showToast("Избранное недоступно в этом профиле браузера");
+    return false;
+  }
+}
+
+function makeCommonsText(tagName, className, value) {
+  const element = document.createElement(tagName);
+  if (className) element.className = className;
+  element.textContent = value;
+  return element;
+}
+
+function renderCommonsDetails(detailPanel, app) {
+  detailPanel.replaceChildren();
+
+  const category = MORA_COMMONS_CATEGORIES.find((item) => item.id === app.category);
+  const header = document.createElement("div");
+  header.className = "commons-detail-head";
+  header.appendChild(makeCommonsText("h3", "", app.name));
+
+  const close = makeCommonsText("button", "commons-detail-close", "×");
+  close.type = "button";
+  close.dataset.commonsCloseDetail = "true";
+  close.setAttribute("aria-label", "Закрыть описание приложения");
+  header.appendChild(close);
+  detailPanel.appendChild(header);
+
+  detailPanel.appendChild(makeCommonsText("p", "commons-card-category", category ? category.title : ""));
+  detailPanel.appendChild(makeCommonsText("p", "", app.description));
+
+  const list = document.createElement("ul");
+  for (const capability of app.capabilities) {
+    list.appendChild(makeCommonsText("li", "", capability));
+  }
+  detailPanel.appendChild(list);
+
+  detailPanel.appendChild(makeCommonsText(
+    "p",
+    "commons-detail-status",
+    "Статус: спецификация. Каталог Mora Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
+  ));
+  detailPanel.hidden = false;
+}
+
+function initializeCommonsPanel(appWindow) {
+  const search = appWindow.querySelector("[data-commons-search]");
+  const filters = appWindow.querySelector("[data-commons-filters]");
+  const grid = appWindow.querySelector("[data-commons-grid]");
+  const count = appWindow.querySelector("[data-commons-count]");
+  const details = appWindow.querySelector("[data-commons-detail]");
+  let activeCategory = "all";
+
+  function renderGrid() {
+    const matches = filterCommonsApps(search.value, activeCategory);
+    grid.replaceChildren();
+
+    count.textContent = "Показано " + matches.length + " из " + MORA_COMMONS_APPS.length;
+
+    if (!matches.length) {
+      grid.appendChild(makeCommonsText("p", "commons-empty", "Ничего не найдено. Измените запрос или выберите другую категорию."));
+      details.hidden = true;
+      return;
+    }
+
+    for (const app of matches) {
+      const category = MORA_COMMONS_CATEGORIES.find((item) => item.id === app.category);
+      const card = document.createElement("article");
+      card.className = "commons-card";
+
+      const top = document.createElement("div");
+      top.className = "commons-card-top";
+      top.appendChild(makeCommonsText("span", "commons-card-glyph", app.glyph));
+
+      const isFavorite = commonsFavorites.has(app.id);
+      const favorite = makeCommonsText("button", "commons-favorite", isFavorite ? "★" : "☆");
+      favorite.type = "button";
+      favorite.dataset.commonsFavorite = app.id;
+      favorite.setAttribute("aria-pressed", String(isFavorite));
+      favorite.setAttribute(
+        "aria-label",
+        (isFavorite ? "Убрать из избранного: " : "Добавить в избранное: ") + app.name
+      );
+      top.appendChild(favorite);
+      card.appendChild(top);
+
+      card.appendChild(makeCommonsText("h3", "", app.name));
+      card.appendChild(makeCommonsText("span", "commons-card-category", category ? category.title : ""));
+      card.appendChild(makeCommonsText("p", "", app.subtitle));
+      card.appendChild(makeCommonsText("p", "", app.description));
+
+      const actions = document.createElement("div");
+      actions.className = "commons-card-actions";
+      const detailsButton = makeCommonsText("button", "", "Подробнее");
+      detailsButton.type = "button";
+      detailsButton.dataset.commonsDetails = app.id;
+      actions.appendChild(detailsButton);
+      card.appendChild(actions);
+      grid.appendChild(card);
+    }
+  }
+
+  filters.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-commons-filter]");
+    if (!button) return;
+    activeCategory = button.dataset.commonsFilter;
+    filters.querySelectorAll("[data-commons-filter]").forEach((item) => {
+      item.setAttribute("aria-pressed", String(item === button));
+    });
+    renderGrid();
+  });
+
+  search.addEventListener("input", renderGrid);
+
+  grid.addEventListener("click", (event) => {
+    const favorite = event.target.closest("[data-commons-favorite]");
+    if (favorite) {
+      const appId = favorite.dataset.commonsFavorite;
+      if (commonsFavorites.has(appId)) commonsFavorites.delete(appId);
+      else commonsFavorites.add(appId);
+      const saved = saveCommonsFavorites();
+      renderGrid();
+      if (saved) {
+        showToast(commonsFavorites.has(appId) ? "Добавлено в избранное" : "Убрано из избранного");
+      }
+      return;
+    }
+
+    const detailsButton = event.target.closest("[data-commons-details]");
+    if (detailsButton) {
+      const app = MORA_COMMONS_APPS.find((item) => item.id === detailsButton.dataset.commonsDetails);
+      if (app) renderCommonsDetails(details, app);
+    }
+  });
+
+  details.addEventListener("click", (event) => {
+    if (event.target.closest("[data-commons-close-detail]")) {
+      details.hidden = true;
+    }
+  });
+
+  renderGrid();
+}
+
 function panelMarkup(appId) {
   switch (appId) {
     case "cockos":
@@ -214,6 +400,20 @@ function panelMarkup(appId) {
         '<div class="device-row"><span class="device-symbol">⌘</span><div class="device-copy"><strong>Геймпад</strong><span>Игровой контроллер · Bluetooth</span></div><button class="switch" role="switch" aria-checked="false" aria-label="Геймпад"></button></div>' +
         '<div class="device-row"><span class="device-symbol">▤</span><div class="device-copy"><strong>Внешний дисплей</strong><span>Экран · HDMI</span></div><button class="switch" role="switch" aria-checked="true" aria-label="Внешний дисплей"></button></div>' +
         '</div><p class="window-copy" data-device-status>Подключённые устройства показаны условно. Сканирование оборудования не выполняется.</p>';
+    case "mora-boost":
+      return '<p class="window-kicker">MORA BOOST · OPLAGUE GAMING LAB</p>' +
+        '<h2 class="window-heading">Игровая производительность под контролем</h2>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>Здесь собраны реальные локальные измерения OPlague. Mora остаётся единым рабочим столом, но браузер не притворяется драйвером или аппаратным брокером.</span></div>' +
+        '<div class="setting-block"><strong>Точное состояние оборудования</strong><span>Полные PCI/USB PnP ID, SUBSYS, REV, INF и версии драйверов; локальный SHA-256 отпечаток и атомарный снимок перед изменениями.</span></div>' +
+        '<div class="setting-block"><strong>Обратимый игровой сеанс</strong><span>Нативный OPlague после подтверждения временно включает штатный план питания Windows и восстанавливает прежний, если он не менялся извне.</span></div>' +
+        '<div class="setting-block"><strong>Телеметрия и стабильность</strong><span>NVIDIA nvidia-smi: температура, загрузка, VRAM, мощность и частоты; Windows WHEA/Display 4101; CSV frametime, средний FPS, 1%/0.1% low и p99.</span></div>' +
+        '<div class="setting-block"><strong>Проверенные профили</strong><span>Локальный кэш только подтверждённых профилей по точной связке «игра + железо + версия драйвера». Деградация бенчмарка вызывает guarded restore плана питания.</span></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Прямой доступ Mora к PCI/GPU, установке драйверов, реестру, BIOS, IRQ/MSI, службам и сетевому стеку не включён. Нативный IPC DuckOS пока описан контрактом, но не реализован.</span></div>' +
+        '<div class="approval-actions">' +
+        '<a class="action-button" href="https://github.com/Ivan-VHS/OPlague" target="_blank" rel="noopener noreferrer">Открыть OPlague ↗</a>' +
+        '<a class="subtle-button" href="https://github.com/Ivan-VHS/OPlague/blob/main/docs/GAMING_PERFORMANCE_WORKBENCH.md" target="_blank" rel="noopener noreferrer">Документация ↗</a>' +
+        '</div>' +
+        '<p class="window-copy">Сама браузерная панель не меняет настройки компьютера. Для снимка, телеметрии и игрового режима откройте нативное Windows-приложение OPlague.</p>';
     case "mora-ai":
       return '<p class="window-kicker">MORA INTENT ENGINE · ЛОКАЛЬНЫЙ РЕЖИМ</p>' +
         '<h2 class="window-heading">Сформулируйте задачу</h2>' +
@@ -247,11 +447,19 @@ function panelMarkup(appId) {
         '<div class="intent-status" data-update-preview>Проверка только сформирует локальный план. Скачивания и установки не будет.</div>' +
         '<p class="window-copy">Сейчас сохраняются только настройки Mora в локальном хранилище браузера — не раздел ОС, приложения или пользовательские файлы.</p>';
     case "runtime":
-      return '<p class="window-kicker">BRIDGE · INSPECTION ONLY</p><h2 class="window-heading">Инспектор исполняемых файлов</h2>' +
-        '<p class="window-copy">Выберите локальный EXE, DLL или ELF. Mora проверит заголовок и разрядность, не запуская файл и не отправляя его в сеть.</p>' +
-        '<label class="file-picker">Выбрать файл<input type="file" data-executable-file accept=".exe,.dll,.so"></label>' +
+      return '<p class="window-kicker">BRIDGE · WINDOWS COMPATIBILITY</p><h2 class="window-heading">Совместимость Windows-приложений</h2>' +
+        '<p class="window-copy">Bridge проверяет выбранные EXE/DLL локально. В Mora доступна быстрая проверка заголовка; расширенный PE-анализ, список импортируемых DLL, профили приложений и диагностика доступны через инструменты DuckOS CLI.</p>' +
+        '<label class="file-picker">Проверить EXE или DLL<input type="file" data-executable-file accept=".exe,.dll"></label>' +
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Запуск Windows-программ, DirectX/Vulkan translation и античитов через этот браузерный интерфейс невозможен. Native runtime пока не подключён.</span></div>';
+        '<div class="setting-block"><strong>Инструменты DuckOS</strong><span>После установки пакета duckos-build-tools в среде разработки:</span>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos inspect-pe ./game.exe — заголовки PE32/PE32+, секции и импортируемые DLL</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge runtimes — поиск Wine, Proton, CrossOver, Bottles, Box64 и QEMU без запуска этих программ</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge plan ./game.exe --purpose game --compat-data PATH — подготовка структуры команды Proton без её выполнения</span></div></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DuckOS ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
+        '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
@@ -266,6 +474,8 @@ function panelMarkup(appId) {
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
+    case "mora-commons":
+      return commonsPanelMarkup();
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }
@@ -327,6 +537,7 @@ function openApp(appId) {
     '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
+  if (appId === "mora-commons") initializeCommonsPanel(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
@@ -386,9 +597,11 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 document.addEventListener("click", (event) => {
   const themeToggle = event.target.closest('[data-action="toggle-theme"]');
   if (themeToggle) {
-    preferences.appearance.theme = preferences.appearance.theme === "light" ? "dark" : "light";
+    const nextTheme = { amber: "dark", dark: "light", light: "amber" };
+    preferences.appearance.theme = nextTheme[preferences.appearance.theme] || "amber";
     persistPreferences();
-    showToast(preferences.appearance.theme === "light" ? "Светлая тема включена" : "Тёмная тема включена");
+    const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
+    showToast("Тема: " + themeNames[preferences.appearance.theme]);
     return;
   }
 
