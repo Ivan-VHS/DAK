@@ -37,12 +37,12 @@ test("the Mora service worker precaches the hardware workspace", () => {
 });
 
 test("the browser UI does not present its frame probe as a game benchmark", () => {
-  assert.ok(js.includes("not FPS игры"));
+  assert.ok(js.includes("не FPS игры"));
   assert.ok(js.includes("requestAnimationFrame"));
   assert.ok(js.includes("ETW/PresentMon"));
 });
 
-test("the driver installer requires explicit approval and never flashes firmware", () => {
+test("the driver installer requires explicit approval and never flashes firmware", async () => {
   const agent = await readFile(new URL("../agent/duckos_hardware_agent.py", import.meta.url), "utf8");
   assert.ok(agent.includes("INSTALL "));
   assert.ok(agent.includes("export_windows_driver_store"));
