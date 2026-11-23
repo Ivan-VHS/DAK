@@ -59,6 +59,13 @@ class RepositoryFederationTests(unittest.TestCase):
         with self.assertRaises(FederationError):
             parse_gitmodules('[remote "origin"]\n\turl = https://example.invalid\n')
 
+    def test_reaper_is_registered_as_a_native_user_space_workbench(self):
+        reaper = next(x for x in self.manifest["repositories"] if x["id"] == "reaper")
+        self.assertEqual(reaper["integration_status"], "native-workbench")
+        self.assertIn("native Duck Desktop workbench", reaper["integration_mode"])
+        self.assertFalse(reaper["auto_build"])
+        self.assertFalse(reaper["auto_execute"])
+
     def test_ventusample_declares_only_an_optional_reaper_dependency(self):
         ventu = next(x for x in self.manifest["repositories"] if x["id"] == "ventusample")
         self.assertEqual(ventu["optional_dependencies"], ["reaper"])

@@ -21,6 +21,7 @@ from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
+from .terminal import TerminalService, run_interactive
 
 
 def _load(path: Path) -> Any:
@@ -94,6 +95,15 @@ def main(argv: list[str] | None = None) -> int:
     startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
     startup_restore.add_argument("entry_id")
 
+    terminal = commands.add_parser(
+        "terminal", help="open the separate DuckOS extended terminal"
+    )
+    terminal_actions = terminal.add_subparsers(dest="terminal_action")
+    terminal_run = terminal_actions.add_parser(
+        "run", help="run one quoted command through the trusted terminal registry"
+    )
+    terminal_run.add_argument("command_line", help="one terminal command, for example 'hardware inventory'")
+
     release_build = commands.add_parser(
         "build-release", help="create a deterministic, optionally signed component bundle"
     )
@@ -122,6 +132,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     deployment.add_argument("--output", type=Path, help="write the JSON plan to this path")
 
+
+    reaper = commands.add_parser(
+        "reaper", help="open and inspect the Reaper language workbench"
+    )
+    reaper.add_argument("--root", type=Path, help="explicit Reaper source checkout (defaults to projects/reaper)")
+    reaper_commands = reaper.add_subparsers(dest="reaper_command", required=True)
+    reaper_commands.add_parser("status", help="inspect the local Reaper checkout and integrated features")
+    reaper_commands.add_parser("studio", help="open the native Reaper Studio window")
+    reaper_check = reaper_commands.add_parser("check", help="parse and statically check a .rpr/.most file")
+    reaper_check.add_argument("source", type=Path)
+    reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
+    reaper_typecheck.add_argument("source", type=Path)
 
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
@@ -184,6 +206,13 @@ def main(argv: list[str] | None = None) -> int:
                     "disk_written": False,
                 })
                 return 0
+        elif args.command == "terminal":
+            if args.terminal_action is None:
+                return run_interactive(TerminalService())
+            if args.terminal_action == "run":
+                result = TerminalService().execute(args.command_line)
+            else:
+                raise ValueError("unsupported terminal action")
         elif args.command == "validate-manifest":
             result = validate_manifest(_load(args.manifest), args.root, verify_files=not args.metadata_only)
         elif args.command == "plan-image":
@@ -244,6 +273,31 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
+        elif args.command == "reaper":
+            from .desktop.reaper import ReaperWorkbench
+
+            workbench = ReaperWorkbench(args.root)
+            if args.reaper_command == "status":
+                result = workbench.inspect()
+            elif args.reaper_command == "studio":
+                process = workbench.open_studio()
+                result = {
+                    "schema": "duckos.reaper-studio-launch.v1",
+                    "started": True,
+                    "pid": process.pid,
+                    "repository": str(workbench.repository_root),
+                    "shell": False,
+                }
+            elif args.reaper_command == "check":
+                result = workbench.check(args.source)
+                _print_result(result)
+                return 0 if result["ok"] else 1
+            elif args.reaper_command == "typecheck":
+                result = workbench.typecheck(args.source)
+                _print_result(result)
+                return 0 if result["ok"] else 1
+            else:
+                raise ValueError("unknown Reaper workbench command")
         else:
             result = compatibility_status()
         _print_result(result)

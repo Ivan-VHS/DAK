@@ -12,12 +12,14 @@ The separate DAK foundational package proposal contains the existing 15 system a
 
 DuckOS keeps the four specialist Ivan-VHS projects as independent, commit-pinned Git submodules under `projects/`: [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [Reaper](https://github.com/Ivan-VHS/Reaper), [OPlague](https://github.com/Ivan-VHS/OPlague) and [VentuSample](https://github.com/Ivan-VHS/VentuSample). The checked-in registry records their source pins, licenses, roles and integration boundaries.
 
-Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
+Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. Reaper is the explicit exception for user-approved source checking and Studio launch through the [native Reaper workbench](docs/REAPER_INTEGRATION.md); this does not grant kernel or device privileges. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
 ## Mora desktop
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora uses the single DuckOS Soft Glass visual profile: quiet graphite surfaces, warm-white content and a muted duck-yellow accent, with original low-contrast folds and a central application launcher. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes a centred icon launcher, draggable glass windows, live clock, compact widgets, responsive layout, local preferences, reduced-motion support and keyboard navigation.
+Mora uses the fixed DuckOS Soft Glass profile: quiet graphite surfaces, warm-white content and a muted duck-yellow accent, with original low-contrast folds and a centred application launcher. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes a centred icon launcher, draggable Soft Glass windows, compact widgets, responsive layout, local preferences, reduced-motion support and keyboard navigation.
+
+The optional [Mora Blade Hub](docs/MORA_BLADE_HUB.md) adds four console-inspired navigation blades, three saved workspaces, RU/UA/RU-UA labels, bilingual semantic paths, a 20-vector index, app registry audit and optional Gamepad API controls. It sits above the existing 29-panel catalogue and does not replace the default desktop.
 
 The system tools are:
 
@@ -30,6 +32,22 @@ The system tools are:
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
+
+## Native Reaper workbench
+
+Reaper is integrated into the native **Duck Desktop** maintenance workspace as a first-class developer tool. It discovers the pinned `projects/reaper` checkout, opens Reaper Studio in its own process and delegates static checks to Reaper's own CLI. It does not embed a second language runtime into DuckOS.
+
+Initialize the specialist checkout and inspect the integration:
+
+```sh
+git submodule update --init projects/reaper
+duckos reaper status
+duckos reaper studio
+duckos reaper check ./examples/program.rpr
+duckos reaper typecheck ./examples/program.rpr
+```
+
+The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
 ## Visual system and offline support
 
@@ -91,6 +109,16 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 
 No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
 
+## DuckOS Extended Terminal
+
+The separate user-space extended terminal is available through `duckos terminal`. It provides an allowlisted command registry for existing hardware, desktop, DuckBridge, compatibility and module diagnostics, plus local aliases, bounded history, prompt settings and an explicit extension API. It does not launch a host shell, execute arbitrary commands or load third-party extensions automatically. See [Extended Terminal](docs/EXTENDED_TERMINAL.md) for commands, state handling, security boundaries and tests.
+
+~~~sh
+duckos terminal
+duckos terminal run "hardware inventory"
+duckos terminal run "bridge runtimes"
+~~~
+
 ## Native Duck Desktop optimizer
 
 The native user-space maintenance utility complements the Mora browser shell. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
@@ -114,6 +142,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [Mora Commons unified application catalogue](docs/MORA_COMMONS.md)
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
+- [Mora Blade Hub navigation](docs/MORA_BLADE_HUB.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
@@ -124,5 +153,4 @@ Implementation maturity, supported platforms and subsystem behavior must be stat
 
 Project author/developer: **Ivan-VHS**. Preserve the authorship, contributions and license notices of existing contributors and dependencies.
 
-
-Mora's launcher uses project-authored glyphs and original CSS/SVG presentation. Its restrained iOS-inspired easing does not use Apple-owned interface assets. A same-origin browser Content Security Policy blocks remote active content; Sentinel remains a local preference surface until a native capability broker exists.
+Mora's launcher, Blade Hub and window treatment use project-authored glyphs, CSS and SVG, plus general category-navigation and motion ideas. No Apple or Xbox/Microsoft proprietary logos, screenshots, fonts, sounds, artwork or source code are bundled. The Blade Hub is an independent DuckOS concept and is not affiliated with Microsoft.

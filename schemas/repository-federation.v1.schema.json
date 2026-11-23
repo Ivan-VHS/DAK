@@ -124,7 +124,10 @@
             }
           },
           "integration_status": {
-            "const": "source-pinned-only"
+            "enum": [
+              "source-pinned-only",
+              "native-workbench"
+            ]
           },
           "auto_build": {
             "const": false
