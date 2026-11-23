@@ -107,12 +107,21 @@ def _linux_processes() -> list[dict[str, Any]]:
                 continue
             try:
                 pid = int(entry.name)
+            except ValueError:
+                continue
+            executable_name = ""
+            try:
                 executable = os.readlink(entry / "exe")
                 executable_name = Path(executable.removesuffix(" (deleted)")).name
-                if not executable_name:
-                    executable_name = (entry / "comm").read_text(encoding="utf-8", errors="replace").strip()
-            except (OSError, ValueError, UnicodeError):
-                continue
+            except OSError:
+                pass
+            if not executable_name:
+                try:
+                    executable_name = (entry / "comm").read_text(
+                        encoding="utf-8", errors="replace"
+                    ).strip()
+                except (OSError, UnicodeError):
+                    continue
             if executable_name:
                 result.append({"pid": pid, "executable_name": executable_name, "source": "linux-procfs"})
             if len(result) >= MAX_PROCESSES:
