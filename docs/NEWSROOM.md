@@ -79,3 +79,14 @@ API не предоставляет proxy-fetch для URL, переданных
 
 Тесты покрывают RSS/Atom parsing, allow-list ссылок, очистку описаний, лимиты,
 кэширование, поведение при ошибке источника и локальную CORS policy.
+
+### Windows PowerShell
+
+Из корня репозитория, в отдельном окне PowerShell:
+
+    $env:PYTHONPATH = "native/services"
+    python -m duckos_services news serve
+
+Переменная действует в текущем окне PowerShell. Для desktop shell используйте второе окно:
+
+    python -m http.server 4173 --directory desktop
