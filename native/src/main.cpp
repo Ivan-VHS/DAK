@@ -1,6 +1,8 @@
 #include "serein/serein.hpp"
 
 #include <algorithm>
+#include <charconv>
+#include <cstdio>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -317,14 +319,15 @@ bool tokenize(const std::string& line, std::vector<std::string>& tokens, std::st
 
     for (const char c : line) {
         if (escaping) {
-            current.push_back(c);
+            if (c == quote || c == '\\') current.push_back(c);
+            else { current.push_back('\\'); current.push_back(c); }
             escaping = false;
             tokenStarted = true;
             continue;
         }
         if (quote != '\0') {
             if (c == quote) quote = '\0';
-            else if (c == '\\') escaping = true;
+            else if (c == '\\' && quote == '"') escaping = true;
             else current.push_back(c);
             tokenStarted = true;
             continue;
@@ -338,9 +341,6 @@ bool tokenize(const std::string& line, std::vector<std::string>& tokens, std::st
                 current.clear();
                 tokenStarted = false;
             }
-        } else if (c == '\\') {
-            error = "Backslash escapes are only accepted inside quoted arguments.";
-            return false;
         } else {
             current.push_back(c);
             tokenStarted = true;
@@ -388,6 +388,6 @@ int main(int argc, char** argv) {
     std::vector<std::string> tokens;
     for (int i = index; i < argc; ++i) tokens.emplace_back(argv[i]);
     bool shouldExit = false;
-    const bool success = dispatch(tokens, registry, false, shouldExit);
+    const bool success = dispatch(tokens, registry, inputIsInteractive(), shouldExit);
     return success ? 0 : 1;
 }
