@@ -120,3 +120,22 @@ The rail supports pointer, touch scrolling and keyboard operation. Left/Right mo
 The profile tile is deliberately a local session summary: it shows the number of currently open Mora windows and opens Control. It does not imply an authenticated Duck account, online presence, hardware health, achievements or a gamerscore. Favorites are stored in the browser's local profile under a versioned key; they are not synced to a remote account.
 
 App cards open the existing panel by its registered app ID. They do not launch arbitrary executables or claim native operating-system process control. Any native launch path must remain separately permissioned and implemented by an appropriate Duck service.
+
+
+## Screen and viewport targets
+
+The desktop is responsive to CSS viewport size rather than assuming one fixed monitor resolution. The current layout profiles cover:
+
+| Class | Target examples | Layout behavior |
+|---|---|---|
+| 8K / 5K | 7680×4320, 5120×2880 | Wider centered workspace, larger type, launcher cards, dock and windows |
+| 4K / UHD | 3840×2160, 4096×2160 | Expanded three-column desktop, wider app rail and native-size panel surfaces |
+| QHD / WQHD | 2560×1440, 3440×1440 | Fluid desktop width with a larger central workspace |
+| Full HD | 1920×1080, 1920×1200 | Standard three-column desktop and readable floating application windows |
+| Compact desktop / laptop | 1366×768, 1440×900 | Two-column layout, independently scrollable app region and reduced vertical chrome |
+| Tablet | 1024×768, 1180×820 | Touch-sized controls and reflowed workspace |
+| Phone | 390×844, 360×800, 320×568 | Single-column document flow, horizontal launcher rail and safe-area-aware dock |
+
+Wide desktop layouts use three columns; 16:10, 3:2 and 4:3 workspaces use a two-column composition to protect the central content width. Short landscape viewports reduce vertical spacing instead of clipping the launcher or dock. The shell uses dynamic/small viewport units where browser chrome can change the visible height, and includes safe-area insets for notched devices.
+
+The 8K profile intentionally caps the centered working surface rather than stretching controls across the entire wall. Typography and cards grow with resolution but stop at readable maximum sizes. Application windows remain bounded by both viewport width and height. On small screens, the page becomes scrollable, while app windows and dialogs stay within the visible viewport.
