@@ -11,19 +11,19 @@ import {
 } from "./core.js";
 
 const appDefinitions = {
-  cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#78c9d1", glyph: "∿" },
-  kavun: { name: "Kavun", subtitle: "Фотографии", color: "#f17b79", glyph: "◒" },
-  kabon: { name: "Ka-bon", subtitle: "Финансы", color: "#e9bb72", glyph: "₴" },
-  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: "#e9a0cf", glyph: "ϟ" },
-  po: { name: "Po", subtitle: "Компас", color: "#a8b6ee", glyph: "⌖" },
-  illidia: { name: "Illidia", subtitle: "Игры", color: "#9dce9b", glyph: "⌘" },
-  unify: { name: "Unify", subtitle: "Устройства", color: "#9bd8c5", glyph: "∞" },
-  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#f2c58d", glyph: "✦" },
-  security: { name: "Sentinel", subtitle: "Права и доверие", color: "#92d7c5", glyph: "◇" },
-  updates: { name: "Restore", subtitle: "Обновления и откат", color: "#efad9a", glyph: "↶" },
-  runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#aebcf0", glyph: "⇄" },
-  workspace: { name: "Control", subtitle: "Среда и питание", color: "#e9a4cd", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" }
+  cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#BDA27D", glyph: "∿" },
+  kavun: { name: "Kavun", subtitle: "Фотографии", color: "#AF806B", glyph: "◒" },
+  kabon: { name: "Ka-bon", subtitle: "Финансы", color: "#D58B3D", glyph: "₴" },
+  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: "#A78A8A", glyph: "ϟ" },
+  po: { name: "Po", subtitle: "Компас", color: "#AAA18A", glyph: "⌖" },
+  illidia: { name: "Illidia", subtitle: "Игры", color: "#82916F", glyph: "⌘" },
+  unify: { name: "Unify", subtitle: "Устройства", color: "#7C9387", glyph: "∞" },
+  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#C19A6A", glyph: "✦" },
+  security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
+  updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
+  runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#948F7D", glyph: "⇄" },
+  workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" }
 };
 
 const windowLayer = document.getElementById("window-layer");
