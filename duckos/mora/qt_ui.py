@@ -974,7 +974,12 @@ class MoraWindow(QMainWindow):
         dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
         dialog.setSizeGripEnabled(True)
         dialog.setWindowTitle("Reaper Studio — Mora")
-        dialog.resize(700, 420)
+        screen = QApplication.screenAt(self.frameGeometry().center()) or QApplication.primaryScreen()
+        available = screen.availableGeometry() if screen is not None else None
+        width = min(700, max(1, available.width() - 32)) if available is not None else 700
+        height = min(420, max(1, available.height() - 72)) if available is not None else 420
+        dialog.setMinimumSize(min(480, width), min(300, height))
+        dialog.resize(width, height)
         layout = QVBoxLayout(dialog)
         report = QPlainTextEdit()
         report.setReadOnly(True)
