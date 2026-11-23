@@ -7,15 +7,20 @@ from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 try:
+    import PySide6
+except ImportError:
+    PySide6 = None
+
+if PySide6 is not None:
     from PySide6.QtWidgets import QApplication, QMainWindow
     from duckos.mora.qt_ui import MoraWindow
-except ImportError:
+else:
     QApplication = None
     QMainWindow = None
     MoraWindow = None
 
 
-@unittest.skipUnless(QApplication is not None, "Install the native-ui extra to run Qt tests")
+@unittest.skipUnless(PySide6 is not None, "Install the native-ui extra to run Qt tests")
 class MoraQtDesktopTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
