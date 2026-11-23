@@ -255,3 +255,10 @@ The prototype stores app metadata in browser `localStorage` and media blobs in `
 - Illidia can export selected clips in a Unify transfer package within the documented per-file limit.
 
 These are local prototype workflows. They do not establish a system-wide event bus, automatic schedules, authenticated device transport or cloud synchronization.
+
+
+## 9. Unify transfer package
+
+The browser prototype uses the versioned [`unify.transfer.v1`](UNIFY_TRANSFER_FORMAT_V1.md) JSON-file contract for manual transfer of selected Po tabs, Illidia clips and selected local settings. The format is validated by [`schemas/unify.transfer.v1.schema.json`](../schemas/unify.transfer.v1.schema.json).
+
+The prototype enforces a 20 MiB package limit, a 12 MiB per-clip limit, and bounds on tab and clip counts. This is a user-mediated file hand-off, not authenticated pairing or live synchronization.
