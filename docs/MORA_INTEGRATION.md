@@ -88,3 +88,22 @@ A native launcher must discover manifests only in trusted installation roots, va
 - **Verified:** reserved for a feature with repeatable tests and evidence at the layer being claimed.
 
 Never promote a feature to native/verified status because its UI panel exists.
+
+## Native project applications in the Mora desktop
+
+The canonical desktop catalogue also exposes four specialist project applications as native tools: Reaper Studio, OPlague, VentuSample and Pytyliki. These are launched from the local Mora host through fixed application IDs and reviewed entry points. They open as separate OS-managed processes; the browser shell does not host native windows in iframes or claim that their process isolation is implemented.
+
+| Project | Role in the desktop | Runtime boundary |
+|---|---|---|
+| Reaper Studio | Language and developer workstation | Existing Python/Tk desktop entry point; user-space execution |
+| OPlague | Device and driver-package workbench | Existing Python/Tk entry point; read-only inspection |
+| VentuSample | Sample and DSP workstation | Existing Qt 6 desktop target; offline audio processing |
+| Pytyliki | Processor-systems workstation | Existing Windows GUI target; bounded, local diagnostics |
+
+The local launcher only accepts the four registered IDs. It resolves the process target in host code; it never executes a browser-supplied command or a manifest-provided shell string. Availability is reported from the actual local checkout and built target.
+
+The 1,000-program adoption catalogue assigns ownership across the four specialist projects. It is an architecture/ownership contract, not a claim that 1,000 upstream programs are installed or that all catalogue capabilities are complete. See [PROGRAM_CATALOGUE_INTEGRATION.md](PROGRAM_CATALOGUE_INTEGRATION.md) and [the versioned ownership manifest](../manifests/ivan-vhs-program-adoption.v1.json).
+
+### One theme across web and native content
+
+The web shell and embedded browser modules share the current Mora theme and window system. Before a native process starts, the host passes MORA_THEME_MODE=dark or light; the native adapter applies that preference before constructing its widgets. Existing native windows keep their current appearance until restarted. Specialist telemetry, warning semantics and product indicators retain their meaning instead of being recoloured indiscriminately.

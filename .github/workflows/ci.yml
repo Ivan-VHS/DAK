@@ -56,6 +56,10 @@ jobs:
         with:
           node-version: "22"
       - run: npm test
+      - name: Check Mora application module syntax
+        run: |
+          node --check mora/app.js
+          node --check mora/core.js
 
   native-c:
     name: Native C

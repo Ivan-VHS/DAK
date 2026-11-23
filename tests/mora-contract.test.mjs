@@ -26,6 +26,31 @@ test("desktop exposes all seven first-party apps and six system tools", () => {
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
   assert.equal(registry.system_services.length, 8);
+  assert.equal(registry.native_apps.length, 4);
+});
+
+test("four native project tools share the Mora desktop and fixed local launcher", () => {
+  const nativeApps = [
+    ["reaper", "Reaper Studio"],
+    ["oplague", "OPlague"],
+    ["ventusample", "VentuSample"],
+    ["pytyliki", "Pytyliki"]
+  ];
+
+  for (const [id, name] of nativeApps) {
+    assert.ok(html.includes('data-app="native-' + id + '"'), name + " must appear on the desktop");
+    assert.ok(js.includes('"native-' + id + '"'), name + " must have a native window definition");
+    assert.ok(js.includes('data-native-id'), name + " must expose the registered launch ID");
+    assert.ok(appIds.includes(id) === false, "native project IDs stay separate from first-party web IDs");
+  }
+
+  assert.deepEqual(registry.native_apps.map((app) => app.id), nativeApps.map(([id]) => id));
+  assert.equal(registry.integration.external_launch, "implemented_loopback_allowlist_launcher");
+  assert.ok(js.includes('fetch("/api/apps"'));
+  assert.ok(js.includes('"/api/launch/"'));
+  assert.ok(js.includes("new Set([\"cockos\""));
+  assert.ok(js.includes("../prototype/mora-home.html?app="));
+  assert.ok(css.includes(".embedded-web-app"));
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {

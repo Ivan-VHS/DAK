@@ -23,8 +23,42 @@ const appDefinitions = {
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#efad9a", glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#aebcf0", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#e9a4cd", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" }
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" },
+  "native-reaper": { name: "Reaper Studio", subtitle: "Native · язык и IDE", color: "#a78bfa", glyph: "R" },
+  "native-oplague": { name: "OPlague", subtitle: "Native · устройства и драйверы", color: "#ff8eac", glyph: "O" },
+  "native-ventusample": { name: "VentuSample", subtitle: "Native · аудио и DSP", color: "#c1aeff", glyph: "V" },
+  "native-pytyliki": { name: "Pytyliki", subtitle: "Native · процессорные системы", color: "#38d4b7", glyph: "P" }
 };
+
+const webAppIds = new Set(["cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"]);
+const nativeApps = {
+  reaper: {
+    appId: "native-reaper",
+    name: "Reaper Studio",
+    repository: "https://github.com/Ivan-VHS/Reaper",
+    description: "Язык Reaper/MOST, Studio IDE, проверка и запуск программ, отладчик и LSP/DAP."
+  },
+  oplague: {
+    appId: "native-oplague",
+    name: "OPlague",
+    repository: "https://github.com/Ivan-VHS/OPlague",
+    description: "Локальная read-only инвентаризация устройств и инспекция INF, ZIP и PE/COFF."
+  },
+  ventusample: {
+    appId: "native-ventusample",
+    name: "VentuSample",
+    repository: "https://github.com/Ivan-VHS/VentuSample",
+    description: "Нативная C++20/Qt 6 рабочая станция для генерации сэмплов и офлайн-DSP."
+  },
+  pytyliki: {
+    appId: "native-pytyliki",
+    name: "Pytyliki",
+    repository: "https://github.com/Ivan-VHS/Pytyliki",
+    description: "Рабочая станция процессорных систем с C11-ядром и Windows GUI."
+  }
+};
+const nativeAvailability = new Map();
+let nativeBridgeOnline = false;
 
 const windowLayer = document.getElementById("window-layer");
 const activeAppLabel = document.getElementById("active-app");
@@ -49,12 +83,28 @@ function applyPreferences() {
     themeButton.setAttribute("aria-pressed", String(isLight));
     themeButton.setAttribute("aria-label", isLight ? "Включить тёмную тему" : "Включить светлую тему");
   }
+  syncEmbeddedWebThemes();
 }
 
 function persistPreferences() {
   preferences = normalizePreferences(preferences);
   savePreferences(preferences);
   applyPreferences();
+  syncNativeThemePreference();
+}
+
+async function syncNativeThemePreference() {
+  try {
+    const response = await fetch("/api/theme", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ theme: preferences.appearance.theme })
+    });
+    if (!response.ok) return false;
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function capabilityRow(id, title, description) {
@@ -165,8 +215,136 @@ function updateWorkspacePanel() {
   });
 }
 
+function nativeAvailabilityMessage(nativeId) {
+  const state = nativeAvailability.get(nativeId);
+  if (!nativeBridgeOnline) return "Локальный узел Mora не подключён. Запустите python mora_host.py.";
+  if (!state) return "Проверяется состояние приложения…";
+  if (state.running) return "Приложение уже запущено в отдельном нативном окне.";
+  if (state.available) return "Сборка обнаружена. Приложение готово к запуску.";
+  return state.status_message || "Репозиторий или исполняемая сборка не найдены.";
+}
+
+function nativePanelMarkup(nativeId) {
+  const app = nativeApps[nativeId];
+  const state = nativeAvailability.get(nativeId);
+  const launchLabel = state?.running ? "Уже запущено" :
+    state?.available ? "Запустить нативное приложение" : "Проверка готовности…";
+  const disabled = !nativeBridgeOnline || !state?.available || state.running;
+  return '<p class="window-kicker">NATIVE WORKSPACE · ОТДЕЛЬНЫЙ ПРОЦЕСС</p>' +
+    '<h2 class="window-heading">' + app.name + '</h2>' +
+    '<p class="window-copy">' + app.description + '</p>' +
+    '<div class="native-runtime-card"><span class="notice-dot"></span>' +
+    '<span data-native-detail-status="' + nativeId + '">' + nativeAvailabilityMessage(nativeId) + '</span></div>' +
+    '<div class="native-panel-actions">' +
+    '<button class="action-button native-launch-button" data-action="launch-native" data-native-id="' + nativeId + '"' +
+    (disabled ? ' disabled' : '') + '>' + launchLabel + '</button>' +
+    '<a href="' + app.repository + '" target="_blank" rel="noopener noreferrer">Репозиторий ↗</a>' +
+    '</div>' +
+    '<p class="window-copy">Mora передаёт запрос локальному launcher с фиксированной точкой входа. Команды из браузера и манифестов не исполняются. Нативное приложение открывается в отдельном окне операционной системы.</p>';
+}
+
+async function refreshNativeApps() {
+  try {
+    const response = await fetch("/api/apps", { cache: "no-store" });
+    if (!response.ok) throw new Error("Локальный узел не ответил.");
+    const payload = await response.json();
+    nativeBridgeOnline = true;
+    nativeAvailability.clear();
+    for (const app of payload.apps || []) {
+      nativeAvailability.set(app.id, app);
+    }
+  } catch {
+    nativeBridgeOnline = false;
+    nativeAvailability.clear();
+  }
+
+  document.querySelectorAll("[data-native-status]").forEach((element) => {
+    const state = nativeAvailability.get(element.dataset.nativeStatus);
+    element.textContent = nativeAvailabilityMessage(element.dataset.nativeStatus);
+    element.classList.toggle("native-ready", Boolean(state?.available));
+  });
+
+  document.querySelectorAll("[data-native-detail-status]").forEach((element) => {
+    element.textContent = nativeAvailabilityMessage(element.dataset.nativeDetailStatus);
+  });
+
+  document.querySelectorAll('[data-action="launch-native"]').forEach((button) => {
+    const state = nativeAvailability.get(button.dataset.nativeId);
+    button.disabled = !nativeBridgeOnline || !state?.available || Boolean(state.running);
+    button.textContent = state?.running ? "Уже запущено" :
+      state?.available ? "Запустить нативное приложение" :
+      nativeBridgeOnline ? "Сборка недоступна" : "Локальный launcher offline";
+  });
+
+  const counter = document.getElementById("native-tools-count");
+  if (counter) {
+    const total = Object.keys(nativeApps).length;
+    const ready = Array.from(nativeAvailability.values()).filter((app) => app.available).length;
+    counter.textContent = nativeBridgeOnline ? ready + " из " + total + " готовы" : "launcher offline";
+  }
+}
+
+async function launchNativeApp(nativeId, button) {
+  const state = nativeAvailability.get(nativeId);
+  const app = nativeApps[nativeId];
+  if (!app) return;
+  if (!nativeBridgeOnline || !state?.available) {
+    showToast(nativeAvailabilityMessage(nativeId));
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Запуск…";
+  try {
+    await syncNativeThemePreference();
+    const response = await fetch("/api/launch/" + encodeURIComponent(nativeId), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Не удалось запустить приложение.");
+    showToast(result.message || app.name + " запускается в отдельном окне.");
+    await refreshNativeApps();
+  } catch (error) {
+    const status = windowLayer.querySelector(
+      '[data-window="' + app.appId + '"] [data-native-detail-status]'
+    );
+    if (status) status.textContent = error.message;
+    button.disabled = false;
+    button.textContent = "Повторить запуск";
+    showToast(error.message || "Ошибка запуска нативного приложения.");
+  }
+}
+
+function embeddedWebPanel(appId) {
+  const src = "../prototype/mora-home.html?app=" + encodeURIComponent(appId) +
+    "&embed=1&theme=" + encodeURIComponent(preferences.appearance.theme);
+  return '<iframe class="embedded-web-app" title="' + appDefinitions[appId].name +
+    ' — веб-приложение Mora" src="' + src +
+    '" loading="eager" allow="microphone; camera; display-capture; clipboard-read; clipboard-write" referrerpolicy="same-origin"></iframe>';
+}
+
+function syncEmbeddedWebThemes() {
+  windowLayer.querySelectorAll(".embedded-web-app").forEach((frame) => {
+    frame.contentWindow?.postMessage({
+      type: "mora:theme",
+      theme: preferences.appearance.theme
+    }, location.origin);
+  });
+}
+
 function panelMarkup(appId) {
+  if (webAppIds.has(appId)) return embeddedWebPanel(appId);
   switch (appId) {
+    case "native-reaper":
+      return nativePanelMarkup("reaper");
+    case "native-oplague":
+      return nativePanelMarkup("oplague");
+    case "native-ventusample":
+      return nativePanelMarkup("ventusample");
+    case "native-pytyliki":
+      return nativePanelMarkup("pytyliki");
     case "cockos":
       return '<p class="window-kicker">АУДИОЦЕНТР · ДЕМО</p>' +
         '<h2 class="window-heading">Звук под контролем</h2>' +
@@ -327,6 +505,15 @@ function openApp(appId) {
     '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
+  const embeddedFrame = appWindow.querySelector(".embedded-web-app");
+  if (embeddedFrame) {
+    embeddedFrame.addEventListener("load", () => {
+      embeddedFrame.contentWindow?.postMessage({
+        type: "mora:theme",
+        theme: preferences.appearance.theme
+      }, location.origin);
+    });
+  }
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
@@ -337,6 +524,13 @@ function openApp(appId) {
   appWindow.querySelector(".window-close").focus();
   showToast(definition.name + " открыто");
 }
+
+window.addEventListener("message", (event) => {
+  if (event.origin !== location.origin || event.data?.type !== "mora:close-app") return;
+  const frame = Array.from(windowLayer.querySelectorAll(".embedded-web-app"))
+    .find((item) => item.contentWindow === event.source);
+  if (frame) closeWindow(frame.closest(".app-window"));
+});
 
 function closeWindow(appWindow) {
   if (!appWindow) return;
@@ -389,6 +583,12 @@ document.addEventListener("click", (event) => {
     preferences.appearance.theme = preferences.appearance.theme === "light" ? "dark" : "light";
     persistPreferences();
     showToast(preferences.appearance.theme === "light" ? "Светлая тема включена" : "Тёмная тема включена");
+    return;
+  }
+
+  const nativeLaunchButton = event.target.closest('[data-action="launch-native"]');
+  if (nativeLaunchButton) {
+    launchNativeApp(nativeLaunchButton.dataset.nativeId, nativeLaunchButton);
     return;
   }
 
@@ -632,6 +832,12 @@ applyPreferences();
 updateClock();
 window.setInterval(updateClock, 1000);
 updateActiveApp();
+syncNativeThemePreference();
+refreshNativeApps();
+window.addEventListener("focus", refreshNativeApps);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refreshNativeApps();
+});
 
 if ("serviceWorker" in navigator &&
     (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {

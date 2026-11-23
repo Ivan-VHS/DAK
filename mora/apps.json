@@ -3,7 +3,7 @@
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
-    "data_policy": "fictional_demo_data"
+    "data_policy": "local_browser_data; explicitly labeled illustrative dashboard values; no connected cloud synchronization"
   },
   "built_in_apps": [
     {
@@ -105,8 +105,8 @@
   ],
   "integration": {
     "manifest_schema": "mora/app-manifest.schema.json",
-    "external_launch": "specified_not_enabled",
-    "execution_rule": "A future native launcher must resolve trusted installed paths and require explicit operator approval. Never execute manifest commands through a shell."
+    "external_launch": "implemented_loopback_allowlist_launcher",
+    "execution_rule": "The browser submits only a registered app ID. The loopback host selects a fixed, reviewed entry point. Manifest strings are descriptive metadata and are never executed."
   },
   "system_services": [
     {
@@ -148,6 +148,58 @@
       "id": "theme-adapter",
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
+    }
+  ],
+  "native_apps": [
+    {
+      "id": "reaper",
+      "name": "Reaper Studio",
+      "category": "developer",
+      "repository": "https://github.com/Ivan-VHS/Reaper",
+      "entrypoint": "reaper_desktop.py",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "launch": "allowlisted_local_process"
+    },
+    {
+      "id": "oplague",
+      "name": "OPlague",
+      "category": "system",
+      "repository": "https://github.com/Ivan-VHS/OPlague",
+      "entrypoint": "oplague_app.py",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "launch": "allowlisted_local_process"
+    },
+    {
+      "id": "ventusample",
+      "name": "VentuSample",
+      "category": "audio",
+      "repository": "https://github.com/Ivan-VHS/VentuSample",
+      "entrypoint": "CMake target VentuSample",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ],
+      "launch": "built_native_target"
+    },
+    {
+      "id": "pytyliki",
+      "name": "Pytyliki",
+      "category": "compute",
+      "repository": "https://github.com/Ivan-VHS/Pytyliki",
+      "entrypoint": "pytyliki-gui.exe",
+      "platforms": [
+        "windows"
+      ],
+      "launch": "built_native_target"
     }
   ]
 }

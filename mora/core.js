@@ -3,7 +3,8 @@ export const RECOVERY_KEY = "duckos.mora.recovery.v1";
 
 export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance",
+  "native-reaper", "native-oplague", "native-ventusample", "native-pytyliki"
 ]);
 
 const CAPABILITIES = ["microphone", "camera", "location", "files", "network", "clipboard"];
@@ -96,7 +97,11 @@ const APP_ALIASES = [
   { id: "updates", pattern: /restore|обновлен|восстановлен/i },
   { id: "runtime", pattern: /bridge|совместим|runtime|\.exe/i },
   { id: "workspace", pattern: /control|настройк|системн/i },
-  { id: "provenance", pattern: /proof|подлин|происхожд|провер.*файл/i }
+  { id: "provenance", pattern: /proof|подлин|происхожд|провер.*файл/i },
+  { id: "native-reaper", pattern: /reaper(?: studio)?|язык reaper/i },
+  { id: "native-oplague", pattern: /oplague|проверка драйверов/i },
+  { id: "native-ventusample", pattern: /ventusample|генератор сэмплов/i },
+  { id: "native-pytyliki", pattern: /pytyliki|процессорн.*систем/i }
 ];
 
 export function buildIntentPlan(rawInput) {

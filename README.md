@@ -1,81 +1,72 @@
-# DuckOS
+# DuckOS · Mora desktop
 
-DuckOS is the operating-system project. **Mora** is its unified desktop environment: the home screen, application launcher, dock, window workspace and system control surface use one visual language and interaction model.
+DuckOS is the operating-system project. **Mora** is its unified desktop: one home screen, one application catalogue, one visual language and one window workspace for browser content, system tools and native project applications.
 
-## Product direction
+## One desktop, three content types
 
-The default application suite contains seven first-party apps: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Their roles, data boundaries and proposed integrations remain defined by the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and the [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The canonical shell is [mora/index.html](mora/index.html), styled by [mora/styles.css](mora/styles.css) and powered by [mora/app.js](mora/app.js). Its catalogue contains 17 entries:
 
-## Mora desktop
+**Seven first-party web workspaces** — Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. They open inside Mora windows using the maintained local browser module runtime in [prototype/mora-home.html](prototype/mora-home.html). They use browser-local data and supported browser APIs. Microphone, camera, screen-capture and clipboard access remain subject to browser permissions. These modules are not native OS services.
 
-**Start here:** [Mora desktop shell](mora/index.html).
+**Six Mora system tools** — Mora AI, Sentinel, Restore, Bridge, Control and Proof. They provide the current browser-shell functions: allowlisted intent planning with explicit approval, local permission preferences, shell-settings recovery, PE/ELF header inspection, workspace preferences and SHA-256 hashing. They do not claim to be kernel services, a native capability broker, atomic OS updater or executable loader.
 
-Mora retains the established indigo-to-rose sunset, layered hills, warm translucent panels and compact dock. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent dark/light theme and a scoped offline cache. It brings the seven application identities and six system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+**Four native project applications** — Reaper Studio, OPlague, VentuSample and Pytyliki. They appear in the same catalogue and open a Mora details window with build readiness and a launch action. Mora starts them as separate OS-managed processes using fixed entry points. Native windows are not embedded in browser iframes.
 
-The system tools are:
+## The 1,000-program ecosystem contract
 
-- **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
-- **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
-- **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
-- **Bridge:** local PE/ELF header inspection. It does not load or launch executables.
-- **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
-- **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
+The 1,000-entry catalogue is an **ownership and integration plan**, not a request to bundle 1,000 applications or copy their source code. The four specialist repositories own their domains:
 
-The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
+| Repository | Assigned entries | Responsibility |
+|---|---:|---|
+| Pytyliki | 200 | CPU/host inventory, bounded benchmarks and system evidence |
+| Reaper | 250 | Language/runtime, compiler, IDE and developer tooling |
+| OPlague | 200 | Device/driver inspection, package and provenance evidence |
+| VentuSample | 350 | DSP, audio analysis, sampling, synthesis and offline rendering |
+| DuckOS | 0 catalogue IDs | OS integration, IPC, system services and packaging |
 
-## Visual system and offline support
+The versioned ownership allocation is in [manifests/ivan-vhs-program-adoption.v1.json](manifests/ivan-vhs-program-adoption.v1.json). Its interfaces, safety rules and adoption order are described in [PROGRAM_CATALOGUE_INTEGRATION.md](docs/PROGRAM_CATALOGUE_INTEGRATION.md). These are integration contracts, not proof that every listed capability is implemented. Hardware inspection stays read-only, Reaper runs in user space, OPlague never installs inspected packages, and VentuSample remains an offline DSP owner unless a separately reviewed audio service exists.
 
-The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The service worker is scoped to the Mora directory, caches only Mora shell assets and removes only older caches named with the `mora-shell-` prefix.
+## Start the combined workspace
 
-## Run and validate
+From the DuckOS repository root:
 
-Open **mora/index.html** in a modern browser. The shell has no external runtime dependencies. A secure browser context may be needed for Web Crypto file hashing.
+    python mora_host.py
 
-Run the JavaScript contract tests with Node.js 18 or newer:
+The local host listens only on 127.0.0.1:43860 and opens the canonical desktop at http://127.0.0.1:43860/mora/. It serves the PWA assets, the seven embedded web modules and the local application-discovery/launch API.
 
-```sh
-npm test
-```
+For a browser-only preview without native launching:
 
-The existing Python validation remains available:
+    python -m http.server 8000
 
-```sh
-python -m pip install jsonschema
-python -m unittest discover -s tests -v
-python tools/validate_app_catalog.py
-```
+Open http://localhost:8000/mora/. The web modules and Mora system tools remain available, while native applications correctly report that the local launcher is not connected.
 
-The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+Python 3.10 or newer is required for the local launcher. Place the four application repositories beside DuckOS or configure their local paths in the user-level Mora workspace settings. Each project retains its own compiler, toolkit, platform and build requirements.
 
-## System architecture and maturity
+## Native launch readiness
 
-The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
-
-| Area | Current Mora shell | Native DuckOS work still required |
+| Application | Existing entry point | Availability requirement |
 |---|---|---|
-| Intent UI and approvals | Limited allowlisted local actions with review | privileged action broker, audit and rollback |
-| Local models and AI-native scheduling | Not connected | local inference runtime, NPU discovery and kernel scheduler |
-| Immutable atomic updates | Local settings snapshot only | signed images, A/B slots, boot verification and recovery |
-| Sandboxing and zero trust | Preferences only | per-process isolation, capability checks and device broker |
-| Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
-| Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
-| Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
-| Windows/Linux compatibility | PE/ELF header inspection | executable loader, Win32/NT, graphics/audio translation and launcher integration |
-| Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
-| Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
+| Reaper Studio | reaper_desktop.py | Reaper checkout and Python/Tk desktop dependencies |
+| OPlague | oplague_app.py | OPlague checkout and Python/Tk desktop dependencies |
+| VentuSample | CMake target VentuSample | Built Qt 6 Widgets desktop target |
+| Pytyliki | pytyliki-gui.exe | Built Windows GUI target |
 
-No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
+A card is not marked ready merely because a repository is listed. Mora checks the local checkout and expected executable target. Unbuilt targets remain disabled with an explanatory status.
 
-## Documentation
+## Shared design and maturity
 
-Start with the [DuckOS documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines terminology, maturity states, runtime claims and evidence requirements.
+The authoritative visual and semantic tokens are [MORA_DESIGN_SYSTEM.md](MORA_DESIGN_SYSTEM.md) and [mora/theme.json](mora/theme.json). The PWA, embedded web modules and native adapters use the same dark/light palette, typography hierarchy, spacing, focus, motion and surface roles. The local host passes MORA_THEME_MODE=dark or light to newly started native processes. Existing native windows retain their current appearance until restarted.
 
-- [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
-- [Mora shell and native integration](docs/MORA_INTEGRATION.md)
-- [Mora machine-readable system policy](mora/system-policy.json)
+The service worker is scoped to /mora/ and caches the current modular shell assets. The local /api/ endpoints are not used as cached availability or launch state.
 
-Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests. Architecture proposals and roadmap entries are not implementation evidence.
+Browser and native capability boundaries remain explicit. The presence of a card, specification or policy toggle does not establish that a kernel, driver, compositor, updater, sandbox or hardware service is implemented. Current maturity is described in [Mora integration](docs/MORA_INTEGRATION.md), [the detailed desktop integration guide](docs/MORA_DESKTOP.md) and the [system policy](mora/system-policy.json).
 
-## Attribution
+## Validate
 
-Project author/developer: **Ivan-VHS**. Preserve the authorship, contributions and license notices of existing contributors and dependencies.
+    npm test
+    python -m pip install jsonschema
+    python -m unittest discover -s tests -v
+    python tools/validate_app_catalog.py
+    python tools/validate_program_adoption.py
+
+Maintained by Ivan-VHS. Preserve the authorship, contributions and license notices of existing contributors and dependencies.

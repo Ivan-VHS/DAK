@@ -1,31 +1,33 @@
 # DuckOS documentation
 
-## Desktop and application interfaces
+## Mora desktop and application content
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md).
+[Mora unified desktop](../mora/index.html) is the canonical browser shell and system-control surface. It presents seven browser workspaces, six Mora system tools and four native project launch integrations in one catalogue.
 
-[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
+- [Mora desktop and web/native integration](MORA_DESKTOP.md) explains routes, embedded web modules, local native launch readiness, themes and process boundaries.
+- [Mora shell and native system integration](MORA_INTEGRATION.md) records the intent, permission, recovery and system-service maturity limits.
+- [Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical visual standard; [mora/theme.json](../mora/theme.json) contains versioned color, shape, spacing, typography and motion tokens.
+- [Mora application registry](../mora/apps.json) records first-party app panels and external native project tools.
+- [Mora system policy](../mora/system-policy.json) describes implemented shell behavior and future native service boundaries.
 
-## Visual design
+## Project catalogue and ownership
 
-[Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical interface standard; [mora/theme.json](../mora/theme.json) contains the versioned color, shape, spacing, typography and motion tokens.
+[1,000-program catalogue integration](PROGRAM_CATALOGUE_INTEGRATION.md) assigns ownership and integration boundaries across Pytyliki, Reaper, OPlague, VentuSample and DuckOS. Its machine-readable source is [ivan-vhs-program-adoption.v1.json](../manifests/ivan-vhs-program-adoption.v1.json), validated against [its schema](../schemas/ivan-vhs-program-adoption.v1.schema.json).
 
-## Runnable prototypes
+The ownership catalogue is an architecture/adoption contract. It does not assert that 1,000 upstream packages are copied, installed or implemented.
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and six system tools, with local intent, preference, recovery and file-inspection contracts.
+## Product application specification
 
-[The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
+[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven first-party web app identities, their prototype scope, boundaries and proposed cross-app workflows. The versioned inventory is [preinstalled-applications.v1.json](../catalogs/preinstalled-applications.v1.json), validated against [its JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
 
-## Product specification
+[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the browser module. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
-[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
+## DuckOS system contracts
 
-## Normative standard
+The [system-manifest schema](../schemas/system-manifest.v1.schema.json), [driver-module schema](../schemas/driver-module.v1.schema.json) and [image-layout schema](../schemas/image-layout-plan.v1.schema.json) define build, module and image metadata. The browser shell does not claim to implement the kernel, driver manager, boot chain or OS image updater.
 
-[Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
+## Normative standards and validation
 
-## Documentation rules
+[Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines shared maturity, evidence and writing rules. The [language quality standard](LANGUAGE_QUALITY.md) and prose diagnostics describe the repository's documentation review conventions.
 
-Describe current behavior from the source, build configuration and tests. Mark designs and future work as specified or planned; do not present them as implemented. Keep kernel, boot, driver, runtime, graphics and desktop claims tied to concrete source paths and reproducible verification evidence.
-
-This index is a documentation entry point. It does not itself assert that any particular subsystem is implemented or absent.
+Describe current behavior from source, build configuration and tests. Mark specifications and planned capabilities clearly; do not present browser controls, metadata or architecture proposals as completed native OS services.
