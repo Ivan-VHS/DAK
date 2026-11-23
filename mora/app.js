@@ -90,6 +90,21 @@ function persistPreferences() {
   preferences = normalizePreferences(preferences);
   savePreferences(preferences);
   applyPreferences();
+  syncNativeThemePreference();
+}
+
+async function syncNativeThemePreference() {
+  try {
+    const response = await fetch("/api/theme", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ theme: preferences.appearance.theme })
+    });
+    if (!response.ok) return false;
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function capabilityRow(id, title, description) {
@@ -281,6 +296,7 @@ async function launchNativeApp(nativeId, button) {
   button.disabled = true;
   button.textContent = "Запуск…";
   try {
+    await syncNativeThemePreference();
     const response = await fetch("/api/launch/" + encodeURIComponent(nativeId), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -816,6 +832,7 @@ applyPreferences();
 updateClock();
 window.setInterval(updateClock, 1000);
 updateActiveApp();
+syncNativeThemePreference();
 refreshNativeApps();
 window.addEventListener("focus", refreshNativeApps);
 document.addEventListener("visibilitychange", () => {
