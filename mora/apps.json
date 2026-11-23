@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -195,6 +195,13 @@
       "panel": "mora/app.js#system-apps",
       "maturity": "partial_catalogue_and_host_contracts",
       "catalogue": "../catalogs/system-applications.v1.json"
+    },
+    {
+      "id": "mora-commons",
+      "name": "Mora Commons",
+      "category": "catalogue",
+      "panel": "mora/app.js#mora-commons",
+      "maturity": "catalog_implemented_products_specified"
     }
   ],
   "widgets": [

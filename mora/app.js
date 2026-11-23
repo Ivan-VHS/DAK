@@ -9,6 +9,11 @@ import {
   savePreferences,
   validateRecoverySnapshot
 } from "./core.js";
+import {
+  MORA_COMMONS_APPS,
+  MORA_COMMONS_CATEGORIES,
+  filterCommonsApps
+} from "./commons-catalog.js";
 
 const systemApps = [
   { id: "sys-settings", name: "Настройки", subtitle: "Параметры и разрешения", glyph: "⚙", color: "#D58B3D", role: "Темы, разрешения, профили изоляции, параметры питания и состояние A/B-образов.", apis: "os.settings.v1 · os.permissions.v1 · os.images.v1 · os.bench.v1" },
@@ -56,11 +61,90 @@ const appDefinitions = {
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
+  "mora-commons": { name: "Mora Commons", subtitle: "Каталог приложений", color: "#C19A6A", glyph: "▦" },
   "system-apps": { name: "System Apps", subtitle: "15 системных приложений", color: "#D58B3D", glyph: "▦" },
   ...Object.fromEntries(systemApps.map((item) => [item.id, {
     name: item.name, subtitle: item.subtitle, color: item.color, glyph: item.glyph
   }]))
 };
+
+
+const COMMONS_FAVORITES_KEY = "duckos.mora.commons.favorites.v1";
+
+function readCommonsFavorites() {
+  try {
+    const raw = localStorage.getItem(COMMONS_FAVORITES_KEY);
+    const saved = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(saved)) return new Set();
+    const knownIds = new Set(MORA_COMMONS_APPS.map((item) => item.id));
+    return new Set(saved.filter((id) => knownIds.has(id)));
+  } catch {
+    return new Set();
+  }
+}
+
+function escapeCommonsText(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[character]);
+}
+
+function renderCommonsResults(owner) {
+  if (!owner) return;
+  const results = owner.querySelector("[data-commons-results]");
+  const search = owner.querySelector("[data-commons-search]");
+  const status = owner.querySelector("[data-commons-status]");
+  if (!results || !search) return;
+
+  const activeFilter = owner.querySelector("[data-commons-category].active");
+  const category = activeFilter ? activeFilter.dataset.commonsCategory : "all";
+  const matches = filterCommonsApps(search.value, category);
+  const favorites = readCommonsFavorites();
+
+  results.innerHTML = matches.map((item) => {
+    const favorite = favorites.has(item.id);
+    const capabilities = item.capabilities.map((capability) =>
+      "<li>" + escapeCommonsText(capability) + "</li>"
+    ).join("");
+    return '<article class="commons-card">' +
+      '<div class="commons-card-top"><span class="commons-glyph">' + escapeCommonsText(item.glyph) + '</span>' +
+      '<button type="button" class="commons-favorite" data-commons-favorite="' + escapeCommonsText(item.id) +
+      '" aria-label="' + (favorite ? "Убрать из избранного" : "Добавить в избранное") +
+      '" aria-pressed="' + String(favorite) + '">' + (favorite ? "★" : "☆") + '</button></div>' +
+      '<p class="commons-category-label">' + escapeCommonsText(MORA_COMMONS_CATEGORIES.find((categoryItem) => categoryItem.id === item.category)?.title || item.category) + '</p>' +
+      '<h3>' + escapeCommonsText(item.name) + '</h3>' +
+      '<p class="commons-subtitle">' + escapeCommonsText(item.subtitle) + '</p>' +
+      '<p class="commons-description">' + escapeCommonsText(item.description) + '</p>' +
+      '<details><summary>Возможности</summary><ul>' + capabilities + '</ul></details>' +
+      '</article>';
+  }).join("");
+
+  if (status) {
+    status.textContent = matches.length
+      ? "Найдено: " + matches.length + " из " + MORA_COMMONS_APPS.length
+      : "По этому запросу ничего не найдено.";
+  }
+}
+
+function commonsPanelMarkup() {
+  const filters = [{ id: "all", title: "Все" }, ...MORA_COMMONS_CATEGORIES];
+  return '<p class="window-kicker">MORA COMMONS · КАТАЛОГ ПРИЛОЖЕНИЙ</p>' +
+    '<h2 class="window-heading">Mora Commons</h2>' +
+    '<p class="window-copy">Единый каталог из пятнадцати прикладных инструментов. Ищите по названию, назначению и возможностям; избранное хранится локально в профиле браузера.</p>' +
+    '<label class="commons-search-label" for="commons-search">Поиск по каталогу</label>' +
+    '<input id="commons-search" class="commons-search" type="search" data-commons-search placeholder="Например, затяжки, тренировка, маршрут…" autocomplete="off">' +
+    '<div class="commons-filters" data-commons-filters role="group" aria-label="Категории каталога">' +
+      filters.map((item, index) =>
+        '<button type="button" class="commons-filter' + (index === 0 ? " active" : "") +
+        '" data-commons-category="' + escapeCommonsText(item.id) +
+        '" aria-pressed="' + String(index === 0) + '">' + escapeCommonsText(item.title) + '</button>'
+      ).join("") +
+    '</div>' +
+    '<p class="commons-status" data-commons-status aria-live="polite">Загружаю каталог…</p>' +
+    '<div class="commons-grid" data-commons-results></div>' +
+    '<p class="window-copy">Каталог и спецификации доступны офлайн. Доступность отдельного нативного пакета зависит от его реализации и сборки DuckOS.</p>';
+}
+
 
 const windowLayer = document.getElementById("window-layer");
 const activeAppLabel = document.getElementById("active-app");
@@ -354,6 +438,8 @@ function extensionPanelMarkup(appId) {
 
 function panelMarkup(appId) {
   switch (appId) {
+    case "mora-commons":
+      return commonsPanelMarkup();
     case "system-apps":
       return '<p class="window-kicker">DUCKOS SYSTEM UTILITIES · CATALOGUE V1</p>' +
         '<h2 class="window-heading">Системные приложения</h2>' +
@@ -556,6 +642,7 @@ function openApp(appId) {
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
+  if (appId === "mora-commons") renderCommonsResults(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
@@ -613,6 +700,36 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 }
 
 document.addEventListener("click", (event) => {
+  const commonsFavorite = event.target.closest("[data-commons-favorite]");
+  if (commonsFavorite) {
+    const owner = commonsFavorite.closest(".app-window");
+    const favorites = readCommonsFavorites();
+    const appId = commonsFavorite.dataset.commonsFavorite;
+    if (!MORA_COMMONS_APPS.some((item) => item.id === appId)) return;
+    if (favorites.has(appId)) favorites.delete(appId);
+    else favorites.add(appId);
+    try {
+      localStorage.setItem(COMMONS_FAVORITES_KEY, JSON.stringify([...favorites]));
+      renderCommonsResults(owner);
+      showToast(favorites.has(appId) ? "Добавлено в избранное" : "Удалено из избранного");
+    } catch {
+      const status = owner && owner.querySelector("[data-commons-status]");
+      if (status) status.textContent = "Не удалось сохранить избранное в профиле браузера.";
+    }
+    return;
+  }
+
+  const commonsCategory = event.target.closest("[data-commons-category]");
+  if (commonsCategory) {
+    const owner = commonsCategory.closest(".app-window");
+    owner.querySelectorAll("[data-commons-category]").forEach((button) => {
+      const active = button === commonsCategory;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    renderCommonsResults(owner);
+    return;
+  }
   const themeToggle = event.target.closest('[data-action="toggle-theme"]');
   if (themeToggle) {
     const nextTheme = { amber: "dark", dark: "light", light: "amber" };
@@ -771,6 +888,11 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const commonsSearch = event.target.closest("[data-commons-search]");
+  if (commonsSearch) {
+    renderCommonsResults(commonsSearch.closest(".app-window"));
+    return;
+  }
   const beatRange = event.target.closest("[data-beat-range]");
   if (beatRange) {
     const output = beatRange.closest(".extension-range-row").querySelector('[data-beat-value="' + beatRange.dataset.beatRange + '"]');

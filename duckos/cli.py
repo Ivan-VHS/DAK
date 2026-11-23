@@ -27,41 +27,6 @@ from .deployment import build_release_bundle, create_deployment_plan, verify_rel
 
 
 def _load(path: Path) -> Any:
-    desktop = commands.add_parser("desktop", help="DuckOS desktop application and bench contracts")
-    desktop_commands = desktop.add_subparsers(dest="desktop_command", required=True)
-    desktop_commands.add_parser("catalog", help="show the fifteen system utility applications")
-
-    slots = desktop_commands.add_parser("slots", help="manage persistent numbered launcher slots")
-    slots.add_argument("--state", type=Path, required=True, help="launcher state JSON path")
-    slot_commands = slots.add_subparsers(dest="slot_action", required=True)
-    slot_commands.add_parser("list", help="list all numbered slots")
-    assign_slot = slot_commands.add_parser("assign", help="assign an application to a slot")
-    assign_slot.add_argument("slot", type=int)
-    assign_slot.add_argument("app_id")
-    assign_slot.add_argument("--replace", action="store_true", help="explicitly replace an occupied slot")
-    assign_slot.add_argument("--unpin", action="store_true", help="assign without pinning")
-    unassign_slot = slot_commands.add_parser("unassign", help="clear a slot without shifting other slots")
-    unassign_slot.add_argument("slot", type=int)
-    resolve_slot = slot_commands.add_parser("resolve", help="resolve a slot to its application identity")
-    resolve_slot.add_argument("slot", type=int)
-
-    package_verify = desktop_commands.add_parser("package-verify", help="calculate SHA-256 and evaluate local package trust")
-    package_verify.add_argument("file", type=Path)
-    package_verify.add_argument("--trust-store", type=Path, required=True)
-    package_approve = desktop_commands.add_parser("package-approve", help="approve one unsigned file by exact SHA-256")
-    package_approve.add_argument("file", type=Path)
-    package_approve.add_argument("--trust-store", type=Path, required=True)
-    package_approve.add_argument("--confirm-unsigned", action="store_true", help="confirm this exact unsigned file")
-
-    image_state = desktop_commands.add_parser("image-state", help="show the local A/B image-slot state")
-    image_state.add_argument("--state", type=Path, required=True)
-
-    bench_profile = desktop_commands.add_parser("bench-profile", help="validate a board-specific hardware bench profile")
-    bench_profile.add_argument("file", type=Path)
-
-    audit_verify = desktop_commands.add_parser("audit-verify", help="verify an audit/serial journal hash chain")
-    audit_verify.add_argument("file", type=Path)
-
     try:
         if path.stat().st_size > 4 * 1024 * 1024:
             raise ValueError("input JSON exceeds 4 MiB")
@@ -174,6 +139,40 @@ def main(argv: list[str] | None = None) -> int:
         help="append one target argument; repeat to add more than one",
     )
 
+    desktop = commands.add_parser("desktop", help="DuckOS desktop application and bench contracts")
+    desktop_commands = desktop.add_subparsers(dest="desktop_command", required=True)
+    desktop_commands.add_parser("catalog", help="show the fifteen system utility applications")
+
+    slots = desktop_commands.add_parser("slots", help="manage persistent numbered launcher slots")
+    slots.add_argument("--state", type=Path, required=True, help="launcher state JSON path")
+    slot_commands = slots.add_subparsers(dest="slot_action", required=True)
+    slot_commands.add_parser("list", help="list all numbered slots")
+    assign_slot = slot_commands.add_parser("assign", help="assign an application to a slot")
+    assign_slot.add_argument("slot", type=int)
+    assign_slot.add_argument("app_id")
+    assign_slot.add_argument("--replace", action="store_true", help="explicitly replace an occupied slot")
+    assign_slot.add_argument("--unpin", action="store_true", help="assign without pinning")
+    unassign_slot = slot_commands.add_parser("unassign", help="clear a slot without shifting other slots")
+    unassign_slot.add_argument("slot", type=int)
+    resolve_slot = slot_commands.add_parser("resolve", help="resolve a slot to its application identity")
+    resolve_slot.add_argument("slot", type=int)
+
+    package_verify = desktop_commands.add_parser("package-verify", help="calculate SHA-256 and evaluate local package trust")
+    package_verify.add_argument("file", type=Path)
+    package_verify.add_argument("--trust-store", type=Path, required=True)
+    package_approve = desktop_commands.add_parser("package-approve", help="approve one unsigned file by exact SHA-256")
+    package_approve.add_argument("file", type=Path)
+    package_approve.add_argument("--trust-store", type=Path, required=True)
+    package_approve.add_argument("--confirm-unsigned", action="store_true", help="confirm this exact unsigned file")
+
+    image_state = desktop_commands.add_parser("image-state", help="show the local A/B image-slot state")
+    image_state.add_argument("--state", type=Path, required=True)
+
+    bench_profile = desktop_commands.add_parser("bench-profile", help="validate a board-specific hardware bench profile")
+    bench_profile.add_argument("file", type=Path)
+
+    audit_verify = desktop_commands.add_parser("audit-verify", help="verify an audit/serial journal hash chain")
+    audit_verify.add_argument("file", type=Path)
     try:
         args = parser.parse_args(argv)
         if args.command == "build-release":

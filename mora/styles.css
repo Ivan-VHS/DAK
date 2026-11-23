@@ -1000,3 +1000,25 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   .dock-item {width:33px;height:33px}
   .dock-glyph {font-size:20px}
 }
+
+ 
+/* Mora Commons catalogue */
+.commons-search-label {display:block;margin:12px 0 6px;color:var(--muted);font-size:11px}
+.commons-search {width:100%;box-sizing:border-box;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);font:inherit}
+.commons-search:focus-visible,.commons-filter:focus-visible,.commons-favorite:focus-visible {outline:2px solid var(--accent,#C19A6A);outline-offset:2px}
+.commons-filters {display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.commons-filter {border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:transparent;color:var(--muted);font-size:10px;cursor:pointer}
+.commons-filter.active {border-color:var(--accent,#C19A6A);background:color-mix(in srgb,var(--accent,#C19A6A) 15%,transparent);color:var(--text)}
+.commons-status {margin:8px 0;color:var(--muted);font-size:11px}
+.commons-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.commons-card {min-width:0;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.commons-card-top {display:flex;align-items:center;justify-content:space-between}
+.commons-glyph {display:inline-grid;place-items:center;min-width:32px;height:32px;padding:0 5px;border-radius:10px;background:color-mix(in srgb,var(--accent,#C19A6A) 16%,transparent);color:var(--text);font-size:14px}
+.commons-favorite {border:0;background:transparent;color:var(--accent,#C19A6A);font-size:21px;cursor:pointer}
+.commons-category-label {margin:10px 0 4px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.commons-card h3 {margin:0;font-size:14px}
+.commons-subtitle {margin:4px 0;color:var(--muted);font-size:11px}
+.commons-description {font-size:11px;line-height:1.55}
+.commons-card details {margin-top:8px;color:var(--muted);font-size:10px}
+.commons-card details ul {padding-left:17px;line-height:1.6}
+@media (max-width:560px) {.commons-grid {grid-template-columns:1fr}}
