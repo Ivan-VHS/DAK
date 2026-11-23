@@ -178,9 +178,11 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
         if not isinstance(network.get(field), bool):
             fail(f"network.{field}", "Ожидается логическое значение")
 
-    if network.get("ipv4_method") not in {"dhcp", "static"}:
+    ipv4_method = network.get("ipv4_method")
+    ipv6_method = network.get("ipv6_method")
+    if not isinstance(ipv4_method, str) or ipv4_method not in {"dhcp", "static"}:
         fail("network.ipv4_method", "Выберите DHCP или Static")
-    if network.get("ipv6_method") not in {"auto", "static"}:
+    if not isinstance(ipv6_method, str) or ipv6_method not in {"auto", "static"}:
         fail("network.ipv6_method", "Выберите автоматическую или ручную настройку IPv6")
 
     if network.get("ipv4_method") == "static" and network.get("ipv4_enabled") is True:
@@ -270,7 +272,8 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
         if not valid_proxy:
             fail("network.proxy_url", "Поддерживаются адреса http(s):// или socks5://")
 
-    if power.get("mode") not in {"eco", "quiet", "balanced", "performance", "maximum"}:
+    power_mode = power.get("mode")
+    if not isinstance(power_mode, str) or power_mode not in {"eco", "quiet", "balanced", "performance", "maximum"}:
         fail("power.mode", "Неизвестный профиль питания")
     for field, low, high in (
         ("eco_threshold", 5, 50),
@@ -286,7 +289,8 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
     if not isinstance(power.get("eco_only_on_battery"), bool):
         fail("power.eco_only_on_battery", "Ожидается логическое значение")
 
-    if appearance.get("theme") not in {"system", "light", "dark"}:
+    theme = appearance.get("theme")
+    if not isinstance(theme, str) or theme not in {"system", "light", "dark"}:
         fail("appearance.theme", "Выберите системную, светлую или тёмную тему")
     if not isinstance(appearance.get("accent"), str) or not HEX_COLOR.fullmatch(appearance.get("accent", "")):
         fail("appearance.accent", "Акцент должен быть в формате #RRGGBB")
@@ -294,7 +298,8 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
         value = appearance.get(field)
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0.75 <= value <= 2.0:
             fail(f"appearance.{field}", "Масштаб должен быть от 0.75 до 2.0")
-    if appearance.get("density") not in {"compact", "comfortable"}:
+    density = appearance.get("density")
+    if not isinstance(density, str) or density not in {"compact", "comfortable"}:
         fail("appearance.density", "Выберите компактную или обычную плотность")
     if not isinstance(appearance.get("reduced_motion"), bool):
         fail("appearance.reduced_motion", "Ожидается логическое значение")
@@ -315,13 +320,14 @@ def validate_settings(payload: Any) -> list[dict[str, str]]:
         return [{"field": "root", "message": "Настройки должны быть JSON-объектом"}]
     if payload.get("schema") != SCHEMA:
         return [{"field": "schema", "message": f"Ожидается схема {SCHEMA}"}]
-    if payload.get("version") != 1:
+    version = payload.get("version")
+    if isinstance(version, bool) or not isinstance(version, int) or version != 1:
         return [{"field": "version", "message": "Неподдерживаемая версия настроек"}]
     profiles = payload.get("profiles")
     if not isinstance(profiles, dict) or not 1 <= len(profiles) <= 32:
         return [{"field": "profiles", "message": "Нужно от 1 до 32 профилей"}]
     active = payload.get("active_profile")
-    if active not in profiles:
+    if not isinstance(active, str) or active not in profiles:
         return [{"field": "active_profile", "message": "Активный профиль отсутствует"}]
 
     errors: list[dict[str, str]] = []
