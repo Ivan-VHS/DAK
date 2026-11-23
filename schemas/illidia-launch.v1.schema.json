@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/illidia-launch.v1.schema.json",
+  "title": "Illidia game launch result",
+  "type": "object",
+  "required": [
+    "schema", "status", "game_id", "game_name", "target", "backend",
+    "pid", "started_at", "compatibility_data", "waited_for_exit",
+    "exit_code", "execution_started", "warnings"
+  ],
+  "properties": {
+    "schema": { "const": "duckos.illidia-launch.v1" },
+    "status": { "enum": ["started", "finished"] },
+    "game_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,47}$" },
+    "game_name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "target": { "type": "string", "minLength": 1 },
+    "backend": { "enum": ["native", "wine", "proton", "crossover", "bottles"] },
+    "pid": { "type": "integer", "minimum": 1 },
+    "started_at": { "type": "string", "format": "date-time" },
+    "compatibility_data": { "type": ["string", "null"] },
+    "waited_for_exit": { "type": "boolean" },
+    "exit_code": { "type": ["integer", "null"] },
+    "execution_started": { "const": true },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
