@@ -134,14 +134,22 @@ def _linux_snapshot(sys_root: Path = Path("/sys"), proc_root: Path = Path("/proc
     report["firmware"] = {key: value for key, value in firmware.items() if value is not None}
 
     cpuinfo = _read_text(proc_root / "cpuinfo", 2 * 1024 * 1024)
-    cpu_model = None
+    cpu_fields: dict[str, str] = {}
     if cpuinfo:
         for line in cpuinfo.splitlines():
             key, separator, value = line.partition(":")
-            if separator and key.strip().lower() in {"model name", "hardware", "processor"}:
-                cpu_model = value.strip()
-                if cpu_model:
-                    break
+            field = key.strip().lower()
+            candidate = value.strip()
+            if separator and field in {"model name", "hardware", "processor"} and candidate:
+                cpu_fields.setdefault(field, candidate)
+
+    # Linux commonly puts "processor : 0" before the model name. That is a
+    # logical CPU index, not a hardware model, so prefer explicit model fields.
+    cpu_model = cpu_fields.get("model name") or cpu_fields.get("hardware")
+    if cpu_model is None:
+        processor_value = cpu_fields.get("processor")
+        if processor_value and not processor_value.isdecimal():
+            cpu_model = processor_value
     max_clock_khz = _read_integer(sys_root / "devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq")
     current_clock_khz = _read_integer(sys_root / "devices/system/cpu/cpu0/cpufreq/scaling_cur_freq")
     cpu = {
