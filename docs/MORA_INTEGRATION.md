@@ -1,100 +1,54 @@
-# Mora desktop shell and native system integration
+# Mora native desktop
 
-## Role in DuckOS
+Mora is DuckOS's native user-space desktop application and application launcher. It is implemented with Python's Tk toolkit and is started with `duckos mora gui` or `duckos-mora`.
 
-DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
+## Runtime boundary
 
-The default Mora Amber profile uses warm vertical drapery with a repeating fold rhythm, a deep radial workspace centre, walnut/graphite panels, muted olive support surfaces and one restrained red critical marker. Material depth comes from soft light, edge highlights and tonal separation rather than neon fills. The compact dock and existing app IDs remain stable; Dark and Light remain selectable alternatives.
+Mora is a regular host desktop process. It uses native Tk widgets directly and does not contain or load HTML, CSS, browser JavaScript, a WebView, a browser engine, a web manifest or a service worker.
 
-## Shell components
+This does not make Mora the DuckOS compositor. The production compositor, window manager, virtual workspaces, system notification service, process manager and kernel-enforced capability broker remain planned system components. The Mora process does not claim to boot DuckOS or replace the host desktop.
 
-| Surface | Responsibility | Current boundary |
-|---|---|---|
-| Desktop | Clock, status bar, app launcher, widgets and dock | Browser-hosted |
-| App windows | Focus, move, close, running state and Escape handling | DOM window manager |
-| Mora AI | Parse safe local intents, preview plan, request approval | Allowlisted rules, no model or shell |
-| Sentinel | Show and store capability preferences | No native process enforcement |
-| Restore | Save/restore shell settings and preview an update sequence | No OS image update/rollback |
-| Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
-| Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
-| Proof | Calculate local SHA-256 | No signer or C2PA verification |
-| Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
+## Included native surfaces
 
-The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
+- Application launcher with search and category filters, populated from the versioned Mora registry.
+- One black, white and yellow Duck palette, with shared JSON design tokens.
+- Local shell preferences for focus mode, reduced motion, density and a user-selected preference profile.
+- A bounded rule-based intent preview with explicit approval. Only listed local actions are supported; arbitrary command execution is not available.
+- Sentinel preference switches. These are local profile values, not device or process permissions.
+- Restore export and import of normalized Mora preferences only. It is not an OS updater or partition rollback system.
+- Proof SHA-256 for a selected regular local file, with a 512 MiB file-size limit. A digest is not proof of authorship or signature validity.
+- Bridge / EXEdotEXE read-only PE and ELF inspection through DuckOS's compatibility parser. Selecting a file does not execute it, load a DLL or install a runtime.
+- Mora Commons catalogue search from packaged JSON data.
+- Duck Desktop and Reaper Studio entry points to their existing native user-space tools.
 
-Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. The panels provide bounded local browser interactions, share the existing window manager and profile storage, and do not claim native service implementations.
+## Data and safety
 
-## Run and validate
+Settings are written to the per-user DuckOS/Mora configuration directory using an atomic JSON replacement. Unknown fields and capability names are discarded during normalization. The settings backup contains only the known preference schema.
 
-Open **mora/index.html** directly in a modern browser. The desktop itself requires no network request. Some browser APIs such as Web Crypto may require a secure context.
+The Sentinel panel describes preferences only. The shell cannot enforce device access or process capabilities. Do not treat a checkbox as a kernel permission.
 
-Run **npm test** with Node.js 18 or newer. Contract tests check the static shell, registry and local policy helpers. They do not certify native OS operation or interaction with actual hardware.
+The Bridge panel only inspects file structure. It never launches the selected target. The Proof panel calculates SHA-256 from local bytes and does not establish publisher identity, signing trust or content provenance.
 
-## Intent actions and approval
+## Visual system
 
-Mora AI accepts only a bounded allowlist of local operations: open a built-in Mora panel, change the shell focus flag, select one of three shell resource profiles, or enable reduced motion. The proposed plan is rendered as text and is not executed until the user presses **Подтвердить план**.
+The single Duck palette is black, white and yellow. Yellow is used for primary actions, active navigation and keyboard focus. Reduced-motion and density preferences are persisted, but they do not alter the host window manager or global desktop.
 
-Unsupported text is rejected. The agent cannot run a command line, interpolate a manifest entry point, install packages, edit arbitrary files, change system permissions or make network requests. The current rule engine is not a neural model.
+## Build and run
 
-A future agent service must return a typed action plan with versioned schemas, target identities, required capabilities, impact summaries, reversible operations, expiration and an audit record. A native approval broker must reject unrecognized actions and enforce confirmation at the process boundary.
+Install the package in the current environment and start the native shell:
 
-## Permission and isolation model
+```sh
+python -m pip install .
+duckos mora gui
+```
 
-Sentinel stores only six shell preferences: microphone, camera, location, personal files, network and clipboard. All begin denied. A switch changes the local Mora preference object; it does not grant or revoke permission in the browser, kernel or another process.
-
-The native design must use deny-by-default capabilities, short-lived grants, per-app identity, path and device scoping, revocation, resource limits and audit events. Apps must run inside an actual sandbox before this UI can be represented as an enforcement surface.
-
-## Recovery and atomic updates
-
-Restore can save and restore the normalized Mora preference object using a versioned local snapshot. It does not back up user files, packages, boot metadata or OS partitions.
-
-The future updater should download signed metadata, verify the complete payload, stage an inactive system slot, check capacity and compatibility, run health tests, switch boot selection atomically and preserve the previous slot until first boot is accepted. Recovery must work when an update is interrupted. This flow is currently displayed as an architecture preview only.
-
-## Compatibility boundary
-
-Bridge reads a user-selected local file and inspects PE or ELF headers without executing it or uploading it. Detecting an x86/x64/ARM64 machine value is not evidence that the corresponding ABI or graphics stack can run.
-
-A native compatibility environment still needs PE loading, Win32/NT services, process and memory mapping, API translation, DirectX/Vulkan/OpenGL support, audio, input, prefixes, launchers and a clear anti-cheat compatibility policy. Anti-cheat bypass is not part of this design.
-
-## Provenance
-
-Proof computes SHA-256 through Web Crypto when available. A digest can identify a file for comparison; it does not establish authorship, signer trust, edit history or C2PA provenance. Those require manifest parsing, signature verification, trusted certificate policy and explicit failure reporting.
-
-## Installable web shell
-
-The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript, catalogue, policy and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
-
-The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser shell provides a persisted light/dark preference; native toolkit adapters must implement the same semantic tokens independently.
-
-## Responsive workspace and accessibility
-
-Mora supports a responsive browser layout and a reduced-motion preference. Its focus and power-profile controls affect only the shell presentation. Native display migration, XR, voice, gesture input, high-contrast profiles, VRR and hardware resource scheduling require dedicated services and accessibility testing.
-
-## Data handling
-
-All legacy photo, budget, game, compass, device and audio content remains clearly identified as fictional demo content. New settings are stored in the browser's local storage. Selected executable and provenance files are read locally by the page; the shell does not transmit them.
-
-The local browser profile can be removed by clearing site data. The snapshot is a copy of Mora preferences only and should not be called a system restore point.
-
-## External application integration
-
-External projects may publish **integrations/mora/manifest.json** using **mora/app-manifest.schema.json**. The manifest describes an entry point; it does not install the app, confer trust or grant capabilities.
-
-A native launcher must discover manifests only in trusted installation roots, validate the full schema, resolve paths without traversal, launch with an argument vector rather than a shell, show publisher and requested capabilities, require first-run approval and log failures. The current shell does not launch external processes.
+Python must include Tk support. On minimal Linux installations this may require the distribution's `python3-tk` package. No Node.js, browser or web runtime is required.
 
 ## Maturity vocabulary
 
-- **Implemented:** exercised by this repository's code within the browser shell.
-- **Partial:** a bounded part works, but the complete service is absent.
-- **Specified:** the contract and policy are documented but not enforced.
+- **Implemented:** the native user-space behavior is present and covered by tests.
+- **Partial:** a bounded local panel exists; the complete service or persistent app data layer is absent.
+- **Specified:** a design or catalogue entry exists, but no native behavior is claimed.
 - **Planned:** implementation is not present.
-- **Verified:** reserved for a feature with repeatable tests and evidence at the layer being claimed.
 
-Never promote a feature to native/verified status because its UI panel exists.
-
-
-## Duck Desktop integration
-
-Mora exposes Duck Desktop as a system tool, but the browser panel is informational. It gives the user the `duckos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DuckOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
-
-Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.
+A native panel does not prove that the corresponding kernel service, driver or bootable OS component exists.
