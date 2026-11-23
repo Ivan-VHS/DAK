@@ -42,6 +42,8 @@ python -m http.server 4173 --directory desktop
 PYTHONPATH=native/services python -m duckos_services news serve
 ~~~
 
+В Windows PowerShell сначала выполните `$env:PYTHONPATH = "native/services"`, затем `python -m duckos_services news serve`.
+
 Затем откройте http://127.0.0.1:4173 и выберите «Новости» в sidebar, dock или через Ctrl+K. Без backend оболочка работает, а газета показывает понятный статус подключения вместо вымышленных публикаций.
 
 Статус CPU/GPU/RAM/SSD в браузерной демонстрации помечен как **demo**: оболочка не выдаёт синтетические графики за показания компьютера.
