@@ -1,7 +1,7 @@
 # Mora Commons — единый центр приложений DuckOS
 
 **Product ID:** ivan-vhs.duckos.mora-commons  
-**Catalog module:** mora/commons-catalog.js  
+**Native catalogue data:** mora/commons-catalog.json  
 **Maturity:** the Mora Commons catalogue interface is implemented in the browser shell; the fifteen listed application products are specified, not shipped native applications.
 
 ## Purpose
@@ -19,7 +19,7 @@ The catalogue groups applications by **user task**, never by gender. Every perso
 | Outdoors and autonomy | DeadReckon, CampLoad, WatchDesk |
 | Work and personal discipline | MarginLine, ColdStart |
 
-Each catalogue record defines a purpose, initial capability list, keywords and a specified maturity boundary in mora/commons-catalog.js.
+Each catalogue record defines a purpose, initial capability list, keywords and a specified maturity boundary in mora/commons-catalog.json.
 
 ## Implemented in the Mora shell
 
