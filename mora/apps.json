@@ -77,6 +77,13 @@
       "maturity": "header_inspection_only"
     },
     {
+      "id": "compatibility",
+      "name": "Compatibility",
+      "category": "compatibility",
+      "panel": "mora/app.js#compatibility",
+      "maturity": "host_cli_partial"
+    },
+    {
       "id": "workspace",
       "name": "Control",
       "category": "workspace",
@@ -127,7 +134,7 @@
     {
       "id": "compat-runtime",
       "maturity": "partial",
-      "scope": "PE and ELF header inspection; no process execution"
+      "scope": "PE/ELF inspection; Linux host CLI for Wine, Proton and DOSBox, managed Wine prefixes and allowlisted Winetricks components; no browser host execution"
     },
     {
       "id": "provenance-verifier",
@@ -148,6 +155,11 @@
       "id": "theme-adapter",
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "compatibility-command-centre",
+      "maturity": "partial",
+      "scope": "Mora command builder and copy-to-terminal workflow; no browser-to-host IPC or direct process execution"
     }
   ]
 }
