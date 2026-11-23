@@ -63,6 +63,8 @@ Commands are tokenized into arguments and checked against known application IDs,
 
 The Reaper policy in duckos/ui/desktop.rpr contains the command allowlist and rejects unknown commands, unexpected extra arguments and untrusted application descriptors.
 
+The browser shell currently applies its allowlist in JavaScript. The matching Reaper policy is an independently executable contract checked by the Reaper CI workflow; Mora does not yet invoke the Reaper interpreter or exchange live policy decisions with it. A future authenticated native host broker is required for that runtime connection.
+
 ### Twenty-direction engineering matrix
 
 The workspace/settings panel includes the 20 development directions from the supplied OS shell prototype. Search and category filters are retained, as is a detail inspector.
