@@ -91,6 +91,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
+- [Illidia universal game library and launcher](docs/ILLIDIA_GAME_LAUNCHER.md)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
 
