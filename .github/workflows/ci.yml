@@ -61,6 +61,21 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_mora.py' -v
       - run: python -m compileall -q duckos/mora
 
+  mora-qt:
+    name: Mora native Qt desktop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[native-ui]"
+      - run: python -m unittest discover -s tests -p 'test_mora_qt.py' -v
+        env:
+          QT_QPA_PLATFORM: offscreen
+      - run: python -m compileall -q duckos/mora
+
   native-c:
     name: Native C
     runs-on: ubuntu-latest
