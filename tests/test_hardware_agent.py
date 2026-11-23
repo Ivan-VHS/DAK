@@ -110,6 +110,10 @@ class GuardrailTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "valid Windows Update GUID"):
                 hardware.install_windows_driver_update("not-a-guid", "C:/backup")
 
+    def test_windows_driver_installer_never_accepts_eula_automatically(self) -> None:
+        self.assertNotIn("AcceptEula", hardware.WINDOWS_INSTALL_SCRIPT)
+        self.assertIn("EulaAccepted", hardware.WINDOWS_INSTALL_SCRIPT)
+
     def test_snapshot_export_is_valid_json(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             target = Path(temporary) / "snapshot.json"
