@@ -44,8 +44,8 @@ jobs:
         run: npm test
 
   native-build:
-    name: Serein native build (\${{ matrix.os }})
-    runs-on: \${{ matrix.os }}
+    name: Serein native build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
