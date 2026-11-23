@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -44,8 +45,8 @@ def signature_report(path: str | Path, timeout: int = 12) -> dict[str, Any]:
 
     script = (
         "$s = Get-AuthenticodeSignature -LiteralPath $args[0]; "
-        "$r = [ordered]@{ status = [string]$s.Status; "
-        "signer = if ($s.SignerCertificate) { $s.SignerCertificate.Subject } else { $null } }; "
+        "$subject = if ($s.SignerCertificate) { $s.SignerCertificate.Subject } else { $null }; "
+        "$r = [ordered]@{ status = [string]$s.Status; signer = $subject }; "
         "$r | ConvertTo-Json -Compress"
     )
     try:
@@ -176,10 +177,10 @@ def _environment(game: GameRecord) -> dict[str, str]:
     if not isinstance(overrides, dict):
         raise LaunchError("Launch profile environment is invalid.")
     env.update(overrides)
-    if game.runtime_prefix:
-        if game.runtime in {"wine", "proton", "crossover", "bottles"}:
-            env.setdefault("WINEPREFIX", game.runtime_prefix)
-            env.setdefault("STEAM_COMPAT_DATA_PATH", game.runtime_prefix) if game.runtime == "proton" else None
+    if game.runtime_prefix and game.runtime in {"wine", "proton", "crossover"}:
+        env.setdefault("WINEPREFIX", game.runtime_prefix)
+    if game.runtime_prefix and game.runtime == "proton":
+        env.setdefault("STEAM_COMPAT_DATA_PATH", game.runtime_prefix)
     return env
 
 
@@ -212,8 +213,20 @@ def _run_hooks(game: GameRecord, hook_name: str, cwd: Path, log_stream: Any) -> 
 
 def _open_store_uri(uri: str) -> tuple[int | None, list[str]]:
     parsed = urlparse(uri)
-    if parsed.scheme not in {"steam", "com.epicgames.launcher", "goggalaxy"}:
-        raise LaunchError("Unsupported store URI scheme.")
+    valid_uri = False
+    if parsed.scheme == "steam":
+        valid_uri = parsed.netloc == "rungameid" and re.fullmatch(r"/\d+", parsed.path) is not None
+    elif parsed.scheme == "com.epicgames.launcher":
+        app_name = parsed.path.strip("/")
+        valid_uri = (
+            parsed.netloc == "apps"
+            and re.fullmatch(r"[A-Za-z0-9_-]{1,160}", app_name) is not None
+            and parsed.query in {"action=launch&silent=true", "action=launch"}
+        )
+    elif parsed.scheme == "goggalaxy":
+        valid_uri = parsed.netloc == "openGameView" and re.fullmatch(r"/\d+", parsed.path) is not None
+    if not valid_uri:
+        raise LaunchError("Store URI does not match a supported, validated game-launch format.")
     if os.name == "nt":
         os.startfile(uri)  # type: ignore[attr-defined]
         return None, ["os-handler", uri]
