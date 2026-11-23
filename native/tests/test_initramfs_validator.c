@@ -108,14 +108,12 @@ int main(void)
     static const uint8_t escaping_link_target[] = "../../etc/passwd";
 
     if (!validate_symlink(safe_link_target, sizeof(safe_link_target) - 1, true)) {
-        fputs("safe relative symlink was rejected
-", stderr);
+        fputs("safe relative symlink was rejected\n", stderr);
         return 1;
     }
 
     if (!validate_symlink(escaping_link_target, sizeof(escaping_link_target) - 1, false)) {
-        fputs("escaping symlink target was accepted
-", stderr);
+        fputs("escaping symlink target was accepted\n", stderr);
         return 1;
     }
 

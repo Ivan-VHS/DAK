@@ -9,5 +9,6 @@ threads = dependency('threads')
 executable('duckos-compositor',
   'main.c',
   dependencies: [wayland_server, wlroots, threads],
+  c_args: ['-DWLR_USE_UNSTABLE'],
   install: true,
   install_dir: get_option('bindir'))
