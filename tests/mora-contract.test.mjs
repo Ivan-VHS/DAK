@@ -27,7 +27,7 @@ test("required dashboard surfaces are present", () => {
 });
 
 test("application panels expose their requested live controls", () => {
-  for (const marker of ["data-range", "data-action=\\"record\\"", "data-photo", "data-direction-tab", "role=\\"switch\\"", "expense-track", "progress-track"]) {
+  for (const marker of ["data-range", 'data-action="record"', "data-photo", "data-direction-tab", 'role="switch"', "expense-track", "progress-track"]) {
     assert.ok(js.includes(marker), "missing panel control: " + marker);
   }
   assert.ok(js.includes('event.key === "Escape"'));
