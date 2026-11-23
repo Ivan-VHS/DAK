@@ -15,6 +15,8 @@ This matrix consolidates modern OS design directions into concrete work in DuckO
 | Multimodal input | Keyboard, pointer and touch interactions | Partial | Voice, gesture, spatial input and accessibility integration |
 | Resource / energy awareness | Mora saver/balanced/performance UI profiles | Partial | CPU/GPU/NPU scheduling, thermal policy, power telemetry and VRR |
 | Native boot foundation | Limine x86-64 kernel, boot handoff, framebuffer/serial report, initramfs tooling | Partial | Memory allocators, IDT/APIC, interrupts, scheduler, userspace and VFS |
+| Reaper-native contracts | Memory, scheduler, IPC, trust, storage and driver orchestration source contracts | Partial | Compile and connect the contracts to the native runtime; contracts are not a booting kernel |
+| Build manifests and image layout | Python validators for system manifests, disk image plans and driver-module dependency graphs | Implemented at tooling level | Connect validated manifests to a signed installer and reproducible image pipeline |
 | Wayland / GPU | wlroots compositor and EGL/GLES shell preview on host Linux | Partial | Input seat/focus, native DRM/KMS and DuckOS GPU drivers |
 | Core services | Seven Python user-space services | Implemented at user-space prototype level | Authenticated IPC and adapters to native compositor/input/device stack |
 | Live information | Newsroom RSS/Atom service with loopback API and cache | Implemented at user-space level | Native service manager and offline/refresh UX polish |
