@@ -12,13 +12,17 @@ except ImportError:
     PySide6 = None
 
 if PySide6 is not None:
-    from PySide6.QtCore import Qt
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
     from PySide6.QtTest import QTest
     from PySide6.QtWidgets import QApplication, QDialog, QLineEdit, QMainWindow, QPlainTextEdit
     from duckos.mora.controls import MoraSlider
     from duckos.mora.qt_ui import MoraWindow
 else:
+    QPoint = None
+    QPointF = None
     Qt = None
+    QWheelEvent = None
     QTest = None
     QApplication = None
     QDialog = None
@@ -79,6 +83,32 @@ class MoraQtDesktopTests(unittest.TestCase):
         slider.value_input.setValue(125)
         self.assertEqual(slider.value(), 125)
         self.assertEqual(slider.value_input.width(), 88)
+
+        wheel = QWheelEvent(
+            QPointF(8, 8),
+            QPointF(8, 8),
+            QPoint(),
+            QPoint(0, 120),
+            Qt.MouseButton.NoButton,
+            Qt.KeyboardModifier.NoModifier,
+            Qt.ScrollPhase.ScrollUpdate,
+            False,
+        )
+        slider.track.wheelEvent(wheel)
+        self.assertEqual(slider.value(), 130)
+        fine_wheel = QWheelEvent(
+            QPointF(8, 8),
+            QPointF(8, 8),
+            QPoint(),
+            QPoint(0, 120),
+            Qt.MouseButton.NoButton,
+            Qt.KeyboardModifier.ShiftModifier,
+            Qt.ScrollPhase.ScrollUpdate,
+            False,
+        )
+        slider.track.wheelEvent(fine_wheel)
+        self.assertEqual(slider.value(), 131)
+
         slider.setValue(10_000)
         self.assertEqual(slider.value(), 140)
         slider.close()
