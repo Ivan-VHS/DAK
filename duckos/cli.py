@@ -23,9 +23,45 @@ from .desktop import (
     ABUpdateManager, AuditLog, LauncherRegistry, PackageTrustStore,
     load_bench_profile, load_system_catalog, system_app_ids,
 )
+from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 
 
 def _load(path: Path) -> Any:
+    desktop = commands.add_parser("desktop", help="DuckOS desktop application and bench contracts")
+    desktop_commands = desktop.add_subparsers(dest="desktop_command", required=True)
+    desktop_commands.add_parser("catalog", help="show the fifteen system utility applications")
+
+    slots = desktop_commands.add_parser("slots", help="manage persistent numbered launcher slots")
+    slots.add_argument("--state", type=Path, required=True, help="launcher state JSON path")
+    slot_commands = slots.add_subparsers(dest="slot_action", required=True)
+    slot_commands.add_parser("list", help="list all numbered slots")
+    assign_slot = slot_commands.add_parser("assign", help="assign an application to a slot")
+    assign_slot.add_argument("slot", type=int)
+    assign_slot.add_argument("app_id")
+    assign_slot.add_argument("--replace", action="store_true", help="explicitly replace an occupied slot")
+    assign_slot.add_argument("--unpin", action="store_true", help="assign without pinning")
+    unassign_slot = slot_commands.add_parser("unassign", help="clear a slot without shifting other slots")
+    unassign_slot.add_argument("slot", type=int)
+    resolve_slot = slot_commands.add_parser("resolve", help="resolve a slot to its application identity")
+    resolve_slot.add_argument("slot", type=int)
+
+    package_verify = desktop_commands.add_parser("package-verify", help="calculate SHA-256 and evaluate local package trust")
+    package_verify.add_argument("file", type=Path)
+    package_verify.add_argument("--trust-store", type=Path, required=True)
+    package_approve = desktop_commands.add_parser("package-approve", help="approve one unsigned file by exact SHA-256")
+    package_approve.add_argument("file", type=Path)
+    package_approve.add_argument("--trust-store", type=Path, required=True)
+    package_approve.add_argument("--confirm-unsigned", action="store_true", help="confirm this exact unsigned file")
+
+    image_state = desktop_commands.add_parser("image-state", help="show the local A/B image-slot state")
+    image_state.add_argument("--state", type=Path, required=True)
+
+    bench_profile = desktop_commands.add_parser("bench-profile", help="validate a board-specific hardware bench profile")
+    bench_profile.add_argument("file", type=Path)
+
+    audit_verify = desktop_commands.add_parser("audit-verify", help="verify an audit/serial journal hash chain")
+    audit_verify.add_argument("file", type=Path)
+
     try:
         if path.stat().st_size > 4 * 1024 * 1024:
             raise ValueError("input JSON exceeds 4 MiB")
@@ -83,6 +119,34 @@ def main(argv: list[str] | None = None) -> int:
 
     commands.add_parser("compat-status", help="show implemented and pending Windows-runtime components")
 
+    release_build = commands.add_parser(
+        "build-release", help="create a deterministic, optionally signed component bundle"
+    )
+    release_build.add_argument("manifest", type=Path)
+    release_build.add_argument("root", type=Path)
+    release_build.add_argument("output", type=Path)
+    release_build.add_argument("--signing-key", type=Path, help="Ed25519 private key in PEM format")
+
+    release_verify = commands.add_parser(
+        "verify-release", help="verify bundle contents, SHA-256 checksums and an optional signature"
+    )
+    release_verify.add_argument("archive", type=Path)
+    release_verify.add_argument("--public-key", type=Path, help="Ed25519 public key in PEM format")
+
+    deployment = commands.add_parser(
+        "deployment-plan", help="prepare a non-destructive USB, PXE, HTTP or cloud deployment plan"
+    )
+    deployment.add_argument("manifest", type=Path)
+    deployment.add_argument("root", type=Path)
+    deployment.add_argument("--target", choices=("usb", "pxe", "http", "cloud"), required=True)
+    deployment.add_argument("--base-url", help="HTTP(S) base URL for network boot")
+    deployment.add_argument("--secure-boot", action="store_true")
+    deployment.add_argument(
+        "--data-size-bytes", type=int, default=2 * 1024 * 1024 * 1024,
+        help="planned Duck Data partition size (default: 2 GiB)",
+    )
+    deployment.add_argument("--output", type=Path, help="write the JSON plan to this path")
+
 
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
@@ -110,44 +174,42 @@ def main(argv: list[str] | None = None) -> int:
         help="append one target argument; repeat to add more than one",
     )
 
-    desktop = commands.add_parser("desktop", help="DuckOS desktop application and bench contracts")
-    desktop_commands = desktop.add_subparsers(dest="desktop_command", required=True)
-    desktop_commands.add_parser("catalog", help="show the fifteen system utility applications")
-
-    slots = desktop_commands.add_parser("slots", help="manage persistent numbered launcher slots")
-    slots.add_argument("--state", type=Path, required=True, help="launcher state JSON path")
-    slot_commands = slots.add_subparsers(dest="slot_action", required=True)
-    slot_commands.add_parser("list", help="list all numbered slots")
-    assign_slot = slot_commands.add_parser("assign", help="assign an application to a slot")
-    assign_slot.add_argument("slot", type=int)
-    assign_slot.add_argument("app_id")
-    assign_slot.add_argument("--replace", action="store_true", help="explicitly replace an occupied slot")
-    assign_slot.add_argument("--unpin", action="store_true", help="assign without pinning")
-    unassign_slot = slot_commands.add_parser("unassign", help="clear a slot without shifting other slots")
-    unassign_slot.add_argument("slot", type=int)
-    resolve_slot = slot_commands.add_parser("resolve", help="resolve a slot to its application identity")
-    resolve_slot.add_argument("slot", type=int)
-
-    package_verify = desktop_commands.add_parser("package-verify", help="calculate SHA-256 and evaluate local package trust")
-    package_verify.add_argument("file", type=Path)
-    package_verify.add_argument("--trust-store", type=Path, required=True)
-    package_approve = desktop_commands.add_parser("package-approve", help="approve one unsigned file by exact SHA-256")
-    package_approve.add_argument("file", type=Path)
-    package_approve.add_argument("--trust-store", type=Path, required=True)
-    package_approve.add_argument("--confirm-unsigned", action="store_true", help="confirm this exact unsigned file")
-
-    image_state = desktop_commands.add_parser("image-state", help="show the local A/B image-slot state")
-    image_state.add_argument("--state", type=Path, required=True)
-
-    bench_profile = desktop_commands.add_parser("bench-profile", help="validate a board-specific hardware bench profile")
-    bench_profile.add_argument("file", type=Path)
-
-    audit_verify = desktop_commands.add_parser("audit-verify", help="verify an audit/serial journal hash chain")
-    audit_verify.add_argument("file", type=Path)
-
     try:
         args = parser.parse_args(argv)
-        if args.command == "validate-manifest":
+        if args.command == "build-release":
+            result = build_release_bundle(
+                _load(args.manifest),
+                args.root,
+                args.output,
+                signing_key=args.signing_key,
+            )
+        elif args.command == "verify-release":
+            result = verify_release_bundle(args.archive, public_key=args.public_key)
+        elif args.command == "deployment-plan":
+            result = create_deployment_plan(
+                _load(args.manifest),
+                args.root,
+                target=args.target,
+                base_url=args.base_url,
+                secure_boot=args.secure_boot,
+                data_size_bytes=args.data_size_bytes,
+            )
+            if args.output:
+                if args.output.is_symlink():
+                    raise ValueError("deployment-plan output must not be a symlink")
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                args.output.write_text(
+                    json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+                    encoding="utf-8",
+                    newline="\n",
+                )
+                _print_result({
+                    "schema": result["schema"],
+                    "written": str(args.output.resolve()),
+                    "disk_written": False,
+                })
+                return 0
+        elif args.command == "validate-manifest":
             result = validate_manifest(_load(args.manifest), args.root, verify_files=not args.metadata_only)
         elif args.command == "plan-image":
             payload = _load(args.components)

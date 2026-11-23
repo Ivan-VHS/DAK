@@ -26,13 +26,15 @@ class ApplicationCatalogTests(unittest.TestCase):
             self.schema, format_checker=FormatChecker()
         ).validate(self.catalog)
 
-    def test_all_seven_default_applications_are_present(self) -> None:
+    def test_all_twenty_first_party_applications_are_present(self) -> None:
         expected = {
-            "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify"
+            "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
+            "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
+            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
         }
         actual = {item["id"] for item in self.catalog["applications"]}
         self.assertEqual(actual, expected)
-        self.assertEqual(len(self.catalog["applications"]), 7)
+        self.assertEqual(len(self.catalog["applications"]), 20)
 
     def test_native_and_browser_maturity_are_not_conflated(self) -> None:
         self.assertEqual(self.catalog["maturity_status"], "specified")
@@ -43,7 +45,7 @@ class ApplicationCatalogTests(unittest.TestCase):
 
     def test_every_workflow_has_valid_endpoints_and_user_consent(self) -> None:
         app_ids = {item["id"] for item in self.catalog["applications"]}
-        self.assertEqual(len(self.catalog["workflows"]), 4)
+        self.assertEqual(len(self.catalog["workflows"]), 9)
         for workflow in self.catalog["workflows"]:
             self.assertIn(workflow["source"], app_ids)
             self.assertIn(workflow["target"], app_ids)
@@ -66,6 +68,7 @@ class ApplicationCatalogTests(unittest.TestCase):
             "docs/PREINSTALLED_APPLICATIONS.md",
             "docs/UNIFY_TRANSFER_FORMAT_V1.md",
             "schemas/unify.transfer.v1.schema.json",
+            "catalogs/dak-base-applications.v1.yaml",
         ]
         for relative in expected_paths:
             with self.subTest(path=relative):
@@ -78,6 +81,31 @@ class ApplicationCatalogTests(unittest.TestCase):
                 self.assertIn(name, html)
         self.assertIn("mora.local-suite.v1", html)
         self.assertIn("IndexedDB", html)
+
+    def test_extended_app_panels_are_registered_in_mora(self) -> None:
+        desktop = (ROOT / "mora/index.html").read_text(encoding="utf-8")
+        app_source = (ROOT / "mora/app.js").read_text(encoding="utf-8")
+        for name in (
+            "Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
+            "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2",
+            "Po-2", "GameCharager", "EXEdotEXE",
+        ):
+            with self.subTest(app=name):
+                self.assertIn(name, desktop + app_source)
+        self.assertIn('id="extension-app-grid"', desktop)
+        self.assertIn("EXTENSION_STORAGE_PREFIX", app_source)
+
+    def test_dak_catalog_is_present_and_remains_design_only(self) -> None:
+        catalog = (ROOT / "catalogs/dak-base-applications.v1.yaml").read_text(encoding="utf-8")
+        self.assertIn("status: design", catalog)
+        self.assertIn("id: dak.settings", catalog)
+        for app_id in (
+            "sestem", "setupup", "orriganize", "abriganza", "olaab",
+            "concrete-thump", "seu-beu", "love-il", "poi", "poi-2",
+            "po-2", "gamecharager", "exedotexe",
+        ):
+            with self.subTest(app=app_id):
+                self.assertIn("id: dak." + app_id, catalog)
 
 
 if __name__ == "__main__":

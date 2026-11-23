@@ -1,0 +1,16 @@
+[submodule "projects/pytyliki"]
+	path = projects/pytyliki
+	url = https://github.com/Ivan-VHS/Pytyliki.git
+	branch = main
+[submodule "projects/reaper"]
+	path = projects/reaper
+	url = https://github.com/Ivan-VHS/Reaper.git
+	branch = main
+[submodule "projects/oplague"]
+	path = projects/oplague
+	url = https://github.com/Ivan-VHS/OPlague.git
+	branch = main
+[submodule "projects/ventusample"]
+	path = projects/ventusample
+	url = https://github.com/Ivan-VHS/VentuSample.git
+	branch = main

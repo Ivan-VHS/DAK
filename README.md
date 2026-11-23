@@ -4,13 +4,20 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The default application suite contains seven first-party apps: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Their roles, data boundaries and proposed integrations remain defined by the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and the [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
+The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
+
+## Federated source workspace
+
+DuckOS keeps the four specialist Ivan-VHS projects as independent, commit-pinned Git submodules under `projects/`: [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [Reaper](https://github.com/Ivan-VHS/Reaper), [OPlague](https://github.com/Ivan-VHS/OPlague) and [VentuSample](https://github.com/Ivan-VHS/VentuSample). The checked-in registry records their source pins, licenses, roles and integration boundaries.
+
+Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
 ## Mora desktop
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven first-party application identities and seven existing system tools into one workspace. A separate, versioned catalogue now defines fifteen additional system utilities without changing the seven-product suite. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings 20 application identities and the existing eight system tools, including Mora Commons and the fifteen-entry System Apps catalogue, into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
 The system tools are:
 
@@ -59,6 +66,12 @@ python tools/validate_system_apps.py
 
 The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
 
+## Release packaging and deployment planning
+
+The native Python toolchain now provides deterministic, optionally Ed25519-signed component bundles, SHA-256 inventory and verification, plus non-destructive GPT A/B/recovery/data layout planning for USB, PXE, UEFI HTTP Boot/iPXE and cloud deployment targets.
+
+See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce a verified component archive or deployment plan; they do not yet build a bootable ISO/USB image, install to a physical disk, convert cloud images, or implement firmware Secure Boot and boot rollback.
+
 ## System architecture and maturity
 
 The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
@@ -81,7 +94,7 @@ No browser control is described as a native kernel, driver, sandbox, updater or 
 
 ## Fifteen system utilities and hardware bench contracts
 
-The additional system utility catalogue is kept separate from the seven first-party DuckOS products: [catalogue](catalogs/system-applications.v1.json), [JSON Schema](schemas/system-applications.v1.schema.json) and [runtime guide](docs/DESKTOP_RUNTIME.md). Mora exposes a System Apps entry with all fifteen identities. The host-side `duckos.desktop` package provides numbered launcher slots, exact-hash unsigned approvals, A/B image state transitions, board-profile interlocks and hash-chained audit/serial records.
+The additional system utility catalogue is kept separate from the twenty first-party Mora application identities: [catalogue](catalogs/system-applications.v1.json), [JSON Schema](schemas/system-applications.v1.schema.json) and [runtime guide](docs/DESKTOP_RUNTIME.md). Mora exposes a System Apps entry with all fifteen identities. The host-side `duckos.desktop` package provides numbered launcher slots, exact-hash unsigned approvals, A/B image state transitions, board-profile interlocks and hash-chained audit/serial records.
 
 Useful commands:
 
@@ -102,6 +115,7 @@ DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix sc
 
 Start with the [DuckOS documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines terminology, maturity states, runtime claims and evidence requirements.
 
+- [Mora Commons unified application catalogue](docs/MORA_COMMONS.md)
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)

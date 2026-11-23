@@ -4,7 +4,7 @@
   "operating_system": "DuckOS",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only; this catalog does not assert that these applications or capabilities are implemented or shipped.",
+  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
   "applications": [
     {
       "id": "cockos",
@@ -164,6 +164,279 @@
       "prototype_evidence": [
         "prototype/mora-home.html"
       ]
+    },
+    {
+      "id": "sestem",
+      "name": "Sestem",
+      "domain": "system_overview",
+      "maturity_status": "specified",
+      "capabilities": [
+        "shell_health_summary",
+        "subsystem_maturity_view",
+        "shortcuts_to_system_tools"
+      ],
+      "boundaries": [
+        "Reports documented shell and project states only",
+        "Does not read native hardware sensors or claim kernel health"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "setupup",
+      "name": "SetupUP",
+      "domain": "first_run_setup",
+      "maturity_status": "specified",
+      "capabilities": [
+        "theme_selection",
+        "workspace_preferences",
+        "setup_completion_marker"
+      ],
+      "boundaries": [
+        "Changes Mora browser-profile preferences only",
+        "Not an OS installer, disk partitioner or bootloader configurator"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "orriganize",
+      "name": "Orriganize",
+      "domain": "projects_tasks",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_project_lists",
+        "task_capture",
+        "manual_item_removal"
+      ],
+      "boundaries": [
+        "Entries remain in the current browser profile",
+        "No OS scheduler, account sync or shared collaboration"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "abriganza",
+      "name": "Abriganza",
+      "domain": "archive_inspection",
+      "maturity_status": "specified",
+      "capabilities": [
+        "archive_metadata_selection",
+        "filename_and_size_report",
+        "bounded_file_selection"
+      ],
+      "boundaries": [
+        "Reads selected file metadata only",
+        "Does not extract archives, execute embedded files or scan for malware"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "olaab",
+      "name": "Olaab",
+      "domain": "media_collections",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_album_labels",
+        "media_tag_lists",
+        "collection_notes"
+      ],
+      "boundaries": [
+        "Stores text references and labels only",
+        "Does not duplicate source media or provide cloud media sync"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "concrete-thump",
+      "name": "Concrete Thump",
+      "domain": "rhythm_planning",
+      "maturity_status": "specified",
+      "capabilities": [
+        "bpm_selection",
+        "swing_selection",
+        "local_rhythm_profiles"
+      ],
+      "boundaries": [
+        "Saves rhythm metadata in Mora browser storage",
+        "Does not synthesize, record or route audio"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "seu-beu",
+      "name": "Seu-Beu",
+      "domain": "sharing_review",
+      "maturity_status": "specified",
+      "capabilities": [
+        "recipient_checklist",
+        "content_scope_checklist",
+        "retention_checklist"
+      ],
+      "boundaries": [
+        "Provides a user-operated review checklist only",
+        "Does not encrypt, authenticate recipients or enforce OS permissions"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "love-il",
+      "name": "Love-IL",
+      "domain": "private_journal",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_text_entries",
+        "entry_removal",
+        "profile_scoped_storage"
+      ],
+      "boundaries": [
+        "Journal text stays in the current browser profile",
+        "No cloud sync, medical advice or secure-vault claim"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "poi",
+      "name": "Poi",
+      "domain": "quick_capture",
+      "maturity_status": "specified",
+      "capabilities": [
+        "quick_text_capture",
+        "local_saved_items",
+        "manual_item_removal"
+      ],
+      "boundaries": [
+        "Stores short text entries locally",
+        "No system-wide search or global capture shortcut"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "poi-2",
+      "name": "Poi-2",
+      "domain": "knowledge_cards",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_reference_cards",
+        "card_capture",
+        "manual_card_removal"
+      ],
+      "boundaries": [
+        "Stores text cards in the Mora browser profile",
+        "No semantic index, external knowledge source or cloud collaboration"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "po-2",
+      "name": "Po-2",
+      "domain": "manual_route_planning",
+      "maturity_status": "specified",
+      "capabilities": [
+        "manual_stop_list",
+        "ordered_waypoints",
+        "local_route_notes"
+      ],
+      "boundaries": [
+        "User enters stop names manually",
+        "No GPS, live maps, navigation or location tracking"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "gamecharager",
+      "name": "GameCharager",
+      "domain": "game_library",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_game_profiles",
+        "executable_header_inspection",
+        "game_notes"
+      ],
+      "boundaries": [
+        "Game entries and diagnostics remain local",
+        "Does not launch executables, install drivers or manage anti-cheat"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "exedotexe",
+      "name": "EXEdotEXE",
+      "domain": "executable_inspection",
+      "maturity_status": "specified",
+      "capabilities": [
+        "pe_elf_header_inspection",
+        "local_sha256_report",
+        "bounded_user_selected_file"
+      ],
+      "boundaries": [
+        "Inspects a user-selected file in the browser",
+        "Not an antivirus, publisher-signature validator or EXE runtime"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
     }
   ],
   "workflows": [
@@ -200,6 +473,51 @@
       "target": "unify",
       "trigger": "user_selects_clip_for_transfer",
       "action": "transfer_clip_to_paired_device",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "planning.poi-to-orriganize.v1",
+      "source": "poi",
+      "target": "orriganize",
+      "trigger": "user_selects_saved_capture",
+      "action": "add_capture_to_project_list",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "media.olaab-to-kavun.v1",
+      "source": "olaab",
+      "target": "kavun",
+      "trigger": "user_selects_album_reference",
+      "action": "open_selected_media_collection",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "knowledge.poi-to-poi-2.v1",
+      "source": "poi",
+      "target": "poi-2",
+      "trigger": "user_promotes_saved_note",
+      "action": "create_knowledge_card_from_selected_text",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "gaming.gamecharager-to-exedotexe.v1",
+      "source": "gamecharager",
+      "target": "exedotexe",
+      "trigger": "user_selects_executable",
+      "action": "request_read_only_executable_inspection",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "audio.concrete-thump-to-cockos.v1",
+      "source": "concrete-thump",
+      "target": "cockos",
+      "trigger": "user_exports_rhythm_profile",
+      "action": "hand_off_bpm_and_swing_metadata",
       "maturity_status": "specified",
       "user_consent_required": true
     }
@@ -250,6 +568,45 @@
       "unify": [
         "Local clipboard APIs and manual JSON export/import for tabs, clips and selected settings are available.",
         "Secure device pairing, live sync, phone notifications and lost-device discovery are not connected."
+      ],
+      "sestem": [
+        "Displays Mora shell state and documented subsystem maturity; does not collect native hardware telemetry."
+      ],
+      "setupup": [
+        "Stores theme selection and a completion marker in local browser preferences; no OS installation."
+      ],
+      "orriganize": [
+        "Stores up to 100 text entries per list in namespaced browser localStorage; no system scheduler."
+      ],
+      "abriganza": [
+        "Reads selected archive filename and size only; no archive extraction."
+      ],
+      "olaab": [
+        "Stores album and collection labels only; no media duplication or cloud indexing."
+      ],
+      "concrete-thump": [
+        "Stores bounded BPM and swing values as local metadata; no audio generation."
+      ],
+      "seu-beu": [
+        "Runs a manual sharing checklist; no encryption or identity verification."
+      ],
+      "love-il": [
+        "Stores text entries in the current browser profile; no cloud sync."
+      ],
+      "poi": [
+        "Stores quick text captures locally."
+      ],
+      "poi-2": [
+        "Stores simple text knowledge cards locally; no semantic search."
+      ],
+      "po-2": [
+        "Stores a manually ordered list of route stops; no GPS or map service."
+      ],
+      "gamecharager": [
+        "Stores game profile names and uses the read-only executable inspector; no process launch."
+      ],
+      "exedotexe": [
+        "Reuses local PE/ELF inspection and SHA-256; no executable launch or signature validation."
       ]
     }
   },

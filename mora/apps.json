@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -47,6 +47,97 @@
       "name": "Unify",
       "category": "devices",
       "panel": "mora/app.js#unify"
+    },
+    {
+      "id": "sestem",
+      "name": "Sestem",
+      "category": "system",
+      "panel": "mora/app.js#sestem",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "setupup",
+      "name": "SetupUP",
+      "category": "system",
+      "panel": "mora/app.js#setupup",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "orriganize",
+      "name": "Orriganize",
+      "category": "productivity",
+      "panel": "mora/app.js#orriganize",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "abriganza",
+      "name": "Abriganza",
+      "category": "files",
+      "panel": "mora/app.js#abriganza",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "olaab",
+      "name": "Olaab",
+      "category": "multimedia",
+      "panel": "mora/app.js#olaab",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "concrete-thump",
+      "name": "Concrete Thump",
+      "category": "audio",
+      "panel": "mora/app.js#concrete-thump",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "seu-beu",
+      "name": "Seu-Beu",
+      "category": "privacy",
+      "panel": "mora/app.js#seu-beu",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "love-il",
+      "name": "Love-IL",
+      "category": "journal",
+      "panel": "mora/app.js#love-il",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "poi",
+      "name": "Poi",
+      "category": "notes",
+      "panel": "mora/app.js#poi",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "poi-2",
+      "name": "Poi-2",
+      "category": "knowledge",
+      "panel": "mora/app.js#poi-2",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "po-2",
+      "name": "Po-2",
+      "category": "navigation",
+      "panel": "mora/app.js#po-2",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "gamecharager",
+      "name": "GameCharager",
+      "category": "gaming",
+      "panel": "mora/app.js#gamecharager",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "exedotexe",
+      "name": "EXEdotEXE",
+      "category": "compatibility",
+      "panel": "mora/app.js#exedotexe",
+      "maturity": "partial_local_workspace"
     },
     {
       "id": "mora-ai",
@@ -163,6 +254,26 @@
       "id": "theme-adapter",
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "extension-local-store",
+      "maturity": "partial",
+      "scope": "Namespaced local browser collections for the extended Mora panels; no system VFS or cross-device synchronization."
+    },
+    {
+      "id": "browser-file-inspector",
+      "maturity": "partial",
+      "scope": "User-selected archive metadata and PE/ELF inspection in the browser; no extraction or executable launch."
+    },
+    {
+      "id": "rhythm-profile-store",
+      "maturity": "partial",
+      "scope": "Local BPM and swing profiles only; no audio engine or device routing."
+    },
+    {
+      "id": "setup-preferences",
+      "maturity": "partial",
+      "scope": "Mora first-run preferences only; no OS installer or boot configuration."
     },
     {
       "id": "desktop-runtime-contracts",

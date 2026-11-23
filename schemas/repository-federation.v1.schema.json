@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/repository-federation.v1.schema.json",
+  "title": "DuckOS repository federation manifest",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "owner",
+    "integration_host",
+    "checkout_strategy",
+    "projects_root",
+    "repositories",
+    "shared_rules"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.repository-federation.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "owner": {
+      "const": "Ivan-VHS"
+    },
+    "integration_host": {
+      "const": "DuckOS"
+    },
+    "checkout_strategy": {
+      "const": "git-submodules"
+    },
+    "projects_root": {
+      "const": "projects"
+    },
+    "repositories": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "repository",
+          "url",
+          "path",
+          "default_branch",
+          "pinned_commit",
+          "license",
+          "license_file",
+          "domain",
+          "responsibility",
+          "integration_mode",
+          "runtime_boundary",
+          "build_system",
+          "depends_on",
+          "optional_dependencies",
+          "integration_status",
+          "auto_build",
+          "auto_execute"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "repository": {
+            "type": "string",
+            "pattern": "^Ivan-VHS/[A-Za-z0-9_.-]+$"
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https://github\\.com/Ivan-VHS/[A-Za-z0-9_.-]+\\.git$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^projects/[a-z][a-z0-9-]*$"
+          },
+          "default_branch": {
+            "const": "main"
+          },
+          "pinned_commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "license": {
+            "enum": [
+              "MIT",
+              "Apache-2.0"
+            ]
+          },
+          "license_file": {
+            "const": "LICENSE"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "responsibility": {
+            "type": "string",
+            "minLength": 1
+          },
+          "integration_mode": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "runtime_boundary": {
+            "type": "string"
+          },
+          "build_system": {
+            "type": "string"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "optional_dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "integration_status": {
+            "const": "source-pinned-only"
+          },
+          "auto_build": {
+            "const": false
+          },
+          "auto_execute": {
+            "const": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "shared_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

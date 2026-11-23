@@ -1,8 +1,11 @@
 # DuckOS documentation
 
+## Federated source projects
+
+[Repository federation](REPOSITORY_FEDERATION.md) documents the four pinned project checkouts, their commit and licence registry, synchronization tool and service boundaries. The machine-readable source registry is [repositories.v1.json](../federation/repositories.v1.json).
 ## Desktop and application interfaces
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
+[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
 
 [Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
@@ -12,7 +15,7 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and seven system tools, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
@@ -23,6 +26,8 @@
 ## Normative standard
 
 [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
+
+[Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) defines the 20-domain evidence-led improvement model. [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) preserves the 20 requested directions and maps them to testable engineering outcomes across all five repositories. The canonical manifest and schema are [`engineering-evolution.v1.json`](../engineering-evolution.v1.json) and [`engineering-evolution.v1.schema.json`](../schemas/engineering-evolution.v1.schema.json).
 
 ## Documentation rules
 
