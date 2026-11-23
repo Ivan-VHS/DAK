@@ -577,7 +577,8 @@ class MoraWindow(QMainWindow):
         header_layout.addWidget(self._label(subtitle, "Muted"))
         layout.addWidget(header)
 
-        body = QVBoxLayout()
+        body_content = QWidget()
+        body = QVBoxLayout(body_content)
         body.addWidget(self._label(description))
         maturity = str(app.get("maturity", "catalog_concept"))
         body.addWidget(self._label(
@@ -593,7 +594,12 @@ class MoraWindow(QMainWindow):
                 "Muted",
             ))
         body.addStretch(1)
-        layout.addLayout(body, 1)
+
+        scroll = QScrollArea(dialog)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(body_content)
+        layout.addWidget(scroll, 1)
 
         close_button = QPushButton("Закрыть")
         close_button.clicked.connect(dialog.accept)
