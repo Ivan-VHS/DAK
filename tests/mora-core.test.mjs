@@ -25,7 +25,8 @@ class MemoryStorage {
 }
 
 test("the shell registry exposes the seven user apps and seven system tools", () => {
-  assert.equal(APP_IDS.length, 14);
+  assert.equal(APP_IDS.length, 15);
+  assert.ok(APP_IDS.includes("mora-belle"));
   assert.ok(APP_IDS.includes("mora-ai"));
   assert.ok(APP_IDS.includes("security"));
   assert.ok(APP_IDS.includes("runtime"));
@@ -102,10 +103,11 @@ test("PE inspection recognises a 64-bit image without attempting to launch it", 
 });
 
 
-test("theme settings accept only Amber, Dark and Light palettes", () => {
+test("theme settings accept Amber, Dark, Light and Belle palettes", () => {
   const defaults = createDefaultPreferences();
   assert.equal(defaults.appearance.theme, "amber");
   assert.equal(normalizePreferences({ appearance: { theme: "light" } }).appearance.theme, "light");
   assert.equal(normalizePreferences({ appearance: { theme: "dark" } }).appearance.theme, "dark");
+  assert.equal(normalizePreferences({ appearance: { theme: "belle" } }).appearance.theme, "belle");
   assert.equal(normalizePreferences({ appearance: { theme: "system" } }).appearance.theme, "amber");
 });
