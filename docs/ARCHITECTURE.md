@@ -21,7 +21,7 @@ The first milestone is a contract kernel: real Reaper code defines and tests sta
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
 | Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
-| Desktop | Tri-Color Duck palette, reduced-motion and frame-budget policy | design policy implemented; compositor/renderer pending |
+| Desktop | Tri-Color Duck palette, reduced-motion, frame-budget, window/workspace/session/command and notification contracts | Reaper policy and Mora browser-shell controls partially implemented; native compositor, display server and kernel session manager pending |
 
 ## Startup contract
 
@@ -74,6 +74,11 @@ The selector is policy only. It does not submit GPU work, serialize a graph, ope
 The UI policy uses the source's 65/25/10 balance: porcelain surface, cobalt navigation and vermilion alerts. Reduced-motion preference overrides animation. A frame-time classifier reports whether a supplied frame duration meets its budget (16 ms by default in the integration tests).
 
 This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS guarantee. Rendering, input handling, font shaping and accessibility integration require native desktop modules.
+
+
+## Mora desktop shell
+
+Mora is the current desktop presentation for DuckOS. The browser shell provides local virtual workspaces, application windows, keyboard command palette and a searchable engineering matrix. Reaper defines the deterministic window/session/command/notification policy in `duckos/ui/window_manager.rpr`, `duckos/ui/desktop.rpr` and `duckos/ui/notifications.rpr`. The Python host adapter reports actual read-only platform facts and validates the local application catalogue. These layers do not implement a native compositor, kernel session manager, process isolation, hardware bus scan or privileged command terminal. See [Mora shell](MORA_SHELL.md) for the implementation boundary and verification commands.
 
 ## Native bring-up gates
 
