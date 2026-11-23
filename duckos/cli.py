@@ -350,9 +350,9 @@ def main(argv: list[str] | None = None) -> int:
             if args.output.is_symlink() or args.output.exists():
                 raise ValueError("transfer output must be a new path and must not be a symlink")
             args.output.parent.mkdir(parents=True, exist_ok=True)
-            with args.output.open("x", encoding="utf-8", newline="\\n") as stream:
+            with args.output.open("x", encoding="utf-8", newline="\n") as stream:
                 json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
-                stream.write("\\n")
+                stream.write("\n")
             _print_result({
                 "schema": result["schema"],
                 "written": str(args.output.resolve()),
