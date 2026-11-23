@@ -157,6 +157,10 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(contrastRatio(palette.success, palette.successSurface) >= 4.5);
   assert.ok(contrastRatio(palette.info, palette.infoSurface) >= 4.5);
   assert.ok(contrastRatio(palette.link, palette.page) >= 4.5);
+  assert.ok(contrastRatio(palette.onDanger, palette.danger) >= 4.5);
+  assert.ok(contrastRatio(palette.onSuccess, palette.success) >= 4.5);
+  assert.ok(contrastRatio(palette.onInfo, palette.info) >= 4.5);
+  assert.ok(contrastRatio(palette.onLink, palette.link) >= 4.5);
   assert.ok(css.includes("--duck-neon-lime:#8CE63C"));
   assert.ok(css.includes("--duck-signal-red:#FF473A"));
   assert.ok(css.includes(".system-notice.warning"));
