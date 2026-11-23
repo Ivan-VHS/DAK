@@ -134,7 +134,7 @@
     {
       "id": "compat-runtime",
       "maturity": "partial",
-      "scope": "PE/ELF inspection; Linux host CLI for Wine, Proton and DOSBox, managed Wine prefixes and allowlisted Winetricks components; no browser host execution"
+      "scope": "PE/ELF inspection; Linux host CLI for Wine, Proton, DOSBox, external manager launch, ReactOS QEMU guests, managed Wine prefixes and allowlisted Winetricks components; no browser host execution"
     },
     {
       "id": "provenance-verifier",
