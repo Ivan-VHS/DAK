@@ -1,0 +1,23 @@
+.compatibility-reference{margin-top:24px;padding-top:22px;border-top:1px solid var(--mora-border)}
+.compat-heading{margin:22px 0 8px;color:var(--ink);font-size:15px;font-weight:650;letter-spacing:-.02em}
+.compat-intro,.compat-loading,.compat-count,.compat-native-status p,.compat-mechanism p,.compat-profile p,.compat-disclaimer{color:var(--muted);font-size:11px;line-height:1.65}
+.compat-intro{max-width:780px;margin:0 0 12px}
+.compat-mechanisms,.compat-profiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0 18px}
+.compat-mechanism,.compat-profile,.compat-native-status{min-width:0;padding:13px;border:1px solid var(--mora-border);border-radius:13px;background:var(--mora-surface)}
+.compat-mechanism strong,.compat-profile h4,.compat-native-status strong{display:block;margin:0 0 7px;color:var(--ink);font-size:11px;font-weight:700}
+.compat-mechanism p,.compat-profile p,.compat-native-status p{margin:0}
+.compat-model{display:inline-flex;margin-bottom:8px;padding:4px 7px;border-radius:6px;background:var(--mora-elevated);color:var(--mora-brand);font-size:8px;font-weight:700}
+.compat-profile h4{font-size:12px}
+.compat-profile .compat-caveat{margin-top:8px;padding-top:8px;border-top:1px solid var(--mora-border);color:var(--mora-muted);font-size:10px}
+.compat-filters{display:flex;gap:8px;margin-top:12px}
+.compat-search,.compat-select{min-width:0;min-height:40px;padding:0 11px;border:1px solid var(--mora-border);border-radius:9px;background:var(--mora-elevated);color:var(--ink);font:inherit;font-size:11px}
+.compat-search{flex:1}
+.compat-select{max-width:240px}
+.compat-count{margin:9px 0;font-variant-numeric:tabular-nums}
+.compat-native-area{margin-top:12px}
+.compat-native-status{border-color:color-mix(in srgb,var(--mora-brand) 48%,var(--mora-border))}
+.compat-native-status strong{color:var(--mora-brand)}
+.compat-disclaimer{margin:16px 0 4px;padding:12px 13px;border-left:3px solid var(--mora-brand);background:var(--mora-elevated)}
+.compat-empty,.compat-error{color:var(--mora-muted);font-size:11px}
+@media(max-width:620px){.compat-mechanisms,.compat-profiles{grid-template-columns:1fr}.compat-filters{flex-direction:column}.compat-select{max-width:none}}
+@media(prefers-reduced-motion:reduce){.compatibility-reference *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

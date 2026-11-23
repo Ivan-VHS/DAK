@@ -4,6 +4,8 @@
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md).
 
+[Executable compatibility architecture](EXECUTABLE_COMPATIBILITY.md) describes Bridge's local executable inspection, the fifteen-system reference matrix, four execution models and the native process-manager boundary. Its data is in [compatibility-targets.v1.json](../catalogs/compatibility-targets.v1.json).
+
 [Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
 ## Visual design
@@ -12,7 +14,7 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and six system tools, with local intent, preference, recovery and file-inspection contracts.
+[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and six system tools, with local intent, preference, recovery and executable compatibility inspection.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 

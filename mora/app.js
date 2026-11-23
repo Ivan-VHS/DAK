@@ -1,3 +1,5 @@
+import { renderCompatibilityReference } from "./compatibility.js";
+
 import {
   RECOVERY_KEY,
   buildIntentPlan,
@@ -21,7 +23,7 @@ const appDefinitions = {
   "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#f2c58d", glyph: "✦" },
   security: { name: "Sentinel", subtitle: "Права и доверие", color: "#92d7c5", glyph: "◇" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#efad9a", glyph: "↶" },
-  runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#aebcf0", glyph: "⇄" },
+  runtime: { name: "Bridge", subtitle: "Исполняемые файлы и совместимость", color: "#aebcf0", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#e9a4cd", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" }
 };
@@ -251,7 +253,8 @@ function panelMarkup(appId) {
         '<p class="window-copy">Выберите локальный EXE, DLL или ELF. Mora проверит заголовок и разрядность, не запуская файл и не отправляя его в сеть.</p>' +
         '<label class="file-picker">Выбрать файл<input type="file" data-executable-file accept=".exe,.dll,.so"></label>' +
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Запуск Windows-программ, DirectX/Vulkan translation и античитов через этот браузерный интерфейс невозможен. Native runtime пока не подключён.</span></div>';
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка формата не запускает файл. Нативный процесс-менеджер, Win32 API и графические runtime пока не подключены.</span></div>' +
+        '<section class="compatibility-reference" data-compatibility-reference aria-label="Справочник совместимости"></section>';
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
@@ -327,6 +330,9 @@ function openApp(appId) {
     '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
+  if (appId === "runtime") {
+    renderCompatibilityReference(appWindow.querySelector("[data-compatibility-reference]"));
+  }
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
