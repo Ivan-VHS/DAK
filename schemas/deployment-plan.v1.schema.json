@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/deployment-plan.v1.schema.json",
+  "title": "DuckOS non-destructive deployment plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "system",
+    "target",
+    "partition_table",
+    "image_layout",
+    "update_strategy",
+    "secure_boot",
+    "network",
+    "cloud_formats",
+    "execution"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.deployment-plan.v1"
+    },
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "architecture",
+        "kernel_abi"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "architecture": {
+          "enum": [
+            "x86_64",
+            "aarch64",
+            "riscv64",
+            "i686"
+          ]
+        },
+        "kernel_abi": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "target": {
+      "enum": [
+        "usb",
+        "pxe",
+        "http",
+        "cloud"
+      ]
+    },
+    "partition_table": {
+      "const": "GPT"
+    },
+    "image_layout": {
+      "$ref": "image-layout.v1.schema.json"
+    },
+    "update_strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "slots",
+        "initial_active_slot",
+        "rollback_policy",
+        "implemented_by_this_plan"
+      ],
+      "properties": {
+        "mode": {
+          "const": "A/B"
+        },
+        "slots": {
+          "const": [
+            "duck_system_a",
+            "duck_system_b"
+          ]
+        },
+        "initial_active_slot": {
+          "const": "duck_system_a"
+        },
+        "rollback_policy": {
+          "const": "native-bootloader-required"
+        },
+        "implemented_by_this_plan": {
+          "const": false
+        }
+      }
+    },
+    "secure_boot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "ready",
+        "reason"
+      ],
+      "properties": {
+        "requested": {
+          "type": "boolean"
+        },
+        "ready": {
+          "const": false
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "network": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocol",
+            "base_url",
+            "bootloader_url",
+            "manifest_url",
+            "ipxe_script",
+            "manifest_verification_owner",
+            "signature_enforcement_configured",
+            "https_transport"
+          ],
+          "properties": {
+            "protocol": {
+              "enum": [
+                "PXE/iPXE",
+                "UEFI HTTP Boot with iPXE handoff"
+              ]
+            },
+            "base_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "bootloader_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "manifest_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "ipxe_script": {
+              "type": "string",
+              "minLength": 1
+            },
+            "manifest_verification_owner": {
+              "const": "native-duck-bootloader"
+            },
+            "signature_enforcement_configured": {
+              "const": false
+            },
+            "https_transport": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "cloud_formats": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "raw",
+          "qcow2",
+          "vhdx"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image_created",
+        "disk_written",
+        "firmware_boot_tested",
+        "hardware_tested"
+      ],
+      "properties": {
+        "image_created": {
+          "const": false
+        },
+        "disk_written": {
+          "const": false
+        },
+        "firmware_boot_tested": {
+          "const": false
+        },
+        "hardware_tested": {
+          "const": false
+        }
+      }
+    }
+  }
+}
