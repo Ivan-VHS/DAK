@@ -102,7 +102,7 @@ class FoundrySnapshotTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_runbook("unknown")
 
-    def test_report_export_is_private_and_never_overwrites(self):
+    def test_report_export_uses_exclusive_create_and_never_overwrites(self):
         with tempfile.TemporaryDirectory() as temporary:
             target = Path(temporary) / "report.json"
             snapshot = {"schema": "duckos.foundry.snapshot.v1", "value": 7}
