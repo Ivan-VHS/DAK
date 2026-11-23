@@ -30,7 +30,7 @@ const appDefinitions = {
   "poi-2": { name: "Poi-2", subtitle: "База знаний", color: "#A5B5C8", glyph: "▧" },
   "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: "#A9B6A0", glyph: "➤" },
   gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: "#BBA77D", glyph: "▣" },
-  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: "#A7AAB7", glyph: "<>" },
+  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: "#A7AAB7", glyph: "E" },
   "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#C19A6A", glyph: "✦" },
   security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },

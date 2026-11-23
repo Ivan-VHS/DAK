@@ -18,7 +18,7 @@ const systemAppIds = [
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
-test("desktop exposes all seven first-party apps and seven system tools", () => {
+test("desktop exposes 20 first-party apps and seven system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
