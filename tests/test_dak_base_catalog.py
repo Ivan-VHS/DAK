@@ -32,6 +32,28 @@ class DakBaseApplicationCatalogTests(unittest.TestCase):
                 self.assertTrue(set(app["services"]).issubset(service_ids))
                 self.assertIsInstance(app["permissions"], list)
 
+    def test_rights_and_controller_contracts_are_registered(self) -> None:
+        services = set(self.catalog["services"])
+        expected_services = {
+            "dak.rights.v1", "dak.publisher-trust.v1", "dak.content-integrity.v1",
+            "dak.content-provenance.v1", "dak.rights-audit.v1", "dak.capture-policy.v1",
+            "dak.rights-transfer.v1", "dak.user-content.v1", "dak.controller-input.v1",
+            "dak.console-navigation.v1",
+        }
+        self.assertTrue(expected_services.issubset(services))
+
+        apps = {item["id"]: item for item in self.catalog["applications"]}
+        game = apps["dak.gamecharager"]
+        self.assertTrue({"games.licenses.read", "games.saves.read", "games.saves.write",
+                         "content.integrity.verify", "capture.policy.read",
+                         "controller.input.read"}.issubset(set(game["permissions"])))
+        self.assertTrue({"dak.rights.v1", "dak.publisher-trust.v1", "dak.rights-audit.v1",
+                         "dak.capture-policy.v1", "dak.controller-input.v1",
+                         "dak.console-navigation.v1"}.issubset(set(game["services"])))
+        sharing = apps["dak.seu-beu"]
+        self.assertIn("rights.transfer.review", sharing["permissions"])
+        self.assertIn("dak.rights-transfer.v1", sharing["services"])
+
     def test_all_requested_extensions_are_registered(self) -> None:
         app_ids = {app["id"] for app in self.catalog["applications"]}
         expected = {
