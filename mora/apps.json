@@ -89,6 +89,13 @@
       "category": "provenance",
       "panel": "mora/app.js#provenance",
       "maturity": "sha256_only"
+    },
+    {
+      "id": "katyuhen",
+      "name": "Katyuhen",
+      "category": "system",
+      "panel": "mora/app.js#katyuhen",
+      "maturity": "local_project_catalog"
     }
   ],
   "widgets": [
