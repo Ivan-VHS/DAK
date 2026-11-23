@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/preinstalled-applications.v1.schema.json",
+  "title": "DuckOS preinstalled applications catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "operating_system",
+    "maturity_status",
+    "distribution_intent",
+    "applications",
+    "workflows",
+    "prototype",
+    "interfaces"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.preinstalled-applications.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "operating_system": {
+      "const": "DuckOS"
+    },
+    "maturity_status": {
+      "enum": [
+        "not_assessed",
+        "specified",
+        "planned",
+        "partial",
+        "implemented",
+        "verified",
+        "deprecated",
+        "unsupported",
+        "not_applicable"
+      ]
+    },
+    "distribution_intent": {
+      "enum": [
+        "preinstalled",
+        "optional",
+        "downloadable"
+      ]
+    },
+    "note": {
+      "type": "string"
+    },
+    "applications": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "domain",
+          "maturity_status",
+          "capabilities",
+          "boundaries"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maturity_status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "concepts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "naming_review": {
+            "enum": [
+              "required_before_public_distribution",
+              "not_assessed",
+              "cleared"
+            ]
+          },
+          "prototype_status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "prototype_evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "target",
+          "trigger",
+          "action",
+          "maturity_status",
+          "user_consent_required"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maturity_status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "user_consent_required": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "integration_contract_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prototype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "maturity_status",
+        "runtime",
+        "storage",
+        "scope",
+        "app_boundaries"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "maturity_status": {
+          "enum": [
+            "not_assessed",
+            "specified",
+            "planned",
+            "partial",
+            "implemented",
+            "verified",
+            "deprecated",
+            "unsupported",
+            "not_applicable"
+          ]
+        },
+        "runtime": {
+          "const": "browser"
+        },
+        "storage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string"
+        },
+        "app_boundaries": {
+          "type": "object"
+        }
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "transport",
+          "status",
+          "schema",
+          "max_package_bytes",
+          "max_clip_bytes",
+          "scope"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "schema": {
+            "type": "string"
+          },
+          "max_package_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_clip_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "scope": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

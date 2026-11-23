@@ -1,0 +1,67 @@
+name: DuckOS CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-3-10:
+    name: Python 3.10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install --upgrade pip jsonschema
+      - run: python -m unittest discover -s tests -v
+      - run: python tools/validate_app_catalog.py
+
+  python-3-11:
+    name: Python 3.11
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip jsonschema
+      - run: python -m unittest discover -s tests -v
+      - run: python tools/validate_app_catalog.py
+
+  python-3-12:
+    name: Python 3.12
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip jsonschema
+      - run: python -m unittest discover -s tests -v
+      - run: python tools/validate_app_catalog.py
+
+  native-c:
+    name: Native C
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build native targets when present
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f CMakeLists.txt ]]; then
+            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            cmake --build build --parallel
+          elif find src include -type f -name '*.c' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cc' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cpp' -print -quit 2>/dev/null | grep -q .; then
+            echo "::error::Native source exists but no CMakeLists.txt build contract is defined."
+            exit 1
+          else
+            echo "::notice::No native C/C++ source tree or build target exists in this DuckOS repository revision; native compilation is not applicable yet."
+          fi

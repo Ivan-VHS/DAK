@@ -1,0 +1,267 @@
+{
+  "schema": "duckos.preinstalled-applications.v1",
+  "version": 1,
+  "operating_system": "DuckOS",
+  "maturity_status": "specified",
+  "distribution_intent": "preinstalled",
+  "note": "Product specification only; this catalog does not assert that these applications or capabilities are implemented or shipped.",
+  "applications": [
+    {
+      "id": "cockos",
+      "name": "Cockos",
+      "domain": "audio_recording",
+      "maturity_status": "specified",
+      "capabilities": [
+        "per_application_volume_mixer",
+        "voice_recorder",
+        "multitrack_recording",
+        "call_noise_suppression"
+      ],
+      "boundaries": [
+        "Visible microphone permission and recording state",
+        "Per-application control depends on host audio-session support",
+        "Not specified as a professional DAW or hidden recorder"
+      ],
+      "naming_review": "required_before_public_distribution",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
+    },
+    {
+      "id": "kavun",
+      "name": "Kavun",
+      "domain": "photos_memories",
+      "maturity_status": "specified",
+      "concepts": [
+        "event_place_slices",
+        "story_albums"
+      ],
+      "capabilities": [
+        "event_place_grouping",
+        "non_destructive_retouch",
+        "story_albums",
+        "visual_content_search"
+      ],
+      "boundaries": [
+        "Slices are logical groups and need not duplicate source files",
+        "Location and image indexing are user-controllable",
+        "Private media metadata requires privacy controls"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
+    },
+    {
+      "id": "ka-bon",
+      "name": "Ka-bon",
+      "domain": "finance_receipts",
+      "maturity_status": "specified",
+      "capabilities": [
+        "camera_receipt_capture",
+        "receipt_field_extraction",
+        "categorized_expenses",
+        "subscription_tracking",
+        "recurring_payment_reminders",
+        "shared_family_budget"
+      ],
+      "boundaries": [
+        "Extracted values require user confirmation",
+        "No payment execution or automatic transfers are specified",
+        "Financial and family data require explicit access controls"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
+    },
+    {
+      "id": "gloverty",
+      "name": "Gloverty",
+      "domain": "automation_gestures",
+      "maturity_status": "specified",
+      "capabilities": [
+        "if_then_automation",
+        "touchpad_gesture_configuration",
+        "touchscreen_gesture_configuration",
+        "keyboard_shortcuts",
+        "no_code_macros"
+      ],
+      "boundaries": [
+        "Rules expose triggers actions scope and enabled state",
+        "Privileged or destructive actions require permission and confirmation",
+        "Loop prevention and failure behavior are required"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
+    },
+    {
+      "id": "po",
+      "name": "Po",
+      "domain": "web_browser",
+      "maturity_status": "specified",
+      "capabilities": [
+        "vertical_tabs",
+        "reading_mode",
+        "tracker_protection",
+        "command_address_bar"
+      ],
+      "boundaries": [
+        "Tracker protection is not anonymity",
+        "Site permissions and private browsing state must be understandable",
+        "Commands must be distinguishable from URLs and searches"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
+    },
+    {
+      "id": "illidia",
+      "name": "Illidia",
+      "domain": "gaming",
+      "maturity_status": "specified",
+      "capabilities": [
+        "game_library",
+        "optional_cloud_saves",
+        "game_clip_capture",
+        "user_controlled_clip_sharing",
+        "achievement_profile",
+        "session_do_not_disturb"
+      ],
+      "boundaries": [
+        "Cloud saves require a compatible provider and conflict handling",
+        "Clip capture and sharing require user control",
+        "Do Not Disturb must be reversible"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
+    },
+    {
+      "id": "unify",
+      "name": "Unify",
+      "domain": "device_connectivity",
+      "maturity_status": "specified",
+      "capabilities": [
+        "paired_device_clipboard",
+        "phone_notification_forwarding",
+        "one_touch_file_transfer",
+        "selected_settings_sync",
+        "browser_tab_sync",
+        "lost_device_discovery"
+      ],
+      "boundaries": [
+        "Pairing must be authenticated and revocable",
+        "Sharing permissions are configurable per data type",
+        "Lost-device discovery is not guaranteed live location tracking"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "automation.weekly-budget-summary.v1",
+      "source": "gloverty",
+      "target": "ka-bon",
+      "trigger": "scheduled_weekly",
+      "action": "prepare_weekly_budget_summary",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "media.event-memory-assembly.v1",
+      "source": "cockos",
+      "target": "kavun",
+      "trigger": "user_selects_recording_or_media",
+      "action": "add_to_event_slice",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "continuity.browser-tabs.v1",
+      "source": "po",
+      "target": "unify",
+      "trigger": "user_selects_tabs_for_transfer",
+      "action": "transfer_tabs_to_paired_device",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "continuity.game-clips.v1",
+      "source": "illidia",
+      "target": "unify",
+      "trigger": "user_selects_clip_for_transfer",
+      "action": "transfer_clip_to_paired_device",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    }
+  ],
+  "integration_contract_requirements": [
+    "versioned_event_or_action_id",
+    "sender_and_receiver",
+    "validated_payload",
+    "explicit_opt_in_and_permissions",
+    "retry_cancellation_and_duplicate_handling",
+    "visible_result",
+    "retention_and_privacy_policy"
+  ],
+  "prototype": {
+    "path": "prototype/mora-home.html",
+    "maturity_status": "partial",
+    "runtime": "browser",
+    "storage": [
+      "localStorage",
+      "IndexedDB"
+    ],
+    "scope": "Interactive local prototype. It is not a native DuckOS system application or proof of integration with OS services.",
+    "app_boundaries": {
+      "cockos": [
+        "Microphone recording and local track import/mixdown are available where browser media APIs permit.",
+        "Per-application volume settings are stored as preferences and do not change OS audio sessions."
+      ],
+      "kavun": [
+        "Local media import, event slices, metadata search and non-destructive preview/export are available.",
+        "Image understanding and automatic location recognition are not connected."
+      ],
+      "ka-bon": [
+        "Local expense, receipt attachment, subscription and family-member records are available.",
+        "Receipt OCR, banking and cloud family sharing are not connected."
+      ],
+      "gloverty": [
+        "Rules can be created, enabled and manually run against supported local actions.",
+        "OS-wide scheduling, input gestures and global shortcuts are not connected."
+      ],
+      "po": [
+        "Tab records, external navigation and pasted-text reading view are available.",
+        "The network stack, browser-engine isolation and tracker blocking are not connected."
+      ],
+      "illidia": [
+        "Local game catalogue, progress, achievements and user-authorized screen clips are available.",
+        "Native executable launch, cloud saves and platform achievement providers are not connected."
+      ],
+      "unify": [
+        "Local clipboard APIs and manual JSON export/import for tabs, clips and selected settings are available.",
+        "Secure device pairing, live sync, phone notifications and lost-device discovery are not connected."
+      ]
+    }
+  },
+  "interfaces": [
+    {
+      "id": "unify.transfer.v1",
+      "transport": "user-selected-json-file",
+      "status": "partial",
+      "schema": "schemas/unify.transfer.v1.schema.json",
+      "max_package_bytes": 20971520,
+      "max_clip_bytes": 12582912,
+      "scope": "Manual export/import of selected browser tabs, user-selected clips and selected local settings; not live device synchronization."
+    }
+  ]
+}
