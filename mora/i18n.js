@@ -381,6 +381,23 @@ Object.assign(translations, {
   "Рабочий стол": ["Робочий стіл", "Desktop"]
 });
 
+Object.assign(translations, {
+  "Открыть меню DuckOS": ["Відкрити меню DuckOS", "Open DuckOS menu"],
+  "Найти приложение": ["Знайти застосунок", "Find an app"],
+  "Локальные команды": ["Локальні команди", "Local commands"],
+  "Настройки оболочки": ["Налаштування оболонки", "Shell settings"],
+  "Права и доверие": ["Дозволи й довіра", "Permissions and trust"],
+  "Восстановление": ["Відновлення", "Recovery"],
+  "Среда Mora": ["Середовище Mora", "Mora workspace"],
+  "Планы и намерения": ["Плани й наміри", "Plans and intents"],
+  "Каталог приложений": ["Каталог застосунків", "App catalogue"],
+  "Приложения запускаются в текущем браузерном пространстве Mora.": [
+    "Застосунки запускаються в поточному браузерному просторі Mora.",
+    "Apps open in the current Mora browser workspace."
+  ],
+  "Локальные команды": ["Локальні команди", "Local commands"]
+});
+
 export function detectLocale(savedLocale, browserLanguage = globalThis.navigator?.language ?? "ru") {
   if (SUPPORTED_LOCALES.includes(savedLocale)) return savedLocale;
   const language = String(browserLanguage).toLowerCase();
