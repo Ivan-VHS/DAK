@@ -294,7 +294,7 @@ function extensionPanelMarkup(appId) {
         '<div class="extension-status-card"><strong>Контракты ядра</strong><span>Reaper reference runtime · проверяемая политика</span></div>' +
         '<div class="extension-status-card"><strong>DuckBridge</strong><span>Инспекция и планы запуска · без выполнения</span></div>' +
         '<div class="extension-status-card"><strong>Native boot</strong><span>Нативный загрузочный образ ещё не готов</span></div></div>' +
-        '<div class="extension-status-card deep-time-card"><strong>Глубокая эпоха Duck</strong><span>' + formatEpochYears(DEEP_TIME_EPOCH_YEARS, getLocale()) + ' · отдельная BigInt-шкала, не системные часы</span></div>' +
+        '<div class="extension-status-card deep-time-card"><strong>Глубокая эпоха Duck</strong><span>' + formatEpochYears(DEEP_TIME_EPOCH_YEARS, "ru") + ' · отдельная BigInt-шкала, не системные часы</span></div>' +
         '<div class="extension-status-card"><strong>Целостность локального состояния</strong><span>CRC32-конверты, поколения сохранений и ветвление точек восстановления</span></div>' +
         '<div class="approval-actions"><button class="action-button" data-app="workspace">Открыть Control</button><button class="subtle-button" data-app="security">Открыть Sentinel</button><button class="subtle-button" data-app="updates">Открыть Restore</button></div>' +
         '<p class="window-copy">Панель показывает подтверждённую зрелость компонентов. Она не читает аппаратные датчики и не выдаёт статус оболочки за состояние ядра. Глубокая эпоха не изменяет гражданскую дату компьютера.</p>';
@@ -1197,11 +1197,9 @@ document.addEventListener("click", (event) => {
       });
       const nextBranches = [...branches, branch].slice(-12);
       localStorage.setItem(RECOVERY_BRANCHES_KEY, JSON.stringify(nextBranches));
-      if (status) status.textContent = getLocale() === "uk"
-        ? "Створено гілку " + branch.id + " · ревізія " + branch.revision +
-          (branch.parentId ? " · батьківська " + branch.parentId : " · коренева гілка")
-        : "Создана ветка " + branch.id + " · ревизия " + branch.revision +
-          (branch.parentId ? " · родитель " + branch.parentId : " · корневая ветка");
+      if (status) setLocalizedText(status,
+        "Создана ветка " + branch.id + " · ревизия " + branch.revision +
+        (branch.parentId ? " · родитель " + branch.parentId : " · корневая ветка"));
       showToast("Ветка настроек создана локально.");
     } catch {
       if (status) status.textContent = getLocale() === "uk"
@@ -1215,22 +1213,18 @@ document.addEventListener("click", (event) => {
   if (updatePreview) {
     const output = updatePreview.closest(".app-window").querySelector("[data-update-preview]");
     const plan = createAtomicUpdatePlan({ activeSlot: "A" });
-    const checks = getLocale() === "uk"
-      ? [
-        ["Підпис пакета", plan.checks.signatureVerified],
-        ["Сумісність", plan.checks.compatible],
-        ["Вільне місце", plan.checks.capacityAvailable]
-      ]
-      : [
-        ["Подпись пакета", plan.checks.signatureVerified],
-        ["Совместимость", plan.checks.compatible],
-        ["Свободное место", plan.checks.capacityAvailable]
-      ];
+    const checks = [
+      ["Подпись пакета", plan.checks.signatureVerified],
+      ["Совместимость", plan.checks.compatible],
+      ["Свободное место", plan.checks.capacityAvailable]
+    ];
     const lines = checks.map(([label, passed]) => label + ": " + (passed ? "OK" : "не проверено"));
-    output.textContent = (getLocale() === "uk" ? "A/B-план · поточний слот " : "A/B-план · текущий слот ") +
-      plan.currentSlot + (getLocale() === "uk" ? " · цільовий слот " : " · целевой слот ") + plan.targetSlot +
-      "\n" + lines.join("\n") + "\n\n" + (getLocale() === "uk" ? "Етапи: " : "Этапы: ") + plan.steps.join(" → ") +
-      "\n\n" + plan.note + " · " + (getLocale() === "uk" ? "режим" : "режим") + ": " + plan.execution + ".";
+    setLocalizedText(output,
+      "A/B-план · текущий слот " + plan.currentSlot + " · целевой слот " + plan.targetSlot +
+      "\n" + lines.join("\n") + "\n\nЭтапы: " + plan.steps.join(" → ") +
+      "\n\nНе переключайте записи загрузки, пока все условия не подтверждены." +
+      " · режим: " + plan.execution + ".");
+
   }
 });
 
