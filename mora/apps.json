@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -201,6 +201,13 @@
       "category": "application_catalogue",
       "panel": "mora/app.js#mora-commons",
       "maturity": "implemented_local_catalog"
+    },
+    {
+      "id": "rights",
+      "name": "Rights Center",
+      "category": "security",
+      "panel": "mora/app.js#rights",
+      "maturity": "partial_native_entitlement_verifier_browser_metadata_only"
     }
   ],
   "widgets": [
@@ -285,6 +292,41 @@
       "id": "desktop-optimizer",
       "maturity": "partial_native_userland",
       "scope": "read-only local desktop/process audit, reversible current-user startup controls, confirmed move-to-Inbox operation and native Tk maintenance window; no compositor or kernel enforcement"
+    },
+    {
+      "id": "publisher-trust",
+      "maturity": "partial_cli_key_allowlist",
+      "scope": "caller-supplied Ed25519 public keys; no publisher account service or key provisioning"
+    },
+    {
+      "id": "content-rights-verifier",
+      "maturity": "partial_native_cli",
+      "scope": "signed entitlement and content-manifest verification; launch gate not connected"
+    },
+    {
+      "id": "content-provenance",
+      "maturity": "partial_local_records",
+      "scope": "user-declared creator/source metadata and publisher-signed content manifests"
+    },
+    {
+      "id": "rights-audit",
+      "maturity": "partial_local_hash_chain",
+      "scope": "local tamper-evident event journal; not immutable against a privileged local administrator"
+    },
+    {
+      "id": "capture-policy",
+      "maturity": "specified",
+      "scope": "publisher-declared screenshot/recording/stream policy; compositor enforcement not connected"
+    },
+    {
+      "id": "controller-input",
+      "maturity": "partial_browser_gamepad_api",
+      "scope": "Web Gamepad API and keyboard focus navigation in optional Mora TV mode; no native input daemon"
+    },
+    {
+      "id": "console-navigation",
+      "maturity": "partial_browser_shell",
+      "scope": "D-pad, left stick, A/B/X/Y mapping and TV-distance UI scaling"
     }
   ]
 }
