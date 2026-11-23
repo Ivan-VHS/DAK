@@ -12,13 +12,13 @@ The current backend targets Linux hosts. It detects installed tools, maintains u
 |---|---|---|
 | Wine | Win32 API compatibility runtime | Managed prefixes, status detection and process launch |
 | Proton | Wine-based Steam compatibility runtime | Detects Steam Proton and launches with an explicit compatdata directory |
-| CrossOver | Commercial Wine distribution | Detects common launcher commands; not a separate backend |
-| Bottles | Prefix manager | Detects installed command; UI remains external |
-| Lutris | Game launcher | Detects installed command; UI remains external |
-| Heroic Games Launcher | Game launcher | Detects installed command; UI remains external |
-| PortProton | Wine/Proton launcher | Detects installed command; UI remains external |
+| CrossOver | Commercial Wine distribution | Detects and opens the installed manager; its own bottles remain externally managed |
+| Bottles | Prefix manager | Detects and opens the installed manager; its own bottles remain externally managed |
+| Lutris | Game launcher | Detects and opens the installed launcher |
+| Heroic Games Launcher | Game launcher | Detects and opens the installed launcher |
+| PortProton | Wine/Proton launcher | Detects and opens the installed launcher |
 | Winetricks | Runtime dependency installer | Runs only the allowlisted component verbs below |
-| PlayOnLinux | Prefix manager | Detects installed command; UI remains external |
+| PlayOnLinux | Prefix manager | Detects and opens the installed manager |
 | Whisky | macOS Wine frontend | macOS-only; not supported on Linux |
 | Kegworks | macOS wrapper builder | macOS-only; not supported on Linux |
 | Game Porting Toolkit | Apple/Metal translation toolkit | macOS-only; not supported on Linux |
@@ -40,7 +40,12 @@ duckos compatibility status
 duckos compatibility prefixes
 ~~~
 
-The status output includes host architecture, detected runtime/launcher commands, Vulkan loader presence and the managed prefix root. It does not certify that a particular graphics driver, game or anti-cheat is compatible.
+The status output includes host architecture, detected runtime/launcher commands, Vulkan loader presence and the managed prefix root. It does not certify that a particular graphics driver, game or anti-cheat is compatible. The six external manager frontends can be opened by DuckOS without taking over their own library or prefix formats:
+
+~~~sh
+duckos compatibility open-manager --name bottles
+duckos compatibility open-manager --name lutris
+~~~
 
 ## Create and use a Wine prefix
 
@@ -73,6 +78,17 @@ duckos compatibility launch --engine dosbox -- /home/user/DOS/GAME.EXE
 ~~~
 
 For complex DOS installs, use DOSBox's own configuration and mount workflow. The simple DuckOS launcher is deliberately narrower.
+
+## ReactOS as a separate QEMU guest
+
+ReactOS is not a Wine prefix or a Win32 translation library. DuckOS can create a qcow2 virtual disk and start a separately supplied guest installation through QEMU:
+
+~~~sh
+duckos compatibility create-reactos-disk --path /home/user/VM/reactos.qcow2 --size-gib 16
+duckos compatibility launch-reactos --disk /home/user/VM/reactos.qcow2 --iso /home/user/Downloads/ReactOS.iso --memory-mib 2048 --cpus 2
+~~~
+
+The disk's parent directory must already exist. The VM has networking disabled by default, and the installer ISO must be supplied by the user. Once installed, start the guest without the `--iso` option. This provides a QEMU launch path, not a promise that every ReactOS driver or Windows application will work.
 
 ## Install graphics/runtime components
 
