@@ -21,6 +21,7 @@ from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
+from .terminal import TerminalService, run_interactive
 
 
 def _load(path: Path) -> Any:
@@ -93,6 +94,15 @@ def main(argv: list[str] | None = None) -> int:
     startup_disable.add_argument("entry_id")
     startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
     startup_restore.add_argument("entry_id")
+
+    terminal = commands.add_parser(
+        "terminal", help="open the separate DuckOS extended terminal"
+    )
+    terminal_actions = terminal.add_subparsers(dest="terminal_action")
+    terminal_run = terminal_actions.add_parser(
+        "run", help="run one quoted command through the trusted terminal registry"
+    )
+    terminal_run.add_argument("command_line", help="one terminal command, for example 'hardware inventory'")
 
     release_build = commands.add_parser(
         "build-release", help="create a deterministic, optionally signed component bundle"
@@ -196,6 +206,13 @@ def main(argv: list[str] | None = None) -> int:
                     "disk_written": False,
                 })
                 return 0
+        elif args.command == "terminal":
+            if args.terminal_action is None:
+                return run_interactive(TerminalService())
+            if args.terminal_action == "run":
+                result = TerminalService().execute(args.command_line)
+            else:
+                raise ValueError("unsupported terminal action")
         elif args.command == "validate-manifest":
             result = validate_manifest(_load(args.manifest), args.root, verify_files=not args.metadata_only)
         elif args.command == "plan-image":
