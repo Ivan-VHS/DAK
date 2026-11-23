@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/mora-*.test.mjs"
+    "test": "node --check mora/app.js && node --check mora/workspace.js && node --check mora/i18n.js && node --test tests/mora-*.test.mjs"
   },
   "engines": {
     "node": ">=18"
