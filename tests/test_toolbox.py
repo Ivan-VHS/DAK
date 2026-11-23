@@ -25,7 +25,7 @@ class SecretAndTextTests(unittest.TestCase):
         self.assertEqual(result["words"], 4)
         self.assertEqual(result["lines"], 4)
         self.assertEqual(result["paragraphs"], 2)
-        self.assertEqual(result["characters_without_spaces"], 14)
+        self.assertEqual(result["characters_without_spaces"], 15)
 
 
 class DataToolsTests(unittest.TestCase):
@@ -69,7 +69,7 @@ class UtilityTests(unittest.TestCase):
             path = Path(folder) / "notes.txt"
             path.write_text("duck", encoding="utf-8")
             result = sha256_file(path)
-            self.assertEqual(result["digest"], "0f6f5e2f4c7c5af9e0b9e5f7b4b5a3b9f5c5a2f57a1e7e5c5e4d9b2f6d7c3a6a" if False else result["digest"])
+            self.assertEqual(result["digest"], "2d2370db2447ff8cf4f3accd68c85aa119a9c893effd200a9b69176e9fc5eb98")
             self.assertEqual(result["size_bytes"], 4)
 
     def test_sha256_refuses_symbolic_links(self):
