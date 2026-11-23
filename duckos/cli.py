@@ -95,6 +95,10 @@ def main(argv: list[str] | None = None) -> int:
     startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
     startup_restore.add_argument("entry_id")
 
+    mora = commands.add_parser("mora", help="open the native Mora desktop environment")
+    mora_commands = mora.add_subparsers(dest="mora_command", required=True)
+    mora_commands.add_parser("gui", help="launch the native Tk desktop shell")
+
     terminal = commands.add_parser(
         "terminal", help="open the separate DuckOS extended terminal"
     )
@@ -270,6 +274,9 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "startup" and args.startup_command in {"disable", "restore"}:
             enabled = args.startup_command == "restore"
             result = DesktopService().startup.set_enabled(args.entry_id, enabled)
+        elif args.command == "mora" and args.mora_command == "gui":
+            from .mora.native_ui import run_native_mora
+            return run_native_mora()
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
