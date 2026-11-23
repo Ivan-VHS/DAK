@@ -21,7 +21,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 - [Mora theme tokens](../mora/theme.json) — versioned machine-readable palettes and interaction tokens.
 - [Mora system policy](../mora/system-policy.json) — maturity and implementation boundaries.
 - [Mora application registry](../mora/apps.json) — first-party panels and shell-level system tools.
-- [Mora native desktop](../duckos/mora/native_ui.py) — native PySide6 / Qt Widgets shell.
+- [Mora native desktop](../duckos/mora/qt_ui.py) — native PySide6 / Qt Widgets shell.
 
 ### 2. Product applications
 
