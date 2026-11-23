@@ -29,6 +29,8 @@ The system tools are:
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
+The interface uses one shared 25-color Duck semantic system: the original black/white/yellow identity and 22 additional tokens for surface depth, typography, warm focus/alerts and cool diagnostic statuses. Mora and the native Duck Desktop maintenance workbench use the same roles; links, success, warnings and critical errors are visually distinct without changing the core Duck-yellow app identity. See [Mora Design System](MORA_DESIGN_SYSTEM.md).
+
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
 
 ## Native Reaper workbench

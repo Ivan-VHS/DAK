@@ -15,9 +15,33 @@ from .service import DesktopService, move_desktop_items_to_inbox
 from .reaper import ReaperIntegrationError, ReaperWorkbench
 
 COLORS = {
-    "background": "#101010", "surface": "#1B1B1B", "raised": "#252525",
-    "text": "#F7F7F7", "muted": "#BDBDBD", "accent": "#FFD400",
-    "accent_text": "#111111", "border": "#454545",
+    "background": "#080808",
+    "deepest": "#040404",
+    "surface": "#111111",
+    "raised": "#1A1A1A",
+    "panel": "#262626",
+    "text": "#FFFFFF",
+    "body": "#E6E6DF",
+    "soft_text": "#F5F3E6",
+    "muted": "#B8B8B8",
+    "quiet": "#888888",
+    "disabled": "#5E5E5E",
+    "accent": "#FFD400",
+    "accent_hover": "#FFF066",
+    "accent_strong": "#E6B800",
+    "accent_shadow": "#B38600",
+    "accent_subtle": "#5C4400",
+    "accent_text": "#080808",
+    "warning": "#FFC42E",
+    "danger": "#FF473A",
+    "success": "#8CE63C",
+    "success_surface": "#2E5918",
+    "info": "#5CE1E6",
+    "link": "#3B82F6",
+    "sapphire": "#16294A",
+    "cool_surface": "#1F2633",
+    "border": "#3A3A3A",
+    "selection": "#5C4400",
 }
 
 
@@ -57,6 +81,13 @@ class DesktopWindow:
         style.map("TNotebook.Tab", background=[("selected", COLORS["accent"])], foreground=[("selected", COLORS["accent_text"])])
         style.configure("Treeview", background=COLORS["surface"], fieldbackground=COLORS["surface"], foreground=COLORS["text"], rowheight=28)
         style.configure("Treeview.Heading", background=COLORS["raised"], foreground=COLORS["accent"])
+        style.map("Treeview", background=[("selected", COLORS["selection"])], foreground=[("selected", COLORS["text"])])
+        style.configure("Success.TLabel", foreground=COLORS["success"])
+        style.configure("Warning.TLabel", foreground=COLORS["warning"])
+        style.configure("Danger.TLabel", foreground=COLORS["danger"])
+        style.configure("Info.TLabel", foreground=COLORS["info"])
+        style.configure("Link.TLabel", foreground=COLORS["link"])
+        style.configure("Disabled.TLabel", foreground=COLORS["disabled"])
 
     def _build(self) -> None:
         header = ttk.Frame(self.root, padding=(22, 18, 22, 12))
@@ -115,6 +146,12 @@ class DesktopWindow:
         ttk.Label(processes, text="Наблюдение за ресурсами", style="Title.TLabel").pack(anchor="w")
         ttk.Label(processes, text="Локальный диагностический снимок. Duck не завершает процессы и не меняет их приоритеты.", style="Muted.TLabel").pack(anchor="w", pady=(4, 12))
         self.process_tree = ttk.Treeview(processes, columns=("pid", "memory", "cpu"), show="tree headings")
+        self.desktop_tree.tag_configure("safe", foreground=COLORS["success"])
+        self.desktop_tree.tag_configure("warning", foreground=COLORS["warning"])
+        self.desktop_tree.tag_configure("blocked", foreground=COLORS["disabled"])
+        self.startup_tree.tag_configure("enabled", foreground=COLORS["success"])
+        self.startup_tree.tag_configure("disabled", foreground=COLORS["muted"])
+        self.process_tree.tag_configure("process", foreground=COLORS["info"])
         self.process_tree.heading("#0", text="Процесс")
         self.process_tree.column("#0", width=360)
         for key, label, width in (("pid", "PID", 100), ("memory", "Память", 150), ("cpu", "CPU", 100)):
@@ -364,14 +401,16 @@ class DesktopWindow:
                 tree.delete(item)
         for item in desktop["items"]:
             note = "Проверьте имя" if item["looks_temporary"] else "Можно перенести" if item["safe_to_move"] else "Не перемещается"
-            self.desktop_tree.insert("", "end", iid=item["name"], text=item["name"], values=(item["kind"], self._bytes(item["size_bytes"]), note))
+            tag = "warning" if item["looks_temporary"] else "safe" if item["safe_to_move"] else "blocked"
+            self.desktop_tree.insert("", "end", iid=item["name"], text=item["name"], values=(item["kind"], self._bytes(item["size_bytes"]), note), tags=(tag,))
         for entry in startup["entries"]:
             label = "Включено" if entry["enabled"] else "Отключено"
             source = "Реестр HKCU Run" if entry["source"] == "user_registry_run" else "Папка автозагрузки"
-            self.startup_tree.insert("", "end", iid=entry["id"], text=entry["name"], values=(label, source))
+            tag = "enabled" if entry["enabled"] else "disabled"
+            self.startup_tree.insert("", "end", iid=entry["id"], text=entry["name"], values=(label, source), tags=(tag,))
         for process in resources["top_processes"]:
             cpu = "—" if process["cpu_percent"] is None else f"{process['cpu_percent']:.1f}%"
-            self.process_tree.insert("", "end", text=process["name"], values=(process["pid"], self._bytes(process["memory_bytes"]), cpu))
+            self.process_tree.insert("", "end", text=process["name"], values=(process["pid"], self._bytes(process["memory_bytes"]), cpu), tags=("process",))
 
     def move_selected(self) -> None:
         names = list(self.desktop_tree.selection())

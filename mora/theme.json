@@ -1,24 +1,45 @@
 {
   "schema": "mora.theme.v1",
-  "name": "DuckOS Black White Yellow",
-  "version": 2,
+  "name": "DuckOS Extended Semantic Palette",
+  "version": 3,
   "palettes": {
     "duck": {
       "page": "#080808",
-      "surface": "#151515",
-      "elevated": "#242424",
-      "text": "#FFFFFF",
-      "secondary": "#E5E5E5",
-      "muted": "#A6A6A6",
-      "brand": "#FFD400",
-      "brandHover": "#FFE45C",
-      "onBrand": "#080808",
-      "secondaryAccent": "#FFD400",
-      "onSecondaryAccent": "#080808",
+      "deepest": "#040404",
+      "surface": "#111111",
+      "elevated": "#1A1A1A",
+      "recessed": "#262626",
       "border": "#3A3A3A",
-      "selection": "#3A3100",
-      "danger": "#FFD400",
-      "onDanger": "#080808"
+      "disabled": "#5E5E5E",
+      "muted": "#888888",
+      "secondary": "#B8B8B8",
+      "body": "#E6E6DF",
+      "softText": "#F5F3E6",
+      "text": "#FFFFFF",
+      "brand": "#FFD400",
+      "brandHover": "#FFF066",
+      "brandStrong": "#E6B800",
+      "brandShadow": "#B38600",
+      "brandSubtle": "#5C4400",
+      "warning": "#FFC42E",
+      "danger": "#FF473A",
+      "success": "#8CE63C",
+      "successSurface": "#2E5918",
+      "info": "#5CE1E6",
+      "link": "#3B82F6",
+      "inspectorSurface": "#16294A",
+      "coolSurface": "#1F2633",
+      "onBrand": "#080808",
+      "onSecondaryAccent": "#080808",
+      "onWarning": "#080808",
+      "onDanger": "#040404",
+      "onSuccess": "#040404",
+      "onInfo": "#040404",
+      "onLink": "#040404",
+      "selection": "#5C4400",
+      "warningSurface": "#5C4400",
+      "infoSurface": "#16294A",
+      "secondaryAccent": "#FFD400"
     }
   },
   "shape": {
@@ -50,5 +71,40 @@
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },
-  "defaultPalette": "duck"
+  "defaultPalette": "duck",
+  "colorScale": {
+    "base": {
+      "black": "#080808",
+      "white": "#FFFFFF",
+      "duckYellow": "#FFD400"
+    },
+    "neutral": {
+      "coalAbyss": "#040404",
+      "graphiteLayer": "#111111",
+      "raisedGraphite": "#1A1A1A",
+      "darkSlate": "#262626",
+      "technicalGray": "#3A3A3A",
+      "mutedSteel": "#5E5E5E",
+      "coldAsh": "#888888",
+      "lightSilver": "#B8B8B8",
+      "softIvory": "#E6E6DF",
+      "warmMilk": "#F5F3E6"
+    },
+    "warm": {
+      "lemonHighlight": "#FFF066",
+      "sunAmber": "#E6B800",
+      "deepSaffron": "#B38600",
+      "darkOchre": "#5C4400",
+      "warmHoney": "#FFC42E",
+      "signalRed": "#FF473A"
+    },
+    "cool": {
+      "neonLime": "#8CE63C",
+      "deepPine": "#2E5918",
+      "iceCyan": "#5CE1E6",
+      "cobaltAccent": "#3B82F6",
+      "nightSapphire": "#16294A",
+      "stormGraphite": "#1F2633"
+    }
+  }
 }
