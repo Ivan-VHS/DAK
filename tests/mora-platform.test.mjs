@@ -22,6 +22,18 @@ test("Russian and Ukrainian locale changes are persistent at the UI contract lay
   setLocale("uk");
   assert.equal(getLocale(), "uk");
   assert.equal(translate("Приложения"), "Застосунки");
+  assert.equal(
+    translate("План содержит 2 действие(й). Ничего не изменится до вашего подтверждения."),
+    "План містить 2 дію(ї). Нічого не зміниться без вашого підтвердження."
+  );
+  assert.equal(
+    translate("86 452 654 432 564 423 644 лет · отдельная BigInt-шкала, не системные часы"),
+    "86 452 654 432 564 423 644 років · окрема шкала BigInt, а не системний годинник"
+  );
+  assert.equal(
+    translate("Создана ветка mora-2 · ревизия 2 · родитель mora-1"),
+    "Створено гілку mora-2 · ревізія 2 · батьківська mora-1"
+  );
   setLocale("ru");
   assert.equal(translate("Приложения"), "Приложения");
 });
