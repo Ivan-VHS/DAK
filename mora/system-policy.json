@@ -2,7 +2,7 @@
   "schema": "duckos.mora.system.v1",
   "product": "DuckOS",
   "desktop": "Mora",
-  "version": 1,
+  "version": 2,
   "principles": [
     "The shell never executes arbitrary commands or manifest-provided shell strings.",
     "Intent actions are limited to a reviewed local allowlist and require explicit approval.",
@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and six system tools"
+      "scope": "Mora browser shell, responsive layout, draggable windows, dock, seven original apps, six system tools, Newsroom and Horizon"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -32,8 +32,8 @@
       "scope": "shell settings snapshot only; no atomic OS image updater"
     },
     "app_sandboxing": {
-      "maturity": "planned",
-      "scope": "policy documented; browser prototype does not sandbox native processes"
+      "maturity": "partial",
+      "scope": "Bubblewrap host-side wrapper; no kernel-enforced process sandbox in DuckOS"
     },
     "zero_trust_permissions": {
       "maturity": "partial",
@@ -45,7 +45,7 @@
     },
     "adaptive_workspace": {
       "maturity": "partial",
-      "scope": "responsive browser layout, persisted light/dark palette and reduced motion; native XR session transfer remains absent"
+      "scope": "Responsive browser layout, persisted light/dark palette and reduced motion; native XR session transfer remains absent"
     },
     "multimodal_input": {
       "maturity": "planned",
@@ -53,11 +53,11 @@
     },
     "material_interface": {
       "maturity": "implemented",
-      "scope": "Mora glass surfaces, explicit borders, motion and contrast states"
+      "scope": "Mora Amber palette, SVG drapery wallpaper, dark radial workspace, glass surfaces, persisted light/dark selection and reduced-motion behavior"
     },
     "compatibility": {
       "maturity": "partial",
-      "scope": "PE/ELF header inspection only; no Win32, DirectX, Vulkan or anti-cheat runtime"
+      "scope": "Wine-backed os-run user-space backend plus local PE inspection; no native PE loader or complete DirectX/Vulkan stack"
     },
     "declarative_configuration": {
       "maturity": "partial",
@@ -73,16 +73,46 @@
     },
     "shared_design_system": {
       "maturity": "implemented",
-      "scope": "shared semantic palette and theme tokens in the Mora browser shell; native adapters remain distinct"
+      "scope": "Shared Mora Amber semantic palette and theme tokens in the browser shell; native adapters remain separate"
     },
     "installable_workspace": {
       "maturity": "partial",
-      "scope": "web manifest and scoped offline cache; not an OS installer"
+      "scope": "Web manifest and scoped offline asset cache including the Amber wallpaper; not an OS installer"
+    },
+    "native_platform": {
+      "maturity": "partial",
+      "scope": "Limine x86-64 kernel bring-up, initramfs builder and wlroots/EGL preview; no scheduler, VFS, process ABI or in-kernel drivers"
+    },
+    "core_user_services": {
+      "maturity": "implemented",
+      "scope": "seven Python user-space services: PipeWire routing adapter, layouts, shortcuts, palette audit, safe command registry, session snapshots and profiles/event hub"
+    },
+    "newsroom": {
+      "maturity": "implemented",
+      "scope": "RSS/Atom aggregation from fixed HTTPS publishers with a bounded loopback API and local cache"
+    },
+    "windows_runtime": {
+      "maturity": "partial",
+      "scope": "PE inspection, per-app Wine prefixes and argv-based os-run on POSIX hosts; no native Win32 kernel, bundled DXVK/VKD3D or anti-cheat support"
+    },
+    "package_store": {
+      "maturity": "partial",
+      "scope": "local staged package store with path and SHA-256 checks; signed publisher metadata and transactional OS updates remain planned"
+    },
+    "reaper_native_contracts": {
+      "maturity": "partial",
+      "scope": "Reaper source contracts cover memory, scheduling, IPC, trust, storage and driver orchestration; not a bootable kernel implementation"
+    },
+    "build_manifest_tools": {
+      "maturity": "implemented",
+      "scope": "Python validators for system manifests, image layout plans and driver-module dependency graphs; not an OS installer"
     }
   },
   "not_in_scope_as_implemented_features": [
     "neural or thought-controlled input",
     "self-modifying kernel and runtime-generated drivers",
-    "temporal or quantum rollback"
+    "temporal or quantum rollback",
+    "automatic anti-cheat bypass",
+    "kernel-mode Windows anti-cheat execution"
   ]
 }

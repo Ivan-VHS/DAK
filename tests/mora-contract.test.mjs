@@ -10,7 +10,7 @@ const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", i
 
 const appIds = [
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "newsroom", "horizon"
 ];
 
 test("desktop exposes all seven first-party apps and six system tools", () => {
@@ -25,7 +25,7 @@ test("desktop exposes all seven first-party apps and six system tools", () => {
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 8);
+  assert.equal(registry.system_services.length, 9);
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {
@@ -42,7 +42,7 @@ test("system panels expose approvals, permissions, recovery and local file inspe
     "data-intent-form", "data-intent-preview", "approve-intent", "deny-intent",
     "data-capability", "save-recovery", "restore-recovery", "preview-update",
     "data-executable-file", "data-provenance-file", "data-power-profile",
-    "data-setting"
+    "data-setting", "NEWS_API", "data-news-status", "refresh-news", "horizonFeatures", "os-run"
   ]) {
     assert.ok(js.includes(marker), "missing system control: " + marker);
   }
@@ -56,6 +56,8 @@ test("shell policy keeps prototype and native-service maturity separate", () => 
   assert.equal(policy.capabilities.local_ai_and_npu.maturity, "planned");
   assert.equal(policy.capabilities.immutable_updates.maturity, "planned");
   assert.equal(policy.capabilities.compatibility.maturity, "partial");
+  assert.equal(policy.capabilities.newsroom.maturity, "implemented");
+  assert.equal(policy.capabilities.windows_runtime.maturity, "partial");
   assert.ok(policy.capabilities.zero_trust_permissions.scope.includes("no kernel enforcement"));
 });
 
@@ -66,4 +68,7 @@ test("the desktop remains self-contained and responsive", () => {
   assert.ok(css.includes("backdrop-filter"));
   assert.ok(css.includes("prefers-reduced-motion"));
   assert.ok(css.includes(".reduce-motion"));
+  assert.ok(html.includes('href="amber.css"'));
+  assert.ok(js.includes('data-action="toggle-theme"'));
+  assert.ok(js.includes("NEWS_API"));
 });

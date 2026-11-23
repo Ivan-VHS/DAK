@@ -55,6 +55,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - run: node --check mora/app.js && node --check mora/core.js && node --check mora/service-worker.js
       - run: npm test
 
   native-c:
