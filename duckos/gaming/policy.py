@@ -197,6 +197,34 @@ def assess_capability_document(document: dict[str, Any] | None = None) -> dict[s
     return assess_capabilities(document)
 
 
+
+def build_session_profile(
+    game_id: str,
+    *,
+    engine: str = "unknown",
+    worker_count: int = 4,
+    multithreaded: bool = True,
+    audio_enabled: bool = True,
+) -> dict[str, Any]:
+    """Build the validated input contract consumed by Reaper's task planner."""
+    game_id = _safe_id(game_id, "game_id")
+    engine = _safe_id(engine, "engine")
+    if isinstance(worker_count, bool) or not isinstance(worker_count, int) or not 1 <= worker_count <= 64:
+        raise GamingPolicyError("worker_count must be between 1 and 64")
+    if not isinstance(multithreaded, bool) or not isinstance(audio_enabled, bool):
+        raise GamingPolicyError("multithreaded and audio_enabled must be booleans")
+    return {
+        "schema": "duckos.gaming-session-profile.v1",
+        "game_id": game_id,
+        "engine": engine,
+        "worker_count": worker_count,
+        "multithreaded": multithreaded,
+        "audio_enabled": audio_enabled,
+        "source_rules": ["GPR-13", "GPR-14", "GPR-15", "GPR-16", "GPR-21", "GPR-22", "GPR-23", "GPR-24"],
+        "execution_performed": False,
+    }
+
+
 def plan_session_transition(
     current_state: str,
     event: str,
