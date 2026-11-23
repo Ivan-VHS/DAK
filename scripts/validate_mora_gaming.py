@@ -8,7 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "mora" / "contracts" / "oplague-gaming.v1.schema.json"
-MORA_JS = ROOT / "mora" / "mora.js"
+MORA_JS = ROOT / "mora" / "app.js"
+MORA_INDEX = ROOT / "mora" / "index.html"
+APP_CATALOG = ROOT / "mora" / "apps.json"
 WORKER_JS = ROOT / "mora" / "service-worker.js"
 INTEGRATION_DOC = ROOT / "docs" / "GAMING_PERFORMANCE_INTEGRATION.md"
 
@@ -72,14 +74,18 @@ def main() -> int:
     )
 
     source = MORA_JS.read_text(encoding="utf-8")
-    require('id:"mora-boost"' in source, "Mora Boost is missing from the app catalogue")
-    require("Игровая лаборатория" in source, "Mora Boost does not explain its native OPlague entry point")
+    require('"mora-boost": {' in source, "Mora Boost is missing from the app definitions")
+    require("Игровая производительность под контролем" in source, "Mora Boost does not explain its workspace")
+    index = MORA_INDEX.read_text(encoding="utf-8")
+    require('data-app="mora-boost"' in index, "Mora Boost tile is missing from the current desktop")
+    catalog = json.loads(APP_CATALOG.read_text(encoding="utf-8"))
+    require(any(item.get("id") == "mora-boost" for item in catalog.get("built_in_apps", [])), "Mora Boost is missing from the versioned app catalogue")
     require("https://github.com/Ivan-VHS/OPlague" in source, "Mora Boost must link to the OPlague project")
 
     worker = WORKER_JS.read_text(encoding="utf-8")
     cache_match = re.search(r'const CACHE="([^"]+)"', worker)
     require(cache_match is not None, "Mora service-worker cache key is missing")
-    require("mora.js" in worker and "index.html" in worker, "Offline shell assets are not cached")
+    require("./app.js" in worker and "./index.html" in worker, "Offline shell assets are not cached")
 
     require(INTEGRATION_DOC.is_file(), "Gaming integration documentation is missing")
     print("Mora gaming IPC contract and workspace entry point validated.")
