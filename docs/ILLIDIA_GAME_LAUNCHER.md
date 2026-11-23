@@ -86,7 +86,7 @@ illidia inspect GAME_ID
 illidia launch GAME_ID --confirm-unverified
 ```
 
-That confirmation is stored locally for the game ID and the exact file digest. A changed binary has a new digest and therefore needs its own review when its signature is not verified. The launcher does not block a file merely because its hash changed: it displays the mismatch, continues after any required first-run approval and leaves the saved fingerprint unchanged unless the user requests an update:
+That first-run confirmation and the digest reviewed at that moment are stored locally. After a baseline fingerprint exists, a changed digest is always reported but does not by itself block the next launch, even when the host cannot verify signatures. This keeps ordinary game updates usable while making the change visible. The saved fingerprint remains unchanged unless the user requests an update:
 
 ```sh
 illidia launch GAME_ID --confirm-unverified --update-fingerprint
