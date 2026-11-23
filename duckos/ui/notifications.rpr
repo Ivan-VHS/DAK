@@ -1,0 +1,47 @@
+# Bounded notification history for the DuckOS desktop.
+# Notification shape: [id, title, body, severity, monotonic_timestamp, read].
+
+export craft notification_valid(notification) {
+    when size(notification) != 6 {
+        yield false
+    }
+    when notification[0] == "" or notification[1] == "" {
+        yield false
+    }
+    when notification[3] != "info" and notification[3] != "warning" and notification[3] != "critical" {
+        yield false
+    }
+    yield notification[4] >= 0
+}
+
+export craft append(history, notification, capacity) {
+    when capacity <= 0 or not notification_valid(notification) {
+        yield ["invalid", history]
+    }
+    make updated := push(history, notification)
+    when size(updated) > capacity {
+        yield ["appended", rest(updated)]
+    }
+    yield ["appended", updated]
+}
+
+export craft sequence_valid(history) {
+    vary previous := -1
+    each notification in history {
+        when not notification_valid(notification) or notification[4] <= previous {
+            yield false
+        }
+        change previous := notification[4]
+    }
+    yield true
+}
+
+export craft unread_count(history) {
+    vary count := 0
+    each notification in history {
+        when notification_valid(notification) and not notification[5] {
+            change count := count + 1
+        }
+    }
+    yield count
+}
