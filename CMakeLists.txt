@@ -6,10 +6,10 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 add_library(duckos_dabi64 STATIC src/abi/dabi64.c)
-target_include_directories(duckos_dabi64 PUBLIC \${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(duckos_dabi64 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(duckos_runtime STATIC src/runtime/value.c)
-target_include_directories(duckos_runtime PUBLIC \${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(duckos_runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(duckos_runtime PUBLIC duckos_dabi64)
 
 if(MSVC)
