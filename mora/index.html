@@ -6,7 +6,7 @@
 </head><body>
 <div class="landscape" aria-hidden="true"><div class="sun"></div><i class="hill h1"></i><i class="hill h2"></i><i class="hill h3"></i></div>
 <div class="desktop">
-<header class="topbar"><a class="brand" href="#"><b>◒ Mora</b><small>DUCKOS DESKTOP</small></a><div class="top-status"><span class="dot"></span>WORKSPACE READY <i></i> LOCAL SHELL <i></i><time id="clock">--:--</time></div><button class="icon" id="theme" aria-label="Переключить тему">◐</button></header>
+<header class="topbar"><a class="brand" href="#"><b>◒ Mora</b><small>DUCKOS DESKTOP</small></a><div class="top-status"><span class="dot" id="bridgeDot"></span>WORKSPACE READY <i></i><span id="bridgeStatus">NATIVE LAUNCHER CHECKING</span><i></i><time id="clock">--:--</time></div><button class="icon" id="theme" aria-label="Переключить тему">◐</button></header>
 <div class="layout">
 <aside class="sidebar"><div class="profile"><b class="avatar">V</b><span><strong>Ivan-VHS</strong><small>Personal workspace</small></span></div>
 <p class="side-label">WORKSPACE</p>
@@ -14,7 +14,7 @@
 <p class="side-label">PROJECTS</p><a href="https://github.com/Ivan-VHS/Pytyliki">▣　Pytyliki</a><a href="https://github.com/Ivan-VHS/Reaper">R　Reaper</a><a href="https://github.com/Ivan-VHS/OPlague">O　OPlague</a><a href="https://github.com/Ivan-VHS/VentuSample">V　VentuSample</a>
 <div class="side-foot">◒　Mora UI v1.0<br><small>One desktop · distinct tools</small></div></aside>
 <main>
-<section class="hero"><div class="hero-copy"><p class="eyebrow">YOUR UNIFIED WORKSPACE</p><h1>Всё нужное.<br><em>В одном месте.</em></h1><p>Единый рабочий стол для системных инструментов, разработки и творчества. Привычные приложения сохраняют свои возможности — Mora объединяет их визуально.</p><button class="primary" id="projectsJump">Открыть проекты ↗</button></div><div class="hero-art"><div class="orb"></div><div class="glass"><small>MORA CONTROL</small><b>12</b><span>workspace modules</span><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="float">● 5 PROJECTS CONNECTED</div></div><div class="hero-time"><b id="heroClock">--:--</b><span id="date"></span></div></section>
+<section class="hero"><div class="hero-copy"><p class="eyebrow">YOUR UNIFIED WORKSPACE</p><h1>Всё нужное.<br><em>В одном месте.</em></h1><p>Единый рабочий стол для системных инструментов, разработки и творчества. Привычные приложения сохраняют свои возможности — Mora объединяет их визуально.</p><button class="primary" id="projectsJump">Открыть проекты ↗</button></div><div class="hero-art"><div class="orb"></div><div class="glass"><small>MORA CONTROL</small><b>12</b><span>workspace modules</span><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="float">● 4 NATIVE TOOLS · LOCAL</div></div><div class="hero-time"><b id="heroClock">--:--</b><span id="date"></span></div></section>
 <section class="heading"><div><p class="eyebrow">YOUR TOOLKIT</p><h2>Приложения</h2></div><label class="search">⌕ <input id="search" placeholder="Найти приложение…" type="search"></label></section>
 <div class="filters"><button class="chip selected" data-filter="all">Все</button><button class="chip" data-filter="system">Система</button><button class="chip" data-filter="creative">Творчество</button><button class="chip" data-filter="developer">Разработка</button></div>
 <section class="app-grid" id="apps"></section>
