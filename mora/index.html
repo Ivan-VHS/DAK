@@ -67,14 +67,22 @@
     </div>
 
     <header class="statusbar">
-      <div class="brand"><span class="brand-mark">m</span><span>Mora</span></div>
+      <button class="brand start-trigger" type="button" data-panel-toggle="start" aria-controls="start-menu" aria-expanded="false" aria-label="Открыть меню DuckOS"><span class="brand-mark">m</span><span>Mora</span><span class="start-chevron">⌄</span></button>
       <div class="active-app" id="active-app">Рабочий стол</div>
+      <nav class="top-launchers" aria-label="Системные приложения">
+        <button class="status-control" data-app="files" aria-label="Открыть Duck Files">Файлы</button>
+        <button class="status-control" data-app="terminal" aria-label="Открыть виртуальный терминал">Терминал</button>
+        <button class="status-control" data-app="settings" aria-label="Открыть настройки">Настройки</button>
+      </nav>
       <div class="system-status" aria-label="Состояние системы">
-        <span class="status-item"><span class="status-dot wifi-dot"></span> Wi-Fi</span>
-        <span class="status-item battery"><span class="battery-shape"><i></i></span> 86%</span>
+        <button class="status-item status-trigger" type="button" data-panel-toggle="quick" aria-controls="quick-panel" aria-expanded="false" aria-label="Wi-Fi · быстрые настройки"><span class="status-dot wifi-dot"></span> Wi-Fi</button>
+        <button class="status-item battery status-trigger" type="button" data-app="workspace" aria-label="Питание · открыть Control" title="Питание"><span class="battery-shape"><i></i></span> 86%</button>
+        <button class="status-item sound-status status-trigger" type="button" data-panel-toggle="quick" aria-controls="quick-panel" aria-expanded="false" aria-label="Звук · открыть громкость">♫ Звук</button>
+        <button class="status-control" data-panel-toggle="quick" aria-controls="quick-panel" aria-expanded="false">Быстрые настройки</button>
+        <button class="status-control notification-trigger" data-panel-toggle="notifications" aria-controls="notification-panel" aria-expanded="false" aria-label="Уведомления">◉</button>
         <button class="status-control" data-app="workspace" aria-label="Открыть параметры системы">Система</button>
         <span class="status-control theme-control" role="img" aria-label="Единая палитра DuckOS: чёрный, белый и жёлтый" title="Чёрный · белый · жёлтый">DUCK</span>
-        <time id="status-time">--:--</time>
+        <button class="status-control clock-trigger" type="button" data-panel-toggle="clock" aria-controls="clock-panel" aria-expanded="false" aria-label="Часы и дата"><time id="status-time">--:--</time></button>
       </div>
     </header>
 
@@ -87,6 +95,13 @@
           <span class="sun-glyph">✦</span>
           <span>Спокойный вечер начинается с порядка.</span>
         </div>
+        <div class="workspace-switcher" role="group" aria-label="Рабочие пространства">
+          <span class="workspace-switcher-label">Пространства</span>
+          <button class="workspace-pill is-active" type="button" data-workspace-select="1" aria-pressed="true">01</button>
+          <button class="workspace-pill" type="button" data-workspace-select="2" aria-pressed="false">02</button>
+          <button class="workspace-pill" type="button" data-workspace-select="3" aria-pressed="false">03</button>
+        </div>
+        <button class="files-shortcut" type="button" data-app="files"><span>▤</span> Открыть Duck Files <kbd>Ctrl+F</kbd></button>
       </aside>
 
       <section class="app-area" aria-label="Приложения">
@@ -178,6 +193,13 @@
           <span class="device-mini-list"><i></i><span>Наушники</span><b>ONLINE</b></span>
           <span class="device-mini-list muted"><i></i><span>Геймпад</span><b>ОФЛАЙН</b></span>
         </button>
+        <section class="system-overview" aria-label="System overview">
+          <div class="overview-heading"><strong>SYSTEM OVERVIEW</strong><span>DEMO</span></div>
+          <p class="overview-note">Симуляция, не телеметрия ядра</p>
+          <div class="metric-line" data-metric="cpu"><div><span>Загрузка CPU</span><strong>24%</strong></div><i><b style="width:24%"></b></i></div>
+          <div class="metric-line" data-metric="memory"><div><span>Память</span><strong>48%</strong></div><i><b style="width:48%"></b></i></div>
+          <div class="metric-line" data-metric="disk"><div><span>Диск</span><strong>62%</strong></div><i><b style="width:62%"></b></i></div>
+        </section>
       </aside>
     </div>
 
@@ -190,9 +212,57 @@
         <button class="dock-item" data-app="po" aria-label="Po"><span class="dock-glyph">⌖</span><i></i></button>
         <button class="dock-item" data-app="illidia" aria-label="Illidia"><span class="dock-glyph">⌘</span><i></i></button>
         <button class="dock-item" data-app="unify" aria-label="Unify"><span class="dock-glyph">∞</span><i></i></button>
+        <button class="dock-item" data-app="files" aria-label="Duck Files"><span class="dock-glyph">▤</span><i></i></button>
+        <button class="dock-item" data-app="terminal" aria-label="Terminal"><span class="dock-glyph">›_</span><i></i></button>
+        <button class="dock-item" data-app="settings" aria-label="Settings"><span class="dock-glyph">⚙</span><i></i></button>
       </nav>
     </footer>
 
+    <section class="desktop-flyout start-menu" id="start-menu" aria-label="Меню DuckOS" hidden>
+      <div class="flyout-heading"><strong>DuckOS · Mora</strong><button type="button" data-panel-close aria-label="Закрыть">×</button></div>
+      <label class="start-search"><span aria-hidden="true">⌕</span><input type="search" data-start-search placeholder="Найти приложение" aria-label="Найти приложение"></label>
+      <div class="start-app-grid" data-start-apps>
+        <button type="button" class="start-app" data-app="files"><span>▤</span><strong>Duck Files</strong><small>Файлы и папки</small></button>
+        <button type="button" class="start-app" data-app="terminal"><span>›_</span><strong>Terminal</strong><small>Локальные команды</small></button>
+        <button type="button" class="start-app" data-app="settings"><span>⚙</span><strong>Settings</strong><small>Настройки оболочки</small></button>
+        <button type="button" class="start-app" data-app="security"><span>◇</span><strong>Sentinel</strong><small>Права и доверие</small></button>
+        <button type="button" class="start-app" data-app="updates"><span>↶</span><strong>Restore</strong><small>Восстановление</small></button>
+        <button type="button" class="start-app" data-app="workspace"><span>⌘</span><strong>Control</strong><small>Среда Mora</small></button>
+        <button type="button" class="start-app" data-app="mora-ai"><span>✦</span><strong>Mora AI</strong><small>Планы и намерения</small></button>
+        <button type="button" class="start-app" data-app="mora-commons"><span>✣</span><strong>Mora Commons</strong><small>Каталог приложений</small></button>
+        <button type="button" class="start-app" data-app="cockos"><span>∿</span><strong>Cockos</strong><small>Звук и запись</small></button>
+        <button type="button" class="start-app" data-app="kavun"><span>◒</span><strong>Kavun</strong><small>Фотографии</small></button>
+        <button type="button" class="start-app" data-app="illidia"><span>⌘</span><strong>Illidia</strong><small>Игры</small></button>
+        <button type="button" class="start-app" data-app="unify"><span>∞</span><strong>Unify</strong><small>Устройства</small></button>
+      </div>
+      <p class="start-footnote">Приложения запускаются в текущем браузерном пространстве Mora.</p>
+    </section>
+    <section class="desktop-flyout quick-panel" id="quick-panel" aria-label="Быстрые настройки" hidden>
+      <div class="flyout-heading"><strong>Быстрые настройки</strong><button type="button" data-panel-close aria-label="Закрыть">×</button></div>
+      <div class="quick-grid">
+        <button type="button" class="quick-toggle is-on" data-action="quick-toggle" data-quick-id="wifi" aria-pressed="true"><span>⌁</span><strong>Wi-Fi</strong><small>Только индикатор</small></button>
+        <button type="button" class="quick-toggle is-on" data-action="quick-toggle" data-quick-id="bluetooth" aria-pressed="true"><span>ᛒ</span><strong>Bluetooth</strong><small>Только индикатор</small></button>
+        <button type="button" class="quick-toggle is-on" data-action="quick-toggle" data-quick-id="focus" aria-pressed="false"><span>◉</span><strong>Фокус</strong><small>Режим оболочки</small></button>
+        <button type="button" class="quick-toggle" data-action="quick-toggle" data-quick-id="airplane" aria-pressed="false"><span>✈</span><strong>Авиарежим</strong><small>Только индикатор</small></button>
+      </div>
+      <label class="quick-range"><span>Громкость интерфейса</span><input type="range" min="0" max="100" value="72" data-quick-range="volume"><output data-quick-value="volume">72%</output></label>
+      <label class="quick-range"><span>Яркость визуальных эффектов</span><input type="range" min="0" max="100" value="80" data-quick-range="brightness"><output data-quick-value="brightness">80%</output></label>
+      <p class="window-copy">Эти переключатели изменяют состояние оболочки Mora. Сетевые адаптеры, Bluetooth и аудиоустройства не управляются браузером.</p>
+    </section>
+    <section class="desktop-flyout clock-panel" id="clock-panel" aria-label="Часы и дата" hidden>
+      <div class="flyout-heading"><strong>Время и дата</strong><button type="button" data-panel-close aria-label="Закрыть">×</button></div>
+      <time class="panel-clock-time" data-panel-clock-time>--:--</time>
+      <p class="panel-clock-date" data-panel-clock-date>Загрузка даты…</p>
+      <div class="clock-panel-actions">
+        <button type="button" data-panel-toggle="notifications" aria-controls="notification-panel" aria-expanded="false">Уведомления</button>
+        <button type="button" data-app="workspace">Питание и Control</button>
+      </div>
+    </section>
+    <section class="desktop-flyout notification-panel" id="notification-panel" aria-label="Уведомления" hidden>
+      <div class="flyout-heading"><strong>Уведомления</strong><div><button type="button" data-notification-action="read">Прочитать всё</button><button type="button" data-notification-action="clear">Очистить</button><button type="button" data-panel-close aria-label="Закрыть">×</button></div></div>
+      <div class="notification-list" data-notification-list aria-live="polite"></div>
+    </section>
+    <div class="desktop-context-menu" id="desktop-context-menu" role="menu" hidden></div>
     <div class="window-layer" id="window-layer" aria-live="polite"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </main>

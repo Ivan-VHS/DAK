@@ -54,11 +54,27 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 ## Geometry, scale and interaction
 
+Mora's browser workspace uses a searchable start menu, three local workspaces, a bottom dock, system quick controls, notifications and draggable application windows. Windows support focus/z-order, minimize, maximize/restore and close. File operations and terminal commands remain scoped to the virtual workspace until DuckOS supplies a permissioned native filesystem and process service.
+
+Quick-panel indicators for Wi-Fi and Bluetooth are presentation-only; they do not toggle physical radios. The System Overview bars are simulated demo values, not kernel telemetry. Browser-side settings remain preferences, not hardware or kernel controls. See [Interactive Mora workspace](docs/MORA_INTERACTIVE_WORKSPACE.md) for the complete behavior and validation boundaries.
+
 - Spacing follows 4, 8, 12, 16, 24 and 32 px.
 - Window corners: 18–24 px; cards: 14–18 px; controls: 9–12 px.
 - Interactive targets are at least 44 × 44 px where the platform allows.
 - Preserve visible keyboard focus, labels, tab order, Escape handling, native DPI and text scaling.
 - Keep the centre stable as layouts reflow; at narrow widths, collapse columns instead of shrinking text or hit areas.
+
+## Typography
+
+Mora keeps **Inter / Segoe UI / system sans-serif** for the main interface. The calligraphic set is an accent layer, not a replacement for controls, dense text or system status.
+
+- Display / brand: **Lobster**, then **Pacifico** as an optional local fallback.
+- Cyrillic handwritten accents: **Caveat**, **Marck Script** and **Bad Script**.
+- Large expressive lettering: **Comforter** and **Comforter Brush**; use sparingly.
+- Latin-only ornament: **Great Vibes**, **Alex Brush**, **Allura**, **Pinyon Script**, **Italianno**, **Parisienne** and **Herr Von Muellerhoff**. Apply only to Latin text.
+- Code and numeric content keep their existing monospace/tabular treatment.
+
+The CSS stacks reference locally installed font families and do not fetch Google Fonts at runtime. This preserves Mora's offline behavior. Until licensed font files are bundled with their original notices, missing families fall back to the browser's local generic fonts. The complete approved set and redistribution rules are in [Calligraphic Typography](docs/CALLIGRAPHIC_TYPOGRAPHY.md).
 
 ## Integration contract
 

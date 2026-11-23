@@ -47,7 +47,7 @@
   },
   "typography": {
     "ui": "Segoe UI",
-    "display": "Unbounded",
+    "display": "Lobster",
     "code": "Cascadia Mono"
   },
   "defaultPalette": "duck"
