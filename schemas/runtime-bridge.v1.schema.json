@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/runtime-bridge.v1.schema.json",
+  "title": "DuckOS host runtime bridge v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["app_id", "approved"],
+      "properties": {
+        "app_id": {"type": "string", "pattern": "^[0-9a-f]{24}$"},
+        "runtime_id": {"enum": ["auto", "native-pe", "wine", "dosbox"]},
+        "arguments": {"type": "array", "maxItems": 128, "items": {"type": "string", "maxLength": 2048}},
+        "approved": {"const": true},
+        "allow_unisolated": {"type": "boolean"},
+        "allow_network": {"type": "boolean"}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approved"],
+      "properties": {
+        "approved": {"const": true},
+        "allow_network": {"type": "boolean"},
+        "persistent": {"const": false}
+      }
+    }
+  ]
+}
