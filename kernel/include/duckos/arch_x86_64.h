@@ -14,6 +14,17 @@ static inline uint8_t duckos_inb(uint16_t port) {
 static inline void duckos_io_wait(void) {
     duckos_outb(0x80u, 0u);
 }
+static inline uint64_t duckos_irq_save(void) {
+    uint64_t flags;
+    __asm__ volatile ("pushfq; popq %0; cli" : "=r"(flags) : : "memory");
+    return flags;
+}
+static inline void duckos_irq_restore(uint64_t flags) {
+    if ((flags & (UINT64_C(1) << 9u)) != 0u)
+        __asm__ volatile ("sti" : : : "memory");
+    else
+        __asm__ volatile ("cli" : : : "memory");
+}
 static inline void duckos_cli(void) {
     __asm__ volatile ("cli" : : : "memory");
 }
