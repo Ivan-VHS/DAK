@@ -1,3 +1,5 @@
+import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+
 import {
   RECOVERY_KEY,
   buildIntentPlan,
@@ -24,7 +26,8 @@ const appDefinitions = {
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
+  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: "#D58B3D", glyph: "✣" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -168,6 +171,186 @@ function updateWorkspacePanel() {
   });
 }
 
+function commonsPanelMarkup() {
+  const filters = MORA_COMMONS_CATEGORIES.map((category) =>
+    '<button class="commons-filter" type="button" data-commons-filter="' + category.id +
+    '" aria-pressed="false">' + category.title + '</button>'
+  ).join("");
+
+  return '<p class="window-kicker">MORA COMMONS · ЕДИНЫЙ КАТАЛОГ</p>' +
+    '<h2 class="window-heading">Пространство возможностей</h2>' +
+    '<p class="commons-intro">Пятнадцать направлений собраны по задачам, а не по полу. Каждый инструмент открыт каждому пользователю. Настраивайте каталог под свои интересы.</p>' +
+    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Mora Commons"></label>' +
+    '<div class="commons-filters" data-commons-filters aria-label="Категории приложений">' +
+    '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
+    filters +
+    '</div>' +
+    '<p class="commons-count" data-commons-count aria-live="polite">Показано 15 приложений</p>' +
+    '<div class="commons-grid" data-commons-grid></div>' +
+    '<section class="commons-detail" data-commons-detail aria-live="polite" hidden></section>' +
+    '<p class="window-copy">Каталог и избранное работают локально. Карточки описывают спецификации новых продуктов; отдельные исполняемые модули ещё не подключены.</p>';
+}
+
+function loadCommonsFavorites() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("mora.commons.favorites.v1") || "[]");
+    const knownIds = new Set(MORA_COMMONS_APPS.map((app) => app.id));
+    return new Set(Array.isArray(stored) ? stored.filter((id) => knownIds.has(id)) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+let commonsFavorites = loadCommonsFavorites();
+
+function saveCommonsFavorites() {
+  try {
+    localStorage.setItem("mora.commons.favorites.v1", JSON.stringify([...commonsFavorites]));
+    return true;
+  } catch {
+    showToast("Избранное недоступно в этом профиле браузера");
+    return false;
+  }
+}
+
+function makeCommonsText(tagName, className, value) {
+  const element = document.createElement(tagName);
+  if (className) element.className = className;
+  element.textContent = value;
+  return element;
+}
+
+function renderCommonsDetails(detailPanel, app) {
+  detailPanel.replaceChildren();
+
+  const category = MORA_COMMONS_CATEGORIES.find((item) => item.id === app.category);
+  const header = document.createElement("div");
+  header.className = "commons-detail-head";
+  header.appendChild(makeCommonsText("h3", "", app.name));
+
+  const close = makeCommonsText("button", "commons-detail-close", "×");
+  close.type = "button";
+  close.dataset.commonsCloseDetail = "true";
+  close.setAttribute("aria-label", "Закрыть описание приложения");
+  header.appendChild(close);
+  detailPanel.appendChild(header);
+
+  detailPanel.appendChild(makeCommonsText("p", "commons-card-category", category ? category.title : ""));
+  detailPanel.appendChild(makeCommonsText("p", "", app.description));
+
+  const list = document.createElement("ul");
+  for (const capability of app.capabilities) {
+    list.appendChild(makeCommonsText("li", "", capability));
+  }
+  detailPanel.appendChild(list);
+
+  detailPanel.appendChild(makeCommonsText(
+    "p",
+    "commons-detail-status",
+    "Статус: спецификация. Каталог Mora Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
+  ));
+  detailPanel.hidden = false;
+}
+
+function initializeCommonsPanel(appWindow) {
+  const search = appWindow.querySelector("[data-commons-search]");
+  const filters = appWindow.querySelector("[data-commons-filters]");
+  const grid = appWindow.querySelector("[data-commons-grid]");
+  const count = appWindow.querySelector("[data-commons-count]");
+  const details = appWindow.querySelector("[data-commons-detail]");
+  let activeCategory = "all";
+
+  function renderGrid() {
+    const matches = filterCommonsApps(search.value, activeCategory);
+    grid.replaceChildren();
+
+    count.textContent = "Показано " + matches.length + " из " + MORA_COMMONS_APPS.length;
+
+    if (!matches.length) {
+      grid.appendChild(makeCommonsText("p", "commons-empty", "Ничего не найдено. Измените запрос или выберите другую категорию."));
+      details.hidden = true;
+      return;
+    }
+
+    for (const app of matches) {
+      const category = MORA_COMMONS_CATEGORIES.find((item) => item.id === app.category);
+      const card = document.createElement("article");
+      card.className = "commons-card";
+
+      const top = document.createElement("div");
+      top.className = "commons-card-top";
+      top.appendChild(makeCommonsText("span", "commons-card-glyph", app.glyph));
+
+      const isFavorite = commonsFavorites.has(app.id);
+      const favorite = makeCommonsText("button", "commons-favorite", isFavorite ? "★" : "☆");
+      favorite.type = "button";
+      favorite.dataset.commonsFavorite = app.id;
+      favorite.setAttribute("aria-pressed", String(isFavorite));
+      favorite.setAttribute(
+        "aria-label",
+        (isFavorite ? "Убрать из избранного: " : "Добавить в избранное: ") + app.name
+      );
+      top.appendChild(favorite);
+      card.appendChild(top);
+
+      card.appendChild(makeCommonsText("h3", "", app.name));
+      card.appendChild(makeCommonsText("span", "commons-card-category", category ? category.title : ""));
+      card.appendChild(makeCommonsText("p", "", app.subtitle));
+      card.appendChild(makeCommonsText("p", "", app.description));
+
+      const actions = document.createElement("div");
+      actions.className = "commons-card-actions";
+      const detailsButton = makeCommonsText("button", "", "Подробнее");
+      detailsButton.type = "button";
+      detailsButton.dataset.commonsDetails = app.id;
+      actions.appendChild(detailsButton);
+      card.appendChild(actions);
+      grid.appendChild(card);
+    }
+  }
+
+  filters.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-commons-filter]");
+    if (!button) return;
+    activeCategory = button.dataset.commonsFilter;
+    filters.querySelectorAll("[data-commons-filter]").forEach((item) => {
+      item.setAttribute("aria-pressed", String(item === button));
+    });
+    renderGrid();
+  });
+
+  search.addEventListener("input", renderGrid);
+
+  grid.addEventListener("click", (event) => {
+    const favorite = event.target.closest("[data-commons-favorite]");
+    if (favorite) {
+      const appId = favorite.dataset.commonsFavorite;
+      if (commonsFavorites.has(appId)) commonsFavorites.delete(appId);
+      else commonsFavorites.add(appId);
+      const saved = saveCommonsFavorites();
+      renderGrid();
+      if (saved) {
+        showToast(commonsFavorites.has(appId) ? "Добавлено в избранное" : "Убрано из избранного");
+      }
+      return;
+    }
+
+    const detailsButton = event.target.closest("[data-commons-details]");
+    if (detailsButton) {
+      const app = MORA_COMMONS_APPS.find((item) => item.id === detailsButton.dataset.commonsDetails);
+      if (app) renderCommonsDetails(details, app);
+    }
+  });
+
+  details.addEventListener("click", (event) => {
+    if (event.target.closest("[data-commons-close-detail]")) {
+      details.hidden = true;
+    }
+  });
+
+  renderGrid();
+}
+
 function panelMarkup(appId) {
   switch (appId) {
     case "cockos":
@@ -291,6 +474,8 @@ function panelMarkup(appId) {
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
+    case "mora-commons":
+      return commonsPanelMarkup();
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }
@@ -352,6 +537,7 @@ function openApp(appId) {
     '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
+  if (appId === "mora-commons") initializeCommonsPanel(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
