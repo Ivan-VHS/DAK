@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-import webbrowser
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -122,6 +121,17 @@ def _read_packaged_json(filename: str, fallback: dict[str, Any]) -> dict[str, An
 
 def _json_text(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)
+
+
+class AppCard(QFrame):
+    from PySide6.QtCore import Signal
+
+    activated = Signal()
+
+    def mouseReleaseEvent(self, event: Any) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.activated.emit()
+        super().mouseReleaseEvent(event)
 
 
 class MoraWindow(QMainWindow):
@@ -427,8 +437,9 @@ class MoraWindow(QMainWindow):
         category = str(app.get("category", "other")).replace("_", " ").title()
         subtitle = APP_DESCRIPTIONS.get(app_id, (category, ""))[0]
 
-        card = QFrame()
+        card = AppCard()
         card.setObjectName("Card")
+        card.activated.connect(lambda selected=app_id: self.open_app(selected))
         card.setMinimumHeight(132)
         layout = QVBoxLayout(card)
         layout.setContentsMargins(14, 13, 14, 13)
@@ -448,10 +459,6 @@ class MoraWindow(QMainWindow):
         meta = self._label(category.upper(), "Eyebrow")
         layout.addWidget(meta)
 
-        card.mouseReleaseEvent = lambda event, selected=app_id, target=card: (
-            self.open_app(selected) if event.button() == Qt.MouseButton.LeftButton
-            else QFrame.mouseReleaseEvent(target, event)
-        )
         return card
 
     def _show_home(self) -> None:
