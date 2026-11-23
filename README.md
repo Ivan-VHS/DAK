@@ -1,42 +1,36 @@
-# DuckOS · Mora Desktop
+# DuckOS
 
-DuckOS now contains **Mora**, the unified desktop shell for the Ivan-VHS application family.
+## Product direction
 
-## Run Mora
+DuckOS is specified with a seven-application default suite: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Their roles, boundaries and proposed integrations are documented in [the preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md). This is a product specification, not a claim that the apps are native system services or included in a bootable image.
 
-Open [mora/index.html](mora/index.html) in a browser. For installable offline-shell behavior, serve the repository through HTTPS or localhost:
+## Mora — one desktop for web and native tools
 
-```sh
-python -m http.server 8000
-``
+Mora is the common desktop for both the seven web applications and the connected native project tools. The main screen in [prototype/mora-home.html](prototype/mora-home.html) shows both groups together:
 
-Then open `http://localhost:8000/mora/`.
+- **Web apps:** Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Their current local browser workflows, app windows and local data stay in the seven-app prototype.
+- **Native tools:** Reaper Studio, OPlague, VentuSample and Pytyliki. Mora checks their real repository and build state, then launches an available application as a separate native OS window.
 
-## Connected native workspaces
+The native tools are additions to the workspace, not replacements for the seven-app suite. A missing repository or unbuilt executable is shown as unavailable; Mora does not imitate a running native app with an HTML placeholder.
 
-| Project | Role | Desktop technology |
-| --- | --- | --- |
-| [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | Processor diagnostics and metrics | Win32 |
-| [Reaper](https://github.com/Ivan-VHS/Reaper) | Programming language and Studio IDE | Tk |
-| [OPlague](https://github.com/Ivan-VHS/OPlague) | Device and driver inspection | Tk |
-| [VentuSample](https://github.com/Ivan-VHS/VentuSample) | Procedural audio workstation | Qt |
-| DuckOS | OS and desktop shell | Mora web shell prototype |
+## Start Mora
 
-Mora shows the real desktop captures published by the native projects and links to their repositories/releases. It does **not** claim to execute native binaries in a browser. A permissioned OS launcher/IPC bridge is a separate integration layer and is not part of this web shell.
+Place DuckOS, Reaper, OPlague, VentuSample and Pytyliki beside one another or configure their paths in the local workspace settings. From the DuckOS directory, run:
 
-## Existing OS specification
+    python mora_host.py
 
-Mora is the updated shared workspace, not a replacement for the operating-system specifications. Keep the earlier material alongside it:
+The local host listens only on 127.0.0.1:43860. The root page opens the combined web/native desktop. The **Каталог проектов** link opens the detailed native project page at /projects. Python 3.10 or newer is required for the host; each external application retains its own build prerequisites.
 
-- [Documentation index](docs/README.md)
-- [Preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md)
-- [Unified documentation standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md)
-- [Original seven-app home-screen prototype](prototype/mora-home.html)
+## Shared desktop behavior
 
-The original prototype and product specifications remain useful references for the seven built-in applications. The new `mora/` directory is the integrated DuckOS shell that brings those modules and the five native project workspaces into one desktop catalogue.
+- One home screen and one visual language for both application groups.
+- One saved dark/light Mora theme, passed to new native processes as MORA_THEME_MODE.
+- Web apps retain their browser-based local data and capability boundaries.
+- Native apps retain their own executable processes, tools and data, with startup theme inherited from Mora.
+- Existing application theme controls remain available; currently running native windows are not remotely repainted.
 
-## Shared design language
+## Documentation
 
-[MORA_DESIGN_SYSTEM.md](MORA_DESIGN_SYSTEM.md) defines the canonical palette, shapes, spacing, typography, motion and accessibility contract. Each native repository keeps its own specialist layout and adopts the shared semantic tokens through its native toolkit.
+Start with the [documentation index](docs/README.md). The [Mora desktop integration guide](docs/MORA_DESKTOP.md) defines the unified home screen, local launch rules, theme contract and security boundaries. The [preinstalled app specification](docs/PREINSTALLED_APPLICATIONS.md) continues to define the seven web app identities and their maturity boundaries. The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines shared terminology and evidence rules.
 
-Maintained by Ivan-VHS.
+Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests. Architecture proposals and roadmap entries are not implementation evidence.

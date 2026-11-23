@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "mora",
+  "name": "Mora",
+  "summary": "Единый рабочий стол",
+  "description": "Локальная оболочка для приложений Ivan-VHS: каталог, общая тема и безопасный запуск нативных окон.",
+  "category": "desktop",
+  "accent": "#315EE8",
+  "capabilities": ["Рабочий стол", "Каталог приложений", "Запуск процессов", "Согласованная тема", "Локальные настройки"],
+  "entrypoint": {
+    "kind": "python",
+    "path": "mora_host.py",
+    "platforms": ["windows", "linux", "macos"],
+    "requires": ["Python 3.10+"]
+  },
+  "integration": {
+    "theme_environment": "MORA_THEME_MODE",
+    "themes": ["dark", "light"],
+    "window_mode": "shell",
+    "local_only": true
+  }
+}
