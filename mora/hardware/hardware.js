@@ -108,7 +108,7 @@
       if (gl) {
         const extension = gl.getExtension("WEBGL_debug_renderer_info");
         gpu = {
-          api: gl instanceof WebGL2RenderingContext ? "WebGL 2" : "WebGL",
+          api: (typeof WebGL2RenderingContext !== "undefined" && gl instanceof WebGL2RenderingContext) ? "WebGL 2" : "WebGL",
           vendor: extension ? gl.getParameter(extension.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR),
           renderer: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)
         };
