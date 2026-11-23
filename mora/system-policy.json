@@ -57,7 +57,7 @@
     },
     "compatibility": {
       "maturity": "partial",
-      "scope": "PE/ELF header inspection only; no Win32, DirectX, Vulkan or anti-cheat runtime"
+      "scope": "Read-only PE32/PE32+ header, section and import-DLL inspection; isolated prefix scaffolding and CLI launch diagnostics; no native NT/Win32 process runtime, DirectX translation or Windows execution"
     },
     "declarative_configuration": {
       "maturity": "partial",

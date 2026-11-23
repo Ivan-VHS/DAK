@@ -29,3 +29,7 @@
 Describe current behavior from the source, build configuration and tests. Mark designs and future work as specified or planned; do not present them as implemented. Keep kernel, boot, driver, runtime, graphics and desktop claims tied to concrete source paths and reproducible verification evidence.
 
 This index is a documentation entry point. It does not itself assert that any particular subsystem is implemented or absent.
+
+## Windows application compatibility
+
+[Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics, the current non-executing boundary and implementation status against the 66-point specification.
