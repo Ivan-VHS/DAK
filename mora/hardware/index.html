@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10142a">
+  <meta name="description" content="Mora Hardware Studio — 15 аппаратных и игровых инструментов DuckOS">
+  <title>Hardware Studio · Mora</title>
+  <link rel="stylesheet" href="../mora.css">
+  <link rel="stylesheet" href="hardware.css">
+</head>
+<body class="hw-app">
+  <div class="hw-ambient" aria-hidden="true"><i></i><b></b></div>
+  <header class="hw-topbar">
+    <a class="hw-brand" href="../index.html" aria-label="Вернуться в Mora">
+      <span class="hw-mark">◒</span>
+      <span><strong>Mora</strong><small>HARDWARE STUDIO</small></span>
+    </a>
+    <div class="hw-status"><span class="hw-live"></span><span id="agentStatus">БРАУЗЕРНЫЙ РЕЖИМ · АГЕНТ НЕ ПОДКЛЮЧЁН</span></div>
+    <div class="hw-actions">
+      <button class="hw-button quiet" id="importSnapshot">Импорт отчёта</button>
+      <button class="hw-button quiet" id="importOffers">Импорт обновлений</button>
+      <button class="hw-button primary" id="exportReport">Экспорт отчёта</button>
+    </div>
+  </header>
+
+  <main class="hw-main">
+    <section class="hw-hero">
+      <div>
+        <p class="hw-eyebrow">DUCKOS · HARDWARE / FIRMWARE / GAMING</p>
+        <h1>Hardware <em>Studio</em></h1>
+        <p class="hw-lead">Пятнадцать специализированных инструментов для инвентаризации железа, контроля драйверов, BIOS/UEFI и измерения игрового frame pacing.</p>
+        <div class="hw-hero-meta">
+          <span><b>15</b> приложений</span>
+          <span><b>0</b> скрытых изменений</span>
+          <span><b>100%</b> локальный импорт</span>
+        </div>
+      </div>
+      <div class="hw-orbit" aria-hidden="true">
+        <div class="hw-orbit-core">HW</div><i></i><b></b><span></span>
+      </div>
+    </section>
+
+    <section class="hw-metrics" aria-label="Сводка обнаруженного оборудования">
+      <article><span>Потоки CPU</span><strong id="metricCpu">—</strong><small id="metricCpuSource">нет данных</small></article>
+      <article><span>GPU / WebGL</span><strong id="metricGpu">—</strong><small id="metricGpuSource">нет данных</small></article>
+      <article><span>Оперативная память</span><strong id="metricMemory">—</strong><small id="metricMemorySource">нет данных</small></article>
+      <article><span>Устройства</span><strong id="metricDevices">—</strong><small id="metricDevicesSource">нет отчёта агента</small></article>
+    </section>
+
+    <section class="hw-toolbar">
+      <div><p class="hw-eyebrow">WORKSPACE CATALOGUE</p><h2>Аппаратные приложения</h2></div>
+      <label class="hw-search"><span>⌕</span><input id="moduleSearch" type="search" placeholder="Поиск по 15 приложениям…" autocomplete="off"></label>
+    </section>
+
+    <div class="hw-layout">
+      <aside class="hw-sidebar" aria-label="Навигация по инструментам">
+        <div class="hw-side-title">MORA WORKSPACE</div>
+        <button class="hw-side-link active" data-app="overview"><span>◈</span> Обзор системы</button>
+        <div class="hw-side-title">DEVICE & DRIVERS</div>
+        <div id="sideDevice"></div>
+        <div class="hw-side-title">FIRMWARE & BUS</div>
+        <div id="sideFirmware"></div>
+        <div class="hw-side-title">PERFORMANCE</div>
+        <div id="sidePerformance"></div>
+        <a class="hw-side-external" href="https://github.com/Ivan-VHS/OPlague" target="_blank" rel="noreferrer">OPlague · инспектор ↗</a>
+        <a class="hw-side-external" href="https://github.com/Ivan-VHS/Pytyliki" target="_blank" rel="noreferrer">Pytyliki · CPU lab ↗</a>
+      </aside>
+
+      <div class="hw-content">
+        <section id="overviewPanel" class="hw-overview">
+          <div class="hw-section-head"><div><p class="hw-eyebrow">LIVE INVENTORY</p><h2>Состояние хоста</h2></div><span class="hw-evidence" id="evidenceState">Ожидается локальный отчёт</span></div>
+          <div class="hw-overview-grid">
+            <article class="hw-info-card"><span class="hw-info-icon">▦</span><div><small>Платформа</small><strong id="hostPlatform">Браузер</strong><p id="hostRelease">ОС не раскрыта веб-странице</p></div></article>
+            <article class="hw-info-card"><span class="hw-info-icon">◉</span><div><small>Прошивка</small><strong id="firmwareVersion">Неизвестно</strong><p id="firmwareVendor">BIOS/UEFI данные недоступны</p></div></article>
+            <article class="hw-info-card"><span class="hw-info-icon">⌁</span><div><small>Графический API</small><strong id="graphicsApi">WebGL недоступен</strong><p id="graphicsRenderer">Нет данных о GPU</p></div></article>
+          </div>
+          <div class="hw-section-head"><div><p class="hw-eyebrow">ALL MODULES</p><h2>15 независимых инструментов</h2></div><span class="hw-muted">Выбери приложение, чтобы открыть его рабочую панель</span></div>
+          <div class="hw-app-grid" id="moduleGrid"></div>
+          <div class="hw-callout">
+            <span class="hw-callout-mark">i</span>
+            <p><strong>Граница доступа.</strong> Браузер сам по себе не читает PCI configuration space, реестр драйверов, температуры всех датчиков или переменные BIOS. Для этих данных запусти локальный агент из репозитория и импортируй его JSON-отчёт. Неизвестные значения не подменяются догадками.</p>
+          </div>
+        </section>
+
+        <section id="detailPanel" class="hw-detail" hidden>
+          <button class="hw-back" id="backOverview">← Все приложения</button>
+          <div id="detailContent"></div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="hw-footer">
+      <span>◒ MORA · HARDWARE STUDIO</span>
+      <span>Локальные данные · видимые источники · обратимые действия</span>
+      <a href="../../docs/HARDWARE_PERFORMANCE_SUITE.md">Техническая спецификация ↗</a>
+    </footer>
+  </main>
+
+  <input id="snapshotFile" type="file" accept=".json,application/json" hidden>
+  <input id="offersFile" type="file" accept=".json,application/json" hidden>
+  <input id="infFile" type="file" accept=".inf,text/plain" hidden>
+  <div id="toast" class="hw-toast" role="status" aria-live="polite"></div>
+  <script src="hardware.js"></script>
+</body>
+</html>
