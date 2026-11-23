@@ -38,3 +38,5 @@
 | Driver installation | Out of scope | OPlague остаётся read-only |
 | AI agent with host access | Not implemented | нужен отдельный permission broker и audit log |
 | Native GPU telemetry | Not implemented | браузерный dashboard показывает только demo |
+
+| Newsroom | Implemented | Trusted RSS/Atom ingestion, local cache, category/search API, reader UI, bookmarks | Publisher availability and feed format can change | `news.py`, `desktop/newsroom/`, `docs/NEWSROOM.md` |
