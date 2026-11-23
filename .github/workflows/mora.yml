@@ -1,25 +1,32 @@
-name: Mora desktop shell
+name: Mora desktop shell and Serein
 
 on:
   push:
     branches: [main, "feature/**"]
     paths:
       - "mora/**"
+      - "native/**"
       - "tests/mora-contract.test.mjs"
+      - "tests/serein_tests.cpp"
       - "package.json"
+      - "CMakeLists.txt"
       - ".github/workflows/mora.yml"
   pull_request:
     paths:
       - "mora/**"
+      - "native/**"
       - "tests/mora-contract.test.mjs"
+      - "tests/serein_tests.cpp"
       - "package.json"
+      - "CMakeLists.txt"
       - ".github/workflows/mora.yml"
 
 permissions:
   contents: read
 
 jobs:
-  mora-contract:
+  frontend-contract:
+    name: Mora frontend contract
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
@@ -28,10 +35,30 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Check JavaScript syntax
         run: node --check mora/app.js
 
       - name: Run Mora contract tests
         run: npm test
+
+  native-build:
+    name: Serein native build (\${{ matrix.os }})
+    runs-on: \${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -S . -B build -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Serein
+        run: cmake --build build --config Release --parallel
+
+      - name: Run native contract tests
+        run: ctest --test-dir build -C Release --output-on-failure
