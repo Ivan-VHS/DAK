@@ -12,36 +12,38 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
+const DUCK_ACCENT = "#FFD400";
+
 const appDefinitions = {
-  cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#BDA27D", glyph: "∿" },
-  kavun: { name: "Kavun", subtitle: "Фотографии", color: "#AF806B", glyph: "◒" },
-  kabon: { name: "Ka-bon", subtitle: "Финансы", color: "#D58B3D", glyph: "₴" },
-  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: "#A78A8A", glyph: "ϟ" },
-  po: { name: "Po", subtitle: "Компас", color: "#AAA18A", glyph: "⌖" },
-  illidia: { name: "Illidia", subtitle: "Игры", color: "#82916F", glyph: "⌘" },
-  unify: { name: "Unify", subtitle: "Устройства", color: "#7C9387", glyph: "∞" },
-  sestem: { name: "Sestem", subtitle: "Статус системы", color: "#D2AA65", glyph: "♟" },
-  setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: "#B9C6A5", glyph: "✳" },
-  orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: "#C5A4A0", glyph: "▦" },
-  abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: "#C5B58C", glyph: "▤" },
-  olaab: { name: "Olaab", subtitle: "Медиатека", color: "#9EB7B2", glyph: "◈" },
-  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: "#D4A26F", glyph: "♫" },
-  "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: "#A6B6A0", glyph: "◇" },
-  "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: "#C49BAE", glyph: "♡" },
-  poi: { name: "Poi", subtitle: "Быстрые заметки", color: "#B7B2D2", glyph: "⌖" },
-  "poi-2": { name: "Poi-2", subtitle: "База знаний", color: "#A5B5C8", glyph: "▧" },
-  "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: "#A9B6A0", glyph: "➤" },
-  gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: "#BBA77D", glyph: "▣" },
-  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: "#A7AAB7", glyph: "E" },
-  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#C19A6A", glyph: "✦" },
-  security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
-  updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
-  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
-  workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
-  desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: "#FFD400", glyph: "▦" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: "#D58B3D", glyph: "✣" }
+  cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
+  kavun: { name: "Kavun", subtitle: "Фотографии", color: DUCK_ACCENT, glyph: "◒" },
+  kabon: { name: "Ka-bon", subtitle: "Финансы", color: DUCK_ACCENT, glyph: "₴" },
+  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: DUCK_ACCENT, glyph: "ϟ" },
+  po: { name: "Po", subtitle: "Компас", color: DUCK_ACCENT, glyph: "⌖" },
+  illidia: { name: "Illidia", subtitle: "Игры", color: DUCK_ACCENT, glyph: "⌘" },
+  unify: { name: "Unify", subtitle: "Устройства", color: DUCK_ACCENT, glyph: "∞" },
+  sestem: { name: "Sestem", subtitle: "Статус системы", color: DUCK_ACCENT, glyph: "♟" },
+  setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: DUCK_ACCENT, glyph: "✳" },
+  orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: DUCK_ACCENT, glyph: "▦" },
+  abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: DUCK_ACCENT, glyph: "▤" },
+  olaab: { name: "Olaab", subtitle: "Медиатека", color: DUCK_ACCENT, glyph: "◈" },
+  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: DUCK_ACCENT, glyph: "♫" },
+  "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: DUCK_ACCENT, glyph: "◇" },
+  "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: DUCK_ACCENT, glyph: "♡" },
+  poi: { name: "Poi", subtitle: "Быстрые заметки", color: DUCK_ACCENT, glyph: "⌖" },
+  "poi-2": { name: "Poi-2", subtitle: "База знаний", color: DUCK_ACCENT, glyph: "▧" },
+  "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: DUCK_ACCENT, glyph: "➤" },
+  gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: DUCK_ACCENT, glyph: "▣" },
+  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: DUCK_ACCENT, glyph: "E" },
+  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: DUCK_ACCENT, glyph: "✦" },
+  security: { name: "Sentinel", subtitle: "Права и доверие", color: DUCK_ACCENT, glyph: "◇" },
+  updates: { name: "Restore", subtitle: "Обновления и откат", color: DUCK_ACCENT, glyph: "↶" },
+  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: DUCK_ACCENT, glyph: "⇄" },
+  workspace: { name: "Control", subtitle: "Среда и питание", color: DUCK_ACCENT, glyph: "⌘" },
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
+  desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
+  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -56,19 +58,10 @@ let pendingIntentPlan = null;
 
 function applyPreferences() {
   document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
-  document.documentElement.dataset.theme = preferences.appearance.theme;
+  document.documentElement.dataset.theme = "duck";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
 
-  const themeButton = document.querySelector('[data-action="toggle-theme"]');
-  if (themeButton) {
-    const currentTheme = preferences.appearance.theme;
-    const labels = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
-    themeButton.textContent = currentTheme === "amber" ? "A" : currentTheme === "dark" ? "◐" : "☼";
-    themeButton.setAttribute("aria-pressed", String(currentTheme !== "amber"));
-    themeButton.setAttribute("aria-label", "Текущая тема: " + labels[currentTheme] + ". Нажмите, чтобы переключить.");
-    themeButton.title = "Тема: " + labels[currentTheme];
-  }
 }
 
 function persistPreferences() {
@@ -270,14 +263,9 @@ function extensionPanelMarkup(appId) {
     case "setupup": {
       let complete = false;
       try { complete = Boolean(localStorage.getItem("duckos.mora.setupup.v1")); } catch {}
-      const currentTheme = preferences.appearance.theme;
-      const themeButton = (theme,label) => '<button class="extension-theme-button' + (currentTheme === theme ? ' active' : '') +
-        '" data-setup-theme="' + theme + '" aria-pressed="' + String(currentTheme === theme) + '">' + label + '</button>';
       return '<p class="window-kicker">SETUPUP · МАСТЕР MORA</p><h2 class="window-heading">Настройте рабочее пространство</h2>' +
-        '<p class="window-copy">Выберите тему и отметьте завершение локальной настройки. Установка ОС, разметка диска и настройка загрузчика здесь не выполняются.</p>' +
-        '<div class="setting-block"><strong>Цветовая тема</strong><div class="extension-theme-options">' +
-        themeButton("amber","Amber") + themeButton("dark","Dark") + themeButton("light","Light") +
-        '</div></div><div class="approval-actions"><button class="action-button" data-action="setup-complete">Завершить настройку</button></div>' +
+        '<p class="window-copy">Отметьте завершение локальной настройки. Установка ОС, разметка диска и настройка загрузчика здесь не выполняются.</p>' +
+        '<div class="setting-block"><strong>Цветовая схема</strong><span>Единая палитра DuckOS: чёрный, белый и жёлтый.</span></div><div class="approval-actions"><button class="action-button" data-action="setup-complete">Завершить настройку</button></div>' +
         '<p class="extension-status" data-setup-status>' + (complete ? 'Первичная настройка Mora уже завершена.' : 'Настройка ещё не завершена.') + '</p>';
     }
     case "orriganize":
@@ -768,33 +756,6 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 }
 
 document.addEventListener("click", (event) => {
-  const themeToggle = event.target.closest('[data-action="toggle-theme"]');
-  if (themeToggle) {
-    const nextTheme = { amber: "dark", dark: "light", light: "amber" };
-    preferences.appearance.theme = nextTheme[preferences.appearance.theme] || "amber";
-    persistPreferences();
-    const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
-    showToast("Тема: " + themeNames[preferences.appearance.theme]);
-    return;
-  }
-
-  const setupTheme = event.target.closest("[data-setup-theme]");
-  if (setupTheme) {
-    const theme = setupTheme.dataset.setupTheme;
-    if (!["amber", "dark", "light"].includes(theme)) return;
-    preferences.appearance.theme = theme;
-    persistPreferences();
-    applyPreferences();
-    const owner = setupTheme.closest(".app-window");
-    if (owner) owner.querySelectorAll("[data-setup-theme]").forEach((button) => {
-      const active = button.dataset.setupTheme === theme;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
-    showToast("Тема Mora обновлена");
-    return;
-  }
-
   const setupComplete = event.target.closest('[data-action="setup-complete"]');
   if (setupComplete) {
     const status = setupComplete.closest(".app-window").querySelector("[data-setup-status]");
