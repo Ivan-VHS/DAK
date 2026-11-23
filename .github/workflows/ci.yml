@@ -59,7 +59,7 @@ jobs:
           if [[ -f CMakeLists.txt ]]; then
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
             cmake --build build --parallel
-          elif find src include -type f \\( -name '*.c' -o -name '*.cc' -o -name '*.cpp' \\) -print -quit 2>/dev/null | grep -q .; then
+          elif find src include -type f -name '*.c' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cc' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cpp' -print -quit 2>/dev/null | grep -q .; then
             echo "::error::Native source exists but no CMakeLists.txt build contract is defined."
             exit 1
           else
