@@ -18,6 +18,7 @@ The shell reuses the original indigo, rose and gold sunset wallpaper, layered hi
 | Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
+| Katyuhen | Browse the local project registry and open repository pages | Navigation only; no external process launcher |
 
 The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify.
 
@@ -78,6 +79,10 @@ The local browser profile can be removed by clearing site data. The snapshot is 
 External projects may publish **integrations/mora/manifest.json** using **mora/app-manifest.schema.json**. The manifest describes an entry point; it does not install the app, confer trust or grant capabilities.
 
 A native launcher must discover manifests only in trusted installation roots, validate the full schema, resolve paths without traversal, launch with an argument vector rather than a shell, show publisher and requested capabilities, require first-run approval and log failures. The current shell does not launch external processes.
+
+## Katyuhen ecosystem entry point
+
+Katyuhen is the project federation directory defined by [the central registry](../ecosystem/katyuhen.v1.json). Mora exposes a local hub panel for DuckOS, Reaper, OPlague, Pytyliki and VentuSample. It opens repository links and documents their declared contracts; it does not install, launch or grant permissions to external applications. See [Katyuhen architecture](KATYUHEN_ECOSYSTEM.md).
 
 ## Maturity vocabulary
 
