@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -208,6 +209,54 @@ class IllidiaTests(unittest.TestCase):
         self.assertEqual(build_plan.call_args.kwargs["backend"], "auto")
         self.assertFalse(expected["execution_started"])
         self.assertFalse(expected["prefix_created"])
+
+    def test_store_launch_is_recorded_as_delegation_not_game_process(self) -> None:
+        game = self.library.add_game(
+            name="Steam title",
+            source="steam",
+            external_id="123",
+            metadata={
+                "steam_app_id": "123",
+                "store_uri": "steam://rungameid/123",
+                "install_path": str(self.root / "steam-title"),
+            },
+        )
+        with patch.object(launcher, "_open_store_uri", return_value=(4321, ["xdg-open", "steam://rungameid/123"])):
+            result = launcher.launch_game(self.library, game.id)
+
+        self.assertEqual(result["status"], "delegated_to_store")
+        self.assertEqual(result["handler_pid"], 4321)
+        session = self.library.list_launches(game.id)[0]
+        self.assertEqual(session["status"], "delegated")
+        self.assertIsNone(session["pid"])
+        with self.assertRaises(launcher.LaunchError):
+            launcher.stop_launch(self.library, result["launch_id"])
+
+    def test_pre_launch_hook_cannot_replace_approved_executable(self) -> None:
+        binary = self.executable(self.root / "hooked-game")
+        game = self.library.add_game(
+            name="Hooked game",
+            source="custom",
+            executable_path=binary,
+            working_directory=self.root,
+            launch_profile={
+                "allow_hooks": True,
+                "pre_launch": [[
+                    sys.executable,
+                    "-c",
+                    "from pathlib import Path; Path(r'" + str(binary) + "').write_text('changed', encoding='utf-8')",
+                ]],
+            },
+        )
+        verifier = {"status": "not_checked", "signer": None, "detail": "test verifier"}
+        with patch.object(launcher, "signature_report", return_value=verifier):
+            with self.assertRaisesRegex(launcher.LaunchError, "changed while pre-launch hooks"):
+                launcher.launch_game(
+                    self.library, game.id, confirm_unverified=True,
+                )
+
+        self.assertEqual(self.library.list_launches(game.id), [])
+        self.assertIsNone(self.library.fingerprint(game.id))
 
     def test_unsupported_store_uri_is_rejected(self) -> None:
         with self.assertRaises(launcher.LaunchError):
