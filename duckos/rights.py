@@ -361,6 +361,116 @@ def verify_entitlement(
     }
 
 
+def verify_licensed_content(
+    entitlement: dict[str, Any],
+    manifest: dict[str, Any],
+    root: str | Path,
+    trusted_keys: Mapping[str, str | Path],
+    *,
+    profile_id: str | None,
+    home_device_id: str | None,
+    region: str | None = None,
+    offline: bool = False,
+    required_action: str | None = "launch",
+    now: int | None = None,
+) -> dict[str, Any]:
+    """Verify an entitlement and the exact package manifest it authorizes.
+
+    The entitlement digest is the SHA-256 of the canonical UTF-8 JSON encoding
+    of the complete signed manifest, including its signature object. This binds
+    the license to one exact manifest rather than merely to a content label.
+    """
+    decision = verify_entitlement(
+        entitlement,
+        trusted_keys,
+        profile_id=profile_id,
+        home_device_id=home_device_id,
+        region=region,
+        offline=offline,
+        required_action=required_action,
+        now=now,
+    )
+    if not decision.get("allowed"):
+        return {
+            "schema": "duckos.licensed-content-decision.v1",
+            "allowed": False,
+            "valid": False,
+            "status": "blocked",
+            "reason_code": decision.get("reason_code", "entitlement_denied"),
+            "message": decision.get("message", "The entitlement was not accepted."),
+            "next_step": decision.get("next_step"),
+            "entitlement_decision": decision,
+        }
+
+    token_content = entitlement.get("content") if isinstance(entitlement, dict) else None
+    manifest_content = manifest.get("content") if isinstance(manifest, dict) else None
+    if not isinstance(token_content, dict) or not isinstance(manifest_content, dict):
+        raise RightsError("entitlement and manifest must both contain content objects")
+
+    if (
+        token_content.get("id") != manifest_content.get("id")
+        or token_content.get("kind") != manifest_content.get("kind")
+    ):
+        return {
+            "schema": "duckos.licensed-content-decision.v1",
+            "allowed": False,
+            "valid": False,
+            "status": "blocked",
+            "reason_code": "content_identity_mismatch",
+            "message": "The entitlement identifies different content from the supplied manifest.",
+            "next_step": "Use the original manifest referenced by this entitlement.",
+            "entitlement_decision": decision,
+        }
+
+    manifest_digest = hashlib.sha256(_canonical_json(manifest)).hexdigest()
+    expected_digest = token_content.get("manifest_sha256")
+    if not isinstance(expected_digest, str) or not hmac.compare_digest(
+        expected_digest, manifest_digest
+    ):
+        return {
+            "schema": "duckos.licensed-content-decision.v1",
+            "allowed": False,
+            "valid": False,
+            "status": "blocked",
+            "reason_code": "manifest_digest_mismatch",
+            "message": "The signed entitlement does not reference this exact content manifest.",
+            "next_step": "Restore the publisher's original manifest or obtain a matching entitlement.",
+            "manifest_sha256": manifest_digest,
+            "entitlement_decision": decision,
+        }
+
+    content_result = verify_content_manifest(manifest, root, trusted_keys)
+    if not content_result.get("valid"):
+        return {
+            "schema": "duckos.licensed-content-decision.v1",
+            "allowed": False,
+            "valid": False,
+            "status": "blocked",
+            "reason_code": content_result.get("reason_code", "content_verification_failed"),
+            "message": content_result.get("message", "The content package could not be verified."),
+            "next_step": "Restore the original signed package from its publisher.",
+            "manifest_sha256": manifest_digest,
+            "entitlement_decision": decision,
+            "content_verification": content_result,
+        }
+
+    return {
+        "schema": "duckos.licensed-content-decision.v1",
+        "allowed": True,
+        "valid": True,
+        "status": decision["status"],
+        "reason_code": "verified",
+        "message": "The entitlement, exact signed manifest and package files are verified.",
+        "next_step": None,
+        "manifest_sha256": manifest_digest,
+        "granted_rights": decision.get("granted_rights", []),
+        "entitlement_decision": decision,
+        "content_verification": content_result,
+        "capture_policy": content_result.get("capture_policy"),
+        "native_launch_enforcement": False,
+    }
+
+
 def verify_content_manifest(
     manifest: dict[str, Any],
     root: str | Path,
