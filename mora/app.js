@@ -140,18 +140,20 @@ function renderIntentPlan(appWindow, plan) {
   if (!plan || !plan.ok) {
     preview.hidden = true;
     approve.disabled = true;
-    status.textContent = plan ? plan.message : "План не подготовлен.";
+    status.textContent = plan ? translate(plan.message) : translate("План не подготовлен.");
     return;
   }
 
   for (const action of plan.actions) {
     const item = document.createElement("li");
-    item.textContent = action.label;
+    item.textContent = translate(action.label);
     steps.appendChild(item);
   }
   preview.hidden = false;
   approve.disabled = false;
-  status.textContent = plan.summary;
+  status.textContent = getLocale() === "uk"
+    ? "План містить " + plan.actions.length + " дію(ї). Нічого не зміниться без вашого підтвердження."
+    : plan.summary;
 }
 
 function executeApprovedPlan() {
@@ -1142,7 +1144,8 @@ document.addEventListener("click", (event) => {
       });
       localStorage.setItem(RECOVERY_KEY, JSON.stringify(envelope));
       const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
-      setRecoveryStatus("Профиль Mora сохранён: " + new Date(snapshot.createdAt).toLocaleString(locale));
+      setRecoveryStatus((getLocale() === "uk" ? "Профіль Mora збережено: " : "Профиль Mora сохранён: ") +
+        new Date(snapshot.createdAt).toLocaleString(locale));
       showToast("Точка настроек Mora сохранена");
     } catch {
       setRecoveryStatus("Не удалось сохранить профиль: локальное хранилище недоступно.");
@@ -1160,7 +1163,9 @@ document.addEventListener("click", (event) => {
         ? validateRecoverySnapshot(envelope ? envelope.payload : stored)
         : null;
       if (!snapshot) {
-        setRecoveryStatus("Нет действительной точки восстановления настроек Mora.");
+        setRecoveryStatus(getLocale() === "uk"
+          ? "Немає дійсної точки відновлення налаштувань Mora."
+          : "Нет действительной точки восстановления настроек Mora.");
         return;
       }
       preferences = normalizePreferences(snapshot.preferences);
@@ -1168,10 +1173,13 @@ document.addEventListener("click", (event) => {
       updateSecurityPanel();
       updateWorkspacePanel();
       const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
-      setRecoveryStatus("Настройки Mora восстановлены из точки от " + new Date(snapshot.createdAt).toLocaleString(locale));
+      setRecoveryStatus((getLocale() === "uk" ? "Налаштування Mora відновлено з точки від " : "Настройки Mora восстановлены из точки от ") +
+        new Date(snapshot.createdAt).toLocaleString(locale));
       showToast("Профиль Mora восстановлен");
     } catch {
-      setRecoveryStatus("Восстановление невозможно: хранилище недоступно или данные повреждены.");
+      setRecoveryStatus(getLocale() === "uk"
+        ? "Відновлення неможливе: сховище недоступне або дані пошкоджені."
+        : "Восстановление невозможно: хранилище недоступно или данные повреждены.");
     }
     return;
   }
@@ -1209,13 +1217,20 @@ document.addEventListener("click", (event) => {
   if (updatePreview) {
     const output = updatePreview.closest(".app-window").querySelector("[data-update-preview]");
     const plan = createAtomicUpdatePlan({ activeSlot: "A" });
-    const checks = [
-      ["Подпись пакета", plan.checks.signatureVerified],
-      ["Совместимость", plan.checks.compatible],
-      ["Свободное место", plan.checks.capacityAvailable]
-    ];
+    const checks = getLocale() === "uk"
+      ? [
+        ["Підпис пакета", plan.checks.signatureVerified],
+        ["Сумісність", plan.checks.compatible],
+        ["Вільне місце", plan.checks.capacityAvailable]
+      ]
+      : [
+        ["Подпись пакета", plan.checks.signatureVerified],
+        ["Совместимость", plan.checks.compatible],
+        ["Свободное место", plan.checks.capacityAvailable]
+      ];
     const lines = checks.map(([label, passed]) => label + ": " + (passed ? "OK" : "не проверено"));
-    output.textContent = "A/B-план · текущий слот " + plan.currentSlot + " · целевой слот " + plan.targetSlot +
+    output.textContent = (getLocale() === "uk" ? "A/B-план · поточний слот " : "A/B-план · текущий слот ") +
+      plan.currentSlot + (getLocale() === "uk" ? " · цільовий слот " : " · целевой слот ") + plan.targetSlot +
       "\n" + lines.join("\n") + "\n\n" + (getLocale() === "uk" ? "Етапи: " : "Этапы: ") + plan.steps.join(" → ") +
       "\n\n" + plan.note + " · " + (getLocale() === "uk" ? "режим" : "режим") + ": " + plan.execution + ".";
   }
