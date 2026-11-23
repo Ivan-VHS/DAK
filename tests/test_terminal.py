@@ -71,7 +71,7 @@ class ExtendedTerminalTests(unittest.TestCase):
         self.assertEqual(reloaded.prompt, "duck dev")
         self.assertEqual(reloaded.config["history_limit"], 25)
         with self.assertRaises(TerminalInputError):
-            reloaded.execute("config set prompt " + repr("\u001b[31m"), record_history=False)
+            reloaded.execute('config set prompt "' + chr(27) + '[31m"', record_history=False)
 
     def test_extensions_require_explicit_registration(self):
         command = CommandSpec(
