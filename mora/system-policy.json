@@ -17,7 +17,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and seven system tools"
+      "scope": "browser shell, responsive layout, draggable windows, dock, 27 registered app concepts and nine system tools"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -32,7 +32,7 @@
       "scope": "Mora intent actions only; system-level approvals require native broker"
     },
     "immutable_updates": {
-      "maturity": "planned",
+      "maturity": "partial",
       "scope": "Mora preferences have versioned integrity envelopes and Restore can display a gated A/B plan; no signed OS image updater, boot-slot switch or system rollback is connected"
     },
     "app_sandboxing": {
@@ -108,7 +108,7 @@
       "scope": "local Mora settings branches with parent lineage and CRC32 validation; branch storage is bounded to the latest 12 entries and is not a filesystem snapshot"
     },
     "atomic_update_plan": {
-      "maturity": "specified",
+      "maturity": "implemented",
       "scope": "testable A/B inactive-slot plan with signature, compatibility and capacity gates; plan-only contract with no updater, boot manager or system image writer"
     },
     "diagnostics_contract": {
