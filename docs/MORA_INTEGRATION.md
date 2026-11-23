@@ -8,8 +8,6 @@ Mora is a normal host desktop process. It uses Qt Widgets directly and does not 
 
 This does not make Mora the DuckOS compositor. The production compositor, window manager, virtual workspaces, system notification service, process manager and kernel-enforced capability broker remain separate system components. Mora does not claim to boot DuckOS or replace the host desktop.
 
-
-
 ## Native interaction and materials
 
 - App panels are independent, non-modal top-level Qt windows. The host window manager owns dragging, resize, minimize, maximize, activation and z-order; Mora re-activates an existing panel instead of opening duplicates. Window content is bounded to the active screen, and a failed panel build is reported inside its own window.
