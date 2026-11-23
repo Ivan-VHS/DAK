@@ -32,12 +32,20 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 - [Unify transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md)
 - [Unify transfer schema](../schemas/unify.transfer.v1.schema.json)
 
-### 3. Engineering and language standards
+### 3. Native settings and operational tools
+
+**Hub:** [Deep settings and user-space tools](DEEP_SETTINGS_AND_USERLAND_TOOLS.md)
+
+- [Duck settings service](../duckos/settings.py) — versioned user profiles, validation, snapshots, import/export and audit journal.
+- [Native settings panel](../duckos/desktop/settings_panel.py) — searchable settings pages and validation-driven profile editing.
+- [User-space toolbox](../duckos/toolbox.py) — bounded text/data, TLS, RSS, hashing, port and unit utilities.
+
+### 4. Engineering and language standards
 
 - [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) — maturity, runtime state, evidence and terminology.
 - [Language quality standard](LANGUAGE_QUALITY.md) — editorial conventions and diagnostic scope.
 
-### 4. Runnable prototypes and evidence
+### 5. Runnable prototypes and evidence
 
 - [Current Mora shell](../mora/index.html) — unified 13-entry desktop, local settings and guarded system-tool panels.
 - [Earlier seven-app prototype](../prototype/mora-home.html) — historical/reference implementation.
