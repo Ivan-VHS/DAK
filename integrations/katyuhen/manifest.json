@@ -1,0 +1,55 @@
+{
+  "schema": "katyuhen.project.v1",
+  "version": 1,
+  "id": "duckos",
+  "name": "DuckOS / Mora",
+  "role": "os-desktop",
+  "repository": "https://github.com/Ivan-VHS/DuckOS",
+  "entrypoints": [
+    {
+      "id": "mora-shell",
+      "path": "mora/index.html",
+      "kind": "browser-desktop",
+      "maturity": "implemented"
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "mora.theme.v1",
+      "direction": "provides",
+      "version": "1",
+      "transport": "local-json",
+      "maturity": "implemented",
+      "description": "Canonical semantic colors, spacing, geometry and motion tokens."
+    },
+    {
+      "id": "katyuhen.ecosystem.v1",
+      "direction": "provides",
+      "version": "1",
+      "transport": "local-json",
+      "maturity": "implemented",
+      "description": "Local project directory and declared cross-project contracts."
+    }
+  ],
+  "capabilities": [
+    "desktop.workspace",
+    "application.catalog",
+    "semantic.theme",
+    "local.intent.preview",
+    "shell.preference.recovery",
+    "pe-elf.header-inspection",
+    "sha256.file-digest",
+    "project-directory"
+  ],
+  "limits": [
+    "Mora is currently a browser desktop shell, not a native compositor.",
+    "The Katyuhen panel opens repository links; it does not launch external processes or install applications.",
+    "System-level permissions, driver management, scheduling and OS-image rollback require native DuckOS services."
+  ],
+  "security": {
+    "network_policy": "not_required",
+    "native_library_policy": "not_supported",
+    "driver_mutation_policy": "not_supported",
+    "process_execution_policy": "not_supported"
+  }
+}
