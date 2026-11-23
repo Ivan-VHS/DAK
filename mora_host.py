@@ -368,10 +368,13 @@ class MoraHandler(BaseHTTPRequestHandler):
         origin = self.headers.get("Origin")
         if not origin:
             return True
+
+        request_host = self.headers.get("Host", "")
         parsed = urlsplit(origin)
         return (
             parsed.scheme == "http"
-            and parsed.netloc == self.headers.get("Host", "")
+            and parsed.netloc == request_host
+            and parsed.hostname in {"127.0.0.1", "localhost"}
         )
 
     def do_GET(self) -> None:
