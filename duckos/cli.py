@@ -30,8 +30,8 @@ from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .shell import host_status as shell_host_status, read_app_catalog, readiness_report
-from .host import CapabilityPolicy, NativeHostBroker
-from .host.runtime import HostError
+from .host import CapabilityPolicy, NativeHostBroker, NativeHostClient
+from .host.runtime import HostError, current_uid
 from .host.server import serve_native_host
 
 
@@ -179,7 +179,19 @@ def main(argv: list[str] | None = None) -> int:
 
     host = commands.add_parser("host", help="native host broker, sessions, safe terminal, drivers and Reaper bridge")
     host_commands = host.add_subparsers(dest="host_command", required=True)
-    host_commands.add_parser("status", help="show native host and Reaper runtime availability")
+    host_status = host_commands.add_parser("status", help="show native host and Reaper runtime availability")
+    host_status.add_argument("--socket", type=Path, help="query a running broker over its Unix socket")
+
+    host_sessions = host_commands.add_parser("sessions", help="list processes managed by the running host broker")
+    host_sessions.add_argument("--socket", type=Path, default=Path("/run/duckos/host.sock"))
+
+    host_start = host_commands.add_parser("session-start", help="start an allowlisted native application")
+    host_start.add_argument("application_id")
+    host_start.add_argument("--socket", type=Path, default=Path("/run/duckos/host.sock"))
+
+    host_stop = host_commands.add_parser("session-stop", help="stop a session owned by the caller")
+    host_stop.add_argument("session_id")
+    host_stop.add_argument("--socket", type=Path, default=Path("/run/duckos/host.sock"))
 
     host_serve = host_commands.add_parser("serve", help="serve native host requests over a Unix socket")
     host_serve.add_argument("--socket", type=Path, default=Path("/run/duckos/host.sock"))
@@ -193,7 +205,7 @@ def main(argv: list[str] | None = None) -> int:
 
     host_policy = host_commands.add_parser("policy-init", help="create an initial UID capability policy")
     host_policy.add_argument("--path", type=Path, default=Path("host-policy.json"))
-    host_policy.add_argument("--uid", type=int, default=os.getuid())
+    host_policy.add_argument("--uid", type=int, default=current_uid())
     host_policy.add_argument("--grant", action="append", default=[
         "host.read", "session.read", "session.spawn", "session.stop",
         "terminal.safe", "driver.inspect", "reaper.evaluate",
@@ -201,13 +213,15 @@ def main(argv: list[str] | None = None) -> int:
 
     host_token = host_commands.add_parser("token-create", help="create a Mora bridge token; raw token is shown once")
     host_token.add_argument("--path", type=Path, default=Path("bridge-tokens.json"))
-    host_token.add_argument("--uid", type=int, default=os.getuid())
+    host_token.add_argument("--uid", type=int, default=current_uid())
 
     host_terminal = host_commands.add_parser("terminal", help="execute one fixed diagnostic command")
     host_terminal.add_argument("command_id", choices=("system", "date", "uptime", "memory", "storage", "processes", "network", "home"))
+    host_terminal.add_argument("--socket", type=Path, help="run through a privileged host broker")
 
     host_driver = host_commands.add_parser("drivers", help="inspect safe Linux driver availability")
     host_driver.add_argument("--load", nargs=2, metavar=("CATEGORY", "MODULE"))
+    host_driver.add_argument("--socket", type=Path, help="run through a privileged host broker")
 
     host_reaper = host_commands.add_parser("reaper", help="inspect or evaluate an allowlisted Reaper contract")
     host_reaper.add_argument("--contract", choices=(
@@ -215,6 +229,7 @@ def main(argv: list[str] | None = None) -> int:
         "desktop.session_transition", "window.transition",
     ))
     host_reaper.add_argument("--arguments", type=Path, help="JSON object with contract arguments")
+    host_reaper.add_argument("--socket", type=Path, help="run through a native host broker")
 
 
     try:
@@ -289,13 +304,22 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "shell" and args.shell_command == "apps":
             result = read_app_catalog()
         elif args.command == "host" and args.host_command == "status":
-            broker = NativeHostBroker()
-            result = {
-                "schema": "duckos.host-status.v1",
-                "host": broker.dispatch(os.getuid(), {"id": "status", "method": "host.status"})["result"],
-                "drivers": broker.dispatch(os.getuid(), {"id": "drivers", "method": "driver.list"})["result"],
-                "reaper": broker.reaper.status(),
-            }
+            if args.socket:
+                result = NativeHostClient(args.socket).call("host.status")
+            else:
+                broker = NativeHostBroker()
+                result = {
+                    "schema": "duckos.host-status.v1",
+                    "host": broker.dispatch(current_uid(), {"id": "status", "method": "host.status"})["result"],
+                    "drivers": broker.dispatch(current_uid(), {"id": "drivers", "method": "driver.list"})["result"],
+                    "reaper": broker.reaper.status(),
+                }
+        elif args.command == "host" and args.host_command == "sessions":
+            result = NativeHostClient(args.socket).call("session.list")
+        elif args.command == "host" and args.host_command == "session-start":
+            result = NativeHostClient(args.socket).call("session.start", {"application_id": args.application_id})
+        elif args.command == "host" and args.host_command == "session-stop":
+            result = NativeHostClient(args.socket).call("session.stop", {"session_id": args.session_id})
         elif args.command == "host" and args.host_command == "policy-init":
             from .host.config import write_policy
             result = write_policy(args.path, args.uid, args.grant)
@@ -303,30 +327,40 @@ def main(argv: list[str] | None = None) -> int:
             from .host.config import create_bridge_token
             result = create_bridge_token(args.path, args.uid)
         elif args.command == "host" and args.host_command == "terminal":
-            broker = NativeHostBroker()
-            result = broker.dispatch(os.getuid(), {
-                "id": "terminal", "method": "terminal.run",
-                "params": {"command_id": args.command_id},
-            })["result"]
-        elif args.command == "host" and args.host_command == "drivers":
-            broker = NativeHostBroker()
-            if args.load:
-                result = broker.dispatch(os.getuid(), {
-                    "id": "driver-load", "method": "driver.load",
-                    "params": {"category": args.load[0], "module": args.load[1]},
-                })["result"]
+            if args.socket:
+                result = NativeHostClient(args.socket).call("terminal.run", {"command_id": args.command_id})
             else:
-                result = broker.dispatch(os.getuid(), {"id": "driver-list", "method": "driver.list"})["result"]
+                broker = NativeHostBroker()
+                result = broker.dispatch(current_uid(), {
+                    "id": "terminal", "method": "terminal.run",
+                    "params": {"command_id": args.command_id},
+                })["result"]
+        elif args.command == "host" and args.host_command == "drivers":
+            method = "driver.load" if args.load else "driver.inventory"
+            params = {"category": args.load[0], "module": args.load[1]} if args.load else {}
+            if args.socket:
+                result = NativeHostClient(args.socket).call(method, params)
+            else:
+                broker = NativeHostBroker()
+                result = broker.dispatch(current_uid(), {
+                    "id": "drivers", "method": method, "params": params,
+                })["result"]
         elif args.command == "host" and args.host_command == "reaper":
-            broker = NativeHostBroker()
             if not args.contract:
-                result = broker.reaper.status()
+                if args.socket:
+                    result = NativeHostClient(args.socket).call("reaper.status")
+                else:
+                    result = NativeHostBroker().reaper.status()
             else:
                 arguments = _load(args.arguments) if args.arguments else {}
-                result = broker.dispatch(os.getuid(), {
-                    "id": "reaper", "method": "reaper.evaluate",
-                    "params": {"contract": args.contract, "arguments": arguments},
-                })["result"]
+                params = {"contract": args.contract, "arguments": arguments}
+                if args.socket:
+                    result = NativeHostClient(args.socket).call("reaper.evaluate", params)
+                else:
+                    broker = NativeHostBroker()
+                    result = broker.dispatch(current_uid(), {
+                        "id": "reaper", "method": "reaper.evaluate", "params": params,
+                    })["result"]
         elif args.command == "host" and args.host_command == "serve":
             policy = CapabilityPolicy.load(args.policy) if args.policy.exists() else CapabilityPolicy.for_current_user()
             broker = NativeHostBroker(policy)

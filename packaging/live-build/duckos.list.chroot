@@ -43,3 +43,6 @@ dbus-x11
 xdg-utils
 lightdm
 lightdm-gtk-greeter
+firefox-esr
+fonts-dejavu-core
+fonts-noto-color-emoji

@@ -59,8 +59,8 @@ test("bridge authenticates health and JSON-RPC requests without shell payloads",
   assert.equal(store.size, 0);
 });
 
-test("bridge rejects malformed tokens and non-loopback endpoints before a request", () => {
+test("bridge rejects malformed tokens and non-loopback endpoints before a request", async () => {
   assert.throws(() => createNativeHostBridge({ endpoint: "http://duckos.example" }), /loopback/);
   const bridge = createNativeHostBridge({ fetcher: async () => { throw new Error("must not run"); } });
-  assert.rejects(() => bridge.connect("too-short"), /формат/);
+  await assert.rejects(() => bridge.connect("too-short"), /формат/);
 });

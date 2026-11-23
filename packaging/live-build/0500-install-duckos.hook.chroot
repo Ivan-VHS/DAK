@@ -22,6 +22,7 @@ install -D -m 0755 "$SOURCE/packaging/live-build/duckos-session" /usr/bin/duckos
 install -D -m 0644 "$SOURCE/packaging/live-build/duckos.desktop" /usr/share/xsessions/duckos.desktop
 install -D -m 0644 "$SOURCE/systemd/duckos-hostd.service" /lib/systemd/system/duckos-hostd.service
 
+getent group duckos >/dev/null 2>&1 || groupadd --system duckos
 if [ -d /usr/share/duckos/Reaper ]; then
     python3 -m pip install --break-system-packages --no-deps /usr/share/duckos/Reaper
 fi

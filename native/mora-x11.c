@@ -566,9 +566,10 @@ static void cleanup(void) {
 
 int main(int argc, char **argv) {
     bool check_only = argc == 2 && strcmp(argv[1], "--check") == 0;
+    bool self_test = argc == 2 && strcmp(argv[1], "--self-test") == 0;
     bool show_version = argc == 2 && strcmp(argv[1], "--version") == 0;
-    if (argc > 2 || (argc == 2 && !check_only && !show_version)) {
-        fprintf(stderr, "Usage: %s [--check|--version]\n", argv[0]);
+    if (argc > 2 || (argc == 2 && !check_only && !self_test && !show_version)) {
+        fprintf(stderr, "Usage: %s [--check|--self-test|--version]\n", argv[0]);
         return 2;
     }
     if (show_version) {
@@ -596,6 +597,12 @@ int main(int argc, char **argv) {
         cleanup();
         XCloseDisplay(display);
         return 1;
+    }
+    if (self_test) {
+        cleanup();
+        XCloseDisplay(display);
+        puts("DuckOS X11 compositor: window-manager selection, redirection and overlay startup passed.");
+        return 0;
     }
 
     signal(SIGINT, stop_running);

@@ -75,3 +75,4 @@ jobs:
           ctest --test-dir build --output-on-failure
       - name: Verify X11 extension negotiation on a virtual display
         run: xvfb-run -a ./build/duckos-compositor --check
+          xvfb-run -a ./build/duckos-compositor --self-test

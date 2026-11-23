@@ -6,6 +6,7 @@ const html = await readFile(new URL("../mora/index.html", import.meta.url), "utf
 const css = await readFile(new URL("../mora/styles.css", import.meta.url), "utf8");
 const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
 const shellJs = await readFile(new URL("../mora/shell.js", import.meta.url), "utf8");
+const hostBridgeJs = await readFile(new URL("../mora/host-bridge.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
 
@@ -115,8 +116,30 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(css.includes(".dock-wrap::before"));
   assert.ok(css.includes("#526347"));
   assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v5-desktop"));
+  assert.ok(serviceWorker.includes("mora-shell-v6-native-host"));
+  assert.ok(serviceWorker.includes('"./host-bridge.js"'));
   assert.ok(serviceWorker.includes('"./shell.js"'));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
+});
+
+
+test("Mora exposes the authenticated local Native Host panel", () => {
+  for (const marker of [
+    'id="native-host-connect"',
+    'id="native-host-state"',
+    'id="native-host-dialog"',
+    'data-native-host-action="drivers"',
+    'data-native-host-action="sessions"',
+    'data-native-host-action="terminal"',
+    'id="native-host-command"',
+    'id="native-host-output"'
+  ]) {
+    assert.ok(html.includes(marker), "missing native host surface: " + marker);
+  }
+  assert.ok(js.includes("initNativeHostBridge"));
+  assert.ok(hostBridgeJs.includes("sessionStorage"));
+  assert.ok(hostBridgeJs.includes('credentials: "omit"'));
+  assert.ok(hostBridgeJs.includes('"/v1/rpc"'));
+  assert.ok(hostBridgeJs.includes('new Set(["127.0.0.1", "localhost", "[::1]"])'));
 });
