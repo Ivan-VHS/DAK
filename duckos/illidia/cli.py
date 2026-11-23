@@ -60,6 +60,8 @@ def build_parser() -> argparse.ArgumentParser:
     add = commands.add_parser("add", help="add a custom executable")
     add.add_argument("name")
     add.add_argument("executable", type=Path)
+    add.add_argument("--source", choices=("steam", "epic", "gog", "battlenet", "ea", "custom"), default="custom")
+    add.add_argument("--external-id")
     add.add_argument("--arg", dest="arguments", action="append", default=[])
     add.add_argument("--working-directory", type=Path)
     add.add_argument("--runtime", choices=("native", "wine", "proton", "crossover", "bottles", "qemu"), default="native")
@@ -132,7 +134,8 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "add":
             game = library.add_game(
                 name=args.name,
-                source="custom",
+                source=args.source,
+                external_id=args.external_id,
                 executable_path=args.executable,
                 arguments=args.arguments,
                 working_directory=args.working_directory,
