@@ -10,6 +10,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 - **Documentation home:** [docs/README.md](README.md) — subject clusters and normative standards.
 - **Project overview:** [clusters/project-overview.md](clusters/project-overview.md) — concise description and links to current subsystems.
 - **Documentation control:** [DOCUMENTATION_CONTROL.md](DOCUMENTATION_CONTROL.md) — evidence, navigation, ownership and maintenance rules.
+- **Coordinated plan:** [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) — the 32-file inventory, plan lifecycle, dependency ordering and completion gates.
 
 ## Topic clusters
 
@@ -37,9 +38,19 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 - [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) — maturity, runtime state, evidence and terminology.
 - [Language quality standard](LANGUAGE_QUALITY.md) — editorial conventions and diagnostic scope.
 
+### 5. Governance, plans and delivery status
+
+- [Unified Documentation Standard](UNIFIED_DOCUMENTATION_STANDARD.md) — canonical terminology, maturity, runtime and evidence semantics.
+- [Documentation Control](DOCUMENTATION_CONTROL.md) — document ownership, acceptance and maintenance rules.
+- [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) — repository-wide document inventory and end-to-end planning lifecycle.
+- [Repository-wide Implementation Directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) — the canonical 20 execution directions.
+- [Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — shared practices, adoption loop and validator.
+- [Implementation Status](IMPLEMENTATION_STATUS.md) — dated evidence-based implementation snapshot.
+- [Thirteen-wave implementation record](THIRTEEN_WAVES_IMPLEMENTATION.md) — historical, PR-linked delivery record.
+
 ### 4. Runnable prototypes and evidence
 
-- [Current Mora shell](../mora/index.html) — unified 13-entry desktop, local settings and guarded system-tool panels.
+- [Current Mora shell](../mora/index.html) — unified multi-application desktop, local settings and guarded system-tool panels.
 - [Earlier seven-app prototype](../prototype/mora-home.html) — historical/reference implementation.
 - [Application catalog validator](../tools/validate_app_catalog.py) and [catalog tests](../tests/test_app_catalog.py).
 - [Mora contract tests](../tests/mora-contract.test.mjs) and [core tests](../tests/mora-core.test.mjs).

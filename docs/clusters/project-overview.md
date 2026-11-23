@@ -4,7 +4,7 @@
 
 ## Product role
 
-DuckOS is the operating-system project. Mora is its unified desktop and system-control shell. The product suite defines seven first-party applications: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Six system tools extend the same desktop: Mora AI, Sentinel, Restore, Bridge, Control and Proof.
+DuckOS is the operating-system project. Mora is its unified desktop and system-control shell. The product catalogue defines twenty first-party application concepts: the original seven identities (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus thirteen additions. Several newer panels remain partial browser-local tools rather than native system services. Mora also provides a set of local system-tool panels, whose current scope and boundaries are described in the [Mora integration guide](../MORA_INTEGRATION.md).
 
 The browser shell is a usable interface and local contract prototype. It is not evidence that DuckOS already boots as a complete native operating system.
 

@@ -2,6 +2,8 @@
 
 Updated: 2026-11-23
 
+> This file is the dated snapshot of capabilities supported by current source and verification evidence. It is not a future-work roadmap. Plan structure, document ownership and coordinated update rules are defined in the [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) and [Unified Documentation Standard](UNIFIED_DOCUMENTATION_STANDARD.md). Documentation-only changes do not change implementation maturity.
+
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.

@@ -3,13 +3,14 @@
 **Version:** 1.0  
 **Machine-readable contract:** [engineering-evolution.v1.json](../engineering-evolution.v1.json)  
 **Schema:** [engineering-evolution.v1.schema.json](../schemas/engineering-evolution.v1.schema.json)  
-**Validator:** [validate_engineering_evolution.py](../tools/validate_engineering_evolution.py)
+**Validator:** [validate_engineering_evolution.py](../tools/validate_engineering_evolution.py)  
+**DuckOS documentation and roadmap lifecycle:** [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md)
 
 ## Purpose and operating model
 
 This framework turns the 20 supplied concept-triples and 20 coordinated implementation directives into an engineering system: **20 domains, 40 practices, 20 execution directives and measurable acceptance checks**. It complements project-contract.json, each repository's existing architecture and resilience policies, quality gates and federation contracts. It does not replace them or create a second source of truth for product capabilities.
 
-The names are conceptual labels, not a requirement to introduce a particular technology. Apply a practice only when it solves a verified problem in the repository. not_applicable is a valid result. A practice may be called implemented only when code, tests or operational evidence in that repository support the claim.
+The names are conceptual labels, not a requirement to introduce a particular technology. Apply a practice only when it solves a verified problem in the repository. `not_applicable` is a valid result and must include a short scope-based reason. A practice may be called implemented only when code, tests or operational evidence in that repository support the claim.
 
 The adoption loop is:
 
@@ -82,6 +83,12 @@ These are applicability guides, not assertions that every listed practice is alr
 - Telemetry is local by default, minimizes sensitive data and does not transmit externally without explicit opt-in.
 - Performance and scaling claims cite workload, environment, hardware, units, sample window and measurement method.
 - Record capability status as not_assessed, planned, implemented or not_applicable. implemented requires code/test/operational evidence; forecasts and plans are not proof.
+
+## Alignment with the DuckOS roadmap lifecycle
+
+For DuckOS documentation and plans, apply the [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md). The six-stage adoption loop in this framework is compatible with that plan's inventory, model, design, implementation, verification, integration and measurement gates.
+
+Do not equate a practice's design description with a capability's implementation maturity. Use the canonical maturity vocabulary, keep runtime and verification states separate, and update the source-backed [Implementation Status](IMPLEMENTATION_STATUS.md) only when code and relevant evidence change.
 
 ## Verification
 

@@ -1,7 +1,7 @@
 # Ivan-VHS Unified Documentation and Semantics Standard
 
 **Document ID:** `IVAN-VHS-DOCS-STD-001`  
-**Version:** 1.0  
+**Version:** 1.1  
 **Scope:** all Ivan-VHS repositories, their documentation, machine-readable project contracts and cross-project integrations  
 **Normative language:** MUST, SHOULD and MAY are used in their ordinary standards-writing sense.
 
@@ -215,6 +215,29 @@ Before merging a documentation change, check:
 10. Were stale links and contradictory duplicate claims removed?
 
 A documentation-only change does not change implementation maturity. A source change that changes behavior MUST trigger a review of the affected README, feature matrix, architecture page, user guide, schema and localized documentation.
+
+## 9. Plans and roadmaps
+
+A plan describes intended work, not current capability. A maintained engineering plan SHOULD state:
+
+- its purpose, target outcome and non-goals;
+- the current source-backed baseline and known gaps;
+- atomic capabilities and their separate maturity values;
+- owning components, dependencies, interfaces and version constraints;
+- independent work packages and operations that must remain serialized;
+- compatibility, migration, security, privacy and resource constraints;
+- measurable acceptance criteria and the verification needed to satisfy them;
+- failure behavior, rollback or recovery;
+- affected documentation, schemas, examples and localized pages;
+- actual branch, pull-request, commit and CI state when delivery begins.
+
+A plan MUST distinguish parallelizable work from shared-state operations. Independent design and implementation may proceed concurrently only after interfaces and dependencies are stable. Shared schemas, registries, migrations, build configuration and release state MUST be changed in dependency order.
+
+Words such as "immediately", "all at once", "fully" or "automatically" MUST NOT be interpreted as permission to bypass review, compatibility, security, verification or recovery. Automation MUST be deterministic, idempotent, bounded, observable and least-privileged.
+
+Plans MUST NOT use completion checkboxes, catalogue entries, mock-ups or accepted proposals as proof of implementation. The [Implementation Status](IMPLEMENTATION_STATUS.md) is the source-backed DuckOS snapshot; the [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) is the repository-specific lifecycle for document inventory and coordinated plan maintenance.
+
+A completed plan item requires the stated acceptance criteria and evidence. A merged change, a passing test and a released capability are different events and MUST be recorded separately.
 
 ---
 
