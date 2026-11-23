@@ -69,15 +69,7 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith((async () => {
     const cached = await caches.match(request);
-    if (cached) {
-      event.waitUntil(fetch(request).then(async (response) => {
-        if (response.ok && response.type === "basic") {
-          const copy = response.clone();
-          await (await caches.open(CACHE)).put(request, copy);
-        }
-      }).catch(() => {}));
-      return cached;
-    }
+    if (cached) return cached;
     const response = await fetch(request);
     if (response.ok && response.type === "basic") {
       await (await caches.open(CACHE)).put(request, response.clone());
