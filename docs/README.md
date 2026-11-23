@@ -41,3 +41,10 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Windows application compatibility
 
 [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
+
+
+## Cross-project engineering
+
+- [Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — the versioned 20-domain contract, 40 engineering practices and evidence-led adoption cycle.
+- [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) — the 20 requested directions, their project applicability, dependency rules and testable outcomes.
+- [Machine-readable contract](../engineering-evolution.v1.json) and [JSON Schema](../schemas/engineering-evolution.v1.schema.json), validated by [the repository tool](../tools/validate_engineering_evolution.py).
