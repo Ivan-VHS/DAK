@@ -1,12 +1,16 @@
 # DuckOS documentation
 
-## Application interfaces
+## Desktop and application interfaces
 
-[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the browser prototype. Its schema is [`unify.transfer.v1.schema.json`](../schemas/unify.transfer.v1.schema.json).
+[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md).
 
-## Runnable prototype
+[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
-[`prototype/mora-home.html`](../prototype/mora-home.html) — local browser implementation of the Mora home screen and seven application workflows. Its prototype limits and native integration gaps are recorded in [PREINSTALLED_APPLICATIONS.md](PREINSTALLED_APPLICATIONS.md).
+## Runnable prototypes
+
+[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and six system tools, with local intent, preference, recovery and file-inspection contracts.
+
+[The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
 ## Product specification
 

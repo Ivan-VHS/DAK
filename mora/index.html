@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17172b">
+  <title>Mora — DuckOS</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main class="desktop" id="desktop">
+    <div class="wallpaper" aria-hidden="true">
+      <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="sky" x2="0" y2="1">
+            <stop offset="0" stop-color="#171a42"/>
+            <stop offset=".42" stop-color="#76527f"/>
+            <stop offset=".72" stop-color="#d77b79"/>
+            <stop offset="1" stop-color="#f3b66f"/>
+          </linearGradient>
+          <radialGradient id="sun">
+            <stop offset="0" stop-color="#ffe8b0" stop-opacity=".98"/>
+            <stop offset=".55" stop-color="#ffc47e" stop-opacity=".55"/>
+            <stop offset="1" stop-color="#f7a777" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="hillA" x2="0" y2="1">
+            <stop stop-color="#51406c"/><stop offset="1" stop-color="#24243f"/>
+          </linearGradient>
+          <linearGradient id="hillB" x2="0" y2="1">
+            <stop stop-color="#373451"/><stop offset="1" stop-color="#171b34"/>
+          </linearGradient>
+        </defs>
+        <rect width="1600" height="1000" fill="url(#sky)"/>
+        <circle cx="1130" cy="490" r="330" fill="url(#sun)"/>
+        <circle cx="1130" cy="490" r="100" fill="#ffe0a1" opacity=".7"/>
+        <path d="M0 570 C210 470 345 520 510 590 S830 660 1010 560 1360 450 1600 570 V1000 H0Z" fill="#93708c" opacity=".45"/>
+        <path d="M0 655 C200 510 375 590 540 665 S850 755 1035 635 1360 525 1600 660 V1000 H0Z" fill="url(#hillA)"/>
+        <path d="M0 760 C240 625 440 700 630 770 S920 845 1120 730 1430 670 1600 760 V1000 H0Z" fill="#302c4b"/>
+        <path d="M0 830 C240 740 410 790 620 850 S1030 910 1230 800 1470 785 1600 835 V1000 H0Z" fill="url(#hillB)"/>
+        <path d="M0 920 C260 850 470 890 700 930 S1110 950 1320 890 1500 880 1600 900 V1000 H0Z" fill="#131a32"/>
+      </svg>
+    </div>
+
+    <header class="statusbar">
+      <div class="brand"><span class="brand-mark">m</span><span>Mora</span></div>
+      <div class="active-app" id="active-app">Рабочий стол</div>
+      <div class="system-status" aria-label="Состояние системы">
+        <span class="status-item"><span class="status-dot wifi-dot"></span> Wi-Fi</span>
+        <span class="status-item battery"><span class="battery-shape"><i></i></span> 86%</span>
+        <time id="status-time">--:--</time>
+      </div>
+    </header>
+
+    <div class="desktop-content">
+      <aside class="time-panel">
+        <p class="eyebrow">ПОНЕДЕЛЬНИК · РАБОЧЕЕ ПРОСТРАНСТВО</p>
+        <time class="hero-clock" id="hero-clock">--:--</time>
+        <p class="hero-date" id="hero-date">Загрузка даты…</p>
+        <div class="welcome-note">
+          <span class="sun-glyph">✦</span>
+          <span>Спокойный вечер начинается с порядка.</span>
+        </div>
+      </aside>
+
+      <section class="app-area" aria-label="Приложения">
+        <div class="section-heading">
+          <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1>Приложения</h1></div>
+          <span class="tiny-counter">07 ПРИЛОЖЕНИЙ</span>
+        </div>
+        <div class="app-grid" id="app-grid">
+          <button class="app-tile" data-app="cockos" style="--accent:#78c9d1">
+            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M5 25h5l4-11 7 23 7-30 7 27 4-9h4" /></svg></span>
+            <span class="app-name">Cockos</span><span class="app-subtitle">Звук и запись</span>
+          </button>
+          <button class="app-tile" data-app="kavun" style="--accent:#f17b79">
+            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M24 7c-3-5-10-5-13 0M24 7c3-5 10-5 13 0"/><path d="M24 8C12 8 5 17 7 28c2 10 10 15 17 15s15-5 17-15C43 17 36 8 24 8Z"/><path d="M24 10v31M11 18l24 16M37 18 13 34"/></svg></span>
+            <span class="app-name">Kavun</span><span class="app-subtitle">Фотографии</span>
+          </button>
+          <button class="app-tile" data-app="kabon" style="--accent:#e9bb72">
+            <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M29 16c-1.5-2-9-3-10 2-1.1 5 12 3 11 9-.8 5-9 6-13 2M24 11v26"/></svg></span>
+            <span class="app-name">Ka-bon</span><span class="app-subtitle">Финансы</span>
+          </button>
+          <button class="app-tile" data-app="gloverty" style="--accent:#e9a0cf">
+            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M27 4 10 27h12l-2 17 18-25H25Z"/></svg></span>
+            <span class="app-name">Gloverty</span><span class="app-subtitle">Сценарии</span>
+          </button>
+          <button class="app-tile" data-app="po" style="--accent:#a8b6ee">
+            <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="m30 13-4 13-13 9 4-13Z"/><circle cx="24" cy="24" r="2"/></svg></span>
+            <span class="app-name">Po</span><span class="app-subtitle">Компас</span>
+          </button>
+          <button class="app-tile" data-app="illidia" style="--accent:#9dce9b">
+            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M15 15h18c6 0 10 6 11 15 1 8-5 10-10 3l-4-5H18l-4 5c-5 7-11 5-10-3 1-9 5-15 11-15Z"/><path d="M15 20v10M10 25h10M32 22h.1M37 28h.1"/></svg></span>
+            <span class="app-name">Illidia</span><span class="app-subtitle">Игры</span>
+          </button>
+          <button class="app-tile" data-app="unify" style="--accent:#9bd8c5">
+            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M19 29 14 34a9 9 0 0 1-13-13l8-8a9 9 0 0 1 13 0l3 3M29 19l5-5a9 9 0 0 1 13 13l-8 8a9 9 0 0 1-13 0l-3-3M16 32l16-16"/></svg></span>
+            <span class="app-name">Unify</span><span class="app-subtitle">Устройства</span>
+          </button>
+        </div>
+      </section>
+
+      <aside class="widgets" aria-label="Виджеты">
+        <button class="widget-card finance-widget" data-app="kabon">
+          <span class="widget-top"><span class="widget-icon money-icon">₴</span><span class="widget-link">Открыть <span>↗</span></span></span>
+          <span class="widget-title">Ka-bon</span>
+          <span class="widget-caption">РАСХОДЫ СЕГОДНЯ</span>
+          <span class="widget-amount">₴ 1 840<span class="widget-change">−8,4%</span></span>
+          <span class="mini-bars" aria-hidden="true"><i style="height:30%"></i><i style="height:55%"></i><i style="height:42%"></i><i style="height:78%"></i><i style="height:49%"></i><i style="height:65%"></i><i style="height:38%"></i><i style="height:90%"></i><i style="height:53%"></i><i style="height:73%"></i><i style="height:44%"></i><i style="height:61%"></i></span>
+          <span class="widget-foot"><span>План на день</span><strong>₴ 2 500</strong></span>
+        </button>
+        <button class="widget-card devices-widget" data-app="unify">
+          <span class="widget-top"><span class="widget-icon device-icon">⌘</span><span class="widget-link">Открыть <span>↗</span></span></span>
+          <span class="widget-title">Unify</span>
+          <span class="widget-caption">УСТРОЙСТВА</span>
+          <span class="device-summary"><strong>3</strong><span>подключено</span></span>
+          <span class="device-mini-list"><i></i><span>Ноутбук Mora</span><b>ONLINE</b></span>
+          <span class="device-mini-list"><i></i><span>Наушники</span><b>ONLINE</b></span>
+          <span class="device-mini-list muted"><i></i><span>Геймпад</span><b>ОФЛАЙН</b></span>
+        </button>
+      </aside>
+    </div>
+
+    <footer class="dock-wrap">
+      <nav class="dock" aria-label="Панель приложений">
+        <button class="dock-item" data-app="cockos" aria-label="Cockos"><span class="dock-glyph">∿</span><i></i></button>
+        <button class="dock-item" data-app="kavun" aria-label="Kavun"><span class="dock-glyph">◒</span><i></i></button>
+        <button class="dock-item" data-app="kabon" aria-label="Ka-bon"><span class="dock-glyph">₴</span><i></i></button>
+        <button class="dock-item" data-app="gloverty" aria-label="Gloverty"><span class="dock-glyph">ϟ</span><i></i></button>
+        <button class="dock-item" data-app="po" aria-label="Po"><span class="dock-glyph">⌖</span><i></i></button>
+        <button class="dock-item" data-app="illidia" aria-label="Illidia"><span class="dock-glyph">⌘</span><i></i></button>
+        <button class="dock-item" data-app="unify" aria-label="Unify"><span class="dock-glyph">∞</span><i></i></button>
+      </nav>
+    </footer>
+
+    <div class="window-layer" id="window-layer" aria-live="polite"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+</body>
+</html>
