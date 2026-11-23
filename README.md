@@ -12,7 +12,7 @@ The separate DAK foundational package proposal contains the existing 15 system a
 
 DuckOS keeps the four specialist Ivan-VHS projects as independent, commit-pinned Git submodules under `projects/`: [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [Reaper](https://github.com/Ivan-VHS/Reaper), [OPlague](https://github.com/Ivan-VHS/OPlague) and [VentuSample](https://github.com/Ivan-VHS/VentuSample). The checked-in registry records their source pins, licenses, roles and integration boundaries.
 
-Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
+Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. Reaper is the explicit exception for user-approved source checking and Studio launch through the [native Reaper workbench](docs/REAPER_INTEGRATION.md); this does not grant kernel or device privileges. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
 ## Mora desktop
 
 **Start here:** [Mora desktop shell](mora/index.html).
@@ -31,15 +31,29 @@ The system tools are:
 
 ### Bilingual and deep-time platform layer
 
-Mora now boots in Russian and offers a persistent Ukrainian interface locale. The language selector updates visible shell text, accessible labels, app panels and the local command palette; the allowlisted intent parser accepts core Russian and Ukrainian command forms. The UI uses the shared Duck palette and a system-first Cyrillic font fallback stack.
+Mora starts in Russian and includes a persistent Ukrainian interface option across the desktop shell, common system panels and core application screens. The reviewed dictionary covers the primary navigation, application catalogue, local workspace tools, accessibility labels and demo panels. The local intent parser accepts Ukrainian forms for its existing allowlisted actions. App IDs, file paths and user-authored notes remain unchanged.
 
-The Sestem panel also exposes a separate deep-time epoch of `86 452 654 432 564 423 644` years. It is represented as a decimal `BigInt` value with bounded parsing and comparison; it does not replace the computer's civil clock or Unix timestamps.
+The Sestem panel displays the separate epoch `86 452 654 432 564 423 644` years using bounded JavaScript `BigInt` values. This speculative chronology never replaces the host civil clock. Restore stores local Mora preference snapshots in versioned UTF-8 envelopes with CRC32 corruption detection and bounded parent-linked settings branches. CRC32 is not cryptographic authentication. The update screen builds a gated A/B plan; it does not install a system image, write a boot slot or perform a native rollback.
 
-Restore now wraps local Mora preference snapshots in a versioned integrity envelope, detects accidental changes with CRC32, retains generation linkage and can create bounded parent-linked state branches. CRC32 is corruption detection, not cryptographic authentication. The update panel builds a testable A/B plan with signature, compatibility and capacity gates, but does not install an OS image or switch boot slots. The service worker stages and verifies all shell assets before activation and keeps one previous cache generation.
-
-The local command palette opens with `Ctrl+K`, Control with `Ctrl+,`, and the top Mora window closes with `Ctrl+W`. These remain browser-shell shortcuts, not global desktop hotkeys.
+The Mora command palette opens with `Ctrl+K`, Control with `Ctrl+,`, and the top Mora window closes with `Ctrl+W`. These are browser-shell shortcuts, not global native desktop hotkeys. See [Mora language, chronology and recovery contracts](docs/MORA_LANGUAGE_AND_CHRONOLOGY.md).
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
+
+## Native Reaper workbench
+
+Reaper is integrated into the native **Duck Desktop** maintenance workspace as a first-class developer tool. It discovers the pinned `projects/reaper` checkout, opens Reaper Studio in its own process and delegates static checks to Reaper's own CLI. It does not embed a second language runtime into DuckOS.
+
+Initialize the specialist checkout and inspect the integration:
+
+```sh
+git submodule update --init projects/reaper
+duckos reaper status
+duckos reaper studio
+duckos reaper check ./examples/program.rpr
+duckos reaper typecheck ./examples/program.rpr
+```
+
+The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
 ## Visual system and offline support
 
