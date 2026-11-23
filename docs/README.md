@@ -16,6 +16,8 @@
 
 [Interactive Mora workspace](MORA_INTERACTIVE_WORKSPACE.md) documents Duck Files, the virtual filesystem, terminal command limits, RU/UK/EN localization, workspace shortcuts, notifications and the explicit boundary between browser UI and native DuckOS services.
 
+[Console navigation and content rights](CONSOLE_AND_CONTENT_RIGHTS.md) documents TV-mode controller input, directional focus, A/B/X/Y actions, audio cues, Ed25519 entitlements, home-device/profile scope, package integrity, user-content attribution, transfer rules, capture-policy maturity and the local audit chain.
+
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
 ## Desktop optimization
