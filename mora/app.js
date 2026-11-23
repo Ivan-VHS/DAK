@@ -487,7 +487,14 @@ document.addEventListener("click", (event) => {
             : value("[data-compat-prefix]"),
         compatData: value("[data-compat-compatdata]"),
         executable: value("[data-compat-executable]"),
-        component: value("[data-compat-component]")
+        component: value("[data-compat-component]"),
+        manager: value("[data-compat-manager]"),
+        diskPath: value("[data-compat-reactos-disk]"),
+        sizeGiB: value("[data-compat-reactos-size]"),
+        reactosDisk: value("[data-compat-reactos-disk]"),
+        reactosIso: value("[data-compat-reactos-iso]"),
+        reactosMemory: value("[data-compat-reactos-memory]"),
+        reactosCpus: value("[data-compat-reactos-cpus]")
       });
       const output = owner.querySelector("[data-compat-command-output]");
       const status = owner.querySelector("[data-compat-status]");
