@@ -58,6 +58,9 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 - Window corners: 18–24 px; cards: 14–18 px; controls: 9–12 px.
 - Interactive targets are at least 44 × 44 px where the platform allows.
 - Preserve visible keyboard focus, labels, tab order, Escape handling, native DPI and text scaling.
+- Use a font stack with broad Cyrillic coverage: Segoe UI, Noto Sans, Arial, then the system sans-serif fallback.
+- Render Russian and Ukrainian glyph sets without substituting missing characters or changing the underlying app/file identifiers.
+- The command palette, locale selector and dynamic window labels must remain keyboard and screen-reader discoverable.
 - Keep the centre stable as layouts reflow; at narrow widths, collapse columns instead of shrinking text or hit areas.
 
 ## Integration contract
@@ -66,3 +69,10 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 Mora remains a browser desktop shell, not a native process launcher. Native application capabilities and security boundaries remain owned by their respective projects; a permissioned launcher/IPC layer must be implemented and verified separately.
 
+
+
+## Language coverage
+
+The shell starts in Russian and offers Ukrainian as a persistent first-class UI locale. Locale changes affect interface strings, accessible labels, app panel copy where a translation is defined, and search descriptions. App IDs, package IDs and file paths stay locale-neutral. Native adapters must use the same versioned message catalog and provide validated glyph coverage for `ё/ы/э` and `ґ/є/і/ї`.
+
+Language selection must not trigger an automatic content translation of user-authored files or alter command targets. Unknown text stays unchanged until a reviewed translation is available.
