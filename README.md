@@ -144,6 +144,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
+- Mora desktop includes a keyboard-accessible blade launcher with app channels, local favorites and live open-window count.
 - [Mora machine-readable system policy](mora/system-policy.json)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
