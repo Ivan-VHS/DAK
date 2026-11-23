@@ -1,0 +1,160 @@
+{
+  "schema": "ivan-vhs.system-capabilities.v1",
+  "version": 1,
+  "project": "DuckOS",
+  "scope": "Operating-system foundation, Mora desktop shell, native services and federated source workspace.",
+  "reference": {
+    "id": "windows-xp-sp3-66-point-comparison",
+    "total_points": 66,
+    "quality": "mixed_historical_claims",
+    "treatment": "historical_input_for_portable_engineering_principles",
+    "warning": "The supplied 66-point list mixes cumulative updates, inherited behavior, absence statements, repeated topics and Windows-specific constraints. It is not treated as an authoritative XP SP3 changelog or as a requirement to reproduce legacy Windows behavior."
+  },
+  "adoption_rules": {
+    "allowed_statuses": [
+      "implemented",
+      "partial",
+      "planned",
+      "not_applicable",
+      "not_assessed"
+    ],
+    "rule": "Only claim implemented when repository code and tests or operational evidence support the exact behavior. Partial requires evidence and explicit limits. Not applicable requires a product-scope reason. Historical Windows features are not silently represented as native capabilities."
+  },
+  "source_groups": [
+    {
+      "id": "security-crypto-policy",
+      "title": "Security, cryptography and access policy",
+      "first": 1,
+      "last": 14,
+      "count": 14
+    },
+    {
+      "id": "network-protocols",
+      "title": "Networking, protocols and local interoperability",
+      "first": 15,
+      "last": 28,
+      "count": 14
+    },
+    {
+      "id": "installation-servicing",
+      "title": "Activation, installation, deployment and servicing",
+      "first": 29,
+      "last": 40,
+      "count": 12
+    },
+    {
+      "id": "user-interface-storage",
+      "title": "User interface, shell, multimedia and storage",
+      "first": 41,
+      "last": 54,
+      "count": 14
+    },
+    {
+      "id": "lifecycle-compatibility",
+      "title": "Lifecycle, versioning and technical limits",
+      "first": 55,
+      "last": 66,
+      "count": 12
+    }
+  ],
+  "controls": [
+    {
+      "id": "security-trust",
+      "source_group": "security-crypto-policy",
+      "source_points": [
+        1,
+        14
+      ],
+      "status": "partial",
+      "assessment": "Capability contracts and deny-by-default shell preferences exist; kernel-enforced privilege separation and native security-service enforcement remain incomplete.",
+      "evidence": [
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/FOUNDATION_ARCHITECTURE.md",
+        "duckos/security/capabilities.rpr"
+      ],
+      "verification": [
+        "tests"
+      ],
+      "limitations": [
+        "Do not treat browser preferences or policy files as OS enforcement."
+      ]
+    },
+    {
+      "id": "network-interoperability",
+      "source_group": "network-protocols",
+      "source_points": [
+        15,
+        28
+      ],
+      "status": "not_assessed",
+      "assessment": "The XP reference describes Windows-specific protocol, NAP and IPsec behavior. DuckOS network-stack parity has not been established; no XP-compatible network implementation is claimed.",
+      "evidence": [],
+      "verification": [],
+      "limitations": [
+        "Assess native network stack and adapter policy only after its implementation boundary is defined."
+      ]
+    },
+    {
+      "id": "deployment-servicing",
+      "source_group": "installation-servicing",
+      "source_points": [
+        29,
+        40
+      ],
+      "status": "partial",
+      "assessment": "Deterministic component bundles and deployment plans exist; a bootable installer, physical-disk deployment and complete A/B boot rollback are not claimed.",
+      "evidence": [
+        "docs/DEPLOYMENT.md",
+        "duckos/deployment.py"
+      ],
+      "verification": [
+        "tests"
+      ],
+      "limitations": [
+        "Keep image creation and privileged installation separate from planning and archive verification."
+      ]
+    },
+    {
+      "id": "user-experience-storage",
+      "source_group": "user-interface-storage",
+      "source_points": [
+        41,
+        54
+      ],
+      "status": "partial",
+      "assessment": "Mora provides a responsive desktop shell and local preferences; it is not a native compositor, Windows Explorer replacement or full OS storage stack.",
+      "evidence": [
+        "docs/MORA_INTEGRATION.md",
+        "MORA_DESIGN_SYSTEM.md",
+        "mora/index.html"
+      ],
+      "verification": [
+        "tests"
+      ],
+      "limitations": [
+        "Browser UI behavior must not be represented as native OS enforcement."
+      ]
+    },
+    {
+      "id": "compatibility-lifecycle",
+      "source_group": "lifecycle-compatibility",
+      "source_points": [
+        55,
+        66
+      ],
+      "status": "partial",
+      "assessment": "Windows/Linux inspection and pinned source federation exist; native execution compatibility, modern driver coverage and bootable release lifecycle remain partial.",
+      "evidence": [
+        "docs/WINDOWS_COMPATIBILITY.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/REPOSITORY_FEDERATION.md"
+      ],
+      "verification": [
+        "tests"
+      ],
+      "limitations": [
+        "Keep inspected formats, prepared launch plans and actually executed workloads distinct."
+      ]
+    }
+  ]
+}
