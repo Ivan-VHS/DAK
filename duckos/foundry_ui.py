@@ -135,7 +135,22 @@ class FoundryWindow:
         self.module_tree.column("#0", width=250)
         self.module_tree.column("state", width=140)
         self.module_tree.column("source", width=470)
-        self.module_tree.pack(fill="both", expand=True)
+        self.module_tree.configure(height=5)
+        self.module_tree.pack(fill="x", expand=False)
+
+        ttk.Label(signals, text="НАГРУЗКА ПРОЦЕССОВ", style="Title.TLabel").pack(anchor="w", pady=(16, 8))
+        self.process_tree = ttk.Treeview(
+            signals, columns=("pid", "memory", "cpu"), show="tree headings", height=8,
+        )
+        self.process_tree.heading("#0", text="Процесс")
+        self.process_tree.heading("pid", text="PID")
+        self.process_tree.heading("memory", text="Память")
+        self.process_tree.heading("cpu", text="CPU")
+        self.process_tree.column("#0", width=310)
+        self.process_tree.column("pid", width=90, anchor="center")
+        self.process_tree.column("memory", width=140, anchor="e")
+        self.process_tree.column("cpu", width=100, anchor="e")
+        self.process_tree.pack(fill="both", expand=True)
 
         runbook_top = ttk.Frame(runbooks)
         runbook_top.pack(fill="x")
@@ -244,7 +259,35 @@ class FoundryWindow:
                 "", "end", text=module["name"],
                 values=(module["state"], module["source"]),
             )
+
+        for item in self.process_tree.get_children():
+            self.process_tree.delete(item)
+        desktop = self.snapshot["sources"].get("desktop_audit") or {}
+        resources = desktop.get("resources", {})
+        processes = resources.get("top_processes", [])
+        for process in processes:
+            memory = process.get("memory_bytes")
+            cpu = process.get("cpu_percent")
+            self.process_tree.insert(
+                "", "end", text=process.get("name") or "Unknown",
+                values=(
+                    process.get("pid", "—"),
+                    self._format_process_memory(memory),
+                    f"{cpu:.1f}%" if isinstance(cpu, (int, float)) else "—",
+                ),
+            )
+        if not processes:
+            self.process_tree.insert(
+                "", "end", text="Метрики процессов недоступны",
+                values=("—", "—", "—"),
+            )
         self.render_runbook()
+
+    @staticmethod
+    def _format_process_memory(value: Any) -> str:
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+            return "—"
+        return f"{value / (1024 * 1024):.1f} MiB"
 
     def render_runbook(self) -> None:
         profile = _PROFILES[self.profile_var.get()]
