@@ -85,6 +85,8 @@ test("Mora layout scales across 8K, 5K, 4K, standard desktop, tablets and phones
   assert.ok(css.includes("width:min(86vw,3600px)"));
   assert.ok(css.includes("scroll-snap-type:x mandatory"));
   assert.ok(css.includes("min-height:44px"));
+  assert.ok(css.includes(".window-close { width:44px; height:44px; min-width:44px; min-height:44px; }"));
+  assert.ok(css.includes("flex:0 0 44px"));
   assert.ok(css.includes("max-height:calc(100dvh - 76px - env(safe-area-inset-bottom))"));
 });
 
