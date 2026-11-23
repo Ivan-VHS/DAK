@@ -478,7 +478,6 @@ document.addEventListener("click", (event) => {
     const value = (selector) => owner.querySelector(selector)?.value || "";
     try {
       const command = buildCompatibilityCommand(compatibilityAction.dataset.compatAction, {
-        prefix: value("[data-compat-prefix]"),
         architecture: value("[data-compat-arch]"),
         engine: value("[data-compat-engine]"),
         prefix: compatibilityAction.dataset.compatAction === "install-component"
