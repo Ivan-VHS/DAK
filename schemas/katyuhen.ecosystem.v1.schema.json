@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Ivan-VHS/DuckOS/main/schemas/katyuhen.ecosystem.v1.schema.json",
+  "title": "Katyuhen ecosystem registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "name",
+    "maintainer",
+    "description",
+    "source_of_truth",
+    "workspace",
+    "projects",
+    "integrations",
+    "policies"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "katyuhen.ecosystem.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "name": {
+      "const": "Katyuhen"
+    },
+    "maintainer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_of_truth": {
+      "const": "ecosystem/katyuhen.v1.json"
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host_project",
+        "desktop",
+        "hub_panel",
+        "theme_contract"
+      ],
+      "properties": {
+        "host_project": {
+          "const": "duckos"
+        },
+        "desktop": {
+          "const": "mora"
+        },
+        "hub_panel": {
+          "const": "katyuhen"
+        },
+        "theme_contract": {
+          "const": "mora.theme.v1"
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "repository_url",
+          "manifest_url",
+          "role",
+          "maturity",
+          "description",
+          "scope"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repository_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://github\\.com/Ivan-VHS/"
+          },
+          "manifest_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://raw\\.githubusercontent\\.com/Ivan-VHS/"
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maturity": {
+            "enum": [
+              "implemented",
+              "partial",
+              "specified",
+              "planned"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "integrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "target",
+          "contract",
+          "transport",
+          "status",
+          "evidence_url",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contract": {
+            "type": "string",
+            "minLength": 1
+          },
+          "transport": {
+            "enum": [
+              "versioned-json-file",
+              "explicit-trusted-c-abi"
+            ]
+          },
+          "status": {
+            "enum": [
+              "implemented",
+              "partial",
+              "specified",
+              "planned"
+            ]
+          },
+          "evidence_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://github\\.com/Ivan-VHS/"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "policies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
