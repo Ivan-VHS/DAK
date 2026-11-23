@@ -129,6 +129,35 @@ duckos desktop startup list
 
 It does not claim to be the native compositor or manage machine-wide services. See [Duck Desktop optimization](docs/DESKTOP_OPTIMIZATION.md) for commands, safety boundaries and implementation status.
 
+## Duck settings and built-in user-space tools
+
+The native Duck Desktop window now includes a **Настройки** tab backed by a versioned user-scoped settings store. It provides independently editable network, power, appearance and security preferences; named profiles; field validation; draft/apply/cancel behavior; JSON import/export; a bounded event journal and snapshots. The settings panel is available through:
+
+~~~sh
+duckos desktop gui
+duckos settings show
+duckos settings profile list
+duckos settings network-test example.com --port 443
+~~~
+
+Settings are stored as desired user preferences. They do not silently reconfigure the host's NIC, routes, power controller, display driver or kernel. See [Deep settings and user-space tools](docs/DEEP_SETTINGS_AND_USERLAND_TOOLS.md) for the full boundary and verification matrix.
+
+DuckOS also provides bounded user-space utilities:
+
+~~~sh
+duckos tools secret --length 40
+duckos tools text-stats ./notes.txt
+duckos tools csv-inspect ./table.csv
+duckos tools data-convert ./data.json --to xml
+duckos tools units 1 km m
+duckos tools tls-check example.com
+duckos tools rss ./feed.xml
+duckos tools sha256 ./release.tar.gz
+duckos tools ports
+~~~
+
+These tools are explicit CLI operations, not arbitrary shell execution. They cover token generation, text metrics, CSV inspection, encoding and JSON/XML conversion, SI/data/time conversions, TLS verification, RSS/Atom parsing, SHA-256 and read-only listening-port inspection.
+
 ## Windows application compatibility
 
 DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.
