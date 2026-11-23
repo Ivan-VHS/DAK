@@ -135,7 +135,7 @@ DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix sc
 
 ## Documentation
 
-Start with the [DuckOS documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines terminology, maturity states, runtime claims and evidence requirements.
+Start with the [DuckOS documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines terminology, maturity states, runtime claims and evidence requirements. The [repository-wide Markdown and Roadmap Execution Plan](docs/MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) governs all 32 maintained Markdown files, technical plans, documentation ownership, evidence gates and coordinated updates.
 
 - [Mora Commons unified application catalogue](docs/MORA_COMMONS.md)
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
