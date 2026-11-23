@@ -47,6 +47,8 @@ Install only the profiles that are needed:
 ```sh
 python -m pip install '.[native-ui,terminal-ui,plots]'
 python -m pip install '.[gpu-tools]'
+python -m pip install '.[windows-native]'  # Windows
+python -m pip install '.[macos-native]'    # macOS
 ```
 
 The 66-item toolkit evaluation is maintained in [GUI framework architecture](GUI_FRAMEWORK_ARCHITECTURE.md) and [gui-toolkits.json](../duckos/mora/data/gui-toolkits.json). It is a review matrix, not a requirement to install all 66 frameworks. Tk-based packages are retired, web-first/HTML/WebView stacks are excluded, game engines remain application renderers, and optional adapters run in separate processes or behind explicit extras.
