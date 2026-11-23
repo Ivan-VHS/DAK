@@ -60,6 +60,33 @@ test("required dashboard surfaces and launch affordances are present", () => {
 });
 
 
+
+test("Mora layout scales across 8K, 5K, 4K, standard desktop, tablets and phones", () => {
+  for (const marker of [
+    "@media (min-width:1920px)",
+    "@media (min-width:2560px)",
+    "@media (min-width:3840px)",
+    "@media (min-width:5120px)",
+    "@media (max-width:1150px)",
+    "@media (max-width:760px)",
+    "@media (max-width:480px)",
+    "@media (max-width:360px)",
+    "@media (max-height:900px)",
+    "max-aspect-ratio:16/10",
+    "env(safe-area-inset-bottom)",
+    "100svh",
+    "100dvh"
+  ]) {
+    assert.ok(css.includes(marker), "missing responsive rule: " + marker);
+  }
+  assert.ok(html.includes("viewport-fit=cover"));
+  assert.ok(css.includes("width:min(82vw,4200px)"));
+  assert.ok(css.includes("width:min(86vw,3600px)"));
+  assert.ok(css.includes("scroll-snap-type:x mandatory"));
+  assert.ok(css.includes("min-height:44px"));
+  assert.ok(css.includes("max-height:calc(100dvh - 76px - env(safe-area-inset-bottom))"));
+});
+
 test("blade launcher filters real apps, supports local favorites and keyboard navigation", () => {
   for (const marker of [
     'data-launch-channel="all"', 'data-launch-channel="favorites"',
@@ -227,7 +254,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v9-blade-launcher"));
+  assert.ok(serviceWorker.includes("mora-shell-v10-responsive-workspace"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
