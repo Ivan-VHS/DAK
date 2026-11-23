@@ -657,3 +657,255 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
 .device-state.offline { color: #A6A6A6; }
 input[type="range"] { accent-color: #FFD400; }
 .theme-control { color: #FFD400; }
+
+
+/* Mora Commons — shared application catalogue. */
+.commons-intro {
+  margin: 0 0 15px;
+  color: var(--mora-secondary, rgba(255,255,255,.7));
+  font-size: 11px;
+  line-height: 1.6;
+}
+.commons-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 0;
+  padding: 0 12px;
+  border: 1px solid var(--line, rgba(255,255,255,.15));
+  border-radius: 12px;
+  background: var(--mora-surface, rgba(255,255,255,.06));
+}
+.commons-search span { color: var(--mora-muted, rgba(255,255,255,.5)); }
+.commons-search input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  outline: 0;
+  color: var(--mora-text, #ffffff);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+}
+.commons-search:focus-within { border-color: var(--mora-brand-hover, #ffd400); }
+.commons-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 12px;
+}
+.commons-filter {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--line, rgba(255,255,255,.13));
+  border-radius: 999px;
+  color: var(--mora-secondary, rgba(255,255,255,.7));
+  background: rgba(255,255,255,.045);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.commons-filter[aria-pressed="true"] {
+  border-color: var(--mora-brand, #ffd400);
+  color: var(--mora-on-brand, #080808);
+  background: var(--mora-brand, #ffd400);
+}
+.commons-count {
+  margin: 0 0 10px;
+  color: var(--mora-muted, rgba(255,255,255,.5));
+  font-size: 9px;
+}
+.commons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.commons-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--line, rgba(255,255,255,.12));
+  border-radius: 14px;
+  background: var(--mora-surface, rgba(255,255,255,.045));
+}
+.commons-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.commons-card-glyph {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  color: var(--mora-brand-hover, #ffd400);
+  background: rgba(255,212,0,.12);
+  font-size: 13px;
+  font-weight: 700;
+}
+.commons-favorite {
+  min-width: 34px;
+  min-height: 34px;
+  border: 1px solid var(--line, rgba(255,255,255,.12));
+  border-radius: 10px;
+  color: var(--mora-secondary, rgba(255,255,255,.7));
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.commons-favorite[aria-pressed="true"] { color: var(--mora-brand-hover, #ffd400); }
+.commons-card h3 {
+  margin: 0;
+  color: var(--mora-text, #ffffff);
+  font-size: 12px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.commons-card p {
+  margin: 0;
+  color: var(--mora-secondary, rgba(255,255,255,.65));
+  font-size: 9px;
+  line-height: 1.5;
+}
+.commons-card-category {
+  color: var(--mora-muted, rgba(255,255,255,.46));
+  font-size: 8px;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+.commons-card-actions { margin-top: auto; }
+.commons-card-actions button {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--line, rgba(255,255,255,.15));
+  border-radius: 10px;
+  color: var(--mora-text, #ffffff);
+  background: rgba(255,255,255,.06);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.commons-card-actions button:hover { background: rgba(255,255,255,.12); }
+.commons-empty {
+  grid-column: 1 / -1;
+  padding: 20px 12px;
+  border: 1px dashed var(--line, rgba(255,255,255,.2));
+  border-radius: 12px;
+  color: var(--mora-secondary, rgba(255,255,255,.65));
+  font-size: 10px;
+  text-align: center;
+}
+.commons-detail {
+  margin-top: 13px;
+  padding: 15px;
+  border: 1px solid rgba(255,212,0,.28);
+  border-radius: 14px;
+  background: rgba(255,212,0,.07);
+}
+.commons-detail[hidden] { display: none; }
+.commons-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.commons-detail h3 {
+  margin: 0;
+  color: var(--mora-text, #ffffff);
+  font-size: 14px;
+}
+.commons-detail p,
+.commons-detail li {
+  color: var(--mora-secondary, rgba(255,255,255,.72));
+  font-size: 10px;
+  line-height: 1.55;
+}
+.commons-detail ul { display: grid; gap: 5px; padding-left: 18px; }
+.commons-detail-status {
+  padding-top: 9px;
+  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+  color: var(--mora-muted, rgba(255,255,255,.55)) !important;
+}
+.commons-detail-close {
+  min-width: 34px;
+  min-height: 34px;
+  border: 1px solid var(--line, rgba(255,255,255,.15));
+  border-radius: 9px;
+  color: var(--mora-text, #ffffff);
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+}
+@media (max-width:760px) {
+  .commons-grid { grid-template-columns: 1fr; }
+  .commons-filters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .commons-filter { border-radius: 10px; }
+}
+
+
+/* DuckOS single palette: black structure, white content and yellow action. */
+:root {
+  color-scheme: dark;
+  --mora-page: #080808;
+  --mora-surface: #080808;
+  --mora-elevated: #080808;
+  --mora-text: #ffffff;
+  --mora-secondary: #ffffff;
+  --mora-muted: #a6a6a6;
+  --mora-brand: #ffd400;
+  --mora-brand-hover: #ffd400;
+  --mora-secondary-accent: #ffd400;
+  --mora-border: #3a3a3a;
+  --mora-selection: #080808;
+  --mora-danger: #ffd400;
+  --mora-focus: #ffd400;
+  --ink: #ffffff;
+  --muted: #a6a6a6;
+  --glass: rgba(8,8,8,.78);
+  --line: rgba(255,212,0,.22);
+  --panel: rgba(8,8,8,.96);
+}
+:root[data-theme="duck"] { color-scheme: dark; }
+.wallpaper {
+  background: radial-gradient(ellipse at 50% 46%, #080808 0%, #080808 38%, #080808 78%);
+}
+.wallpaper svg { opacity: .34; }
+.wallpaper::after {
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(8,8,8,.18), rgba(8,8,8,.76)),
+    repeating-linear-gradient(90deg, rgba(255,212,0,.035) 0, rgba(255,212,0,.012) 2.5%, rgba(8,8,8,.2) 6%);
+}
+.statusbar {
+  color: var(--mora-text);
+  border-bottom-color: rgba(255,212,0,.22);
+  background: rgba(8,8,8,.78);
+}
+.brand-mark {
+  color: #080808;
+  border: 1px solid rgba(255,255,255,.24);
+  background: linear-gradient(145deg,#ffd400,#ffd400);
+}
+.active-app, .system-status { color: var(--mora-secondary); }
+.app-tile {
+  border-color: rgba(255,212,0,.22);
+  background: linear-gradient(145deg,rgba(255,212,0,.08),rgba(255,255,255,.035));
+}
+.app-tile:hover {
+  border-color: rgba(255,212,0,.58);
+  background: linear-gradient(145deg,rgba(255,212,0,.14),rgba(255,255,255,.055));
+}
+.widget-card, .app-window, .dock {
+  border-color: var(--line);
+  background: rgba(8,8,8,.88);
+}
+.app-icon, .widget-icon, .device-icon, .widget-link span,
+.compass-needle, .device-symbol, .sun-glyph { color: var(--mora-brand); }
+.dock-item:nth-child(n) { --dock-color: #ffd400; }
+.status-dot, .battery-shape i, .record-dot, .notice-dot,
+.device-mini-list i, .device-state, .progress-track i { background-color: #ffd400; }
+input[type="range"] { accent-color: #ffd400; }
+.theme-control { color: #ffd400; }
