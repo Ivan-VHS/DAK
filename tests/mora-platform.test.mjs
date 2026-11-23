@@ -42,7 +42,7 @@ test("Russian and Ukrainian locale changes are persistent at the UI contract lay
     "Этапы: verify-signed-metadata-and-payload → verify-compatibility-and-capacity → stage-inactive-slot",
     "Не переключайте записи загрузки, пока все условия не подтверждены.",
     " · режим: plan-only."
-  ].join("\\n");
+  ].join("\n");
   const localizedPreview = translate(updatePreview);
   assert.match(localizedPreview, /поточний слот A · цільовий слот B/);
   assert.match(localizedPreview, /Підпис пакета: не перевірено/);
