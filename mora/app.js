@@ -23,7 +23,14 @@ const appDefinitions = {
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#efad9a", glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#aebcf0", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#e9a4cd", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" }
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" },
+  "hardware-studio": {
+    name: "Hardware Studio",
+    subtitle: "15 аппаратных и игровых инструментов",
+    color: "#9fc4f4",
+    glyph: "⟁",
+    entryPoint: "./hardware/index.html"
+  }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -309,6 +316,10 @@ function focusWindow(appWindow) {
 function openApp(appId) {
   const definition = appDefinitions[appId];
   if (!definition) return;
+  if (definition.entryPoint) {
+    window.location.assign(definition.entryPoint);
+    return;
+  }
   let appWindow = windowLayer.querySelector('[data-window="' + appId + '"]');
   if (appWindow) {
     focusWindow(appWindow);
