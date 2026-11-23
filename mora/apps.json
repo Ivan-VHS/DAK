@@ -194,6 +194,13 @@
       "category": "workspace",
       "panel": "mora/app.js#desktop",
       "maturity": "partial_native_userland_tool"
+    },
+    {
+      "id": "mora-commons",
+      "name": "Mora Commons",
+      "category": "application_catalogue",
+      "panel": "mora/app.js#mora-commons",
+      "maturity": "implemented_local_catalog"
     }
   ],
   "widgets": [
