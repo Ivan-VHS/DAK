@@ -83,7 +83,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
 
     def test_syntax_check_accepts_python_subset_and_uses_validation_only(self):
         source = self.root / "sample.py"
-        source.write_text("print(42)\\n", encoding="utf-8")
+        source.write_text("print(42)\n", encoding="utf-8")
         completed = subprocess.CompletedProcess(
             args=[], returncode=0,
             stdout=json.dumps({"valid": True, "execution_performed": False}), stderr="",
@@ -98,7 +98,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
 
     def test_polyglot_run_preserves_steps_and_uses_the_shared_runtime(self):
         source = self.root / "demo.polyglot"
-        source.write_text("%% brainfuck\\n+.", encoding="utf-8")
+        source.write_text("%% brainfuck\n+.", encoding="utf-8")
         completed = subprocess.CompletedProcess(
             args=[], returncode=0,
             stdout=json.dumps({"block_count": 1, "steps": 2}), stderr="",
