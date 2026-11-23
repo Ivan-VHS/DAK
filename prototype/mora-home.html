@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#292653">
+<meta name="theme-color" content="#211913">
 <title>Mora OS — рабочий стол и приложения</title>
 <style>
 :root{color-scheme:dark;--glass:rgba(255,255,255,.14);--glass-hi:rgba(19,22,49,.88);--line:rgba(255,255,255,.25);--txt:#fff;--muted:rgba(255,255,255,.72);--shadow:0 24px 70px rgba(5,6,35,.42);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -19,10 +19,78 @@ button,input,select,textarea{font:inherit}button{color:inherit}button:focus-visi
 @media(max-width:980px){.main{grid-template-columns:1fr;align-content:start;overflow:auto;padding:12px 0;gap:17px}.clock{display:flex;align-items:baseline;gap:13px}.clock-time{font-size:3.2rem}.clock-date{margin:0}.clock-hint{display:none}.app-grid{max-width:540px;width:100%;margin:auto}.widgets{grid-template-columns:repeat(2,minmax(0,1fr))}.screen{grid-template-rows:auto 1fr auto}}
 @media(max-width:560px){.screen{padding-left:12px;padding-right:12px}.bar{font-size:.75rem}.main{gap:14px}.app-grid{grid-template-columns:repeat(4,minmax(55px,1fr));gap:11px 3px}.app{width:70px;font-size:.73rem}.app .ico{width:55px;height:55px;border-radius:17px}.widgets{grid-template-columns:1fr 1fr}.widget{padding:11px}.widget-value{font-size:1.2rem}.dock{gap:7px;padding:7px}.dock .ico{width:45px;height:45px}.form-row,.card-grid{grid-template-columns:1fr}.window-body{padding:13px}#win{width:96vw;height:88vh;max-height:88vh}.bar-right .status{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{animation:none!important;transition:none!important}
+
+/* Mora Amber — folded amber light, grounded surfaces and a quiet radial workspace. */
+:root{color-scheme:dark;--glass:rgba(38,28,20,.82);--glass-hi:rgba(30,22,16,.97);--line:rgba(244,211,167,.27);--txt:#FFF3E2;--muted:#C4A98A;--shadow:0 28px 84px rgba(12,8,5,.58);--amber:#D58B3D;--amber-hi:#EAA653;--red:#B64A40;font-family:Georgia,"Segoe UI",sans-serif}
+body{background:#211913;color:var(--txt)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #F3C16B;outline-offset:3px}
+#wall{opacity:.98}.screen{position:relative;isolation:isolate}.bar{font-family:"Segoe UI",sans-serif}
+.logo{letter-spacing:.19em;color:#F3D8AF;text-shadow:0 2px 18px #1b1009}
+.status{background:rgba(31,22,16,.78);border-color:rgba(244,211,167,.3);color:#E7D2B8}
+.main{grid-template-columns:minmax(170px,.85fr) minmax(340px,540px) minmax(210px,.85fr)}
+.clock-time{color:#FFF0D9;text-shadow:0 5px 30px rgba(18,10,5,.52)}.clock-date{color:#E2C6A2}.clock-hint{color:#C4A98A}
+.app-grid{position:relative;isolation:isolate;z-index:0;width:100%;min-height:440px;aspect-ratio:1/1;padding:42px 30px;align-content:center;grid-template-columns:repeat(4,minmax(58px,1fr));gap:clamp(13px,2vw,24px) 10px;border:1px solid rgba(236,197,145,.19);border-radius:50%;background:radial-gradient(circle at 50% 43%,rgba(14,10,7,.97) 0,rgba(25,17,12,.94) 42%,rgba(45,30,20,.86) 64%,rgba(45,30,20,.08) 76%,transparent 78%),radial-gradient(ellipse at 50% 100%,rgba(200,135,71,.13),transparent 63%);box-shadow:inset 0 0 0 13px rgba(255,226,183,.025),inset 0 0 70px rgba(0,0,0,.5),0 26px 70px rgba(15,9,5,.28)}
+.app-grid:before{content:"";position:absolute;inset:8%;z-index:-1;border:1px solid rgba(230,190,139,.13);border-radius:50%;pointer-events:none}
+.app-grid:after{content:"";position:absolute;inset:17%;z-index:-1;border:1px solid rgba(230,190,139,.08);border-radius:50%;pointer-events:none}
+.app{font-family:"Segoe UI",sans-serif;color:#FFF1DC}.app:hover .ico{transform:translateY(-2px) scale(1.035)}
+.ico{border:1px solid rgba(255,234,202,.25);background:linear-gradient(145deg,var(--c1),var(--c2));box-shadow:inset 0 1px 1px rgba(255,245,225,.42),inset 0 -6px 12px rgba(0,0,0,.28),0 9px 20px rgba(0,0,0,.42);transition:transform .18s ease-in-out,box-shadow .18s ease-in-out}
+.ico svg{stroke:#FFF0D9;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}.app-name{text-shadow:0 2px 7px #120b07}
+.widgets{font-family:"Segoe UI",sans-serif;gap:12px}
+.widget{border:1px solid var(--line);border-radius:18px;padding:16px 17px;background:linear-gradient(145deg,rgba(58,41,28,.91),rgba(31,23,17,.94));backdrop-filter:blur(16px);box-shadow:0 14px 34px rgba(13,8,4,.3);transition:border-color .18s ease-in-out,background .18s ease-in-out}
+.widget:hover{border-color:rgba(244,193,107,.58);background:linear-gradient(145deg,rgba(72,50,33,.94),rgba(36,26,19,.97))}
+.widget h3{color:#D4B48D}.widget-value{color:#FFF0D9}.widget-sub{color:#C4A98A}
+.meter,.bar-track{background:rgba(255,238,210,.14)}.meter>i,.bar-track i{background:linear-gradient(90deg,#D58B3D,#B64A40)}
+.device-chips span{background:rgba(224,192,150,.13);border:1px solid rgba(224,192,150,.14);color:#E7D2B8}
+.dock-wrap{position:relative;padding-bottom:12px}
+.dock-wrap:before{content:"";position:absolute;left:clamp(18px,5vw,76px);right:clamp(18px,5vw,76px);bottom:3px;height:2px;background:repeating-linear-gradient(90deg,rgba(255,241,220,.48) 0 1px,transparent 1px 24px);opacity:.52}
+.dock-wrap:after{content:"";position:absolute;left:31%;bottom:3px;width:38%;height:2px;background:var(--red);box-shadow:0 0 9px rgba(182,74,64,.38)}
+.dock{gap:13px;padding:9px 16px;border-radius:22px;background:rgba(32,23,17,.9);border:1px solid rgba(240,206,162,.24);backdrop-filter:blur(16px);box-shadow:0 13px 32px rgba(11,7,4,.48)}
+.dock .ico{border-radius:15px}.dock .app.run:after{background:#D9C3A6;box-shadow:0 0 7px rgba(217,195,166,.38)}
+#win{border:1px solid rgba(241,206,160,.32);border-radius:20px;background:rgba(30,22,16,.98);backdrop-filter:blur(22px);box-shadow:0 32px 90px rgba(9,6,4,.68)}
+#win.open{animation:pop .22s ease-in-out}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-48%) scale(.985)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.window-head{border-bottom:1px solid rgba(238,204,158,.2);background:rgba(64,43,28,.36)}.window-title{color:#FFF0D9}.window-title small{color:#C4A98A}
+.window-close{background:rgba(225,197,160,.13);color:#FFF0D9}.window-close:hover{background:rgba(225,197,160,.24)}
+.window-body{font-family:"Segoe UI",sans-serif}.section-title{color:#D8B78F}
+.note,.panel,.list-row,.tab-row,.media-card{border-color:rgba(232,198,157,.2);background:rgba(234,207,169,.055)}
+.note{color:#D6C0A4}.note.warn{border-color:rgba(240,190,115,.48);background:rgba(168,105,42,.13);color:#F3D39F}
+.note.good{border-color:rgba(158,195,154,.44);background:rgba(95,129,90,.14);color:#C7DFC0}
+.panel h4,.list-main strong{color:#FFF0D9}.muted,.small,.list-main small{color:#C4A98A}
+.field input,.field select,.field textarea,.input{border:1px solid rgba(233,201,160,.26);background:#34271D;color:#FFF3E2}
+.field option{background:#33261D;color:#FFF3E2}
+.btn{border:1px solid rgba(236,205,166,.25);background:rgba(223,193,153,.1);color:#FFF0D9}
+.btn:hover{background:rgba(223,193,153,.18);border-color:rgba(244,193,107,.58)}
+.btn.primary{background:#D58B3D;border-color:#D58B3D;color:#211913}.btn.primary:hover{background:#EAA653;border-color:#EAA653}
+.btn.danger{background:#B64A40;border-color:#B64A40;color:#FFF3E2}
+.empty{border-color:rgba(232,198,157,.3);color:#C4A98A}.switch{background:rgba(231,210,184,.22)}.switch:checked{background:#D58B3D}.switch:checked:before{background:#211913}
+.list-row input[type=range]{accent-color:#D58B3D}.badge{color:#EBD8C0;background:rgba(129,94,105,.28);border:1px solid rgba(191,162,172,.25)}
+.toast{border-color:rgba(240,206,162,.28);background:rgba(28,20,15,.97);color:#FFF0D9}.reader{background:#F4EBDD;color:#30251D}
+@media(max-width:980px){.main{grid-template-columns:1fr;overflow:auto;align-content:start}.app-grid{width:min(100%,560px);min-height:0;aspect-ratio:1/.86;margin:auto;padding:34px 24px}.clock{justify-content:center;text-align:center}.widgets{max-width:560px;width:100%;margin:0 auto}}
+@media(max-width:560px){.app-grid{aspect-ratio:1/.92;min-height:290px;padding:28px 12px;grid-template-columns:repeat(4,minmax(48px,1fr));gap:12px 3px}.app{width:65px;font-size:.72rem}.app .ico{width:51px;height:51px;border-radius:16px}.widgets{grid-template-columns:1fr 1fr}.widget{padding:11px;border-radius:15px}.dock{gap:7px;padding:7px 10px}.dock .ico{width:43px;height:43px}.bar-left,.bar-right{gap:8px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+body.reduce-motion *,body.reduce-motion *:before,body.reduce-motion *:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+
 </style>
 </head>
 <body>
-<svg id="wall" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1b1f4a"/><stop offset=".45" stop-color="#5a4aa8"/><stop offset=".72" stop-color="#e58aa8"/><stop offset="1" stop-color="#ffd7a1"/></linearGradient><radialGradient id="sun"><stop stop-color="#fff6d6"/><stop offset=".5" stop-color="#ffd8a0" stop-opacity=".7"/><stop offset="1" stop-color="#ffb4b4" stop-opacity="0"/></radialGradient><linearGradient id="h1" x2="0" y2="1"><stop stop-color="#7c5fb8"/><stop offset="1" stop-color="#b57ab8"/></linearGradient><linearGradient id="h2" x2="0" y2="1"><stop stop-color="#4b3f94"/><stop offset="1" stop-color="#6d59a8"/></linearGradient><linearGradient id="h3" x2="0" y2="1"><stop stop-color="#2f2e7a"/><stop offset="1" stop-color="#3e3a8c"/></linearGradient><linearGradient id="h4" x2="0" y2="1"><stop stop-color="#1c2257"/><stop offset="1" stop-color="#232a66"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><circle cx="1130" cy="560" r="260" fill="url(#sun)"/><circle cx="1130" cy="560" r="62" fill="#fff3d0"/><path d="M0 640 Q250 520 520 610 T1050 590 T1600 560 V900 H0Z" fill="url(#h1)" opacity=".9"/><path d="M0 700 Q300 600 600 690 T1180 660 T1600 650 V900 H0Z" fill="url(#h2)"/><path d="M0 770 Q280 700 640 765 T1240 740 T1600 750 V900 H0Z" fill="url(#h3)"/><path d="M0 835 Q360 790 760 830 T1600 820 V900 H0Z" fill="url(#h4)"/><g fill="#fff" opacity=".7"><circle cx="160" cy="90" r="1.6"/><circle cx="420" cy="170" r="1.2"/><circle cx="720" cy="70" r="1.8"/><circle cx="980" cy="130" r="1.3"/><circle cx="1320" cy="60" r="1.6"/><circle cx="1500" cy="190" r="1.2"/><circle cx="260" cy="260" r="1.1"/></g></svg>
+<svg id="wall" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs>
+<linearGradient id="cloth" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#51301E"/><stop offset=".07" stop-color="#98603A"/><stop offset=".15" stop-color="#D1A16B"/><stop offset=".22" stop-color="#A96B3D"/><stop offset=".31" stop-color="#4C2E1E"/><stop offset=".40" stop-color="#C28A52"/><stop offset=".48" stop-color="#E0BC89"/><stop offset=".55" stop-color="#98603A"/><stop offset=".65" stop-color="#41271B"/><stop offset=".75" stop-color="#AE7749"/><stop offset=".84" stop-color="#D5AA75"/><stop offset=".92" stop-color="#6A4028"/><stop offset="1" stop-color="#3A2419"/>
+</linearGradient>
+<pattern id="folds" width="320" height="900" patternUnits="userSpaceOnUse">
+<rect width="320" height="900" fill="url(#cloth)"/>
+<path d="M20 0 C52 250 2 570 26 900 M77 0 C102 260 62 610 93 900 M155 0 C131 280 187 620 160 900 M235 0 C260 250 219 630 248 900 M300 0 C286 260 330 600 310 900" fill="none" stroke="#F4D6A9" stroke-opacity=".12" stroke-width="7"/>
+<path d="M42 0 C60 260 32 630 53 900 M112 0 C88 280 132 630 115 900 M198 0 C220 250 184 610 209 900 M276 0 C254 280 286 620 274 900" fill="none" stroke="#24150E" stroke-opacity=".34" stroke-width="13"/>
+</pattern>
+<linearGradient id="roomShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#24170F" stop-opacity=".15"/><stop offset=".62" stop-color="#1B120C" stop-opacity=".18"/><stop offset="1" stop-color="#140E0A" stop-opacity=".88"/></linearGradient>
+<radialGradient id="core"><stop offset="0" stop-color="#100C09" stop-opacity=".98"/><stop offset=".72" stop-color="#1D140E" stop-opacity=".94"/><stop offset="1" stop-color="#24180F" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#folds)"/><rect width="1600" height="900" fill="url(#roomShade)"/>
+<ellipse cx="800" cy="500" rx="510" ry="390" fill="url(#core)"/>
+<path d="M0 842 C360 817 610 855 800 842 C1040 824 1300 855 1600 830 V900 H0Z" fill="#17100B" opacity=".94"/>
+<path d="M0 837 C360 812 610 850 800 837 C1040 819 1300 850 1600 825" fill="none" stroke="#D2A16D" stroke-opacity=".2" stroke-width="2"/>
+</svg>
 <div class="screen"><header class="bar"><div class="bar-left"><span class="logo">mora</span><span id="current-label">Домашний экран</span></div><div class="bar-right"><span class="status">Локальный режим · прототип</span><span id="clock-mini"></span></div></header>
 <main class="main"><section class="clock"><div><div class="clock-time" id="clock-time">--:--</div><div class="clock-date" id="clock-date"></div><div class="clock-hint">Ваше пространство. Приложения работают с данными, которые вы добавляете в этом браузере.</div></div></section><section class="app-grid" id="app-grid" aria-label="Приложения"></section>
 <section class="widgets"><button class="widget" data-open="kabon"><h3>Ka-bon · расходы сегодня</h3><div class="widget-value" id="today-total">0 ₴</div><div class="widget-sub" id="today-sub">Пока нет добавленных расходов</div><div class="meter"><i id="today-meter" style="width:0%"></i></div></button><button class="widget" data-open="unify"><h3>Unify · устройства</h3><div class="widget-value" id="device-count">0</div><div class="widget-sub" id="device-sub">Нет локально сохранённых устройств</div><div class="device-chips" id="device-chips"><span>Связь настраивается</span></div></button></section></main>
@@ -32,16 +100,16 @@ button,input,select,textarea{font:inherit}button{color:inherit}button:focus-visi
 <script>
 'use strict';
 const APPS=[
-{id:'cockos',name:'Cockos',sub:'Звук и запись',c1:'#ff6fa3',c2:'#c2335f',glyph:'<path d="M5 14v6M10 8v18M15 4v26M20 10v14M25 13v8M30 16v2"/>'},
-{id:'kavun',name:'Kavun',sub:'Фото и воспоминания',c1:'#6fe39d',c2:'#1f9d63',glyph:'<path d="M4 14a14 14 0 0 0 28 0zM8 14a10 10 0 0 0 20 0M13 19v.1M18 22v.1M23 19v.1"/>'},
-{id:'kabon',name:'Ka-bon',sub:'Деньги и чеки',c1:'#ffd45c',c2:'#e39a1a',glyph:'<circle cx="18" cy="18" r="13"/><path d="M22 12h-6a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-6M18 9v3M18 24v3"/>'},
-{id:'gloverty',name:'Gloverty',sub:'Автоматизация и жесты',c1:'#9a7dff',c2:'#5a36d6',glyph:'<path d="M20 4 8 20h9l-2 12 13-17h-9z"/>'},
-{id:'po',name:'Po',sub:'Браузер',c1:'#5fb2ff',c2:'#2058d8',glyph:'<circle cx="18" cy="18" r="13"/><path d="m23 13-3 7-7 3 3-7z"/>'},
-{id:'illidia',name:'Illidia',sub:'Игры',c1:'#4fe0e0',c2:'#1590a8',glyph:'<path d="M9 12h18a6 6 0 0 1 6 6l-1 7a3.5 3.5 0 0 1-6 1.5L24 24H12l-2 2.5A3.5 3.5 0 0 1 4 25l-1-7a6 6 0 0 1 6-6z"/><path d="M11 16v4M9 18h4M23 17v.1M26 19v.1"/>'},
-{id:'unify',name:'Unify',sub:'Связь устройств',c1:'#e8edff',c2:'#9aa8e6',glyph:'<circle cx="12" cy="18" r="8"/><circle cx="24" cy="18" r="8"/>'}
+{id:'cockos',name:'Cockos',sub:'Звук и запись',c1:'#B77B45',c2:'#65432D',glyph:'<path d="M5 14v6M10 8v18M15 4v26M20 10v14M25 13v8M30 16v2"/>'},
+{id:'kavun',name:'Kavun',sub:'Фото и воспоминания',c1:'#A7A08B',c2:'#5E624B',glyph:'<path d="M4 14a14 14 0 0 0 28 0zM8 14a10 10 0 0 0 20 0M13 19v.1M18 22v.1M23 19v.1"/>'},
+{id:'kabon',name:'Ka-bon',sub:'Деньги и чеки',c1:'#D6A65E',c2:'#80562F',glyph:'<circle cx="18" cy="18" r="13"/><path d="M22 12h-6a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-6M18 9v3M18 24v3"/>'},
+{id:'gloverty',name:'Gloverty',sub:'Автоматизация и жесты',c1:'#B2A0A1',c2:'#62556A',glyph:'<path d="M20 4 8 20h9l-2 12 13-17h-9z"/>'},
+{id:'po',name:'Po',sub:'Браузер',c1:'#A5B4B0',c2:'#4D6963',glyph:'<circle cx="18" cy="18" r="13"/><path d="m23 13-3 7-7 3 3-7z"/>'},
+{id:'illidia',name:'Illidia',sub:'Игры',c1:'#AF6C60',c2:'#5C302A',glyph:'<path d="M9 12h18a6 6 0 0 1 6 6l-1 7a3.5 3.5 0 0 1-6 1.5L24 24H12l-2 2.5A3.5 3.5 0 0 1 4 25l-1-7a6 6 0 0 1 6-6z"/><path d="M11 16v4M9 18h4M23 17v.1M26 19v.1"/>'},
+{id:'unify',name:'Unify',sub:'Связь устройств',c1:'#D9C4A4',c2:'#78634B',glyph:'<circle cx="12" cy="18" r="8"/><circle cx="24" cy="18" r="8"/>'}
 ];
 const KEY='mora.local-suite.v1';
-const emptyState=()=>({dailyLimit:0,expenses:[],subscriptions:[],familyMembers:[],media:[],slices:[],audioTracks:[],volumePrefs:{},rules:[],tabs:[],readerText:'',games:[],clips:[],devices:[],clipboardText:'',doNotDisturb:false,trackerProtection:true,retouch:{mediaId:'',brightness:100,contrast:100,saturate:100},theme:'sunset',reduceMotion:false});
+const emptyState=()=>({dailyLimit:0,expenses:[],subscriptions:[],familyMembers:[],media:[],slices:[],audioTracks:[],volumePrefs:{},rules:[],tabs:[],readerText:'',games:[],clips:[],devices:[],clipboardText:'',doNotDisturb:false,trackerProtection:true,retouch:{mediaId:'',brightness:100,contrast:100,saturate:100},theme:'mora',reduceMotion:false});
 let state=loadState();let currentApp=null;let toastTimer=null;let dbPromise=null;let activeRecording=null;let activeScreenCapture=null;let objectUrls=new Map();
 function loadState(){try{const raw=localStorage.getItem(KEY);return raw?{...emptyState(),...JSON.parse(raw)}:emptyState()}catch{return emptyState()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));renderWidgets()}catch(e){notify('Не удалось сохранить настройки: '+e.message)}}
