@@ -1,37 +1,33 @@
 # Mora Design System
 
-**Canonical source:** DuckOS / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.
+**Canonical source:** DuckOS / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.  
+**Palette set:** Solar, Amber, Arctic, Amethyst and Jade.
 
 Mora is the shared desktop identity for the Ivan-VHS application family. The shell owns wallpaper, workspace navigation, application catalogue, status area and app presentation. Each native tool keeps its specialist layout and product indicators while sharing semantic surfaces, spacing, typography, focus, motion and a restrained material language.
 
 ## Visual direction
 
-The primary desktop profile is **Mora Amber**: warm amber-sand drapery with a repeating vertical fold rhythm, a deep near-black radial centre, graphite and walnut surfaces, muted mauve/grey textiles, subdued olive glass and a single controlled red critical marker. Depth comes from light and shadow, edge highlights and recognizable material response — not neon fill or scattered gradients.
+The default desktop palette is **Obsidian Solar**: near-black graphite, clean white and a focused solar-yellow action accent. **Mora Amber** remains the warm signature option: amber-sand drapery with a repeating vertical fold rhythm, a deep near-black radial centre, graphite and walnut surfaces, subdued olive glass and a single controlled red critical marker. Depth comes from light and shadow, edge highlights and recognizable material response — not neon fill or scattered gradients.
 
 The standard workspace remains visually stable at the centre. Secondary content and controls are arranged symmetrically around it; decorative treatment never obscures task content.
 
-## Semantic palette
+## Semantic palettes
 
-| Token | Mora Amber | Role |
+`mora/theme.json` is the canonical source for five complete semantic palettes. Users can change the active palette in **Control → Цветовая палитра**; the choice is applied immediately and persisted in the local preference profile. The compact palette control in the status bar cycles through the same five presets.
+
+| Palette | Core colors | Visual role |
 |---|---|---|
-| Page | `#211913` | Deep walnut workspace |
-| Surface | `#33261D` | Primary panel |
-| Elevated | `#493326` | Secondary panel |
-| Text | `#FFF3E2` | Main copy |
-| Secondary | `#E7D2B8` | Supporting copy |
-| Muted | `#C4A98A` | Quiet metadata |
-| Brand | `#D58B3D` | Normal action and progress |
-| Brand hover / focus | `#EAA653` / `#F3C16B` | Hover and keyboard focus |
-| Brand text | `#211913` | Text on amber |
-| Secondary accent | `#526347` | Subdued olive / glass |
-| Border | `#75543A` | Warm structural edge |
-| Selection | `#60442E` | Selected content |
-| Critical | `#B64A40` | Destructive state / progress marker |
-| Critical text | `#FFF3E2` | Text on critical |
+| **Obsidian Solar** | Graphite black · clean white · solar yellow | High-contrast, focused desktop; default palette |
+| **Mora Amber** | Walnut · sand · copper · muted olive | Warm signature material palette |
+| **Arctic Glass** | Ice white · slate · deep cyan · teal | Bright, calm workspace |
+| **Amethyst Night** | Deep plum · lavender · mint | Creative, low-glare night palette |
+| **Forest Jade** | Pine graphite · cream · jade · soft gold | Natural, restrained green palette |
 
-Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone. Red is not used for routine emphasis.
+Each palette defines the same roles: page, surface, elevated surface, primary/secondary/muted text, brand and hover colors, on-brand text, secondary accent and its foreground, border, selection, danger and on-danger foreground. Components must consume semantic roles rather than hard-coded palette colors.
 
-Light and Dark remain available as alternate themes. `mora/theme.json` is the portable, versioned source for all three palettes.
+Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 or higher. The automated design-system contract checks every palette's text, secondary text, muted text, main action, secondary action and danger contrast. Meaning is never communicated through hue alone. Red is reserved for destructive or critical states.
+
+Legacy saved values migrate safely: `dark` maps to **Amethyst Night** and `light` maps to **Arctic Glass**. Existing `amber` preferences remain unchanged.
 
 ## Composition and geometry
 
