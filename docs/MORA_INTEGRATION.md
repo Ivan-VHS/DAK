@@ -20,7 +20,7 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 | Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
 
-The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
+The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Belle is an additional browser-hosted personal workspace with fifteen local modules, registered as a separate first-party app. It does not change the original seven app identities. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
 
 ## Run and validate
 
