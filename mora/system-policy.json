@@ -57,7 +57,7 @@
     },
     "compatibility": {
       "maturity": "partial",
-      "scope": "Mora inspects PE/ELF headers and exposes the compatibility centre; the Linux host CLI detects Wine/Proton/DOSBox, manages Wine prefixes, launches selected executables and installs an allowlisted set of Winetricks components. No process sandbox, anti-cheat bypass, Windows kernel-driver support or universal game compatibility is provided."
+      "scope": "Mora inspects PE/ELF headers and exposes the compatibility centre; Linux host CLI detects Wine/Proton/DOSBox and external managers, manages Wine prefixes, installs allowlisted Winetricks components, launches selected executables and starts user-supplied ReactOS guests through QEMU. No process sandbox, anti-cheat bypass or Windows kernel-driver support is provided."
     },
     "declarative_configuration": {
       "maturity": "partial",
