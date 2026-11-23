@@ -35,23 +35,20 @@ def main() -> int:
     if actual != expected or len(actual) != 20:
         raise SystemExit(f"Unexpected app catalog IDs: {sorted(actual)}")
 
+    native_shell = catalog["native_shell"]
+    if native_shell["maturity_status"] != "implemented":
+        raise SystemExit("Mora native user-space shell must be marked implemented")
+    if native_shell["runtime"] != "python-tk":
+        raise SystemExit("Mora must use the native Tk runtime")
+
     for app in catalog["applications"]:
         if app["maturity_status"] != "specified":
             raise SystemExit(
-                f"{app['id']}: native app maturity must remain specified"
+                f"{app['id']}: native application maturity must remain specified"
             )
-        if app["prototype_status"] != "partial":
+        if "prototype_status" in app or "prototype_evidence" in app:
             raise SystemExit(
-                f"{app['id']}: browser prototype status must remain partial"
-            )
-        expected_evidence = (
-            "prototype/mora-home.html"
-            if app["id"] in {"cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify"}
-            else "mora/index.html"
-        )
-        if expected_evidence not in app["prototype_evidence"]:
-            raise SystemExit(
-                f"{app['id']}: missing browser-prototype evidence path {expected_evidence}"
+                f"{app['id']}: retired browser-prototype metadata must be removed"
             )
 
     if len(catalog["workflows"]) != 9:
