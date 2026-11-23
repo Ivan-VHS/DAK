@@ -19,8 +19,12 @@ function cleanName(value) {
   return name;
 }
 
+function defaultStorage() {
+  try { return globalThis.localStorage ?? null; } catch { return null; }
+}
+
 function seedItems() {
-  const now = "2026-11-23T00:00:00.000Z";
+  const now = new Date().toISOString();
   const folder = (id, name) => ({ id, name, type: "folder", parentId: "home", size: 0, updatedAt: now, readonly: true });
   const file = (id, name, parentId, content, mime = "text/plain") => ({
     id, name, type: "file", parentId, content, mime,
@@ -36,11 +40,11 @@ function seedItems() {
     folder("applications", "Applications"),
     folder("system", "System"),
     file("system-report", "system-report.duck", "documents",
-      "DuckOS Mora workspace report\\n\\nShell: Mora browser workspace\\nStorage: local virtual workspace\\nNative filesystem: not connected\\n", "text/plain"),
+      "DuckOS Mora workspace report\n\nShell: Mora browser workspace\nStorage: local virtual workspace\nNative filesystem: not connected\n", "text/plain"),
     file("workspace-rpr", "workspace.rpr", "documents",
-      "# Reaper workspace example\\nlet workspace = \"DuckOS Mora\";\\nprint(workspace);\\n", "text/plain"),
+      "# Reaper workspace example\nlet workspace = \"DuckOS Mora\";\nprint(workspace);\n", "text/plain"),
     file("welcome-note", "welcome.txt", "desktop",
-      "Welcome to DuckOS.\\nThis file belongs to the local Mora workspace.\\n", "text/plain"),
+      "Welcome to DuckOS.\nThis file belongs to the local Mora workspace.\n", "text/plain"),
     file("app-catalog", "applications.json", "applications",
       JSON.stringify({ schema: "duckos.apps.v1", source: "Mora browser catalogue", nativeLaunch: false }, null, 2), "application/json"),
     file("theme-json", "theme.json", "system",
@@ -61,7 +65,7 @@ function validateItems(value) {
       name: raw.name.slice(0, 120),
       type: raw.type,
       parentId: typeof raw.parentId === "string" ? raw.parentId : null,
-      content: raw.type === "file" && typeof raw.content === "string" ? raw.content.slice(0, MAX_FILE_BYTES) : "",
+      content: raw.type === "file" && typeof raw.content === "string" ? raw.content : "",
       mime: typeof raw.mime === "string" ? raw.mime.slice(0, 120) : "text/plain",
       size: Number.isFinite(raw.size) && raw.size >= 0 ? raw.size : 0,
       updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : new Date(0).toISOString(),
@@ -74,11 +78,23 @@ function validateItems(value) {
     if (item.id !== "home" && (!item.parentId || byId.get(item.parentId)?.type !== "folder")) return null;
   }
   if (byId.get("home")?.parentId !== null || byId.get("home")?.type !== "folder") return null;
+  for (const item of items) {
+    if (item.id === "home") continue;
+    const visited = new Set([item.id]);
+    let parentId = item.parentId;
+    while (parentId) {
+      if (visited.has(parentId)) return null;
+      visited.add(parentId);
+      parentId = byId.get(parentId)?.parentId ?? null;
+    }
+    if (!visited.has("home")) return null;
+    if (item.type === "file" && byteLength(item.content) > MAX_FILE_BYTES) return null;
+  }
   return items;
 }
 
 export class VirtualWorkspace {
-  constructor(storage = globalThis.localStorage ?? null) {
+  constructor(storage = defaultStorage()) {
     this.storage = storage;
     this.items = this.load();
   }
