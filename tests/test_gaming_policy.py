@@ -62,6 +62,8 @@ class GamingPolicyTests(unittest.TestCase):
         from duckos.gaming import assess_capability_document
         report = assess_capability_document({
             "schema": "duckos.gaming-provider-evidence.v1",
+            "system_mutations_performed": False,
+            "evidence_scope": "whole_host",
             "capabilities": {
                 "cpu_telemetry": {
                     "available": True, "provider": "Pytyliki", "version": "measured", "reason": None
