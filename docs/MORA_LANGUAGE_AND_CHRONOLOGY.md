@@ -40,7 +40,7 @@ The envelope schema is `duckos.storage-envelope.v1`. It stores a version, monoto
 
 CRC32 is intentionally labelled as an accidental-corruption detector. It is not a digital signature, keyed MAC or proof of publisher identity. Authentic update bundles require a trusted signing key, signed manifest, algorithm agility, revocation policy and verification before staging.
 
-The shell migrates a legacy plain preference snapshot on restore. A newly saved snapshot is written in the envelope format. If an envelope fails validation, Restore must report it as damaged rather than silently accepting modified contents as a valid envelope.
+The shell accepts and restores a legacy plain preference snapshot. The next save writes the snapshot in the envelope format. If an envelope fails validation, Restore must report it as damaged rather than silently accepting modified contents as a valid envelope.
 
 ## Branching
 
