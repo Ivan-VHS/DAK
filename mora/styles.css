@@ -805,3 +805,17 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   :root[data-theme="amber"] .desktop-content {gap:26px}
   :root[data-theme="amber"] .dock-wrap {padding-bottom:14px}
 }
+function content(value) {
+    const iterate =
+      typeof value === "string" ? undefined : value?.[iteratorKey];
+    if (typeof iterate !== "function") {
+      return emitBlock(value);
+    }
+
+    // Reuse the method from a potentially stateful getter, with its original
+    // receiver. The for-of loop closes the iterator if the host rejects a block.
+    const blocks = { [iteratorKey]: () => apply(iterate, value, []) };
+    for (const block of blocks) {
+      emitBlock(block);
+    }
+  }
