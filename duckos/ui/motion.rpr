@@ -1,0 +1,22 @@
+# UI motion and frame-budget policy.
+# The compositor/renderer is a separate native subsystem.
+
+export craft motion_mode(reduced_motion) {
+    when reduced_motion {
+        yield "static"
+    }
+    yield "fluid"
+}
+
+export craft frame_state(frame_time_us, budget_us, reduced_motion) {
+    when reduced_motion {
+        yield "static"
+    }
+    when frame_time_us < 0 or budget_us <= 0 {
+        yield "invalid"
+    }
+    when frame_time_us <= budget_us {
+        yield "within-budget"
+    }
+    yield "late"
+}

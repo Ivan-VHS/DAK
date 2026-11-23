@@ -1,0 +1,44 @@
+# Bounded byte-stream contract for a future shared-memory UDB bus.
+# It accounts for slots and watermarks; it does not map shared pages or copy payloads.
+
+export craft create(capacity_bytes, high_watermark_percent) {
+    when capacity_bytes <= 0 or high_watermark_percent <= 0 or high_watermark_percent > 100 {
+        yield ["invalid", nothing]
+    }
+    yield ["ready", [capacity_bytes, 0, 0, 0, high_watermark_percent]]
+}
+
+export craft publish(bus, payload_bytes) {
+    when size(bus) != 5 or payload_bytes <= 0 {
+        yield ["invalid", bus, 0]
+    }
+    when bus[1] > bus[0] or payload_bytes > bus[0] - bus[1] {
+        yield ["backpressure", bus, 0]
+    }
+
+    make sequence := bus[2] + 1
+    make updated := [bus[0], bus[1] + payload_bytes, sequence, bus[3], bus[4]]
+    yield ["published", updated, sequence]
+}
+
+export craft consume(bus, payload_bytes) {
+    when size(bus) != 5 or payload_bytes <= 0 {
+        yield ["invalid", bus]
+    }
+    when bus[1] == 0 {
+        yield ["empty", bus]
+    }
+    when payload_bytes > bus[1] {
+        yield ["invalid-size", bus]
+    }
+
+    make updated := [bus[0], bus[1] - payload_bytes, bus[2], bus[3] + 1, bus[4]]
+    yield ["consumed", updated]
+}
+
+export craft pressured(bus) {
+    when size(bus) != 5 or bus[0] <= 0 {
+        yield false
+    }
+    yield bus[1] * 100 >= bus[0] * bus[4]
+}

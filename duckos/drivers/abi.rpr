@@ -1,0 +1,43 @@
+# Driver descriptor: [id, abi_version, bus, required_capabilities].
+# Validation does not load or execute a driver.
+
+export craft descriptor_valid(descriptor, expected_abi, supported_buses) {
+    when size(descriptor) != 4 {
+        yield false
+    }
+    when descriptor[0] == "" or descriptor[1] != expected_abi or descriptor[2] == "" {
+        yield false
+    }
+
+    vary supported := false
+    each bus in supported_buses {
+        when bus == descriptor[2] {
+            change supported := true
+        }
+    }
+    yield supported
+}
+
+export craft load_policy(descriptor, expected_abi, supported_buses, granted_capabilities) {
+    when not descriptor_valid(descriptor, expected_abi, supported_buses) {
+        yield "reject"
+    }
+
+    vary allowed := true
+    each requested in descriptor[3] {
+        vary present := false
+        each granted in granted_capabilities {
+            when granted == requested {
+                change present := true
+            }
+        }
+        when not present {
+            change allowed := false
+        }
+    }
+
+    when not allowed {
+        yield "reject"
+    }
+    yield "descriptor-approved"
+}

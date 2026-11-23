@@ -1,0 +1,45 @@
+# Bounded telemetry sample and alert policy.
+# Sample: [sequence, metric_id, value, unit, monotonic_timestamp].
+
+export craft sample_valid(sample) {
+    when size(sample) != 5 {
+        yield false
+    }
+    yield sample[0] > 0 and sample[1] != "" and sample[3] != "" and sample[4] >= 0
+}
+
+export craft alert_level(value, warning_threshold, critical_threshold) {
+    when critical_threshold < warning_threshold {
+        yield "invalid-thresholds"
+    }
+    when value >= critical_threshold {
+        yield "critical"
+    }
+    when value >= warning_threshold {
+        yield "warning"
+    }
+    yield "normal"
+}
+
+export craft append_window(samples, sample, capacity) {
+    when capacity <= 0 or not sample_valid(sample) {
+        yield ["invalid", samples]
+    }
+
+    make updated := push(samples, sample)
+    when size(updated) > capacity {
+        yield ["appended", rest(updated)]
+    }
+    yield ["appended", updated]
+}
+
+export craft sequence_valid(samples) {
+    vary previous := 0
+    each sample in samples {
+        when not sample_valid(sample) or sample[0] <= previous {
+            yield false
+        }
+        change previous := sample[0]
+    }
+    yield true
+}

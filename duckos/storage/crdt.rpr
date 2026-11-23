@@ -1,0 +1,33 @@
+# Deterministic last-writer-wins register merge.
+# Register shape: [value, lamport_clock, actor_id].
+# Equal clocks are resolved by actor id, then canonical text of the value.
+
+export craft register_valid(register) {
+    when size(register) != 3 {
+        yield false
+    }
+    yield register[1] >= 0 and register[2] != ""
+}
+
+export craft merge_register(left, right) {
+    when not register_valid(left) or not register_valid(right) {
+        yield ["invalid"]
+    }
+    when left[1] > right[1] {
+        yield left
+    }
+    when right[1] > left[1] {
+        yield right
+    }
+    when left[2] < right[2] {
+        yield left
+    }
+    when right[2] < left[2] {
+        yield right
+    }
+
+    when text(left[0]) >= text(right[0]) {
+        yield left
+    }
+    yield right
+}
