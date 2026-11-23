@@ -83,7 +83,7 @@ def main() -> int:
     require("https://github.com/Ivan-VHS/OPlague" in source, "Mora Boost must link to the OPlague project")
 
     worker = WORKER_JS.read_text(encoding="utf-8")
-    cache_match = re.search(r'const CACHE="([^"]+)"', worker)
+    cache_match = re.search(r'const\s+CACHE\s*=\s*"([^"]+)"', worker)
     require(cache_match is not None, "Mora service-worker cache key is missing")
     require("./app.js" in worker and "./index.html" in worker, "Offline shell assets are not cached")
 
