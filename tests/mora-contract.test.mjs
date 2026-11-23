@@ -8,24 +8,39 @@ const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
 
-const appIds = [
-  "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
+const coreAppIds = ["cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"];
+const extensionAppIds = [
+  "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
+  "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"
+];
+const systemAppIds = [
   "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
 ];
+const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
 test("desktop exposes all seven first-party apps and seven system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
-    const appKey = ["mora-ai", "mora-boost"].includes(id) ? '"' + id + '":' : id + ":";
-    assert.ok(js.includes(appKey), id + " must have a panel definition");
+    const appKey = id.includes("-") ? '"' + id + '"' : id;
+    assert.ok(js.includes(appKey + ": { name:"), id + " must have an app definition");
   }
-  for (const id of appIds.slice(0, 7)) {
+  for (const id of coreAppIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 8);
+  assert.equal(registry.system_services.length, 12);
+  assert.ok(html.includes('id="extension-app-grid"'));
+  for (const id of extensionAppIds) {
+    assert.ok(html.includes('data-app="' + id + '"'), id + " is missing from the extension grid");
+    assert.ok(js.includes('case "' + id + '"'), id + " is missing an extension panel");
+    assert.ok(registry.built_in_apps.some((app) => app.id === id), id + " is missing from the registry");
+  }
+  for (const name of ["Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
+    "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2", "Po-2", "GameCharager", "EXEdotEXE"]) {
+    assert.ok(html.includes(name) || js.includes(name), name + " label is missing");
+  }
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {
@@ -42,7 +57,8 @@ test("system panels expose approvals, permissions, recovery and local file inspe
     "data-intent-form", "data-intent-preview", "approve-intent", "deny-intent",
     "data-capability", "save-recovery", "restore-recovery", "preview-update",
     "data-executable-file", "data-provenance-file", "data-power-profile",
-    "data-setting"
+    "data-setting", "data-extension-form", "data-archive-file", "data-beat-range",
+    "data-setup-theme", "data-share-check"
   ]) {
     assert.ok(js.includes(marker), "missing system control: " + marker);
   }
@@ -112,7 +128,7 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(css.includes(".dock-wrap::before"));
   assert.ok(css.includes("#526347"));
   assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v4-amber"));
+  assert.ok(serviceWorker.includes("mora-shell-v5-amber"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
