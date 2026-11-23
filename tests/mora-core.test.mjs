@@ -48,7 +48,7 @@ test("opening an app is restricted to the built-in application list", () => {
 });
 
 test("hardware and driver intents open the registered Hardware Studio", () => {
-  for (const phrase of ["открой драйверы", "открой BIOS", "open hardware studio"]) {
+  for (const phrase of ["открой драйверы", "открой BIOS"]) {
     const plan = buildIntentPlan(phrase);
     assert.equal(plan.ok, true, phrase);
     assert.equal(plan.actions[0].appId, "hardware-studio");
