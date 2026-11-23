@@ -21,6 +21,10 @@ from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
+from .rights import (
+    RightsAuditLog, build_transfer_manifest, validate_transfer_manifest,
+    verify_content_manifest, verify_entitlement,
+)
 
 
 def _load(path: Path) -> Any:
@@ -36,6 +40,18 @@ def _load(path: Path) -> Any:
 
 def _print_result(value: Any) -> None:
     print(json.dumps(value, ensure_ascii=False, indent=2))
+
+
+def _trusted_key_map(values: list[str]) -> dict[str, Path]:
+    result: dict[str, Path] = {}
+    for value in values:
+        key_id, separator, key_path = value.partition("=")
+        if not separator or not key_id or not key_path:
+            raise ValueError("--trusted-key must use KEY_ID=/path/to/public-key.pem")
+        if key_id in result:
+            raise ValueError(f"duplicate trusted key id: {key_id}")
+        result[key_id] = Path(key_path).expanduser()
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -149,6 +165,49 @@ def main(argv: list[str] | None = None) -> int:
         help="append one target argument; repeat to add more than one",
     )
 
+    rights = commands.add_parser(
+        "rights", help="verify signed content entitlements, package integrity and rights audit evidence"
+    )
+    rights_commands = rights.add_subparsers(dest="rights_command", required=True)
+
+    entitlement_check = rights_commands.add_parser(
+        "verify-entitlement", help="verify a local Ed25519 entitlement without contacting a store"
+    )
+    entitlement_check.add_argument("token", type=Path)
+    entitlement_check.add_argument("--trusted-key", action="append", required=True,
+                                   help="trusted publisher key as KEY_ID=/path/to/public-key.pem")
+    entitlement_check.add_argument("--profile-id", help="current local profile identifier")
+    entitlement_check.add_argument("--device-id", help="registered DuckOS home-device identifier")
+    entitlement_check.add_argument("--region", help="current region code")
+    entitlement_check.add_argument("--offline", action="store_true",
+                                   help="apply the signed offline-valid-until deadline")
+    entitlement_check.add_argument("--action", choices=(
+        "install", "launch", "download", "backup", "transfer", "stream",
+        "capture_screenshot", "capture_recording", "redistribute", "modify",
+    ), help="require a particular content right")
+    entitlement_check.add_argument("--audit-log", type=Path,
+                                   help="append the decision to the local rights audit log")
+
+    content_check = rights_commands.add_parser(
+        "verify-content", help="verify publisher signature and the exact package file set"
+    )
+    content_check.add_argument("manifest", type=Path)
+    content_check.add_argument("root", type=Path)
+    content_check.add_argument("--trusted-key", action="append", required=True,
+                               help="trusted publisher key as KEY_ID=/path/to/public-key.pem")
+    content_check.add_argument("--audit-log", type=Path,
+                               help="append the result to the local rights audit log")
+
+    transfer_check = rights_commands.add_parser(
+        "validate-transfer", help="check a rights-preserving metadata export without reassigning licenses"
+    )
+    transfer_check.add_argument("manifest", type=Path)
+
+    audit_check = rights_commands.add_parser(
+        "audit-log", help="verify the local hash-chained rights audit journal"
+    )
+    audit_check.add_argument("--path", type=Path, help="journal path (defaults to ~/.duckos/rights-audit.jsonl)")
+
     try:
         args = parser.parse_args(argv)
         if args.command == "build-release":
@@ -244,6 +303,44 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
+        elif args.command == "rights" and args.rights_command == "verify-entitlement":
+            result = verify_entitlement(
+                _load(args.token),
+                _trusted_key_map(args.trusted_key),
+                profile_id=args.profile_id,
+                home_device_id=args.device_id,
+                region=args.region,
+                offline=args.offline,
+                required_action=args.action,
+            )
+            RightsAuditLog(args.audit_log).append(
+                action="entitlement.verify",
+                content_id=result.get("content_id"),
+                entitlement_id=result.get("entitlement_id"),
+                status=result.get("status", "blocked"),
+                reason_code=result.get("reason_code", "verification_error"),
+            )
+            _print_result(result)
+            return 0 if result.get("allowed") else 1
+        elif args.command == "rights" and args.rights_command == "verify-content":
+            result = verify_content_manifest(
+                _load(args.manifest), args.root, _trusted_key_map(args.trusted_key)
+            )
+            RightsAuditLog(args.audit_log).append(
+                action="content.verify",
+                content_id=result.get("content_id"),
+                entitlement_id=None,
+                status="verified" if result.get("valid") else "blocked",
+                reason_code=result.get("reason_code", "verification_error"),
+            )
+            _print_result(result)
+            return 0 if result.get("valid") else 1
+        elif args.command == "rights" and args.rights_command == "validate-transfer":
+            result = validate_transfer_manifest(_load(args.manifest))
+        elif args.command == "rights" and args.rights_command == "audit-log":
+            result = RightsAuditLog(args.path).verify()
+            _print_result(result)
+            return 0 if result.get("valid") else 1
         else:
             result = compatibility_status()
         _print_result(result)
