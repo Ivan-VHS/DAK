@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { HUB_APPS, HUB_BLADES, HUB_VFS_NODES, MORA_VECTORS, localizePair, normalizeHubPreferences, resolveVfsNode, validateHubRegistry } from "../mora/xbox-hub.js";
 
 const html = await readFile(new URL("../mora/index.html", import.meta.url), "utf8");
 const css = await readFile(new URL("../mora/styles.css", import.meta.url), "utf8");
@@ -110,29 +111,29 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.equal(theme.defaultPalette, "duck");
   assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
   const palette = theme.palettes.duck;
-  assert.equal(palette.page, "#080808");
-  assert.equal(palette.surface, "#151515");
-  assert.equal(palette.text, "#FFFFFF");
-  assert.equal(palette.brand, "#FFD400");
-  assert.equal(palette.danger, "#FFD400");
+  assert.equal(palette.page, "#0E0F0D");
+  assert.equal(palette.surface, "#191A17");
+  assert.equal(palette.text, "#F5F4EF");
+  assert.equal(palette.brand, "#D6BE65");
+  assert.equal(palette.danger, "#D6BE65");
   assert.ok(contrastRatio(palette.text, palette.page) >= 7);
   assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
   assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5);
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
-  assert.equal(manifest.theme_color, "#FFD400");
-  assert.equal(manifest.background_color, "#080808");
-  assert.ok(html.includes('name="theme-color" content="#FFD400"'));
+  assert.equal(manifest.theme_color, "#D6BE65");
+  assert.equal(manifest.background_color, "#0E0F0D");
+  assert.ok(html.includes('name="theme-color" content="#D6BE65"'));
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
   assert.ok(html.includes('Единая палитра DuckOS'));
   assert.ok(html.includes('data-app="mora-commons"'));
   assert.ok(css.includes(':root[data-theme="duck"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
-  assert.ok(css.includes("#FFD400"));
+  assert.ok(css.includes("#D6BE65"));
   assert.ok(css.includes(".commons-grid"));
   const allowedColors = new Set([
-    "#080808", "#151515", "#242424", "#3A3A3A", "#3A3100",
-    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C"
+    "#0E0F0D", "#191A17", "#252721", "#3A3B35", "#3E3825",
+    "#A6A69D", "#E7E5DC", "#F5F4EF", "#D6BE65", "#E6D48B", "#14140F"
   ].map((color) => color.toLowerCase()));
   const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
@@ -142,8 +143,94 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v9-blade-hub"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
+});
+
+
+test("Mora central launcher uses Soft Glass, one Duck accent and gentle platform motion", () => {
+  assert.ok(html.includes("29 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ"));
+  assert.ok(css.includes("grid-template-columns:repeat(4,minmax(0,1fr))"));
+  assert.ok(css.includes(".app-tile:active"));
+  assert.ok(css.includes("@keyframes mora-window-in"));
+  assert.ok(css.includes("prefers-reduced-motion"));
+  assert.ok(css.includes(":root.reduce-motion"));
+  assert.ok(css.includes("@supports not"));
+  assert.ok(js.includes("MAX_OPEN_WINDOWS = 6"));
+});
+
+test("Mora blocks remote active content and limits browser-layer authority", () => {
+  assert.ok(html.includes("Content-Security-Policy"));
+  assert.ok(html.includes("script-src 'self'"));
+  assert.ok(html.includes("connect-src 'self'"));
+  assert.ok(html.includes("object-src 'none'"));
+  assert.ok(html.includes('name="referrer" content="no-referrer"'));
+  assert.equal(policy.capabilities.content_security_policy.maturity,"partial");
+  assert.ok(policy.capabilities.content_security_policy.scope.includes("inline styles remain allowed"));
+});
+
+
+test("Blade Hub provides a complete, bilingual workspace over the existing Mora registry", () => {
+  assert.ok(html.includes('id="xbox-hub-toggle"'));
+  assert.ok(html.includes('id="xbox-hub-root"'));
+  assert.ok(html.includes('src="xbox-hub.js"'));
+  assert.ok(css.includes(".xbox-hub-dialog"));
+  assert.ok(css.includes(".xbox-hub-blades"));
+  assert.ok(css.includes(".xbox-hub-vector-grid"));
+  assert.ok(css.includes("@media (prefers-reduced-motion: reduce)"));
+
+  assert.equal(HUB_BLADES.length, 4);
+  assert.deepEqual(HUB_BLADES.map((blade) => blade.id), ["live", "games", "media", "system"]);
+  assert.equal(HUB_APPS.length, 29);
+  assert.equal(new Set(HUB_APPS.map((app) => app.id)).size, 29);
+  assert.deepEqual(HUB_APPS.map((app) => app.id).sort(), registry.built_in_apps.map((app) => app.id).sort());
+  assert.equal(MORA_VECTORS.length, 20);
+  assert.equal(new Set(MORA_VECTORS.map((vector) => vector.id)).size, 20);
+  assert.ok(MORA_VECTORS.every((vector) => HUB_APPS.some((app) => app.id === vector.appId)));
+  assert.equal(HUB_VFS_NODES.length, 8);
+
+  assert.equal(localizePair("Игры", "Ігри", "ru"), "Игры");
+  assert.equal(localizePair("Игры", "Ігри", "ua"), "Ігри");
+  assert.equal(localizePair("Игры", "Ігри", "dual"), "Игры / Ігри");
+  assert.equal(resolveVfsNode("/игры").id, "games");
+  assert.equal(resolveVfsNode("/ігри").id, "games");
+  assert.equal(resolveVfsNode("інтеграції").id, "integrations");
+
+  const normalized = normalizeHubPreferences({
+    language: "invalid",
+    workspace: "99",
+    profile: "root",
+    views: { "01": { blade: "foreign", cwd: "../../", selectedApp: "not-installed" } }
+  });
+  assert.equal(normalized.language, "ru");
+  assert.equal(normalized.workspace, "01");
+  assert.equal(normalized.profile, "owner");
+  assert.deepEqual(normalized.views["01"], { blade: "live", cwd: "root", selectedApp: "mora-ai" });
+
+  const complete = validateHubRegistry(HUB_APPS, HUB_APPS.map((app) => app.id));
+  assert.equal(complete.ok, true);
+  assert.equal(complete.available, 29);
+  const incomplete = validateHubRegistry(HUB_APPS, HUB_APPS.slice(1).map((app) => app.id));
+  assert.equal(incomplete.ok, false);
+  assert.equal(incomplete.missing.length, 1);
+});
+
+test("Blade Hub keeps console-inspired navigation separate from native rights enforcement", async () => {
+  const hubSource = await readFile(new URL("../mora/xbox-hub.js", import.meta.url), "utf8");
+  assert.ok(hubSource.includes("navigator.getGamepads"));
+  assert.ok(hubSource.includes("requestAnimationFrame"));
+  assert.ok(hubSource.includes("signatureUnknown"));
+  assert.ok(hubSource.includes("licenseUnknown"));
+  assert.ok(hubSource.includes("без запуска нативного процесса"));
+  assert.ok(!hubSource.includes("eval("));
+  assert.ok(!hubSource.includes("new Function"));
+
+  assert.ok(policy.capabilities.blade_navigation);
+  assert.equal(policy.capabilities.blade_navigation.maturity, "implemented");
+  assert.ok(policy.capabilities.blade_navigation.scope.includes("semantic VFS"));
+  assert.ok(policy.capabilities.blade_navigation.scope.includes("no native VFS"));
+  assert.ok(serviceWorker.includes("./xbox-hub.js"));
+  assert.ok(serviceWorker.includes("mora-shell-v9-blade-hub"));
 });

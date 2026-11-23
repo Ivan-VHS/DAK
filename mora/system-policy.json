@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and seven system tools"
+      "scope": "browser shell, responsive central launcher with 20 first-party app panels, nine system tools, accessible windows and dock"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -45,15 +45,15 @@
     },
     "adaptive_workspace": {
       "maturity": "partial",
-      "scope": "responsive browser layout, persisted Amber/Dark/Light palettes and reduced motion; native XR session transfer remains absent"
+      "scope": "responsive browser layout, four console-inspired blades, three persisted view contexts, RU/UA/dual semantic path labels, fixed Duck palette, reduced-motion and Eco Visuals preferences; no native compositor, virtual desktop service or XR session transfer"
     },
     "multimodal_input": {
       "maturity": "planned",
-      "scope": "keyboard, pointer and touch; no voice or spatial input service"
+      "scope": "keyboard, pointer, touch and optional standard Gamepad API D-pad/A navigation in the Blade Hub; no voice or spatial input service"
     },
     "material_interface": {
       "maturity": "implemented",
-      "scope": "Mora Amber drapery rhythm, graphite/walnut surfaces, muted olive secondary accent, restrained critical red, with Dark and Light alternate palettes"
+      "scope": "flat Soft Glass surfaces, graphite structure, warm-white content, muted Duck yellow selection and restrained iOS-inspired motion; no copied Apple assets"
     },
     "compatibility": {
       "maturity": "partial",
@@ -73,7 +73,7 @@
     },
     "shared_design_system": {
       "maturity": "implemented",
-      "scope": "versioned Amber/Dark/Light semantic palette, geometry, spacing, typography and motion tokens; native adapters remain distinct"
+      "scope": "versioned single Duck palette, central app grid, spacing, typography, focus and motion tokens; no alternate palettes"
     },
     "installable_workspace": {
       "maturity": "partial",
@@ -86,6 +86,14 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "content_security_policy": {
+      "maturity": "partial",
+      "scope": "same-origin CSP for scripts, connections, workers, images and forms; inline styles remain allowed for current component layout; deployment response headers and native process isolation require the host platform"
+    },
+    "blade_navigation": {
+      "maturity": "implemented",
+      "scope": "browser-only four-blade navigation, three saved workspace contexts, RU/UA/dual labels, bilingual semantic VFS index with path aliases, a 20-vector index and optional standard Gamepad API navigation; no Xbox account, console licence or DRM service, no package signature verification, no native VFS, no process sandbox, and no native console integration"
     }
   },
   "not_in_scope_as_implemented_features": [

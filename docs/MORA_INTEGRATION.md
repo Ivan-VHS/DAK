@@ -4,7 +4,7 @@
 
 DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
 
-The default Mora Amber profile uses warm vertical drapery with a repeating fold rhythm, a deep radial workspace centre, walnut/graphite panels, muted olive support surfaces and one restrained red critical marker. Material depth comes from soft light, edge highlights and tonal separation rather than neon fills. The compact dock and existing app IDs remain stable; Dark and Light remain selectable alternatives.
+The default Mora Soft Glass profile uses quiet original vertical folds, a deep graphite radial workspace, centred application glyphs, translucent low-contrast panels and one muted Duck-yellow accent. Material depth comes from soft light, a fine edge and modest blur rather than bright gradients or heavy shadows. The compact dock, all application IDs and the single Duck palette remain stable; alternate Amber, Dark and Light palettes are not exposed.
 
 ## Shell components
 
@@ -68,7 +68,7 @@ The shared palette and design constraints are defined by [Mora Design System](..
 
 ## Responsive workspace and accessibility
 
-Mora supports a responsive browser layout and a reduced-motion preference. Its focus and power-profile controls affect only the shell presentation. Native display migration, XR, voice, gesture input, high-contrast profiles, VRR and hardware resource scheduling require dedicated services and accessibility testing.
+Mora supports a responsive central app launcher, accessible glass windows, restrained spring-like transitions and a reduced-motion preference. Its focus and power-profile controls affect only the shell presentation. The browser CSP restricts active content and connections to the same origin; inline styles remain permitted for current component layout. Native display migration, XR, voice, gesture input, high-contrast profiles, VRR and hardware resource scheduling require dedicated services and accessibility testing.
 
 ## Data handling
 
@@ -98,3 +98,21 @@ Never promote a feature to native/verified status because its UI panel exists.
 Mora exposes Duck Desktop as a system tool, but the browser panel is informational. It gives the user the `duckos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DuckOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
 
 Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.
+
+
+## Visual ownership and browser security
+
+The shell uses project-maintained SVG glyphs, CSS and wallpaper geometry. Its motion references general platform interaction principles only; it does not bundle or imitate Apple-owned icons, fonts, screenshots or wallpapers. All app identifiers and panel contracts remain DuckOS-owned.
+
+A same-origin CSP is present in `mora/index.html`. It blocks remote scripts, fonts, images, connections and embedded objects. Inline styles are currently allowed because app panels use style attributes for bounded display values. The browser shell still does not replace a native capability broker, OS process sandbox or HTTP response security headers.
+
+
+## Blade Hub and semantic workspace
+
+Mora offers an optional console-inspired Blade Hub above the existing 29-panel launcher. Four horizontal blades organise profile/access, games, media and system tools. Three workspace contexts retain their selected blade, semantic location and highlighted panel independently. RU, UA and paired RU/UA labels are available for navigation, vector names and supporting descriptions.
+
+The Hub includes the 20 shared architecture vectors as a navigation index with links to relevant built-in Mora panels. It does not mark those vectors as natively complete. Its semantic VFS maps stable in-shell nodes to equivalent Russian and Ukrainian names; it is not a mounted host filesystem or a native VFS implementation.
+
+The built-in catalogue inspector checks that the expected app IDs have visible Mora desktop tiles and confirms the expected same-origin CSP. Package signatures, content ownership, console accounts, licences and DRM are not validated. The profile selector changes only the Hub's local presentation state. The browser shell does not receive native process authority through this interface.
+
+Keyboard navigation includes Escape, arrow-key focus movement and Alt+Left/Right blade switching. The standard Gamepad API is used only while the Hub is open; D-pad changes blades/focus and A activates the focused control. Its polling loop is stopped when the overlay closes. No Xbox/Microsoft logos, screenshots, proprietary fonts, sounds or code are bundled; this is an independent design concept and is not affiliated with Microsoft.
