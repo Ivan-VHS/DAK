@@ -3,15 +3,12 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "mora" / "contracts" / "oplague-gaming.v1.schema.json"
-MORA_JS = ROOT / "mora" / "app.js"
-MORA_INDEX = ROOT / "mora" / "index.html"
+MORA_NATIVE = ROOT / "duckos" / "mora" / "qt_ui.py"
 APP_CATALOG = ROOT / "mora" / "apps.json"
-WORKER_JS = ROOT / "mora" / "service-worker.js"
 INTEGRATION_DOC = ROOT / "docs" / "GAMING_PERFORMANCE_INTEGRATION.md"
 
 CAPABILITIES = {
@@ -73,19 +70,16 @@ def main() -> int:
         "The IPC payload must not expose arbitrary execution or filesystem fields",
     )
 
-    source = MORA_JS.read_text(encoding="utf-8")
-    require('"mora-boost": {' in source, "Mora Boost is missing from the app definitions")
-    require("Игровая производительность под контролем" in source, "Mora Boost does not explain its workspace")
-    index = MORA_INDEX.read_text(encoding="utf-8")
-    require('data-app="mora-boost"' in index, "Mora Boost tile is missing from the current desktop")
+    source = MORA_NATIVE.read_text(encoding="utf-8")
+    require("def _build_boost_panel" in source, "Native Mora Boost panel is missing")
+    require("Игровая лаборатория" in source, "Mora Boost does not explain its workspace")
     catalog = json.loads(APP_CATALOG.read_text(encoding="utf-8"))
-    require(any(item.get("id") == "mora-boost" for item in catalog.get("built_in_apps", [])), "Mora Boost is missing from the versioned app catalogue")
+    require(
+        any(item.get("id") == "mora-boost" and item.get("runtime") == "pyside6"
+            for item in catalog.get("built_in_apps", [])),
+        "Mora Boost is missing from the native app catalogue",
+    )
     require("https://github.com/Ivan-VHS/OPlague" in source, "Mora Boost must link to the OPlague project")
-
-    worker = WORKER_JS.read_text(encoding="utf-8")
-    cache_match = re.search(r'const\s+CACHE\s*=\s*"([^"]+)"', worker)
-    require(cache_match is not None, "Mora service-worker cache key is missing")
-    require("./app.js" in worker and "./index.html" in worker, "Offline shell assets are not cached")
 
     require(INTEGRATION_DOC.is_file(), "Gaming integration documentation is missing")
     print("Mora gaming IPC contract and workspace entry point validated.")

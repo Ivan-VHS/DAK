@@ -95,6 +95,15 @@ def main(argv: list[str] | None = None) -> int:
     startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
     startup_restore.add_argument("entry_id")
 
+    mora = commands.add_parser("mora", help="open the native Mora desktop environment")
+    mora_commands = mora.add_subparsers(dest="mora_command", required=True)
+    mora_commands.add_parser("gui", help="launch the native PySide6 desktop shell")
+    mora_commands.add_parser("tui", help="open the optional native Textual terminal workspace")
+    mora_commands.add_parser("gpu", help="open the separate Dear PyGui diagnostic utility")
+    mora_commands.add_parser("plot", help="open the optional PyQtGraph CSV viewer")
+    mora_commands.add_parser("scene", help="open the native Qt Quick declarative scene preview")
+    mora_commands.add_parser("bridges", help="report available native platform bridge capabilities")
+
     terminal = commands.add_parser(
         "terminal", help="open the separate DuckOS extended terminal"
     )
@@ -270,6 +279,24 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "startup" and args.startup_command in {"disable", "restore"}:
             enabled = args.startup_command == "restore"
             result = DesktopService().startup.set_enabled(args.entry_id, enabled)
+        elif args.command == "mora" and args.mora_command == "gui":
+            from .mora.native_ui import run_native_mora
+            return run_native_mora()
+        elif args.command == "mora" and args.mora_command == "tui":
+            from .mora.tui import main as run_mora_tui
+            return run_mora_tui()
+        elif args.command == "mora" and args.mora_command == "gpu":
+            from .mora.gpu_tools import main as run_gpu_tools
+            return run_gpu_tools()
+        elif args.command == "mora" and args.mora_command == "plot":
+            from .mora.plotting import main as run_plot_viewer
+            return run_plot_viewer()
+        elif args.command == "mora" and args.mora_command == "scene":
+            from .mora.qml_scene import main as run_qml_scene
+            return run_qml_scene()
+        elif args.command == "mora" and args.mora_command == "bridges":
+            from .mora.native_bridge import native_bridge_status
+            result = native_bridge_status()
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()

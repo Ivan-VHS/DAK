@@ -103,7 +103,7 @@ The release bundle is a component archive, not a bootable image. Deployment plan
 - [x] Reuse local PE/ELF header inspection and SHA-256 helpers in GameCharager and EXEdotEXE without executing targets.
 - [ ] Native implementations of the proposed DAK services, system-wide persistent storage, archive extraction, native audio, GPS/navigation, game process creation, OS installation and kernel-enforced capabilities.
 
-These are partial browser-shell features. The new DAK package catalog remains at design maturity and does not indicate that the corresponding native services ship in an OS image.
+These were partial browser-shell features. The native Mora launcher now exposes catalogue entries, while the corresponding native services remain partial or planned. The DAK package catalog remains at design maturity and does not indicate that those services ship in an OS image.
 
 
 ## Duck Desktop optimizer — 2026-11-23
@@ -120,4 +120,30 @@ These are partial browser-shell features. The new DAK package catalog remains at
 - [ ] Native process manager, tray/notification services, capability broker and kernel-enforced resource scheduling.
 - [ ] MacOS LaunchAgents integration and machine-wide/service startup management (intentionally outside this module's scope).
 
-The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
+The native Duck Desktop utility is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel invokes the dedicated DuckOS user-space audit function; it does not route host access through a browser runtime. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
+
+## Mora native desktop — 2026-11-23
+
+- [x] Replace the Mora browser shell with a native PySide6 / Qt Widgets user-space application.
+- [x] Remove the browser HTML entry points, web manifest, service worker, CSS shell and DOM-driven application router.
+- [x] Package the app registry, design tokens and Mora Commons catalogue as JSON data.
+- [x] Native application launcher with search, category filtering and individual app panels.
+- [x] Local preference normalization and atomic persistence; bounded intent preview and explicit approval.
+- [x] Settings-only JSON backup/restore, SHA-256 file inspection and read-only PE/ELF inspection entry point.
+- [x] Native entry points to Duck Desktop and Reaper Studio.
+- [ ] DuckOS compositor, boot-time shell, native window manager, process manager, system notifications and kernel-enforced capabilities.
+
+Mora now runs as a normal host process using Qt Widgets; it is not a compositor or proof of a bootable DuckOS image. Sentinel remains a local preference panel, Restore handles Mora settings only, and Bridge inspects files without executing them. See [Mora native desktop](MORA_INTEGRATION.md).
+
+## Mora PySide6 desktop and toolkit adapters — 2026-11-23
+
+- [x] Replace the interim Tk UI with PySide6 / Qt 6 Widgets as the single primary desktop runtime.
+- [x] Keep the browser/WebView runtime removed; no HTML files or browser execution path is present.
+- [x] Move Mora search, responsive app cards, dialogs, profile panels and local tools to native Qt widgets.
+- [x] Add isolated Textual TUI, Dear PyGui GPU utility, PyQtGraph CSV viewer and scoped native-bridge adapters.
+- [x] Review and classify all 66 proposed UI libraries in the machine-readable toolkit registry.
+- [x] Add optional dependency profiles and CI smoke tests for the offscreen Qt runtime.
+- [ ] DuckOS compositor, boot-time shell, native window manager, process manager, system notifications and kernel-enforced capabilities.
+- [ ] Dedicated domain engines and persistent data stores for the first-party applications.
+
+The optional frameworks are not installed as a single dependency bundle. Main desktop uses PySide6; TUI, GPU tools, plotting and platform bridges are loaded only when their corresponding extra and command are selected. See [GUI framework architecture](GUI_FRAMEWORK_ARCHITECTURE.md).

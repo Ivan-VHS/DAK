@@ -1,8 +1,8 @@
 # Mora Commons — единый центр приложений DuckOS
 
 **Product ID:** ivan-vhs.duckos.mora-commons  
-**Catalog module:** mora/commons-catalog.js  
-**Maturity:** the Mora Commons catalogue interface is implemented in the browser shell; the fifteen listed application products are specified, not shipped native applications.
+**Native catalogue data:** mora/commons-catalog.json  
+**Maturity:** the Mora Commons catalogue interface is implemented in the native Mora shell; the fifteen listed application products are specified, not shipped native applications.
 
 ## Purpose
 
@@ -19,22 +19,21 @@ The catalogue groups applications by **user task**, never by gender. Every perso
 | Outdoors and autonomy | DeadReckon, CampLoad, WatchDesk |
 | Work and personal discipline | MarginLine, ColdStart |
 
-Each catalogue record defines a purpose, initial capability list, keywords and a specified maturity boundary in mora/commons-catalog.js.
+Each catalogue record defines a purpose, initial capability list, keywords and a specified maturity boundary in mora/commons-catalog.json.
 
-## Implemented in the Mora shell
+## Implemented in the native Mora shell
 
-- Open Mora Commons from the system application grid.
+- Open Mora Commons from the native launcher or system navigation.
 - Search all fifteen catalogue entries by name, description, capability or keyword.
 - Filter entries by four task-oriented categories.
-- Open an information panel with the purpose, feature list and maturity notice.
-- Save and remove favourites in the current browser profile.
-- Use the same Mora theme, keyboard focus, responsive grid and reduced-motion behavior as the rest of the shell.
+- Select an entry to view its description and product maturity boundary.
+- Use the shared Duck black, white and yellow visual system.
 
-The catalogue and favourites are local to the browser profile. No account, cloud sync, background telemetry or gender-based personalization is introduced.
+The catalogue is packaged JSON data. Favourites, per-app persistent workspaces and cross-device synchronization are not implemented in the current native shell.
 
 ## Product maturity and boundaries
 
-The **Mora Commons interface and catalogue interactions** are implemented in the browser shell.
+The **Mora Commons interface and catalogue interactions** are implemented in the native Mora shell.
 
 The **fifteen application products** remain at specified maturity. Their cards are product records, not installed packages or executable application windows. No app-specific native service, persistent domain database, device driver, location engine, training sensor integration, bank connection or OS-level scheduler is claimed by this catalogue.
 

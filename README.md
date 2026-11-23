@@ -4,7 +4,7 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial native catalogue views, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
 The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
 
@@ -13,23 +13,23 @@ The separate DAK foundational package proposal contains the existing 15 system a
 DuckOS keeps the four specialist Ivan-VHS projects as independent, commit-pinned Git submodules under `projects/`: [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [Reaper](https://github.com/Ivan-VHS/Reaper), [OPlague](https://github.com/Ivan-VHS/OPlague) and [VentuSample](https://github.com/Ivan-VHS/VentuSample). The checked-in registry records their source pins, licenses, roles and integration boundaries.
 
 Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. Reaper is the explicit exception for user-approved source checking and Studio launch through the [native Reaper workbench](docs/REAPER_INTEGRATION.md); this does not grant kernel or device privileges. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
-## Mora desktop
+## Mora native desktop
 
-**Start here:** [Mora desktop shell](mora/index.html).
+**Start here:** the native Mora desktop is launched with:
 
-Mora uses the single DuckOS black/white/yellow visual profile: near-black surfaces, white content and a shared duck-yellow accent, with restrained vertical folds around a deep radial centre. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+```sh
+duckos mora gui
+# or
+duckos-mora
+```
 
-The system tools are:
+Mora is now a native user-space desktop application built with PySide6 / Qt 6 Widgets. It does not load HTML, browser documents, browser JavaScript, a WebView, a service worker or an embedded browser runtime. The application registry and design tokens remain versioned JSON data and are packaged with the Python module.
 
-- **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
-- **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
-- **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
-- **Bridge:** local PE/ELF inspection in Mora; the native DuckBridge CLI discovers compatibility runtimes and prepares reviewable launch plans. It still does not launch targets.
-- **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
-- **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
-- **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
+The native shell provides the application launcher, search and category filtering, local preferences, a bounded intent preview, profile-only permission settings, settings backup and restore, local SHA-256 calculation, read-only PE/ELF inspection, Mora Commons browsing and entry points to Duck Desktop and Reaper Studio.
 
-The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
+The native window is not yet the DuckOS compositor, boot shell, window manager or system service manager. It runs as a normal user-space process on the host operating system. Profile controls do not change kernel scheduling, device permissions, drivers, power limits or system services. Application catalogue entries remain distinct from shipped native services; each module's maturity is shown in its panel.
+
+The canonical black/white/yellow tokens remain in [Mora Design System](MORA_DESIGN_SYSTEM.md) and [mora/theme.json](mora/theme.json). The earlier browser shell and single-file prototype have been removed rather than retained as an alternate runtime.
 
 ## Native Reaper workbench
 
@@ -45,11 +45,11 @@ duckos reaper check ./examples/program.rpr
 duckos reaper typecheck ./examples/program.rpr
 ```
 
-The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+Reaper Studio is also available directly from the native Mora launcher and through `duckos reaper studio`. Native launch is handled by the DuckOS user-space integration. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
 ## Visual system and offline support
 
-The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The service worker is scoped to the Mora directory, caches only Mora shell assets and removes only older caches named with the `mora-shell-` prefix.
+The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The application registry and visual tokens are packaged as JSON resources; no web cache or browser runtime is part of the native application.
 
 ## Hardware inventory and driver audit
 
@@ -63,15 +63,15 @@ The versioned [hardware inventory contract](schemas/hardware-inventory.v1.schema
 
 ## Run and validate
 
-Open **mora/index.html** in a modern browser. The shell has no external runtime dependencies. A secure browser context may be needed for Web Crypto file hashing.
-
-Run the JavaScript contract tests with Node.js 18 or newer:
+Install and launch the native desktop (Python must include Tk support):
 
 ```sh
-npm test
+python -m pip install '.[native-ui]'
+duckos mora gui
+# or: duckos-mora
 ```
 
-The existing Python validation remains available:
+Run the Python validation suite:
 
 ```sh
 python -m pip install jsonschema
@@ -79,7 +79,30 @@ python -m unittest discover -s tests -v
 python tools/validate_app_catalog.py
 ```
 
-The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+The tests cover the native Qt user-space shell and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+
+
+### Optional native UI toolkits
+
+The primary desktop is PySide6. Install only the optional profiles that are needed:
+
+```sh
+python -m pip install '.[native-ui,terminal-ui,plots]'
+duckos mora tui
+duckos mora plot
+
+python -m pip install '.[gpu-tools]'
+duckos mora gpu
+
+duckos mora scene
+
+# Platform-only extras when needed:
+python -m pip install '.[windows-native]'  # Windows
+python -m pip install '.[macos-native]'    # macOS
+duckos mora bridges
+```
+
+The complete 66-toolkit evaluation is recorded in [GUI framework architecture](docs/GUI_FRAMEWORK_ARCHITECTURE.md). The list is a compatibility matrix, not a bundle of mandatory dependencies. Textual, Dear PyGui, PyQtGraph and Qt Quick have separate entry points; web and WebView runtimes remain excluded.
 
 ## Release packaging and deployment planning
 
@@ -91,21 +114,21 @@ See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce
 
 The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
 
-| Area | Current Mora shell | Native DuckOS work still required |
+| Area | Current native Mora shell | Native DuckOS work still required |
 |---|---|---|
 | Intent UI and approvals | Limited allowlisted local actions with review | privileged action broker, audit and rollback |
 | Local models and AI-native scheduling | Not connected | local inference runtime, NPU discovery and kernel scheduler |
 | Immutable atomic updates | Local settings snapshot only | signed images, A/B slots, boot verification and recovery |
 | Sandboxing and zero trust | Preferences only | per-process isolation, capability checks and device broker |
 | Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
-| Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
+| Adaptive workspace | PySide6 Qt Widgets launcher, search, category filters and reduced-motion preference | native compositor, display migration, virtual workspaces and XR runtime |
 | Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
 | Windows/Linux compatibility | PE32/PE32+ header, section and import inspection; prefix scaffolding and CLI diagnostics | native executable loader, Win32/NT APIs, graphics/audio translation and launcher integration |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
 | Hardware inventory | Read-only PCI/USB (Linux) and PnP (Windows) snapshot | PCI/USB/ACPI enumeration in kernel, signed driver installation and device recovery |
 
-No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
+No Mora user-space control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
 
 ## DuckOS Extended Terminal
 
@@ -119,7 +142,7 @@ duckos terminal run "bridge runtimes"
 
 ## Native Duck Desktop optimizer
 
-The native user-space maintenance utility complements the Mora browser shell. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
+The native user-space maintenance utility complements the Mora launcher. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
 
 ~~~sh
 duckos desktop audit
@@ -143,6 +166,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
+- [Native GUI framework architecture and 66-toolkit review](docs/GUI_FRAMEWORK_ARCHITECTURE.md)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
 

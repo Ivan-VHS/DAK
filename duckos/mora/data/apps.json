@@ -1,0 +1,319 @@
+{
+  "schema_version": "1.4.0",
+  "shell": {
+    "id": "ivan-vhs.duckos.mora",
+    "name": "Mora",
+    "data_policy": "fictional_demo_data"
+  },
+  "built_in_apps": [
+    {
+      "id": "cockos",
+      "name": "Cockos",
+      "category": "audio",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "kavun",
+      "name": "Kavun",
+      "category": "photos",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "kabon",
+      "name": "Ka-bon",
+      "category": "finance",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "gloverty",
+      "name": "Gloverty",
+      "category": "automation",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "po",
+      "name": "Po",
+      "category": "compass",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "illidia",
+      "name": "Illidia",
+      "category": "games",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "unify",
+      "name": "Unify",
+      "category": "devices",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "sestem",
+      "name": "Sestem",
+      "category": "system",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "setupup",
+      "name": "SetupUP",
+      "category": "system",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "orriganize",
+      "name": "Orriganize",
+      "category": "productivity",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "abriganza",
+      "name": "Abriganza",
+      "category": "files",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "olaab",
+      "name": "Olaab",
+      "category": "multimedia",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "concrete-thump",
+      "name": "Concrete Thump",
+      "category": "audio",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "seu-beu",
+      "name": "Seu-Beu",
+      "category": "privacy",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "love-il",
+      "name": "Love-IL",
+      "category": "journal",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "poi",
+      "name": "Poi",
+      "category": "notes",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "poi-2",
+      "name": "Poi-2",
+      "category": "knowledge",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "po-2",
+      "name": "Po-2",
+      "category": "navigation",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "gamecharager",
+      "name": "GameCharager",
+      "category": "gaming",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "exedotexe",
+      "name": "EXEdotEXE",
+      "category": "compatibility",
+      "maturity": "partial_local_workspace",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "mora-ai",
+      "name": "Mora AI",
+      "category": "system",
+      "maturity": "partial_local_rules",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "security",
+      "name": "Sentinel",
+      "category": "security",
+      "maturity": "shell_policy_only",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "updates",
+      "name": "Restore",
+      "category": "recovery",
+      "maturity": "shell_snapshot_only",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "runtime",
+      "name": "Bridge",
+      "category": "compatibility",
+      "maturity": "partial_pe_cli_and_prefix_foundation",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "workspace",
+      "name": "Control",
+      "category": "workspace",
+      "maturity": "shell_preferences",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "provenance",
+      "name": "Proof",
+      "category": "provenance",
+      "maturity": "sha256_only",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "mora-boost",
+      "name": "Mora Boost",
+      "category": "gaming",
+      "maturity": "external_native_workbench",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "desktop",
+      "name": "Duck Desktop",
+      "category": "workspace",
+      "maturity": "partial_native_userland_tool",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    },
+    {
+      "id": "mora-commons",
+      "name": "Mora Commons",
+      "category": "application_catalogue",
+      "maturity": "implemented_local_catalog",
+      "runtime": "pyside6",
+      "scope": "user-space"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "kabon.expenses_today",
+      "app_id": "kabon",
+      "kind": "expenses_summary"
+    },
+    {
+      "id": "unify.device_status",
+      "app_id": "unify",
+      "kind": "device_status"
+    }
+  ],
+  "integration": {
+    "manifest_schema": "mora/app-manifest.schema.json",
+    "external_launch": "specified_not_enabled",
+    "execution_rule": "A future native launcher must resolve trusted installed paths and require explicit operator approval. Never execute manifest commands through a shell."
+  },
+  "system_services": [
+    {
+      "id": "intent-planner",
+      "maturity": "partial",
+      "scope": "whitelisted local actions; approval required"
+    },
+    {
+      "id": "capability-broker",
+      "maturity": "specified",
+      "scope": "UI preferences only; no process enforcement"
+    },
+    {
+      "id": "atomic-updater",
+      "maturity": "planned",
+      "scope": "no native updater or OS images connected"
+    },
+    {
+      "id": "compat-runtime",
+      "maturity": "partial",
+      "scope": "PE32/PE32+ headers, sections and import DLL inspection; isolated prefix scaffold and CLI diagnostics; no native process execution"
+    },
+    {
+      "id": "provenance-verifier",
+      "maturity": "partial",
+      "scope": "local SHA-256 only; no C2PA validation"
+    },
+    {
+      "id": "resource-scheduler",
+      "maturity": "planned",
+      "scope": "no kernel or device scheduling integration"
+    },
+    {
+      "id": "pwa-shell",
+      "maturity": "partial",
+      "scope": "scoped offline cache for Mora web assets; no OS installation"
+    },
+    {
+      "id": "theme-adapter",
+      "maturity": "implemented",
+      "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "extension-local-store",
+      "maturity": "partial",
+      "scope": "Namespaced local browser collections for the extended Mora panels; no system VFS or cross-device synchronization."
+    },
+    {
+      "id": "browser-file-inspector",
+      "maturity": "partial",
+      "scope": "User-selected archive metadata and PE/ELF inspection in the browser; no extraction or executable launch."
+    },
+    {
+      "id": "rhythm-profile-store",
+      "maturity": "partial",
+      "scope": "Local BPM and swing profiles only; no audio engine or device routing."
+    },
+    {
+      "id": "setup-preferences",
+      "maturity": "partial",
+      "scope": "Mora first-run preferences only; no OS installer or boot configuration."
+    },
+    {
+      "id": "desktop-optimizer",
+      "maturity": "partial_native_userland",
+      "scope": "read-only local desktop/process audit, reversible current-user startup controls, confirmed move-to-Inbox operation and native Tk maintenance window; no compositor or kernel enforcement"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
   "operating_system": "DuckOS",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
+  "note": "Product specification only. The 20 application entries define intended product scope; Mora is a native Tk user-space shell and does not prove native DuckOS services or boot-image inclusion.",
   "applications": [
     {
       "id": "cockos",
@@ -22,11 +22,7 @@
         "Per-application control depends on host audio-session support",
         "Not specified as a professional DAW or hidden recorder"
       ],
-      "naming_review": "required_before_public_distribution",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "prototype/mora-home.html"
-      ]
+      "naming_review": "required_before_public_distribution"
     },
     {
       "id": "kavun",
@@ -47,10 +43,6 @@
         "Slices are logical groups and need not duplicate source files",
         "Location and image indexing are user-controllable",
         "Private media metadata requires privacy controls"
-      ],
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "prototype/mora-home.html"
       ]
     },
     {
@@ -70,10 +62,6 @@
         "Extracted values require user confirmation",
         "No payment execution or automatic transfers are specified",
         "Financial and family data require explicit access controls"
-      ],
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "prototype/mora-home.html"
       ]
     },
     {
@@ -92,10 +80,6 @@
         "Rules expose triggers actions scope and enabled state",
         "Privileged or destructive actions require permission and confirmation",
         "Loop prevention and failure behavior are required"
-      ],
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "prototype/mora-home.html"
       ]
     },
     {
@@ -113,10 +97,6 @@
         "Tracker protection is not anonymity",
         "Site permissions and private browsing state must be understandable",
         "Commands must be distinguishable from URLs and searches"
-      ],
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "prototype/mora-home.html"
       ]
     },
     {
@@ -136,10 +116,6 @@
         "Cloud saves require a compatible provider and conflict handling",
         "Clip capture and sharing require user control",
         "Do Not Disturb must be reversible"
-      ],
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "prototype/mora-home.html"
       ]
     },
     {
@@ -159,10 +135,6 @@
         "Pairing must be authenticated and revocable",
         "Sharing permissions are configurable per data type",
         "Lost-device discovery is not guaranteed live location tracking"
-      ],
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "prototype/mora-home.html"
       ]
     },
     {
@@ -179,12 +151,7 @@
         "Reports documented shell and project states only",
         "Does not read native hardware sensors or claim kernel health"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "setupup",
@@ -197,15 +164,10 @@
         "setup_completion_marker"
       ],
       "boundaries": [
-        "Changes Mora browser-profile preferences only",
+        "Changes Mora user-space preferences only",
         "Not an OS installer, disk partitioner or bootloader configurator"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "orriganize",
@@ -218,15 +180,10 @@
         "manual_item_removal"
       ],
       "boundaries": [
-        "Entries remain in the current browser profile",
+        "Entries remain in the current Mora user-space data",
         "No OS scheduler, account sync or shared collaboration"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "abriganza",
@@ -242,12 +199,7 @@
         "Reads selected file metadata only",
         "Does not extract archives, execute embedded files or scan for malware"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "olaab",
@@ -263,12 +215,7 @@
         "Stores text references and labels only",
         "Does not duplicate source media or provide cloud media sync"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "concrete-thump",
@@ -281,15 +228,10 @@
         "local_rhythm_profiles"
       ],
       "boundaries": [
-        "Saves rhythm metadata in Mora browser storage",
+        "Saves rhythm metadata in Mora Mora user-space data",
         "Does not synthesize, record or route audio"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "seu-beu",
@@ -305,12 +247,7 @@
         "Provides a user-operated review checklist only",
         "Does not encrypt, authenticate recipients or enforce OS permissions"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "love-il",
@@ -323,15 +260,10 @@
         "profile_scoped_storage"
       ],
       "boundaries": [
-        "Journal text stays in the current browser profile",
+        "Journal text stays in the current Mora user-space data",
         "No cloud sync, medical advice or secure-vault claim"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "poi",
@@ -347,12 +279,7 @@
         "Stores short text entries locally",
         "No system-wide search or global capture shortcut"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "poi-2",
@@ -365,15 +292,10 @@
         "manual_card_removal"
       ],
       "boundaries": [
-        "Stores text cards in the Mora browser profile",
+        "Stores text cards in the Mora Mora user-space data",
         "No semantic index, external knowledge source or cloud collaboration"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "po-2",
@@ -389,12 +311,7 @@
         "User enters stop names manually",
         "No GPS, live maps, navigation or location tracking"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "gamecharager",
@@ -410,12 +327,7 @@
         "Game entries and diagnostics remain local",
         "Does not launch executables, install drivers or manage anti-cheat"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     },
     {
       "id": "exedotexe",
@@ -428,15 +340,10 @@
         "bounded_user_selected_file"
       ],
       "boundaries": [
-        "Inspects a user-selected file in the browser",
+        "Inspects a user-selected file in the native user-space application",
         "Not an antivirus, publisher-signature validator or EXE runtime"
       ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
+      "naming_review": "not_assessed"
     }
   ],
   "workflows": [
@@ -531,85 +438,6 @@
     "visible_result",
     "retention_and_privacy_policy"
   ],
-  "prototype": {
-    "path": "prototype/mora-home.html",
-    "maturity_status": "partial",
-    "runtime": "browser",
-    "storage": [
-      "localStorage",
-      "IndexedDB"
-    ],
-    "scope": "Interactive local prototype. It is not a native DuckOS system application or proof of integration with OS services.",
-    "app_boundaries": {
-      "cockos": [
-        "Microphone recording and local track import/mixdown are available where browser media APIs permit.",
-        "Per-application volume settings are stored as preferences and do not change OS audio sessions."
-      ],
-      "kavun": [
-        "Local media import, event slices, metadata search and non-destructive preview/export are available.",
-        "Image understanding and automatic location recognition are not connected."
-      ],
-      "ka-bon": [
-        "Local expense, receipt attachment, subscription and family-member records are available.",
-        "Receipt OCR, banking and cloud family sharing are not connected."
-      ],
-      "gloverty": [
-        "Rules can be created, enabled and manually run against supported local actions.",
-        "OS-wide scheduling, input gestures and global shortcuts are not connected."
-      ],
-      "po": [
-        "Tab records, external navigation and pasted-text reading view are available.",
-        "The network stack, browser-engine isolation and tracker blocking are not connected."
-      ],
-      "illidia": [
-        "Local game catalogue, progress, achievements and user-authorized screen clips are available.",
-        "Native executable launch, cloud saves and platform achievement providers are not connected."
-      ],
-      "unify": [
-        "Local clipboard APIs and manual JSON export/import for tabs, clips and selected settings are available.",
-        "Secure device pairing, live sync, phone notifications and lost-device discovery are not connected."
-      ],
-      "sestem": [
-        "Displays Mora shell state and documented subsystem maturity; does not collect native hardware telemetry."
-      ],
-      "setupup": [
-        "Stores theme selection and a completion marker in local browser preferences; no OS installation."
-      ],
-      "orriganize": [
-        "Stores up to 100 text entries per list in namespaced browser localStorage; no system scheduler."
-      ],
-      "abriganza": [
-        "Reads selected archive filename and size only; no archive extraction."
-      ],
-      "olaab": [
-        "Stores album and collection labels only; no media duplication or cloud indexing."
-      ],
-      "concrete-thump": [
-        "Stores bounded BPM and swing values as local metadata; no audio generation."
-      ],
-      "seu-beu": [
-        "Runs a manual sharing checklist; no encryption or identity verification."
-      ],
-      "love-il": [
-        "Stores text entries in the current browser profile; no cloud sync."
-      ],
-      "poi": [
-        "Stores quick text captures locally."
-      ],
-      "poi-2": [
-        "Stores simple text knowledge cards locally; no semantic search."
-      ],
-      "po-2": [
-        "Stores a manually ordered list of route stops; no GPS or map service."
-      ],
-      "gamecharager": [
-        "Stores game profile names and uses the read-only executable inspector; no process launch."
-      ],
-      "exedotexe": [
-        "Reuses local PE/ELF inspection and SHA-256; no executable launch or signature validation."
-      ]
-    }
-  },
   "interfaces": [
     {
       "id": "unify.transfer.v1",
@@ -618,7 +446,39 @@
       "schema": "schemas/unify.transfer.v1.schema.json",
       "max_package_bytes": 20971520,
       "max_clip_bytes": 12582912,
-      "scope": "Manual export/import of selected browser tabs, user-selected clips and selected local settings; not live device synchronization."
+      "scope": "Manual export/import of selected tab metadata, user-selected clips and selected local settings; not live device synchronization."
     }
-  ]
+  ],
+  "native_shell": {
+    "path": "duckos/mora/qt_ui.py",
+    "maturity_status": "implemented",
+    "runtime": "pyside6",
+    "storage": [
+      "versioned-packaged-json",
+      "atomic-per-user-preferences-file"
+    ],
+    "scope": "Native Tk user-space application running as a host process. It is not the DuckOS compositor, boot shell, window manager or kernel.",
+    "app_boundaries": {
+      "cockos": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "kavun": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "ka-bon": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "gloverty": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "po": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "illidia": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "unify": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "sestem": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "setupup": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "orriganize": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "abriganza": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "olaab": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "concrete-thump": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "seu-beu": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "love-il": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "poi": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "poi-2": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "po-2": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "gamecharager": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented.",
+      "exedotexe": "Native launcher catalogue entry only; dedicated application behavior and domain persistence are not yet implemented."
+    }
+  }
 }
