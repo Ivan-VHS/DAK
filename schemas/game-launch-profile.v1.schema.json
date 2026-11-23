@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ivan-vhs.github.io/DuckOS/schemas/game-launch-profile.v1.schema.json",
+  "title": "DuckOS Windows XP SP3 game launch profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "name", "executable", "runtime", "compatibility"],
+  "properties": {
+    "schema": {"const": "duckos.game-launch-profile.v1"},
+    "id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "executable": {"type": "string", "minLength": 1, "maxLength": 2048},
+    "working_directory": {"type": "string", "minLength": 1, "maxLength": 2048, "default": "."},
+    "arguments": {"type": "array", "maxItems": 256, "items": {"type": "string", "maxLength": 4096}},
+    "runtime": {
+      "type": "object", "additionalProperties": false, "required": ["backend"],
+      "properties": {
+        "backend": {"const": "wine"},
+        "executable": {"type": "string", "default": "wine"},
+        "prefix": {"type": ["string", "null"]}
+      }
+    },
+    "compatibility": {
+      "type": "object", "additionalProperties": false,
+      "required": ["windows_version", "service_pack"],
+      "properties": {
+        "windows_version": {"const": "windows-xp"},
+        "service_pack": {"const": 3},
+        "graphics": {"type": "array", "uniqueItems": true, "items": {"enum": ["directdraw", "direct3d7", "direct3d8", "direct3d9", "opengl", "glide"]}},
+        "audio": {"type": "array", "uniqueItems": true, "items": {"enum": ["directsound", "winmm", "eax", "openal"]}},
+        "input": {"type": "array", "uniqueItems": true, "items": {"enum": ["directinput", "xinput", "win32"]}},
+        "network": {"type": "array", "uniqueItems": true, "items": {"enum": ["tcp_ip", "directplay", "ipx_spx"]}},
+        "display": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "width": {"type": "integer", "minimum": 320, "maximum": 16384},
+            "height": {"type": "integer", "minimum": 200, "maximum": 16384},
+            "color_depth": {"enum": [8, 16, 24, 32]},
+            "refresh_rate_hz": {"type": "integer", "minimum": 30, "maximum": 360},
+            "windowed": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "environment": {
+      "type": "object", "propertyNames": {"enum": ["LANG", "LC_ALL", "LC_CTYPE", "TZ", "WINEDEBUG"]},
+      "additionalProperties": {"type": "string", "maxLength": 1024}
+    }
+  }
+}
