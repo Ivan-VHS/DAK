@@ -805,3 +805,63 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   :root[data-theme="amber"] .desktop-content {gap:26px}
   :root[data-theme="amber"] .dock-wrap {padding-bottom:14px}
 }
+
+
+
+/* Mora desktop shell: workspaces, command palette and Reaper task matrix. */
+.workspace-switcher { display:flex; align-items:center; gap:4px; padding:3px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(15,17,36,.28); }
+.workspace-tab { border:0; border-radius:8px; padding:6px 9px; color:rgba(255,250,246,.68); background:transparent; font:inherit; font-size:10px; cursor:pointer; transition:background .16s ease,color .16s ease; }
+.workspace-tab:hover { color:#fff; background:rgba(255,255,255,.1); }
+.workspace-tab.active { color:#241d18; background:linear-gradient(135deg,#f1d1a7,#e6aaa0); font-weight:750; }
+.shell-command-button { width:28px; height:28px; display:grid; place-items:center; font-size:18px; border-radius:9px; }
+.shell-status-note { color:rgba(255,250,246,.48); font-size:9px; white-space:nowrap; }
+.app-window[hidden] { display:none !important; }
+.app-window.is-maximized { border-radius:14px; }
+.window-controls { display:flex; align-items:center; gap:5px; }
+.window-tool { width:27px; height:27px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.14); border-radius:9px; color:rgba(255,255,255,.72); background:rgba(255,255,255,.07); cursor:pointer; font:inherit; font-size:13px; }
+.window-tool:hover { color:#fff; background:rgba(255,255,255,.17); }
+
+.command-overlay { position:fixed; inset:0; z-index:60; display:flex; align-items:flex-start; justify-content:center; padding:min(16vh,130px) 18px 24px; background:rgba(8,9,20,.56); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+.command-overlay[hidden] { display:none; }
+.command-palette { width:min(620px,100%); max-height:min(72vh,680px); overflow:hidden; padding:15px; border:1px solid rgba(255,255,255,.22); border-radius:20px; color:#fff9f2; background:rgba(31,28,45,.96); box-shadow:0 28px 100px rgba(0,0,0,.52); }
+.command-palette-heading { display:flex; align-items:center; justify-content:space-between; margin:0 2px 12px; color:rgba(255,249,242,.55); font-size:9px; font-weight:750; letter-spacing:.15em; }
+.command-palette-heading kbd { padding:3px 7px; border:1px solid rgba(255,255,255,.18); border-radius:6px; font:10px "JetBrains Mono",monospace; }
+.command-input-wrap { display:flex; align-items:center; gap:10px; padding:0 13px; border:1px solid rgba(255,255,255,.18); border-radius:13px; background:rgba(255,255,255,.08); color:rgba(255,255,255,.64); }
+.command-input-wrap > span { font-size:22px; }
+.command-input { width:100%; min-width:0; padding:13px 0; border:0; outline:0; color:#fff; background:transparent; font:inherit; font-size:13px; }
+.command-input::placeholder { color:rgba(255,255,255,.38); }
+.command-hint { margin:10px 2px; color:rgba(255,255,255,.42); font-size:9px; }
+.command-results { display:grid; gap:5px; max-height:min(42vh,400px); overflow:auto; }
+.command-result { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:10px 12px; border:1px solid transparent; border-radius:11px; color:rgba(255,255,255,.9); background:transparent; text-align:left; cursor:pointer; }
+.command-result:hover,.command-result:focus-visible { outline:0; border-color:rgba(230,185,161,.34); background:rgba(230,185,161,.14); }
+.command-result strong { font-size:12px; font-weight:650; }
+.command-result span { color:rgba(255,255,255,.46); font-size:10px; }
+.command-empty { padding:16px 12px; color:rgba(255,255,255,.5); font-size:12px; }
+
+.shell-directions { margin-top:22px; padding-top:18px; border-top:1px solid rgba(255,255,255,.12); }
+.shell-directions-heading h3 { margin:0 0 6px; font-size:17px; font-weight:600; letter-spacing:-.025em; }
+.shell-directions-note { margin:0; color:rgba(255,255,255,.52); font-size:10px; line-height:1.55; }
+.shell-matrix-tools { display:grid; gap:9px; margin:14px 0 11px; }
+.shell-matrix-search { width:100%; padding:9px 11px; border:1px solid rgba(255,255,255,.16); border-radius:10px; outline:none; color:#fff; background:rgba(255,255,255,.07); font:inherit; font-size:11px; }
+.shell-matrix-search:focus { border-color:rgba(230,185,161,.72); }
+.shell-matrix-search::placeholder { color:rgba(255,255,255,.38); }
+.shell-matrix-filters { display:flex; flex-wrap:wrap; gap:5px; }
+.shell-matrix-filter { padding:5px 8px; border:1px solid rgba(255,255,255,.14); border-radius:999px; color:rgba(255,255,255,.65); background:rgba(255,255,255,.05); cursor:pointer; font:inherit; font-size:9px; }
+.shell-matrix-filter.active { color:#231b16; background:#e9c49f; border-color:#e9c49f; font-weight:750; }
+.shell-matrix-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.shell-matrix-item { display:grid; gap:7px; min-width:0; padding:9px; border:1px solid rgba(255,255,255,.11); border-radius:11px; color:rgba(255,255,255,.9); background:rgba(255,255,255,.045); text-align:left; cursor:pointer; }
+.shell-matrix-item:hover { border-color:rgba(230,185,161,.48); }
+.shell-matrix-item.selected { border-color:rgba(230,185,161,.72); background:rgba(230,185,161,.12); }
+.shell-matrix-item > strong { font-size:10px; font-weight:600; line-height:1.4; }
+.shell-matrix-top { display:flex; align-items:center; justify-content:space-between; gap:5px; }
+.shell-matrix-number { color:rgba(255,255,255,.5); font:9px "JetBrains Mono",monospace; }
+.maturity-pill { display:inline-flex; align-items:center; width:fit-content; padding:3px 6px; border:1px solid rgba(255,255,255,.12); border-radius:999px; color:rgba(255,255,255,.62); background:rgba(255,255,255,.07); font-size:8px; white-space:nowrap; }
+.maturity-partial { color:#f1d2a3; background:rgba(194,145,80,.14); }
+.maturity-specified { color:#aac8ec; background:rgba(100,145,195,.14); }
+.maturity-planned { color:#c3b6c9; background:rgba(143,116,154,.14); }
+.shell-matrix-inspector { display:grid; gap:7px; margin-top:10px; padding:11px 12px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(12,13,26,.25); }
+.shell-matrix-inspector strong { font-size:11px; line-height:1.5; }
+.shell-matrix-inspector p { margin:0; color:rgba(255,255,255,.58); font-size:10px; line-height:1.6; }
+.shell-matrix-empty { grid-column:1/-1; color:rgba(255,255,255,.48); font-size:11px; }
+@media (max-width:940px) { .workspace-switcher { order:3; width:100%; justify-content:center; } .shell-status-note { display:none; } }
+@media (max-width:600px) { .workspace-tab { padding:6px 7px; font-size:9px; } .shell-matrix-list { grid-template-columns:1fr; } .command-overlay { padding-top:9vh; } }

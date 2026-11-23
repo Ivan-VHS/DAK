@@ -1,0 +1,117 @@
+# DuckOS desktop-session and command policy.
+# Shell commands are parsed into argument arrays before policy evaluation.
+# A command is never a shell string and cannot reach a host command interpreter.
+
+import "../security/capabilities.rpr" as capabilities
+
+export craft palette_valid(palette) {
+    yield palette == "amber" or palette == "dark" or palette == "light" or palette == "pond" or palette == "drake"
+}
+
+export craft workspace_valid(workspace) {
+    when size(workspace) != 3 {
+        yield false
+    }
+    yield workspace[0] != "" and workspace[1] != "" and workspace[2] >= 0
+}
+
+export craft workspace_switch(current_id, target_id, workspaces) {
+    when current_id == "" or target_id == "" {
+        yield ["invalid", current_id]
+    }
+    each workspace in workspaces {
+        when workspace_valid(workspace) and workspace[0] == target_id {
+            yield ["switched", target_id]
+        }
+    }
+    yield ["unknown-workspace", current_id]
+}
+
+# Session shape: [session_id, workspace_id, palette, reduced_motion, focus_mode, locked, open_window_count].
+export craft session_valid(session, workspaces, max_windows) {
+    when size(session) != 7 or max_windows <= 0 {
+        yield false
+    }
+    when session[0] == "" or session[1] == "" or not palette_valid(session[2]) {
+        yield false
+    }
+    when session[6] < 0 or session[6] > max_windows {
+        yield false
+    }
+    vary workspace_found := false
+    each workspace in workspaces {
+        when workspace_valid(workspace) and workspace[0] == session[1] {
+            change workspace_found := true
+        }
+    }
+    yield workspace_found
+}
+
+export craft session_transition_valid(current, next) {
+    when current == "starting" and (next == "running" or next == "failed") {
+        yield true
+    }
+    when current == "running" and (next == "suspended" or next == "locked" or next == "stopping" or next == "failed") {
+        yield true
+    }
+    when current == "suspended" and (next == "running" or next == "stopping" or next == "failed") {
+        yield true
+    }
+    when current == "locked" and (next == "running" or next == "stopping" or next == "failed") {
+        yield true
+    }
+    when current == "stopping" and (next == "stopped" or next == "failed") {
+        yield true
+    }
+    yield false
+}
+
+# App shape: [app_id, display_name, category, required_capabilities].
+export craft app_launch_allowed(app, granted_capabilities, trust_state) {
+    when size(app) != 4 or app[0] == "" or app[1] == "" {
+        yield false
+    }
+    when trust_state != "validated" {
+        yield false
+    }
+    yield capabilities["child_is_subset"](granted_capabilities, app[3])
+}
+
+# Allowed commands: help, status, apps, close, open <app>, workspace <id>,
+# theme <palette>, focus on|off. No arbitrary executable or shell arguments.
+export craft command_policy(command, known_apps, known_workspaces) {
+    when size(command) == 1 {
+        when command[0] == "help" or command[0] == "status" or command[0] == "apps" or command[0] == "close" {
+            yield "allowed"
+        }
+    }
+
+    when size(command) == 2 {
+        when command[0] == "open" {
+            each app_id in known_apps {
+                when app_id == command[1] {
+                    yield "allowed"
+                }
+            }
+            yield "unknown-app"
+        }
+        when command[0] == "workspace" {
+            each workspace_id in known_workspaces {
+                when workspace_id == command[1] {
+                    yield "allowed"
+                }
+            }
+            yield "unknown-workspace"
+        }
+        when command[0] == "theme" {
+            when palette_valid(command[1]) {
+                yield "allowed"
+            }
+            yield "invalid-theme"
+        }
+        when command[0] == "focus" and (command[1] == "on" or command[1] == "off") {
+            yield "allowed"
+        }
+    }
+    yield "denied"
+}

@@ -15,10 +15,17 @@ from .compat.bridge import (
     detect_runtimes as detect_bridge_runtimes,
     inspect_binary as inspect_bridge_binary,
 )
+from .compat.illidia import (
+    add_game as illidia_add_game,
+    list_games as illidia_list_games,
+    launch_game as illidia_launch_game,
+    remove_game as illidia_remove_game,
+)
 from .hardware_inventory import collect_host_inventory
 from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
+from .shell import host_status as shell_host_status, read_app_catalog, readiness_report
 
 
 def _load(path: Path) -> Any:
@@ -101,10 +108,67 @@ def main(argv: list[str] | None = None) -> int:
     )
     bridge_plan.add_argument("--bottle", help="name of an existing CrossOver or Bottles bottle")
     bridge_plan.add_argument("--compat-data", type=Path, help="Proton compatibility-data directory")
+    bridge_plan.add_argument("--wine-prefix", type=Path, help="existing or new per-application Wine prefix")
     bridge_plan.add_argument(
         "--arg", dest="arguments", action="append", default=[],
         help="append one target argument; repeat to add more than one",
     )
+
+    illidia = commands.add_parser(
+        "illidia", help="manage and launch games through DuckBridge"
+    )
+    illidia_commands = illidia.add_subparsers(dest="illidia_command", required=True)
+
+    illidia_list = illidia_commands.add_parser("list", help="list registered local games")
+    illidia_list.add_argument("--library", type=Path, help="alternate library JSON path")
+
+    illidia_add = illidia_commands.add_parser("add", help="register an existing PE or ELF game executable")
+    illidia_add.add_argument("file", type=Path)
+    illidia_add.add_argument("--name", help="display name for the game")
+    illidia_add.add_argument("--id", dest="game_id", help="stable lowercase game identifier")
+    illidia_add.add_argument(
+        "--backend", choices=("auto", "wine", "proton", "crossover", "bottles"), default="auto"
+    )
+    illidia_add.add_argument("--bottle", help="existing CrossOver or Bottles bottle name")
+    illidia_add.add_argument("--library", type=Path, help="alternate library JSON path")
+    illidia_add.add_argument(
+        "--arg", dest="arguments", action="append", default=[],
+        help="save one target argument; repeat to add more than one",
+    )
+
+    illidia_remove = illidia_commands.add_parser("remove", help="remove a game from the library")
+    illidia_remove.add_argument("game_id")
+    illidia_remove.add_argument("--library", type=Path, help="alternate library JSON path")
+
+    illidia_launch = illidia_commands.add_parser("launch", help="start a registered game")
+    illidia_launch.add_argument("game_id")
+    illidia_launch.add_argument(
+        "--backend", choices=("auto", "wine", "proton", "crossover", "bottles"),
+        help="override the saved compatibility backend",
+    )
+    illidia_launch.add_argument("--bottle", help="override the saved CrossOver or Bottles bottle")
+    illidia_launch.add_argument("--library", type=Path, help="alternate library JSON path")
+    illidia_launch.add_argument("--compatibility-root", type=Path, help="per-game Wine/Proton data directory")
+    illidia_launch.add_argument(
+        "--arg", dest="arguments", action="append", default=[],
+        help="append one target argument; repeat to add more than one",
+    )
+    illidia_launch.add_argument("--gamemode", action="store_true", help="wrap the launch with GameMode")
+    illidia_launch.add_argument("--mangohud", action="store_true", help="show MangoHud telemetry")
+    illidia_launch.add_argument("--wined3d", action="store_true", help="use Proton's WineD3D fallback instead of DXVK/VKD3D")
+    illidia_launch.add_argument("--no-esync", action="store_true", help="disable Proton esync")
+    illidia_launch.add_argument("--no-fsync", action="store_true", help="disable Proton fsync")
+    illidia_launch.add_argument("--wait", action="store_true", help="wait for the game and return its exit code")
+
+    shell = commands.add_parser(
+        "shell", help="inspect the Mora desktop shell and current host without changing the system"
+    )
+    shell_commands = shell.add_subparsers(dest="shell_command", required=True)
+    shell_commands.add_parser("status", help="show real host information and native desktop boundaries")
+    shell_commands.add_parser("apps", help="list the local Mora application catalogue")
+    shell_verify = shell_commands.add_parser("verify", help="check shell source wiring and Reaper runtime availability")
+    shell_verify.add_argument("--root", type=Path, help="DuckOS project root")
+    shell_verify.add_argument("--catalogue", type=Path, help="alternate Mora app catalogue JSON")
 
     try:
         args = parser.parse_args(argv)
@@ -151,8 +215,34 @@ def main(argv: list[str] | None = None) -> int:
                 backend=args.backend,
                 bottle=args.bottle,
                 compat_data=args.compat_data,
+                wine_prefix=args.wine_prefix,
                 arguments=args.arguments,
             )
+        elif args.command == "illidia" and args.illidia_command == "list":
+            result = illidia_list_games(library_path=args.library)
+        elif args.command == "illidia" and args.illidia_command == "add":
+            result = illidia_add_game(
+                args.file, name=args.name, game_id=args.game_id,
+                backend=args.backend, bottle=args.bottle,
+                arguments=args.arguments, library_path=args.library,
+            )
+        elif args.command == "illidia" and args.illidia_command == "remove":
+            result = illidia_remove_game(args.game_id, library_path=args.library)
+        elif args.command == "illidia" and args.illidia_command == "launch":
+            result = illidia_launch_game(
+                args.game_id, backend=args.backend, bottle=args.bottle,
+                arguments=args.arguments, library_path=args.library,
+                compatibility_root=args.compatibility_root,
+                use_gamemode=args.gamemode, use_mangohud=args.mangohud,
+                use_wined3d=args.wined3d, disable_esync=args.no_esync,
+                disable_fsync=args.no_fsync, wait=args.wait,
+            )
+        elif args.command == "shell" and args.shell_command == "status":
+            result = shell_host_status()
+        elif args.command == "shell" and args.shell_command == "apps":
+            result = read_app_catalog()
+        elif args.command == "shell" and args.shell_command == "verify":
+            result = readiness_report(project_root=args.root, catalogue_path=args.catalogue)
         else:
             result = compatibility_status()
         _print_result(result)

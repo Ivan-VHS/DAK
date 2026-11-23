@@ -1,0 +1,98 @@
+# DuckOS desktop window-management policy.
+# Window shape: [id, app_id, x, y, width, height, z_index, state, workspace_id].
+# This module defines deterministic policy; it does not draw or move windows.
+
+export craft window_valid(window, screen_width, screen_height) {
+    when size(window) != 9 {
+        yield false
+    }
+    when window[0] == "" or window[1] == "" or window[8] == "" {
+        yield false
+    }
+    when screen_width <= 0 or screen_height <= 0 {
+        yield false
+    }
+    when window[2] < 0 or window[3] < 0 {
+        yield false
+    }
+    when window[4] <= 0 or window[5] <= 0 or window[6] < 0 {
+        yield false
+    }
+    when window[4] > screen_width or window[5] > screen_height {
+        yield false
+    }
+    when window[2] + window[4] > screen_width {
+        yield false
+    }
+    when window[3] + window[5] > screen_height {
+        yield false
+    }
+    when window[7] != "normal" and window[7] != "minimized" and window[7] != "maximized" and window[7] != "closed" {
+        yield false
+    }
+    yield true
+}
+
+export craft transition_valid(current, next) {
+    when current == "normal" and (next == "minimized" or next == "maximized" or next == "closed") {
+        yield true
+    }
+    when current == "minimized" and (next == "normal" or next == "closed") {
+        yield true
+    }
+    when current == "maximized" and (next == "normal" or next == "minimized" or next == "closed") {
+        yield true
+    }
+    yield false
+}
+
+export craft visible_on_workspace(window, workspace_id) {
+    when size(window) != 9 or workspace_id == "" {
+        yield false
+    }
+    yield window[8] == workspace_id and window[7] != "minimized" and window[7] != "closed"
+}
+
+export craft focus_candidate(windows, target_id, workspace_id) {
+    when target_id == "" or workspace_id == "" {
+        yield ["invalid", "", 0]
+    }
+
+    each window in windows {
+        when size(window) == 9 {
+            when window[0] == target_id and visible_on_workspace(window, workspace_id) {
+                yield ["focused", target_id, window[6]]
+            }
+        }
+    }
+    yield ["not-found", "", 0]
+}
+
+export craft next_z_order(windows) {
+    vary highest := 0
+    each window in windows {
+        when size(window) == 9 and window[7] != "closed" {
+            when window[6] > highest {
+                change highest := window[6]
+            }
+        }
+    }
+    yield highest + 1
+}
+
+export craft geometry_state(x, y, width, height, screen_width, screen_height) {
+    when width <= 0 or height <= 0 or screen_width <= 0 or screen_height <= 0 {
+        yield "invalid"
+    }
+    when width > screen_width or height > screen_height {
+        yield "oversized"
+    }
+    when x < 0 or y < 0 or x + width > screen_width or y + height > screen_height {
+        yield "outside"
+    }
+    yield "valid"
+}
+
+export craft window_limit_valid(open_count, capacity) {
+    yield open_count >= 0 and capacity > 0 and open_count <= capacity
+}

@@ -12,6 +12,7 @@ from duckos.cli import main
 from duckos.compat.bridge import (
     DuckBridgeError, build_launch_plan, detect_runtimes, inspect_binary,
 )
+from duckos.compat.illidia import add_game, launch_game, list_games, remove_game
 
 
 def make_pe64(path: Path) -> Path:
@@ -283,6 +284,88 @@ class DuckBridgeTests(unittest.TestCase):
             )
         self.assertEqual(plan["status"], "unsupported")
         self.assertIn("PE machine type", plan["warnings"][0])
+
+    def test_wine_launch_plan_accepts_an_isolated_prefix(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bindir = root / "bin"
+            bindir.mkdir()
+            make_program(bindir, "wine")
+            target = make_pe64(root / "game.exe")
+            prefix = root / "prefix"
+            plan = build_launch_plan(
+                target, purpose="game", backend="wine", wine_prefix=prefix,
+                search_path=str(bindir), home=root, host_machine="x86_64",
+            )
+        self.assertEqual(plan["status"], "ready")
+        self.assertEqual(plan["environment"]["WINEPREFIX"], str(prefix.resolve()))
+
+    def test_illidia_library_registers_lists_and_removes_a_game(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = make_pe64(root / "A game.exe")
+            library = root / "library.json"
+            added = add_game(target, name="A Game", library_path=library)
+            games = list_games(library_path=library)
+            removed = remove_game(added["game"]["id"], library_path=library)
+            empty = list_games(library_path=library)
+
+        self.assertEqual(added["game"]["id"], "a-game")
+        self.assertEqual(games["count"], 1)
+        self.assertEqual(games["games"][0]["executable"], str(target))
+        self.assertEqual(removed["game_files_deleted"], False)
+        self.assertEqual(empty["count"], 0)
+
+    def test_illidia_launches_through_wine_with_an_isolated_prefix(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bindir = root / "bin"
+            bindir.mkdir()
+            wine = make_program(bindir, "wine")
+            target = make_pe64(root / "A game.exe")
+            library = root / "library.json"
+            compatibility_root = root / "compatdata"
+            added = add_game(target, name="A Game", library_path=library)
+
+            result = launch_game(
+                added["game"]["id"],
+                library_path=library,
+                compatibility_root=compatibility_root,
+                search_path=str(bindir),
+                home=root,
+                host_machine="x86_64",
+                arguments=["argument with spaces"],
+                wait=True,
+            )
+            stored = list_games(library_path=library)["games"][0]
+            prefix_exists = Path(result["compatibility_data"]).is_dir()
+
+        self.assertEqual(result["status"], "finished")
+        self.assertEqual(result["backend"], "wine")
+        self.assertEqual(result["exit_code"], 0)
+        self.assertTrue(result["execution_started"])
+        self.assertTrue(prefix_exists)
+        self.assertEqual(stored["last_exit_code"], 0)
+        self.assertIsNotNone(stored["last_launched_at"])
+
+    def test_cli_exposes_illidia_library_commands_as_json(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = make_pe64(root / "game.exe")
+            library = root / "library.json"
+            output = StringIO()
+            with redirect_stdout(output):
+                status = main(["illidia", "add", str(target), "--library", str(library)])
+            self.assertEqual(status, 0)
+            report = json.loads(output.getvalue())
+            self.assertEqual(report["game"]["name"], "game")
+
+            output = StringIO()
+            with redirect_stdout(output):
+                status = main(["illidia", "list", "--library", str(library)])
+            self.assertEqual(status, 0)
+            listing = json.loads(output.getvalue())
+        self.assertEqual(listing["count"], 1)
 
     def test_cli_exposes_duckbridge_commands_as_json(self):
         output = StringIO()

@@ -68,3 +68,34 @@ The implemented foundation never executes a Windows binary and does not install 
 - [ ] Native target process creation, compatibility-prefix management for third-party runtimes, sandbox enforcement and graphics/audio translation.
 
 The runtime inventory and plan generator do not invoke a discovered runtime or target. Both execution_started and prefix_created are false in the versioned plan.
+
+
+## Illidia game library and launcher — 2026-11-23
+
+- [x] Versioned per-user game library with add, list and remove operations.
+- [x] PE/ELF executable validation before a game is registered.
+- [x] Real process launch for native matching-architecture ELF targets and detected Wine, Proton, CrossOver or Bottles backends.
+- [x] Per-game compatibility-data directories for Wine and Proton, with WINEPREFIX or STEAM_COMPAT_DATA_PATH passed to the runtime.
+- [x] Argument-vector process creation with shell execution disabled.
+- [x] Optional GameMode and MangoHud wrappers and opt-in Proton WineD3D/esync/fsync switches.
+- [x] Launch timestamps, optional exit-code collection and versioned library/launch schemas.
+- [ ] Native NT/Win32 process execution, kernel-enforced process isolation and a native authenticated Mora host service.
+- [ ] Automatic game/runtime installation, cloud saves, clip capture, achievements and native session Do Not Disturb integration.
+
+Illidia starts external runtimes; it does not replace Wine/Proton or guarantee per-game graphics, DRM or anti-cheat compatibility. The launch tests use synthetic PE files and temporary runtime stubs, not commercial games.
+
+
+## Mora OS shell integration — 2026-11-23
+
+- [x] Reaper contract for window geometry, lifecycle transitions, workspace visibility, focus and z-order.
+- [x] Reaper contract for desktop workspaces, session metadata, capability-gated application launch and allowlisted commands.
+- [x] Reaper contract for bounded desktop notifications, monotonic ordering and unread state.
+- [x] Mora virtual workspaces, workspace-local window visibility, minimize/maximize/restore controls and persistent local workspace selection.
+- [x] Ctrl+K command palette for application search and allowlisted shell commands; arbitrary command/shell execution remains denied.
+- [x] Searchable 20-direction engineering matrix with explicit partial/specified/planned maturity labels instead of simulated completion percentages.
+- [x] Read-only Python host status, application catalogue validation and shell readiness CLI.
+- [x] Python shell host/catalogue/CLI tests and Reaper window/desktop/notification contract assertions.
+- [ ] Native Wayland/X11 compositor, display server, native window manager and kernel session manager.
+- [ ] Privileged process/capability broker, native lock screen, power management, system terminal and real hardware telemetry providers.
+
+The current Mora user interface is a browser/PWA shell. Reaper scripts define testable OS policy on the reference runtime; the Python adapter only inspects host metadata and the application catalogue. Neither constitutes a native compositor or kernel service. Reaper contract CI tests policy execution on its tree-walk and VM reference engines; separate host/hardware evidence is required for future native bring-up.

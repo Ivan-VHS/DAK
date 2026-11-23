@@ -12,14 +12,17 @@ The default application suite contains seven first-party apps: Cockos, Kavun, Ka
 
 Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
+The shell also includes four virtual workspaces (Home, Studio, Play and System), movable/minimizable/maximizable windows and a Ctrl+K command palette with an explicit allowlist. The system settings panel contains the searchable 20-direction engineering matrix from the OS prototype; each row is marked partial, specified or planned rather than assigned a fictional completion percentage. These are browser-shell features with matching Reaper policy contracts; the browser does not yet call the Reaper runtime. They are not a native compositor. See [Mora shell implementation](docs/MORA_SHELL.md).
+
 The system tools are:
 
 - **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
 - **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
 - **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
-- **Bridge:** local PE/ELF inspection in Mora; the native DuckBridge CLI discovers compatibility runtimes and prepares reviewable launch plans. It still does not launch targets.
+- **Bridge:** local PE/ELF inspection in Mora; the native DuckBridge CLI discovers runtimes and prepares reviewable plans. Its Illidia game launcher can start registered native games or invoke installed Wine-compatible runtimes.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
+- **Illidia:** local game library and CLI launcher with per-game Wine/Proton data, optional GameMode/MangoHud and structured process results. The Mora browser shell cannot launch host executables directly.
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
@@ -46,6 +49,13 @@ Run the JavaScript contract tests with Node.js 18 or newer:
 
 ```sh
 npm test
+```
+
+The Reaper policy source files are syntax-checked and exercised by the separate Reaper contract workflow. The browser shell modules can also be syntax-checked directly:
+
+```sh
+node --check mora/app.js
+node --check mora/shell.js
 ```
 
 The existing Python validation remains available:
@@ -80,7 +90,7 @@ No browser control is described as a native kernel, driver, sandbox, updater or 
 
 ## Windows application compatibility
 
-DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.
+DuckOS includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and structured runtime planning. **Illidia** adds a real local game library and can launch native matching-architecture ELF games or start installed Wine/Proton/CrossOver/Bottles runtimes for Windows games. It is not a Wine replacement: native NT/Win32 process execution, graphics/audio translation inside DuckOS and kernel-enforced sandboxing remain future work. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md), [DuckBridge](docs/DUCKBRIDGE.md) and [Illidia](docs/ILLIDIA.md) for supported workflows and boundaries.
 
 ## Documentation
 
@@ -89,6 +99,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
+- [Illidia game library and launcher](docs/ILLIDIA.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
 
