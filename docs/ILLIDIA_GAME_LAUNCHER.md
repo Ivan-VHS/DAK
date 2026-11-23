@@ -127,7 +127,7 @@ A profile is updated from a local JSON document:
 illidia profile GAME_ID ./profile.json
 ```
 
-The window-mode field is saved as profile metadata; it is not yet applied by a native compositor. Runtime commands and environment variables are passed explicitly. For Proton, Illidia appends `run` before the executable. Other compatibility runtimes receive the executable and its arguments after the configured runtime command. DXVK or other layers must be configured in the selected runtime environment; Illidia does not download DLLs or modify a prefix automatically.
+The window-mode field is saved as profile metadata; it is not yet applied by a native compositor. When `runtime` is `auto`, `wine`, `proton`, `crossover`, `bottles` or `qemu` and no explicit runtime command override is supplied, Illidia calls DuckBridge's `build_launch_plan`, requires a `ready` plan and consumes its argv and environment. The Bridge planner never executes the runtime or target. Proton requires a selected compatibility-data prefix; CrossOver and Bottles require an existing `bottle_name`. When an explicit runtime command is configured, that command takes precedence. Runtime commands and environment variables are passed explicitly. DXVK or other layers must be configured in the selected runtime environment; Illidia does not download DLLs or modify a prefix automatically.
 
 Hooks are disabled by default. To run them, the profile must contain explicit argv arrays and set `allow_hooks` to `true`. They use `shell=False`; a user who explicitly configures an interpreter such as `sh -c` is explicitly choosing that interpreter. Post-launch hooks run only when the caller uses `--wait`.
 
@@ -144,7 +144,7 @@ illidia stop LAUNCH_ID --force
 
 Direct launches are started without a shell, in a separate process group on POSIX or a separate process group on Windows. stdout and stderr are written to a per-launch log under the Illidia data directory. Arguments are not interpreted by a shell.
 
-On POSIX, stop requests signal the recorded process group so ordinary child processes that inherit that group are included. On Windows, Illidia uses `taskkill /T` and adds `/F` only when the user requests a forceful stop. Process status is refreshed from the recorded PID. This host-tool session model is best effort; the future native process manager must use authenticated process handles and stable process-generation identifiers to avoid PID-reuse races.
+On POSIX, stop requests signal the recorded process group so ordinary child processes that inherit that group are included. On Windows, Illidia uses `taskkill /T` and adds `/F` only when the user requests a forceful stop. The executable is hashed again after pre-launch hooks and immediately before process creation; if a hook replaced the file, launch is aborted so the new bytes can be reviewed. Process status is refreshed from the recorded PID. This host-tool session model is best effort; the future native process manager must use authenticated process handles and stable process-generation identifiers to avoid PID-reuse races.
 
 When a game is launched through an official store URI, the store owns the actual game process, overlay, cloud saves and provider session. Illidia records the delegation but cannot claim to supervise or terminate the full game process tree through the URI handler. Stop that game through its store client. A future native store broker can expose provider session IDs and authenticated process handles.
 
@@ -171,7 +171,7 @@ The current Mora window is a browser shell. It cannot enumerate arbitrary host d
 
 This backend is therefore exposed as a local Python command first. The next native integration is a narrowly scoped Illidia broker over authenticated DuckOS IPC, with typed operations for library query, scan preview, add/update, inspect, approve, launch, session status, stop, export and import. The browser must never receive arbitrary process-spawn authority or raw store credentials. Its launch request must carry a selected game ID; the broker resolves the stored record, rechecks capabilities and trust state, then presents the canonical launch review.
 
-No current implementation claims a native compositor, kernel-enforced per-game sandbox, store login, cloud-save synchronization, achievements sync, driver modification, anti-cheat bypass or compatibility guarantee. DuckBridge discovery remains a separate source of runtime availability; a configured Wine/Proton command is not proof that a specific title will run.
+No current implementation claims a native compositor, kernel-enforced per-game sandbox, store login, cloud-save synchronization, achievements sync, driver modification, anti-cheat bypass or compatibility guarantee. Illidia consumes DuckBridge's non-executing runtime plans when automatic or named runtime selection is used. A ready plan only supplies a command and environment; it is not proof that a specific title will run.
 
 ## 9. Validation
 
@@ -183,6 +183,6 @@ illidia discover
 illidia list
 ```
 
-Tests cover the SQLite record lifecycle, filtered queries, export/import, safe directory scanning, Steam/Epic/GOG manifest parsing, Epic path traversal rejection, explicit first-run approval, hash-change behavior, literal argv handling and URI allowlisting.
+Tests cover the SQLite record lifecycle, filtered queries, export/import, safe directory scanning, Steam/Epic/GOG manifest parsing, Epic path traversal rejection, explicit first-run approval, non-blocking hash changes, literal argv handling, Bridge-plan consumption, store-session delegation and pre-launch executable replacement detection.
 
 The test suite validates the host-side library and launcher policy. It does not prove native DuckOS sandbox enforcement or store-provider correctness on every platform.
