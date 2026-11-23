@@ -153,13 +153,14 @@ def compatibility_status() -> dict[str, Any]:
         _tool("winetricks", winetricks, "Wine dependency and graphics-layer installer"),
         _tool("dxvk", winetricks, "DXVK installer via Winetricks"),
         _tool("vkd3d", winetricks, "vkd3d installer via Winetricks"),
-        _tool("crossover", _program("cxrun", "crossover", "cxoffice"), "Commercial Wine distribution"),
+        _tool("crossover", _program(*MANAGER_COMMANDS["crossover"]), "Commercial Wine distribution"),
         _tool("bottles", _program("bottles"), "Prefix manager"),
         _tool("lutris", _program("lutris"), "Game launcher"),
-        _tool("heroic", _program("heroic"), "Game launcher"),
+        _tool("heroic", _program(*MANAGER_COMMANDS["heroic"]), "Game launcher"),
         _tool("portproton", _program("portproton"), "Wine/Proton launcher"),
         _tool("playonlinux", _program("playonlinux"), "Wine prefix manager"),
         _tool("qemu", qemu, "Virtual machine monitor for separate guest operating systems"),
+        _tool("qemu-img", _program("qemu-img"), "Virtual disk image creation and inspection"),
     ]
     graphics = {
         "vulkan_loader": ctypes.util.find_library("vulkan"),
@@ -184,6 +185,144 @@ def compatibility_status() -> dict[str, Any]:
             "ReactOS is a separate operating system and must be run as a virtual machine guest.",
             "A detected executable or launcher is not proof that a particular game is compatible.",
         ],
+    }
+
+
+def open_manager(name: str) -> dict[str, Any]:
+    candidates = MANAGER_COMMANDS.get(name)
+    if candidates is None:
+        raise CompatibilityError(
+            "manager must be one of: " + ", ".join(sorted(MANAGER_COMMANDS))
+        )
+    runner = _program(*candidates)
+    if not runner:
+        raise CompatibilityError(f"{name} is not installed or its launcher is not in PATH")
+    try:
+        process = subprocess.Popen(
+            [runner],
+            cwd=str(Path.home()),
+            env=os.environ.copy(),
+            stdin=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except OSError as error:
+        raise CompatibilityError(f"could not open {name}: {error}") from error
+    return {
+        "schema": "duckos.compatibility.manager.v1",
+        "manager": name,
+        "launcher": runner,
+        "pid": process.pid,
+        "opened": True,
+        "shell_used": False,
+    }
+
+
+def _new_disk_path(value: str | Path) -> Path:
+    raw = Path(value).expanduser()
+    if raw.suffix.lower() != ".qcow2":
+        raise CompatibilityError("ReactOS virtual disk must use the .qcow2 extension")
+    if raw.name in {"", ".", ".."} or "," in str(raw):
+        raise CompatibilityError("virtual disk path contains unsupported characters")
+    try:
+        parent = raw.parent.resolve(strict=True)
+    except (OSError, RuntimeError) as error:
+        raise CompatibilityError(f"virtual disk parent directory does not exist: {error}") from error
+    target = parent / raw.name
+    if target.exists() or target.is_symlink():
+        raise CompatibilityError("virtual disk destination already exists")
+    if not parent.is_dir():
+        raise CompatibilityError("virtual disk parent must be a directory")
+    return target
+
+
+def create_reactos_disk(path: str | Path, size_gib: int = 16) -> dict[str, Any]:
+    if platform.system() != "Linux":
+        raise CompatibilityError("the DuckOS QEMU guest helper currently requires a Linux host")
+    if isinstance(size_gib, bool) or not isinstance(size_gib, int) or not 4 <= size_gib <= 128:
+        raise CompatibilityError("ReactOS disk size must be an integer from 4 to 128 GiB")
+    qemu_img = _program("qemu-img")
+    if not qemu_img:
+        raise CompatibilityError("qemu-img is not installed")
+    target = _new_disk_path(path)
+    try:
+        result = subprocess.run(
+            [qemu_img, "create", "-f", "qcow2", str(target), f"{size_gib}G"],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise CompatibilityError(f"could not create ReactOS virtual disk: {error}") from error
+    if result.returncode != 0 or not target.is_file():
+        detail = (result.stderr or result.stdout or "qemu-img returned a failure status").strip()
+        raise CompatibilityError(f"qemu-img failed: {detail[-1200:]}")
+    return {
+        "schema": "duckos.compatibility.vm-disk.v1",
+        "path": str(target),
+        "format": "qcow2",
+        "size_gib": size_gib,
+        "created": True,
+    }
+
+
+def launch_reactos(
+    disk: str | Path,
+    *,
+    iso: str | Path | None = None,
+    memory_mib: int = 2048,
+    cpus: int = 2,
+) -> dict[str, Any]:
+    if platform.system() != "Linux":
+        raise CompatibilityError("the DuckOS QEMU guest helper currently requires a Linux host")
+    if isinstance(memory_mib, bool) or not isinstance(memory_mib, int) or not 1024 <= memory_mib <= 16384:
+        raise CompatibilityError("guest memory must be an integer from 1024 to 16384 MiB")
+    if isinstance(cpus, bool) or not isinstance(cpus, int) or not 1 <= cpus <= 16:
+        raise CompatibilityError("guest CPU count must be an integer from 1 to 16")
+    qemu = _program("qemu-system-x86_64")
+    if not qemu:
+        raise CompatibilityError("qemu-system-x86_64 is not installed")
+
+    disk_path = _existing_file(disk)
+    extension = disk_path.suffix.lower()
+    formats = {".qcow2": "qcow2", ".img": "raw", ".raw": "raw"}
+    disk_format = formats.get(extension)
+    if disk_format is None or "," in str(disk_path):
+        raise CompatibilityError("ReactOS disk must be .qcow2, .img or .raw and contain no commas in its path")
+
+    argv = [
+        qemu,
+        "-m", str(memory_mib),
+        "-smp", str(cpus),
+        "-drive", f"file={disk_path},format={disk_format},if=ide",
+        "-vga", "std",
+        "-nic", "none",
+    ]
+    if iso is not None:
+        iso_path = _existing_file(iso)
+        if iso_path.suffix.lower() != ".iso" or "," in str(iso_path):
+            raise CompatibilityError("ReactOS installation media must be an .iso file without commas in its path")
+        argv.extend(["-cdrom", str(iso_path), "-boot", "order=d"])
+
+    try:
+        process = subprocess.Popen(
+            argv,
+            cwd=str(disk_path.parent),
+            env=os.environ.copy(),
+            stdin=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except OSError as error:
+        raise CompatibilityError(f"could not start ReactOS virtual machine: {error}") from error
+    return {
+        "schema": "duckos.compatibility.vm-launch.v1",
+        "guest": "ReactOS",
+        "disk": str(disk_path),
+        "iso": str(iso_path) if iso is not None else None,
+        "pid": process.pid,
+        "started": True,
+        "network": "disabled",
+        "shell_used": False,
     }
 
 
