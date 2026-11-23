@@ -259,41 +259,38 @@ Names in this catalog are working product names. Cockos requires an explicit nam
 - [DuckOS documentation index](README.md)
 - [Machine-readable application catalog](../catalogs/preinstalled-applications.v1.json)
 
-## 8. Interactive browser prototype
+## 8. Native Mora shell and application maturity
 
-A runnable browser prototype is maintained at [`prototype/mora-home.html`](../prototype/mora-home.html). It provides a local interaction layer for all seven application concepts and demonstrates selected cross-app flows.
+Mora is now a native Tk user-space application. The former browser prototype has been retired and its HTML, CSS, DOM-driven JavaScript and browser storage layer have been removed. The native launcher reads packaged JSON registry data and opens individual application panels without a WebView or embedded browser.
 
-The catalogue deliberately keeps two maturity values separate:
+The following maturity values remain separate:
 
-- `maturity_status: specified` describes the intended native DuckOS applications. This repository does not yet contain seven native application packages, OS services, package manifests or a bootable distribution.
-- `prototype_status: partial` describes the interactive browser implementation. It is useful for exercising local workflows, but it is not equivalent to a native OS application.
+- `maturity_status: specified` describes the intended native DuckOS applications. A registry entry does not mean that a complete application package, system service or bootable distribution exists.
+- `native_shell_status: implemented` describes the native Mora launcher, local preferences, selected diagnostic tools and system-panel entry points.
+- Individual product features remain partial or specified until their own native services and persistent data layers are implemented and tested.
 
-### Implemented in the browser prototype
+### Current native shell surfaces
 
-| Application | Working local behavior | Still requires native DuckOS services or external providers |
+| Area | Native behavior | Boundary |
 |---|---|---|
-| Cockos | Microphone recording when permitted, local audio-file import, track playback and offline WAV mixdown | System-wide per-process volume control and integration with other applications' audio sessions |
-| Kavun | Local image/video import, event slices, metadata search, non-destructive image filters and PNG export | Automatic visual recognition, semantic image search and automatic location intelligence |
-| Ka-bon | Expense ledger, category totals, receipt-photo attachment, subscription reminders and local family-member entries | Receipt OCR, bank connections, cloud synchronization and shared multi-user accounts |
-| Gloverty | Local rule creation, enable/disable controls and manual execution of supported actions | Background scheduler, OS event bus, global shortcuts and touchpad/touchscreen gesture service |
-| Po | Local tab list, external navigation, address commands and a reading view for pasted text | Native browser engine, isolated tab processes, network-level tracker filtering and download management |
-| Illidia | Local game library, progress and achievement entries, user-authorized screen recording and clip export | Launching installed executables, cloud saves, provider-backed achievements and OS-level Do Not Disturb |
-| Unify | Browser clipboard access where permitted and manual JSON export/import for tabs, clips and selected settings | Authenticated pairing, live device sync, phone notifications and lost-device discovery |
+| Launcher | Application grid, search, category filters and native app windows | Does not replace the host window manager |
+| Control | Local focus, density, reduced-motion and preference profile | Does not change kernel scheduling, hardware power or global desktop settings |
+| Sentinel | Persisted preference flags for listed capabilities | Does not grant or enforce process/device permissions |
+| Restore | JSON export and import of normalized Mora settings | Not a system updater, image backup or boot rollback |
+| Proof | SHA-256 for a selected local file | Does not verify a signer or prove authorship |
+| Bridge | Read-only PE/ELF inspection | Does not execute targets or install compatibility runtimes |
+| Duck Desktop | Opens the existing native maintenance utility | User-space tool, not the compositor |
+| Reaper Studio | Opens the separate Reaper workbench process | No embedded language runtime or kernel privilege |
+| Mora Commons | Local application catalogue from packaged JSON | Catalogue entries are not installed services |
 
-The prototype stores app metadata in browser `localStorage` and media blobs in `IndexedDB`. Data is local to the browser profile and is not shared automatically between devices. Microphone and screen capture use browser permission prompts and may require HTTPS or localhost. External links open in the host browser.
+### Product concepts awaiting native implementation
 
-### Prototype cross-app workflows
+Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify remain product concepts with defined responsibilities and integration requirements. Their previous browser demonstration is not shipped as an alternate runtime. The native Mora shell may display their registry cards, but this does not imply that audio capture, image processing, finance storage, automation scheduling, browser tabs, game launching or device pairing are implemented.
 
-- Gloverty can prepare a local Ka-bon weekly summary when the user manually runs an enabled rule.
-- A Cockos recording can be added to Kavun's local media collection and assigned to an event slice.
-- Po can export selected tab metadata in a Unify transfer package.
-- Illidia can export selected clips in a Unify transfer package within the documented per-file limit.
+The thirteen additional application identities are likewise catalogue entries with partial or specified maturity. Their panels must not claim access to devices, archives, audio engines, navigation sensors, system installation or network synchronization unless a dedicated native service has been delivered.
 
-These are local prototype workflows. They do not establish a system-wide event bus, automatic schedules, authenticated device transport or cloud synchronization.
+## 9. Unify transfer package specification
 
+The versioned [`unify.transfer.v1`](UNIFY_TRANSFER_FORMAT_V1.md) JSON-file contract describes a user-mediated hand-off format for selected Po tabs, Illidia clips and selected settings. The format is validated by [`schemas/unify.transfer.v1.schema.json`](../schemas/unify.transfer.v1.schema.json).
 
-## 9. Unify transfer package
-
-The browser prototype uses the versioned [`unify.transfer.v1`](UNIFY_TRANSFER_FORMAT_V1.md) JSON-file contract for manual transfer of selected Po tabs, Illidia clips and selected local settings. The format is validated by [`schemas/unify.transfer.v1.schema.json`](../schemas/unify.transfer.v1.schema.json).
-
-The prototype enforces a 20 MiB package limit, a 12 MiB per-clip limit, and bounds on tab and clip counts. This is a user-mediated file hand-off, not authenticated pairing or live synchronization.
+The transfer schema is a specification and validation surface. The retired browser prototype's localStorage and IndexedDB behavior is not part of the native application, and authenticated pairing or live synchronization is not currently implemented.
