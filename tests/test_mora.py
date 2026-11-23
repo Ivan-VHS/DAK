@@ -42,6 +42,29 @@ class MoraPreferencesTests(unittest.TestCase):
         self.assertEqual(value["powerProfile"], "balanced")
         self.assertEqual(value["permissions"], default_preferences()["permissions"])
 
+    def test_ui_scale_defaults_persists_and_stays_inside_supported_bounds(self):
+        defaults = default_preferences()
+        self.assertEqual(defaults["appearance"]["uiScale"], 100)
+        self.assertEqual(normalize_preferences({
+            "appearance": {"uiScale": 125}
+        })["appearance"]["uiScale"], 125)
+        self.assertEqual(normalize_preferences({
+            "appearance": {"uiScale": 20}
+        })["appearance"]["uiScale"], 80)
+        self.assertEqual(normalize_preferences({
+            "appearance": {"uiScale": 240}
+        })["appearance"]["uiScale"], 140)
+        self.assertEqual(normalize_preferences({
+            "appearance": {"uiScale": True}
+        })["appearance"]["uiScale"], 100)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "preferences.json"
+            self.assertTrue(save_preferences({
+                "appearance": {"uiScale": 125}
+            }, path))
+            self.assertEqual(load_preferences(path)["appearance"]["uiScale"], 125)
+
     def test_preferences_round_trip(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "preferences.json"
@@ -96,6 +119,21 @@ class MoraIntentTests(unittest.TestCase):
         self.assertFalse(build_intent_plan("запусти powershell")["ok"])
         self.assertFalse(build_intent_plan("x" * 321)["ok"])
         self.assertFalse(build_intent_plan("")["ok"])
+        self.assertFalse(build_intent_plan("open" + chr(0) + "app")["ok"])
+
+    def test_intents_accept_russian_and_ukrainian_phrasing(self):
+        russian = build_intent_plan("включи режим фокуса и экономию энергии")
+        ukrainian = build_intent_plan("увімкни режим фокусу та режим енергозбереження")
+        self.assertTrue(russian["ok"])
+        self.assertTrue(ukrainian["ok"])
+        self.assertEqual(
+            [action["setting"] for action in ukrainian["actions"]],
+            ["focusMode", "powerProfile"],
+        )
+        self.assertEqual(
+            build_intent_plan("відкрий безпека")["actions"],
+            [{"type": "open-app", "appId": "security"}],
+        )
 
     def test_known_application_can_be_opened_without_shell_execution(self):
         plan = build_intent_plan("открой безопасность")

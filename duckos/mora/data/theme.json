@@ -50,5 +50,13 @@
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },
-  "defaultPalette": "duck"
+  "defaultPalette": "duck",
+  "materials": {
+    "glass": {
+      "fallback": "#151515",
+      "surface": "rgba(21, 21, 21, 236)",
+      "border": "rgba(255, 255, 255, 30)",
+      "backdropBlur": false
+    }
+  }
 }

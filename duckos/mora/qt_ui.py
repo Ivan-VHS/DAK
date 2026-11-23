@@ -40,6 +40,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .controls import MoraSlider
 from .model import (
     build_intent_plan,
     calculate_sha256,
@@ -136,6 +137,12 @@ class MoraWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.preferences = load_preferences()
+        self._display_scale = self.preferences["appearance"]["uiScale"]
+        self._app_dialogs: dict[str, QDialog] = {}
+        self.theme = _read_packaged_json("theme.json", {})
+        glass = self.theme.get("materials", {}).get("glass", {})
+        self.glass_surface = str(glass.get("surface", "rgba(21, 21, 21, 236)"))
+        self.glass_border = str(glass.get("border", "rgba(255, 255, 255, 30)"))
         registry = _read_packaged_json("apps.json", {"built_in_apps": []})
         commons = _read_packaged_json("commons-catalog.json", {"apps": [], "categories": []})
         self.apps = list(registry.get("built_in_apps", []))
@@ -156,35 +163,41 @@ class MoraWindow(QMainWindow):
 
         shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
         shortcut.activated.connect(self.search_entry.setFocus)
+        shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
         clear_shortcut = QShortcut(QKeySequence("Escape"), self)
+        clear_shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
         clear_shortcut.activated.connect(self._clear_search)
 
     def _apply_palette(self) -> None:
+        scale = self._display_scale / 100
+        scaled = lambda points: f"{points * scale:.2f}pt"
         self.setStyleSheet(f"""
             QWidget {{
                 background: {PAGE};
                 color: {TEXT};
                 font-family: "Segoe UI";
-                font-size: 10pt;
+                font-size: {scaled(10)};
             }}
             QMainWindow, QDialog {{ background: {PAGE}; }}
             QFrame#Sidebar {{
                 background: {SURFACE};
-                border: 1px solid {BORDER};
+                background: {self.glass_surface};
+                border: 1px solid {self.glass_border};
                 border-radius: 18px;
             }}
             QFrame#Card, QFrame#Hero, QFrame#Panel {{
                 background: {SURFACE};
-                border: 1px solid {BORDER};
+                background: {self.glass_surface};
+                border: 1px solid {self.glass_border};
                 border-radius: 16px;
             }}
-            QLabel#Brand {{ color: {ACCENT}; font-size: 10pt; font-weight: 800; }}
-            QLabel#Wordmark {{ color: {TEXT}; font-size: 27pt; font-weight: 800; }}
-            QLabel#PageTitle {{ color: {TEXT}; font-size: 23pt; font-weight: 700; }}
-            QLabel#SectionTitle {{ color: {TEXT}; font-size: 14pt; font-weight: 700; }}
-            QLabel#Eyebrow {{ color: {ACCENT}; font-size: 8pt; font-weight: 800; }}
+            QLabel#Brand {{ color: {ACCENT}; font-size: {scaled(10)}; font-weight: 800; }}
+            QLabel#Wordmark {{ color: {TEXT}; font-size: {scaled(27)}; font-weight: 800; }}
+            QLabel#PageTitle {{ color: {TEXT}; font-size: {scaled(23)}; font-weight: 700; }}
+            QLabel#SectionTitle {{ color: {TEXT}; font-size: {scaled(14)}; font-weight: 700; }}
+            QLabel#Eyebrow {{ color: {ACCENT}; font-size: {scaled(8)}; font-weight: 800; }}
             QLabel#Muted {{ color: {MUTED}; }}
-            QLabel#Clock {{ color: {TEXT}; font-size: 19pt; font-weight: 700; }}
+            QLabel#Clock {{ color: {TEXT}; font-size: {scaled(19)}; font-weight: 700; }}
             QPushButton {{
                 background: {ELEVATED};
                 color: {TEXT};
@@ -215,7 +228,7 @@ class MoraWindow(QMainWindow):
                 background: {ELEVATED};
                 border-color: {BORDER};
             }}
-            QLineEdit, QComboBox, QPlainTextEdit, QListWidget {{
+            QLineEdit, QComboBox, QPlainTextEdit, QListWidget, QSpinBox {{
                 background: {SURFACE};
                 color: {TEXT};
                 border: 1px solid {BORDER};
@@ -229,6 +242,46 @@ class MoraWindow(QMainWindow):
                 color: {TEXT};
                 selection-background-color: {ACCENT};
                 selection-color: {ON_ACCENT};
+            }}
+            QSpinBox {{
+                background: {SURFACE};
+                color: {TEXT};
+                border: 1px solid {BORDER};
+                border-radius: 9px;
+                padding: 5px 7px;
+                min-height: 22px;
+                font-variant-numeric: tabular-nums;
+            }}
+            QSlider::groove:horizontal {{
+                height: 6px;
+                border-radius: 3px;
+                background: {BORDER};
+            }}
+            QSlider::sub-page:horizontal {{
+                border-radius: 3px;
+                background: {ACCENT};
+            }}
+            QSlider::add-page:horizontal {{
+                border-radius: 3px;
+                background: {ELEVATED};
+            }}
+            QSlider::handle:horizontal {{
+                width: 18px;
+                height: 18px;
+                margin: -7px 0;
+                border: 2px solid {PAGE};
+                border-radius: 9px;
+                background: {ACCENT};
+            }}
+            QSlider::handle:horizontal:hover,
+            QSlider::handle:horizontal:focus {{
+                background: {ACCENT_HOVER};
+                border-color: {ACCENT_HOVER};
+            }}
+            QLineEdit:focus, QComboBox:focus, QSpinBox:focus,
+            QPlainTextEdit:focus, QListWidget:focus,
+            QPushButton:focus, QCheckBox:focus {{
+                border: 2px solid {ACCENT_HOVER};
             }}
             QCheckBox {{ spacing: 9px; padding: 5px; }}
             QCheckBox::indicator {{
@@ -394,6 +447,14 @@ class MoraWindow(QMainWindow):
         if self.search_entry.hasFocus():
             self.search_entry.clear()
 
+    def _preview_ui_scale(self, value: int) -> None:
+        self._display_scale = int(value)
+        self._apply_palette()
+
+    def _restore_ui_scale_preview(self, *_args: Any) -> None:
+        self._display_scale = self.preferences["appearance"]["uiScale"]
+        self._apply_palette()
+
     def _render_apps(self, *_args: Any) -> None:
         while self.app_grid.count():
             item = self.app_grid.takeAt(0)
@@ -445,8 +506,8 @@ class MoraWindow(QMainWindow):
 
         open_button = QPushButton(name)
         open_button.setStyleSheet(
-            f"text-align: left; background: transparent; border: none; "
-            f"padding: 2px; font-size: 12pt; font-weight: 700;"
+            "text-align: left; background: transparent; border: none; "
+            "padding: 2px; font-weight: 700;"
         )
         open_button.clicked.connect(lambda _checked=False, selected=app_id: self.open_app(selected))
         layout.addWidget(open_button)
@@ -472,6 +533,15 @@ class MoraWindow(QMainWindow):
         if app_id == "reaper":
             self._open_reaper()
             return
+
+        current = self._app_dialogs.get(app_id)
+        if current is not None:
+            if current.isMinimized():
+                current.showNormal()
+            current.raise_()
+            current.activateWindow()
+            return
+
         app = self.apps_by_id.get(app_id)
         if app is None:
             QMessageBox.warning(self, "Mora", "Приложение отсутствует в реестре.")
@@ -481,11 +551,26 @@ class MoraWindow(QMainWindow):
             app_id, ("Нативное приложение", "Описание приложения пока не добавлено.")
         )
         dialog = QDialog(self)
+        dialog.setWindowFlags(
+            Qt.WindowType.Window
+            | Qt.WindowType.WindowMinMaxButtonsHint
+            | Qt.WindowType.WindowCloseButtonHint
+        )
+        dialog.setWindowModality(Qt.WindowModality.NonModal)
+        dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        dialog.setSizeGripEnabled(True)
         dialog.setWindowTitle(f"{app.get('name', app_id)} — Mora")
-        dialog.resize(760, 610)
-        dialog.setMinimumSize(580, 420)
-        layout = QVBoxLayout(dialog)
 
+        screen = QApplication.screenAt(self.frameGeometry().center()) or QApplication.primaryScreen()
+        available = screen.availableGeometry() if screen is not None else None
+        usable_width = max(1, available.width() - 32) if available is not None else 760
+        usable_height = max(1, available.height() - 72) if available is not None else 610
+        width = min(760, usable_width)
+        height = min(610, usable_height)
+        dialog.setMinimumSize(min(580, width), min(420, height))
+        dialog.resize(width, height)
+
+        layout = QVBoxLayout(dialog)
         header = QFrame()
         header.setObjectName("Panel")
         header_layout = QVBoxLayout(header)
@@ -495,22 +580,47 @@ class MoraWindow(QMainWindow):
         header_layout.addWidget(self._label(subtitle, "Muted"))
         layout.addWidget(header)
 
-        body = QVBoxLayout()
+        body_content = QWidget()
+        body = QVBoxLayout(body_content)
         body.addWidget(self._label(description))
         maturity = str(app.get("maturity", "catalog_concept"))
         body.addWidget(self._label(
             f"СТАТУС: {MATURITY_LABELS.get(maturity, 'Каталог приложения')}",
             "Eyebrow",
         ))
-        self._build_app_panel(app_id, app, body)
+        try:
+            self._build_app_panel(app_id, app, body)
+        except Exception as error:
+            body.addWidget(self._label(
+                "Панель не удалось открыть. Остальная оболочка продолжает работать.\n"
+                f"{type(error).__name__}: {error}",
+                "Muted",
+            ))
         body.addStretch(1)
-        layout.addLayout(body, 1)
+
+        scroll = QScrollArea(dialog)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(body_content)
+        layout.addWidget(scroll, 1)
 
         close_button = QPushButton("Закрыть")
         close_button.clicked.connect(dialog.accept)
         close_button.setObjectName("Primary")
         layout.addWidget(close_button, alignment=Qt.AlignmentFlag.AlignRight)
-        dialog.exec()
+
+        self._app_dialogs[app_id] = dialog
+        dialog.finished.connect(
+            lambda _result, key=app_id: self._app_dialogs.pop(key, None)
+        )
+        dialog.destroyed.connect(
+            lambda *_args, key=app_id: self._app_dialogs.pop(key, None)
+        )
+        if app_id == "workspace":
+            dialog.finished.connect(self._restore_ui_scale_preview)
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
 
     def _build_app_panel(self, app_id: str, app: dict[str, Any], layout: QVBoxLayout) -> None:
         if app_id == "workspace":
@@ -544,6 +654,16 @@ class MoraWindow(QMainWindow):
 
     def _build_control_panel(self, layout: QVBoxLayout) -> None:
         layout.addWidget(self._label("Настройки текущей оболочки", "SectionTitle"))
+        scale = MoraSlider(
+            "Масштаб интерфейса",
+            80,
+            140,
+            self.preferences["appearance"]["uiScale"],
+            suffix="%",
+            step=5,
+            precise_step=1,
+        )
+        scale.valueChanged.connect(self._preview_ui_scale)
         focus = QCheckBox("Режим фокуса")
         focus.setChecked(self.preferences["focusMode"])
         reduced = QCheckBox("Уменьшить анимацию интерфейса")
@@ -562,6 +682,7 @@ class MoraWindow(QMainWindow):
         profile.setCurrentIndex(max(0, profile.findData(self.preferences["powerProfile"])))
 
         form = QFormLayout()
+        form.addRow(scale)
         form.addRow(focus)
         form.addRow(reduced)
         form.addRow("Плотность", density)
@@ -575,7 +696,10 @@ class MoraWindow(QMainWindow):
             self.preferences["focusMode"] = focus.isChecked()
             self.preferences["appearance"]["reducedMotion"] = reduced.isChecked()
             self.preferences["appearance"]["density"] = density.currentData()
+            self.preferences["appearance"]["uiScale"] = scale.value()
             self.preferences["powerProfile"] = profile.currentData()
+            self._display_scale = scale.value()
+            self._apply_palette()
             self._save_profile()
 
         save.clicked.connect(commit)
@@ -726,6 +850,7 @@ class MoraWindow(QMainWindow):
             self._save_profile("Mora AI")
 
         preview_button.clicked.connect(preview)
+        query.returnPressed.connect(preview)
         approve_button.clicked.connect(approve)
         layout.addWidget(self._label(
             "Mora AI здесь — локальный ограниченный rule-engine. Он не запускает shell, "
@@ -831,9 +956,30 @@ class MoraWindow(QMainWindow):
         from ..desktop.reaper import ReaperWorkbench
 
         workbench = ReaperWorkbench()
+        current = self._app_dialogs.get("reaper")
+        if current is not None:
+            if current.isMinimized():
+                current.showNormal()
+            current.raise_()
+            current.activateWindow()
+            return
+
         dialog = QDialog(self)
+        dialog.setWindowFlags(
+            Qt.WindowType.Window
+            | Qt.WindowType.WindowMinMaxButtonsHint
+            | Qt.WindowType.WindowCloseButtonHint
+        )
+        dialog.setWindowModality(Qt.WindowModality.NonModal)
+        dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        dialog.setSizeGripEnabled(True)
         dialog.setWindowTitle("Reaper Studio — Mora")
-        dialog.resize(700, 420)
+        screen = QApplication.screenAt(self.frameGeometry().center()) or QApplication.primaryScreen()
+        available = screen.availableGeometry() if screen is not None else None
+        width = min(700, max(1, available.width() - 32)) if available is not None else 700
+        height = min(420, max(1, available.height() - 72)) if available is not None else 420
+        dialog.setMinimumSize(min(480, width), min(300, height))
+        dialog.resize(width, height)
         layout = QVBoxLayout(dialog)
         report = QPlainTextEdit()
         report.setReadOnly(True)
@@ -852,7 +998,16 @@ class MoraWindow(QMainWindow):
                 QMessageBox.information(dialog, "Reaper", f"Reaper Studio открыт. PID: {process.pid}")
 
         launch.clicked.connect(start)
-        dialog.exec()
+        self._app_dialogs["reaper"] = dialog
+        dialog.finished.connect(
+            lambda _result: self._app_dialogs.pop("reaper", None)
+        )
+        dialog.destroyed.connect(
+            lambda *_args: self._app_dialogs.pop("reaper", None)
+        )
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
 
     def _build_commons_panel(self, layout: QVBoxLayout) -> None:
         controls = QHBoxLayout()
