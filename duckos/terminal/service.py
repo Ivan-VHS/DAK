@@ -292,8 +292,9 @@ class TerminalService:
             return
         bounded = entries[-self.config["history_limit"]:]
         encoded = json.dumps(bounded, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
-        if len(encoded.encode("utf-8")) > MAX_HISTORY_BYTES:
-            raise TerminalInputError("terminal history exceeds its size limit")
+        while bounded and len(encoded.encode("utf-8")) > MAX_HISTORY_BYTES:
+            bounded.pop(0)
+            encoded = json.dumps(bounded, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
         self._atomic_write(self.history_path, encoded)
 
     def _record_history(self, tokens: list[str], result: str) -> None:
