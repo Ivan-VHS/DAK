@@ -12,13 +12,17 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and six system tools, with local intent, preference, recovery and file-inspection contracts.
+[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and seven system tools, with local intent, preference, recovery and file-inspection contracts.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
 ## Product specification
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
+
+## Katyuhen ecosystem
+
+[Katyuhen](KATYUHEN_ECOSYSTEM.md) is the shared directory and federation contract for DuckOS/Mora, Reaper, OPlague, Pytyliki and VentuSample. The canonical project graph is [ecosystem/katyuhen.v1.json](../ecosystem/katyuhen.v1.json); Mora exposes it through the Katyuhen system panel.
 
 ## Normative standard
 
