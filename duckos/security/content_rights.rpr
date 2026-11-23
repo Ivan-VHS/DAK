@@ -1,0 +1,68 @@
+# DuckOS content-rights policy.
+# A positive result is a decision input, not a substitute for native enforcement.
+# Publisher signatures and file hashes are checked by duckos.rights before use.
+
+export craft entitlement_scope_allowed(scope, current_profile, owner_profile, current_device, home_device) {
+    when scope == "profile" and current_profile == owner_profile {
+        yield true
+    }
+    when scope == "home_device" and current_device == home_device {
+        yield true
+    }
+    yield false
+}
+
+export craft entitlement_time_allowed(now, not_before, expires_at, offline, offline_valid_until) {
+    when now < not_before {
+        yield false
+    }
+    when expires_at >= 0 and now > expires_at {
+        yield false
+    }
+    when offline and now > offline_valid_until {
+        yield false
+    }
+    yield true
+}
+
+export craft content_integrity_ready(signature_verified, hashes_verified, file_set_matches) {
+    yield signature_verified and hashes_verified and file_set_matches
+}
+
+export craft content_may_launch(signature_verified, hashes_verified, file_set_matches, entitlement_valid, scope_valid, time_valid, launch_granted) {
+    yield content_integrity_ready(signature_verified, hashes_verified, file_set_matches) and entitlement_valid and scope_valid and time_valid and launch_granted
+}
+
+export craft capture_allowed(manifest_verified, action, denied_actions, allowed_actions) {
+    when not manifest_verified {
+        yield false
+    }
+    vary denied := false
+    each item in denied_actions {
+        when item == action {
+            change denied := true
+        }
+    }
+    when denied {
+        yield false
+    }
+    vary allowed := false
+    each item in allowed_actions {
+        when item == action {
+            change allowed := true
+        }
+    }
+    yield allowed
+}
+
+export craft user_save_separate(content_kind) {
+    yield content_kind == "save"
+}
+
+export craft attribution_is_verified(attribution_status, publisher_signature_verified) {
+    yield publisher_signature_verified and attribution_status == "publisher_signed"
+}
+
+export craft transfer_preserves_rights(manifest_preserved, entitlement_preserved) {
+    yield manifest_preserved and entitlement_preserved
+}
