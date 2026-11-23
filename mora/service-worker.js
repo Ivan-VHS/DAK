@@ -1,10 +1,12 @@
-const CACHE = "mora-shell-v3-amber";
+const CACHE = "mora-shell-v4-compatibility";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./core.js",
+  "./compatibility.js",
+  "./compatibility.css",
   "./apps.json",
   "./system-policy.json",
   "./theme.json",
