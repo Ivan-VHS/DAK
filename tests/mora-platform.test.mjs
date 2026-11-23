@@ -34,6 +34,20 @@ test("Russian and Ukrainian locale changes are persistent at the UI contract lay
     translate("Создана ветка mora-2 · ревизия 2 · родитель mora-1"),
     "Створено гілку mora-2 · ревізія 2 · батьківська mora-1"
   );
+  const updatePreview = [
+    "A/B-план · текущий слот A · целевой слот B",
+    "Подпись пакета: не проверено",
+    "Совместимость: не проверено",
+    "Свободное место: не проверено",
+    "Этапы: verify-signed-metadata-and-payload → verify-compatibility-and-capacity → stage-inactive-slot",
+    "Не переключайте записи загрузки, пока все условия не подтверждены.",
+    " · режим: plan-only."
+  ].join("\\n");
+  const localizedPreview = translate(updatePreview);
+  assert.match(localizedPreview, /поточний слот A · цільовий слот B/);
+  assert.match(localizedPreview, /Підпис пакета: не перевірено/);
+  assert.match(localizedPreview, /Етапи: перевірити підписані метадані та пакет/);
+  assert.match(localizedPreview, /Не перемикайте записи завантаження/);
   setLocale("ru");
   assert.equal(translate("Приложения"), "Приложения");
 });
