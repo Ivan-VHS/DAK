@@ -75,7 +75,7 @@ def main() -> int:
     require("Игровая лаборатория" in source, "Mora Boost does not explain its workspace")
     catalog = json.loads(APP_CATALOG.read_text(encoding="utf-8"))
     require(
-        any(item.get("id") == "mora-boost" and item.get("runtime") == "native-tk"
+        any(item.get("id") == "mora-boost" and item.get("runtime") == "pyside6"
             for item in catalog.get("built_in_apps", [])),
         "Mora Boost is missing from the native app catalogue",
     )
