@@ -83,8 +83,8 @@
       "name": "Qt Quick / QML",
       "area": "declarative-ui",
       "kind": "optional",
-      "status": "planned",
-      "reason": "Опциональные декларативные сцены и анимации поверх Qt; вводить отдельными модулями."
+      "status": "supported-extra",
+      "reason": "Optional native declarative animation and scene entry point; no browser runtime."
     },
     {
       "number": 11,
@@ -219,7 +219,7 @@
       "name": "Pygame CE",
       "area": "game-rendering",
       "kind": "domain-tool",
-      "status": "optional",
+      "status": "not-selected",
       "reason": "Изолированный игровой viewport или тестовая сцена по необходимости."
     },
     {
@@ -227,7 +227,7 @@
       "name": "Arcade",
       "area": "game-rendering",
       "kind": "domain-tool",
-      "status": "optional",
+      "status": "not-selected",
       "reason": "2D game framework для игровых приложений, не системного desktop."
     },
     {
@@ -235,7 +235,7 @@
       "name": "Panda3D",
       "area": "3d-engine",
       "kind": "domain-tool",
-      "status": "optional",
+      "status": "not-selected",
       "reason": "3D engine для отдельного viewport/tool; не shell compositor."
     },
     {
@@ -251,7 +251,7 @@
       "name": "Pyglet",
       "area": "media-windowing",
       "kind": "domain-tool",
-      "status": "optional",
+      "status": "not-selected",
       "reason": "Окна/OpenGL/media для специализированного renderer; запускать изолированно."
     },
     {
@@ -259,7 +259,7 @@
       "name": "ModernGL + imgui",
       "area": "gpu-rendering",
       "kind": "optional",
-      "status": "planned",
+      "status": "not-selected",
       "reason": "Специализированный renderer/overlay с отдельным GPU context."
     },
     {
@@ -267,7 +267,7 @@
       "name": "Vispy",
       "area": "scientific-gpu",
       "kind": "optional",
-      "status": "planned",
+      "status": "not-selected",
       "reason": "GPU scientific visualization; только по требованию аналитического приложения."
     },
     {
@@ -283,8 +283,8 @@
       "name": "Matplotlib",
       "area": "plotting",
       "kind": "optional",
-      "status": "supported-extra",
-      "reason": "Экспортные графики и статические scientific plots; не основной widget renderer."
+      "status": "not-selected",
+      "reason": "Static plot export is not a primary Mora dependency; PyQtGraph is the interactive Qt plot adapter."
     },
     {
       "number": 36,
