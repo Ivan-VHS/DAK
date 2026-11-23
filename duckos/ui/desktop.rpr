@@ -2,7 +2,7 @@
 # Shell commands are parsed into argument arrays before policy evaluation.
 # A command is never a shell string and cannot reach a host command interpreter.
 
-import "duckos/security/capabilities.rpr" as capabilities
+import "../security/capabilities.rpr" as capabilities
 
 export craft palette_valid(palette) {
     yield palette == "amber" or palette == "dark" or palette == "light" or palette == "pond" or palette == "drake"
