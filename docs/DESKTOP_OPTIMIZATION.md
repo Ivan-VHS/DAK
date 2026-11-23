@@ -40,6 +40,10 @@ duckos desktop startup restore folder:example.desktop
 
 On Windows, registry IDs use the \`registry:\` prefix; on Linux, user autostart files use \`folder:\`. Quote IDs in shells when they contain spaces or special characters.
 
+## Visual system
+
+The native maintenance window uses the same DuckOS 25-color semantic scale as Mora: the black/white/yellow identity triad plus ten neutral, six warm and six cool roles. Tree rows use lime for safe/ready, honey for review-needed, muted steel for unavailable and cyan for diagnostic information. The palette is defined in `mora/theme.json` and mirrored in the native `COLORS` mapping; no separate native theme is introduced.
+
 ## Implemented behavior
 
 - Read-only inventory of Desktop/Рабочий стол files, item count, file type, basic size and common temporary naming patterns.
