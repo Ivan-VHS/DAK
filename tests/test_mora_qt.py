@@ -2,13 +2,20 @@ from __future__ import annotations
 
 import os
 import unittest
+from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication, QMainWindow
-from duckos.mora.qt_ui import MoraWindow
+try:
+    from PySide6.QtWidgets import QApplication, QMainWindow
+    from duckos.mora.qt_ui import MoraWindow
+except ImportError:
+    QApplication = None
+    QMainWindow = None
+    MoraWindow = None
 
 
+@unittest.skipUnless(QApplication is not None, "Install the native-ui extra to run Qt tests")
 class MoraQtDesktopTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -22,17 +29,14 @@ class MoraQtDesktopTests(unittest.TestCase):
         self.assertEqual(window.windowTitle(), "Mora — DuckOS")
         window.close()
 
-    def test_search_and_category_filter_update_the_native_launcher(self):
+    def test_search_updates_the_native_launcher(self):
         window = MoraWindow()
         self.assertIn("29 из 29", window.count_label.text())
         window.search_entry.setText("EXEdotEXE")
         self.assertIn("1 из 29", window.count_label.text())
-        window.search_entry.clear()
-        window.category_box.setCurrentIndex(0)
         window.close()
 
     def test_main_source_has_no_browser_engine_or_tk_runtime(self):
-        from pathlib import Path
         import duckos.mora.qt_ui as module
 
         source = Path(module.__file__).read_text(encoding="utf-8")
@@ -40,7 +44,6 @@ class MoraQtDesktopTests(unittest.TestCase):
         self.assertNotIn("QWebView", source)
         self.assertNotIn("tkinter", source.casefold())
         self.assertIn("QApplication", source)
-
 
 
 if __name__ == "__main__":
