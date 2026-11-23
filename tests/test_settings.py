@@ -113,6 +113,17 @@ class SettingsStoreTests(unittest.TestCase):
         self.assertEqual(self.store.active_profile()[0], "Студия")
         self.assertIn("Студия", self.store.list_profiles())
 
+    def test_session_security_preferences_are_validated_and_saved(self):
+        self.store.save()
+        result = self.store.update_profile(
+            "Дом", "security",
+            {"auto_lock_minutes": 15, "lock_on_sleep": False},
+        )
+        self.assertFalse(result["system_changes_performed"])
+        security = self.store.active_profile()[1]["security"]
+        self.assertEqual(security["auto_lock_minutes"], 15)
+        self.assertFalse(security["lock_on_sleep"])
+
     def test_invalid_update_does_not_change_saved_state(self):
         self.store.save()
         before = self.store.load()
