@@ -46,3 +46,11 @@ test("demo data is explicitly declared", () => {
   assert.equal(registry.shell.data_policy, "fictional_demo_data");
   assert.equal(registry.integration.external_launch, "specified_not_enabled");
 });
+
+test("Serein is exposed as a native system utility, not a browser process launcher", () => {
+  assert.ok(html.includes('data-app="serein"'));
+  assert.ok(js.includes('case "serein"'));
+  assert.ok(registry.system_utilities.some((item) => item.id === "serein" && item.kind === "native_cli"));
+  assert.equal(registry.integration.external_launch, "implemented_cli_opt_in");
+  assert.ok(js.includes("Браузерная версия Mora не может запускать процессы ОС"));
+});
