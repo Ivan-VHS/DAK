@@ -234,8 +234,10 @@ class ProcessSupervisor:
         identity_options = _drop_identity(uid, gid, groups)
 
         with self.lock:
-            active = [record for record in self.records.values() if record.process.poll() is None]
-            if len(active) >= self.maximum:
+            for session_id, record in tuple(self.records.items()):
+                if record.process.poll() is not None:
+                    del self.records[session_id]
+            if len(self.records) >= self.maximum:
                 raise HostError(f"active process limit reached ({self.maximum})")
             process = self.popen(
                 list(argv),

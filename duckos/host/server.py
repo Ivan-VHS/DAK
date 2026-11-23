@@ -73,7 +73,13 @@ class _UnixRequestHandler(socketserver.StreamRequestHandler):
             }
         try:
             encoded = json.dumps(response, ensure_ascii=False, separators=(",", ":")).encode("utf-8") + b"\n"
-            self.wfile.write(encoded[:MAX_REQUEST_BYTES])
+            if len(encoded) > MAX_REQUEST_BYTES:
+                encoded = json.dumps({
+                    "jsonrpc": "2.0",
+                    "id": response.get("id"),
+                    "error": {"code": -32001, "message": "native host response exceeds 64 KiB"},
+                }, separators=(",", ":")).encode("utf-8") + b"\n"
+            self.wfile.write(encoded)
         except OSError:
             return
 
@@ -113,6 +119,7 @@ class _BridgeHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = True
 
     def __init__(self, address, broker: NativeHostBroker, tokens: dict[str, int], origins: set[str]):
+        self.address_family = socket.AF_INET6 if address[0] == "::1" else socket.AF_INET
         self.broker = broker
         self.tokens = tokens
         self.origins = origins
@@ -150,6 +157,9 @@ class _BridgeRequestHandler(BaseHTTPRequestHandler):
 
     def _send(self, status: int, payload: dict[str, Any]) -> None:
         body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        if len(body) > 2 * 1024 * 1024:
+            status = 500
+            body = b'{"error":"native host response exceeds 2 MiB"}'
         self._body_length = len(body)
         self._headers(status)
         self.wfile.write(body)
@@ -207,7 +217,10 @@ class _BridgeRequestHandler(BaseHTTPRequestHandler):
             self._send(413, {"error": "request body is missing or too large"})
             return
         try:
-            payload = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+            raw_body = self.rfile.read(int(raw_length))
+            if len(raw_body) != int(raw_length):
+                raise HostError("request body ended before Content-Length bytes were received")
+            payload = json.loads(raw_body.decode("utf-8"))
             result = self.server.broker.dispatch(uid, payload)
         except (HostError, UnicodeError, json.JSONDecodeError, OSError) as error:
             self._send(400, {"error": str(error)[:1024]})
