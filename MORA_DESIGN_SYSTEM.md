@@ -31,7 +31,7 @@ The standard workspace remains visually stable at the centre. Secondary content 
 
 Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone. Red is not used for routine emphasis.
 
-Light and Dark remain available as alternate themes. `mora/theme.json` is the portable, versioned source for all three palettes.
+Light and Dark remain available as alternate themes; Belle is an optional fourth profile. `mora/theme.json` is the portable, versioned source for all three palettes.
 
 ## Composition and geometry
 
@@ -65,3 +65,6 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 Mora remains a browser desktop shell, not a native process launcher. Native application capabilities and security boundaries remain owned by their respective projects; a permissioned launcher/IPC layer must be implemented and verified separately.
 
+## Optional Mora Belle profile
+
+Mora Belle is an optional fourth shell palette, not a replacement for Mora Amber. It uses blush, ivory, muted plum and sage semantic tokens from `mora/theme.json`. Scalloped edges, lace-like linework, bows and flower medallions are decorative framing only: they must never overlap content, hide state, reduce contrast or shrink interaction targets. Keyboard focus, WCAG AA contrast, text scaling and reduced-motion behavior remain mandatory. The original Amber, Dark and Light profiles remain available.
