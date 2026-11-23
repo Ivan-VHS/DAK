@@ -26,8 +26,10 @@ Qt Quick / QML is reserved for separate declarative scenes where it provides a c
 | TUI | Textual, optional | Terminal-based recovery and remote administration |
 | Terminal rendering | Rich, optional | Tables, logs, progress and structured output |
 | Interactive command input | Prompt Toolkit, optional | Completion and multiline terminal interaction |
-| Windows bridge | ctypes + optional PyWin32 | Carefully scoped Win32 functions behind a platform adapter |
-| Native ABI plugins | CFFI, optional | Explicitly registered and compiled plugin contracts |
+| Windows bridge | ctypes + optional PyWin32 | Read-only HWND title/class inspection behind a platform adapter |
+| Native ABI plugins | CFFI, optional | Availability detection and foundation for explicitly registered compiled adapters; arbitrary library loading is disabled |
+
+PyObjC is currently detected as an optional AppKit bridge on macOS; app enumeration/window control is not yet exposed by Mora. CFFI is an optional ABI foundation, not an arbitrary dynamic loader.
 
 The CPU/GPU rendering frameworks (Pygame, Arcade, Panda3D, Ursina, Pyglet, ModernGL, Vispy and Manim) are application or scene engines. They do not replace the desktop window manager or Qt controls.
 
