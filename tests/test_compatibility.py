@@ -7,9 +7,70 @@ import unittest
 from unittest.mock import patch
 
 from duckos import compatibility
+from duckos.cli import main as duckos_main
 
 
 class CompatibilityTests(unittest.TestCase):
+    def test_cli_forwards_wine_launch_arguments_to_the_host_runtime(self):
+        from contextlib import redirect_stdout
+        from io import StringIO
+
+        output = StringIO()
+        expected = {
+            "schema": "duckos.compatibility.launch.v1",
+            "engine": "wine",
+            "executable": "/tmp/game.exe",
+            "pid": 123,
+            "started": True,
+            "shell_used": False,
+        }
+        with patch("duckos.cli.host_compatibility.launch_program", return_value=expected) as launch:
+            with redirect_stdout(output):
+                result = duckos_main([
+                    "compatibility", "launch", "--engine", "wine",
+                    "--prefix", "games", "--", "/tmp/game.exe", "--windowed"
+                ])
+
+        self.assertEqual(result, 0)
+        launch.assert_called_once_with(
+            Path("/tmp/game.exe"),
+            engine="wine",
+            prefix="games",
+            compat_data=None,
+            arguments=["--windowed"],
+        )
+        self.assertIn('"started": true', output.getvalue())
+
+    def test_cli_routes_reactos_guest_options_without_shell_execution(self):
+        from contextlib import redirect_stdout
+        from io import StringIO
+
+        output = StringIO()
+        with patch("duckos.cli.host_compatibility.launch_reactos", return_value={
+            "schema": "duckos.compatibility.vm-launch.v1",
+            "guest": "ReactOS",
+            "started": True,
+            "network": "disabled",
+            "shell_used": False,
+        }) as launch:
+            with redirect_stdout(output):
+                result = duckos_main([
+                    "compatibility", "launch-reactos",
+                    "--disk", "/tmp/reactos.qcow2",
+                    "--iso", "/tmp/reactos.iso",
+                    "--memory-mib", "4096",
+                    "--cpus", "4",
+                ])
+
+        self.assertEqual(result, 0)
+        launch.assert_called_once_with(
+            Path("/tmp/reactos.qcow2"),
+            iso=Path("/tmp/reactos.iso"),
+            memory_mib=4096,
+            cpus=4,
+        )
+        self.assertIn('"network": "disabled"', output.getvalue())
+
     def test_prefix_names_are_bounded_and_cannot_traverse_directories(self):
         for name in ("", "../escape", "two words", ".hidden/../x", "x" * 49):
             with self.subTest(name=name), self.assertRaises(compatibility.CompatibilityError):
