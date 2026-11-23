@@ -13,6 +13,10 @@ endif()
 add_executable(serein src/main.cpp)
 target_link_libraries(serein PRIVATE serein_core)
 
+if(WIN32)
+    target_link_libraries(serein_core PRIVATE shell32 ole32)
+endif()
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(serein-tests ../tests/serein_tests.cpp)
