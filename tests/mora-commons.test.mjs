@@ -41,7 +41,7 @@ test("search and category filters return the expected catalogue entries", () => 
   assert.deepEqual(filterCommonsApps("", "workshop").map((app) => app.id), [
     "torquespec", "bore-thread", "garagebay-log", "blade-edge", "rigcheck"
   ]);
-  assert.ok(filterCommonsApps("моменты").some((app) => app.id === "torquespec"));
+  assert.ok(filterCommonsApps("затяжки").some((app) => app.id === "torquespec"));
   assert.ok(filterCommonsApps("бокс", "training").some((app) => app.id === "roundtimer-pro"));
   assert.equal(filterCommonsApps("несуществующий запрос").length, 0);
   assert.equal(filterCommonsApps("", "all").length, 15);
