@@ -50,7 +50,7 @@ Commands are registered as explicit `CommandSpec` entries with a word-based path
 
 Trusted in-process DuckOS components may register an extension through `TerminalService.register_command` or the constructor's `extra_commands` argument. Extension handlers receive an argument list and must return JSON-serializable data. There is no directory scanning, implicit import, remote plugin download or automatic execution of third-party extension code.
 
-The parser supports quoted arguments and preserves Windows path separators. It does not implement shell operators, command substitution, environment expansion, pipes, redirection, globbing or script evaluation. A line is dispatched only to a registered DuckOS command or one of the documented local terminal commands.
+Where the host provides Python's optional readline module, the interactive prompt offers Tab completion from the command registry and saved aliases. The parser supports quoted arguments and preserves Windows path separators. It does not implement shell operators, command substitution, environment expansion, pipes, redirection, globbing or script evaluation. A line is dispatched only to a registered DuckOS command or one of the documented local terminal commands.
 
 ## Local state
 
