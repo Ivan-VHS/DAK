@@ -588,7 +588,7 @@ function filesPanelMarkup() {
       '<button type="button" data-files-action="download" hidden>Скачать файл</button>' +
     '</section>' +
     '<p class="files-status" data-files-status role="status">Готово · локальное виртуальное пространство</p>' +
-    '<p class="files-footnote">Виртуальное пространство Duck Files хранится в профиле браузера. Оно не является доступом к диску или настоящей файловой системе DuckOS. Текстовые файлы ограничены 2 MiB.</p>';
+    '<p class="files-footnote" data-files-footnote>Виртуальное пространство Duck Files хранится в профиле браузера. Оно не является доступом к диску или настоящей файловой системе DuckOS. Текстовые файлы ограничены 2 MiB.</p>';
 }
 
 function filesAncestorChain(folderId) {
@@ -612,6 +612,8 @@ function navigateFiles(panel, folderId, remember = true) {
   state.currentFolder = folderId;
   currentDirectoryId = folderId;
   state.selectedId = null;
+  const search = panel.querySelector("[data-files-search]");
+  if (search) search.value = "";
   renderFileManager(panel);
 }
 
@@ -637,6 +639,14 @@ function renderFileManager(panel) {
   items = items.slice().sort((a, b) => a.type !== b.type ? (a.type === "folder" ? -1 : 1) : compare(a, b));
   const count = panel.querySelector("[data-files-count]");
   if (count) count.textContent = formatItemCount(items.length, currentLocale);
+  const footnote = panel.querySelector("[data-files-footnote]");
+  if (footnote && !virtualWorkspace.persistenceAvailable) {
+    footnote.textContent = "Временная сессия: браузерное хранилище недоступно или переполнено. Изменения исчезнут после закрытия страницы.";
+    footnote.classList.add("is-ephemeral");
+  } else if (footnote) {
+    footnote.textContent = "Виртуальное пространство Duck Files хранится в профиле браузера. Это не доступ к диску или настоящей файловой системе DuckOS. Текстовые файлы ограничены 2 MiB.";
+    footnote.classList.remove("is-ephemeral");
+  }
 
   const list = panel.querySelector("[data-files-list]");
   list.classList.toggle("grid-view", state.view === "grid");
@@ -724,7 +734,10 @@ function initializeFileManager(appWindow) {
 
 function setFilesStatus(panel, message) {
   const status = panel.querySelector("[data-files-status]");
-  if (status) status.textContent = message;
+  if (!status) return;
+  status.textContent = virtualWorkspace.persistenceAvailable
+    ? message
+    : message + " (только в памяти этой страницы; сохранение недоступно)";
 }
 
 function downloadWorkspaceFile(item) {
@@ -737,7 +750,7 @@ function downloadWorkspaceFile(item) {
   document.body.append(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function handleFilesAction(button) {
@@ -1043,6 +1056,13 @@ function handleContextAction(action) {
     else if (item.type === "file" && owner) {
       owner._filesState.selectedId = item.id;
       renderFileManager(owner);
+    }
+  } else if (action === "properties") {
+    if (item.type === "file" && owner) {
+      owner._filesState.selectedId = item.id;
+      renderFileManager(owner);
+    } else if (owner) {
+      setFilesStatus(owner.closest(".app-window"), item.name + " · папка · " + virtualWorkspace.list(item.id).length + " элементов");
     }
   } else if (action === "rename") {
     const name = window.prompt("Новое имя", item.name);
@@ -1692,6 +1712,7 @@ document.addEventListener("contextmenu", (event) => {
     contextOwnerPanel = fileItem.closest("[data-files-root]");
     const item = virtualWorkspace.get(contextTargetFile);
     const actions = [{ action: "open", label: item?.type === "folder" ? "Открыть папку" : "Предпросмотр" },
+      { action: "properties", label: "Свойства" },
       { action: "rename", label: "Переименовать", disabled: item?.readonly },
       { action: "delete", label: "Удалить", disabled: item?.readonly },
       { action: "download", label: "Скачать", disabled: item?.type !== "file" }];
