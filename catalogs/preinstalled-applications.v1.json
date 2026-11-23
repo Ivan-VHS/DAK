@@ -465,6 +465,7 @@
         "duckos/foundry.py",
         "duckos/foundry_ui.py",
         "duckos/cli.py",
+        "mora/index.html",
         "mora/app.js",
         "tests/test_foundry.py",
         "tests/test_foundry_cli.py"
