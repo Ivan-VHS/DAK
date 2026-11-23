@@ -1,5 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
-import { getLocale, setLocale, applyLocale, translate } from "./i18n.js";
+import { getLocale, setLocale, applyLocale, translate, setLocalizedText } from "./i18n.js";
 import { DEEP_TIME_EPOCH_YEARS, formatEpochYears } from "./chrono.js";
 import {
   createAtomicUpdatePlan,
@@ -140,20 +140,18 @@ function renderIntentPlan(appWindow, plan) {
   if (!plan || !plan.ok) {
     preview.hidden = true;
     approve.disabled = true;
-    status.textContent = plan ? translate(plan.message) : translate("План не подготовлен.");
+    setLocalizedText(status, plan ? plan.message : "План не подготовлен.");
     return;
   }
 
   for (const action of plan.actions) {
     const item = document.createElement("li");
-    item.textContent = translate(action.label);
+    setLocalizedText(item, action.label);
     steps.appendChild(item);
   }
   preview.hidden = false;
   approve.disabled = false;
-  status.textContent = getLocale() === "uk"
-    ? "План містить " + plan.actions.length + " дію(ї). Нічого не зміниться без вашого підтвердження."
-    : plan.summary;
+  setLocalizedText(status, plan.summary);
 }
 
 function executeApprovedPlan() {
@@ -186,7 +184,7 @@ function executeApprovedPlan() {
 
 function setRecoveryStatus(message) {
   const status = windowLayer.querySelector('[data-window="updates"] [data-recovery-status]');
-  if (status) status.textContent = translate(message);
+  if (status) setLocalizedText(status, message);
 }
 
 function updateSecurityPanel() {
@@ -694,7 +692,7 @@ function updateClock() {
 }
 
 function showToast(message) {
-  toastElement.textContent = translate(message);
+  setLocalizedText(toastElement, message);
   toastElement.classList.add("visible");
   window.clearTimeout(toastTimeout);
   toastTimeout = window.setTimeout(() => toastElement.classList.remove("visible"), 2200);
