@@ -126,7 +126,7 @@ class MoraRegistryTests(unittest.TestCase):
         registry = json.loads((root / "apps.json").read_text(encoding="utf-8"))
         self.assertEqual(registry["schema_version"], "1.3.0")
         self.assertGreaterEqual(len(registry["built_in_apps"]), 29)
-        self.assertTrue(all(app.get("runtime") == "native-tk" for app in registry["built_in_apps"]))
+        self.assertTrue(all(app.get("runtime") == "pyside6" for app in registry["built_in_apps"]))
         self.assertTrue(all("panel" not in app for app in registry["built_in_apps"]))
 
     def test_commons_catalog_is_valid_json(self):
