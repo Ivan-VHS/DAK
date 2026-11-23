@@ -6,32 +6,33 @@ Mora is the shared desktop identity for the Ivan-VHS application family. The she
 
 ## Visual direction
 
-The primary desktop profile is **Mora Amber**: warm amber-sand drapery with a repeating vertical fold rhythm, a deep near-black radial centre, graphite and walnut surfaces, muted mauve/grey textiles, subdued olive glass and a single controlled red critical marker. Depth comes from light and shadow, edge highlights and recognizable material response — not neon fill or scattered gradients.
+Mora uses one fixed DuckOS palette: black structural surfaces, white content and duck yellow for selection, focus and primary action. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
+
+The target composition is approximately 65% black, 25% white/graphite and 10% yellow. These are visual balance targets, not a requirement to recolor imported media or user content. Application identities share the same yellow accent; application meaning comes from names, glyphs and labels rather than a rainbow of per-app colors.
 
 The standard workspace remains visually stable at the centre. Secondary content and controls are arranged symmetrically around it; decorative treatment never obscures task content.
 
 ## Semantic palette
 
-| Token | Mora Amber | Role |
+| Token | Value | Role |
 |---|---|---|
-| Page | `#211913` | Deep walnut workspace |
-| Surface | `#33261D` | Primary panel |
-| Elevated | `#493326` | Secondary panel |
-| Text | `#FFF3E2` | Main copy |
-| Secondary | `#E7D2B8` | Supporting copy |
-| Muted | `#C4A98A` | Quiet metadata |
-| Brand | `#D58B3D` | Normal action and progress |
-| Brand hover / focus | `#EAA653` / `#F3C16B` | Hover and keyboard focus |
-| Brand text | `#211913` | Text on amber |
-| Secondary accent | `#526347` | Subdued olive / glass |
-| Border | `#75543A` | Warm structural edge |
-| Selection | `#60442E` | Selected content |
-| Critical | `#B64A40` | Destructive state / progress marker |
-| Critical text | `#FFF3E2` | Text on critical |
+| Page | `#080808` | Desktop background |
+| Surface | `#151515` | Primary panel |
+| Elevated | `#242424` | Secondary panel |
+| Text | `#FFFFFF` | Main copy |
+| Secondary | `#E5E5E5` | Supporting copy |
+| Muted | `#A6A6A6` | Quiet metadata |
+| Brand | `#FFD400` | Primary action and selection |
+| Brand hover / focus | `#FFE45C` | Hover and keyboard focus |
+| Brand text | `#080808` | Text on yellow |
+| Secondary accent | `#FFD400` | Shared application accent |
+| Border | `#3A3A3A` | Structural edge |
+| Selection | `#3A3100` | Selected surface |
+| Alert | `#FFD400` | Alert marker, accompanied by text and an icon |
 
-Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone. Red is not used for routine emphasis.
+Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone: alert, warning and critical states retain explicit labels, icons and text.
 
-Light and Dark remain available as alternate themes. `mora/theme.json` is the portable, versioned source for all three palettes.
+`mora/theme.json` is the canonical, versioned token source. It contains exactly one palette, `duck`. Saved legacy theme preferences are normalized to this profile; the shell has no theme-cycling control.
 
 ## Composition and geometry
 
