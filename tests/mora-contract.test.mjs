@@ -10,10 +10,10 @@ const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", i
 
 const appIds = [
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance"
+  "mora-ai", "security", "updates", "runtime", "compatibility", "workspace", "provenance"
 ];
 
-test("desktop exposes all seven first-party apps and six system tools", () => {
+test("desktop exposes all seven first-party apps and seven system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
@@ -25,7 +25,7 @@ test("desktop exposes all seven first-party apps and six system tools", () => {
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 8);
+  assert.equal(registry.system_services.length, 9);
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {
@@ -112,7 +112,9 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(css.includes(".dock-wrap::before"));
   assert.ok(css.includes("#526347"));
   assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v3-amber"));
+  assert.ok(serviceWorker.includes("mora-shell-v4-compatibility"));
+  assert.ok(serviceWorker.includes("./compatibility.js"));
+  assert.ok(serviceWorker.includes("./compatibility.css"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
