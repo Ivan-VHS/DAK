@@ -1,0 +1,11 @@
+{
+  "schema": "duckos.game-profile-catalog.v1",
+  "profiles": [
+    {
+      "id": "example-game",
+      "name": "Example Game",
+      "engine": "unknown",
+      "executables": ["DuckOSExampleGame.exe"]
+    }
+  ]
+}
