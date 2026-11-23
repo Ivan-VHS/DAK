@@ -73,6 +73,7 @@
         <button class="status-control" data-app="files" aria-label="Открыть Duck Files">Файлы</button>
         <button class="status-control" data-app="terminal" aria-label="Открыть виртуальный терминал">Терминал</button>
         <button class="status-control" data-app="settings" aria-label="Открыть настройки">Настройки</button>
+        <button class="status-control console-mode-trigger" type="button" data-console-mode-toggle aria-pressed="false">TV · ВЫКЛ</button>
       </nav>
       <div class="system-status" aria-label="Состояние системы">
         <button class="status-item status-trigger" type="button" data-panel-toggle="quick" aria-controls="quick-panel" aria-expanded="false" aria-label="Wi-Fi · быстрые настройки"><span class="status-dot wifi-dot"></span> Wi-Fi</button>
@@ -109,6 +110,13 @@
           <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1>Приложения</h1></div>
           <span class="tiny-counter">27 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
         </div>
+        <nav class="console-strip" aria-label="Навигация по разделам" data-console-strip>
+          <button type="button" class="console-tab is-active" data-console-target="app-grid" aria-current="page">Главная</button>
+          <button type="button" class="console-tab" data-console-target="extension-app-grid">Игры и коллекция</button>
+          <button type="button" class="console-tab" data-console-target="system-app-grid">Система</button>
+          <button type="button" class="console-tab" data-console-target="widgets">Медиа и виджеты</button>
+        </nav>
+        <div class="console-focus-hint">D-pad / левый стик · A выбрать · B назад · X детали · Y поиск</div>
         <div class="app-grid" id="app-grid">
           <button class="app-tile" data-app="cockos" style="--accent:#ffd400">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M5 25h5l4-11 7 23 7-30 7 27 4-9h4" /></svg></span>
@@ -172,6 +180,7 @@
           <button class="app-tile" data-app="mora-boost" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⚡</span></span><span class="app-name">Mora Boost</span><span class="app-subtitle">Игровая производительность</span></button>
           <button class="app-tile" data-app="desktop" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Duck Desktop</span><span class="app-subtitle">Оптимизация рабочего пространства</span></button>
           <button class="app-tile" data-app="mora-commons" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">✣</span></span><span class="app-name">Mora Commons</span><span class="app-subtitle">Единый каталог приложений</span></button>
+          <button class="app-tile" data-app="rights" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">©</span></span><span class="app-name">Rights Center</span><span class="app-subtitle">Лицензии и происхождение</span></button>
         </div>
       </section>
 
@@ -225,6 +234,7 @@
         <button type="button" class="start-app" data-app="files"><span>▤</span><strong>Duck Files</strong><small>Файлы и папки</small></button>
         <button type="button" class="start-app" data-app="terminal"><span>›_</span><strong>Terminal</strong><small>Локальные команды</small></button>
         <button type="button" class="start-app" data-app="settings"><span>⚙</span><strong>Settings</strong><small>Настройки оболочки</small></button>
+        <button type="button" class="start-app" data-app="rights"><span>©</span><strong>Rights Center</strong><small>Лицензии и происхождение</small></button>
         <button type="button" class="start-app" data-app="security"><span>◇</span><strong>Sentinel</strong><small>Права и доверие</small></button>
         <button type="button" class="start-app" data-app="updates"><span>↶</span><strong>Restore</strong><small>Восстановление</small></button>
         <button type="button" class="start-app" data-app="workspace"><span>⌘</span><strong>Control</strong><small>Среда Mora</small></button>
