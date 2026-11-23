@@ -41,6 +41,17 @@ def main() -> int:
     if native_shell["runtime"] != "pyside6":
         raise SystemExit("Mora must use the native PySide6 runtime")
 
+    if native_shell.get("path") != "duckos/mora/qt_ui.py":
+        raise SystemExit("Mora desktop path must target the PySide6 Qt Widgets shell")
+
+    toolkit_path = ROOT / "duckos" / "mora" / "data" / "gui-toolkits.json"
+    toolkits = json.loads(toolkit_path.read_text(encoding="utf-8"))
+    entries = toolkits.get("entries", [])
+    if len(entries) != 66 or sorted(item.get("number") for item in entries) != list(range(1, 67)):
+        raise SystemExit("Mora toolkit registry must contain exactly 66 uniquely numbered entries")
+    if toolkits.get("primary_runtime") != "PySide6" or toolkits.get("html_runtime") or toolkits.get("webview"):
+        raise SystemExit("Mora toolkit policy must keep PySide6 primary and browser runtimes disabled")
+
     for app in catalog["applications"]:
         if app["maturity_status"] != "specified":
             raise SystemExit(
