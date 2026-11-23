@@ -1,0 +1,33 @@
+name: Mora gaming integration
+
+on:
+  pull_request:
+    paths:
+      - "mora/**"
+      - "docs/GAMING_PERFORMANCE_INTEGRATION.md"
+      - "scripts/validate_mora_gaming.py"
+      - ".github/workflows/mora-gaming.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "mora/**"
+      - "docs/GAMING_PERFORMANCE_INTEGRATION.md"
+      - "scripts/validate_mora_gaming.py"
+      - ".github/workflows/mora-gaming.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check Mora JavaScript syntax
+        run: node --check mora/app.js
+      - name: Parse the IPC schema
+        run: python -m json.tool mora/contracts/oplague-gaming.v1.schema.json > /dev/null
+      - name: Validate the gaming capability contract
+        run: python scripts/validate_mora_gaming.py
