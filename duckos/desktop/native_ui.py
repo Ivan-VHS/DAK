@@ -22,6 +22,7 @@ COLORS = {
     "panel": "#262626",
     "text": "#FFFFFF",
     "body": "#E6E6DF",
+    "soft_text": "#F5F3E6",
     "muted": "#B8B8B8",
     "quiet": "#888888",
     "disabled": "#5E5E5E",
