@@ -33,6 +33,29 @@ class MoraHostTests(unittest.TestCase):
         )
         self.assertIsNone(mora_host.resolve_desktop_page("/unknown"))
 
+    def test_four_native_tools_are_part_of_the_same_mora_catalog(self) -> None:
+        expected = {"reaper", "oplague", "ventusample", "pytyliki"}
+        actual = {app["id"] for app in mora_host.APP_SPECS}
+        self.assertEqual(actual, expected)
+        for app in mora_host.APP_SPECS:
+            with self.subTest(app=app["id"]):
+                self.assertTrue(app["repo"])
+                self.assertTrue(app["fallback"]["name"])
+                self.assertTrue(app["fallback"]["capabilities"])
+
+    def test_mora_home_renders_web_and_native_groups_together(self) -> None:
+        page = (mora_host.ROOT / "prototype" / "mora-home.html").read_text(
+            encoding="utf-8"
+        )
+        for app_id in ("cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"):
+            with self.subTest(web_app=app_id):
+                self.assertIn(f"id:'{app_id}'", page)
+        for app_id in ("reaper", "oplague", "ventusample", "pytyliki"):
+            with self.subTest(native_app=app_id):
+                self.assertIn(f"id:'{app_id}'", page)
+        self.assertIn('id="native-grid"', page)
+        self.assertIn("launchNativeApp", page)
+
     def test_workspace_can_resolve_a_sibling_repository(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "DuckOS"
