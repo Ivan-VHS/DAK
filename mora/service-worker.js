@@ -1,9 +1,12 @@
-const CACHE = "mora-shell-v7-duck-palette";
-const ASSETS = [
+const CACHE = "mora-shell-v8-bilingual-platform";
+const REQUIRED_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./i18n.js",
+  "./chrono.js",
+  "./platform-contracts.js",
   "./commons-catalog.js",
   "./core.js",
   "./apps.json",
@@ -15,18 +18,30 @@ const ASSETS = [
 const SCOPE_PATH = new URL("./", self.location.href).pathname;
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
-  self.skipWaiting();
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    try {
+      await cache.addAll(REQUIRED_ASSETS);
+      const checks = await Promise.all(REQUIRED_ASSETS.map((asset) => cache.match(asset)));
+      if (checks.some((response) => !response || !response.ok)) {
+        throw new Error("The staged Mora shell cache is incomplete.");
+      }
+    } catch (error) {
+      await caches.delete(CACHE);
+      throw error;
+    }
+    self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(
-      keys
-        .filter((key) => key.startsWith("mora-shell-") && key !== CACHE)
-        .map((key) => caches.delete(key))
-    );
+    const keys = (await caches.keys())
+      .filter((key) => key.startsWith("mora-shell-"))
+      .sort()
+      .reverse();
+    // Keep the active cache and one known-good predecessor for recovery.
+    await Promise.all(keys.slice(2).map((key) => caches.delete(key)));
     await self.clients.claim();
   })());
 });
@@ -54,13 +69,19 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith((async () => {
     const cached = await caches.match(request);
-    const update = fetch(request).then((response) => {
-      if (response.ok && response.type === "basic") {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, copy));
-      }
-      return response;
-    });
-    return cached || update;
+    if (cached) {
+      event.waitUntil(fetch(request).then(async (response) => {
+        if (response.ok && response.type === "basic") {
+          const copy = response.clone();
+          await (await caches.open(CACHE)).put(request, copy);
+        }
+      }).catch(() => {}));
+      return cached;
+    }
+    const response = await fetch(request);
+    if (response.ok && response.type === "basic") {
+      await (await caches.open(CACHE)).put(request, response.clone());
+    }
+    return response;
   })());
 });
