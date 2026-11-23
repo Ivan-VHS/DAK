@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { VirtualWorkspace, MAX_WORKSPACE_FILE_BYTES } from "../mora/workspace.js";
+import { VirtualWorkspace, MAX_WORKSPACE_FILE_BYTES, WORKSPACE_STORAGE_KEY } from "../mora/workspace.js";
 
 function makeStorage() {
   const values = new Map();
@@ -54,4 +54,30 @@ test("file size limit is enforced in UTF-8 bytes", () => {
     /2 MiB/
   );
   assert.equal(workspace.createFile("small.txt", "ok").size, 2);
+});
+
+test("invalid names cannot escape the virtual folder tree", () => {
+  const workspace = new VirtualWorkspace(makeStorage());
+  for (const name of ["../secrets", "folder/name", "C:\\\\boot.ini", "a:b"]) {
+    assert.throws(() => workspace.createFolder(name), /name of up to 120 characters/);
+  }
+});
+
+test("a malformed or cyclic stored tree is discarded", () => {
+  const storage = makeStorage();
+  storage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify([
+    { id: "home", name: "Home", type: "folder", parentId: null },
+    { id: "a", name: "A", type: "folder", parentId: "b" },
+    { id: "b", name: "B", type: "folder", parentId: "a" }
+  ]));
+  const workspace = new VirtualWorkspace(storage);
+  assert.equal(workspace.get("a"), null);
+  assert.deepEqual(workspace.path("documents"), ["Home", "Documents"]);
+});
+
+test("memory-only mode is explicit when storage is unavailable", () => {
+  const workspace = new VirtualWorkspace(null);
+  const file = workspace.createFile("session.txt", "temporary");
+  assert.equal(workspace.persistenceAvailable, false);
+  assert.equal(workspace.get(file.id).content, "temporary");
 });
