@@ -338,12 +338,13 @@ class DuckBridgeTests(unittest.TestCase):
                 wait=True,
             )
             stored = list_games(library_path=library)["games"][0]
+            prefix_exists = Path(result["compatibility_data"]).is_dir()
 
         self.assertEqual(result["status"], "finished")
         self.assertEqual(result["backend"], "wine")
         self.assertEqual(result["exit_code"], 0)
         self.assertTrue(result["execution_started"])
-        self.assertTrue(Path(result["compatibility_data"]).is_dir())
+        self.assertTrue(prefix_exists)
         self.assertEqual(stored["last_exit_code"], 0)
         self.assertIsNotNone(stored["last_launched_at"])
 
