@@ -113,6 +113,25 @@
               "not_assessed",
               "cleared"
             ]
+          },
+          "prototype_status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "prototype_evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
@@ -175,6 +194,51 @@
       "type": "array",
       "items": {
         "type": "string"
+      }
+    },
+    "prototype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "maturity_status",
+        "runtime",
+        "storage",
+        "scope",
+        "app_boundaries"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "maturity_status": {
+          "enum": [
+            "not_assessed",
+            "specified",
+            "planned",
+            "partial",
+            "implemented",
+            "verified",
+            "deprecated",
+            "unsupported",
+            "not_applicable"
+          ]
+        },
+        "runtime": {
+          "const": "browser"
+        },
+        "storage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string"
+        },
+        "app_boundaries": {
+          "type": "object"
+        }
       }
     }
   }
