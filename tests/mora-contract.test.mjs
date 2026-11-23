@@ -43,6 +43,29 @@ test("desktop exposes 20 first-party apps and ten system tools", () => {
   }
 });
 
+test("TV mode exposes controller actions, large-card navigation and Rights Center", () => {
+  for (const marker of [
+    "data-console-mode-toggle", "data-console-strip", "data-console-target",
+    "D-pad / левый стик", "Rights Center", "data-rights-document",
+    "duckos rights verify-entitlement", "duckos rights verify-content",
+    "DEMO · НЕТ ЛИЦЕНЗИИ", "data-demo-game"
+  ]) {
+    assert.ok(html.includes(marker) || js.includes(marker), "missing console/rights marker: " + marker);
+  }
+  assert.ok(js.includes("createGamepadInput"));
+  assert.ok(js.includes("findDirectionalTarget"));
+  assert.ok(js.includes("capture-policy"));
+  assert.ok(js.includes("signature_status"));
+  assert.ok(css.includes(".console-mode"));
+  assert.ok(css.includes(".rights-status-grid"));
+  assert.ok(serviceWorker.includes("./console-navigation.js"));
+  assert.equal(registry.built_in_apps.find((app) => app.id === "rights")?.maturity,
+    "partial_native_entitlement_verifier_browser_metadata_only");
+  assert.equal(policy.capabilities.console_mode.maturity, "partial");
+  assert.equal(policy.capabilities.content_rights.maturity, "partial");
+  assert.equal(policy.capabilities.capture_enforcement.maturity, "specified");
+});
+
 test("required dashboard surfaces and launch affordances are present", () => {
   for (const id of ["hero-clock", "hero-date", "active-app", "app-grid", "system-app-grid", "window-layer", "toast"]) {
     assert.ok(html.includes('id="' + id + '"'), id + " is missing");
