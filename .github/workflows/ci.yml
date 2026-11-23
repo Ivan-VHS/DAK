@@ -2,7 +2,7 @@ name: DuckOS CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, native-mora-desktop]
   push:
     branches: [main, "feat/**"]
   workflow_dispatch:
