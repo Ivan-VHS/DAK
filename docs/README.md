@@ -12,7 +12,7 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and seven system tools, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
@@ -32,4 +32,4 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 ## Windows application compatibility
 
-[Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics, the current non-executing boundary and implementation status against the 66-point specification.
+[Windows compatibility foundation and host runtime](WINDOWS_COMPATIBILITY.md) documents PE inspection, managed Wine prefixes, the Wine/Proton/DOSBox host CLI, Winetricks components, external managers, ReactOS QEMU guests, and the boundaries of native NT/Win32 implementation.
