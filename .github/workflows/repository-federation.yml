@@ -1,0 +1,44 @@
+name: Repository federation
+
+on:
+  pull_request:
+    paths:
+      - '.gitmodules'
+      - 'projects/**'
+      - 'federation/**'
+      - 'schemas/repository-federation.v1.schema.json'
+      - 'tools/federate_repositories.py'
+      - 'tests/test_repository_federation.py'
+      - '.github/workflows/repository-federation.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.gitmodules'
+      - 'projects/**'
+      - 'federation/**'
+      - 'schemas/repository-federation.v1.schema.json'
+      - 'tools/federate_repositories.py'
+      - 'tests/test_repository_federation.py'
+      - '.github/workflows/repository-federation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-sources:
+    name: Validate pinned project sources
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate registry, Git links and .gitmodules
+        run: python tools/federate_repositories.py validate --json
+      - name: Confirm every repository is checked out at its pin
+        run: python tools/federate_repositories.py status --json
+      - name: Test federation policy
+        run: python -m unittest tests.test_repository_federation -v

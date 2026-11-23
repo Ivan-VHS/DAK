@@ -1,0 +1,118 @@
+{
+  "schema": "duckos.repository-federation.v1",
+  "version": 1,
+  "owner": "Ivan-VHS",
+  "integration_host": "DuckOS",
+  "checkout_strategy": "git-submodules",
+  "projects_root": "projects",
+  "repositories": [
+    {
+      "id": "pytyliki",
+      "repository": "Ivan-VHS/Pytyliki",
+      "url": "https://github.com/Ivan-VHS/Pytyliki.git",
+      "path": "projects/pytyliki",
+      "default_branch": "main",
+      "pinned_commit": "6a20e4d4bc02a62b6fe91a8d2717f6275b75661e",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "domain": "processor-systems",
+      "responsibility": "Processor and host inventory, bounded benchmarks, profiling evidence, static analysis and C11 systems utilities.",
+      "integration_mode": [
+        "versioned C ABI",
+        "JSON evidence reports",
+        "user-space inspection adapter"
+      ],
+      "runtime_boundary": "user-space",
+      "build_system": "CMake / C11",
+      "depends_on": [],
+      "optional_dependencies": [],
+      "integration_status": "source-pinned-only",
+      "auto_build": false,
+      "auto_execute": false
+    },
+    {
+      "id": "reaper",
+      "repository": "Ivan-VHS/Reaper",
+      "url": "https://github.com/Ivan-VHS/Reaper.git",
+      "path": "projects/reaper",
+      "default_branch": "main",
+      "pinned_commit": "02a1008bb071de50f2890d3f045aef0d50b9dc04",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "domain": "language-and-toolchain",
+      "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser and native toolchain contracts.",
+      "integration_mode": [
+        "user-space CLI",
+        "versioned JSON protocol",
+        "sandboxed extension ABI"
+      ],
+      "runtime_boundary": "user-space-only",
+      "build_system": "CMake / C17 plus Python reference runtime",
+      "depends_on": [],
+      "optional_dependencies": [],
+      "integration_status": "source-pinned-only",
+      "auto_build": false,
+      "auto_execute": false
+    },
+    {
+      "id": "oplague",
+      "repository": "Ivan-VHS/OPlague",
+      "url": "https://github.com/Ivan-VHS/OPlague.git",
+      "path": "projects/oplague",
+      "default_branch": "main",
+      "pinned_commit": "c0ebba86d8a851c8b1d6abbcd660909be4bd50ca",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "domain": "device-and-driver-evidence",
+      "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes and SBOM metadata.",
+      "integration_mode": [
+        "read-only user-space service",
+        "versioned JSON evidence reports"
+      ],
+      "runtime_boundary": "user-space-read-only",
+      "build_system": "Python 3.10+ / Tkinter; Windows live inventory",
+      "depends_on": [],
+      "optional_dependencies": [],
+      "integration_status": "source-pinned-only",
+      "auto_build": false,
+      "auto_execute": false
+    },
+    {
+      "id": "ventusample",
+      "repository": "Ivan-VHS/VentuSample",
+      "url": "https://github.com/Ivan-VHS/VentuSample.git",
+      "path": "projects/ventusample",
+      "default_branch": "main",
+      "pinned_commit": "f98aa06fd407823cb289acaf4590c864ff29cb0e",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "domain": "audio-and-dsp",
+      "responsibility": "C++20 procedural audio and sample generation, offline DSP, WAV/MIDI processing, synthesis, effects and analysis.",
+      "integration_mode": [
+        "versioned C/C++ library boundary",
+        "offline render jobs",
+        "JSON manifests"
+      ],
+      "runtime_boundary": "user-space-offline-by-default",
+      "build_system": "CMake / C++20; optional Qt 6 desktop",
+      "depends_on": [],
+      "optional_dependencies": [
+        "reaper"
+      ],
+      "integration_status": "source-pinned-only",
+      "auto_build": false,
+      "auto_execute": false
+    }
+  ],
+  "shared_rules": [
+    "Each upstream repository remains an independently versioned Git repository and is pinned by an exact commit in the DuckOS superproject.",
+    "Use git submodule update --init --recursive; never use --remote in a reproducible build or silently advance pins.",
+    "Do not copy upstream source files into DuckOS directories; preserve repository history, license files and notices.",
+    "Do not automatically build, load, launch or execute imported project content.",
+    "Reaper tools and extensions run only in user space with explicit filesystem scope, capabilities, quotas and audit.",
+    "Pytyliki and OPlague hardware inspection remains read-only; no clock, voltage, firmware, device or driver writes.",
+    "VentuSample processing is offline by default; real-time audio and device access need a separate reviewed OS service contract.",
+    "Validate licenses, provenance, schema versions and dependency boundaries before creating a native cross-project link.",
+    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image."
+  ]
+}
