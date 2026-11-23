@@ -143,7 +143,7 @@ def resolve_repository(app_id: str, config: dict[str, Any]) -> Path | None:
         Path.home() / "projects" / spec["repo"],
     ))
     for candidate in candidates:
-        if (candidate / "mora-app.json").is_file():
+        if candidate.is_dir():
             return candidate.resolve()
     return None
 
