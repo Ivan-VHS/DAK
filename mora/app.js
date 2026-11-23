@@ -1,6 +1,7 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
 import { VirtualWorkspace, MAX_WORKSPACE_FILE_BYTES } from "./workspace.js";
 import { applyTranslations, detectLocale, formatItemCount, LOCALE_STORAGE_KEY, translateText } from "./i18n.js";
+import { createGamepadInput, findDirectionalTarget, isEditableTarget } from "./console-navigation.js";
 
 import {
   RECOVERY_KEY,
@@ -48,7 +49,8 @@ const appDefinitions = {
   "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
   files: { name: "Duck Files", subtitle: "Файлы и папки", color: DUCK_ACCENT, glyph: "▤" },
   terminal: { name: "Terminal", subtitle: "Локальная командная строка", color: DUCK_ACCENT, glyph: "›_" },
-  settings: { name: "Settings", subtitle: "Настройки оболочки", color: DUCK_ACCENT, glyph: "⚙" }
+  settings: { name: "Settings", subtitle: "Настройки оболочки", color: DUCK_ACCENT, glyph: "⚙" },
+  rights: { name: "Rights Center", subtitle: "Лицензии и происхождение", color: DUCK_ACCENT, glyph: "©" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -60,6 +62,9 @@ const virtualWorkspace = new VirtualWorkspace();
 let currentDirectoryId = "home";
 let activeWorkspace = 1;
 let currentLocale = "ru";
+let consoleMode = false;
+let consoleAudioEnabled = true;
+let consoleAudioContext = null;
 let contextTargetFile = null;
 let contextOwnerPanel = null;
 const quickState = { wifi: true, bluetooth: true, focus: false, airplane: false };
@@ -71,6 +76,8 @@ const notifications = [
 try {
   const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
   currentLocale = detectLocale(savedLocale);
+  consoleMode = localStorage.getItem("duckos.mora.console-mode.v1") === "true";
+  consoleAudioEnabled = localStorage.getItem("duckos.mora.console-audio.v1") !== "false";
   const savedWorkspace = Number(localStorage.getItem("duckos.mora.active-workspace.v1"));
   if ([1, 2, 3].includes(savedWorkspace)) activeWorkspace = savedWorkspace;
 } catch {
@@ -915,6 +922,8 @@ function settingsPanelMarkup() {
       '<div class="settings-control"><div><strong>Режим фокуса</strong><small>Приглушить второстепенные виджеты</small></div>' +
         '<button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' +
         (preferences.focusMode ? "Включено" : "Выключено") + '</button></div>' +
+      '<div class="settings-control"><div><strong>Аудиосигналы TV</strong><small>Короткие сигналы фокуса и выбора</small></div><button class="permission-toggle" data-console-audio-toggle aria-pressed="' + String(consoleAudioEnabled) + '">' + (consoleAudioEnabled ? "Включено" : "Выключено") + '</button></div>' +
+      '<div class="settings-control"><div><strong>Режим ТВ</strong><small>Крупные карточки и управление D-pad / A / B / X / Y</small></div><button class="permission-toggle" data-console-mode-toggle aria-pressed="' + String(consoleMode) + '">' + (consoleMode ? "TV · ВКЛ" : "TV · ВЫКЛ") + '</button></div>' +
       '<div class="settings-control"><div><strong>Акцент DuckOS</strong><small>Единая палитра не переключается</small></div><strong>#FFD400</strong></div>' +
     '</div>' +
     '<div class="system-notice"><span class="notice-dot"></span><span>Только локальные настройки оболочки. Системные службы и оборудование браузеру не управляются.</span></div>';
@@ -1100,8 +1109,243 @@ function handleContextAction(action) {
   contextOwnerPanel = null;
 }
 
+function rightsPanelMarkup() {
+  return '<p class="window-kicker">DUCKOS · CONTENT RIGHTS</p>' +
+    '<h2 class="window-heading">Rights Center</h2>' +
+    '<p class="window-copy">Единое место для лицензий, сохранений, авторства и проверки целостности. Подлинность подтверждается только нативным модулем DuckOS с доверенным ключом издателя.</p>' +
+    '<div class="rights-status-grid">' +
+      '<article class="rights-status-card"><strong>Доверенные издатели</strong><span class="rights-status status-unconfigured">НЕ НАСТРОЕНО</span><small>Ключи издателей не встроены и не выдумываются.</small></article>' +
+      '<article class="rights-status-card"><strong>Нативная проверка</strong><span class="rights-status status-unverified">CLI / OPENSSL</span><small>Ed25519 + SHA-256 · проверка пакета до доверенного запуска.</small></article>' +
+      '<article class="rights-status-card"><strong>Офлайн-доступ</strong><span class="rights-status status-policy">SIGNED TOKEN</span><small>Кэшированный токен действует только до offline_valid_until.</small></article>' +
+      '<article class="rights-status-card"><strong>Журнал прав</strong><span class="rights-status status-policy">HASH CHAIN</span><small>Локальная цепочка событий; не неизменяемое хранилище.</small></article>' +
+    '</div>' +
+    '<section class="rights-section"><h3>Проверить метаданные</h3><p>Выберите токен лицензии или манифест контента. Браузер покажет только поля документа — статус всегда останется «НЕ ПРОВЕРЕНО».</p>' +
+      '<div class="rights-import-row"><label class="file-picker">Entitlement JSON<input type="file" data-rights-document="entitlement" accept=".json,application/json"></label>' +
+      '<label class="file-picker">Content manifest JSON<input type="file" data-rights-document="content" accept=".json,application/json"></label></div>' +
+      '<div class="rights-document-preview" data-rights-preview aria-live="polite"><strong>Документ не выбран</strong><span>Источник, издатель, владелец профиля/устройства, срок действия и права появятся здесь после чтения метаданных.</span></div>' +
+      '<p class="rights-warning">Просмотр JSON не проверяет подпись. Не используйте этот экран как доказательство покупки или разрешение на запуск.</p>' +
+    '</section>' +
+    '<section class="rights-section"><h3>Разделение прав</h3>' +
+      '<div class="rights-rule"><strong>Профиль</strong><span>Лицензия следует за владельцем аккаунта после повторной авторизации у издателя.</span></div>' +
+      '<div class="rights-rule"><strong>Домашнее устройство</strong><span>Подписанный home_device token может давать локальный офлайн-доступ всем профилям зарегистрированного устройства.</span></div>' +
+      '<div class="rights-rule"><strong>Сохранения и пользовательские ассеты</strong><span>Сейвы отделены от игрового пакета; авторство тем, аватаров и модов хранится отдельно и помечается как self-declared, пока не подтверждено издателем.</span></div>' +
+      '<div class="rights-rule"><strong>Перенос</strong><span>Экспорт сохраняет исходные подписанные манифесты и токены, но не переносит и не расширяет права. На новом устройстве лицензия перепроверяется.</span></div>' +
+      '<div class="rights-rule"><strong>Захват экрана и клипы</strong><span>Политика capture может быть прочитана, но блокировка записи требует нативного compositor/capture broker.</span></div>' +
+    '</section>' +
+    '<section class="rights-section"><h3>Нативные команды проверки</h3>' +
+      '<pre class="rights-cli">duckos rights verify-entitlement license.json --trusted-key studio=/path/studio.pub --profile-id PROFILE --device-id DEVICE --offline --action launch\n' +
+      'duckos rights verify-content manifest.json ./package --trusted-key studio=/path/studio.pub\n' +
+      'duckos rights build-transfer records.json rights-transfer.json\n' +
+      'duckos rights validate-transfer rights-transfer.json\n' +
+      'duckos rights audit-log</pre>' +
+      '<p class="rights-warning">До подключения доверенного launcher и compositor результат проверки не является системным запретом обходного запуска или записи сторонним приложением.</p>' +
+    '</section>';
+}
+
+function initializeRightsPanel(appWindow) {
+  const preview = appWindow.querySelector("[data-rights-preview]");
+  if (!preview) return;
+  appWindow.querySelector(".window-body").addEventListener("change", async (event) => {
+    const input = event.target.closest("[data-rights-document]");
+    if (!input) return;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      preview.textContent = "Документ превышает лимит 2 MiB.";
+      return;
+    }
+    preview.replaceChildren();
+    try {
+      const documentData = JSON.parse(await file.text());
+      if (!documentData || typeof documentData !== "object" || Array.isArray(documentData)) {
+        throw new Error("Корневой элемент должен быть JSON-объектом.");
+      }
+      const content = documentData.content && typeof documentData.content === "object" ? documentData.content : {};
+      const license = documentData.license && typeof documentData.license === "object" ? documentData.license : {};
+      const publisher = documentData.publisher ?? documentData.issuer ?? {};
+      const attribution = documentData.attribution ?? {};
+      const values = [
+        ["Файл", file.name],
+        ["Тип документа", documentData.schema ?? "неизвестный"],
+        ["Контент", content.title ?? content.id ?? "не указан"],
+        ["Тип контента", content.kind ?? "не указан"],
+        ["Издатель / подписант", publisher.id ?? "не указан"],
+        ["Профиль", license.profile_id ?? "не привязан"],
+        ["Домашнее устройство", license.home_device_id ?? "не привязано"],
+        ["Область лицензии", license.scope ?? "не указана"],
+        ["Права", Array.isArray(license.rights) ? license.rights.join(", ") : "не указаны"],
+        ["Срок", license.expires_at ?? "не указан"],
+        ["Создатель", typeof attribution.creator === "string" ? attribution.creator : (attribution.creator?.display_name ?? "не указан")],
+        ["Источник", attribution.source?.reference ?? attribution.source?.description ?? "не указан"]
+      ];
+      const heading = document.createElement("strong");
+      heading.textContent = input.dataset.rightsDocument === "entitlement" ? "Entitlement metadata" : "Content manifest metadata";
+      const state = document.createElement("span");
+      state.className = "rights-status status-unverified";
+      state.textContent = "НЕ ПРОВЕРЕНО · просмотр метаданных";
+      const list = document.createElement("dl");
+      list.className = "rights-meta-list";
+      values.forEach(([label, value]) => {
+        const row = document.createElement("div");
+        const term = document.createElement("dt");
+        const detail = document.createElement("dd");
+        term.textContent = label;
+        detail.textContent = String(value);
+        row.append(term, detail);
+        list.append(row);
+      });
+      preview.append(heading, state, list);
+    } catch (error) {
+      preview.textContent = "Не удалось прочитать JSON: " + (error.message || "неизвестная ошибка");
+    }
+  });
+}
+
+function consoleFocusableElements() {
+  return Array.from(document.querySelectorAll(
+    'button:not([disabled]),a[href],input:not([type="hidden"]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex="0"]'
+  )).filter((element) => {
+    if (element.closest("[hidden],.app-window[hidden]")) return false;
+    const rect = element.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
+}
+
+function moveConsoleFocus(direction) {
+  const elements = consoleFocusableElements();
+  const current = elements.includes(document.activeElement) ? document.activeElement : null;
+  const next = findDirectionalTarget(elements, current, direction);
+  if (!next) return;
+  next.focus({ preventScroll: true });
+  next.scrollIntoView?.({
+    block: "nearest",
+    inline: "nearest",
+    behavior: document.documentElement.classList.contains("reduce-motion") ? "auto" : "smooth"
+  });
+  playConsoleCue("move");
+}
+
+function playConsoleCue(kind = "move") {
+  if (!consoleMode || !consoleAudioEnabled) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  try {
+    consoleAudioContext ??= new AudioContextClass();
+    if (consoleAudioContext.state === "suspended") consoleAudioContext.resume().catch(() => {});
+    const oscillator = consoleAudioContext.createOscillator();
+    const gain = consoleAudioContext.createGain();
+    const frequency = kind === "select" ? 760 : kind === "back" ? 360 : kind === "details" ? 620 : 520;
+    const now = consoleAudioContext.currentTime;
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.028, now + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+    oscillator.connect(gain);
+    gain.connect(consoleAudioContext.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.06);
+  } catch {
+    // Audio feedback is optional; unsupported browsers keep silent navigation.
+  }
+}
+
+function handleConsoleAction(action) {
+  const active = document.activeElement;
+  if (action === "select") {
+    const target = active?.closest?.("button,a,[role='button']");
+    if (target) {
+      target.click();
+      playConsoleCue("select");
+    }
+    return;
+  }
+  if (action === "back") {
+    const menu = document.getElementById("desktop-context-menu");
+    if (menu && !menu.hidden) { menu.hidden = true; playConsoleCue("back"); return; }
+    const flyout = document.querySelector(".desktop-flyout:not([hidden])");
+    if (flyout) {
+      toggleFlyout("start", false); toggleFlyout("quick", false);
+      toggleFlyout("clock", false); toggleFlyout("notifications", false);
+      playConsoleCue("back");
+      return;
+    }
+    const filesWindow = windowLayer.querySelector('[data-window="files"]:not([hidden])');
+    const files = filesWindow?.querySelector("[data-files-root]");
+    if (files?._filesState) {
+      const state = files._filesState;
+      if (state.back.length) {
+        handleFilesAction(filesWindow.querySelector('[data-files-action="back"]'));
+        playConsoleCue("back");
+        return;
+      }
+      if (state.currentFolder !== "home") {
+        handleFilesAction(filesWindow.querySelector('[data-files-action="up"]'));
+        playConsoleCue("back");
+        return;
+      }
+    }
+    closeTopWindow();
+    playConsoleCue("back");
+    return;
+  }
+  if (action === "details") {
+    const file = active?.closest?.("[data-file-id]");
+    if (file) {
+      file.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, clientX: 30, clientY: 80 }));
+      playConsoleCue("details");
+      return;
+    }
+    const game = active?.closest?.("[data-demo-game]");
+    if (game) {
+      openApp("rights");
+      playConsoleCue("details");
+      return;
+    }
+    const app = active?.closest?.("[data-app]");
+    if (app) {
+      openApp(app.dataset.app === "illidia" ? "rights" : app.dataset.app);
+      playConsoleCue("details");
+    }
+    return;
+  }
+  if (action === "search") {
+    const filesSearch = windowLayer.querySelector('[data-window="files"]:not([hidden]) [data-files-search]');
+    if (filesSearch) {
+      filesSearch.focus();
+    } else {
+      toggleFlyout("start", true);
+      document.querySelector("[data-start-search]")?.focus();
+    }
+    playConsoleCue("select");
+  }
+}
+
+function setConsoleMode(enabled) {
+  consoleMode = Boolean(enabled);
+  document.documentElement.classList.toggle("console-mode", consoleMode);
+  try { localStorage.setItem("duckos.mora.console-mode.v1", String(consoleMode)); } catch {}
+  document.querySelectorAll("[data-console-mode-toggle]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(consoleMode));
+    button.textContent = consoleMode ? "TV · ВКЛ" : "TV · ВЫКЛ";
+  });
+  if (consoleMode) gamepadInput.start();
+  else gamepadInput.stop();
+  showToast(consoleMode ? "Режим ТВ включён · D-pad / A / B / X / Y" : "Обычный режим Mora");
+}
+
+const gamepadInput = createGamepadInput({
+  onAction: handleConsoleAction,
+  onDirection: moveConsoleFocus,
+  onConnection: (connected) => {
+    if (connected) showToast("Геймпад обнаружен · можно управлять DuckOS");
+  }
+});
+
 function panelMarkup(appId) {
   switch (appId) {
+    case "rights":
+      return rightsPanelMarkup();
     case "files":
       return filesPanelMarkup();
     case "terminal":
@@ -1328,6 +1572,7 @@ function openApp(appId) {
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
   if (appId === "mora-commons") initializeCommonsPanel(appWindow);
+  if (appId === "rights") initializeRightsPanel(appWindow);
   if (appId === "files") initializeFileManager(appWindow);
   if (appId === "terminal") initializeTerminal(appWindow);
   applyTranslations(appWindow, currentLocale);
@@ -1415,6 +1660,15 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 }
 
 document.addEventListener("click", (event) => {
+  const consoleAudioToggle = event.target.closest("[data-console-audio-toggle]");
+  if (consoleAudioToggle) {
+    consoleAudioEnabled = !consoleAudioEnabled;
+    try { localStorage.setItem("duckos.mora.console-audio.v1", String(consoleAudioEnabled)); } catch {}
+    consoleAudioToggle.setAttribute("aria-pressed", String(consoleAudioEnabled));
+    consoleAudioToggle.textContent = consoleAudioEnabled ? "Включено" : "Выключено";
+    showToast(consoleAudioEnabled ? "Аудиосигналы включены." : "Аудиосигналы выключены.");
+    return;
+  }
   const panelToggle = event.target.closest("[data-panel-toggle]");
   if (panelToggle) {
     toggleFlyout(panelToggle.dataset.panelToggle);
@@ -1709,6 +1963,19 @@ windowLayer.addEventListener("dblclick", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (consoleMode && !isEditableTarget(event.target)) {
+    const key = event.key.toLowerCase();
+    if (["arrowup", "arrowdown", "arrowleft", "arrowright"].includes(key)) {
+      event.preventDefault();
+      moveConsoleFocus(key.slice(5));
+      return;
+    }
+    if (["a", "b", "x", "y"].includes(key)) {
+      event.preventDefault();
+      handleConsoleAction(({ a: "select", b: "back", x: "details", y: "search" })[key]);
+      return;
+    }
+  }
   if (event.altKey && !event.ctrlKey && !event.metaKey && ["1", "2", "3"].includes(event.key)) {
     event.preventDefault();
     switchWorkspace(Number(event.key));
@@ -2013,6 +2280,7 @@ document.addEventListener("keydown", (event) => {
 
 applyPreferences();
 switchWorkspace(activeWorkspace);
+setConsoleMode(consoleMode);
 updateClock();
 window.setInterval(updateClock, 1000);
 updateDemoMetrics();
