@@ -418,7 +418,7 @@ for ($i = 0; $i -lt $result.Updates.Count; $i++) {
 }
 if ($matches.Count -ne 1) { throw 'The exact driver update ID was not found exactly once.' }
 $update = $matches[0]
-if (-not $update.EulaAccepted) { $update.AcceptEula() }
+if (-not $update.EulaAccepted) { throw 'The update EULA has not been accepted. Review and accept it through Windows Update Settings, then run this command again.' }
 $collection = New-Object -ComObject Microsoft.Update.UpdateColl
 [void]$collection.Add($update)
 $downloader = $session.CreateUpdateDownloader()
