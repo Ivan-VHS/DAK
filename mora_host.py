@@ -292,6 +292,12 @@ def launch_app(app_id: str) -> dict[str, Any]:
 STATIC_ASSETS: dict[str, tuple[Path, str]] = {
     "/mora/": (ROOT / "mora" / "index.html", "text/html; charset=utf-8"),
     "/mora/index.html": (ROOT / "mora" / "index.html", "text/html; charset=utf-8"),
+    "/mora/styles.css": (ROOT / "mora" / "styles.css", "text/css; charset=utf-8"),
+    "/mora/app.js": (ROOT / "mora" / "app.js", "text/javascript; charset=utf-8"),
+    "/mora/core.js": (ROOT / "mora" / "core.js", "text/javascript; charset=utf-8"),
+    "/mora/apps.json": (ROOT / "mora" / "apps.json", "application/json; charset=utf-8"),
+    "/mora/system-policy.json": (ROOT / "mora" / "system-policy.json", "application/json; charset=utf-8"),
+    "/mora/theme.json": (ROOT / "mora" / "theme.json", "application/json; charset=utf-8"),
     "/mora/mora.css": (ROOT / "mora" / "mora.css", "text/css; charset=utf-8"),
     "/mora/mora.js": (ROOT / "mora" / "mora.js", "application/javascript; charset=utf-8"),
     "/mora/service-worker.js": (ROOT / "mora" / "service-worker.js", "application/javascript; charset=utf-8"),
