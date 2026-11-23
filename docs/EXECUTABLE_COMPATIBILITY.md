@@ -7,7 +7,7 @@
 
 ## Scope
 
-Mora Compatibility Center is the user-facing place to inspect Windows PE, DOS MZ/COM, ELF and Mach-O files, understand possible execution paths, and select a host-provided runtime when DuckOS has a trusted native process manager.
+Mora Compatibility Center is the user-facing place to inspect Windows PE, DOS MZ/COM, ELF and Mach-O files, understand possible execution paths, and view capabilities advertised by a future trusted native process manager.
 
 The fifteen operating-system profiles in [the compatibility catalog](../catalogs/compatibility-targets.v1.json) are reference material. They do not mean that DuckOS contains the corresponding kernels, APIs, emulators or compatibility layers.
 
@@ -52,7 +52,9 @@ A future native Mora host may expose a trusted object at globalThis.duckos.compa
 }
 ```
 
-The browser UI passes an opaque artifact identifier and a runtime identifier advertised by the host. It does not pass filesystem paths, shell fragments, executable search paths or a command string. Launch always follows an explicit user action and confirmation.
+The current browser UI only calls getCapabilities() to display host and runtime information when the optional bridge is present. It does not call pickExecutable() or launch(). The latter methods describe a future native integration contract.
+
+A future launch UI must pass an opaque artifact identifier and a runtime identifier advertised by the host. It must not pass filesystem paths, shell fragments, executable search paths or a command string. Launch must follow an explicit user action and confirmation.
 
 This bridge is a **contract**, not a currently shipped native service. Do not add a JavaScript shim that pretends to create host processes.
 
