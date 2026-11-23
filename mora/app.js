@@ -1663,7 +1663,7 @@ document.addEventListener("input", (event) => {
   const startSearch = event.target.closest("[data-start-search]");
   if (startSearch) {
     const query = startSearch.value.trim().toLocaleLowerCase();
-    document.querySelectorAll("[data-start-app]").forEach((item) => {
+    document.querySelectorAll(".start-app").forEach((item) => {
       const haystack = item.textContent.toLocaleLowerCase();
       item.hidden = Boolean(query) && !haystack.includes(query);
     });
