@@ -93,13 +93,13 @@ const APP_ALIASES = [
   { id: "po", pattern: /(?:^|\s)po(?:$|\s)/i },
   { id: "illidia", pattern: /illidia/i },
   { id: "unify", pattern: /unify/i },
-  { id: "mora-ai", pattern: /mora\s*ai|помощник|агент/i },
-  { id: "security", pattern: /sentinel|безопасност/i },
-  { id: "updates", pattern: /restore|обновлен|восстановлен/i },
-  { id: "runtime", pattern: /bridge|совместим|runtime|\.exe/i },
-  { id: "workspace", pattern: /control|настройк|системн/i },
-  { id: "provenance", pattern: /proof|подлин|происхожд|провер.*файл/i },
-  { id: "mora-boost", pattern: /mora\s*boost|игров(ая|ую)\s+лаборатор|game\s*boost/i }
+  { id: "mora-ai", pattern: /mora\s*ai|помощник|помічник|агент/i },
+  { id: "security", pattern: /sentinel|безопасност|безпек/i },
+  { id: "updates", pattern: /restore|обновлен|восстановлен|оновлен|відновлен/i },
+  { id: "runtime", pattern: /bridge|совместим|сумісн|runtime|\.exe/i },
+  { id: "workspace", pattern: /control|настройк|налаштув|системн/i },
+  { id: "provenance", pattern: /proof|подлин|происхожд|справж|походжен|провер.*файл|перевір.*файл/i },
+  { id: "mora-boost", pattern: /mora\s*boost|игров(ая|ую)\s+лаборатор|ігров(а|у)\s+лаборатор|game\s*boost/i }
 ];
 
 export function buildIntentPlan(rawInput) {
@@ -114,14 +114,14 @@ export function buildIntentPlan(rawInput) {
   const text = input.toLocaleLowerCase("ru-RU");
   const actions = [];
 
-  if (/(включи|активируй|запусти).{0,24}(фокус|не беспокоить)|режим фокуса/u.test(text)) {
+  if (/(включи|активируй|запусти|увімкни|активуй).{0,24}(фокус|не беспокоить|фокусування)|режим фокуса|режим фокусування/u.test(text)) {
     actions.push({
       type: "set",
       setting: "focusMode",
       value: true,
       label: "Включить режим фокуса"
     });
-  } else if (/(выключи|отключи).{0,24}(фокус|не беспокоить)/u.test(text)) {
+  } else if (/(выключи|отключи|вимкни|відключи).{0,24}(фокус|не беспокоить|фокусування)/u.test(text)) {
     actions.push({
       type: "set",
       setting: "focusMode",
@@ -130,21 +130,21 @@ export function buildIntentPlan(rawInput) {
     });
   }
 
-  if (/(эконом|энергосбереж|меньше энергии|бережн.*питани)/u.test(text)) {
+  if (/(эконом|энергосбереж|меньше энергии|бережн.*питани|економ|енергозбереж|менше енергії|бережн.*живлен)/u.test(text)) {
     actions.push({
       type: "set",
       setting: "powerProfile",
       value: "saver",
       label: "Выбрать профиль экономии энергии"
     });
-  } else if (/(сбалансирован.*режим|обычн.*профиль)/u.test(text)) {
+  } else if (/(сбалансирован.*режим|обычн.*профиль|збалансован.*режим|звичайн.*профіль)/u.test(text)) {
     actions.push({
       type: "set",
       setting: "powerProfile",
       value: "balanced",
       label: "Выбрать сбалансированный профиль"
     });
-  } else if (/(максимальн.*производительност|профиль производительност)/u.test(text)) {
+  } else if (/(максимальн.*производительност|профиль производительност|максимальн.*продуктивност|профіль продуктивності)/u.test(text)) {
     actions.push({
       type: "set",
       setting: "powerProfile",
@@ -153,14 +153,14 @@ export function buildIntentPlan(rawInput) {
     });
   }
 
-  if (/(уменьш|сниз|отключ|без).{0,24}анимац/u.test(text)) {
+  if (/(уменьш|сниз|отключ|без|зменш|вимкн).{0,24}анимац|без.{0,24}руху/u.test(text)) {
     actions.push({
       type: "set",
       setting: "reducedMotion",
       value: true,
       label: "Снизить движение интерфейса"
     });
-  } else if (/(обычн|включ).{0,24}анимац/u.test(text)) {
+  } else if (/(обычн|включ|звичайн|увімк).{0,24}анимац/u.test(text)) {
     actions.push({
       type: "set",
       setting: "reducedMotion",
@@ -169,7 +169,7 @@ export function buildIntentPlan(rawInput) {
     });
   }
 
-  const openMatch = text.match(/(?:открой|запусти|перейди в)\s+(.+)/u);
+  const openMatch = text.match(/(?:открой|запусти|перейди в|відкрий|перейди до)\s+(.+)/u);
   if (openMatch) {
     const destination = APP_ALIASES.find((entry) => entry.pattern.test(openMatch[1]));
     if (destination) {
