@@ -98,6 +98,7 @@ const APP_ALIASES = [
   { id: "workspace", pattern: /control|настройк|системн/i },
   { id: "provenance", pattern: /proof|подлин|происхожд|провер.*файл/i },
   { id: "mora-boost", pattern: /mora\s*boost|игров(ая|ую)\s+лаборатор|game\s*boost/i }
+  { id: "mora-belle", pattern: /mora\\s*belle|личн.*пространств|женск.*приложен/i },
 ];
 
 export function buildIntentPlan(rawInput) {
