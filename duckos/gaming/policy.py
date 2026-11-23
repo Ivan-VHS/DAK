@@ -178,6 +178,25 @@ def assess_capabilities(
     }
 
 
+def assess_capability_document(document: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Accept native provider maps or versioned evidence documents from adapters."""
+    if document is None:
+        return assess_capabilities({})
+    if not isinstance(document, dict):
+        raise GamingPolicyError("capability document must be an object")
+    if document.get("schema") == "oplague.duckos-gaming-evidence.v1":
+        if document.get("system_mutations_performed") is not False:
+            raise GamingPolicyError("OPlague evidence must be read-only")
+        return assess_capabilities(document.get("providers"))
+    if document.get("schema") == "duckos.gaming-provider-evidence.v1":
+        return assess_capabilities(document.get("capabilities"))
+    if "capabilities" in document:
+        return assess_capabilities(document["capabilities"])
+    if "providers" in document and isinstance(document["providers"], dict):
+        return assess_capabilities(document["providers"])
+    return assess_capabilities(document)
+
+
 def plan_session_transition(
     current_state: str,
     event: str,
