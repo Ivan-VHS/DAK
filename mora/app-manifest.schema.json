@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/mora/app-manifest.schema.json",
+  "title": "Mora external application manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "application_id", "project", "display_name", "description", "launch", "policy", "maturity", "capabilities"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "application_id": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$" },
+    "project": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "description": { "type": "string", "minLength": 1, "maxLength": 240 },
+    "launch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "platforms", "entrypoint"],
+      "properties": {
+        "kind": { "enum": ["local_process", "static_entrypoint"] },
+        "platforms": { "type": "array", "items": { "enum": ["windows", "linux", "macos"] }, "uniqueItems": true },
+        "entrypoint": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "runtime": { "type": "string", "maxLength": 80 },
+        "arguments": { "type": "array", "items": { "type": "string", "maxLength": 240 }, "maxItems": 32 },
+        "working_directory": { "type": "string", "maxLength": 240 }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["integration_policy", "confirmation_required", "shell_interpolation"],
+      "properties": {
+        "integration_policy": { "enum": ["required", "optional", "opt_in", "disabled", "not_applicable"] },
+        "confirmation_required": { "const": true },
+        "shell_interpolation": { "const": false },
+        "trust_source": { "enum": ["operator_installed_project", "bundled_os_component"] }
+      }
+    },
+    "maturity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maturity_status", "verification_status"],
+      "properties": {
+        "maturity_status": { "enum": ["specified", "planned", "partial", "implemented", "verified"] },
+        "verification_status": { "enum": ["not_run", "passed", "failed", "blocked", "skipped", "not_applicable"] }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 80 },
+      "maxItems": 32
+    }
+  }
+}
