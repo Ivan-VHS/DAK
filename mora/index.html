@@ -73,6 +73,14 @@
         <span class="status-item"><span class="status-dot wifi-dot"></span> Wi-Fi</span>
         <span class="status-item battery"><span class="battery-shape"><i></i></span> 86%</span>
         <button class="status-control" data-app="workspace" aria-label="Открыть параметры системы">Система</button>
+        <button class="status-control search-control" id="command-search-trigger" type="button" aria-label="Быстрый поиск" title="Ctrl+K">⌕</button>
+        <label class="locale-control" title="Язык интерфейса">
+          <span class="visually-hidden">Язык интерфейса</span>
+          <select id="language-select" aria-label="Язык интерфейса">
+            <option value="ru">RU</option>
+            <option value="uk">UA</option>
+          </select>
+        </label>
         <span class="status-control theme-control" role="img" aria-label="Единая палитра DuckOS: чёрный, белый и жёлтый" title="Чёрный · белый · жёлтый">DUCK</span>
         <time id="status-time">--:--</time>
       </div>
@@ -193,6 +201,20 @@
       </nav>
     </footer>
 
+    <div class="command-overlay" id="command-overlay" hidden>
+      <div class="command-backdrop" data-command-close></div>
+      <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+        <div class="command-search-row">
+          <span aria-hidden="true">⌕</span>
+          <label class="visually-hidden" id="command-title" for="command-search-input">Быстрый поиск</label>
+          <input id="command-search-input" type="search" autocomplete="off" spellcheck="false"
+            placeholder="Открыть приложение или настройку…">
+          <kbd>ESC</kbd>
+        </div>
+        <div class="command-results" id="command-results" role="listbox" aria-label="Результаты поиска"></div>
+        <p class="command-hint">Ctrl+K — поиск · Ctrl+, — Control · Ctrl+W — закрыть окно</p>
+      </section>
+    </div>
     <div class="window-layer" id="window-layer" aria-live="polite"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </main>
