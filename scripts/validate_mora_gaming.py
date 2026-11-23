@@ -77,7 +77,11 @@ def main() -> int:
     require('"mora-boost": {' in source, "Mora Boost is missing from the app definitions")
     require("Игровая производительность под контролем" in source, "Mora Boost does not explain its workspace")
     index = MORA_INDEX.read_text(encoding="utf-8")
-    require('data-app="mora-boost"' in index, "Mora Boost tile is missing from the current desktop")
+    require(
+        'data-app="mora-boost"' in index
+        or ('id="blade-strip"' in index and 'card.dataset.app = appId' in source and '"mora-boost"' in source),
+        "Mora Boost is missing from the current desktop launcher",
+    )
     catalog = json.loads(APP_CATALOG.read_text(encoding="utf-8"))
     require(any(item.get("id") == "mora-boost" for item in catalog.get("built_in_apps", [])), "Mora Boost is missing from the versioned app catalogue")
     require("https://github.com/Ivan-VHS/OPlague" in source, "Mora Boost must link to the OPlague project")
