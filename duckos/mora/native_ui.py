@@ -167,6 +167,7 @@ class MoraWindow:
         self._sidebar_button(sidebar, "✦   Mora AI", lambda: self.open_app("mora-ai"))
         self._sidebar_button(sidebar, "◇   Sentinel", lambda: self.open_app("security"))
         self._sidebar_button(sidebar, "✣   Mora Commons", lambda: self.open_app("mora-commons"))
+        self._sidebar_button(sidebar, "⌘   Reaper Studio", lambda: self.open_app("reaper"))
 
         tk.Frame(sidebar, background=BORDER, height=1).pack(fill="x", pady=20)
         tk.Label(sidebar, text="СИСТЕМНЫЙ СТАТУС", background=SURFACE,
@@ -350,14 +351,14 @@ class MoraWindow:
         self._render_apps()
 
     def _app_info(self, app_id: str) -> tuple[dict[str, Any], str, str]:
-        app = self.apps_by_id.get(app_id, {"id": app_id, "name": app_id, "category": "system"})
+        app = self.apps_by_id.get(app_id, {"id": app_id, "name": "Reaper", "category": "developer"})
         subtitle, description = APP_DESCRIPTIONS.get(
-            app_id, ("Нативное приложение", "Описание приложения пока не добавлено.")
+            app_id, ("Инструменты разработчика", "Открывает отдельное нативное окно Reaper Studio.")
         )
         return app, subtitle, description
 
     def open_app(self, app_id: str) -> None:
-        if app_id not in self.apps_by_id:
+        if app_id not in self.apps_by_id and app_id != "reaper":
             messagebox.showwarning("Mora", "Это приложение не зарегистрировано.", parent=self.root)
             return
         app, subtitle, description = self._app_info(app_id)
@@ -709,6 +710,7 @@ class MoraWindow:
             listing.delete(0, "end")
             for app in matches:
                 listing.insert("end", f"{app.get('name')}  ·  {app.get('subtitle')}")
+            details.configure(state="normal")
             details.delete("1.0", "end")
             if not matches:
                 details.insert("end", "Нет совпадений.")
