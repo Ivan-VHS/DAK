@@ -104,3 +104,20 @@ The release bundle is a component archive, not a bootable image. Deployment plan
 - [ ] Native implementations of the proposed DAK services, system-wide persistent storage, archive extraction, native audio, GPS/navigation, game process creation, OS installation and kernel-enforced capabilities.
 
 These are partial browser-shell features. The new DAK package catalog remains at design maturity and does not indicate that the corresponding native services ship in an OS image.
+
+
+## Duck Desktop optimizer — 2026-11-23
+
+- [x] Read-only Desktop/Рабочий стол inventory, item count and temporary-name hints.
+- [x] Ten-item default clutter threshold and machine-readable audit report.
+- [x] Explicitly confirmed move-to-Inbox operation for regular files, with collision-safe names and no deletion.
+- [x] Current-user startup-folder inventory and reversible disable/restore on Windows and Linux.
+- [x] Windows HKCU Run inventory and backup-before-disable / restore behavior.
+- [x] Bounded process and memory snapshot; optional psutil enrichment.
+- [x] Native Tk user-space maintenance window and `duckos desktop` CLI.
+- [x] Reaper desktop policy contract for allowed actions and clutter threshold.
+- [ ] Production Duck compositor, native window manager, true virtual workspaces and shell integration.
+- [ ] Native process manager, tray/notification services, capability broker and kernel-enforced resource scheduling.
+- [ ] MacOS LaunchAgents integration and machine-wide/service startup management (intentionally outside this module's scope).
+
+The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).

@@ -37,7 +37,8 @@ const appDefinitions = {
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
+  desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: "#FFD400", glyph: "▦" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -393,6 +394,15 @@ function panelMarkup(appId) {
         '<a class="subtle-button" href="https://github.com/Ivan-VHS/OPlague/blob/main/docs/GAMING_PERFORMANCE_WORKBENCH.md" target="_blank" rel="noopener noreferrer">Документация ↗</a>' +
         '</div>' +
         '<p class="window-copy">Сама браузерная панель не меняет настройки компьютера. Для снимка, телеметрии и игрового режима откройте нативное Windows-приложение OPlague.</p>';
+    case "desktop":
+      return '<p class="window-kicker">DUCK DESKTOP · НАТИВНЫЙ ИНСТРУМЕНТ</p>' +
+        '<h2 class="window-heading">Рабочее пространство под контролем</h2>' +
+        '<p class="window-copy">Mora остаётся графической оболочкой. Настоящая диагностика и управление пользовательской автозагрузкой выполняются отдельным приложением Duck Desktop на стороне DuckOS, а не браузерным JavaScript.</p>' +
+        '<div class="setting-block"><strong>Нативное приложение</strong><span>Аудит файлов, пользовательской автозагрузки и процессов.</span></div>' +
+        '<div class="setting-block"><strong>Команда запуска</strong><span>Откройте терминал установленной среды DuckOS и выполните: <code>duckos desktop gui</code>.</span></div>' +
+        '<div class="setting-block"><strong>Безопасная организация</strong><span>Перенос выбранных файлов в Inbox без удаления и перезаписи; операции выполняются после подтверждения.</span></div>' +
+        '<div class="setting-block"><strong>Автозагрузка</strong><span>Только текущий пользователь; отключение можно восстановить.</span></div>' +
+        '<p class="window-copy">Браузерная Mora показывает только точку входа. Она не изображает системный монитор, оконный менеджер или привилегированный доступ.</p>';
     case "mora-ai":
       return '<p class="window-kicker">MORA INTENT ENGINE · ЛОКАЛЬНЫЙ РЕЖИМ</p>' +
         '<h2 class="window-heading">Сформулируйте задачу</h2>' +

@@ -19,6 +19,7 @@ import "duckos/system/three_media.rpr" as media
 import "duckos/system/telemetry.rpr" as telemetry
 import "duckos/ui/theme.rpr" as theme
 import "duckos/ui/motion.rpr" as motion
+import "duckos/ui/desktop.rpr" as desktop
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -156,5 +157,21 @@ assert(theme["motion_profile"](true) == "static", "reduced-motion preference is 
 assert(motion["frame_state"](15900, 16000, false) == "within-budget", "frame stays within 16 ms budget")
 assert(motion["frame_state"](17000, 16000, false) == "late", "late frame is observable")
 assert(motion["frame_state"](17000, 16000, true) == "static", "reduced motion takes precedence")
+
+assert(desktop["item_limit"]() == 10, "desktop clutter limit")
+assert(desktop["clutter_state"](10) == "clear", "desktop stays clear at the limit")
+assert(desktop["clutter_state"](11) == "review", "desktop clutter is surfaced")
+assert(desktop["clutter_state"](-1) == "invalid", "negative desktop count is invalid")
+assert(desktop["startup_action_valid"]("disable", "current_user"), "user startup can be disabled reversibly")
+assert(not desktop["startup_action_valid"]("disable", "machine"), "machine-wide startup changes are denied")
+assert(not desktop["startup_action_valid"]("delete", "current_user"), "startup deletion is not an allowed action")
+assert(desktop["process_action_valid"]("inspect"), "process inspection is allowed")
+assert(not desktop["process_action_valid"]("terminate"), "process termination is outside desktop optimizer")
+assert(desktop["file_action_valid"]("move_to_inbox"), "safe file organization is allowed")
+assert(not desktop["file_action_valid"]("delete"), "file deletion is not an allowed action")
+assert(desktop["background_state"](19, 9) == "normal", "low background use")
+assert(desktop["background_state"](25, 4) == "review", "high CPU use is flagged")
+assert(desktop["background_state"](4, 11) == "review", "high memory use is flagged")
+assert(desktop["background_state"](101, 0) == "invalid", "out-of-range metrics are rejected")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"

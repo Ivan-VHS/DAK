@@ -16,6 +16,7 @@ from .compat.bridge import (
     inspect_binary as inspect_bridge_binary,
 )
 from .hardware_inventory import collect_host_inventory
+from .desktop import DesktopService, audit_desktop
 from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
@@ -79,6 +80,19 @@ def main(argv: list[str] | None = None) -> int:
     launch.add_argument("--prefix", type=Path)
 
     commands.add_parser("compat-status", help="show implemented and pending Windows-runtime components")
+
+    desktop = commands.add_parser("desktop", help="audit and maintain the current user's desktop workspace")
+    desktop_commands = desktop.add_subparsers(dest="desktop_command", required=True)
+    desktop_audit = desktop_commands.add_parser("audit", help="read-only desktop, startup and resource report")
+    desktop_audit.add_argument("--item-limit", type=int, default=10)
+    desktop_commands.add_parser("gui", help="open the native Duck Desktop maintenance window")
+    startup = desktop_commands.add_parser("startup", help="manage reversible per-user startup entries")
+    startup_commands = startup.add_subparsers(dest="startup_command", required=True)
+    startup_commands.add_parser("list", help="list current-user startup entries")
+    startup_disable = startup_commands.add_parser("disable", help="disable one startup entry without deleting its data")
+    startup_disable.add_argument("entry_id")
+    startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
+    startup_restore.add_argument("entry_id")
 
     release_build = commands.add_parser(
         "build-release", help="create a deterministic, optionally signed component bundle"
@@ -215,11 +229,26 @@ def main(argv: list[str] | None = None) -> int:
                 compat_data=args.compat_data,
                 arguments=args.arguments,
             )
+        elif args.command == "desktop" and args.desktop_command == "audit":
+            result = audit_desktop(item_limit=args.item_limit)
+        elif args.command == "desktop" and args.desktop_command == "startup" and args.startup_command == "list":
+            result = {
+                "schema": "duckos.startup-list.v1",
+                "scope": "current_user",
+                "entries": DesktopService().startup.list_entries(),
+                "machine_wide_entries_included": False,
+            }
+        elif args.command == "desktop" and args.desktop_command == "startup" and args.startup_command in {"disable", "restore"}:
+            enabled = args.startup_command == "restore"
+            result = DesktopService().startup.set_enabled(args.entry_id, enabled)
+        elif args.command == "desktop" and args.desktop_command == "gui":
+            from .desktop.native_ui import run_native_desktop
+            return run_native_desktop()
         else:
             result = compatibility_status()
         _print_result(result)
         return 0
-    except (OSError, TypeError, ValueError) as error:
+    except (OSError, TypeError, ValueError, RuntimeError, ImportError) as error:
         parser.exit(2, f"DuckOS check failed: {error}\n")
 
 

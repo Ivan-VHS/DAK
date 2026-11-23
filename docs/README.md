@@ -1,8 +1,5 @@
 # DuckOS documentation
 
-## Federated source projects
-
-[Repository federation](REPOSITORY_FEDERATION.md) documents the four pinned project checkouts, their commit and licence registry, synchronization tool and service boundaries. The machine-readable source registry is [repositories.v1.json](../federation/repositories.v1.json).
 ## Desktop and application interfaces
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
@@ -19,6 +16,10 @@
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
+## Desktop optimization
+
+[Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.
+
 ## Product specification
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
@@ -26,8 +27,6 @@
 ## Normative standard
 
 [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
-
-[Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) defines the 20-domain evidence-led improvement model. [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) preserves the 20 requested directions and maps them to testable engineering outcomes across all five repositories. The canonical manifest and schema are [`engineering-evolution.v1.json`](../engineering-evolution.v1.json) and [`engineering-evolution.v1.schema.json`](../schemas/engineering-evolution.v1.schema.json).
 
 ## Documentation rules
 

@@ -91,3 +91,10 @@ A native launcher must discover manifests only in trusted installation roots, va
 - **Verified:** reserved for a feature with repeatable tests and evidence at the layer being claimed.
 
 Never promote a feature to native/verified status because its UI panel exists.
+
+
+## Duck Desktop integration
+
+Mora exposes Duck Desktop as a system tool, but the browser panel is informational. It gives the user the `duckos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DuckOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
+
+Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.

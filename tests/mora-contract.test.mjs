@@ -14,11 +14,11 @@ const extensionAppIds = [
   "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"
 ];
 const systemAppIds = [
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "desktop"
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
-test("desktop exposes 20 first-party apps and seven system tools", () => {
+test("desktop exposes 20 first-party apps and eight system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
@@ -30,7 +30,7 @@ test("desktop exposes 20 first-party apps and seven system tools", () => {
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 12);
+  assert.equal(registry.system_services.length, 13);
   assert.ok(html.includes('id="extension-app-grid"'));
   for (const id of extensionAppIds) {
     assert.ok(html.includes('data-app="' + id + '"'), id + " is missing from the extension grid");
@@ -50,6 +50,9 @@ test("required dashboard surfaces and launch affordances are present", () => {
   assert.ok(html.includes('aria-label="Панель приложений"'));
   assert.ok(html.includes('data-app="workspace"'));
   assert.ok(html.includes("status-control"));
+  assert.ok(html.includes('data-app="desktop"'));
+  assert.ok(js.includes('case "desktop":'));
+  assert.equal(policy.capabilities.desktop_optimizer.maturity, "partial");
 });
 
 test("system panels expose approvals, permissions, recovery and local file inspection", () => {

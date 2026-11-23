@@ -82,6 +82,10 @@
     "gaming_performance": {
       "maturity": "partial",
       "scope": "Mora Boost links to OPlague's Windows workbench; no direct browser PCI, GPU, driver or power-plan access"
+    },
+    "desktop_optimizer": {
+      "maturity": "partial",
+      "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
     }
   },
   "not_in_scope_as_implemented_features": [

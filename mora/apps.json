@@ -187,6 +187,13 @@
       "category": "gaming",
       "panel": "mora/app.js#mora-boost",
       "maturity": "external_native_workbench"
+    },
+    {
+      "id": "desktop",
+      "name": "Duck Desktop",
+      "category": "workspace",
+      "panel": "mora/app.js#desktop",
+      "maturity": "partial_native_userland_tool"
     }
   ],
   "widgets": [
@@ -266,6 +273,11 @@
       "id": "setup-preferences",
       "maturity": "partial",
       "scope": "Mora first-run preferences only; no OS installer or boot configuration."
+    },
+    {
+      "id": "desktop-optimizer",
+      "maturity": "partial_native_userland",
+      "scope": "read-only local desktop/process audit, reversible current-user startup controls, confirmed move-to-Inbox operation and native Tk maintenance window; no compositor or kernel enforcement"
     }
   ]
 }
