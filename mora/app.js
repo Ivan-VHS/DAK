@@ -1,4 +1,6 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { VirtualWorkspace, MAX_WORKSPACE_FILE_BYTES } from "./workspace.js";
+import { applyTranslations, detectLocale, LOCALE_STORAGE_KEY, translateText } from "./i18n.js";
 
 import {
   RECOVERY_KEY,
@@ -43,7 +45,10 @@ const appDefinitions = {
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
+  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
+  files: { name: "Duck Files", subtitle: "Файлы и папки", color: DUCK_ACCENT, glyph: "▤" },
+  terminal: { name: "Terminal", subtitle: "Локальная командная строка", color: DUCK_ACCENT, glyph: "›_" },
+  settings: { name: "Settings", subtitle: "Настройки оболочки", color: DUCK_ACCENT, glyph: "⚙" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -51,7 +56,33 @@ const activeAppLabel = document.getElementById("active-app");
 const toastElement = document.getElementById("toast");
 let nextZIndex = 10;
 let toastTimeout = null;
+const virtualWorkspace = new VirtualWorkspace();
+let currentDirectoryId = "home";
+let activeWorkspace = 1;
+let currentLocale = "ru";
+let contextTargetFile = null;
+let contextOwnerPanel = null;
+const workspaceHistory = new Map();
+const quickState = { wifi: true, bluetooth: true, focus: false, airplane: false };
+const notifications = [
+  { id: "welcome", title: "Mora запущена", body: "Рабочая оболочка готова. Файловые и системные действия ограничены браузерным профилем.", app: "files", read: false },
+  { id: "security", title: "Sentinel активен", body: "Профиль разрешений действует как настройка интерфейса и не заменяет нативный брокер доступа.", app: "security", read: false }
+];
 
+try {
+  const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
+  currentLocale = detectLocale(savedLocale);
+  const savedWorkspace = Number(localStorage.getItem("duckos.mora.active-workspace.v1"));
+  if ([1, 2, 3].includes(savedWorkspace)) activeWorkspace = savedWorkspace;
+} catch {
+  currentLocale = detectLocale(null);
+}
+try {
+  const savedReads = JSON.parse(localStorage.getItem("duckos.mora.notifications.v1") || "[]");
+  if (Array.isArray(savedReads)) notifications.forEach((item) => { item.read = savedReads.includes(item.id); });
+} catch {
+  // Fresh session starts with the two local onboarding notices.
+}
 
 let preferences = loadPreferences();
 let pendingIntentPlan = null;
@@ -61,7 +92,12 @@ function applyPreferences() {
   document.documentElement.dataset.theme = "duck";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
-
+  document.querySelector(".desktop")?.setAttribute("data-workspace", String(activeWorkspace));
+  document.querySelectorAll("[data-workspace-select]").forEach((button) => {
+    const selected = Number(button.dataset.workspaceSelect) === activeWorkspace;
+    button.classList.toggle("is-active", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
 }
 
 function persistPreferences() {
