@@ -30,6 +30,35 @@ test("command builder only emits bounded DuckOS compatibility commands", () => {
   );
 });
 
+test("third-party managers and ReactOS QEMU commands are allowlisted", () => {
+  assert.equal(
+    buildCompatibilityCommand("open-manager", { manager: "bottles" }),
+    "duckos compatibility open-manager --name 'bottles'"
+  );
+  assert.throws(() => buildCompatibilityCommand("open-manager", { manager: "../shell" }), /разрешённом списке/);
+  assert.equal(
+    buildCompatibilityCommand("create-reactos-disk", {
+      diskPath: "/home/user/VM/reactos.qcow2", sizeGiB: 32
+    }),
+    "duckos compatibility create-reactos-disk --path '/home/user/VM/reactos.qcow2' --size-gib 32"
+  );
+  assert.match(
+    buildCompatibilityCommand("launch-reactos", {
+      reactosDisk: "/home/user/VM/reactos.qcow2",
+      reactosIso: "/home/user/Downloads/ReactOS.iso",
+      reactosMemory: 4096,
+      reactosCpus: 4
+    }),
+    /--iso '\/home\/user\/Downloads\/ReactOS\.iso' --memory-mib 4096 --cpus 4$/
+  );
+  assert.throws(() => buildCompatibilityCommand("create-reactos-disk", {
+    diskPath: "/tmp/reactos.img", sizeGiB: 32
+  }), /qcow2/);
+  assert.throws(() => buildCompatibilityCommand("launch-reactos", {
+    reactosDisk: "/tmp/reactos.qcow2", reactosMemory: 512, reactosCpus: 2
+  }), /память ReactOS/);
+});
+
 test("launch paths are shell-quoted and engine-specific prefix arguments are required", () => {
   assert.equal(
     buildCompatibilityCommand("launch", {
