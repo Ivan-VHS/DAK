@@ -66,7 +66,7 @@ The versioned [hardware inventory contract](schemas/hardware-inventory.v1.schema
 Install and launch the native desktop (Python must include Tk support):
 
 ```sh
-python -m pip install .
+python -m pip install '.[native-ui]'
 duckos mora gui
 # or: duckos-mora
 ```
@@ -79,7 +79,7 @@ python -m unittest discover -s tests -v
 python tools/validate_app_catalog.py
 ```
 
-The tests cover the native user-space shell and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+The tests cover the native Qt user-space shell and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
 
 ## Release packaging and deployment planning
 
@@ -98,7 +98,7 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 | Immutable atomic updates | Local settings snapshot only | signed images, A/B slots, boot verification and recovery |
 | Sandboxing and zero trust | Preferences only | per-process isolation, capability checks and device broker |
 | Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
-| Adaptive workspace | Native Tk launcher, search, category filters and reduced-motion preference | native compositor, display migration, virtual workspaces and XR runtime |
+| Adaptive workspace | PySide6 Qt Widgets launcher, search, category filters and reduced-motion preference | native compositor, display migration, virtual workspaces and XR runtime |
 | Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
 | Windows/Linux compatibility | PE32/PE32+ header, section and import inspection; prefix scaffolding and CLI diagnostics | native executable loader, Win32/NT APIs, graphics/audio translation and launcher integration |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
@@ -143,6 +143,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
+- [Native GUI framework architecture and 66-toolkit review](docs/GUI_FRAMEWORK_ARCHITECTURE.md)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
 
