@@ -18,6 +18,21 @@ class MoraHostTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     mora_host.normalize_theme(value)
 
+    def test_home_and_project_pages_have_distinct_routes(self) -> None:
+        self.assertEqual(
+            mora_host.resolve_desktop_page("/"),
+            mora_host.ROOT / "prototype" / "mora-home.html",
+        )
+        self.assertEqual(
+            mora_host.resolve_desktop_page("/projects"),
+            mora_host.ROOT / "index.html",
+        )
+        self.assertEqual(
+            mora_host.resolve_desktop_page("/workspace"),
+            mora_host.ROOT / "index.html",
+        )
+        self.assertIsNone(mora_host.resolve_desktop_page("/unknown"))
+
     def test_workspace_can_resolve_a_sibling_repository(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "DuckOS"
@@ -58,11 +73,27 @@ class MoraHostTests(unittest.TestCase):
             )
             self.assertIsNone(mora_host.launch_target("unknown", repo))
 
-    def test_missing_repository_uses_honest_fallback_metadata(self) -> None:
+    def test_unknown_application_cannot_be_launched(self) -> None:
+        with self.assertRaises(KeyError):
+            mora_host.launch_app("not-an-app")
+
+    def test_manifest_fallback_is_grounded_in_registered_app_spec(self) -> None:
         spec = next(item for item in mora_host.APP_SPECS if item["id"] == "reaper")
         info = mora_host.app_manifest(None, spec)
         self.assertEqual(info["name"], "Reaper Studio")
         self.assertEqual(info["category"], "developer")
+
+    def test_origin_check_rejects_other_local_sites(self) -> None:
+        handler = object.__new__(mora_host.MoraHandler)
+        handler.headers = {
+            "Host": "127.0.0.1:43860",
+            "Origin": "http://127.0.0.1:43860",
+        }
+        self.assertTrue(handler._origin_allowed())
+        handler.headers["Origin"] = "http://localhost:43860"
+        self.assertFalse(handler._origin_allowed())
+        handler.headers["Origin"] = "https://127.0.0.1:43860"
+        self.assertFalse(handler._origin_allowed())
 
 
 if __name__ == "__main__":
