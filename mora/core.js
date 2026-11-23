@@ -3,7 +3,7 @@ export const RECOVERY_KEY = "duckos.mora.recovery.v1";
 
 export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance"
+  "mora-ai", "security", "updates", "runtime", "compatibility", "workspace", "provenance"
 ]);
 
 const CAPABILITIES = ["microphone", "camera", "location", "files", "network", "clipboard"];
@@ -94,7 +94,8 @@ const APP_ALIASES = [
   { id: "mora-ai", pattern: /mora\s*ai|помощник|агент/i },
   { id: "security", pattern: /sentinel|безопасност/i },
   { id: "updates", pattern: /restore|обновлен|восстановлен/i },
-  { id: "runtime", pattern: /bridge|совместим|runtime|\.exe/i },
+  { id: "compatibility", pattern: /центр совместимости|совместим|windows runtime|compatibility/i },
+  { id: "runtime", pattern: /bridge|runtime|\.exe/i },
   { id: "workspace", pattern: /control|настройк|системн/i },
   { id: "provenance", pattern: /proof|подлин|происхожд|провер.*файл/i }
 ];
