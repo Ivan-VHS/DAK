@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import io
 import json
 import re
 import secrets
@@ -64,7 +65,7 @@ def inspect_csv(text: str, *, delimiter: str = ",", preview_rows: int = 50) -> d
     if isinstance(preview_rows, bool) or not isinstance(preview_rows, int) or not 1 <= preview_rows <= 200:
         raise ValueError("preview_rows must be between 1 and 200")
     try:
-        rows = list(csv.reader(text.splitlines(), delimiter=delimiter, strict=True))
+        rows = list(csv.reader(io.StringIO(text, newline=""), delimiter=delimiter, strict=True))
     except csv.Error as error:
         raise ValueError(f"Invalid CSV: {error}") from error
     if len(rows) > MAX_CSV_ROWS + 1:
