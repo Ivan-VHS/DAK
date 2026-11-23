@@ -80,6 +80,20 @@ jobs:
           QT_QPA_PLATFORM: offscreen
       - run: python -m compileall -q duckos/mora
 
+  mora-optional-adapters:
+    name: Mora optional toolkit adapters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: sudo apt-get update && sudo apt-get install -y libegl1 libgl1
+      - run: python -m pip install -e ".[native-ui,terminal-ui,gpu-tools,plots,native-ffi]"
+      - run: python -c "import textual, rich, prompt_toolkit, dearpygui.dearpygui, pyqtgraph, cffi"
+      - run: python -m compileall -q duckos/mora
+
   native-c:
     name: Native C
     runs-on: ubuntu-latest
