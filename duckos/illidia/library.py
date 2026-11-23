@@ -22,7 +22,7 @@ SCHEMA = "duckos.illidia-library.v1"
 SOURCES = {"steam", "epic", "gog", "battlenet", "ea", "custom"}
 RUNTIMES = {"native", "wine", "proton", "crossover", "bottles", "qemu"}
 MAX_SCAN_RESULTS = 10_000
-_EXECUTABLE_SUFFIXES = {".exe", ".com", ".bat", ".cmd", ".appimage", ".bin"}
+_EXECUTABLE_SUFFIXES = {".exe", ".com", ".appimage", ".bin"}
 
 
 class IllidiaError(ValueError):
@@ -373,6 +373,24 @@ class IllidiaLibrary:
             records = [record for record in records if tag in record.tags]
         return records
 
+    def set_launch_profile(self, game_id: str, profile: dict[str, Any]) -> GameRecord:
+        current = self.get_game(game_id)
+        updated = self.add_game(
+            name=current.name,
+            source=current.source,
+            executable_path=current.executable_path,
+            external_id=current.external_id,
+            arguments=current.arguments,
+            working_directory=current.working_directory,
+            runtime=current.runtime,
+            runtime_command=current.runtime_command,
+            runtime_prefix=current.runtime_prefix,
+            launch_profile=profile,
+            metadata=current.metadata,
+            tags=current.tags,
+        )
+        return updated
+
     def remove_game(self, game_id: str) -> None:
         with self._connect() as connection:
             cursor = connection.execute("DELETE FROM games WHERE id=?", (game_id,))
@@ -417,8 +435,9 @@ class IllidiaLibrary:
         launch_kind: str,
         command: list[str],
         log_path: str | None,
+        launch_id: str | None = None,
     ) -> str:
-        launch_id = str(uuid.uuid4())
+        launch_id = launch_id or str(uuid.uuid4())
         with self._connect() as connection:
             connection.execute(
                 """
@@ -502,7 +521,7 @@ class IllidiaLibrary:
 
 
 def _key_value(text: str, key: str) -> str | None:
-    match = re.search(r'"' + re.escape(key) + r'"\\s*"((?:\\\\.|[^"])*)"', text, re.IGNORECASE)
+    match = re.search(r'"' + re.escape(key) + r'"\s*"((?:\\.|[^"])*)"', text, re.IGNORECASE)
     return match.group(1).replace("\\\\", "\\") if match else None
 
 
