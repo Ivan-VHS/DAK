@@ -285,6 +285,21 @@ class DuckBridgeTests(unittest.TestCase):
         self.assertEqual(plan["status"], "unsupported")
         self.assertIn("PE machine type", plan["warnings"][0])
 
+    def test_wine_launch_plan_accepts_an_isolated_prefix(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bindir = root / "bin"
+            bindir.mkdir()
+            make_program(bindir, "wine")
+            target = make_pe64(root / "game.exe")
+            prefix = root / "prefix"
+            plan = build_launch_plan(
+                target, purpose="game", backend="wine", wine_prefix=prefix,
+                search_path=str(bindir), home=root, host_machine="x86_64",
+            )
+        self.assertEqual(plan["status"], "ready")
+        self.assertEqual(plan["environment"]["WINEPREFIX"], str(prefix.resolve()))
+
     def test_illidia_library_registers_lists_and_removes_a_game(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
