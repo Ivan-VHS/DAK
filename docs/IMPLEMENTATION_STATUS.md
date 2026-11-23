@@ -121,3 +121,16 @@ These are partial browser-shell features. The new DAK package catalog remains at
 - [ ] MacOS LaunchAgents integration and machine-wide/service startup management (intentionally outside this module's scope).
 
 The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
+
+## Mora native desktop — 2026-11-23
+
+- [x] Replace the Mora browser shell with a native Tk user-space application.
+- [x] Remove the browser HTML entry points, web manifest, service worker, CSS shell and DOM-driven application router.
+- [x] Package the app registry, design tokens and Mora Commons catalogue as JSON data.
+- [x] Native application launcher with search, category filtering and individual app panels.
+- [x] Local preference normalization and atomic persistence; bounded intent preview and explicit approval.
+- [x] Settings-only JSON backup/restore, SHA-256 file inspection and read-only PE/ELF inspection entry point.
+- [x] Native entry points to Duck Desktop and Reaper Studio.
+- [ ] DuckOS compositor, boot-time shell, native window manager, process manager, system notifications and kernel-enforced capabilities.
+
+Mora now runs as a normal host process using Tk widgets; it is not a compositor or proof of a bootable DuckOS image. Sentinel remains a local preference panel, Restore handles Mora settings only, and Bridge inspects files without executing them. See [Mora native desktop](MORA_INTEGRATION.md).
