@@ -49,6 +49,11 @@ test("required dashboard surfaces and launch affordances are present", () => {
   }
   assert.ok(html.includes('aria-label="Панель приложений"'));
   assert.ok(html.includes('data-app="workspace"'));
+  assert.ok(html.includes('data-app="foundry"'));
+  assert.ok(html.includes("30 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ"));
+  assert.ok(js.includes('case "foundry":'));
+  assert.ok(js.includes("duckos foundry gui"));
+  assert.ok(js.includes("duckos foundry plan --profile preventive"));
   assert.ok(html.includes("status-control"));
   assert.ok(html.includes('data-app="desktop"'));
   assert.ok(js.includes('case "desktop":'));
