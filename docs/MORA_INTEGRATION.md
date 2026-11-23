@@ -22,6 +22,8 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 
 The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
 
+Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. The panels provide bounded local browser interactions, share the existing window manager and profile storage, and do not claim native service implementations.
+
 ## Run and validate
 
 Open **mora/index.html** directly in a modern browser. The desktop itself requires no network request. Some browser APIs such as Web Crypto may require a secure context.

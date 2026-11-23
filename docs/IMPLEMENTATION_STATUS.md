@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-22
+Updated: 2026-11-23
 
 ## Implemented in Reaper source
 
@@ -68,3 +68,17 @@ The implemented foundation never executes a Windows binary and does not install 
 - [ ] Native target process creation, compatibility-prefix management for third-party runtimes, sandbox enforcement and graphics/audio translation.
 
 The runtime inventory and plan generator do not invoke a discovered runtime or target. Both execution_started and prefix_created are false in the versioned plan.
+
+
+## Mora extended application suite — 2026-11-23
+
+- [x] Register 13 additional app identities in the Mora launcher, app registry and shared panel router.
+- [x] Provide local profile lists with safe text rendering and bounded entries for Orriganize, Olaab, Love-IL, Poi, Poi-2, Po-2 and GameCharager.
+- [x] Provide SetupUP theme onboarding and a local completion marker.
+- [x] Provide Abriganza archive filename/size inspection without extraction.
+- [x] Provide Concrete Thump BPM/swing profile controls without audio playback or synthesis.
+- [x] Provide Seu-Beu's user-operated sharing checklist without claiming encryption or identity verification.
+- [x] Reuse local PE/ELF header inspection and SHA-256 helpers in GameCharager and EXEdotEXE without executing targets.
+- [ ] Native implementations of the proposed DAK services, system-wide persistent storage, archive extraction, native audio, GPS/navigation, game process creation, OS installation and kernel-enforced capabilities.
+
+These are partial browser-shell features. The new DAK package catalog remains at design maturity and does not indicate that the corresponding native services ship in an OS image.
