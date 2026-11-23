@@ -10,7 +10,7 @@ test("the compatibility catalogue includes runtimes, launchers, graphics layers 
   for (const name of [
     "Wine", "Proton", "DOSBox / Staging", "Winetricks", "DXVK",
     "vkd3d-proton", "CrossOver", "Bottles", "Lutris", "Heroic",
-    "PortProton", "PlayOnLinux", "Whisky", "Kegworks",
+    "PortProton", "PlayOnLinux", "PlayOnMac", "Whisky", "Kegworks",
     "Game Porting Toolkit", "ReactOS"
   ]) {
     assert.ok(names.has(name), name + " must be documented");
