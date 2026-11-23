@@ -4,13 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "duckos-build-tools"
-version = "0.3.0"
-description = "DuckOS native desktop, image, driver ABI and compatibility tools."
+version = "0.4.0"
+description = "DuckOS native Qt desktop, image, driver ABI and compatibility tools."
 requires-python = ">=3.10"
+
+[project.optional-dependencies]
+native-ui = ["PySide6>=6.10,<6.12"]
+plots = ["PySide6>=6.10,<6.12", "pyqtgraph>=0.13.7"]
+gpu-tools = ["dearpygui>=2.0"]
+terminal-ui = ["textual>=1.0", "rich>=13.9", "prompt-toolkit>=3.0"]
+windows-native = ["pywin32>=306; platform_system == 'Windows'"]
+native-ffi = ["cffi>=1.16"]
 
 [project.scripts]
 duckos = "duckos.cli:main"
 duckos-mora = "duckos.mora.native_ui:main"
+duckos-mora-tui = "duckos.mora.tui:main"
+duckos-mora-gpu = "duckos.mora.gpu_tools:main"
+duckos-mora-plot = "duckos.mora.plotting:main"
 
 [tool.setuptools.packages.find]
 include = ["duckos*"]
