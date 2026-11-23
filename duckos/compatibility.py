@@ -339,10 +339,10 @@ def launch_program(
         if not re.fullmatch(r"[A-Za-z0-9_~-]{1,8}(?:\.[A-Za-z0-9_~-]{1,3})?", path.name):
             raise CompatibilityError("DOSBox direct launch requires an 8.3-compatible ASCII file name")
         parent = str(path.parent)
-        if any(char in parent for char in '"\r\n\x00'):
-            raise CompatibilityError("DOSBox mount path contains unsupported characters")
-        if any(any(char in arg for char in '"\r\n\x00') for arg in extra):
-            raise CompatibilityError("DOSBox arguments cannot contain quotes or line breaks")
+        if any(char in parent for char in '"\r\n\x00&|<>;%'):
+            raise CompatibilityError("DOSBox mount path contains unsupported command characters")
+        if any(any(char in arg for char in '"\r\n\x00&|<>;%') for arg in extra):
+            raise CompatibilityError("DOSBox arguments contain unsupported command characters")
         program_line = path.name + "".join(
             " " + ('"' + arg + '"' if any(char.isspace() for char in arg) else arg)
             for arg in extra
