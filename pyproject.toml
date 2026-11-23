@@ -13,3 +13,6 @@ duckos = "duckos.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["duckos*"]
+
+[tool.setuptools.package-data]
+"duckos.desktop" = ["system-applications.v1.json"]

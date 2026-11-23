@@ -22,6 +22,7 @@ jobs:
       - run: python -m pip install --upgrade pip jsonschema pyyaml
       - run: python -m unittest discover -s tests -v
       - run: python tools/validate_app_catalog.py
+      - run: python tools/validate_system_apps.py
       - run: python tools/validate_engineering_evolution.py
 
   python-3-11:
@@ -35,6 +36,7 @@ jobs:
       - run: python -m pip install --upgrade pip jsonschema pyyaml
       - run: python -m unittest discover -s tests -v
       - run: python tools/validate_app_catalog.py
+      - run: python tools/validate_system_apps.py
       - run: python tools/validate_engineering_evolution.py
 
   python-3-12:
@@ -48,6 +50,7 @@ jobs:
       - run: python -m pip install --upgrade pip jsonschema pyyaml
       - run: python -m unittest discover -s tests -v
       - run: python tools/validate_app_catalog.py
+      - run: python tools/validate_system_apps.py
       - run: python tools/validate_engineering_evolution.py
 
   mora-node:

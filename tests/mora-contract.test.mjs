@@ -14,7 +14,7 @@ const extensionAppIds = [
   "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"
 ];
 const systemAppIds = [
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "system-apps"
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
@@ -30,7 +30,7 @@ test("desktop exposes 20 first-party apps and seven system tools", () => {
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 12);
+  assert.equal(registry.system_services.length, 14);
   assert.ok(html.includes('id="extension-app-grid"'));
   for (const id of extensionAppIds) {
     assert.ok(html.includes('data-app="' + id + '"'), id + " is missing from the extension grid");
@@ -128,7 +128,7 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(css.includes(".dock-wrap::before"));
   assert.ok(css.includes("#526347"));
   assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v5-amber"));
+  assert.ok(serviceWorker.includes("mora-shell-v6-system-apps"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });

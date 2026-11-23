@@ -82,6 +82,26 @@
     "gaming_performance": {
       "maturity": "partial",
       "scope": "Mora Boost links to OPlague's Windows workbench; no direct browser PCI, GPU, driver or power-plan access"
+    },
+    "system_application_catalogue": {
+      "maturity": "partial",
+      "scope": "fifteen utility identities and descriptive Mora panels; native GUI packages and system API providers are not connected"
+    },
+    "numbered_launcher": {
+      "maturity": "partial",
+      "scope": "persistent host-side slot registry and structured launch request; no native process creation"
+    },
+    "package_integrity": {
+      "maturity": "partial",
+      "scope": "SHA-256 inspection and exact-digest unsigned approval; publisher signature verifier and installer are not connected"
+    },
+    "ab_image_state": {
+      "maturity": "partial",
+      "scope": "host-side A/B state machine and native-backend interface; no image writes or verified boot"
+    },
+    "hardware_bench": {
+      "maturity": "partial",
+      "scope": "board-profile validation and fail-closed telemetry interlocks; no board adapter or physical power/bus/probe access"
     }
   },
   "not_in_scope_as_implemented_features": [

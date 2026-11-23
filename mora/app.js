@@ -10,6 +10,24 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
+const systemApps = [
+  { id: "sys-settings", name: "Настройки", subtitle: "Параметры и разрешения", glyph: "⚙", color: "#D58B3D", role: "Темы, разрешения, профили изоляции, параметры питания и состояние A/B-образов.", apis: "os.settings.v1 · os.permissions.v1 · os.images.v1 · os.bench.v1" },
+  { id: "pkg-center", name: "Магазин приложений", subtitle: "Пакеты и доверие", glyph: "▣", color: "#C19A6A", role: "Каталоги пакетов, манифесты, SHA-256, статус подписи и подтверждение точного хеша неподписанной сборки.", apis: "os.packages.v1 · os.trust.v1 · os.launcher.v1" },
+  { id: "web-browser", name: "Веб-браузер", subtitle: "Документация и сеть", glyph: "◎", color: "#8FA8B8", role: "Документация и диагностические веб-панели в отдельном сетевом профиле.", apis: "os.network.v1 · os.sandbox.v1 · os.storage.v1" },
+  { id: "mail-client", name: "Почта", subtitle: "Отчёты и сообщения", glyph: "✉", color: "#A78A8A", role: "Почта и отправка отчётов испытаний только с выбранными пользователем вложениями.", apis: "os.secrets.v1 · os.notifications.v1 · os.storage.v1" },
+  { id: "contacts-dir", name: "Контакты", subtitle: "Команда и владельцы", glyph: "♧", color: "#82916F", role: "Справочник команды, инженеров, владельцев модулей и ответственных сборок.", apis: "os.identity.v1 · os.storage.v1" },
+  { id: "file-manager", name: "Файловый менеджер", subtitle: "Файлы и образы", glyph: "▤", color: "#C7A77D", role: "Файлы, staging-пакеты, образы, слоты A/B, дампы и диагностические журналы.", apis: "os.storage.v1 · os.packages.v1 · os.images.v1" },
+  { id: "quick-notes", name: "Заметки", subtitle: "Гипотезы и заметки", glyph: "✎", color: "#A68EAC", role: "Заметки с привязкой к номерным слотам лаунчера и сессиям аппаратных испытаний.", apis: "os.storage.v1 · os.launcher.v1 · os.audit.v1" },
+  { id: "todo-tasks", name: "Задачи", subtitle: "Инженерная очередь", glyph: "☷", color: "#9AA98B", role: "Очередь тестов, чек-листы, зависимости задач и связь с прогонами стенда.", apis: "os.scheduler.v1 · os.bench.v1 · os.notifications.v1" },
+  { id: "os-calendar", name: "Календарь", subtitle: "Релизы и обслуживание", glyph: "▦", color: "#D1A36E", role: "Календарь релизов, окон обслуживания, длительных тестов и контрольных точек.", apis: "os.scheduler.v1 · os.notifications.v1 · os.storage.v1" },
+  { id: "clocks-timers", name: "Часы и таймеры", subtitle: "Время и охлаждение", glyph: "◷", color: "#8BA39B", role: "Системное время, секундомер и таймеры прогрева, охлаждения и телеметрии.", apis: "os.clock.v1 · os.notifications.v1 · os.telemetry.v1" },
+  { id: "os-calc", name: "Калькулятор", subtitle: "Инженерные расчёты", glyph: "±", color: "#D6B58C", role: "Расчёты V/A/W, бюджетов, единиц измерения, таймингов и систем счисления.", apis: "os.units.v1 · os.storage.v1 · os.telemetry.v1" },
+  { id: "text-doc-view", name: "Текст и документы", subtitle: "Конфиги и манифесты", glyph: "¶", color: "#A7A4BD", role: "Редактирование и просмотр JSON, манифестов, скриптов, спецификаций и логов.", apis: "os.storage.v1 · os.packages.v1 · os.audit.v1" },
+  { id: "media-gallery", name: "Галерея", subtitle: "Снимки и осциллограммы", glyph: "▧", color: "#B68C79", role: "Скриншоты, фотографии стенда, схемы, осциллограммы и артефакты тестов.", apis: "os.storage.v1 · os.devices.v1 · os.bench.v1" },
+  { id: "av-player", name: "Аудио и видео", subtitle: "Мультимедиа и сигналы", glyph: "▷", color: "#8E9EB3", role: "Воспроизведение контрольных файлов, сигналов, записей экрана и видеоотчётов.", apis: "os.media.v1 · os.audio.v1 · os.devices.v1" },
+  { id: "term-sysmon", name: "Терминал и монитор", subtitle: "Процессы и телеметрия", glyph: ">_", color: "#9BA98D", role: "Процессы, CPU/NPU, PCIe/USB-инвентаризация, TTY0 и серийные журналы стенда.", apis: "os.processes.v1 · os.telemetry.v1 · os.devices.v1 · os.bench.v1" }
+];
+
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#BDA27D", glyph: "∿" },
   kavun: { name: "Kavun", subtitle: "Фотографии", color: "#AF806B", glyph: "◒" },
@@ -37,7 +55,11 @@ const appDefinitions = {
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
+  "system-apps": { name: "System Apps", subtitle: "15 системных приложений", color: "#D58B3D", glyph: "▦" },
+  ...Object.fromEntries(systemApps.map((item) => [item.id, {
+    name: item.name, subtitle: item.subtitle, color: item.color, glyph: item.glyph
+  }]))
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -332,6 +354,17 @@ function extensionPanelMarkup(appId) {
 
 function panelMarkup(appId) {
   switch (appId) {
+    case "system-apps":
+      return '<p class="window-kicker">DUCKOS SYSTEM UTILITIES · CATALOGUE V1</p>' +
+        '<h2 class="window-heading">Системные приложения</h2>' +
+        '<p class="window-copy">Пятнадцать отдельных инструментов вокруг общей инфраструктуры DuckOS. Выберите приложение, чтобы открыть его назначение и системные интерфейсы.</p>' +
+        '<div class="system-utility-grid">' + systemApps.map((app, index) =>
+          '<button class="system-utility-card" data-app="' + app.id + '">' +
+          '<span class="system-utility-number">' + String(index + 1).padStart(2, "0") + '</span>' +
+          '<span class="system-utility-glyph" style="--utility-accent:' + app.color + '">' + app.glyph + '</span>' +
+          '<strong>' + app.name + '</strong><small>' + app.subtitle + '</small></button>'
+        ).join("") + '</div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Каталог и host-side контракты подключены. Нативные GUI-пакеты и привилегированные системные службы ещё требуют реализации.</span></div>';
     case "cockos":
       return '<p class="window-kicker">АУДИОЦЕНТР · ДЕМО</p>' +
         '<h2 class="window-heading">Звук под контролем</h2>' +
@@ -453,8 +486,16 @@ function panelMarkup(appId) {
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
-    default:
-      return '<h2 class="window-heading">Приложение не найдено</h2>';
+    default: {
+      const utility = systemApps.find((item) => item.id === appId);
+      if (!utility) return '<h2 class="window-heading">Приложение не найдено</h2>';
+      return '<p class="window-kicker">DUCKOS SYSTEM UTILITY · ' + String(systemApps.indexOf(utility) + 1).padStart(2, "0") + ' / 15</p>' +
+        '<h2 class="window-heading">' + utility.name + '</h2>' +
+        '<p class="window-copy">' + utility.role + '</p>' +
+        '<div class="setting-block"><strong>Системные API</strong><span>' + utility.apis + '</span></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Это зарегистрированная точка приложения и контракт интеграции. Нативная реализация и выдача полномочий ядром пока не подключены.</span></div>' +
+        '<button class="subtle-button" data-app="system-apps">← Ко всем системным приложениям</button>';
+    }
   }
 }
 

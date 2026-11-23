@@ -104,3 +104,24 @@ The release bundle is a component archive, not a bootable image. Deployment plan
 - [ ] Native implementations of the proposed DAK services, system-wide persistent storage, archive extraction, native audio, GPS/navigation, game process creation, OS installation and kernel-enforced capabilities.
 
 These are partial browser-shell features. The new DAK package catalog remains at design maturity and does not indicate that the corresponding native services ship in an OS image.
+
+
+## Desktop application and bench contracts — 2026-11-23
+
+- [x] Separate versioned catalogue for fifteen system utilities, with packaged copy, JSON Schema and validator.
+- [x] Stable numbered launcher assignments, duplicate protection and structured launch requests.
+- [x] Bounded streaming SHA-256 inspection and explicit unsigned approval bound to one exact digest.
+- [x] A/B image-slot state machine with inactive-slot planning, verified-signature gate, native-backend requirement, boot confirmation and fallback state.
+- [x] Board-profile validation, fresh-telemetry checks, profile-bounded per-rail power enable/setpoints/disable with telemetry read-back, PCIe/USB link, GPU/NPU and calibrated-probe interlocks, plus a fail-closed bench state machine.
+- [x] Hash-chained append-only audit journal and serial-line capture with basic secret redaction.
+- [x] Mora System Apps catalogue entry for the fifteen utility identities.
+- [x] Host-side tests and CI catalogue validation.
+
+- [ ] Native process manager, IPC launcher service and kernel-enforced per-process sandbox.
+- [ ] Cryptographic package signature verifier, signer trust roots, revocation and package installation transaction.
+- [ ] Native A/B image writer, verified boot integration, boot-success signal and firmware boot-target adapter.
+- [ ] Board-specific power controller, calibrated sensors/probes, PCIe/USB/NPU telemetry driver and hardware emergency cutoff.
+- [ ] Native UART/USB-serial collector and real TTY0 integration.
+- [ ] Native applications and compositor integration for all fifteen utilities.
+
+The current Python layer is a host-side executable contract and CI-tested state machine, not a running kernel service. A/B and bench hardware mutations are deliberately unavailable until their native adapters are implemented and reviewed. SHA-256 does not establish publisher identity; the current CLI does not claim to verify package signatures.

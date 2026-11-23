@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/system-applications.v1.schema.json",
+  "title": "DuckOS system utility applications catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "operating_system",
+    "desktop",
+    "maturity_status",
+    "distribution_intent",
+    "note",
+    "applications",
+    "shared_contracts"
+  ],
+  "properties": {
+    "schema": { "const": "duckos.system-applications.v1" },
+    "version": { "const": 1 },
+    "operating_system": { "const": "DuckOS" },
+    "desktop": { "const": "Mora" },
+    "maturity_status": {
+      "enum": ["not_assessed", "specified", "planned", "partial", "implemented", "verified", "deprecated", "unsupported", "not_applicable"]
+    },
+    "distribution_intent": { "enum": ["preinstalled", "optional", "downloadable"] },
+    "note": { "type": "string", "minLength": 1 },
+    "applications": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "category", "role", "capabilities", "system_apis", "permissions", "maturity_status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "category": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "capabilities": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "system_apis": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "permissions": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "maturity_status": {
+            "enum": ["not_assessed", "specified", "planned", "partial", "implemented", "verified", "deprecated", "unsupported", "not_applicable"]
+          }
+        }
+      }
+    },
+    "shared_contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}
