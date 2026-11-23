@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v8-interactive-workspace";
+const CACHE = "mora-shell-v9-duckos-interactive-desktop";
 const ASSETS = [
   "./",
   "./index.html",
