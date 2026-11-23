@@ -439,12 +439,15 @@ export function applyTranslations(root, locale = "ru") {
   }
 
   if (root.querySelectorAll) {
-    root.querySelectorAll("[aria-label],[placeholder],[title]").forEach((element) => {
+    const elements = [];
+    if (root.nodeType === 1 && root.matches("[aria-label],[placeholder],[title]")) elements.push(root);
+    elements.push(...root.querySelectorAll("[aria-label],[placeholder],[title]"));
+    elements.forEach((element) => {
       for (const attribute of ["aria-label", "placeholder", "title"]) {
         if (!element.hasAttribute(attribute)) continue;
         const value = element.getAttribute(attribute);
-        const next = translateText(value, locale);
-        if (next !== value) element.setAttribute(attribute, next);
+        const translated = translateText(value, locale);
+        if (translated !== value) element.setAttribute(attribute, translated);
       }
     });
   }
