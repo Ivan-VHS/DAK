@@ -39,6 +39,7 @@ Optional capabilities are isolated behind extras and entry points:
 | `plots` | `duckos mora plot` | PyQtGraph numeric CSV viewer in a native Qt window |
 | `native-ui` | `duckos mora scene` | Qt Quick / QML native declarative scene preview |
 | `windows-native` | `duckos mora bridges` | Optional PyWin32 functions on Windows |
+| `macos-native` | `duckos mora bridges` | PyObjC availability detection on macOS; no app-control API is claimed |
 | `native-ffi` | `duckos mora bridges` | CFFI availability for explicit native plugin contracts |
 
 Install only the profiles that are needed:
