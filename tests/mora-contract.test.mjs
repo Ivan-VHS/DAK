@@ -58,6 +58,7 @@ test("required dashboard surfaces and launch affordances are present", () => {
   assert.ok(html.includes('data-app="desktop"'));
   assert.ok(js.includes('case "desktop":'));
   assert.equal(policy.capabilities.desktop_optimizer.maturity, "partial");
+  assert.equal(policy.capabilities.foundry_operations.maturity, "partial");
 });
 
 test("system panels expose approvals, permissions, recovery and local file inspection", () => {
