@@ -89,6 +89,14 @@
       "category": "provenance",
       "panel": "mora/app.js#provenance",
       "maturity": "sha256_only"
+    },
+    {
+      "id": "hardware-studio",
+      "name": "Hardware Studio",
+      "category": "hardware",
+      "panel": "mora/hardware/index.html",
+      "maturity": "partial_native_agent",
+      "description": "15 инструментов инвентаризации устройств, драйверов, firmware и игрового профилирования."
     }
   ],
   "widgets": [
@@ -148,6 +156,26 @@
       "id": "theme-adapter",
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "hardware-inventory-agent",
+      "maturity": "partial",
+      "scope": "Windows CIM/PnP and Linux sysfs/procfs read-only inventory; browser hints are not native device data"
+    },
+    {
+      "id": "driver-store-manager",
+      "maturity": "partial",
+      "scope": "Windows Driver Store export and Windows Update discovery; one explicit update only after backup, restore checkpoint and user-accepted EULA"
+    },
+    {
+      "id": "firmware-inspector",
+      "maturity": "partial",
+      "scope": "read-only BIOS/UEFI/DMI/Secure Boot/TPM metadata; no firmware flashing"
+    },
+    {
+      "id": "gaming-telemetry",
+      "maturity": "partial",
+      "scope": "local browser frame pacing probe and profiles; native PresentMon/ETW and vendor GPU telemetry are not connected"
     }
   ]
 }
