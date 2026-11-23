@@ -83,11 +83,14 @@ def _validate_prefix_name(name: str) -> str:
 def _prefix_path(name: str) -> Path:
     name = _validate_prefix_name(name)
     root = _data_root()
-    candidate = root / "prefixes" / name
+    prefix_root = root / "prefixes"
+    if prefix_root.is_symlink():
+        raise CompatibilityError("symbolic-link prefix directories are not accepted")
+    candidate = prefix_root / name
     if candidate.is_symlink():
         raise CompatibilityError("symbolic-link prefixes are not accepted")
     resolved = candidate.resolve()
-    expected_parent = (root / "prefixes").resolve()
+    expected_parent = prefix_root.resolve()
     if resolved.parent != expected_parent:
         raise CompatibilityError("prefix path escaped the DuckOS data directory")
     return candidate
@@ -238,11 +241,11 @@ def create_prefix(name: str, architecture: str = "win64") -> dict[str, Any]:
 
 
 def install_component(prefix: str, component: str) -> dict[str, Any]:
-    record = _read_prefix(prefix)
     if component not in COMPONENTS:
         raise CompatibilityError(
             "unsupported component; choose one of: " + ", ".join(sorted(COMPONENTS))
         )
+    record = _read_prefix(prefix)
     winetricks = _program("winetricks")
     if not winetricks:
         raise CompatibilityError("winetricks is not installed")
