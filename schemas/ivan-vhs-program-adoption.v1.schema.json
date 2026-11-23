@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/ivan-vhs-program-adoption.v1.schema.json",
+  "title": "Ivan-VHS program adoption manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "owner",
+    "catalogue_size",
+    "integration_host",
+    "projects",
+    "shared_rules"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "owner": {
+      "const": "Ivan-VHS"
+    },
+    "catalogue_size": {
+      "const": 1000
+    },
+    "integration_host": {
+      "const": "DuckOS"
+    },
+    "projects": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "repository",
+          "catalogue_ranges",
+          "entry_count",
+          "responsibility",
+          "integration_mode",
+          "policy"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "repository": {
+            "type": "string",
+            "pattern": "^Ivan-VHS/"
+          },
+          "catalogue_ranges": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "integer",
+                  "maximum": 1000
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "entry_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "responsibility": {
+            "type": "string",
+            "minLength": 1
+          },
+          "integration_mode": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "policy": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "shared_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

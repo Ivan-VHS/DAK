@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "owner": "Ivan-VHS",
+  "catalogue_size": 1000,
+  "integration_host": "DuckOS",
+  "projects": [
+    {
+      "id": "pytyliki",
+      "repository": "Ivan-VHS/Pytyliki",
+      "catalogue_ranges": [
+        [
+          1,
+          120
+        ],
+        [
+          171,
+          250
+        ]
+      ],
+      "entry_count": 200,
+      "responsibility": "CPU and host inventory, bounded benchmarks, profiling evidence, static analysis, embedded reference data and classical simulation",
+      "integration_mode": [
+        "versioned C ABI",
+        "JSON reports"
+      ],
+      "policy": "Local read-only hardware inspection; no clock, voltage, firmware or device writes."
+    },
+    {
+      "id": "reaper",
+      "repository": "Ivan-VHS/Reaper",
+      "catalogue_ranges": [
+        [
+          251,
+          500
+        ]
+      ],
+      "entry_count": 250,
+      "responsibility": "Reaper language, reference runtime, compiler/tooling, Studio, LSP/DAP, parsers, build and test adapters",
+      "integration_mode": [
+        "user-space CLI",
+        "versioned JSON protocol",
+        "sandboxed extension ABI"
+      ],
+      "policy": "Explicit permissions and resource quotas; never execute as kernel code."
+    },
+    {
+      "id": "oplague",
+      "repository": "Ivan-VHS/OPlague",
+      "catalogue_ranges": [
+        [
+          501,
+          700
+        ]
+      ],
+      "entry_count": 200,
+      "responsibility": "Device and driver inventory, package and binary inspection, signature evidence, hashes, SBOM and supply-chain metadata",
+      "integration_mode": [
+        "read-only user-space service",
+        "versioned JSON evidence reports"
+      ],
+      "policy": "Never install, load, flash, patch or execute inspected driver/package content."
+    },
+    {
+      "id": "ventusample",
+      "repository": "Ivan-VHS/VentuSample",
+      "catalogue_ranges": [
+        [
+          121,
+          170
+        ],
+        [
+          701,
+          1000
+        ]
+      ],
+      "entry_count": 350,
+      "responsibility": "Offline DSP, sample generation, WAV/MIDI processing, synthesis, effects, music metadata and audio analysis",
+      "integration_mode": [
+        "versioned C/C++ library boundary",
+        "offline render jobs",
+        "JSON manifests"
+      ],
+      "policy": "Deterministic offline processing by default; real-time audio and device access require a separately reviewed OS service."
+    },
+    {
+      "id": "duckos",
+      "repository": "Ivan-VHS/DuckOS",
+      "catalogue_ranges": [],
+      "entry_count": 0,
+      "responsibility": "Future operating-system integration host and system-service boundary",
+      "integration_mode": [
+        "documented service contracts",
+        "versioned IPC",
+        "signed package metadata"
+      ],
+      "policy": "OS components are not implemented until source, build, boot and hardware tests exist."
+    }
+  ],
+  "shared_rules": [
+    "Adopt concepts and independently implemented interfaces, not copied proprietary code.",
+    "Review every dependency license before adding it; do not assume GPL compatibility with MIT or Apache-2.0.",
+    "Keep hardware inspection read-only unless a separately reviewed, explicit privileged operation is designed.",
+    "Use deterministic local operation as the default; remote services are optional and disclosed.",
+    "Record provenance, schema version, source quality and unknown values in machine-readable reports.",
+    "Mark a capability implemented only when source code, tests and documented limits are present."
+  ]
+}
