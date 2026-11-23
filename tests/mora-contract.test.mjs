@@ -18,7 +18,7 @@ test("desktop exposes the first-party suite, system tools and system-apps catalo
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
-    const appKey = ["mora-ai", "mora-boost"].includes(id) ? '"' + id + '":' : id + ":";
+    const appKey = ["mora-ai", "mora-boost", "system-apps"].includes(id) ? '"' + id + '":' : id + ":";
     assert.ok(js.includes(appKey), id + " must have a panel definition");
   }
   for (const id of appIds.slice(0, 7)) {
