@@ -1,5 +1,5 @@
-# Tri-Color Duck UI design tokens.
-# White/porcelain 65%, cobalt 25%, vermilion 10%.
+# DuckOS single-palette design contract.
+# 65% black, 25% white and 10% yellow.
 
 export craft palette_ratios() {
     yield [65, 25, 10]
@@ -13,14 +13,29 @@ export craft palette_valid(ratios) {
 }
 
 export craft palette_color(role) {
+    when role == "page" {
+        yield "#080808"
+    }
     when role == "surface" {
-        yield "#F4F7FB"
+        yield "#151515"
+    }
+    when role == "elevated" {
+        yield "#242424"
     }
     when role == "navigation" {
-        yield "#0052CC"
+        yield "#FFD400"
+    }
+    when role == "accent" {
+        yield "#FFD400"
     }
     when role == "alert" {
-        yield "#E62E2D"
+        yield "#FFD400"
+    }
+    when role == "border" {
+        yield "#3A3A3A"
+    }
+    when role == "focus" {
+        yield "#FFE45C"
     }
     yield "#FFFFFF"
 }
