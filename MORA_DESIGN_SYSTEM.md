@@ -6,40 +6,42 @@ Mora is the shared desktop identity for the Ivan-VHS application family. The she
 
 ## Visual direction
 
-The primary desktop profile is **Mora Amber**: warm amber-sand drapery with a repeating vertical fold rhythm, a deep near-black radial centre, graphite and walnut surfaces, muted mauve/grey textiles, subdued olive glass and a single controlled red critical marker. Depth comes from light and shadow, edge highlights and recognizable material response — not neon fill or scattered gradients.
+The single desktop profile is **DuckOS Black / White / Yellow**: near-black workspace surfaces, bright white text, and a restrained duck-yellow accent for navigation, focus, selection and actions. The wallpaper may use tonal black folds and yellow edge highlights, but no blue, red, green, purple or legacy amber palette remains. Depth comes from light, shadow and subtle grayscale surfaces rather than unrelated hues.
 
 The standard workspace remains visually stable at the centre. Secondary content and controls are arranged symmetrically around it; decorative treatment never obscures task content.
 
 ## Semantic palette
 
-| Token | Mora Amber | Role |
+The shell has one palette only. Legacy Amber, Dark and Light variants are not retained.
+
+| Token | DuckOS value | Role |
 |---|---|---|
-| Page | `#211913` | Deep walnut workspace |
-| Surface | `#33261D` | Primary panel |
-| Elevated | `#493326` | Secondary panel |
-| Text | `#FFF3E2` | Main copy |
-| Secondary | `#E7D2B8` | Supporting copy |
-| Muted | `#C4A98A` | Quiet metadata |
-| Brand | `#D58B3D` | Normal action and progress |
-| Brand hover / focus | `#EAA653` / `#F3C16B` | Hover and keyboard focus |
-| Brand text | `#211913` | Text on amber |
-| Secondary accent | `#526347` | Subdued olive / glass |
-| Border | `#75543A` | Warm structural edge |
-| Selection | `#60442E` | Selected content |
-| Critical | `#B64A40` | Destructive state / progress marker |
-| Critical text | `#FFF3E2` | Text on critical |
+| Page | `#080808` | Near-black desktop |
+| Surface | `#151515` | Primary panel |
+| Elevated | `#242424` | Secondary panel |
+| Text | `#FFFFFF` | Main copy |
+| Secondary | `#E5E5E5` | Supporting copy |
+| Muted | `#A6A6A6` | Quiet metadata |
+| Brand | `#FFD400` | Duck-yellow action and progress |
+| Brand hover / focus | `#FFE45C` | Hover and keyboard focus |
+| Brand text | `#111111` | Text on yellow |
+| Secondary accent | `#FFD400` | Shared accent |
+| Border | `#3A3A3A` | Neutral structural edge |
+| Selection | `#3A3100` | Selected content |
+| Critical | `#FFD400` | Critical marker; pair with an icon and label |
+| Critical text | `#111111` | Text on yellow |
 
-Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone. Red is not used for routine emphasis.
+Only black, white, grayscale neutrals and yellow tones are permitted in the interface. State meaning must remain readable through text, shape and iconography, not hue alone. Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical.
 
-Light and Dark remain available as alternate themes. `mora/theme.json` is the portable, versioned source for all three palettes.
+`mora/theme.json` is the portable, versioned source for the sole Duck palette.
 
 ## Composition and geometry
 
 - Build a central radial anchor using a stable circular field and concentric edge detail.
 - Repeat vertical folds with a consistent interval; align columns, dividers and background texture to that rhythm.
 - Balance secondary controls around the core, leaving the working surface open and legible.
-- Keep dark surfaces distinguishable through a warm rim, tonal gradient or controlled highlight.
-- Use material cues selectively: draped fabric, natural wood, brushed metal, muted glass and paper.
+- Keep dark surfaces distinguishable through a neutral rim, tonal gradient or yellow highlight.
+- Use material cues selectively: black and white surfaces, brushed metal, muted glass and yellow edge details.
 - Foreground controls stay crisp; background structure may soften with distance.
 - Keep top controls compact and grouped. Put progress, discrete ticks and critical markers at the lower boundary instead of floating over work content.
 

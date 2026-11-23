@@ -154,7 +154,7 @@
     {
       "id": "theme-adapter",
       "maturity": "implemented",
-      "scope": "shared dark/light semantic tokens in Mora shell"
+      "scope": "single black, white and duck-yellow semantic palette in Mora shell"
     }
   ]
 }

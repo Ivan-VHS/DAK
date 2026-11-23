@@ -71,7 +71,7 @@ The selector is policy only. It does not submit GPU work, serialize a graph, ope
 
 ## Tri-Color Duck desktop contract
 
-The UI policy uses the source's 65/25/10 balance: porcelain surface, cobalt navigation and vermilion alerts. Reduced-motion preference overrides animation. A frame-time classifier reports whether a supplied frame duration meets its budget (16 ms by default in the integration tests).
+The UI policy uses a 65/25/10 balance: black workspace, white text and duck-yellow accents. The former cobalt and vermilion colors are removed. Reduced-motion preference overrides animation. A frame-time classifier reports whether a supplied frame duration meets its budget (16 ms by default in the integration tests).
 
 This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS guarantee. Rendering, input handling, font shaping and accessibility integration require native desktop modules.
 
