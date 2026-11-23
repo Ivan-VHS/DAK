@@ -94,7 +94,7 @@ This is not yet a native kernel console, privileged recovery shell, PTY multiple
 Run the focused terminal tests:
 
 ~~~sh
-python -m unittest tests.test_terminal -v
+python -m unittest discover -s tests -p "test_terminal.py" -v
 ~~~
 
 Run the full Python suite:
