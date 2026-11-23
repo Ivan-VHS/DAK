@@ -23,7 +23,7 @@ duckos mora gui
 duckos-mora
 ```
 
-Mora is now a native user-space desktop application built with Python Tk widgets. It does not load HTML, CSS, browser JavaScript, a WebView, a service worker or an embedded browser runtime. The application registry and design tokens remain versioned JSON data and are packaged with the Python module.
+Mora is now a native user-space desktop application built with PySide6 / Qt 6 Widgets. It does not load HTML, browser documents, browser JavaScript, a WebView, a service worker or an embedded browser runtime. The application registry and design tokens remain versioned JSON data and are packaged with the Python module.
 
 The native shell provides the application launcher, search and category filtering, local preferences, a bounded intent preview, profile-only permission settings, settings backup and restore, local SHA-256 calculation, read-only PE/ELF inspection, Mora Commons browsing and entry points to Duck Desktop and Reaper Studio.
 
@@ -80,6 +80,25 @@ python tools/validate_app_catalog.py
 ```
 
 The tests cover the native Qt user-space shell and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+
+
+### Optional native UI toolkits
+
+The primary desktop is PySide6. Install only the optional profiles that are needed:
+
+```sh
+python -m pip install '.[native-ui,terminal-ui,plots]'
+duckos mora tui
+duckos mora plot
+
+python -m pip install '.[gpu-tools]'
+duckos mora gpu
+
+duckos mora scene
+duckos mora bridges
+```
+
+The complete 66-toolkit evaluation is recorded in [GUI framework architecture](docs/GUI_FRAMEWORK_ARCHITECTURE.md). The list is a compatibility matrix, not a bundle of mandatory dependencies. Textual, Dear PyGui, PyQtGraph and Qt Quick have separate entry points; web and WebView runtimes remain excluded.
 
 ## Release packaging and deployment planning
 
