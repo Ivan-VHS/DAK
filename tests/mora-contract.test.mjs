@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 const html = await readFile(new URL("../mora/index.html", import.meta.url), "utf8");
 const css = await readFile(new URL("../mora/styles.css", import.meta.url), "utf8");
 const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
+const shellJs = await readFile(new URL("../mora/shell.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
 
@@ -46,8 +47,10 @@ test("system panels expose approvals, permissions, recovery and local file inspe
   ]) {
     assert.ok(js.includes(marker), "missing system control: " + marker);
   }
-  assert.ok(js.includes('event.key.toLowerCase() === "k"'));
-  assert.ok(js.includes("Ctrl+K") === false);
+  assert.ok(js.includes("initDesktopShell"), "the main Mora app must initialize the desktop shell");
+  assert.ok(shellJs.includes('event.key.toLowerCase() === "k"'), "Ctrl+K belongs to the desktop shell command palette");
+  assert.ok(shellJs.includes('command === "/open"'), "the command palette must support opening an application by id");
+  assert.ok(shellJs.includes("WORKSPACES"), "virtual workspaces must be owned by the desktop shell");
 });
 
 test("shell policy keeps prototype and native-service maturity separate", () => {
