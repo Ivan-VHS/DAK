@@ -324,6 +324,36 @@ class TerminalService:
             raise TerminalInputError("alias expansion exceeds eight levels")
         return expanded
 
+    def completion_candidates(self, prefix: str, current_word: str = "") -> list[str]:
+        """Return safe next-word suggestions for a readline-style completer."""
+        try:
+            parent = _tokenize(prefix)
+        except TerminalInputError:
+            return []
+        candidates: set[str] = set()
+        if not parent:
+            candidates.update(self.registry.roots())
+            candidates.update({
+                "alias", "unalias", "history", "config", "doctor", "exit", "quit"
+            })
+            candidates.update(self.config["aliases"])
+        else:
+            parent_path = tuple(parent)
+            for command in self.registry.commands():
+                if len(command.path) > len(parent_path) and command.path[:len(parent_path)] == parent_path:
+                    candidates.add(command.path[len(parent_path)])
+            if parent_path == ("history",):
+                candidates.update({"show", "clear"})
+            elif parent_path == ("config",):
+                candidates.update({"show", "set"})
+            elif parent_path == ("config", "set"):
+                candidates.update({"prompt", "history_limit"})
+            elif parent_path == ("alias",):
+                candidates.update(self.config["aliases"])
+            elif parent_path == ("unalias",):
+                candidates.update(self.config["aliases"])
+        return sorted(item for item in candidates if item.startswith(current_word))
+
     def _register_builtin_commands(self) -> None:
         register = self.registry.register
         register(CommandSpec(("help",), "List commands or explain one command.", "help [command]", self._help))
@@ -612,6 +642,19 @@ class TerminalService:
 def run_interactive(service: TerminalService | None = None) -> int:
     """Run the line-oriented terminal until exit, EOF or an interrupt."""
     terminal = service or TerminalService()
+    try:
+        import readline
+
+        def complete(text: str, state: int) -> str | None:
+            line = readline.get_line_buffer()
+            start = readline.get_begidx()
+            matches = terminal.completion_candidates(line[:start], text)
+            return matches[state] if state < len(matches) else None
+
+        readline.set_completer(complete)
+        readline.parse_and_bind("tab: complete")
+    except (ImportError, AttributeError):
+        pass
     print("DuckOS Extended Terminal — trusted commands only. Run help for commands.")
     while True:
         try:
