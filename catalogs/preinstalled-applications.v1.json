@@ -252,5 +252,16 @@
         "Secure device pairing, live sync, phone notifications and lost-device discovery are not connected."
       ]
     }
-  }
+  },
+  "interfaces": [
+    {
+      "id": "unify.transfer.v1",
+      "transport": "user-selected-json-file",
+      "status": "partial",
+      "schema": "schemas/unify.transfer.v1.schema.json",
+      "max_package_bytes": 20971520,
+      "max_clip_bytes": 12582912,
+      "scope": "Manual export/import of selected browser tabs, user-selected clips and selected local settings; not live device synchronization."
+    }
+  ]
 }
