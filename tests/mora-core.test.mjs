@@ -102,10 +102,15 @@ test("PE inspection recognises a 64-bit image without attempting to launch it", 
 });
 
 
-test("theme settings accept only Amber, Dark and Light palettes", () => {
+test("theme settings support five palettes and migrate old preferences", () => {
   const defaults = createDefaultPreferences();
-  assert.equal(defaults.appearance.theme, "amber");
-  assert.equal(normalizePreferences({ appearance: { theme: "light" } }).appearance.theme, "light");
-  assert.equal(normalizePreferences({ appearance: { theme: "dark" } }).appearance.theme, "dark");
-  assert.equal(normalizePreferences({ appearance: { theme: "system" } }).appearance.theme, "amber");
+  assert.equal(defaults.appearance.theme, "solar");
+
+  for (const theme of ["solar", "amber", "arctic", "amethyst", "jade"]) {
+    assert.equal(normalizePreferences({ appearance: { theme } }).appearance.theme, theme);
+  }
+
+  assert.equal(normalizePreferences({ appearance: { theme: "dark" } }).appearance.theme, "amethyst");
+  assert.equal(normalizePreferences({ appearance: { theme: "light" } }).appearance.theme, "arctic");
+  assert.equal(normalizePreferences({ appearance: { theme: "system" } }).appearance.theme, "solar");
 });
