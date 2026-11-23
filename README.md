@@ -1,16 +1,42 @@
-# DuckOS
+# DuckOS · Mora Desktop
 
-## Product direction
+DuckOS now contains **Mora**, the unified desktop shell for the Ivan-VHS application family.
 
-DuckOS is specified with a seven-application default suite: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Their roles, boundaries and proposed integrations are documented in [the preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md). This is a product specification, not a claim that these apps are already implemented or included in a bootable image.
+## Run Mora
 
+Open [mora/index.html](mora/index.html) in a browser. For installable offline-shell behavior, serve the repository through HTTPS or localhost:
 
-## Interactive desktop prototype
+```sh
+python -m http.server 8000
+``
 
-The seven-app Mora shell can be opened from [`prototype/mora-home.html`](prototype/mora-home.html). It is a local browser prototype of the app suite, not a native DuckOS desktop or proof that the operating-system services are available. See [the app-suite specification](docs/PREINSTALLED_APPLICATIONS.md) for implemented prototype behavior and remaining native integration boundaries.
+Then open `http://localhost:8000/mora/`.
 
-## Documentation
+## Connected native workspaces
 
-Start with the [documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared terminology and evidence rules used across Ivan-VHS repositories.
+| Project | Role | Desktop technology |
+| --- | --- | --- |
+| [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | Processor diagnostics and metrics | Win32 |
+| [Reaper](https://github.com/Ivan-VHS/Reaper) | Programming language and Studio IDE | Tk |
+| [OPlague](https://github.com/Ivan-VHS/OPlague) | Device and driver inspection | Tk |
+| [VentuSample](https://github.com/Ivan-VHS/VentuSample) | Procedural audio workstation | Qt |
+| DuckOS | OS and desktop shell | Mora web shell prototype |
 
-Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests. Architecture proposals and roadmap entries are not implementation evidence.
+Mora shows the real desktop captures published by the native projects and links to their repositories/releases. It does **not** claim to execute native binaries in a browser. A permissioned OS launcher/IPC bridge is a separate integration layer and is not part of this web shell.
+
+## Existing OS specification
+
+Mora is the updated shared workspace, not a replacement for the operating-system specifications. Keep the earlier material alongside it:
+
+- [Documentation index](docs/README.md)
+- [Preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md)
+- [Unified documentation standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md)
+- [Original seven-app home-screen prototype](prototype/mora-home.html)
+
+The original prototype and product specifications remain useful references for the seven built-in applications. The new `mora/` directory is the integrated DuckOS shell that brings those modules and the five native project workspaces into one desktop catalogue.
+
+## Shared design language
+
+[MORA_DESIGN_SYSTEM.md](MORA_DESIGN_SYSTEM.md) defines the canonical palette, shapes, spacing, typography, motion and accessibility contract. Each native repository keeps its own specialist layout and adopts the shared semantic tokens through its native toolkit.
+
+Maintained by Ivan-VHS.
