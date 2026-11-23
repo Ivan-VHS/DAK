@@ -136,6 +136,14 @@ class NewsServiceTests(unittest.TestCase):
             with self.assertRaises(ServiceError):
                 service.snapshot(limit=999)
 
+    def test_malformed_cache_fields_are_ignored_safely(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            cache = Path(temporary) / "news-cache.json"
+            cache.write_text('{"items": null, "sources": null, "updated_at": 12}', encoding="utf-8")
+            service = NewsService(Path(temporary), sources=(SOURCE,), fetcher=lambda _source: RSS)
+            self.assertEqual(service.status()["article_count"], 0)
+            self.assertIsNone(service.status()["updated_at"])
+
     def test_loopback_origin_policy_rejects_public_origins(self) -> None:
         self.assertTrue(_is_local_origin("http://127.0.0.1:4173"))
         self.assertTrue(_is_local_origin("http://localhost:8000"))
