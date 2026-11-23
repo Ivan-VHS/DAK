@@ -47,6 +47,15 @@
   },
   "typography": {
     "ui": "Segoe UI",
+    "uiFallbacks": [
+      "Noto Sans",
+      "Arial",
+      "sans-serif"
+    ],
+    "cyrillicCoverage": [
+      "ru",
+      "uk"
+    ],
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },

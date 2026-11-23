@@ -29,6 +29,14 @@ The system tools are:
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
+### Bilingual and deep-time platform layer
+
+Mora starts in Russian and includes a persistent Ukrainian interface option across the desktop shell, common system panels and core application screens. The reviewed dictionary covers the primary navigation, application catalogue, local workspace tools, accessibility labels and demo panels. The local intent parser accepts Ukrainian forms for its existing allowlisted actions. App IDs, file paths and user-authored notes remain unchanged.
+
+The Sestem panel displays the separate epoch `86 452 654 432 564 423 644` years using bounded JavaScript `BigInt` values. This speculative chronology never replaces the host civil clock. Restore stores local Mora preference snapshots in versioned UTF-8 envelopes with CRC32 corruption detection and bounded parent-linked settings branches. CRC32 is not cryptographic authentication. The update screen builds a gated A/B plan; it does not install a system image, write a boot slot or perform a native rollback.
+
+The Mora command palette opens with `Ctrl+K`, Control with `Ctrl+,`, and the top Mora window closes with `Ctrl+W`. These are browser-shell shortcuts, not global native desktop hotkeys. See [Mora language, chronology and recovery contracts](docs/MORA_LANGUAGE_AND_CHRONOLOGY.md).
+
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
 
 ## Native Reaper workbench
@@ -140,6 +148,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [Mora Commons unified application catalogue](docs/MORA_COMMONS.md)
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
+- [Mora language, chronology and recovery contracts](docs/MORA_LANGUAGE_AND_CHRONOLOGY.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)

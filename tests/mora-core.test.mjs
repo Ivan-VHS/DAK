@@ -56,6 +56,21 @@ test("Mora Boost can be opened through the bounded intent allowlist", () => {
   assert.deepEqual(plan.actions.map((action) => action.appId), ["mora-boost"]);
 });
 
+test("Ukrainian commands use the same reviewed local action allowlist", () => {
+  const plan = buildIntentPlan("увімкни режим фокусування та економію енергії");
+  assert.equal(plan.ok, true);
+  assert.deepEqual(plan.actions.map((action) => action.setting), ["focusMode", "powerProfile"]);
+
+  const open = buildIntentPlan("відкрий безпеку");
+  assert.equal(open.ok, true);
+  assert.equal(open.actions[0].appId, "security");
+
+  const reduceMotion = buildIntentPlan("зменш анімацію");
+  assert.equal(reduceMotion.ok, true);
+  assert.equal(reduceMotion.actions[0].setting, "reducedMotion");
+  assert.equal(reduceMotion.actions[0].value, true);
+});
+
 test("preferences are validated and saved without trusting arbitrary values", () => {
   const storage = new MemoryStorage();
   const settings = createDefaultPreferences();

@@ -32,6 +32,10 @@
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
 
+## Mora language and chronology
+
+[Mora language, chronology and recovery contracts](MORA_LANGUAGE_AND_CHRONOLOGY.md) documents the Russian/Ukrainian interface layer, command semantics, BigInt deep-time model, CRC32-checked preference history and the boundary between shell update planning and native A/B boot updates.
+
 ## Normative standard
 
 [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.

@@ -73,7 +73,7 @@ test("shell policy keeps prototype and native-service maturity separate", () => 
   assert.equal(policy.desktop, "Mora");
   assert.equal(policy.product, "DuckOS");
   assert.equal(policy.capabilities.local_ai_and_npu.maturity, "planned");
-  assert.equal(policy.capabilities.immutable_updates.maturity, "planned");
+  assert.equal(policy.capabilities.immutable_updates.maturity, "partial");
   assert.equal(policy.capabilities.compatibility.maturity, "partial");
   assert.ok(policy.capabilities.zero_trust_permissions.scope.includes("no kernel enforcement"));
 });
@@ -142,7 +142,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v8-bilingual-platform"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
