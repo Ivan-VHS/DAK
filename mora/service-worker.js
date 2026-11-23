@@ -36,12 +36,12 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
-    const keys = (await caches.keys())
-      .filter((key) => key.startsWith("mora-shell-"))
+    const previous = (await caches.keys())
+      .filter((key) => key.startsWith("mora-shell-") && key !== CACHE)
       .sort()
       .reverse();
-    // Keep the active cache and one known-good predecessor for recovery.
-    await Promise.all(keys.slice(2).map((key) => caches.delete(key)));
+    // Keep the active cache and the newest available predecessor.
+    await Promise.all(previous.slice(1).map((key) => caches.delete(key)));
     await self.clients.claim();
   })());
 });
