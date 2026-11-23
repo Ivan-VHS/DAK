@@ -13,7 +13,7 @@ export const COMPATIBILITY_ENTRIES = Object.freeze([
   { name: "DOSBox / Staging", group: "Запуск", state: "cli", detail: "Эмуляция DOS-программ с ограничением имён файлов для прямого запуска." },
   { name: "Winetricks", group: "Компоненты", state: "cli", detail: "Установка ограниченного набора Winetricks-компонентов в выбранный Wine-префикс." },
   { name: "DXVK", group: "Графика", state: "component", detail: "Установка Direct3D 8–11 → Vulkan через Winetricks; нужен совместимый Vulkan-драйвер." },
-  { name: "vkd3d-proton", group: "Графика", state: "component", detail: "Direct3D 12 → Vulkan в составе Proton; отдельный Winetricks verb vkd3d не является vkd3d-proton." },
+  { name: "vkd3d-proton", group: "Графика", state: "proton", detail: "Direct3D 12 → Vulkan в составе Proton; отдельный Winetricks verb vkd3d не является vkd3d-proton." },
   { name: "CrossOver", group: "Менеджеры", state: "detect", detail: "Коммерческая сборка Wine: обнаруживается, но не заменяет основной backend DuckOS." },
   { name: "Bottles", group: "Менеджеры", state: "detect", detail: "Внешний менеджер префиксов; его графический интерфейс не встраивается в Mora." },
   { name: "Lutris", group: "Менеджеры", state: "detect", detail: "Внешний игровой launcher; каталоги и сценарии Lutris не исполняются из Mora." },
@@ -119,6 +119,7 @@ function statusLabel(state) {
   return ({
     cli: "CLI backend",
     component: "Компонент",
+    proton: "В составе Proton",
     detect: "Обнаружение",
     mac: "Только macOS",
     vm: "Отдельная ОС"
