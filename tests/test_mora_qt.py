@@ -41,6 +41,17 @@ class MoraQtDesktopTests(unittest.TestCase):
         self.assertIn("1 из 29", window.count_label.text())
         window.close()
 
+    def test_qt_quick_scene_compiles_to_a_native_qml_window(self):
+        from PySide6.QtCore import QUrl
+        from PySide6.QtQml import QQmlApplicationEngine
+        from duckos.mora.qml_scene import QML_SOURCE
+
+        engine = QQmlApplicationEngine()
+        engine.loadData(QML_SOURCE.encode("utf-8"), QUrl("mora-scene.qml"))
+        self.assertTrue(engine.rootObjects())
+        self.assertIn("ApplicationWindow", QML_SOURCE)
+        self.assertNotIn("<html", QML_SOURCE.casefold())
+
     def test_main_source_has_no_browser_engine_or_tk_runtime(self):
         import duckos.mora.qt_ui as module
 
