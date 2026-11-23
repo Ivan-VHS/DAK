@@ -63,7 +63,18 @@
             "baseline_report_id": { "type": "string", "format": "uuid" },
             "candidate_report_id": { "type": "string", "format": "uuid" },
             "hardware_fingerprint": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
-            "driver_version": { "type": "string", "maxLength": 128 }
+            "driver_version": { "type": "string", "maxLength": 128 },
+            "settings": {
+              "type": "object",
+              "properties": {
+                "mode": { "type": "string", "enum": ["competitive", "balanced", "quality"] },
+                "resolution": { "type": "string", "maxLength": 32 },
+                "refresh_hz": { "type": "integer", "minimum": 24, "maximum": 1000 },
+                "frame_cap": { "type": "integer", "minimum": 1, "maximum": 1000 },
+                "graphics_preset": { "type": "string", "enum": ["low", "medium", "high", "ultra", "custom"] }
+              },
+              "additionalProperties": false
+            }
           },
           "additionalProperties": false
         }
@@ -83,7 +94,31 @@
         },
         {
           "if": { "properties": { "capability": { "const": "profile.write.validated" } } },
-          "then": { "properties": { "payload": { "required": ["game_id", "game_name", "hardware_fingerprint", "driver_version"] } } }
+          "then": { "properties": { "payload": { "required": ["game_id", "game_name", "hardware_fingerprint", "driver_version", "settings"] } } }
+        },
+        {
+          "if": { "properties": { "capability": { "const": "hardware.read" } } },
+          "then": { "properties": { "consent": { "properties": { "scope": { "const": "hardware.read" } } } } }
+        },
+        {
+          "if": { "properties": { "capability": { "const": "snapshot.create" } } },
+          "then": { "properties": { "consent": { "properties": { "scope": { "const": "snapshot.create" } } } } }
+        },
+        {
+          "if": { "properties": { "capability": { "enum": ["session.start", "session.restore"] } } },
+          "then": { "properties": { "consent": { "properties": { "scope": { "const": "power-plan.temporary" } } } } }
+        },
+        {
+          "if": { "properties": { "capability": { "const": "benchmark.compare" } } },
+          "then": { "properties": { "consent": { "properties": { "scope": { "const": "benchmark.read" } } } } }
+        },
+        {
+          "if": { "properties": { "capability": { "const": "profile.read" } } },
+          "then": { "properties": { "consent": { "properties": { "scope": { "const": "profile.read" } } } } }
+        },
+        {
+          "if": { "properties": { "capability": { "const": "profile.write.validated" } } },
+          "then": { "properties": { "consent": { "properties": { "scope": { "const": "profile.write.validated" } } } } }
         }
       ],
       "additionalProperties": false
