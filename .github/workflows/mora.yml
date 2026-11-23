@@ -1,0 +1,37 @@
+name: Mora desktop shell
+
+on:
+  push:
+    branches: [main, "feature/**"]
+    paths:
+      - "mora/**"
+      - "tests/mora-contract.test.mjs"
+      - "package.json"
+      - ".github/workflows/mora.yml"
+  pull_request:
+    paths:
+      - "mora/**"
+      - "tests/mora-contract.test.mjs"
+      - "package.json"
+      - ".github/workflows/mora.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  mora-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check JavaScript syntax
+        run: node --check mora/app.js
+
+      - name: Run Mora contract tests
+        run: npm test
