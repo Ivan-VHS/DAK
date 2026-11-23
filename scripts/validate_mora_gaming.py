@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "mora" / "contracts" / "oplague-gaming.v1.schema.json"
-MORA_NATIVE = ROOT / "duckos" / "mora" / "native_ui.py"
+MORA_NATIVE = ROOT / "duckos" / "mora" / "qt_ui.py"
 APP_CATALOG = ROOT / "mora" / "apps.json"
 INTEGRATION_DOC = ROOT / "docs" / "GAMING_PERFORMANCE_INTEGRATION.md"
 
