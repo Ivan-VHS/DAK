@@ -53,6 +53,23 @@
       "selection": "#E6E0F7",
       "danger": "#A91F49",
       "onDanger": "#FFFFFF"
+    },
+    "belle": {
+      "page": "#FBF3F5",
+      "surface": "#FFFAF9",
+      "elevated": "#F7E9ED",
+      "text": "#3D2934",
+      "secondary": "#6F5362",
+      "muted": "#8B7180",
+      "brand": "#A85878",
+      "brandHover": "#BC7291",
+      "onBrand": "#FFFFFF",
+      "secondaryAccent": "#526B57",
+      "onSecondaryAccent": "#FFFFFF",
+      "border": "#EAD6DE",
+      "selection": "#F2DCE4",
+      "danger": "#A33D50",
+      "onDanger": "#FFFFFF"
     }
   },
   "shape": {
