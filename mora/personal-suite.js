@@ -441,8 +441,9 @@ function fieldValue(field, rawValue) {
     if (!Number.isFinite(value) || (field.min != null && value < field.min) || (field.max != null && value > field.max)) throw new Error("Проверьте поле «" + field.label + "».");
     return value;
   }
-  if (field.type === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(raw)) throw new Error("Укажите корректную дату.");
-  if (field.type === "datetime-local" && Number.isNaN(Date.parse(raw))) throw new Error("Укажите корректные дату и время.");
+  if (field.type === "date" && (!/^\d{4}-\d{2}-\d{2}$/.test(raw) || Number.isNaN(Date.parse(raw + "T00:00:00")))) throw new Error("Укажите корректную дату.");
+  if (field.type === "datetime-local" && (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw) || Number.isNaN(Date.parse(raw)))) throw new Error("Укажите корректные дату и время.");
+  if (field.type === "select" && !field.options?.some(([option]) => option === raw)) throw new Error("Выберите значение из списка «" + field.label + "».");
   if (field.type === "url") {
     let url;
     try { url = new URL(raw); } catch { throw new Error("Укажите полный адрес сайта, начиная с https://."); }
@@ -640,7 +641,7 @@ export function installPersonalSuite() {
     if (host) host.innerHTML = renderPersonalApp(appId);
   });
   window.addEventListener("storage", (event) => {
-    if (event.key !== STORE_KEY) return;
+    if (event.key !== STORE_KEY && event.key !== null) return;
     cachedState = undefined;
     document.querySelectorAll("[data-suite-app]").forEach((host) => {
       host.innerHTML = renderPersonalApp(host.dataset.suiteApp);

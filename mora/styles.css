@@ -873,3 +873,7 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
 
 .suite-profile-field {display:flex;align-items:center;gap:10px;color:var(--mora-muted);font-size:10px}
 .suite-profile-field input {flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:9px;color:var(--mora-text);background:var(--mora-page);font:inherit;font-size:11px}
+
+/* Keep the expanded launcher usable on shorter desktop viewports. */
+.app-area {max-height:calc(100vh - 190px);min-height:0;overflow-y:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent}
+@media (max-width:760px) {.app-area {max-height:none;overflow:visible;padding-right:0}}
