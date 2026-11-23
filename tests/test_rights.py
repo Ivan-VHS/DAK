@@ -20,6 +20,7 @@ from duckos.rights import (
     validate_transfer_manifest,
     verify_content_manifest,
     verify_entitlement,
+    verify_licensed_content,
 )
 
 
@@ -72,7 +73,8 @@ class RightsVerificationTests(unittest.TestCase):
 
     def entitlement(self, *, scope="profile", profile_id="profile-ivan",
                     device_id=None, offline_until=1_700_001_800,
-                    expires_at=1_700_003_600, rights=None):
+                    expires_at=1_700_003_600, rights=None,
+                    manifest_sha256="a" * 64):
         license_data = {
             "scope": scope,
             "profile_id": profile_id if scope == "profile" else None,
@@ -90,7 +92,7 @@ class RightsVerificationTests(unittest.TestCase):
             "issuer": {"id": "studio.example", "key_id": "studio-key-2026"},
             "content": {
                 "id": "game.aster", "kind": "game",
-                "manifest_sha256": "a" * 64,
+                "manifest_sha256": manifest_sha256,
             },
             "license": license_data,
         })
@@ -207,6 +209,86 @@ class RightsVerificationTests(unittest.TestCase):
         tampered = verify_content_manifest(manifest, package, self.trusted_keys)
         self.assertFalse(tampered["valid"])
         self.assertEqual(tampered["reason_code"], "integrity_mismatch")
+
+    def test_combined_verification_binds_license_to_manifest_and_package(self):
+        package = self.root / "licensed-package"
+        binary = package / "bin" / "game.dat"
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_bytes(b"official game payload")
+        manifest = self.sign({
+            "schema": CONTENT_MANIFEST_SCHEMA,
+            "content": {"id": "game.aster", "kind": "game", "title": "Echoes of Aster"},
+            "publisher": {"id": "studio.example", "key_id": "studio-key-2026"},
+            "attribution": {
+                "creator": {"display_name": "Studio Example"},
+                "source": {"type": "official_store", "reference": "store.example/game.aster"},
+                "copyright": {"notice": "Copyright Studio Example", "license_id": "store-entitlement"},
+            },
+            "files": [{
+                "path": "bin/game.dat",
+                "size_bytes": binary.stat().st_size,
+                "sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+            }],
+        })
+        manifest_digest = hashlib.sha256(canonical(manifest)).hexdigest()
+        token = self.entitlement(manifest_sha256=manifest_digest)
+
+        verified = verify_licensed_content(
+            token, manifest, package, self.trusted_keys,
+            profile_id="profile-ivan", home_device_id=None,
+            required_action="launch", now=1_700_000_100,
+        )
+        self.assertTrue(verified["allowed"])
+        self.assertTrue(verified["valid"])
+        self.assertEqual(verified["reason_code"], "verified")
+        self.assertEqual(verified["manifest_sha256"], manifest_digest)
+        self.assertFalse(verified["native_launch_enforcement"])
+
+        changed_document = dict(manifest)
+        changed_document.pop("signature")
+        changed_document["content"] = dict(manifest["content"], title="Substituted title")
+        changed_manifest = self.sign(changed_document)
+        substituted = verify_licensed_content(
+            token, changed_manifest, package, self.trusted_keys,
+            profile_id="profile-ivan", home_device_id=None,
+            now=1_700_000_100,
+        )
+        self.assertFalse(substituted["allowed"])
+        self.assertEqual(substituted["reason_code"], "manifest_digest_mismatch")
+
+        binary.write_bytes(b"modified game payload")
+        tampered_package = verify_licensed_content(
+            token, manifest, package, self.trusted_keys,
+            profile_id="profile-ivan", home_device_id=None,
+            now=1_700_000_100,
+        )
+        self.assertFalse(tampered_package["allowed"])
+        self.assertEqual(tampered_package["reason_code"], "integrity_mismatch")
+
+    def test_combined_verification_rejects_a_different_content_identity(self):
+        package = self.root / "identity-package"
+        package.mkdir(exist_ok=True)
+        manifest = self.sign({
+            "schema": CONTENT_MANIFEST_SCHEMA,
+            "content": {"id": "game.other", "kind": "game", "title": "Another Game"},
+            "publisher": {"id": "studio.example", "key_id": "studio-key-2026"},
+            "attribution": {
+                "creator": {"display_name": "Studio Example"},
+                "source": {"type": "official_store", "reference": "store.example/game.other"},
+                "copyright": {"notice": "Copyright Studio Example", "license_id": "store-entitlement"},
+            },
+            "files": [{"path": "game.dat", "size_bytes": 0, "sha256": hashlib.sha256(b"").hexdigest()}],
+        })
+        token = self.entitlement(
+            manifest_sha256=hashlib.sha256(canonical(manifest)).hexdigest()
+        )
+        decision = verify_licensed_content(
+            token, manifest, package, self.trusted_keys,
+            profile_id="profile-ivan", home_device_id=None,
+            now=1_700_000_100,
+        )
+        self.assertFalse(decision["allowed"])
+        self.assertEqual(decision["reason_code"], "content_identity_mismatch")
 
     def test_unverified_capture_policy_is_not_treated_as_permission(self):
         decision = evaluate_capture_policy(
