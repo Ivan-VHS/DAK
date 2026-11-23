@@ -1,3 +1,5 @@
+import { initDesktopShell } from "./shell.js";
+
 import {
   RECOVERY_KEY,
   buildIntentPlan,
@@ -318,7 +320,9 @@ function showToast(message) {
 }
 
 function updateActiveApp() {
-  const windows = Array.from(windowLayer.querySelectorAll(".app-window"));
+  const windows = Array.from(windowLayer.querySelectorAll(".app-window")).filter((appWindow) =>
+    !appWindow.hidden && appWindow.dataset.minimized !== "true"
+  );
   if (windows.length === 0) {
     activeAppLabel.textContent = "Рабочий стол";
   } else {
@@ -341,6 +345,7 @@ function openApp(appId) {
   if (!definition) return;
   let appWindow = windowLayer.querySelector('[data-window="' + appId + '"]');
   if (appWindow) {
+    window.dispatchEvent(new CustomEvent("mora:window-focus", { detail: { appId } }));
     focusWindow(appWindow);
     return;
   }
@@ -653,17 +658,20 @@ document.addEventListener("change", async (event) => {
   }
 });
 
-document.addEventListener("keydown", (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-    event.preventDefault();
-    openApp("mora-ai");
-  }
-});
-
 applyPreferences();
 updateClock();
 window.setInterval(updateClock, 1000);
 updateActiveApp();
+
+initDesktopShell({
+  appDefinitions,
+  openApp,
+  closeTopWindow,
+  showToast,
+  updateActiveApp,
+  preferences,
+  persistPreferences
+});
 
 if ("serviceWorker" in navigator &&
     (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
