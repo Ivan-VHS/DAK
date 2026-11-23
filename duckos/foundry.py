@@ -335,7 +335,7 @@ def build_runbook(profile: str, snapshot: dict[str, Any] | None = None) -> dict[
 
 
 def write_snapshot(path: str | Path, snapshot: dict[str, Any]) -> dict[str, Any]:
-    """Create a new private report file; refuse links and existing destinations."""
+    """Create a new report file without following links or overwriting a destination."""
     destination = Path(path).expanduser()
     if destination.name in {"", ".", ".."} or destination.is_symlink():
         raise ValueError("report destination must be a regular new file path")
@@ -367,5 +367,6 @@ def write_snapshot(path: str | Path, snapshot: dict[str, Any]) -> dict[str, Any]
         "written": str(target),
         "bytes": len(encoded.encode("utf-8")),
         "overwritten": False,
+        "access_policy": "owner_only_posix" if os.name == "posix" else "inherited_destination_acl",
         "disk_write": "explicit_operator_export",
     }
