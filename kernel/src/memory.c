@@ -145,19 +145,19 @@ int duckos_memory_init(uint64_t multiboot_info) {
 }
 
 void *duckos_alloc_page(void) {
-    duckos_cli();
+    uint64_t irq_flags = duckos_irq_save();
     for (uint64_t page = 256u; page < PAGE_COUNT; ++page) {
         if (!page_is_used(page)) {
             page_set_used(page);
             memory_stats.free_pages--;
             memory_stats.used_pages++;
-            duckos_sti();
+            duckos_irq_restore(irq_flags);
             uint8_t *address = (uint8_t *)(uintptr_t)(page * DUCKOS_PAGE_SIZE);
             for (uint32_t i = 0u; i < DUCKOS_PAGE_SIZE; ++i) address[i] = 0u;
             return address;
         }
     }
-    duckos_sti();
+    duckos_irq_restore(irq_flags);
     return NULL;
 }
 
@@ -167,13 +167,13 @@ void duckos_free_page(void *address) {
         physical < 0x100000u || physical >= DUCKOS_MAX_PHYSICAL_ADDRESS)
         return;
     uint64_t page = physical / DUCKOS_PAGE_SIZE;
-    duckos_cli();
+    uint64_t irq_flags = duckos_irq_save();
     if (page_is_used(page)) {
         page_set_free(page);
         memory_stats.free_pages++;
         memory_stats.used_pages--;
     }
-    duckos_sti();
+    duckos_irq_restore(irq_flags);
 }
 
 static uint64_t *allocate_table(void) {
@@ -225,7 +225,8 @@ int duckos_vm_map_page(uint64_t virtual_address, uint64_t physical_address,
     uint16_t pd_index = (uint16_t)((virtual_address >> 21u) & 0x1ffu);
     uint16_t pt_index = (uint16_t)((virtual_address >> 12u) & 0x1ffu);
 
-    uint64_t *pdpt = next_level(boot_pml4, pml4_index, user, 0);
+    uint64_t *root = (uint64_t *)(uintptr_t)(duckos_read_cr3() & PAGE_ADDRESS_MASK);
+    uint64_t *pdpt = next_level(root, pml4_index, user, 0);
     if (pdpt == NULL) return 0;
     uint64_t *pd = next_level(pdpt, pdpt_index, user, 0);
     if (pd == NULL) return 0;
@@ -248,8 +249,9 @@ int duckos_vm_unmap_page(uint64_t virtual_address) {
     uint16_t pdpt_index = (uint16_t)((virtual_address >> 30u) & 0x1ffu);
     uint16_t pd_index = (uint16_t)((virtual_address >> 21u) & 0x1ffu);
     uint16_t pt_index = (uint16_t)((virtual_address >> 12u) & 0x1ffu);
-    if ((boot_pml4[pml4_index] & PAGE_PRESENT) == 0u) return 0;
-    uint64_t *pdpt = (uint64_t *)(uintptr_t)(boot_pml4[pml4_index] & PAGE_ADDRESS_MASK);
+    uint64_t *root = (uint64_t *)(uintptr_t)(duckos_read_cr3() & PAGE_ADDRESS_MASK);
+    if ((root[pml4_index] & PAGE_PRESENT) == 0u) return 0;
+    uint64_t *pdpt = (uint64_t *)(uintptr_t)(root[pml4_index] & PAGE_ADDRESS_MASK);
     if ((pdpt[pdpt_index] & PAGE_PRESENT) == 0u) return 0;
     uint64_t *pd = (uint64_t *)(uintptr_t)(pdpt[pdpt_index] & PAGE_ADDRESS_MASK);
     if ((pd[pd_index] & PAGE_PRESENT) == 0u) return 0;
