@@ -7,8 +7,9 @@
     "The shell never executes arbitrary commands or manifest-provided shell strings.",
     "Intent actions are limited to a reviewed local allowlist and require explicit approval.",
     "Unconfigured capabilities default to denied in the shell preference profile.",
-    "File inspection and hashing run locally; uploads are not performed by the shell.",
-    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected."
+    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected.",
+    "Browser inspection and hashing stay local; executable imports are sent only to the authenticated loopback host-agent.",
+    "Native host processes require an explicit launch approval and report when host sandboxing is unavailable."
   ],
   "capabilities": {
     "desktop": {

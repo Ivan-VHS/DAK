@@ -18,10 +18,17 @@ The first milestone is a contract kernel: real Reaper code defines and tests sta
 | Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
 | DuckDriver boundary | driver ABI, package metadata and resource-conflict policy | descriptor policy implemented; signature verifier and device discovery pending |
 | Service supervisor | finite restart budget | policy implemented; process manager pending |
+| Host executable runtime | imported app manifests, runtime discovery, host process creation, VM guest launch | Python host service implemented and CI-tested; not the native DuckOS kernel process manager |
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
 | Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
 | Desktop | Tri-Color Duck palette, reduced-motion and frame-budget policy | design policy implemented; compositor/renderer pending |
+
+## Host executable runtime boundary
+
+The optional Python runtime service is a host-side adapter for the current Mora desktop. On Windows it asks the Windows host to create a PE process. On POSIX it delegates PE API compatibility to an installed Wine runtime; DOS programs use an installed DOSBox; a registered guest disk is booted with QEMU. The service uses opaque app IDs, integrity-checked imports, structured argument arrays and an authenticated loopback API.
+
+This host service does not create DuckOS kernel processes. The native process model, address spaces, syscall ABI, kernel PE loader, Win32/NT API layer, kernel-enforced capabilities and bootable image remain native bring-up gates. DXVK is an optional Wine graphics component for Direct3D 9/10/11 to Vulkan; Direct3D 12 and QEMU GPU passthrough are not part of the current implementation.
 
 ## Startup contract
 

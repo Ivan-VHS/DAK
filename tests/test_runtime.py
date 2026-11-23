@@ -115,12 +115,14 @@ class ApplicationStoreTests(unittest.TestCase):
                 bundle.writestr("Game/game.exe", pe_fixture())
                 bundle.writestr("Game/setup.exe", pe_fixture())
                 bundle.writestr("Game/data/config.ini", "quality=high")
+                bundle.writestr("Game/data/manifest.json", '{"save":"present"}')
             store = AppStore(root / "state")
             with self.assertRaises(AppStoreError):
                 store.import_source(archive)
             app = store.import_source(archive, entrypoint="Game/game.exe")
             self.assertEqual(app["entrypoint"], "Game/game.exe")
-            self.assertEqual(len(app["files"]), 3)
+            self.assertEqual(len(app["files"]), 4)
+            self.assertIn("Game/data/manifest.json", {item["path"] for item in app["files"]})
 
     def test_zip_path_traversal_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

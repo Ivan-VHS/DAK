@@ -1,9 +1,11 @@
-const CACHE = "mora-shell-v2";
+const CACHE = "mora-shell-v3-runtime";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
+  "./runtime-manager.css",
   "./app.js",
+  "./runtime-manager.js",
   "./core.js",
   "./apps.json",
   "./system-policy.json",

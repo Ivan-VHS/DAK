@@ -15,7 +15,7 @@ The shell reuses the original indigo, rose and gold sunset wallpaper, layered hi
 | Mora AI | Parse safe local intents, preview plan, request approval | Allowlisted rules, no model or shell |
 | Sentinel | Show and store capability preferences | No native process enforcement |
 | Restore | Save/restore shell settings and preview an update sequence | No OS image update/rollback |
-| Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
+| Bridge | Inspect PE/ELF headers; pair with host runtime-agent; import, launch and stop PE/DOS apps and QEMU guests | Real host processes on the OS running the agent; not a DuckOS kernel process ABI |
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 
@@ -47,11 +47,22 @@ Restore can save and restore the normalized Mora preference object using a versi
 
 The future updater should download signed metadata, verify the complete payload, stage an inactive system slot, check capacity and compatibility, run health tests, switch boot selection atomically and preserve the previous slot until first boot is accepted. Recovery must work when an update is interrupted. This flow is currently displayed as an architecture preview only.
 
-## Compatibility boundary
+## Executable compatibility and host process manager
 
-Bridge reads a user-selected local file and inspects PE or ELF headers without executing it or uploading it. Detecting an x86/x64/ARM64 machine value is not evidence that the corresponding ABI or graphics stack can run.
+Bridge keeps its local PE/ELF header inspection and also pairs with the optional Python host service through a loopback-only authenticated API. The host agent imports PE/DOS executables and ZIP game packages into a private application store, records a per-file SHA-256 manifest, detects installed runtimes, creates processes with an argv vector and shell disabled, lists managed process IDs and supports termination.
 
-A native compatibility environment still needs PE loading, Win32/NT services, process and memory mapping, API translation, DirectX/Vulkan/OpenGL support, audio, input, prefixes, launchers and a clear anti-cheat compatibility policy. Anti-cheat bypass is not part of this design.
+The available execution paths are deliberately distinct:
+
+- **Windows host:** Windows PE applications are passed to the Windows process-creation API via the host's native process manager. The Windows OS supplies the PE loader, Win32/NT APIs and installed graphics drivers. The child receives the current user's permissions. This is a real host process, not a DuckOS kernel PE/Win32 implementation or an AppContainer sandbox.
+- **POSIX host:** Wine supplies the Windows API implementation for PE programs. On Linux, bubblewrap can provide an optional filesystem and network namespace boundary. Without it, launch requires explicit approval for an unisolated host process.
+- **DOS:** DOSBox/DOSBox-X runs compatible MZ/COM/legacy DOS applications in an emulator. It is not a modern Windows runtime.
+- **QEMU:** a registered Windows guest disk can be booted as a full virtual machine. Snapshot mode and disabled networking are defaults. The current QEMU profile uses virtual VGA and does not configure GPU passthrough.
+
+The host agent accepts only loopback requests with a random bearer token. File imports are bounded, reject symbolic links/path traversal and are re-hashed before launch. Launch requires an explicit approval flag and uses an argument vector, never a shell command string. Windows-native runs are not OS-sandboxed; the current user's Windows permissions and network access remain available. A user must separately approve that unisolated execution.
+
+Graphics translation remains a separate component. DXVK can be installed into a managed Wine prefix from a user-supplied archive after its expected SHA-256 is checked; it covers Direct3D 9/10/11 to Vulkan. Direct3D 12 needs vkd3d-proton and is not enabled. A Vulkan loader/device check is not a benchmark or proof that a game works. No anti-cheat bypass is included.
+
+**Kernel boundary:** DuckOS still has no bootable native kernel process model, syscall ABI, PE image loader, Win32/NT implementation or kernel-enforced capability sandbox. The manager launches on the host OS running Mora. Cross-architecture Windows user-mode binary translation is not integrated. A QEMU guest may use translated guest CPUs inside its VM, but that does not turn QEMU into a host PE API layer.
 
 ## Provenance
 

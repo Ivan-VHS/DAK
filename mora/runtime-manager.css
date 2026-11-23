@@ -1,0 +1,30 @@
+.runtime-manager{display:grid;gap:13px;margin-top:18px}
+.runtime-intro,.runtime-help,.runtime-muted,.runtime-status,.runtime-notice{color:var(--mora-muted);font-size:10px;line-height:1.65}
+.runtime-card{min-width:0;padding:15px;border:1px solid var(--mora-border);border-radius:14px;background:var(--mora-surface)}
+.runtime-card h3{margin:0 0 7px;color:var(--mora-text);font-size:13px;font-weight:700}
+.runtime-help{margin:0 0 12px}
+.runtime-field{display:grid;gap:6px;margin:10px 0;color:var(--mora-secondary);font-size:10px}
+.runtime-input,.runtime-select{width:100%;min-width:0;min-height:39px;padding:9px 11px;border:1px solid var(--mora-border);border-radius:9px;background:var(--mora-elevated);color:var(--mora-text);font:inherit;font-size:11px}
+.runtime-input:focus-visible,.runtime-select:focus-visible{outline:2px solid var(--mora-brand);outline-offset:2px}
+.runtime-file{padding:8px}
+.runtime-arguments{resize:vertical;white-space:pre;line-height:1.5}
+.runtime-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.runtime-button{min-height:36px;padding:8px 12px;border:1px solid var(--mora-border);border-radius:9px;background:var(--mora-elevated);color:var(--mora-text);font-family:inherit;font-size:10px;font-weight:700;cursor:pointer}
+.runtime-button:hover:not(:disabled){border-color:var(--mora-brand)}
+.runtime-primary{border-color:var(--mora-brand);background:var(--mora-brand);color:#fff}
+.runtime-small{min-height:30px;padding:6px 9px;font-size:9px}
+.runtime-button:disabled{opacity:.42;cursor:not-allowed}
+.runtime-status{min-height:16px;margin:9px 0 0;overflow-wrap:anywhere}
+.runtime-list,.runtime-processes{display:grid;gap:8px}
+.runtime-runtime-row,.runtime-process-row{min-width:0;padding:11px;border:1px solid var(--mora-border);border-radius:10px;background:var(--mora-elevated)}
+.runtime-runtime-row strong,.runtime-process-copy strong{display:block;color:var(--mora-text);font-size:10px;font-weight:700;overflow-wrap:anywhere}
+.runtime-runtime-row p,.runtime-process-copy p{margin:5px 0 0;color:var(--mora-muted);font-size:9px;line-height:1.55;overflow-wrap:anywhere}
+.runtime-consent{display:grid;gap:9px;margin:12px 0;padding:12px;border:1px solid var(--mora-border);border-radius:10px;background:var(--mora-elevated)}
+.runtime-check{display:flex;align-items:flex-start;gap:9px;color:var(--mora-secondary);font-size:9px;line-height:1.55}
+.runtime-check input{margin-top:2px;accent-color:var(--mora-brand);flex:0 0 auto}
+.runtime-heading-row,.runtime-process-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.runtime-heading-row h3{margin:0}
+.runtime-process-row{align-items:flex-start}
+.runtime-process-copy{min-width:0;flex:1}
+.runtime-notice{margin:0;padding:12px 14px;border-left:3px solid var(--mora-brand);background:var(--mora-elevated)}
+@media(max-width:620px){.runtime-process-row{align-items:flex-start;flex-direction:column}.runtime-process-row .runtime-button{align-self:flex-end}.runtime-actions .runtime-button{flex:1}}

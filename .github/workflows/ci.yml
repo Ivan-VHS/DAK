@@ -57,6 +57,23 @@ jobs:
           node-version: "22"
       - run: npm test
 
+
+  runtime-windows:
+    name: Windows native PE process
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: ilammy/msvc-dev-cmd@v1
+      - run: cl /nologo /MT /O2 /Fe:duckos-native-pe-smoke.exe tests/runtime_smoke.c
+      - run: python -m pip install --upgrade pip jsonschema
+      - name: Run host runtime tests with a real Windows PE fixture
+        run: python -m unittest discover -s tests -p test_runtime.py -v
+        env:
+          DUCKOS_NATIVE_PE_FIXTURE: ${{ github.workspace }}\\duckos-native-pe-smoke.exe
+
   native-c:
     name: Native C
     runs-on: ubuntu-latest

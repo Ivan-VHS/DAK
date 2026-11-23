@@ -185,13 +185,21 @@ def main(argv: list[str] | None = None) -> int:
             if not approved:
                 print("VM launch cancelled.")
                 return 1
+            persistent_approved = False
+            if args.persistent:
+                persistent_approved = args.yes or _confirm(
+                    "Write guest changes permanently to the original virtual disk? This cannot be undone by QEMU snapshot mode."
+                )
+                if not persistent_approved:
+                    print("Persistent guest write cancelled.")
+                    return 1
             _print(manager.launch_vm(
                 args.name,
                 approved=True,
                 allow_unisolated=args.allow_unisolated,
                 allow_network=args.allow_network,
                 persistent=args.persistent,
-                allow_persistent=args.persistent and args.yes,
+                allow_persistent=persistent_approved,
             ))
             return 0
         raise RuntimeErrorBase(f"unknown runtime action: {action}")

@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-22
+Updated: 2026-11-23
 
 ## Implemented in Reaper source
 
@@ -22,6 +22,19 @@ Updated: 2026-11-22
 - [x] Tri-Color Duck palette, reduced-motion policy and frame-budget classification.
 - [x] Reaper contract suite for tree-walk and VM execution, wired into GitHub Actions.
 
+## Implemented host-side executable runtime
+
+- [x] Bounded PE/DOS/ELF/Mach-O header inspection and architecture classification.
+- [x] Private imported application store with ZIP path/size limits, per-file SHA-256 manifests and pre-launch integrity verification.
+- [x] Windows host PE process creation, plus installed Wine and DOSBox adapter discovery on POSIX hosts.
+- [x] Direct argv-based process creation with shell disabled, explicit launch approval, PID tracking and process termination.
+- [x] Optional Linux bubblewrap filesystem/network namespace isolation for Wine/DOSBox; unisolated host launches require explicit approval.
+- [x] QEMU guest disk registration with SHA-256 verification, snapshot-by-default boot and networking disabled by default.
+- [x] Optional user-supplied DXVK archive installation into managed Wine prefixes with expected archive digest and installed-file verification.
+- [x] Authenticated loopback API used by Mora Bridge; Windows CI executes a real PE host process.
+
+These are host-side integrations. They do not provide kernel-level process isolation or prove that the DuckOS image boots.
+
 ## Partial or external boundaries
 
 - [ ] Real frame/page allocator, page tables, MMIO and DMA.
@@ -34,9 +47,11 @@ Updated: 2026-11-22
 - [ ] GPU command submission and accelerated compositor.
 - [ ] Freestanding native Reaper compiler/backend and self-hosted compiler.
 - [ ] UEFI/BIOS bootloader, kernel entry point and bootable ISO/USB image.
-- [ ] Process model, syscall ABI and kernel-enforced capabilities.
+- [ ] Native DuckOS process model, address spaces, syscall ABI, PE image loader and kernel-enforced capabilities.
 - [ ] Package manager, init process tree, filesystem and installer.
-- [ ] Audio engine, Wayland-compatible compositor and native settings applications.
+- [ ] Audio engine, Wayland-compatible compositor, native settings applications and GPU-accelerated game compositor.
+- [ ] Cross-architecture Windows user-mode binary translation; native Win32/NT runtime inside DuckOS.
+- [ ] Direct3D 12 via vkd3d-proton and QEMU GPU passthrough.
 
 ## Evidence policy
 

@@ -6,24 +6,62 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["app_id", "approved"],
+      "required": [
+        "app_id",
+        "approved"
+      ],
       "properties": {
-        "app_id": {"type": "string", "pattern": "^[0-9a-f]{24}$"},
-        "runtime_id": {"enum": ["auto", "native-pe", "wine", "dosbox"]},
-        "arguments": {"type": "array", "maxItems": 128, "items": {"type": "string", "maxLength": 2048}},
-        "approved": {"const": true},
-        "allow_unisolated": {"type": "boolean"},
-        "allow_network": {"type": "boolean"}
+        "app_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{24}$"
+        },
+        "runtime_id": {
+          "enum": [
+            "auto",
+            "native-pe",
+            "wine",
+            "dosbox"
+          ]
+        },
+        "arguments": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "maxLength": 2048
+          }
+        },
+        "approved": {
+          "const": true
+        },
+        "allow_unisolated": {
+          "type": "boolean"
+        },
+        "allow_network": {
+          "type": "boolean"
+        }
       }
     },
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["approved"],
+      "required": [
+        "approved",
+        "allow_unisolated"
+      ],
       "properties": {
-        "approved": {"const": true},
-        "allow_network": {"type": "boolean"},
-        "persistent": {"const": false}
+        "approved": {
+          "const": true
+        },
+        "allow_network": {
+          "type": "boolean"
+        },
+        "persistent": {
+          "const": false
+        },
+        "allow_unisolated": {
+          "const": true
+        }
       }
     }
   ]

@@ -17,7 +17,7 @@ The system tools are:
 - **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
 - **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
 - **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
-- **Bridge:** local PE/ELF header inspection. It does not load or launch executables.
+- **Bridge:** local PE/ELF header inspection plus a host runtime manager for importing and launching real Windows PE/DOS applications through Windows native PE, Wine or DOSBox, with QEMU guest management.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
 
@@ -45,7 +45,58 @@ python -m unittest discover -s tests -v
 python tools/validate_app_catalog.py
 ```
 
-The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+The tests cover the browser-shell contracts, runtime package/integrity policy, argument-vector process creation and a real Windows-host PE process in the Windows CI job. They do not prove native DuckOS kernel, driver, compositor or boot-image behavior.
+
+## Host executable runtime
+
+The current real launcher is a host service, not a pretend browser execution button and not yet a kernel PE loader. Install the project in an editable Python environment:
+
+```powershell
+py -3 -m pip install -e .
+duckos runtime list
+duckos runtime bridge
+```
+
+Keep that terminal open. The command prints a random pairing token; paste it into Mora → Bridge. Serve the desktop from another terminal so the browser origin is an allowed loopback origin:
+
+```powershell
+py -m http.server 8000
+```
+
+Open `http://localhost:8000/mora/`. Select an EXE or ZIP game package in Bridge, import it, select its runtime and approve the launch. The pairing token stays only in the current Mora window's memory.
+
+Examples for command-line import:
+
+```powershell
+duckos runtime import "C:\Games\Example\game.exe" --name "Example Game"
+duckos runtime import "C:\Games\Example\game.zip" --entrypoint "Example\game.exe"
+duckos runtime apps
+duckos runtime launch APP_ID --adapter native-pe --allow-unisolated
+```
+
+On Windows, PE applications are created as real host processes through the Windows process API via Python's argument-vector process creation. They run with the current user's Windows permissions; this is not an AppContainer or DuckOS kernel sandbox. The first launch requires explicit approval for an unisolated host process.
+
+On Linux/macOS/POSIX hosts, Windows PE requires an installed Wine runtime. On Linux, optional bubblewrap isolation restricts the filesystem view and can isolate the network namespace. DOS MZ/COM programs require DOSBox or DOSBox-X. QEMU can boot an existing registered guest disk; it does not run an arbitrary host EXE by itself. The guest disk defaults to snapshot mode and its virtual network adapter is disabled.
+
+```sh
+duckos runtime list
+duckos runtime import ~/Games/game.zip --entrypoint "Game/game.exe"
+duckos runtime launch APP_ID --adapter wine --allow-unisolated
+duckos runtime vm-register windows-guest ~/VMs/windows.qcow2 --memory 8192 --cpus 4
+duckos runtime vm-launch windows-guest --allow-unisolated
+```
+
+Install host dependencies using the package manager for the selected distribution. Wine is not bundled. DOSBox and QEMU are separate optional packages; unavailable runtimes are shown as unavailable rather than simulated.
+
+DXVK can be installed into one managed Wine prefix only from an archive supplied by the user with its expected SHA-256 digest:
+
+```sh
+duckos runtime dxvk-install APP_ID dxvk.tar.gz --sha256 YOUR_64_CHARACTER_SHA256
+```
+
+DXVK covers Direct3D 9/10/11 to Vulkan. Direct3D 12 is **not** implemented by DXVK and currently has no vkd3d-proton adapter in this launcher. QEMU uses virtual VGA; GPU passthrough and gaming-grade 3D acceleration are not configured.
+
+The host bridge binds only to `127.0.0.1`, uses a random bearer token, accepts local browser origins, and never accepts shell command strings. Imported packages are stored privately, checked against their per-file SHA-256 manifest before launch, and treated as untrusted. No Windows network sandbox is claimed; host-native Windows applications retain the current user's normal network permissions.
 
 ## System architecture and maturity
 
@@ -60,7 +111,7 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 | Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
 | Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
 | Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
-| Windows/Linux compatibility | PE/ELF header inspection | executable loader, Win32/NT, graphics/audio translation and launcher integration |
+| Windows/DOS execution | Mora inspection plus host-native process manager, Wine and DOSBox adapters, managed imports and QEMU guest launcher | Native DuckOS kernel PE/Win32 ABI, cross-architecture user-mode translation, native graphics/audio stack and GPU passthrough |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
 

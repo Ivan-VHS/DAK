@@ -102,6 +102,8 @@ class AppStore:
             else:
                 raise AppStoreError("source must be a file, ZIP package or directory")
 
+            if (stage / "manifest.json").exists():
+                raise AppStoreError("a root-level manifest.json is reserved by DuckOS; rename it before import")
             files = self._build_file_manifest(stage)
             entry = self._select_entrypoint(stage, files, entrypoint)
             executable = inspect_executable(stage / entry)
@@ -260,7 +262,7 @@ class AppStore:
         for item in sorted(root.rglob("*")):
             if item.is_symlink():
                 raise AppStoreError("symbolic links are not allowed in imported packages")
-            if not item.is_file() or item.name == "manifest.json":
+            if not item.is_file():
                 continue
             relative = item.relative_to(root).as_posix()
             _validate_relative_path(relative)
@@ -314,8 +316,12 @@ class AppStore:
             raise AppStoreError("invalid application identifier")
         folder = self.apps / app_id
         manifest_path = folder / "manifest.json"
-        if folder.is_symlink() or manifest_path.is_symlink():
+        if self.root.is_symlink() or self.apps.is_symlink() or folder.is_symlink() or manifest_path.is_symlink():
             raise AppStoreError("application store contains a symbolic link")
+        try:
+            folder.resolve(strict=True).relative_to(self.apps.resolve(strict=True))
+        except (OSError, ValueError) as error:
+            raise AppStoreError("application directory escapes the managed store") from error
         try:
             if manifest_path.stat().st_size > 1024 * 1024:
                 raise AppStoreError("application manifest exceeds 1 MiB")
@@ -333,6 +339,13 @@ class AppStore:
             raise AppStoreError("application manifest identity does not match its store path")
         if manifest["trust_state"] != "untrusted" or manifest["signature_state"] != "not_verified":
             raise AppStoreError("imported application trust state is invalid")
+        if not isinstance(manifest["name"], str) or not 1 <= len(manifest["name"]) <= 120:
+            raise AppStoreError("application display name is invalid")
+        if not isinstance(manifest["imported_at"], str) or len(manifest["imported_at"]) > 64:
+            raise AppStoreError("application import timestamp is invalid")
+        capabilities = manifest["requested_capabilities"]
+        if capabilities != ["graphics", "audio", "input", "filesystem.appdata"]:
+            raise AppStoreError("application capability manifest is invalid")
         files = manifest["files"]
         if not isinstance(files, list) or not 1 <= len(files) <= MAX_APP_FILES:
             raise AppStoreError("application file list is invalid")

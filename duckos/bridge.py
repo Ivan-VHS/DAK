@@ -253,11 +253,11 @@ class RuntimeRequestHandler(BaseHTTPRequestHandler):
             self._write_json(404, {"error": "unknown virtual machine"})
             return
         payload = self._read_json()
-        if set(payload) - {"approved", "allow_network", "persistent"}:
+        if set(payload) - {"approved", "allow_unisolated", "allow_network", "persistent"}:
             raise ValueError("VM launch request contains unknown fields")
-        if payload.get("approved") is not True:
-            raise ValueError("explicit user approval is required")
-        for name in ("allow_network", "persistent"):
+        if payload.get("approved") is not True or payload.get("allow_unisolated") is not True:
+            raise ValueError("explicit approval for an unisolated QEMU host process is required")
+        for name in ("allow_unisolated", "allow_network", "persistent"):
             if name in payload and not isinstance(payload[name], bool):
                 raise ValueError(f"{name} must be a boolean")
         if payload.get("persistent", False):
@@ -265,6 +265,7 @@ class RuntimeRequestHandler(BaseHTTPRequestHandler):
         result = self.server.manager.launch_vm(
             match.group(1),
             approved=True,
+            allow_unisolated=True,
             allow_network=payload.get("allow_network", False),
         )
         self._write_json(202, {"process": result})
