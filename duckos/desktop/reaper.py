@@ -16,6 +16,11 @@ from typing import Any
 MAX_OUTPUT_CHARS = 1_000_000
 COMMAND_TIMEOUT_SECONDS = 30
 SOURCE_SUFFIXES = {".rpr", ".most"}
+SYNTAX_SOURCE_SUFFIXES = {
+    ".rpr", ".most", ".py", ".pipe", ".ppl", ".lisp", ".lsp", ".scm",
+    ".forth", ".fs", ".bf", ".b", ".bf93", ".befunge",
+}
+MAX_SYNTAX_STEPS = 10_000_000
 
 
 class ReaperIntegrationError(ValueError):
@@ -104,6 +109,8 @@ class ReaperWorkbench:
             capabilities.append("static_typecheck")
         if (root / "reaper" / "native_compiler.py").is_file():
             capabilities.append("native_aot_subset")
+        if (root / "reaper" / "multisyntax.py").is_file():
+            capabilities.extend(("multi_syntax_frontends", "polyglot_runner", "syntax_validation"))
 
         return {
             "schema": "duckos.reaper-workbench.v1",
@@ -133,6 +140,20 @@ class ReaperWorkbench:
             raise ReaperIntegrationError(f"cannot open Reaper source file: {error}") from error
         if not resolved.is_file() or resolved.suffix.lower() not in SOURCE_SUFFIXES:
             raise ReaperIntegrationError("select an existing .rpr or .most source file")
+        return resolved
+
+    @staticmethod
+    def _syntax_source_path(source: str | Path) -> Path:
+        path = Path(source).expanduser()
+        if path.is_symlink():
+            raise ReaperIntegrationError("syntax source files must not be symbolic links")
+        try:
+            resolved = path.resolve(strict=True)
+        except OSError as error:
+            raise ReaperIntegrationError(f"cannot open syntax source file: {error}") from error
+        if not resolved.is_file() or resolved.suffix.casefold() not in SYNTAX_SOURCE_SUFFIXES:
+            supported = ", ".join(sorted(SYNTAX_SOURCE_SUFFIXES))
+            raise ReaperIntegrationError(f"select an existing source file with a supported syntax extension: {supported}")
         return resolved
 
     def _run(self, arguments: list[str], *, timeout: int = COMMAND_TIMEOUT_SECONDS) -> dict[str, Any]:
@@ -188,6 +209,55 @@ class ReaperWorkbench:
                 "this Reaper checkout predates the integrated static type checker; update the projects/reaper submodule"
             )
         return self._run(["typecheck", str(path), "--json"])
+
+    def syntax_registry(self) -> dict[str, Any]:
+        state = self.inspect()
+        if "multi_syntax_frontends" not in state["capabilities"]:
+            raise ReaperIntegrationError("this Reaper checkout does not include the multi-syntax frontend registry")
+        return self._run(["syntax", "--list", "--json"])
+
+    def check_syntax(
+        self,
+        source: str | Path,
+        *,
+        syntax: str = "auto",
+        polyglot: bool = False,
+    ) -> dict[str, Any]:
+        path = self._syntax_source_path(source)
+        state = self.inspect()
+        if "syntax_validation" not in state["capabilities"]:
+            raise ReaperIntegrationError("this Reaper checkout does not include syntax-only validation")
+        arguments = ["syntax", "--check", "--json", "--syntax", syntax]
+        if polyglot:
+            arguments.append("--polyglot")
+        arguments.append(str(path))
+        return self._run(arguments)
+
+    def run_syntax(
+        self,
+        source: str | Path,
+        *,
+        syntax: str = "auto",
+        polyglot: bool = False,
+        max_steps: int = 1_000_000,
+        input_text: str = "",
+    ) -> dict[str, Any]:
+        path = self._syntax_source_path(source)
+        state = self.inspect()
+        if "multi_syntax_frontends" not in state["capabilities"]:
+            raise ReaperIntegrationError("this Reaper checkout does not include the multi-syntax runtime")
+        if isinstance(max_steps, bool) or not isinstance(max_steps, int) or not 1 <= max_steps <= MAX_SYNTAX_STEPS:
+            raise ReaperIntegrationError(f"max_steps must be between 1 and {MAX_SYNTAX_STEPS}")
+        if not isinstance(input_text, str) or len(input_text) > 1_000_000:
+            raise ReaperIntegrationError("input_text must be text no longer than 1,000,000 characters")
+        arguments = [
+            "syntax", "--json", "--syntax", syntax,
+            "--steps", str(max_steps), "--input", input_text,
+        ]
+        if polyglot:
+            arguments.append("--polyglot")
+        arguments.append(str(path))
+        return self._run(arguments, timeout=COMMAND_TIMEOUT_SECONDS)
 
     def open_studio(self) -> subprocess.Popen[str]:
         root = self._require_repository()
