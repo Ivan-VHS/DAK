@@ -15,13 +15,13 @@ The first milestone is a contract kernel: real Reaper code defines and tests sta
 | Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | implemented as Reaper contract; not a physical allocator |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
-| Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
-| DuckDriver boundary | driver ABI, package metadata and resource-conflict policy | descriptor policy implemented; signature verifier and device discovery pending |
-| Service supervisor | finite restart budget | policy implemented; process manager pending |
+| Capability and trust layer | explicit grants, attenuation, validation and quarantine | Reaper policy plus a userspace UID/capability broker; kernel enforcement pending |
+| DuckDriver boundary | driver ABI, package metadata and resource-conflict policy | Reaper descriptor policy plus Linux module inventory/allowlisted modprobe integration; DuckOS driver source and signature verifier pending |
+| Service supervisor | finite restart budget | Reaper restart policy plus POSIX host process/session supervisor; kernel process manager pending |
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
 | Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
-| Desktop | Tri-Color Duck palette, reduced-motion, frame-budget, window/workspace/session/command and notification contracts | Reaper policy and Mora browser-shell controls partially implemented; native compositor, display server and kernel session manager pending |
+| Desktop | Tri-Color Duck palette, reduced-motion, frame-budget, window/workspace/session/command and notification contracts | Mora browser shell plus initial native C/X11 compositor/window manager; Wayland/DRM and kernel session manager pending |
 
 ## Startup contract
 
@@ -79,6 +79,17 @@ This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS gua
 ## Mora desktop shell
 
 Mora is the current desktop presentation for DuckOS. The browser shell provides local virtual workspaces, application windows, keyboard command palette and a searchable engineering matrix. Reaper defines the deterministic window/session/command/notification policy in `duckos/ui/window_manager.rpr`, `duckos/ui/desktop.rpr` and `duckos/ui/notifications.rpr`. The Python host adapter reports actual read-only platform facts and validates the local application catalogue. These layers do not implement a native compositor, kernel session manager, process isolation, hardware bus scan or privileged command terminal. See [Mora shell](MORA_SHELL.md) for the implementation boundary and verification commands.
+
+
+## Native X11 desktop and host services
+
+The native desktop target, `native/mora-x11.c`, is built as `duckos-compositor`. It owns the X11 window-manager selection, redirects top-level windows with X Composite, draws the redirected surfaces through XRender, tracks XDamage, provides basic frame decoration/focus/title dragging and publishes basic EWMH client properties. The X11 self-test runs against Xvfb in CI. It is a first X11 implementation, not a Wayland compositor, KMS/DRM backend or accelerated Vulkan renderer.
+
+The `duckos.host` userspace broker exposes a versioned JSON-RPC surface over a Unix domain socket. It identifies socket peers with `SO_PEERCRED`, checks UID-scoped grants, launches only a fixed application registry and drops root-hosted child processes to the caller's UID/GID and supplementary groups. Process groups provide bounded session stop behavior but are not kernel namespaces or cgroups. The optional Mora HTTP bridge is restricted to loopback, a configured Origin allowlist and SHA-256-indexed bearer tokens. The system terminal only maps named diagnostic operations to fixed argv arrays; there is no arbitrary shell method.
+
+The driver interface inventories selected Linux kernel modules and can request `modprobe` only for allowlisted graphics/audio/network/device module names after a `driver.load` grant and root check. It reuses the distribution's drivers; it does not implement GPU/audio/network/USB/NVMe drivers in DuckOS. The broker can invoke fixed `.rpr` contracts through the installed Reaper Python reference interpreter. If Reaper is unavailable, the bridge reports that state instead of simulating evaluation.
+
+The Live build recipe packages this userspace, Mora and the native X11 backend into a Debian Live image. That image boots the Debian Linux kernel. UEFI entry, a freestanding Reaper compiler, page allocator, kernel scheduler, syscall ABI and kernel-enforced capability isolation remain separate bring-up gates.
 
 ## Native bring-up gates
 

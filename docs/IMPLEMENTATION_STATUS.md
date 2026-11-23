@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-22
+Updated: 2026-11-23
 
 ## Implemented in Reaper source
 
@@ -31,10 +31,10 @@ Updated: 2026-11-22
 - [ ] Cryptographic driver signature verification and isolated driver loading.
 - [ ] Sensor collection, hardware telemetry and DPC/ISR tracing.
 - [ ] BLAKE3 hashing, persistent semantic graph, structural sharing and general CRDT synchronization.
-- [ ] GPU command submission and accelerated compositor.
+- [ ] GPU command submission, DRM/KMS and accelerated compositor; the initial X11 compositor uses XRender.
 - [ ] Freestanding native Reaper compiler/backend and self-hosted compiler.
-- [ ] UEFI/BIOS bootloader, kernel entry point and bootable ISO/USB image.
-- [ ] Process model, syscall ABI and kernel-enforced capabilities.
+- [ ] UEFI/BIOS bootloader, kernel entry point and a self-hosted DuckOS kernel image; a Debian Live userspace image recipe is now present.
+- [ ] Process model, syscall ABI and kernel-enforced capabilities; userspace process supervision and a privileged UID capability broker are implemented separately.
 - [ ] Package manager, init process tree, filesystem and installer.
 - [ ] Audio engine, Wayland-compatible compositor and native settings applications.
 
@@ -99,3 +99,23 @@ Illidia starts external runtimes; it does not replace Wine/Proton or guarantee p
 - [ ] Privileged process/capability broker, native lock screen, power management, system terminal and real hardware telemetry providers.
 
 The current Mora user interface is a browser/PWA shell. Reaper scripts define testable OS policy on the reference runtime; the Python adapter only inspects host metadata and the application catalogue. Neither constitutes a native compositor or kernel service. Reaper contract CI tests policy execution on its tree-walk and VM reference engines; separate host/hardware evidence is required for future native bring-up.
+
+
+## Native Mora compositor, host broker and Live image — 2026-11-23
+
+- [x] Native X11 compositor/window manager in C using X Composite, XDamage, XRender and XFixes; basic frame decorations, focus, title dragging, EWMH client list and close/minimize shortcuts.
+- [x] Native compositor build and Xvfb startup/self-test in CI.
+- [x] POSIX process supervisor with fixed application registry, independent process groups, UID/GID drop for root-hosted child processes, session listing and bounded stop escalation.
+- [x] Capability-checked native host broker using Unix socket peer credentials (SO_PEERCRED), per-UID grants, root ownership/0600 policy checks and a loopback-only bearer-token bridge.
+- [x] Controlled diagnostic terminal with fixed argv allowlist, per-command timeout, output cap and caller-UID execution; no generic shell endpoint.
+- [x] Linux driver-module inventory/load path for allowlisted graphics, audio, network and device modules, plus the existing read-only PCI/USB inventory.
+- [x] Optional live Reaper bridge through `reaper.runtime.Interpreter`, with four allowlisted policy entry points and bounded execution quotas.
+- [x] Mora Native Host panel for host status, device/driver inventory, managed sessions, Reaper status and allowlisted diagnostics.
+- [x] Debian Live build recipe packaging the X11 compositor, Mora, host service and X session.
+- [ ] Wayland compositor, DRM/KMS renderer, GPU command scheduler, modern multi-monitor/resizing/colour management and accelerated rendering.
+- [ ] DuckOS-owned graphics/audio/network/USB/NVMe driver source, signing, isolation and hardware qualification; current module operations reuse the Linux host kernel's drivers.
+- [ ] Kernel scheduler, address spaces, syscall ABI, kernel-enforced capabilities, cgroups/namespaces sandbox and native process isolation.
+- [ ] DuckOS UEFI entry point, freestanding native Reaper backend, physical memory manager and self-hosted kernel; the Live ISO recipe uses a Debian Linux kernel.
+- [ ] Actual release ISO/USB image built and boot-tested on target hardware; CI validates the compositor under Xvfb, not a complete hardware boot.
+
+The C compositor is a real X11 userspace window manager/compositor, not a Wayland or DRM/KMS implementation. The host broker is a privileged userspace service with explicit UID policy and process identity dropping; it is not a kernel reference monitor or a general-purpose security sandbox. The image recipe creates a bootable Linux-based DuckOS userspace image, not a new DuckOS kernel image. See [Native runtime](NATIVE_RUNTIME.md) for interfaces, setup and exact limitations.

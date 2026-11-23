@@ -18,7 +18,6 @@ UMask=0077
 NoNewPrivileges=no
 PrivateTmp=yes
 ProtectSystem=full
-ProtectHome=read-only
 ProtectKernelTunables=yes
 ProtectKernelLogs=yes
 ProtectControlGroups=yes

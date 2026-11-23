@@ -434,7 +434,7 @@ class DriverManager:
             "module": module,
             "category": category,
             "loaded": module.replace("-", "_") in self._loaded(),
-            "kernel_module_loaded": True,
+            "load_request_succeeded": True,
             "driver_source_built_by_duckos": False,
         }
 

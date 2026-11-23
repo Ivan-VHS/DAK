@@ -21,8 +21,11 @@ python3 -m http.server 8760 --bind 127.0.0.1 --directory "$MORA_ROOT" &
 web_pid=$!
 
 cleanup() {
+    if [ -n "${browser_pid:-}" ]; then
+        kill "$browser_pid" 2>/dev/null || true
+    fi
     kill "$web_pid" "$compositor_pid" 2>/dev/null || true
-    wait "$web_pid" "$compositor_pid" 2>/dev/null || true
+    wait "$web_pid" "$compositor_pid" ${browser_pid:+"$browser_pid"} 2>/dev/null || true
 }
 trap cleanup EXIT HUP INT TERM
 
@@ -44,8 +47,14 @@ else:
     raise SystemExit("Mora local web server did not become ready")
 PY
 
-if command -v xdg-open >/dev/null 2>&1; then
+if command -v firefox-esr >/dev/null 2>&1; then
+    firefox-esr --kiosk "$MORA_URL" >/dev/null 2>&1 &
+    browser_pid=$!
+elif command -v xdg-open >/dev/null 2>&1; then
     xdg-open "$MORA_URL" >/dev/null 2>&1 &
+    browser_pid=$!
+else
+    echo "Install a browser (Firefox ESR) to open Mora." >&2
 fi
 
 wait "$compositor_pid"

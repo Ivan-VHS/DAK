@@ -98,6 +98,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
+- [Native Mora compositor, host broker and Live image](docs/NATIVE_RUNTIME.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Illidia game library and launcher](docs/ILLIDIA.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)

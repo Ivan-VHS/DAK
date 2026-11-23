@@ -27,6 +27,8 @@ def _read_tokens(path: str | Path) -> dict[str, int]:
     mode = stat.S_IMODE(token_path.stat().st_mode)
     if mode & 0o077:
         raise HostError("bridge token file must not be readable or writable by group/other")
+    if metadata.st_size > 64 * 1024:
+        raise HostError("bridge token file exceeds the 64 KiB limit")
     try:
         payload = json.loads(token_path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:

@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+import pwd
+import socket
 import shutil
 import subprocess
+import threading
 import sys
 import tempfile
 import unittest
@@ -11,6 +14,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from duckos.host.config import create_bridge_token, write_policy
+from duckos.host.client import NativeHostClient
 from duckos.host.runtime import (
     CapabilityPolicy,
     DriverManager,
@@ -20,7 +24,7 @@ from duckos.host.runtime import (
     SafeTerminal,
     current_uid,
 )
-from duckos.host.server import _read_tokens
+from duckos.host.server import UnixHostServer, _read_tokens
 
 
 class FakeProcess:
@@ -57,6 +61,7 @@ class NativeHostTests(unittest.TestCase):
                 "schema": "duckos.host-policy.v1",
                 "principals": {"1000": ["root.shell"]},
             }), encoding="utf-8")
+            path.chmod(0o600)
             with self.assertRaisesRegex(HostError, "unknown capabilities"):
                 CapabilityPolicy.load(path)
 
@@ -117,8 +122,11 @@ class NativeHostTests(unittest.TestCase):
         self.assertTrue(captured["kwargs"]["start_new_session"])
         self.assertEqual(captured["kwargs"]["stdin"], subprocess.DEVNULL)
         if os.geteuid() == 0:
+            account = pwd.getpwuid(current_uid())
+            expected_groups = sorted(set(os.getgrouplist(account.pw_name, account.pw_gid)) - {account.pw_gid})
             self.assertEqual(captured["kwargs"]["user"], current_uid())
-            self.assertEqual(captured["kwargs"]["extra_groups"], [])
+            self.assertEqual(captured["kwargs"]["group"], account.pw_gid)
+            self.assertEqual(captured["kwargs"]["extra_groups"], expected_groups)
 
     def test_process_sessions_are_owned_and_can_be_stopped(self):
         if os.name != "posix":
@@ -185,6 +193,25 @@ class NativeHostTests(unittest.TestCase):
         self.assertEqual(report["schema"], "duckos.driver-inventory.v1")
         self.assertIn("modules", report)
         self.assertTrue(all("loaded" in item for item in report["modules"]))
+
+    def test_unix_socket_uses_peer_credentials_and_client_rpc(self):
+        if not hasattr(socket, "SO_PEERCRED"):
+            self.skipTest("Linux SO_PEERCRED is required")
+        with tempfile.TemporaryDirectory() as temporary:
+            socket_path = Path(temporary) / "host.sock"
+            broker = NativeHostBroker(CapabilityPolicy.for_current_user())
+            server = UnixHostServer(socket_path, broker, mode=0o600)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                result = NativeHostClient(socket_path).call("host.status")
+                self.assertIn(result["host"], {"Linux", "Darwin", "FreeBSD"})
+                self.assertEqual(result["uid"], current_uid())
+                self.assertTrue(result["process_supervisor"])
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=2)
 
 
 if __name__ == "__main__":

@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Mora is DuckOS's desktop shell. This implementation connects the existing browser/PWA presentation to explicit Reaper policy contracts and a read-only host inspection layer.
+Mora is DuckOS's desktop shell. The browser/PWA surface now connects to an authenticated loopback Native Host broker, while a separate native C executable provides an initial X11 compositor and window manager. Reaper policy is available through a bounded live interpreter bridge when Reaper is installed.
 
 The shell has three distinct parts:
 
 1. **Mora presentation** — HTML, CSS and JavaScript render the desktop, application windows, virtual workspaces, command palette and the 20-direction system matrix.
 2. **Reaper OS policy** — .rpr modules define window geometry and lifecycle, workspace/session validation, capability-gated application launch, allowlisted commands and bounded notification history.
-3. **Host integration** — Python CLI commands report actual host information and check that the shell's source files and application catalogue are present.
+3. **Host integration** — a POSIX broker manages registered processes, per-UID sessions, controlled diagnostics, Linux driver-module inspection and allowlisted Reaper policy evaluation. Mora connects to it over authenticated loopback HTTP; local CLI clients can use its Unix socket.
 
-This separation is intentional. Browser JavaScript manages the visible workspace; Reaper owns deterministic policy; privileged or device-specific operations belong to a future native OS service.
+This separation is intentional. Browser JavaScript manages the visible workspace; the C compositor owns X11 top-level windows; Reaper owns deterministic policy; the Python host service mediates privileged userspace operations. Kernel enforcement and device-specific DuckOS drivers remain future work.
 
 ## Desktop features
 
@@ -35,7 +35,7 @@ Application windows support focus ordering, minimize, maximize/restore, close an
 - monotonic z-order assignment;
 - an explicit maximum-window count.
 
-The browser shell is the current renderer and window host. These contracts do not constitute a native compositor or a kernel window manager.
+Mora still renders its app content in a browser, but top-level desktop windows can now be managed by the separate `duckos-compositor` X11 binary. The C window manager provides basic X11 frames, focus, title dragging, close/minimize shortcuts and compositing through XRender. It is not a Wayland compositor, DRM/KMS renderer, kernel window manager or a complete multi-monitor desktop.
 
 ### Command palette
 
@@ -63,7 +63,7 @@ Commands are tokenized into arguments and checked against known application IDs,
 
 The Reaper policy in duckos/ui/desktop.rpr contains the command allowlist and rejects unknown commands, unexpected extra arguments and untrusted application descriptors.
 
-The browser shell currently applies its allowlist in JavaScript. The matching Reaper policy is an independently executable contract checked by the Reaper CI workflow; Mora does not yet invoke the Reaper interpreter or exchange live policy decisions with it. A future authenticated native host broker is required for that runtime connection.
+The browser shell still validates its own command palette in JavaScript. The Native Host also exposes a fixed set of Reaper policy calls by loading `reaper.runtime.Interpreter` and evaluating the repository's `.rpr` modules under strict step, heap and resource limits. That live bridge is available only when Reaper is installed in the broker's Python environment; otherwise it reports `not-installed`.
 
 ### Twenty-direction engineering matrix
 
@@ -127,7 +127,7 @@ All three commands are read-only. They do not install packages, change power set
 
 ## Implementation boundary
 
-The current shell implementation is partial, not a bootable operating system desktop.
+The Mora UI and native X11 backend are a working desktop layer, but they are not a self-hosted DuckOS kernel or a standalone OS image by themselves. The repository now includes a Debian Live build recipe that packages the userspace and boots with the Debian Linux kernel.
 
 Implemented in this repository:
 
@@ -137,20 +137,22 @@ Implemented in this repository:
 - keyboard command palette and allowlisted application/workspace/theme/focus commands;
 - searchable 20-direction systems matrix with maturity and boundary descriptions;
 - Reaper contracts for window state, workspace/session policy, command authorization and notification records;
-- read-only Python host status, application catalogue validation and shell-readiness CLI;
-- Python tests for host reporting, catalogue validation and CLI JSON output;
+- native C/X11 compositor and window manager with Xvfb CI self-test;
+- UID-aware POSIX process/session supervisor and capability-checked Unix-socket/loopback HTTP host broker;
+- allowlisted diagnostic terminal, Linux driver-module inspection/loader and live Reaper policy bridge;
+- Mora Native Host panel and browser client tests;
+- Debian Live image build recipe and X11 session entry;
 - Reaper contract tests executed in CI on the tree-walk and VM engines.
 
 Not implemented by this change:
 
-- native Wayland/X11 compositor, native window manager or display server;
-- kernel session manager, process isolation or capability enforcement;
-- native terminal or arbitrary command execution;
-- actual screen-lock service, power management or system settings daemon;
-- real Wi-Fi, battery, GPU/NPU, temperature, PCIe, USB, frame-time or sensor collection in the browser shell;
-- UEFI/boot integration or a bootable DuckOS image.
+- native Wayland compositor, DRM/KMS and accelerated GPU rendering; the implemented compositor is X11/XRender only;
+- kernel scheduler/session manager, namespaces/cgroups, process isolation or kernel-enforced capabilities;
+- generic interactive shell, arbitrary command execution, power management or native lock-screen service;
+- DuckOS-owned graphics/audio/network/USB/NVMe driver sources, signed driver packages and isolation; module inventory and load operations reuse the Linux kernel's drivers;
+- UEFI entry point, freestanding DuckOS kernel and a bootable image using a DuckOS-owned kernel; the Live recipe is based on Debian Linux.
 
-The repository currently defines **Reaper** as its system policy/source language. The shell presentation is JavaScript/HTML/CSS, while the read-only host adapter is Python. There is no separately implemented “OS language” runtime in this revision. Native privileged services must be added behind versioned interfaces rather than pretending that browser code is kernel code.
+The repository currently defines **Reaper** as its system policy/source language. The Mora presentation is JavaScript/HTML/CSS, the native X11 desktop binary is C, and the host broker is Python. Reaper is executed through its reference interpreter when installed; its C17 compiler subset is not a freestanding OS compiler. The userspace broker is not a kernel reference monitor.
 
 ## Verification
 
@@ -159,6 +161,11 @@ Run the Python and catalogue tests:
 ~~~sh
 python -m unittest discover -s tests -v
 python tools/validate_app_catalog.py
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+xvfb-run -a ./build/duckos-compositor --check
+xvfb-run -a ./build/duckos-compositor --self-test
 ~~~
 
 Run the browser-shell tests:

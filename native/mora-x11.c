@@ -34,6 +34,7 @@ typedef struct Client {
     int y;
     unsigned int width;
     unsigned int height;
+    unsigned int border_width;
     bool dragging;
     int drag_x;
     int drag_y;
@@ -255,6 +256,7 @@ static void manage(Window window) {
     client->y = attributes.y;
     client->width = attributes.width > 0 ? (unsigned int)attributes.width : 640U;
     client->height = attributes.height > 0 ? (unsigned int)attributes.height : 480U;
+    client->border_width = attributes.border_width > 0 ? (unsigned int)attributes.border_width : 0U;
 
     client->frame = XCreateSimpleWindow(
         display, root, client->x, client->y,
@@ -543,6 +545,13 @@ static void cleanup(void) {
         Client *next = client->next;
         if (client->damage) {
             XDamageDestroy(display, client->damage);
+        }
+        if (client->window) {
+            XRemoveFromSaveSet(display, client->window);
+            XReparentWindow(display, client->window, root, client->x, client->y);
+            XSetWindowBorderWidth(display, client->window, client->border_width);
+            XMapWindow(display, client->window);
+            set_wm_state(client->window, NormalState);
         }
         if (client->frame) {
             XDestroyWindow(display, client->frame);

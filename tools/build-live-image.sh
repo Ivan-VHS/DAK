@@ -19,7 +19,7 @@ done
 mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 mkdir -p config/includes.chroot/usr/share/duckos/source
-rsync -a --delete --exclude .git --exclude build --exclude .venv "$ROOT/" \
+rsync -a --delete --exclude .git --exclude build --exclude .venv --exclude Reaper "$ROOT/" \
     config/includes.chroot/usr/share/duckos/source/
 if [ -n "$REAPER_SOURCE" ]; then
     if [ ! -d "$REAPER_SOURCE/reaper" ] || [ ! -f "$REAPER_SOURCE/pyproject.toml" ]; then

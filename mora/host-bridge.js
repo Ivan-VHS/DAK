@@ -2,6 +2,14 @@ const DEFAULT_ENDPOINT = "http://127.0.0.1:8765";
 const TOKEN_KEY = "duckos.native-host-token";
 const ALLOWED_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 
+function browserSessionStorage() {
+  try {
+    return globalThis.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
 export function normalizeHostEndpoint(value = DEFAULT_ENDPOINT) {
   let url;
   try {
@@ -19,7 +27,7 @@ export function normalizeHostEndpoint(value = DEFAULT_ENDPOINT) {
 export function createNativeHostBridge({
   endpoint = DEFAULT_ENDPOINT,
   fetcher = globalThis.fetch,
-  storage = globalThis.sessionStorage
+  storage = browserSessionStorage()
 } = {}) {
   const baseUrl = normalizeHostEndpoint(endpoint);
   if (typeof fetcher !== "function") {
@@ -128,7 +136,8 @@ export function createNativeHostBridge({
     connect,
     disconnect,
     request,
-    isConnected: () => Boolean(token)
+    isConnected: () => Boolean(token),
+    hasSavedToken: () => Boolean(readToken())
   };
 }
 
@@ -170,15 +179,16 @@ export function initNativeHostBridge({
       return;
     }
 
-    const token = window.prompt("Введите одноразово выданный токен DuckOS Native Host:");
-    if (!token) {
+    const savedToken = bridge.hasSavedToken();
+    const token = savedToken ? null : window.prompt("Введите одноразово выданный токен DuckOS Native Host:");
+    if (!savedToken && !token) {
       setStatus("Подключение отменено", "offline");
       return;
     }
     button.disabled = true;
     setStatus("Подключение…", "connecting");
     try {
-      const host = await bridge.connect(token.trim());
+      const host = await bridge.connect(token ? token.trim() : undefined);
       const backend = host.display_backend || "display не определён";
       const label = host.native_x11_compositor_installed
         ? "X11 compositor установлен"

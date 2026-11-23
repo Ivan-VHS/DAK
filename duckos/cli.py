@@ -30,8 +30,8 @@ from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .shell import host_status as shell_host_status, read_app_catalog, readiness_report
-from .host import CapabilityPolicy, NativeHostBroker, NativeHostClient
-from .host.runtime import HostError, current_uid
+from .host import CapabilityPolicy, NativeHostBroker, NativeHostClient, NativeHostClient
+from .host.runtime import HostError, current_uid, current_uid
 from .host.server import serve_native_host
 
 
@@ -206,10 +206,7 @@ def main(argv: list[str] | None = None) -> int:
     host_policy = host_commands.add_parser("policy-init", help="create an initial UID capability policy")
     host_policy.add_argument("--path", type=Path, default=Path("host-policy.json"))
     host_policy.add_argument("--uid", type=int, default=current_uid())
-    host_policy.add_argument("--grant", action="append", default=[
-        "host.read", "session.read", "session.spawn", "session.stop",
-        "terminal.safe", "driver.inspect", "reaper.evaluate",
-    ])
+    host_policy.add_argument("--grant", action="append", default=None, help="capability to grant; may be repeated (default: safe desktop grants)")
 
     host_token = host_commands.add_parser("token-create", help="create a Mora bridge token; raw token is shown once")
     host_token.add_argument("--path", type=Path, default=Path("bridge-tokens.json"))
@@ -218,9 +215,11 @@ def main(argv: list[str] | None = None) -> int:
     host_terminal = host_commands.add_parser("terminal", help="execute one fixed diagnostic command")
     host_terminal.add_argument("command_id", choices=("system", "date", "uptime", "memory", "storage", "processes", "network", "home"))
     host_terminal.add_argument("--socket", type=Path, help="run through a privileged host broker")
+    host_terminal.add_argument("--socket", type=Path, help="run through a privileged host broker")
 
     host_driver = host_commands.add_parser("drivers", help="inspect safe Linux driver availability")
     host_driver.add_argument("--load", nargs=2, metavar=("CATEGORY", "MODULE"))
+    host_driver.add_argument("--socket", type=Path, help="run through a privileged host broker")
     host_driver.add_argument("--socket", type=Path, help="run through a privileged host broker")
 
     host_reaper = host_commands.add_parser("reaper", help="inspect or evaluate an allowlisted Reaper contract")
@@ -229,6 +228,7 @@ def main(argv: list[str] | None = None) -> int:
         "desktop.session_transition", "window.transition",
     ))
     host_reaper.add_argument("--arguments", type=Path, help="JSON object with contract arguments")
+    host_reaper.add_argument("--socket", type=Path, help="run through a native host broker")
     host_reaper.add_argument("--socket", type=Path, help="run through a native host broker")
 
 
@@ -322,7 +322,12 @@ def main(argv: list[str] | None = None) -> int:
             result = NativeHostClient(args.socket).call("session.stop", {"session_id": args.session_id})
         elif args.command == "host" and args.host_command == "policy-init":
             from .host.config import write_policy
-            result = write_policy(args.path, args.uid, args.grant)
+            grants = args.grant if args.grant is not None else [
+                "host.read", "session.read", "session.spawn", "session.stop",
+                "terminal.safe", "driver.inspect", "reaper.evaluate",
+                "desktop.start", "display.manage",
+            ]
+            result = write_policy(args.path, args.uid, grants)
         elif args.command == "host" and args.host_command == "token-create":
             from .host.config import create_bridge_token
             result = create_bridge_token(args.path, args.uid)

@@ -1,0 +1,53 @@
+name: Build DuckOS Live image
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_reaper:
+        description: Include the pinned Reaper Python reference runtime
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  live-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out DuckOS
+        uses: actions/checkout@v4
+      - name: Check out the pinned Reaper runtime
+        if: inputs.include_reaper
+        uses: actions/checkout@v4
+        with:
+          repository: Ivan-VHS/Reaper
+          ref: b7c11257bef2f1cb9b2d75bfd0896774665ba301
+          path: Reaper
+      - name: Install live-build host tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y live-build rsync
+      - name: Build the bootable Linux-based DuckOS userspace image
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ inputs.include_reaper }}" == "true" ]]; then
+            sudo env \
+              DUCKOS_LIVE_WORKDIR="$RUNNER_TEMP/duckos-live" \
+              REAPER_SOURCE_DIR="$GITHUB_WORKSPACE/Reaper" \
+              "$GITHUB_WORKSPACE/tools/build-live-image.sh"
+          else
+            sudo env \
+              DUCKOS_LIVE_WORKDIR="$RUNNER_TEMP/duckos-live" \
+              "$GITHUB_WORKSPACE/tools/build-live-image.sh"
+          fi
+      - name: Publish ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: duckos-live-amd64
+          path: ${{ runner.temp }}/duckos-live/*.iso
+          if-no-files-found: error
+          compression-level: 0

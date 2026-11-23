@@ -46,3 +46,5 @@ lightdm-gtk-greeter
 firefox-esr
 fonts-dejavu-core
 fonts-noto-color-emoji
+linux-image-amd64
+passwd
