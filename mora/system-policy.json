@@ -8,7 +8,11 @@
     "Intent actions are limited to a reviewed local allowlist and require explicit approval.",
     "Unconfigured capabilities default to denied in the shell preference profile.",
     "File inspection and hashing run locally; uploads are not performed by the shell.",
-    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected."
+    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected.",
+    "The Russian locale is the default shell language; Ukrainian is a first-class peer interface locale with local command aliases.",
+    "Deep-time epochs use arbitrary-precision integer values and never replace civil wall-clock time.",
+    "CRC32 checks detect accidental local snapshot corruption only; they are not signatures or proof of origin.",
+    "A browser update preview cannot change boot entries, partitions, kernel state or drivers."
   ],
   "capabilities": {
     "desktop": {
@@ -29,7 +33,7 @@
     },
     "immutable_updates": {
       "maturity": "planned",
-      "scope": "shell settings snapshot only; no atomic OS image updater"
+      "scope": "Mora preferences have versioned integrity envelopes and Restore can display a gated A/B plan; no signed OS image updater, boot-slot switch or system rollback is connected"
     },
     "app_sandboxing": {
       "maturity": "planned",
@@ -45,7 +49,7 @@
     },
     "adaptive_workspace": {
       "maturity": "partial",
-      "scope": "responsive browser layout, persisted Amber/Dark/Light palettes and reduced motion; native XR session transfer remains absent"
+      "scope": "responsive browser layout, RU/UK locale switch, local app command palette, keyboard navigation and reduced motion; native compositor, XR session transfer and OS-wide speech remain absent"
     },
     "multimodal_input": {
       "maturity": "planned",
@@ -53,7 +57,7 @@
     },
     "material_interface": {
       "maturity": "implemented",
-      "scope": "Mora Amber drapery rhythm, graphite/walnut surfaces, muted olive secondary accent, restrained critical red, with Dark and Light alternate palettes"
+      "scope": "one DuckOS black/white/yellow palette, near-black radial workspace, restrained folds, soft neutral glass, readable Cyrillic fallback stack and reduced-motion-aware transitions"
     },
     "compatibility": {
       "maturity": "partial",
@@ -65,7 +69,7 @@
     },
     "accessibility": {
       "maturity": "partial",
-      "scope": "reduced-motion controls and responsive layout; more contrast and assistive profiles remain"
+      "scope": "keyboard command surface, locale-aware labels, responsive layout and reduced-motion support; complete screen-reader audit and native accessibility services remain"
     },
     "energy_awareness": {
       "maturity": "partial",
@@ -73,7 +77,7 @@
     },
     "shared_design_system": {
       "maturity": "implemented",
-      "scope": "versioned Amber/Dark/Light semantic palette, geometry, spacing, typography and motion tokens; native adapters remain distinct"
+      "scope": "versioned single Duck palette, geometry, spacing, typography and motion tokens with Segoe UI/Noto Sans/Arial fallbacks and explicit RU/UK coverage; native toolkit adapters remain distinct"
     },
     "installable_workspace": {
       "maturity": "partial",
@@ -86,6 +90,30 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "language_runtime": {
+      "maturity": "implemented",
+      "scope": "browser shell Russian default and persistent Ukrainian locale; local command palette, translated shell labels and Ukrainian aliases for allowlisted intent actions; complete native text-to-speech and OS-wide locale services are not connected"
+    },
+    "deep_time_model": {
+      "maturity": "implemented",
+      "scope": "separate BigInt epoch-year model with bounded decimal parsing and comparison; civil date/time remains sourced from the host clock"
+    },
+    "recovery_integrity": {
+      "maturity": "partial",
+      "scope": "versioned Mora preference snapshots wrapped in canonical UTF-8 envelopes with CRC32 corruption detection and previous-generation linkage; no signed OS image or cryptographic provenance claim"
+    },
+    "state_branching": {
+      "maturity": "partial",
+      "scope": "local Mora settings branches with parent lineage and CRC32 validation; branch storage is bounded to the latest 12 entries and is not a filesystem snapshot"
+    },
+    "atomic_update_plan": {
+      "maturity": "specified",
+      "scope": "testable A/B inactive-slot plan with signature, compatibility and capacity gates; plan-only contract with no updater, boot manager or system image writer"
+    },
+    "diagnostics_contract": {
+      "maturity": "implemented",
+      "scope": "bounded structured local diagnostic record schema with component, severity, locale and recovery action; native kernel journal and process-wide error aggregation remain absent"
     }
   },
   "not_in_scope_as_implemented_features": [
