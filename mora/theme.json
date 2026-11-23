@@ -83,5 +83,6 @@
     "ui": "Segoe UI",
     "display": "Unbounded",
     "code": "Cascadia Mono"
-  }
+  },
+  "defaultPalette": "amber"
 }
