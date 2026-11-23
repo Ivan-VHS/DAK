@@ -22,7 +22,7 @@ struct DuckOsProcess {
 static DuckOsProcess *processes;
 static DuckOsProcess *current_process;
 static uint64_t next_process_id = 1u;
-static uint64_t scheduler_stack;
+static uint64_t *scheduler_stack;
 static uint8_t scheduler_active;
 
 static void process_bootstrap(void) __attribute__((noreturn));
@@ -90,7 +90,7 @@ void duckos_process_yield(void) {
     if (current_process == NULL || !scheduler_active) return;
     current_process->state = DUCKOS_PROCESS_READY;
     duckos_context_switch((uint64_t **)&current_process->saved_stack,
-                          &scheduler_stack);
+                          scheduler_stack);
 }
 
 void duckos_process_exit(int64_t exit_code) {
