@@ -54,6 +54,10 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 ## Geometry, scale and interaction
 
+Mora's browser workspace uses a searchable start menu, three local workspaces, a bottom dock, system quick controls, notifications and draggable application windows. Windows support focus/z-order, minimize, maximize/restore and close. File operations and terminal commands remain scoped to the virtual workspace until DuckOS supplies a permissioned native filesystem and process service.
+
+Quick-panel indicators for Wi-Fi and Bluetooth are presentation-only; they do not toggle physical radios. The System Overview bars are simulated demo values, not kernel telemetry. Browser-side settings remain preferences, not hardware or kernel controls. See [Interactive Mora workspace](docs/MORA_INTERACTIVE_WORKSPACE.md) for the complete behavior and validation boundaries.
+
 - Spacing follows 4, 8, 12, 16, 24 and 32 px.
 - Window corners: 18–24 px; cards: 14–18 px; controls: 9–12 px.
 - Interactive targets are at least 44 × 44 px where the platform allows.
