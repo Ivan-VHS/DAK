@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/windows-prefix.v1.schema.json",
+  "title": "DuckOS Windows compatibility prefix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "name",
+    "architecture",
+    "created_at",
+    "layout",
+    "runtime_state",
+    "windows_api_available",
+    "execution_enabled",
+    "copy_on_write_base",
+    "runtime_components"
+  ],
+  "properties": {
+    "schema": { "const": "duckos.windows-prefix.v1" },
+    "name": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "architecture": { "enum": ["x86", "x86_64", "aarch64"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "layout": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+    },
+    "runtime_state": { "const": "metadata_only" },
+    "windows_api_available": { "const": false },
+    "execution_enabled": { "const": false },
+    "copy_on_write_base": { "type": ["string", "null"] },
+    "runtime_components": { "type": "array", "maxItems": 128, "items": { "type": "string" } }
+  }
+}

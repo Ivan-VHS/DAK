@@ -22,7 +22,6 @@ SCHEMA = "duckos.hardware-inventory.v1"
 MAX_DEVICES = 10_000
 MAX_OUTPUT_BYTES = 16 * 1024 * 1024
 _HEX_ID = re.compile(r"^(?:0x)?[0-9a-f]{4}$", re.IGNORECASE)
-_HEX_CLASS = re.compile(r"^(?:0x)?[0-9a-f]{6}$", re.IGNORECASE)
 _WINDOWS_SCRIPT = r"""
 $ErrorActionPreference = 'Stop'
 $rows = @(Get-PnpDevice -PresentOnly | ForEach-Object {
