@@ -4,7 +4,7 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial native catalogue views, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
 The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
 
@@ -49,7 +49,7 @@ The same controls are available in the **Reaper** tab of the native Duck Desktop
 
 ## Visual system and offline support
 
-The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The service worker is scoped to the Mora directory, caches only Mora shell assets and removes only older caches named with the `mora-shell-` prefix.
+The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The application registry and visual tokens are packaged as JSON resources; no web cache or browser runtime is part of the native application.
 
 ## Hardware inventory and driver audit
 
