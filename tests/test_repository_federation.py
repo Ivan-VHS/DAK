@@ -29,6 +29,12 @@ class RepositoryFederationTests(unittest.TestCase):
         altered["repositories"][1]["path"] = "projects/pytyliki"
         self.assertTrue(any("path" in error or "duplicate" in error for error in validate_manifest(altered)))
 
+    def test_unknown_repository_id_is_reported_without_crashing(self):
+        altered = copy.deepcopy(self.manifest)
+        altered["repositories"][0]["id"] = "unknown-project"
+        errors = validate_manifest(altered)
+        self.assertTrue(any("unexpected repository id" in error for error in errors))
+
     def test_wrong_commit_pin_is_rejected(self):
         altered = copy.deepcopy(self.manifest)
         altered["repositories"][0]["pinned_commit"] = "main"
