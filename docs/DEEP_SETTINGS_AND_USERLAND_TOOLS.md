@@ -81,6 +81,10 @@ The editor stores an energy preference, automatic eco threshold, whether eco is 
 
 The editor stores system/light/dark preference, a #RRGGBB accent, UI and icon scales, density and reduced-motion preference. The accent preview updates while editing.
 
+### Session security preferences
+
+The editor stores an automatic-lock timeout and a lock-on-sleep preference in the security section of a profile. These are preferences only; the current user-space utility does not authenticate users, enforce session lock or install a screen-lock service.
+
 **Not implemented:** a global native compositor/theme engine, automatic time-of-day switching, contrast certification or system-wide DPI changes. The stored values are ready for a future native theme service; the current panel does not claim to restyle every host window.
 
 ### Profiles, history and recovery
