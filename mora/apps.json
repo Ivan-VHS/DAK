@@ -3,7 +3,7 @@
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
-    "data_policy": "fictional_demo_data"
+    "data_policy": "demo_content_with_local_hardware_reports"
   },
   "built_in_apps": [
     {
