@@ -8,7 +8,9 @@ on:
       - "duckos/cli.py"
       - "catalogs/game-performance-rules.v1.json"
       - "tests/test_gaming_policy.py"
+      - "tests/test_gaming_detection.py"
       - "docs/GAMING_POLICY_66.md"
+      - "docs/GAMING_PROCESS_DETECTION.md"
       - "docs/GAMING_PERFORMANCE_INTEGRATION.md"
       - "scripts/validate_mora_gaming.py"
       - ".github/workflows/mora-gaming.yml"
@@ -43,6 +45,8 @@ jobs:
         run: python scripts/validate_mora_gaming.py
       - name: Test the 66-rule gaming policy
         run: python -m unittest tests.test_gaming_policy -v
+      - name: Test read-only game process detection
+        run: python -m unittest tests.test_gaming_detection -v
       - name: Smoke-test the gaming assessment CLI
         run: python -m duckos gaming-assess
       - name: Smoke-test the gaming lifecycle CLI
