@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <array>
 #include <cerrno>
+#include <cmath>
+#include <cstring>
+#include <cwctype>
+#include <iterator>
 #include <charconv>
 #include <cctype>
 #include <cstdlib>
@@ -24,6 +28,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -1324,8 +1329,8 @@ bool pathIsWithin(const fs::path& base, const fs::path& candidate) {
 #ifdef _WIN32
     auto baseText = normalizedBase.wstring();
     auto candidateText = normalizedCandidate.wstring();
-    std::transform(baseText.begin(), baseText.end(), baseText.begin(), towlower);
-    std::transform(candidateText.begin(), candidateText.end(), candidateText.begin(), towlower);
+    std::transform(baseText.begin(), baseText.end(), baseText.begin(), [](wchar_t c) { return static_cast<wchar_t>(std::towlower(c)); });
+    std::transform(candidateText.begin(), candidateText.end(), candidateText.begin(), [](wchar_t c) { return static_cast<wchar_t>(std::towlower(c)); });
     if (candidateText == baseText) return true;
     if (baseText.empty()) return false;
     if (baseText.back() != L'\\' && baseText.back() != L'/') baseText.push_back(L'\\');
