@@ -1,8 +1,19 @@
 {
-  "name":"Mora Desktop","short_name":"Mora","description":"Unified Ivan-VHS workspace",
-  "start_url":"./index.html","scope":"./","display":"standalone",
-  "background_color":"#10142a","theme_color":"#10142a",
-  "icons":[
-    {"src":"icon.svg","sizes":"192x192 512x512","type":"image/svg+xml","purpose":"any"}
+  "name": "Mora — DuckOS Desktop",
+  "short_name": "Mora",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10142A",
+  "theme_color": "#10142A",
+  "description": "Единый рабочий стол и системная оболочка DuckOS.",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }
