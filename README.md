@@ -63,6 +63,12 @@ python tools/validate_app_catalog.py
 
 The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
 
+## Release packaging and deployment planning
+
+The native Python toolchain now provides deterministic, optionally Ed25519-signed component bundles, SHA-256 inventory and verification, plus non-destructive GPT A/B/recovery/data layout planning for USB, PXE, UEFI HTTP Boot/iPXE and cloud deployment targets.
+
+See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce a verified component archive or deployment plan; they do not yet build a bootable ISO/USB image, install to a physical disk, convert cloud images, or implement firmware Secure Boot and boot rollback.
+
 ## System architecture and maturity
 
 The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
