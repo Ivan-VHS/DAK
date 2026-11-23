@@ -15,7 +15,7 @@ export function createDefaultPreferences() {
     appearance: {
       reducedMotion: false,
       density: "comfortable",
-      theme: "dark"
+      theme: "amber"
     },
     focusMode: false,
     powerProfile: "balanced",
@@ -38,7 +38,7 @@ export function normalizePreferences(value) {
     appearance: {
       reducedMotion: appearance.reducedMotion === true,
       density: appearance.density === "compact" ? "compact" : defaults.appearance.density,
-      theme: appearance.theme === "light" ? "light" : "dark"
+      theme: ["amber", "dark", "light"].includes(appearance.theme) ? appearance.theme : defaults.appearance.theme
     },
     focusMode: source.focusMode === true,
     powerProfile: POWER_PROFILES.includes(source.powerProfile)
