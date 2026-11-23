@@ -450,9 +450,9 @@
     }
   ],
   "native_shell": {
-    "path": "duckos/mora/native_ui.py",
+    "path": "duckos/mora/qt_ui.py",
     "maturity_status": "implemented",
-    "runtime": "python-tk",
+    "runtime": "pyside6",
     "storage": [
       "versioned-packaged-json",
       "atomic-per-user-preferences-file"
