@@ -261,7 +261,7 @@ Names in this catalog are working product names. Cockos requires an explicit nam
 
 ## 8. Native Mora shell and application maturity
 
-Mora is now a native Tk user-space application. The former browser prototype has been retired and its HTML, CSS, DOM-driven JavaScript and browser storage layer have been removed. The native launcher reads packaged JSON registry data and opens individual application panels without a WebView or embedded browser.
+Mora is now a native PySide6 / Qt Widgets user-space application. The former browser prototype has been retired and its HTML, CSS, DOM-driven JavaScript and browser storage layer have been removed. The Qt launcher reads packaged JSON registry data and opens individual application panels without a WebView or embedded browser.
 
 The following maturity values remain separate:
 
