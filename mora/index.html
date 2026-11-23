@@ -75,13 +75,14 @@
         <button class="status-control" data-app="settings" aria-label="Открыть настройки">Настройки</button>
       </nav>
       <div class="system-status" aria-label="Состояние системы">
-        <span class="status-item"><span class="status-dot wifi-dot"></span> Wi-Fi</span>
-        <span class="status-item battery"><span class="battery-shape"><i></i></span> 86%</span>
+        <button class="status-item status-trigger" type="button" data-panel-toggle="quick" aria-controls="quick-panel" aria-expanded="false" aria-label="Wi-Fi · быстрые настройки"><span class="status-dot wifi-dot"></span> Wi-Fi</button>
+        <button class="status-item battery status-trigger" type="button" data-app="workspace" aria-label="Питание · открыть Control" title="Питание"><span class="battery-shape"><i></i></span> 86%</button>
+        <button class="status-item sound-status status-trigger" type="button" data-panel-toggle="quick" aria-controls="quick-panel" aria-expanded="false" aria-label="Звук · открыть громкость">♫ Звук</button>
         <button class="status-control" data-panel-toggle="quick" aria-controls="quick-panel" aria-expanded="false">Быстрые настройки</button>
         <button class="status-control notification-trigger" data-panel-toggle="notifications" aria-controls="notification-panel" aria-expanded="false" aria-label="Уведомления">◉</button>
         <button class="status-control" data-app="workspace" aria-label="Открыть параметры системы">Система</button>
         <span class="status-control theme-control" role="img" aria-label="Единая палитра DuckOS: чёрный, белый и жёлтый" title="Чёрный · белый · жёлтый">DUCK</span>
-        <time id="status-time">--:--</time>
+        <button class="status-control clock-trigger" type="button" data-panel-toggle="clock" aria-controls="clock-panel" aria-expanded="false" aria-label="Часы и дата"><time id="status-time">--:--</time></button>
       </div>
     </header>
 
@@ -247,6 +248,15 @@
       <label class="quick-range"><span>Громкость интерфейса</span><input type="range" min="0" max="100" value="72" data-quick-range="volume"><output data-quick-value="volume">72%</output></label>
       <label class="quick-range"><span>Яркость визуальных эффектов</span><input type="range" min="0" max="100" value="80" data-quick-range="brightness"><output data-quick-value="brightness">80%</output></label>
       <p class="window-copy">Эти переключатели изменяют состояние оболочки Mora. Сетевые адаптеры, Bluetooth и аудиоустройства не управляются браузером.</p>
+    </section>
+    <section class="desktop-flyout clock-panel" id="clock-panel" aria-label="Часы и дата" hidden>
+      <div class="flyout-heading"><strong>Время и дата</strong><button type="button" data-panel-close aria-label="Закрыть">×</button></div>
+      <time class="panel-clock-time" data-panel-clock-time>--:--</time>
+      <p class="panel-clock-date" data-panel-clock-date>Загрузка даты…</p>
+      <div class="clock-panel-actions">
+        <button type="button" data-panel-toggle="notifications" aria-controls="notification-panel" aria-expanded="false">Уведомления</button>
+        <button type="button" data-app="workspace">Питание и Control</button>
+      </div>
     </section>
     <section class="desktop-flyout notification-panel" id="notification-panel" aria-label="Уведомления" hidden>
       <div class="flyout-heading"><strong>Уведомления</strong><div><button type="button" data-notification-action="read">Прочитать всё</button><button type="button" data-notification-action="clear">Очистить</button><button type="button" data-panel-close aria-label="Закрыть">×</button></div></div>
