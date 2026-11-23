@@ -96,6 +96,21 @@ def main(argv: list[str] | None = None) -> int:
     startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
     startup_restore.add_argument("entry_id")
 
+    foundry = commands.add_parser(
+        "foundry", help="open the read-only industrial operations workbench"
+    )
+    foundry_commands = foundry.add_subparsers(dest="foundry_command", required=True)
+    foundry_commands.add_parser("gui", help="open the native Duck Foundry window")
+    foundry_audit = foundry_commands.add_parser("audit", help="collect a local industrial operations snapshot")
+    foundry_audit.add_argument("--skip-devices", action="store_true")
+    foundry_audit.add_argument("--skip-runtimes", action="store_true")
+    foundry_audit.add_argument("--output", type=Path, help="export the snapshot to a new private JSON file")
+    foundry_plan = foundry_commands.add_parser("plan", help="create a manual operator runbook")
+    foundry_plan.add_argument(
+        "--profile", choices=("routine", "preventive", "incident", "commissioning"),
+        default="preventive",
+    )
+
     terminal = commands.add_parser(
         "terminal", help="open the separate DuckOS extended terminal"
     )
@@ -274,6 +289,21 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
+        elif args.command == "foundry" and args.foundry_command == "gui":
+            from .foundry_ui import run_foundry
+            return run_foundry()
+        elif args.command == "foundry" and args.foundry_command == "audit":
+            snapshot = foundry_service.collect_foundry_snapshot(
+                include_devices=not args.skip_devices,
+                include_runtimes=not args.skip_runtimes,
+            )
+            result = (
+                foundry_service.write_snapshot(args.output, snapshot)
+                if args.output else snapshot
+            )
+        elif args.command == "foundry" and args.foundry_command == "plan":
+            snapshot = foundry_service.collect_foundry_snapshot()
+            result = foundry_service.build_runbook(args.profile, snapshot)
         elif args.command == "reaper":
             from .desktop.reaper import ReaperWorkbench
 
