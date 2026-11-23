@@ -1,0 +1,290 @@
+{
+  "schema_version": "1.2.0",
+  "shell": {
+    "id": "ivan-vhs.duckos.mora",
+    "name": "Mora",
+    "data_policy": "fictional_demo_data"
+  },
+  "built_in_apps": [
+    {
+      "id": "cockos",
+      "name": "Cockos",
+      "category": "audio",
+      "panel": "mora/app.js#cockos"
+    },
+    {
+      "id": "kavun",
+      "name": "Kavun",
+      "category": "photos",
+      "panel": "mora/app.js#kavun"
+    },
+    {
+      "id": "kabon",
+      "name": "Ka-bon",
+      "category": "finance",
+      "panel": "mora/app.js#kabon"
+    },
+    {
+      "id": "gloverty",
+      "name": "Gloverty",
+      "category": "automation",
+      "panel": "mora/app.js#gloverty"
+    },
+    {
+      "id": "po",
+      "name": "Po",
+      "category": "compass",
+      "panel": "mora/app.js#po"
+    },
+    {
+      "id": "illidia",
+      "name": "Illidia",
+      "category": "games",
+      "panel": "mora/app.js#illidia"
+    },
+    {
+      "id": "unify",
+      "name": "Unify",
+      "category": "devices",
+      "panel": "mora/app.js#unify"
+    },
+    {
+      "id": "sestem",
+      "name": "Sestem",
+      "category": "system",
+      "panel": "mora/app.js#sestem",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "setupup",
+      "name": "SetupUP",
+      "category": "system",
+      "panel": "mora/app.js#setupup",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "orriganize",
+      "name": "Orriganize",
+      "category": "productivity",
+      "panel": "mora/app.js#orriganize",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "abriganza",
+      "name": "Abriganza",
+      "category": "files",
+      "panel": "mora/app.js#abriganza",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "olaab",
+      "name": "Olaab",
+      "category": "multimedia",
+      "panel": "mora/app.js#olaab",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "concrete-thump",
+      "name": "Concrete Thump",
+      "category": "audio",
+      "panel": "mora/app.js#concrete-thump",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "seu-beu",
+      "name": "Seu-Beu",
+      "category": "privacy",
+      "panel": "mora/app.js#seu-beu",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "love-il",
+      "name": "Love-IL",
+      "category": "journal",
+      "panel": "mora/app.js#love-il",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "poi",
+      "name": "Poi",
+      "category": "notes",
+      "panel": "mora/app.js#poi",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "poi-2",
+      "name": "Poi-2",
+      "category": "knowledge",
+      "panel": "mora/app.js#poi-2",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "po-2",
+      "name": "Po-2",
+      "category": "navigation",
+      "panel": "mora/app.js#po-2",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "gamecharager",
+      "name": "GameCharager",
+      "category": "gaming",
+      "panel": "mora/app.js#gamecharager",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "exedotexe",
+      "name": "EXEdotEXE",
+      "category": "compatibility",
+      "panel": "mora/app.js#exedotexe",
+      "maturity": "partial_local_workspace"
+    },
+    {
+      "id": "mora-ai",
+      "name": "Mora AI",
+      "category": "system",
+      "panel": "mora/app.js#mora-ai",
+      "maturity": "partial_local_rules"
+    },
+    {
+      "id": "security",
+      "name": "Sentinel",
+      "category": "security",
+      "panel": "mora/app.js#security",
+      "maturity": "shell_policy_only"
+    },
+    {
+      "id": "updates",
+      "name": "Restore",
+      "category": "recovery",
+      "panel": "mora/app.js#updates",
+      "maturity": "shell_snapshot_only"
+    },
+    {
+      "id": "runtime",
+      "name": "Bridge",
+      "category": "compatibility",
+      "panel": "mora/app.js#runtime",
+      "maturity": "partial_pe_cli_and_prefix_foundation"
+    },
+    {
+      "id": "workspace",
+      "name": "Control",
+      "category": "workspace",
+      "panel": "mora/app.js#workspace",
+      "maturity": "shell_preferences"
+    },
+    {
+      "id": "provenance",
+      "name": "Proof",
+      "category": "provenance",
+      "panel": "mora/app.js#provenance",
+      "maturity": "sha256_only"
+    },
+    {
+      "id": "mora-boost",
+      "name": "Mora Boost",
+      "category": "gaming",
+      "panel": "mora/app.js#mora-boost",
+      "maturity": "external_native_workbench"
+    },
+    {
+      "id": "desktop",
+      "name": "Duck Desktop",
+      "category": "workspace",
+      "panel": "mora/app.js#desktop",
+      "maturity": "partial_native_userland_tool"
+    },
+    {
+      "id": "mora-commons",
+      "name": "Mora Commons",
+      "category": "application_catalogue",
+      "panel": "mora/app.js#mora-commons",
+      "maturity": "implemented_local_catalog"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "kabon.expenses_today",
+      "app_id": "kabon",
+      "kind": "expenses_summary"
+    },
+    {
+      "id": "unify.device_status",
+      "app_id": "unify",
+      "kind": "device_status"
+    }
+  ],
+  "integration": {
+    "manifest_schema": "mora/app-manifest.schema.json",
+    "external_launch": "specified_not_enabled",
+    "execution_rule": "A future native launcher must resolve trusted installed paths and require explicit operator approval. Never execute manifest commands through a shell."
+  },
+  "system_services": [
+    {
+      "id": "intent-planner",
+      "maturity": "partial",
+      "scope": "whitelisted local actions; approval required"
+    },
+    {
+      "id": "capability-broker",
+      "maturity": "specified",
+      "scope": "UI preferences only; no process enforcement"
+    },
+    {
+      "id": "atomic-updater",
+      "maturity": "planned",
+      "scope": "no native updater or OS images connected"
+    },
+    {
+      "id": "compat-runtime",
+      "maturity": "partial",
+      "scope": "PE32/PE32+ headers, sections and import DLL inspection; isolated prefix scaffold and CLI diagnostics; no native process execution"
+    },
+    {
+      "id": "provenance-verifier",
+      "maturity": "partial",
+      "scope": "local SHA-256 only; no C2PA validation"
+    },
+    {
+      "id": "resource-scheduler",
+      "maturity": "planned",
+      "scope": "no kernel or device scheduling integration"
+    },
+    {
+      "id": "pwa-shell",
+      "maturity": "partial",
+      "scope": "scoped offline cache for Mora web assets; no OS installation"
+    },
+    {
+      "id": "theme-adapter",
+      "maturity": "implemented",
+      "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "extension-local-store",
+      "maturity": "partial",
+      "scope": "Namespaced local browser collections for the extended Mora panels; no system VFS or cross-device synchronization."
+    },
+    {
+      "id": "browser-file-inspector",
+      "maturity": "partial",
+      "scope": "User-selected archive metadata and PE/ELF inspection in the browser; no extraction or executable launch."
+    },
+    {
+      "id": "rhythm-profile-store",
+      "maturity": "partial",
+      "scope": "Local BPM and swing profiles only; no audio engine or device routing."
+    },
+    {
+      "id": "setup-preferences",
+      "maturity": "partial",
+      "scope": "Mora first-run preferences only; no OS installer or boot configuration."
+    },
+    {
+      "id": "desktop-optimizer",
+      "maturity": "partial_native_userland",
+      "scope": "read-only local desktop/process audit, reversible current-user startup controls, confirmed move-to-Inbox operation and native Tk maintenance window; no compositor or kernel enforcement"
+    }
+  ]
+}
