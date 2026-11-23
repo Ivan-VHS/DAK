@@ -45,6 +45,8 @@ DuckRuntimeStatus duck_runtime_init(
     DuckRuntimeAllocator allocator
 );
 
+/* Initialize writable output slots with duck_value_unit() before passing them
+ * to constructors, clone/get functions, or iterator_next. */
 DuckValue duck_value_unit(void);
 DuckValue duck_value_i64(int64_t value);
 DuckValue duck_value_bool(int value);

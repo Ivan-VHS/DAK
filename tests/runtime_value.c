@@ -74,6 +74,7 @@ static void strings_preserve_bytes_and_ownership(void) {
     const char text[] = { 'd', 'u', 'c', 'k', '\0', 'o', 's' };
     DuckValue string = duck_value_unit();
     DuckValue clone = duck_value_unit();
+    DuckValue moved = duck_value_unit();
     const char *view = NULL;
     size_t length = 0U;
 
@@ -88,7 +89,12 @@ static void strings_preserve_bytes_and_ownership(void) {
     assert(duck_value_string_view(&clone, &view, &length) == DUCK_RUNTIME_OK);
     assert(length == sizeof text);
 
-    duck_value_drop(&clone);
+    duck_value_move(&clone, &moved);
+    assert(clone.kind == DUCK_VALUE_UNIT);
+    assert(duck_value_string_view(&moved, &view, &length) == DUCK_RUNTIME_OK);
+    assert(length == sizeof text);
+
+    duck_value_drop(&moved);
     assert(state.live_allocations == 0U);
 }
 
@@ -169,7 +175,7 @@ static void allocation_failure_leaves_the_array_unchanged(void) {
     size_t length = 0U;
 
     assert(duck_value_array_new(&runtime, 0U, &array) == DUCK_RUNTIME_OK);
-    state.fail_on_call = state.allocation_calls + 2U;
+    state.fail_on_call = state.allocation_calls + 1U;
     assert(duck_value_array_push(&array, &number) == DUCK_RUNTIME_OUT_OF_MEMORY);
     assert(duck_value_array_length(&array, &length) == DUCK_RUNTIME_OK);
     assert(length == 0U);
