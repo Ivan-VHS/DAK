@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-CATALOG_PATH = Path(__file__).resolve().parents[2] / "catalogs" / "game-performance-rules.v1.json"
+CATALOG_PATH = Path(__file__).with_name("game-performance-rules.v1.json")
 CATALOG_SCHEMA = "duckos.gaming-rule-catalog.v1"
 ASSESSMENT_SCHEMA = "duckos.gaming-policy-assessment.v1"
 MAX_CATALOG_BYTES = 512 * 1024
