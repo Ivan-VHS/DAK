@@ -10,14 +10,14 @@ const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", i
 
 const appIds = [
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "mora-belle"
 ];
 
-test("desktop exposes all seven first-party apps and seven system tools", () => {
+test("desktop exposes the original apps, system tools and Mora Belle", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
-    const appKey = ["mora-ai", "mora-boost"].includes(id) ? '"' + id + '":' : id + ":";
+    const appKey = ["mora-ai", "mora-boost", "mora-belle"].includes(id) ? '"' + id + '":' : id + ":";
     assert.ok(js.includes(appKey), id + " must have a panel definition");
   }
   for (const id of appIds.slice(0, 7)) {
@@ -100,6 +100,9 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(contrastRatio(theme.palettes.amber.onSecondaryAccent, theme.palettes.amber.secondaryAccent) >= 4.5);
   assert.equal(theme.palettes.dark.brand, "#A78BFA");
   assert.equal(theme.palettes.light.brand, "#5B43B5");
+  assert.equal(theme.palettes.belle.brand, "#A85878");
+  assert.ok(contrastRatio(theme.palettes.belle.text, theme.palettes.belle.page) >= 7);
+  assert.ok(contrastRatio(theme.palettes.belle.onBrand, theme.palettes.belle.brand) >= 4.5);
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
   assert.equal(manifest.theme_color, "#211913");
   assert.equal(manifest.background_color, "#211913");
@@ -111,8 +114,9 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(css.includes(".app-grid::before"));
   assert.ok(css.includes(".dock-wrap::before"));
   assert.ok(css.includes("#526347"));
-  assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v4-amber"));
+  assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "belle", belle: "amber" }'));
+  assert.ok(serviceWorker.includes("mora-shell-v5-belle"));
+  assert.ok(serviceWorker.includes("./belle/index.html"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
