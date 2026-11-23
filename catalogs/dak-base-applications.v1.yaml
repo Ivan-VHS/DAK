@@ -1,11 +1,11 @@
-# Draft package catalog for the DAK OS foundational application suite.
-# Based on the supplied apps.yaml draft and extended with 13 Mora applications.
+# Draft package catalog for the DuckOS foundational application suite.
+# Based on the supplied app draft, 13 Mora additions and the Foundry system tool.
 # API and capability identifiers are proposals; register them in platform policy/API
 # registries and implement service providers before production packaging.
 schema_version: 1
 suite:
   id: dak.base-suite
-  name: DAK OS Base Applications
+  name: DuckOS Base Applications
   version: 1.1.0
   status: design
   minimum_platform_api: 1
@@ -238,3 +238,10 @@ applications:
     category: development
     permissions: [files.read.selected, executable.inspect]
     services: [dak.executable-inspection.v1]
+
+  - id: dak.foundry
+    name: Foundry
+    entry: app://dak.foundry/main
+    category: system
+    permissions: [system.status.read, processes.read, desktop.audit.read, hardware.inventory.read, compat.runtime.inspect, reports.export.user]
+    services: [dak.system-status.v1, dak.desktop-audit.v1, dak.hardware-inventory.v1, dak.compatibility-discovery.v1, dak.maintenance-runbooks.v1]

@@ -19,8 +19,9 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 | Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
+| Foundry | Industrial operations diagnostics, subsystem signals and operator runbooks | Native user-space Tk/CLI workbench; read-only existing sources, manual checklists and explicit report export |
 
-The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
+The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Foundry is an additional native user-space system application that correlates existing host diagnostics without replacing their providers. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
 
 Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. The panels provide bounded local browser interactions, share the existing window manager and profile storage, and do not claim native service implementations.
 
@@ -92,6 +93,10 @@ A native launcher must discover manifests only in trusted installation roots, va
 
 Never promote a feature to native/verified status because its UI panel exists.
 
+
+## Duck Foundry integration
+
+The native Foundry workbench is available through the command duckos foundry gui and machine-readable audit/runbook commands. It reuses the existing Duck Desktop, hardware inventory and DuckBridge collectors rather than creating competing providers. The browser panel is informational and does not read system sensors or launch a host process. Reports stay local and are exported only after explicit user selection. See [Duck Foundry](FOUNDRY.md).
 
 ## Duck Desktop integration
 

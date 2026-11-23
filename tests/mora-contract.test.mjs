@@ -14,11 +14,11 @@ const extensionAppIds = [
   "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"
 ];
 const systemAppIds = [
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "desktop", "mora-commons"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "desktop", "mora-commons", "foundry"
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
-test("desktop exposes 20 first-party apps and nine system tools", () => {
+test("desktop exposes 20 first-party app concepts and ten system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
@@ -30,7 +30,7 @@ test("desktop exposes 20 first-party apps and nine system tools", () => {
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 13);
+  assert.equal(registry.system_services.length, 14);
   assert.ok(html.includes('id="extension-app-grid"'));
   for (const id of extensionAppIds) {
     assert.ok(html.includes('data-app="' + id + '"'), id + " is missing from the extension grid");
@@ -49,10 +49,16 @@ test("required dashboard surfaces and launch affordances are present", () => {
   }
   assert.ok(html.includes('aria-label="Панель приложений"'));
   assert.ok(html.includes('data-app="workspace"'));
+  assert.ok(html.includes('data-app="foundry"'));
+  assert.ok(html.includes("30 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ"));
+  assert.ok(js.includes('case "foundry":'));
+  assert.ok(js.includes("duckos foundry gui"));
+  assert.ok(js.includes("duckos foundry plan --profile preventive"));
   assert.ok(html.includes("status-control"));
   assert.ok(html.includes('data-app="desktop"'));
   assert.ok(js.includes('case "desktop":'));
   assert.equal(policy.capabilities.desktop_optimizer.maturity, "partial");
+  assert.equal(policy.capabilities.foundry_operations.maturity, "partial");
 });
 
 test("system panels expose approvals, permissions, recovery and local file inspection", () => {
@@ -142,7 +148,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v8-foundry-operations"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));

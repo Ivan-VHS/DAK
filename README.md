@@ -4,9 +4,9 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **21 first-party application entries**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify), 13 extended applications (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE), and the native Foundry operations console. The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
-The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
+The separate DuckOS foundational package proposal contains the existing 15 system and everyday apps, the 13 extended applications and Foundry. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DuckOS base application catalog](catalogs/dak-base-applications.v1.yaml)).
 
 ## Federated source workspace
 
@@ -128,6 +128,18 @@ duckos desktop startup list
 ~~~
 
 It does not claim to be the native compositor or manage machine-wide services. See [Duck Desktop optimization](docs/DESKTOP_OPTIMIZATION.md) for commands, safety boundaries and implementation status.
+
+## Duck Foundry industrial operations console
+
+Duck Foundry is a native user-space operations workbench. It correlates the existing read-only Duck Desktop resource/workspace audit, PCI/USB or Windows PnP inventory and DuckBridge runtime discovery. It produces threshold-based findings, versioned local reports and manual runbooks for routine checks, preventive maintenance, incident review and commissioning.
+
+~~~sh
+duckos foundry gui
+duckos foundry audit
+duckos foundry plan --profile preventive
+~~~
+
+Foundry does not control machinery, modify hardware or drivers, stop processes, change system services or perform automatic remediation. Its recovery and security entries remain explicitly marked as specified until native enforcement exists. See [Duck Foundry](docs/FOUNDRY.md).
 
 ## Windows application compatibility
 

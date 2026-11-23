@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and seven system tools"
+      "scope": "browser shell, responsive layout, draggable windows, dock, 20 core and extended app panels and ten system tools"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -86,6 +86,10 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "foundry_operations": {
+      "maturity": "partial",
+      "scope": "native user-space Tk/CLI read-only diagnostics, existing-source correlation, manual operator runbooks and explicit local report export; Mora panel is informational; no system writes or machinery control"
     }
   },
   "not_in_scope_as_implemented_features": [

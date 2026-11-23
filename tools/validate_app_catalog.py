@@ -30,12 +30,24 @@ def main() -> int:
         "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
         "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
         "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+        "foundry",
     }
     actual = {app["id"] for app in catalog["applications"]}
-    if actual != expected or len(actual) != 20:
+    if actual != expected or len(actual) != 21:
         raise SystemExit(f"Unexpected app catalog IDs: {sorted(actual)}")
 
     for app in catalog["applications"]:
+        if app["id"] == "foundry":
+            if app["maturity_status"] != "partial":
+                raise SystemExit("foundry: native user-space maturity must remain partial")
+            if app["prototype_status"] != "partial":
+                raise SystemExit("foundry: Mora browser panel maturity must remain partial")
+            evidence = set(app["prototype_evidence"])
+            if not {"duckos/foundry.py", "duckos/foundry_ui.py", "duckos/cli.py", "mora/index.html"} <= evidence:
+                raise SystemExit("foundry: missing native implementation or Mora launcher evidence")
+            if not any("physical actuators" in item for item in app["boundaries"]):
+                raise SystemExit("foundry: physical equipment boundary must be explicit")
+            continue
         if app["maturity_status"] != "specified":
             raise SystemExit(
                 f"{app['id']}: native app maturity must remain specified"
