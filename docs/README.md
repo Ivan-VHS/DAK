@@ -28,6 +28,10 @@
 
 [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.
 
+## Native settings and user-space tools
+
+[Deep settings and user-space tools](DEEP_SETTINGS_AND_USERLAND_TOOLS.md) documents the user-scoped settings store, profile transactions, native Duck Desktop settings panel, bounded history and the implemented safe utility commands. It also lists functions that still require privileged services or hardware providers.
+
 ## Product specification
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
