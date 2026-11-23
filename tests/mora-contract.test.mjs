@@ -108,8 +108,15 @@ test("Mora exposes one accessible black, white and yellow DuckOS palette", () =>
   assert.ok(css.includes(':root[data-theme="duck"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
   assert.ok(css.includes("#FFD400"));
-  assert.ok(css.includes(".app-grid::before"));
-  assert.ok(css.includes(".dock-wrap::before"));
+  assert.ok(css.includes(".app-grid {"));
+  assert.ok(css.includes(".app-tile {"));
+  assert.ok(css.includes(".dock-wrap {"));
+  const allowedColors = new Set([
+    "#080808", "#151515", "#242424", "#3A3A3A", "#3A3100",
+    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C"
+  ].map((color) => color.toLowerCase()));
+  const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
+  assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
   assert.ok(js.includes('document.documentElement.dataset.theme = "duck"'));
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
