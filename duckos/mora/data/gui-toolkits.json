@@ -1,0 +1,545 @@
+{
+  "schema": "duckos.mora.gui-toolkits.v1",
+  "version": 1,
+  "primary_runtime": "PySide6",
+  "native_shell": "Qt Widgets",
+  "html_runtime": false,
+  "webview": false,
+  "entries": [
+    {
+      "number": 1,
+      "name": "PySide6",
+      "area": "desktop",
+      "kind": "core",
+      "status": "primary",
+      "reason": "Основной GUI-стек Mora: Qt Widgets, signal/slot, модели, accessibility, native window integration."
+    },
+    {
+      "number": 2,
+      "name": "PyQt6",
+      "area": "desktop",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Альтернативные биндинги Qt 6; второй binding layer в одном приложении не нужен."
+    },
+    {
+      "number": 3,
+      "name": "wxPython",
+      "area": "desktop",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Нативные виджеты как самостоятельная альтернатива Qt; отдельная архитектура и зависимости."
+    },
+    {
+      "number": 4,
+      "name": "Kivy",
+      "area": "desktop-mobile",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Собственный рендеринг и мультитач; отдельный движок, не базовый системный shell."
+    },
+    {
+      "number": 5,
+      "name": "BeeWare Toga",
+      "area": "desktop-mobile",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Нативные platform widgets; рассмотрен как альтернативная оболочка, не смешивается с Qt."
+    },
+    {
+      "number": 6,
+      "name": "PyGObject GTK",
+      "area": "desktop-linux",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Интеграция с GTK/GNOME; отдельный frontend для Linux, не универсальный host."
+    },
+    {
+      "number": 7,
+      "name": "Flet",
+      "area": "desktop-mobile",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Отдельный Flutter runtime; не нужен для общего Qt оконного процесса."
+    },
+    {
+      "number": 8,
+      "name": "PySide2",
+      "area": "desktop",
+      "kind": "legacy",
+      "status": "unsupported",
+      "reason": "Qt 5 binding; не использовать для новых модулей."
+    },
+    {
+      "number": 9,
+      "name": "PyQt5",
+      "area": "desktop",
+      "kind": "legacy",
+      "status": "unsupported",
+      "reason": "Qt 5 binding; не использовать в новом Qt 6 приложении."
+    },
+    {
+      "number": 10,
+      "name": "Qt Quick / QML",
+      "area": "declarative-ui",
+      "kind": "optional",
+      "status": "planned",
+      "reason": "Опциональные декларативные сцены и анимации поверх Qt; вводить отдельными модулями."
+    },
+    {
+      "number": 11,
+      "name": "FLTK / pyFLTK",
+      "area": "desktop",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Лёгкий независимый toolkit; не смешивать с Qt в одном основном shell."
+    },
+    {
+      "number": 12,
+      "name": "IUP",
+      "area": "desktop",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Лёгкий независимый toolkit; оставить как альтернативу для малых утилит."
+    },
+    {
+      "number": 13,
+      "name": "CustomTkinter",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Tkinter удалён из основного Mora; не устанавливать."
+    },
+    {
+      "number": 14,
+      "name": "ttkbootstrap",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Тема ttk не применяется к Qt Widgets."
+    },
+    {
+      "number": 15,
+      "name": "PySimpleGUI",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Высокоуровневая обёртка вокруг нескольких GUI-движков; не вводить второй abstraction layer."
+    },
+    {
+      "number": 16,
+      "name": "FreeSimpleGUI",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Tk-ориентированная обёртка; не применяется к основному Qt shell."
+    },
+    {
+      "number": 17,
+      "name": "tkinterdnd2",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Drag-and-drop реализуется через Qt drag/drop APIs."
+    },
+    {
+      "number": 18,
+      "name": "tkcalendar",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Календарные поля реализуются Qt date/time widgets."
+    },
+    {
+      "number": 19,
+      "name": "TkinterMapView",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Картографический виджет привязан к Tk; карте нужен отдельный нативный backend."
+    },
+    {
+      "number": 20,
+      "name": "tkhtmlview / TkinterWeb",
+      "area": "webview",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "HTML rendering внутри Tk запрещён архитектурным правилом Duck."
+    },
+    {
+      "number": 21,
+      "name": "ctkmessagebox / CTkToolTip",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Диалоги и подсказки реализуются Qt dialogs и Qt tooltips."
+    },
+    {
+      "number": 22,
+      "name": "sv_ttk",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Sun Valley тема применима к ttk, не к Qt."
+    },
+    {
+      "number": 23,
+      "name": "awthemes",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Tcl/Tk themes не являются частью Qt theme system."
+    },
+    {
+      "number": 24,
+      "name": "Pmw",
+      "area": "tk-extension",
+      "kind": "retired",
+      "status": "unsupported",
+      "reason": "Составные Tk widgets не используются в Qt оболочке."
+    },
+    {
+      "number": 25,
+      "name": "Dear PyGui",
+      "area": "gpu-tools",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Отдельная GPU-ускоренная панель диагностики; не заменяет системное окно Mora."
+    },
+    {
+      "number": 26,
+      "name": "Pygame",
+      "area": "game-rendering",
+      "kind": "domain-tool",
+      "status": "not-shell",
+      "reason": "Игровой и multimedia loop, не desktop widget system."
+    },
+    {
+      "number": 27,
+      "name": "Pygame CE",
+      "area": "game-rendering",
+      "kind": "domain-tool",
+      "status": "optional",
+      "reason": "Изолированный игровой viewport или тестовая сцена по необходимости."
+    },
+    {
+      "number": 28,
+      "name": "Arcade",
+      "area": "game-rendering",
+      "kind": "domain-tool",
+      "status": "optional",
+      "reason": "2D game framework для игровых приложений, не системного desktop."
+    },
+    {
+      "number": 29,
+      "name": "Panda3D",
+      "area": "3d-engine",
+      "kind": "domain-tool",
+      "status": "optional",
+      "reason": "3D engine для отдельного viewport/tool; не shell compositor."
+    },
+    {
+      "number": 30,
+      "name": "Ursina",
+      "area": "3d-engine",
+      "kind": "domain-tool",
+      "status": "not-selected",
+      "reason": "Высокоуровневый игровой engine поверх Panda3D, не основной UI."
+    },
+    {
+      "number": 31,
+      "name": "Pyglet",
+      "area": "media-windowing",
+      "kind": "domain-tool",
+      "status": "optional",
+      "reason": "Окна/OpenGL/media для специализированного renderer; запускать изолированно."
+    },
+    {
+      "number": 32,
+      "name": "ModernGL + imgui",
+      "area": "gpu-rendering",
+      "kind": "optional",
+      "status": "planned",
+      "reason": "Специализированный renderer/overlay с отдельным GPU context."
+    },
+    {
+      "number": 33,
+      "name": "Vispy",
+      "area": "scientific-gpu",
+      "kind": "optional",
+      "status": "planned",
+      "reason": "GPU scientific visualization; только по требованию аналитического приложения."
+    },
+    {
+      "number": 34,
+      "name": "PyQtGraph",
+      "area": "qt-plotting",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Графики и осциллограммы внутри PySide6; отдельный plotting extra."
+    },
+    {
+      "number": 35,
+      "name": "Matplotlib",
+      "area": "plotting",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Экспортные графики и статические scientific plots; не основной widget renderer."
+    },
+    {
+      "number": 36,
+      "name": "Manim",
+      "area": "scene-generation",
+      "kind": "domain-tool",
+      "status": "not-shell",
+      "reason": "Генерация сцен/роликов офлайн, а не интерактивная desktop UI."
+    },
+    {
+      "number": 37,
+      "name": "PyWebView",
+      "area": "webview",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "HTML/CSS/JS интерфейс; запрещён для основного Mora runtime."
+    },
+    {
+      "number": 38,
+      "name": "Eel",
+      "area": "webview",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Локальный HTML/JS bridge; запрещён в системной оболочке."
+    },
+    {
+      "number": 39,
+      "name": "NiceGUI",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Browser/WebView-first UI; не включать в desktop shell."
+    },
+    {
+      "number": 40,
+      "name": "Streamlit",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Dashboard в браузере; допустим только во внешнем исследовательском сервисе, не в Mora."
+    },
+    {
+      "number": 41,
+      "name": "Dash / Plotly",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Web analytics UI; для локального desktop использовать Qt/pyqtgraph."
+    },
+    {
+      "number": 42,
+      "name": "Reflex",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "React/web app architecture; не используется в нативной оболочке."
+    },
+    {
+      "number": 43,
+      "name": "Gradio",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Web UI для моделей; не входит в системный desktop runtime."
+    },
+    {
+      "number": 44,
+      "name": "Solara",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Reactive web/Jupyter UI; не использовать как Mora surface."
+    },
+    {
+      "number": 45,
+      "name": "Remi",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Python web UI; интерфейс рендерится браузером."
+    },
+    {
+      "number": 46,
+      "name": "JustPy",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Web framework; не заменяет Qt widgets."
+    },
+    {
+      "number": 47,
+      "name": "FastAPI + HTML/HTMX/React",
+      "area": "web-api-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Локальный HTTP API может быть отдельной службой, но HTML/JS frontend не допускается в Mora."
+    },
+    {
+      "number": 48,
+      "name": "Flask / Django + local frontend",
+      "area": "web-ui",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Web frontend в локальной оболочке не применяется."
+    },
+    {
+      "number": 49,
+      "name": "Textual",
+      "area": "terminal-ui",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Основной дополнительный TUI для диагностики и headless management."
+    },
+    {
+      "number": 50,
+      "name": "Rich",
+      "area": "terminal-ui",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Цветной terminal output, таблицы, панели и progress rendering."
+    },
+    {
+      "number": 51,
+      "name": "Prompt Toolkit",
+      "area": "terminal-ui",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Интерактивный line editor и completion для отдельных terminal workflows."
+    },
+    {
+      "number": 52,
+      "name": "urwid",
+      "area": "terminal-ui",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Альтернативный TUI toolkit; не нужен параллельно с Textual."
+    },
+    {
+      "number": 53,
+      "name": "curses",
+      "area": "terminal-ui",
+      "kind": "platform",
+      "status": "posix-only",
+      "reason": "Низкоуровневый POSIX TUI fallback для recovery environments."
+    },
+    {
+      "number": 54,
+      "name": "npyscreen",
+      "area": "terminal-ui",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Слой форм поверх curses; не выбран при наличии Textual."
+    },
+    {
+      "number": 55,
+      "name": "blessed",
+      "area": "terminal-ui",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Низкоуровневые terminal primitives для ограниченных утилит."
+    },
+    {
+      "number": 56,
+      "name": "Click",
+      "area": "cli",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "CLI framework альтернатива; текущий argparse contract остаётся стабильным."
+    },
+    {
+      "number": 57,
+      "name": "Typer",
+      "area": "cli",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Опциональная CLI надстройка; не дублировать существующее дерево argparse."
+    },
+    {
+      "number": 58,
+      "name": "PyWin32",
+      "area": "native-bridge",
+      "kind": "optional",
+      "status": "windows-extra",
+      "reason": "Windows-only API bridge для проверенных shell/window integrations."
+    },
+    {
+      "number": 59,
+      "name": "ctypes",
+      "area": "native-bridge",
+      "kind": "core",
+      "status": "stdlib",
+      "reason": "Стандартный FFI для небольших проверенных native calls; все вызовы должны иметь явные типы и ограничения."
+    },
+    {
+      "number": 60,
+      "name": "CFFI",
+      "area": "native-bridge",
+      "kind": "optional",
+      "status": "supported-extra",
+      "reason": "Для компилируемых ABI адаптеров и плагинов; не грузить произвольные библиотеки."
+    },
+    {
+      "number": 61,
+      "name": "PyObjC",
+      "area": "native-bridge",
+      "kind": "optional",
+      "status": "macos-extra",
+      "reason": "macOS-only bridge для AppKit; отдельный платформенный пакет."
+    },
+    {
+      "number": 62,
+      "name": "KivyMD",
+      "area": "desktop-mobile",
+      "kind": "alternative",
+      "status": "not-selected",
+      "reason": "Material components для Kivy; не совместимы с выбранным Qt widget shell как основной UI."
+    },
+    {
+      "number": 63,
+      "name": "PyUIkit",
+      "area": "desktop",
+      "kind": "unverified",
+      "status": "review-required",
+      "reason": "Пакет требует отдельной проверки поддержки, лицензии и зрелости до включения."
+    },
+    {
+      "number": 64,
+      "name": "cefpython",
+      "area": "webview",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Embedded Chromium/HTML runtime прямо противоречит архитектуре без WebView."
+    },
+    {
+      "number": 65,
+      "name": "Qt Charts / Qt Graphs",
+      "area": "qt-plotting",
+      "kind": "license-review",
+      "status": "not-selected",
+      "reason": "Модули Qt Graphs для open-source edition имеют GPLv3-only статус; для более гибкой лицензии выбран PyQtGraph."
+    },
+    {
+      "number": 66,
+      "name": "Tauri / Electron + Python",
+      "area": "web-desktop",
+      "kind": "forbidden",
+      "status": "excluded",
+      "reason": "Web-based frontend; запрещён для основного Mora desktop."
+    }
+  ],
+  "policy": [
+    "Exactly one primary desktop widget toolkit is used by the Mora process.",
+    "Optional toolkits run in separate entry points or are loaded only by an application that declares the extra.",
+    "A toolkit catalog entry never implies the package is installed or the feature is implemented.",
+    "HTML, CSS browser rendering, embedded WebView and browser JavaScript are forbidden in the Mora system shell.",
+    "Native FFI must be isolated behind explicit platform adapters; arbitrary DLL or shared-library loading is not allowed."
+  ]
+}
