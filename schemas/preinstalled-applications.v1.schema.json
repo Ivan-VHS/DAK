@@ -260,7 +260,7 @@
           ]
         },
         "runtime": {
-          "const": "python-tk"
+          "const": "pyside6"
         },
         "storage": {
           "type": "array",
