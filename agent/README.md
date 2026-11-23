@@ -14,7 +14,7 @@ python agent/duckos_hardware_agent.py scan-driver-updates --output driver-offers
 python agent/duckos_hardware_agent.py install-driver-update --update-id <GUID> --backup-dir D:\\DuckOSDriverBackup
 \`\`\`
 
-The export folder must be empty and the path absolute. Run elevated for a full Driver Store export. Installation is never unattended: the agent rechecks the exact Windows Update ID, asks for a confirmation phrase, exports the existing Driver Store and creates a Windows System Restore checkpoint before installing one offer. A failed prerequisite aborts the operation.
+The export folder must be empty and the path absolute. Run elevated for a full Driver Store export. Installation is never unattended: the agent rechecks the exact Windows Update ID, asks for a confirmation phrase, exports the existing Driver Store and creates a Windows System Restore checkpoint before installing one offer. The EULA must already have been reviewed and accepted by the user in Windows Update Settings; the agent will not accept it automatically. A failed prerequisite aborts the operation.
 
 Linux snapshot collection reads sysfs/procfs/DMI/EFI where available. It does not invoke a package manager, load/unload modules or write firmware. macOS currently receives only a platform-level report.
 
