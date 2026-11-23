@@ -3,7 +3,7 @@
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
-    "data_policy": "fictional_demo_data"
+    "data_policy": "local_browser_data; explicitly labeled illustrative dashboard values; no connected cloud synchronization"
   },
   "built_in_apps": [
     {
