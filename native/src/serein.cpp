@@ -23,7 +23,6 @@
 #ifdef _WIN32
 #define NOMINMAX
 #include <Windows.h>
-#include <ShlObj.h>
 #else
 #include <fcntl.h>
 #include <signal.h>
@@ -501,7 +500,7 @@ public:
         locked_ = handle_ != INVALID_HANDLE_VALUE;
 #else
         const fs::path lockPath = registry / "processes.lock";
-        descriptor_ = ::open(lockPath.c_str(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+        descriptor_ = ::open(lockPath.c_str(), O_CREAT | O_RDWR | O_NOFOLLOW, S_IRUSR | S_IWUSR);
         if (descriptor_ >= 0 && ::flock(descriptor_, LOCK_EX) == 0) locked_ = true;
         else if (descriptor_ >= 0) {
             ::close(descriptor_);
@@ -535,6 +534,12 @@ private:
 bool readProcessLedger(const fs::path& registry, std::vector<ProcessRecord>& records, std::string& error) {
     const fs::path path = processLedgerPath(registry);
     std::error_code ec;
+    const auto status = fs::symlink_status(path, ec);
+    if (!ec && fs::is_symlink(status)) {
+        error = "Refusing to read a symlinked Serein process ledger";
+        return false;
+    }
+    ec.clear();
     if (!fs::exists(path, ec)) return true;
 
     std::ifstream input(path);
