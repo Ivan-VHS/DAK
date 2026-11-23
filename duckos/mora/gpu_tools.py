@@ -46,7 +46,7 @@ def main() -> int:
         dpg.set_value("report", str(state["snapshot"]))
 
     dpg.create_context()
-    with dpg.window(label="DuckOS · GPU diagnostics", width=980, height=680):
+    with dpg.window(label="DuckOS · GPU diagnostics", tag="main-window", width=980, height=680):
         dpg.add_text("Mora GPU tools", color=(255, 212, 0))
         dpg.add_text(
             "Standalone Dear PyGui window · read-only host inventory · no driver tuning"
@@ -71,7 +71,7 @@ def main() -> int:
     )
     dpg.setup_dearpygui()
     dpg.show_viewport()
-    dpg.set_primary_window("Dear PyGui Demo", True) if dpg.does_item_exist("Dear PyGui Demo") else None
+    dpg.set_primary_window("main-window", True)
     dpg.start_dearpygui()
     dpg.destroy_context()
     return 0
