@@ -62,7 +62,6 @@ let activeWorkspace = 1;
 let currentLocale = "ru";
 let contextTargetFile = null;
 let contextOwnerPanel = null;
-const workspaceHistory = new Map();
 const quickState = { wifi: true, bluetooth: true, focus: false, airplane: false };
 const notifications = [
   { id: "welcome", title: "Mora запущена", body: "Рабочая оболочка готова. Файловые и системные действия ограничены браузерным профилем.", app: "files", read: false },
@@ -1295,8 +1294,9 @@ function openApp(appId) {
   if (appId === "terminal") initializeTerminal(appWindow);
   applyTranslations(appWindow, currentLocale);
 
-  const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
-  const top = Math.max(58, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
+  const layerTop = windowLayer.getBoundingClientRect().top;
+  const left = Math.max(8, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
+  const top = Math.max(8, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14 - layerTop);
   appWindow.style.left = left + "px";
   appWindow.style.top = top + "px";
   appWindow.style.transform = "none";
@@ -1336,15 +1336,17 @@ function closeWindow(appWindow) {
 }
 
 function closeTopWindow() {
-  const windows = Array.from(windowLayer.querySelectorAll(".app-window"));
+  const windows = Array.from(windowLayer.querySelectorAll(".app-window"))
+    .filter((item) => !item.hidden && Number(item.dataset.workspace || 1) === activeWorkspace);
   if (!windows.length) return;
   windows.sort((a, b) => Number(b.style.zIndex) - Number(a.style.zIndex));
   closeWindow(windows[0]);
 }
 
 function startWindowDrag(appWindow, header, pointerEvent) {
-  if (pointerEvent.target.closest("button")) return;
+  if (pointerEvent.target.closest("button") || appWindow.classList.contains("is-maximized")) return;
   const rect = appWindow.getBoundingClientRect();
+  const layerRect = windowLayer.getBoundingClientRect();
   const offsetX = pointerEvent.clientX - rect.left;
   const offsetY = pointerEvent.clientY - rect.top;
   header.setPointerCapture(pointerEvent.pointerId);
@@ -1355,9 +1357,9 @@ function startWindowDrag(appWindow, header, pointerEvent) {
     const width = appWindow.offsetWidth;
     const height = appWindow.offsetHeight;
     const maxLeft = Math.max(8, window.innerWidth - width - 8);
-    const maxTop = Math.max(56, window.innerHeight - height - 72);
-    const left = Math.min(maxLeft, Math.max(8, moveEvent.clientX - offsetX));
-    const top = Math.min(maxTop, Math.max(56, moveEvent.clientY - offsetY));
+    const maxTop = Math.max(8, window.innerHeight - height - 72 - layerRect.top);
+    const left = Math.min(maxLeft, Math.max(8, moveEvent.clientX - offsetX - layerRect.left));
+    const top = Math.min(maxTop, Math.max(8, moveEvent.clientY - offsetY - layerRect.top));
     appWindow.style.left = left + "px";
     appWindow.style.top = top + "px";
   }
@@ -1542,6 +1544,15 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const dockItem = event.target.closest(".dock-item");
+  if (dockItem) {
+    const dockWindow = windowLayer.querySelector('[data-window="' + dockItem.dataset.app + '"]');
+    if (dockWindow && !dockWindow.hidden && Number(dockWindow.dataset.workspace || 1) === activeWorkspace) {
+      minimizeWindow(dockWindow);
+      return;
+    }
+  }
+
   const opener = event.target.closest("[data-app]");
   if (opener) {
     openApp(opener.dataset.app);
@@ -1638,6 +1649,13 @@ windowLayer.addEventListener("pointerdown", (event) => {
   focusWindow(appWindow);
   const header = event.target.closest(".window-titlebar");
   if (header && event.button === 0) startWindowDrag(appWindow, header, event);
+});
+
+windowLayer.addEventListener("dblclick", (event) => {
+  const header = event.target.closest(".window-titlebar");
+  const appWindow = event.target.closest(".app-window");
+  if (!header || !appWindow || event.target.closest("button")) return;
+  maximizeWindow(appWindow);
 });
 
 document.addEventListener("keydown", (event) => {
