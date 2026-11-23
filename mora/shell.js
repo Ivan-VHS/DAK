@@ -310,6 +310,8 @@ export function initDesktopShell({
         ["/help", "Список встроенных команд"],
         ["/status", "Состояние оболочки и активное пространство"],
         ["/apps", "Каталог приложений"],
+        ["/open illidia", "Открыть Illidia"],
+        ["/open workspace", "Открыть панель системных задач"],
         ["/close", "Закрыть верхнее окно"],
         ["/workspace home", "Перейти на рабочий стол"],
         ["/workspace studio", "Перейти в студию"],
@@ -365,6 +367,10 @@ export function initDesktopShell({
       }
       showToast("Неизвестное приложение: " + value);
     } else if (command === "/workspace" && tokens.length === 2) {
+      if (!WORKSPACES.some((workspace) => workspace.id === value)) {
+        showToast("Неизвестное рабочее пространство: " + value);
+        return;
+      }
       switchWorkspace(value);
     } else if (command === "/theme" && tokens.length === 2 && PALETTE_NAMES[value]) {
       preferences.appearance.theme = value;
