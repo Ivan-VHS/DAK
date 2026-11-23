@@ -18,6 +18,8 @@ MAX_HASH_FILE_BYTES = 512 * 1024 * 1024
 
 CAPABILITIES = ("microphone", "camera", "location", "files", "network", "clipboard")
 POWER_PROFILES = ("saver", "balanced", "performance")
+MIN_UI_SCALE = 80
+MAX_UI_SCALE = 140
 
 APP_ALIASES = {
     "cockos": ("cockos",),
@@ -28,13 +30,13 @@ APP_ALIASES = {
     "illidia": ("illidia",),
     "unify": ("unify",),
     "mora-ai": ("mora ai", "помощник", "агент"),
-    "security": ("sentinel", "безопасность"),
-    "updates": ("restore", "восстановление", "обновление"),
-    "runtime": ("bridge", "совместимость", "runtime"),
-    "workspace": ("control", "настройки", "системные"),
+    "security": ("sentinel", "безопасность", "безпека"),
+    "updates": ("restore", "восстановление", "обновление", "відновлення", "оновлення"),
+    "runtime": ("bridge", "совместимость", "сумісність", "runtime"),
+    "workspace": ("control", "настройки", "налаштування", "системные", "системні"),
     "provenance": ("proof", "подлинность", "проверка файла"),
     "mora-boost": ("mora boost", "игровая лаборатория", "game boost"),
-    "desktop": ("duck desktop", "рабочий стол"),
+    "desktop": ("duck desktop", "рабочий стол", "робочий стіл"),
     "mora-commons": ("mora commons", "каталог приложений"),
 }
 
@@ -54,12 +56,19 @@ def default_preferences() -> dict[str, Any]:
         "appearance": {
             "reducedMotion": False,
             "density": "comfortable",
+            "uiScale": 100,
             "theme": "duck",
         },
         "focusMode": False,
         "powerProfile": "balanced",
         "permissions": {name: False for name in CAPABILITIES},
     }
+
+
+def _normalize_ui_scale(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return 100
+    return max(MIN_UI_SCALE, min(MAX_UI_SCALE, value))
 
 
 def normalize_preferences(value: Any) -> dict[str, Any]:
@@ -75,6 +84,7 @@ def normalize_preferences(value: Any) -> dict[str, Any]:
         "appearance": {
             "reducedMotion": appearance.get("reducedMotion") is True,
             "density": "compact" if appearance.get("density") == "compact" else "comfortable",
+            "uiScale": _normalize_ui_scale(appearance.get("uiScale", defaults["appearance"]["uiScale"])),
             "theme": "duck",
         },
         "focusMode": source.get("focusMode") is True,
@@ -177,17 +187,32 @@ def build_intent_plan(raw_input: Any) -> dict[str, Any]:
     normalized = text.casefold()
     actions: list[dict[str, Any]] = []
 
-    if re.search(r"(включи|активируй|запусти).{0,24}(фокус|не беспокоить)|режим фокуса", normalized):
+    if re.search(
+        r"(включи|активируй|запусти).{0,24}(фокус|не беспокоить)|режим фокуса",
+        normalized,
+    ) or re.search(r"(увімкни|активуй|запусти).{0,24}(фокус|не турбувати)|режим фокусу", normalized):
         actions.append({"type": "set", "setting": "focusMode", "value": True})
-    if re.search(r"(выключи|отключи).{0,24}(фокус|не беспокоить)", normalized):
+    elif re.search(r"(выключи|отключи).{0,24}(фокус|не беспокоить)", normalized) or re.search(
+        r"(вимкни|відключи).{0,24}(фокус|не турбувати)", normalized
+    ):
         actions.append({"type": "set", "setting": "focusMode", "value": False})
-    if re.search(r"(эконом|сбереж).{0,24}(энерг|питан)|режим экономии", normalized):
+
+    if re.search(r"(эконом|сбереж).{0,24}(энерг|питан)|режим экономии", normalized) or re.search(
+        r"(економ|заощад|енергозбереж).{0,24}(енерг|живлен)|режим енергозбереження", normalized
+    ):
         actions.append({"type": "set", "setting": "powerProfile", "value": "saver"})
-    elif re.search(r"(максимальн|производительност).{0,24}(энерг|питан)|режим производительности", normalized):
+    elif re.search(r"(максимальн|производительност).{0,24}(энерг|питан)|режим производительности", normalized) or re.search(
+        r"(максимальн|продуктивност).{0,24}(енерг|живлен)|режим продуктивності", normalized
+    ):
         actions.append({"type": "set", "setting": "powerProfile", "value": "performance"})
-    elif re.search(r"сбалансированн.{0,24}(профил|режим)|обычный режим", normalized):
+    elif re.search(r"сбалансированн.{0,24}(профил|режим)|обычный режим", normalized) or re.search(
+        r"збалансован.{0,24}(профіл|режим)|звичайний режим", normalized
+    ):
         actions.append({"type": "set", "setting": "powerProfile", "value": "balanced"})
-    if re.search(r"(уменьши|отключи|сократи).{0,24}(анимац|движен)|без анимац", normalized):
+
+    if re.search(r"(уменьши|отключи|сократи).{0,24}(анимац|движен)|без анимац", normalized) or re.search(
+        r"(зменш|вимкни|скорот).{0,24}(анімац|рух)|без анімац", normalized
+    ):
         actions.append({"type": "set", "setting": "reducedMotion", "value": True})
 
     for app_id, aliases in APP_ALIASES.items():
