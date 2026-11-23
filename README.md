@@ -1,5 +1,9 @@
 # DuckOS
 
+## Product direction
+
+DuckOS is specified with a seven-application default suite: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Their roles, boundaries and proposed integrations are documented in [the preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md). This is a product specification, not a claim that these apps are already implemented or included in a bootable image.
+
 ## Documentation
 
 Start with the [documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared terminology and evidence rules used across Ivan-VHS repositories.
