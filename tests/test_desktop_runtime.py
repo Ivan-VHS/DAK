@@ -256,6 +256,9 @@ class FakeBenchAdapter:
         self.bus_status = bus_status
         self.npu_temperature = npu_temperature
         self.probe_value = probe_value
+        self.rail_enabled = True
+        self.current = 1.0
+        self.power_commands = []
         self.connected = True
         self.emergency_calls = 0
         self.started = None
@@ -273,7 +276,7 @@ class FakeBenchAdapter:
             "rails": {
                 "main_12v": {
                     "voltage_v": self.voltage,
-                    "current_a": 1.0,
+                    "current_a": self.current,
                     "temperature_c": self.temperature,
                 }
             },
@@ -299,6 +302,12 @@ class FakeBenchAdapter:
             },
         }
 
+    def set_rail_power(self, rail_id, enabled, voltage_v, current_limit_a):
+        self.power_commands.append((rail_id, enabled, voltage_v, current_limit_a))
+        self.rail_enabled = enabled
+        self.voltage = voltage_v if enabled else 0.0
+        self.current = 1.0 if enabled else 0.0
+
     def start_test(self, test_id, fixture_slot, duration_seconds):
         self.started = (test_id, fixture_slot, duration_seconds)
 
@@ -307,6 +316,12 @@ class FakeBenchAdapter:
 
     def emergency_disable(self):
         self.emergency_calls += 1
+        self.rail_enabled = False
+        self.voltage = 0.0
+        self.current = 0.0
+        self.rail_enabled = False
+        self.voltage = 0.0
+        self.current = 0.0
 
 
 class BenchTests(unittest.TestCase):
@@ -336,6 +351,56 @@ class BenchTests(unittest.TestCase):
         self.assertTrue(controller.status()["hardware_connected"])
         self.assertFalse(controller.status()["register_write_api_exposed"])
         self.assertEqual(controller.status()["power_controller_backend"], "adapter")
+
+    def test_power_rail_commands_are_bounded_and_confirmed_by_telemetry(self):
+        adapter = FakeBenchAdapter()
+        controller = BenchController(sample_profile(), adapter, clock=lambda: 1000.0)
+        controller.connect()
+
+        enabled = controller.set_rail_power(
+            "main_12v", enabled=True, voltage_v=12.0, current_limit_a=3.0
+        )
+        self.assertTrue(enabled["hardware_command_sent"])
+        self.assertTrue(enabled["hardware_state_confirmed"])
+        self.assertEqual(adapter.power_commands[-1], ("main_12v", True, 12.0, 3.0))
+
+        disabled = controller.set_rail_power("main_12v", enabled=False)
+        self.assertFalse(disabled["enabled"])
+        self.assertEqual(adapter.power_commands[-1], ("main_12v", False, None, None))
+        self.assertFalse(adapter.rail_enabled)
+
+    def test_power_rail_rejects_out_of_profile_setpoints_without_sending_command(self):
+        adapter = FakeBenchAdapter()
+        controller = BenchController(sample_profile(), adapter, clock=lambda: 1000.0)
+        controller.connect()
+
+        with self.assertRaisesRegex(BenchError, "must be between"):
+            controller.set_rail_power(
+                "main_12v", enabled=True, voltage_v=15.0, current_limit_a=3.0
+            )
+        with self.assertRaisesRegex(BenchError, "not allowed"):
+            controller.set_rail_power(
+                "unlisted_rail", enabled=True, voltage_v=12.0, current_limit_a=1.0
+            )
+        self.assertEqual(adapter.power_commands, [])
+        self.assertEqual(controller.status()["state"], "safe-idle")
+
+    def test_power_rail_mismatch_after_enable_enters_fault_and_disables_outputs(self):
+        adapter = FakeBenchAdapter()
+        adapter.set_rail_power = lambda rail_id, enabled, voltage_v, current_limit_a: (
+            setattr(adapter, "rail_enabled", False),
+            setattr(adapter, "voltage", 0.0),
+            setattr(adapter, "current", 0.0),
+        )
+        controller = BenchController(sample_profile(), adapter, clock=lambda: 1000.0)
+        controller.connect()
+
+        with self.assertRaisesRegex(BenchError, "did not confirm"):
+            controller.set_rail_power(
+                "main_12v", enabled=True, voltage_v=12.0, current_limit_a=3.0
+            )
+        self.assertEqual(controller.status()["state"], "fault")
+        self.assertEqual(adapter.emergency_calls, 1)
 
     def test_cooling_waits_for_the_configured_temperature_without_marking_a_fault(self):
         adapter = FakeBenchAdapter(temperature=50.0)

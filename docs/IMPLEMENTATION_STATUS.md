@@ -76,7 +76,7 @@ The runtime inventory and plan generator do not invoke a discovered runtime or t
 - [x] Stable numbered launcher assignments, duplicate protection and structured launch requests.
 - [x] Bounded streaming SHA-256 inspection and explicit unsigned approval bound to one exact digest.
 - [x] A/B image-slot state machine with inactive-slot planning, verified-signature gate, native-backend requirement, boot confirmation and fallback state.
-- [x] Board-profile validation, fresh-telemetry checks, power-rail voltage/current, PCIe/USB link, GPU/NPU and calibrated-probe interlocks, plus a fail-closed bench state machine.
+- [x] Board-profile validation, fresh-telemetry checks, profile-bounded per-rail power enable/setpoints/disable with telemetry read-back, PCIe/USB link, GPU/NPU and calibrated-probe interlocks, plus a fail-closed bench state machine.
 - [x] Hash-chained append-only audit journal and serial-line capture with basic secret redaction.
 - [x] Mora System Apps catalogue entry for the fifteen utility identities.
 - [x] Host-side tests and CI catalogue validation.

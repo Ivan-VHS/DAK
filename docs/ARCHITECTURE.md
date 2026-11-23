@@ -101,7 +101,7 @@ Privileged boundaries remain explicit:
 
 - Launcher resolution returns a structured request. A native process manager, executable path resolver and kernel-enforced sandbox must perform the actual launch.
 - A/B activation requires a board/image backend and verified signature evidence. The default implementation only reports state and plans; no disk image or boot variable is modified.
-- Bench control accepts only a named board profile, checks fresh telemetry and enforces configured voltage/current, PCIe/USB link, GPU/NPU temperature/utilization and calibrated-probe limits before a test. Without a board-specific native adapter it remains disconnected and fail-closed.
+- Bench control accepts only a named board profile, checks fresh telemetry and enforces configured voltage/current, PCIe/USB link, GPU/NPU temperature/utilization and calibrated-probe limits before a test. Named rail enable/disable and V/A setpoints are bounded by that profile and read back through the adapter. Without a board-specific native adapter it remains disconnected and fail-closed.
 - The serial journal records session, fixture slot, port and redacted line data with a hash chain. A native UART/USB serial adapter must supply the lines.
 - PCIe, USB, NPU and probe access remains read-only inventory/telemetry until a real driver and restricted device broker exist. No generic register write interface is exposed.
 

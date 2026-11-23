@@ -21,9 +21,15 @@ class BenchAdapter(Protocol):
     def is_connected(self) -> bool: ...
     def discover(self) -> dict[str, Any]: ...
     def read_telemetry(self) -> dict[str, Any]: ...
+    def set_rail_power(
+        self, rail_id: str, enabled: bool,
+        voltage_v: float | None, current_limit_a: float | None,
+    ) -> None: ...
     def start_test(self, test_id: str, fixture_slot: str, duration_seconds: int) -> None: ...
     def stop_test(self) -> None: ...
-    def emergency_disable(self) -> None: ...
+    def emergency_disable(self) -> None:
+        """Disable every controlled power output using the board's safe path."""
+        ...
 
 
 def _number(value: Any, name: str, *, minimum: float, maximum: float) -> float:
@@ -306,8 +312,13 @@ class BenchController:
             voltage = _number(reading.get("voltage_v"), rail["id"] + ".voltage_v", minimum=0, maximum=1000)
             current = _number(reading.get("current_a"), rail["id"] + ".current_a", minimum=0, maximum=10000)
             temperature = _number(reading.get("temperature_c"), rail["id"] + ".temperature_c", minimum=-100, maximum=300)
-            if not rail["min_voltage_v"] <= voltage <= rail["max_voltage_v"]:
+            enabled = reading.get("enabled")
+            if not isinstance(enabled, bool):
+                raise BenchError(f"{rail['id']}: rail power state is missing or invalid")
+            if enabled and not rail["min_voltage_v"] <= voltage <= rail["max_voltage_v"]:
                 raise BenchError(f"{rail['id']}: voltage is outside the configured safe range")
+            if not enabled and (voltage > 0.5 or current > 0.1):
+                raise BenchError(f"{rail['id']}: disabled rail still reports voltage or current")
             if current > rail["max_current_a"]:
                 raise BenchError(f"{rail['id']}: current exceeds the configured limit")
             if temperature > rail["max_temperature_c"]:
@@ -384,6 +395,86 @@ class BenchController:
             if not probe["min_value"] <= value <= probe["max_value"]:
                 raise BenchError(f"{probe['id']}: probe reading is outside the configured profile range")
         return sample
+
+    def set_rail_power(
+        self,
+        rail_id: str,
+        *,
+        enabled: bool,
+        voltage_v: float | None = None,
+        current_limit_a: float | None = None,
+    ) -> dict[str, Any]:
+        """Set one named power rail using board-profile-limited setpoints."""
+        if self.state not in {"safe-idle", "armed"}:
+            raise BenchError("rail power can only be changed while the bench is safe-idle or armed")
+        if self.adapter is None or not self.adapter.is_connected():
+            raise BenchError("a connected native power-control adapter is required")
+        if not isinstance(enabled, bool):
+            raise BenchError("enabled must be a boolean")
+
+        rail = next((item for item in self.profile["rails"] if item["id"] == rail_id), None)
+        if rail is None:
+            raise BenchError(f"power rail {rail_id} is not allowed by the board profile")
+
+        if enabled:
+            voltage = _number(
+                voltage_v, rail_id + ".voltage_v",
+                minimum=rail["min_voltage_v"], maximum=rail["max_voltage_v"],
+            )
+            current_limit = _number(
+                current_limit_a, rail_id + ".current_limit_a",
+                minimum=0.001, maximum=rail["max_current_a"],
+            )
+            try:
+                self._read_telemetry()
+                self.adapter.set_rail_power(rail_id, True, voltage, current_limit)
+                sample = self._read_telemetry()
+                reading = sample["rails"][rail_id]
+                if reading.get("enabled") is not True:
+                    raise BenchError(f"{rail_id}: adapter did not confirm that the rail is enabled")
+                measured_voltage = float(reading["voltage_v"])
+                measured_current = float(reading["current_a"])
+                if not rail["min_voltage_v"] <= measured_voltage <= rail["max_voltage_v"]:
+                    raise BenchError(f"{rail_id}: measured voltage is outside the configured range")
+                if measured_current > current_limit:
+                    raise BenchError(f"{rail_id}: measured current exceeds the requested current limit")
+            except Exception as error:
+                self._disable_and_fault(str(error))
+                if isinstance(error, BenchError):
+                    raise
+                raise BenchError(f"{rail_id}: power enable failed: {error}") from error
+        else:
+            try:
+                self.adapter.set_rail_power(rail_id, False, None, None)
+                sample = self._read_telemetry()
+                reading = sample["rails"][rail_id]
+                if reading.get("enabled") is not False:
+                    raise BenchError(f"{rail_id}: adapter did not confirm that the rail is disabled")
+            except Exception as error:
+                self._disable_and_fault(str(error))
+                if isinstance(error, BenchError):
+                    raise
+                raise BenchError(f"{rail_id}: power disable failed: {error}") from error
+            voltage = None
+            current_limit = None
+
+        self._audit("bench.power-rail-changed", {
+            "board_id": self.profile["board_id"],
+            "rail_id": rail_id,
+            "enabled": enabled,
+            "voltage_v": voltage if enabled else None,
+            "current_limit_a": current_limit if enabled else None,
+        })
+        return {
+            "schema": "duckos.bench-power-command.v1",
+            "board_id": self.profile["board_id"],
+            "rail_id": rail_id,
+            "enabled": enabled,
+            "voltage_v": voltage if enabled else None,
+            "current_limit_a": current_limit if enabled else None,
+            "hardware_command_sent": True,
+            "hardware_state_confirmed": True,
+        }
 
     def arm(self) -> dict[str, Any]:
         if self.state != "safe-idle":

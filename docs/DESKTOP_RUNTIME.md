@@ -36,7 +36,7 @@ The `duckos.desktop` package currently provides:
 - `launcher.py`: stable numbered slots, duplicate protection and structured launch requests. It never constructs shell commands or starts processes.
 - `packages.py`: bounded SHA-256 inspection and exact-digest local approval for an unsigned file.
 - `updates.py`: A/B state machine, signed-evidence gate, inactive-slot planning, activation through a native backend, boot confirmation and fallback selection.
-- `bench.py`: board-profile validation, safe-idle/armed/running/cooling/fault state machine, telemetry freshness and rail interlocks.
+- `bench.py`: board-profile validation, safe-idle/armed/running/cooling/fault state machine, telemetry freshness, explicit profile-limited power-rail commands and bus/accelerator/probe interlocks.
 - `audit.py`: append-only JSONL audit entries with a SHA-256 chain and redacted serial-line capture.
 - `storage.py`: bounded JSON state with same-directory atomic replacement and restrictive file permissions.
 
@@ -86,7 +86,7 @@ A board profile is a separately reviewed JSON file conforming to `duckos.bench-p
 duckos desktop bench-profile ./bench/board-rev-a.json
 ```
 
-The CLI validates the profile only. A native `BenchAdapter` is required for physical connection. Before a run, the controller checks that the discovered board identity matches the profile, telemetry is recent, each configured voltage is in range, current is under its limit and temperature is below its ceiling. Faults call the adapter's emergency-disable method. A normal stop enters `cooling`; the fixture cannot return to safe idle until every rail is below its cooldown threshold.
+The CLI validates the profile only. A native `BenchAdapter` is required for physical connection. `BenchController.set_rail_power()` accepts only named rails and voltage/current setpoints inside the reviewed board profile; it reads back telemetry and faults if the adapter does not confirm the requested state or measured output. There is no arbitrary register/GPIO API. `BenchController.set_rail_power()` accepts only named rails and voltage/current setpoints inside the reviewed board profile; it reads back telemetry and faults if the adapter does not confirm the requested state or measured output. There is no arbitrary register/GPIO API. Before a run, the controller checks that the discovered board identity matches the profile, telemetry is recent, each configured voltage is in range, current is under its limit and temperature is below its ceiling. Faults call the adapter's emergency-disable method. A normal stop enters `cooling`; the fixture cannot return to safe idle until every rail is below its cooldown threshold.
 
 The adapter reports configured bus link state/width/speed, GPU/NPU presence, temperature/utilization and timestamped probe measurements alongside power-rail telemetry. The controller rejects missing required devices, unhealthy bus status, out-of-profile link width/speed, NPU/GPU temperature or utilization violations, stale probes and probe values outside their calibrated range. The adapter interface deliberately has no arbitrary register-write or free-form GPIO method. A board-specific implementation must expose only approved operations for that exact revision. Do not derive power limits from a generic motherboard guess. NPU counters, PCIe lane state and probes require actual device-specific drivers and calibrated measurement sources.
 
