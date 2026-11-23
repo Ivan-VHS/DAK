@@ -136,6 +136,49 @@ class MoraRegistryTests(unittest.TestCase):
         self.assertEqual(len({app["id"] for app in catalogue["apps"]}), 15)
 
 
+
+class MoraToolkitRegistryTests(unittest.TestCase):
+    def test_all_66_toolkits_are_reviewed_and_numbered_once(self):
+        root = Path(__file__).resolve().parents[1] / "duckos" / "mora" / "data"
+        registry = json.loads((root / "gui-toolkits.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(registry["entries"]), 66)
+        self.assertEqual(
+            [item["number"] for item in registry["entries"]],
+            list(range(1, 67)),
+        )
+        self.assertEqual(registry["primary_runtime"], "PySide6")
+        self.assertFalse(registry["html_runtime"])
+        self.assertFalse(registry["webview"])
+        self.assertIn("forbidden", {item["kind"] for item in registry["entries"]})
+        self.assertTrue(all(item["reason"] for item in registry["entries"]))
+
+    def test_native_bridge_metadata_is_safe_and_platform_scoped(self):
+        from duckos.mora.native_bridge import native_bridge_status
+
+        status = native_bridge_status()
+        self.assertTrue(status["ctypes"])
+        self.assertFalse(status["arbitrary_library_loading"])
+        self.assertFalse(status["shell_execution"])
+
+    def test_plot_reader_rejects_symlinks_and_reads_numeric_columns(self):
+        from duckos.mora.plotting import read_numeric_columns
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            csv_file = root / "samples.csv"
+            csv_file.write_text("time,value,label\n0,1.5,a\n1,2.5,b\n", encoding="utf-8")
+            names, columns = read_numeric_columns(csv_file)
+            self.assertEqual(names, ["time", "value"])
+            self.assertEqual(columns["value"], [1.5, 2.5])
+            link = root / "link.csv"
+            try:
+                link.symlink_to(csv_file)
+            except (OSError, NotImplementedError):
+                self.skipTest("symbolic links are not available")
+            with self.assertRaises(ValueError):
+                read_numeric_columns(link)
+
+
 class MoraIntegrityTests(unittest.TestCase):
     def test_sha256_reads_but_never_executes_a_file(self):
         with tempfile.TemporaryDirectory() as temporary:
