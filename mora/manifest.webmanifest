@@ -5,8 +5,8 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#080808",
-  "theme_color": "#FFD400",
+  "background_color": "#0E0F0D",
+  "theme_color": "#D6BE65",
   "description": "Единый рабочий стол и системная оболочка DuckOS.",
   "icons": [
     {

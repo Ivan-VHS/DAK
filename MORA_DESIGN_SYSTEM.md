@@ -6,7 +6,7 @@ Mora is the shared desktop identity for the Ivan-VHS application family. The she
 
 ## Visual direction
 
-Mora uses one fixed DuckOS palette: black structural surfaces, white content and duck yellow for selection, focus and primary action. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
+Mora uses one fixed DuckOS palette: soft graphite structure, warm white content and a muted duck-yellow accent for selection, focus and primary action. The desktop keeps a quiet radial workspace with low-contrast original folds and a central application grid. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
 
 The target composition is approximately 65% black, 25% white/graphite and 10% yellow. These are visual balance targets, not a requirement to recolor imported media or user content. Application identities share the same yellow accent; application meaning comes from names, glyphs and labels rather than a rainbow of per-app colors.
 
@@ -16,19 +16,19 @@ The standard workspace remains visually stable at the centre. Secondary content 
 
 | Token | Value | Role |
 |---|---|---|
-| Page | `#080808` | Desktop background |
-| Surface | `#151515` | Primary panel |
-| Elevated | `#242424` | Secondary panel |
-| Text | `#FFFFFF` | Main copy |
-| Secondary | `#E5E5E5` | Supporting copy |
-| Muted | `#A6A6A6` | Quiet metadata |
-| Brand | `#FFD400` | Primary action and selection |
-| Brand hover / focus | `#FFE45C` | Hover and keyboard focus |
-| Brand text | `#080808` | Text on yellow |
-| Secondary accent | `#FFD400` | Shared application accent |
-| Border | `#3A3A3A` | Structural edge |
-| Selection | `#3A3100` | Selected surface |
-| Alert | `#FFD400` | Alert marker, accompanied by text and an icon |
+| Page | `#0E0F0D` | Desktop background |
+| Surface | `#191A17` | Primary panel |
+| Elevated | `#252721` | Secondary panel |
+| Text | `#F5F4EF` | Main copy |
+| Secondary | `#E7E5DC` | Supporting copy |
+| Muted | `#A6A69D` | Quiet metadata |
+| Brand | `#D6BE65` | Primary action and selection |
+| Brand hover / focus | `#E6D48B` | Hover and keyboard focus |
+| Brand text | `#0E0F0D` | Text on yellow |
+| Secondary accent | `#D6BE65` | Shared application accent |
+| Border | `#3A3B35` | Structural edge |
+| Selection | `#3E3825` | Selected surface |
+| Alert | `#D6BE65` | Alert marker, accompanied by text and an icon |
 
 Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone: alert, warning and critical states retain explicit labels, icons and text.
 
@@ -36,21 +36,20 @@ Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targ
 
 ## Composition and geometry
 
-- Build a central radial anchor using a stable circular field and concentric edge detail.
-- Repeat vertical folds with a consistent interval; align columns, dividers and background texture to that rhythm.
-- Balance secondary controls around the core, leaving the working surface open and legible.
-- Keep dark surfaces distinguishable through a warm rim, tonal gradient or controlled highlight.
-- Use material cues selectively: draped fabric, natural wood, brushed metal, muted glass and paper.
-- Foreground controls stay crisp; background structure may soften with distance.
+- Keep the app launcher centred and give it the strongest visual hierarchy; place clock and widgets in quieter side columns.
+- Use original low-contrast folds and a restrained radial background; avoid bright gradients behind text.
+- Represent applications with consistent, centred glyph tiles and readable labels rather than large promotional cards.
+- Use Soft Glass sparingly: translucent graphite surfaces, a subtle border and modest blur, with flat content inside.
+- Keep controls crisp and backgrounds quiet; depth comes from light separation, not heavy shadows.
 - Keep top controls compact and grouped. Put progress, discrete ticks and critical markers at the lower boundary instead of floating over work content.
 
 ## Motion
 
-Use predictable low-amplitude transitions with `ease-in-out`: 80–140 ms for focus and direct feedback, 160–240 ms for panel changes and 260–380 ms for context changes. Avoid random movement, strobing, flashing gradients and perpetual ambient motion.
+Use restrained iOS-inspired motion without copying proprietary interface assets: 140–180 ms for direct feedback, 200–240 ms for app interactions and 260–300 ms for window transitions. Prefer a short ease-out curve with a slight spring, small scale/opacity changes and no exaggerated bouncing. Avoid random movement, strobing, flashing gradients and perpetual ambient motion.
 
 A stable centre may frame peripheral markers. Progress uses a linear track and discrete ticks with an explicit position; state must also be represented semantically.
 
-OS reduced-motion preferences override decorative movement. Disable nonessential transitions and replace smooth scrolling with immediate navigation when reduced motion is requested. The Eco profile suppresses expensive visual effects.
+OS reduced-motion preferences and the Mora Reduce Motion setting override decorative movement. Disable nonessential transitions and smooth scrolling when reduced motion is requested. The Eco profile suppresses blur-heavy surfaces and background detail.
 
 ## Geometry, scale and interaction
 
@@ -66,3 +65,12 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 Mora remains a browser desktop shell, not a native process launcher. Native application capabilities and security boundaries remain owned by their respective projects; a permissioned launcher/IPC layer must be implemented and verified separately.
 
+
+
+## Rights, provenance and security
+
+The Mora glyphs, wallpaper treatment, layout, CSS and interaction details are maintained as project-authored DuckOS assets. The interface may use familiar motion principles such as easing, spring settling and sheet-like transitions, but it does not reproduce Apple logos, SF Symbols, screenshots, wallpapers or proprietary UI artwork. No external font, script, analytics or image service is loaded by the shell.
+
+The HTML shell carries a same-origin Content Security Policy: scripts, workers, connections, manifests and form targets are restricted to the local origin; object embedding is disabled. Inline styles remain enabled because the current app panels use bounded, project-authored style attributes. A deployed native host should also send response headers for frame policy, MIME sniffing, permissions and transport security. The CSP is a browser-layer defence, not process sandboxing.
+
+Sentinel remains a deny-by-default preference surface. Its toggles do not enforce microphone, camera, file, network or clipboard isolation in native processes until a DuckOS capability broker and sandbox are implemented.

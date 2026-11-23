@@ -12,7 +12,7 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
-const DUCK_ACCENT = "#FFD400";
+const DUCK_ACCENT = "#D6BE65";
 
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
@@ -49,6 +49,7 @@ const appDefinitions = {
 const windowLayer = document.getElementById("window-layer");
 const activeAppLabel = document.getElementById("active-app");
 const toastElement = document.getElementById("toast");
+const MAX_OPEN_WINDOWS = 6;
 let nextZIndex = 10;
 let toastTimeout = null;
 
@@ -677,11 +678,17 @@ function focusWindow(appWindow) {
 }
 
 function openApp(appId) {
+  if (typeof appId !== "string" || !Object.prototype.hasOwnProperty.call(appDefinitions, appId)) return;
   const definition = appDefinitions[appId];
   if (!definition) return;
   let appWindow = windowLayer.querySelector('[data-window="' + appId + '"]');
   if (appWindow) {
     focusWindow(appWindow);
+    return;
+  }
+
+  if (windowLayer.querySelectorAll(".app-window").length >= MAX_OPEN_WINDOWS) {
+    showToast("Открыто максимальное число окон. Закройте одно из шести приложений.");
     return;
   }
 

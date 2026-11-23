@@ -110,29 +110,29 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.equal(theme.defaultPalette, "duck");
   assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
   const palette = theme.palettes.duck;
-  assert.equal(palette.page, "#080808");
-  assert.equal(palette.surface, "#151515");
-  assert.equal(palette.text, "#FFFFFF");
-  assert.equal(palette.brand, "#FFD400");
-  assert.equal(palette.danger, "#FFD400");
+  assert.equal(palette.page, "#0E0F0D");
+  assert.equal(palette.surface, "#191A17");
+  assert.equal(palette.text, "#F5F4EF");
+  assert.equal(palette.brand, "#D6BE65");
+  assert.equal(palette.danger, "#D6BE65");
   assert.ok(contrastRatio(palette.text, palette.page) >= 7);
   assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
   assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5);
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
-  assert.equal(manifest.theme_color, "#FFD400");
-  assert.equal(manifest.background_color, "#080808");
-  assert.ok(html.includes('name="theme-color" content="#FFD400"'));
+  assert.equal(manifest.theme_color, "#D6BE65");
+  assert.equal(manifest.background_color, "#0E0F0D");
+  assert.ok(html.includes('name="theme-color" content="#D6BE65"'));
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
   assert.ok(html.includes('Единая палитра DuckOS'));
   assert.ok(html.includes('data-app="mora-commons"'));
   assert.ok(css.includes(':root[data-theme="duck"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
-  assert.ok(css.includes("#FFD400"));
+  assert.ok(css.includes("#D6BE65"));
   assert.ok(css.includes(".commons-grid"));
   const allowedColors = new Set([
-    "#080808", "#151515", "#242424", "#3A3A3A", "#3A3100",
-    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C"
+    "#0E0F0D", "#191A17", "#252721", "#3A3B35", "#3E3825",
+    "#A6A69D", "#E7E5DC", "#F5F4EF", "#D6BE65", "#E6D48B", "#14140F"
   ].map((color) => color.toLowerCase()));
   const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
@@ -142,8 +142,30 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v8-soft-glass"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
+});
+
+
+test("Mora central launcher uses Soft Glass, one Duck accent and gentle platform motion", () => {
+  assert.ok(html.includes("29 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ"));
+  assert.ok(css.includes("grid-template-columns:repeat(4,minmax(0,1fr))"));
+  assert.ok(css.includes(".app-tile:active"));
+  assert.ok(css.includes("@keyframes mora-window-in"));
+  assert.ok(css.includes("prefers-reduced-motion"));
+  assert.ok(css.includes(":root.reduce-motion"));
+  assert.ok(css.includes("@supports not"));
+  assert.ok(js.includes("MAX_OPEN_WINDOWS = 6"));
+});
+
+test("Mora blocks remote active content and limits browser-layer authority", () => {
+  assert.ok(html.includes("Content-Security-Policy"));
+  assert.ok(html.includes("script-src 'self'"));
+  assert.ok(html.includes("connect-src 'self'"));
+  assert.ok(html.includes("object-src 'none'"));
+  assert.ok(html.includes('name="referrer" content="no-referrer"'));
+  assert.equal(policy.capabilities.content_security_policy.maturity,"partial");
+  assert.ok(policy.capabilities.content_security_policy.scope.includes("inline styles remain allowed"));
 });

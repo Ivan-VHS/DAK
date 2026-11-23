@@ -2,9 +2,11 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+  <meta name="referrer" content="no-referrer">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#FFD400">
+  <meta name="theme-color" content="#D6BE65">
   <meta name="description" content="Mora — единый рабочий стол DuckOS">
   <title>Mora — DuckOS</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -18,42 +20,42 @@
       <svg id="mora-folds" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="presentation">
         <defs>
           <linearGradient id="mora-cloth" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#080808"/>
-            <stop offset=".07" stop-color="#3a3100"/>
-            <stop offset=".15" stop-color="#ffd400"/>
-            <stop offset=".22" stop-color="#ffd400"/>
-            <stop offset=".31" stop-color="#080808"/>
-            <stop offset=".40" stop-color="#ffd400"/>
-            <stop offset=".48" stop-color="#ffd400"/>
-            <stop offset=".55" stop-color="#3a3100"/>
-            <stop offset=".65" stop-color="#080808"/>
-            <stop offset=".75" stop-color="#ffd400"/>
-            <stop offset=".84" stop-color="#ffd400"/>
-            <stop offset=".92" stop-color="#3a3100"/>
-            <stop offset="1" stop-color="#080808"/>
+            <stop offset="0" stop-color="#0E0F0D"/>
+            <stop offset=".07" stop-color="#3E3825"/>
+            <stop offset=".15" stop-color="#D6BE65"/>
+            <stop offset=".22" stop-color="#D6BE65"/>
+            <stop offset=".31" stop-color="#0E0F0D"/>
+            <stop offset=".40" stop-color="#D6BE65"/>
+            <stop offset=".48" stop-color="#D6BE65"/>
+            <stop offset=".55" stop-color="#3E3825"/>
+            <stop offset=".65" stop-color="#0E0F0D"/>
+            <stop offset=".75" stop-color="#D6BE65"/>
+            <stop offset=".84" stop-color="#D6BE65"/>
+            <stop offset=".92" stop-color="#3E3825"/>
+            <stop offset="1" stop-color="#0E0F0D"/>
           </linearGradient>
           <pattern id="mora-fold-pattern" width="320" height="1000" patternUnits="userSpaceOnUse">
             <rect width="320" height="1000" fill="url(#mora-cloth)"/>
             <path d="M20 0 C52 250 2 650 26 1000 M77 0 C102 270 62 650 93 1000 M155 0 C131 300 187 700 160 1000 M235 0 C260 270 219 690 248 1000 M300 0 C286 260 330 650 310 1000"
-              fill="none" stroke="#ffd400" stroke-opacity=".23" stroke-width="7"/>
+              fill="none" stroke="#D6BE65" stroke-opacity=".23" stroke-width="7"/>
             <path d="M42 0 C60 260 32 670 53 1000 M112 0 C88 290 132 680 115 1000 M198 0 C220 260 184 660 209 1000 M276 0 C254 290 286 680 274 1000"
-              fill="none" stroke="#080808" stroke-opacity=".52" stroke-width="15"/>
+              fill="none" stroke="#0E0F0D" stroke-opacity=".52" stroke-width="15"/>
             <path d="M63 0 C79 280 53 650 70 1000 M250 0 C231 290 262 670 252 1000"
-              fill="none" stroke="#ffd400" stroke-opacity=".11" stroke-width="3"/>
+              fill="none" stroke="#D6BE65" stroke-opacity=".11" stroke-width="3"/>
           </pattern>
           <linearGradient id="mora-room-shade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#080808" stop-opacity=".12"/>
-            <stop offset=".58" stop-color="#080808" stop-opacity=".20"/>
-            <stop offset="1" stop-color="#080808" stop-opacity=".84"/>
+            <stop offset="0" stop-color="#0E0F0D" stop-opacity=".12"/>
+            <stop offset=".58" stop-color="#0E0F0D" stop-opacity=".20"/>
+            <stop offset="1" stop-color="#0E0F0D" stop-opacity=".84"/>
           </linearGradient>
           <radialGradient id="mora-core">
-            <stop offset="0" stop-color="#080808" stop-opacity=".98"/>
-            <stop offset=".68" stop-color="#080808" stop-opacity=".96"/>
-            <stop offset="1" stop-color="#080808" stop-opacity="0"/>
+            <stop offset="0" stop-color="#0E0F0D" stop-opacity=".98"/>
+            <stop offset=".68" stop-color="#0E0F0D" stop-opacity=".96"/>
+            <stop offset="1" stop-color="#0E0F0D" stop-opacity="0"/>
           </radialGradient>
           <linearGradient id="mora-floor" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#080808" stop-opacity=".05"/>
-            <stop offset="1" stop-color="#080808" stop-opacity=".96"/>
+            <stop offset="0" stop-color="#0E0F0D" stop-opacity=".05"/>
+            <stop offset="1" stop-color="#0E0F0D" stop-opacity=".96"/>
           </linearGradient>
         </defs>
         <rect width="1600" height="1000" fill="url(#mora-fold-pattern)"/>
@@ -62,7 +64,7 @@
         <path d="M0 858 C310 835 570 876 800 852 C1060 828 1330 866 1600 842 V1000 H0Z"
           fill="url(#mora-floor)"/>
         <path d="M0 855 C310 832 570 873 800 849 C1060 825 1330 863 1600 839"
-          fill="none" stroke="#ffd400" stroke-opacity=".24" stroke-width="2"/>
+          fill="none" stroke="#D6BE65" stroke-opacity=".24" stroke-width="2"/>
       </svg>
     </div>
 
@@ -80,7 +82,7 @@
 
     <div class="desktop-content">
       <aside class="time-panel">
-        <p class="eyebrow">ПОНЕДЕЛЬНИК · РАБОЧЕЕ ПРОСТРАНСТВО</p>
+        <p class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО · DUCKOS</p>
         <time class="hero-clock" id="hero-clock">--:--</time>
         <p class="hero-date" id="hero-date">Загрузка даты…</p>
         <div class="welcome-note">
@@ -89,37 +91,37 @@
         </div>
       </aside>
 
-      <section class="app-area" aria-label="Приложения">
+      <section class="app-area" aria-label="Приложения" aria-labelledby="app-heading">
         <div class="section-heading">
-          <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1>Приложения</h1></div>
-          <span class="tiny-counter">27 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
+          <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1 id="app-heading">Приложения</h1></div>
+          <span class="tiny-counter">29 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
         </div>
-        <div class="app-grid" id="app-grid">
-          <button class="app-tile" data-app="cockos" style="--accent:#ffd400">
+        <div class="app-grid" id="app-grid" role="group" aria-label="Основные приложения">
+          <button class="app-tile" data-app="cockos" style="--accent:#D6BE65">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M5 25h5l4-11 7 23 7-30 7 27 4-9h4" /></svg></span>
             <span class="app-name">Cockos</span><span class="app-subtitle">Звук и запись</span>
           </button>
-          <button class="app-tile" data-app="kavun" style="--accent:#ffd400">
+          <button class="app-tile" data-app="kavun" style="--accent:#D6BE65">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M24 7c-3-5-10-5-13 0M24 7c3-5 10-5 13 0"/><path d="M24 8C12 8 5 17 7 28c2 10 10 15 17 15s15-5 17-15C43 17 36 8 24 8Z"/><path d="M24 10v31M11 18l24 16M37 18 13 34"/></svg></span>
             <span class="app-name">Kavun</span><span class="app-subtitle">Фотографии</span>
           </button>
-          <button class="app-tile" data-app="kabon" style="--accent:#ffd400">
+          <button class="app-tile" data-app="kabon" style="--accent:#D6BE65">
             <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M29 16c-1.5-2-9-3-10 2-1.1 5 12 3 11 9-.8 5-9 6-13 2M24 11v26"/></svg></span>
             <span class="app-name">Ka-bon</span><span class="app-subtitle">Финансы</span>
           </button>
-          <button class="app-tile" data-app="gloverty" style="--accent:#ffd400">
+          <button class="app-tile" data-app="gloverty" style="--accent:#D6BE65">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M27 4 10 27h12l-2 17 18-25H25Z"/></svg></span>
             <span class="app-name">Gloverty</span><span class="app-subtitle">Сценарии</span>
           </button>
-          <button class="app-tile" data-app="po" style="--accent:#ffd400">
+          <button class="app-tile" data-app="po" style="--accent:#D6BE65">
             <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="m30 13-4 13-13 9 4-13Z"/><circle cx="24" cy="24" r="2"/></svg></span>
             <span class="app-name">Po</span><span class="app-subtitle">Компас</span>
           </button>
-          <button class="app-tile" data-app="illidia" style="--accent:#3a3100">
+          <button class="app-tile" data-app="illidia" style="--accent:#3E3825">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M15 15h18c6 0 10 6 11 15 1 8-5 10-10 3l-4-5H18l-4 5c-5 7-11 5-10-3 1-9 5-15 11-15Z"/><path d="M15 20v10M10 25h10M32 22h.1M37 28h.1"/></svg></span>
             <span class="app-name">Illidia</span><span class="app-subtitle">Игры</span>
           </button>
-          <button class="app-tile" data-app="unify" style="--accent:#3a3100">
+          <button class="app-tile" data-app="unify" style="--accent:#3E3825">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M19 29 14 34a9 9 0 0 1-13-13l8-8a9 9 0 0 1 13 0l3 3M29 19l5-5a9 9 0 0 1 13 13l-8 8a9 9 0 0 1-13 0l-3-3M16 32l16-16"/></svg></span>
             <span class="app-name">Unify</span><span class="app-subtitle">Устройства</span>
           </button>
@@ -128,35 +130,35 @@
           <div><span class="eyebrow">РАСШИРЕННЫЙ НАБОР</span><h2>Новые приложения DuckOS</h2></div>
           <span class="system-section-note">13 дополнительных инструментов Mora</span>
         </div>
-        <div class="extension-app-grid" id="extension-app-grid">
-          <button class="app-tile" data-app="sestem" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">♟</span></span><span class="app-name">Sestem</span><span class="app-subtitle">Статус системы</span></button>
-          <button class="app-tile" data-app="setupup" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">✳</span></span><span class="app-name">SetupUP</span><span class="app-subtitle">Первичная настройка</span></button>
-          <button class="app-tile" data-app="orriganize" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Orriganize</span><span class="app-subtitle">Задачи и проекты</span></button>
-          <button class="app-tile" data-app="abriganza" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▤</span></span><span class="app-name">Abriganza</span><span class="app-subtitle">Архивы и файлы</span></button>
-          <button class="app-tile" data-app="olaab" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">◈</span></span><span class="app-name">Olaab</span><span class="app-subtitle">Медиатека</span></button>
-          <button class="app-tile" data-app="concrete-thump" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">♫</span></span><span class="app-name">Concrete Thump</span><span class="app-subtitle">Ритм и темп</span></button>
-          <button class="app-tile" data-app="seu-beu" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Seu-Beu</span><span class="app-subtitle">Проверка обмена</span></button>
-          <button class="app-tile" data-app="love-il" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">♡</span></span><span class="app-name">Love-IL</span><span class="app-subtitle">Личный дневник</span></button>
-          <button class="app-tile" data-app="poi" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⌖</span></span><span class="app-name">Poi</span><span class="app-subtitle">Быстрые заметки</span></button>
-          <button class="app-tile" data-app="poi-2" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▧</span></span><span class="app-name">Poi-2</span><span class="app-subtitle">База знаний</span></button>
-          <button class="app-tile" data-app="po-2" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">➤</span></span><span class="app-name">Po-2</span><span class="app-subtitle">Маршруты и точки</span></button>
-          <button class="app-tile" data-app="gamecharager" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▣</span></span><span class="app-name">GameCharager</span><span class="app-subtitle">Игровая библиотека</span></button>
-          <button class="app-tile" data-app="exedotexe" style="--accent:#a6a6a6"><span class="app-icon"><span class="system-glyph"><></span></span><span class="app-name">EXEdotEXE</span><span class="app-subtitle">EXE-инспектор</span></button>
+        <div class="extension-app-grid" id="extension-app-grid" role="group" aria-label="Дополнительные приложения">
+          <button class="app-tile" data-app="sestem" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">♟</span></span><span class="app-name">Sestem</span><span class="app-subtitle">Статус системы</span></button>
+          <button class="app-tile" data-app="setupup" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">✳</span></span><span class="app-name">SetupUP</span><span class="app-subtitle">Первичная настройка</span></button>
+          <button class="app-tile" data-app="orriganize" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Orriganize</span><span class="app-subtitle">Задачи и проекты</span></button>
+          <button class="app-tile" data-app="abriganza" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">▤</span></span><span class="app-name">Abriganza</span><span class="app-subtitle">Архивы и файлы</span></button>
+          <button class="app-tile" data-app="olaab" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">◈</span></span><span class="app-name">Olaab</span><span class="app-subtitle">Медиатека</span></button>
+          <button class="app-tile" data-app="concrete-thump" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">♫</span></span><span class="app-name">Concrete Thump</span><span class="app-subtitle">Ритм и темп</span></button>
+          <button class="app-tile" data-app="seu-beu" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Seu-Beu</span><span class="app-subtitle">Проверка обмена</span></button>
+          <button class="app-tile" data-app="love-il" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">♡</span></span><span class="app-name">Love-IL</span><span class="app-subtitle">Личный дневник</span></button>
+          <button class="app-tile" data-app="poi" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">⌖</span></span><span class="app-name">Poi</span><span class="app-subtitle">Быстрые заметки</span></button>
+          <button class="app-tile" data-app="poi-2" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">▧</span></span><span class="app-name">Poi-2</span><span class="app-subtitle">База знаний</span></button>
+          <button class="app-tile" data-app="po-2" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">➤</span></span><span class="app-name">Po-2</span><span class="app-subtitle">Маршруты и точки</span></button>
+          <button class="app-tile" data-app="gamecharager" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">▣</span></span><span class="app-name">GameCharager</span><span class="app-subtitle">Игровая библиотека</span></button>
+          <button class="app-tile" data-app="exedotexe" style="--accent:#A6A69D"><span class="app-icon"><span class="system-glyph"><></span></span><span class="app-name">EXEdotEXE</span><span class="app-subtitle">EXE-инспектор</span></button>
         </div>
         <div class="system-section-heading">
           <div><span class="eyebrow">СИСТЕМА MORA</span><h2>Инструменты рабочего пространства</h2></div>
           <span class="system-section-note">Локальные функции и центры управления</span>
         </div>
-        <div class="system-app-grid" id="system-app-grid">
-          <button class="app-tile" data-app="mora-ai" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
-          <button class="app-tile" data-app="security" style="--accent:#3a3100"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Sentinel</span><span class="app-subtitle">Права и доверие</span></button>
-          <button class="app-tile" data-app="updates" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
-          <button class="app-tile" data-app="runtime" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
-          <button class="app-tile" data-app="workspace" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
-          <button class="app-tile" data-app="provenance" style="--accent:#3a3100"><span class="app-icon"><span class="system-glyph">⌁</span></span><span class="app-name">Proof</span><span class="app-subtitle">Файлы и SHA-256</span></button>
-          <button class="app-tile" data-app="mora-boost" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⚡</span></span><span class="app-name">Mora Boost</span><span class="app-subtitle">Игровая производительность</span></button>
-          <button class="app-tile" data-app="desktop" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Duck Desktop</span><span class="app-subtitle">Оптимизация рабочего пространства</span></button>
-          <button class="app-tile" data-app="mora-commons" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">✣</span></span><span class="app-name">Mora Commons</span><span class="app-subtitle">Единый каталог приложений</span></button>
+        <div class="system-app-grid" id="system-app-grid" role="group" aria-label="Системные инструменты">
+          <button class="app-tile" data-app="mora-ai" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
+          <button class="app-tile" data-app="security" style="--accent:#3E3825"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Sentinel</span><span class="app-subtitle">Права и доверие</span></button>
+          <button class="app-tile" data-app="updates" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
+          <button class="app-tile" data-app="runtime" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
+          <button class="app-tile" data-app="workspace" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
+          <button class="app-tile" data-app="provenance" style="--accent:#3E3825"><span class="app-icon"><span class="system-glyph">⌁</span></span><span class="app-name">Proof</span><span class="app-subtitle">Файлы и SHA-256</span></button>
+          <button class="app-tile" data-app="mora-boost" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">⚡</span></span><span class="app-name">Mora Boost</span><span class="app-subtitle">Игровая производительность</span></button>
+          <button class="app-tile" data-app="desktop" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Duck Desktop</span><span class="app-subtitle">Оптимизация рабочего пространства</span></button>
+          <button class="app-tile" data-app="mora-commons" style="--accent:#D6BE65"><span class="app-icon"><span class="system-glyph">✣</span></span><span class="app-name">Mora Commons</span><span class="app-subtitle">Единый каталог приложений</span></button>
         </div>
       </section>
 

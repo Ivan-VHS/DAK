@@ -17,7 +17,7 @@ Clone the complete source workspace with `git clone --recurse-submodules https:/
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora uses the single DuckOS black/white/yellow visual profile: near-black surfaces, white content and a shared duck-yellow accent, with restrained vertical folds around a deep radial centre. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora uses the single DuckOS Soft Glass visual profile: quiet graphite surfaces, warm-white content and a muted duck-yellow accent, with original low-contrast folds and a central application launcher. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes a centred icon launcher, draggable glass windows, live clock, compact widgets, responsive layout, local preferences, reduced-motion support and keyboard navigation.
 
 The system tools are:
 
@@ -123,3 +123,6 @@ Implementation maturity, supported platforms and subsystem behavior must be stat
 ## Attribution
 
 Project author/developer: **Ivan-VHS**. Preserve the authorship, contributions and license notices of existing contributors and dependencies.
+
+
+Mora's launcher uses project-authored glyphs and original CSS/SVG presentation. Its restrained iOS-inspired easing does not use Apple-owned interface assets. A same-origin browser Content Security Policy blocks remote active content; Sentinel remains a local preference surface until a native capability broker exists.
