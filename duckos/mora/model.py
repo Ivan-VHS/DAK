@@ -180,9 +180,11 @@ def build_intent_plan(raw_input: Any) -> dict[str, Any]:
     """Create a preview for a tiny allowlist; never returns shell commands."""
     text = str(raw_input if raw_input is not None else "").strip()
     if not text:
-        return {"ok": False, "message": "Введите действие."}
+        return {"ok": False, "message": "Введите действие, например: «включи режим фокуса»."}
     if len(text) > MAX_INTENT_LENGTH:
-        return {"ok": False, "message": f"Запрос длиннее {MAX_INTENT_LENGTH} символов."}
+        return {"ok": False, "message": f"Сократите запрос до {MAX_INTENT_LENGTH} символов и повторите."}
+    if any(ord(character) < 32 and character not in "\\t\\r\\n" for character in text):
+        return {"ok": False, "message": "Удалите управляющие символы и повторите запрос."}
 
     normalized = text.casefold()
     actions: list[dict[str, Any]] = []
@@ -227,7 +229,11 @@ def build_intent_plan(raw_input: Any) -> dict[str, Any]:
     if not actions:
         return {
             "ok": False,
-            "message": "Это действие не входит в локальный список Mora. Команды и запуск программ недоступны.",
+            "message": (
+                "Это действие не входит в локальный список Mora. "
+                "Попробуйте «включи режим фокуса», «увімкни режим фокусу» "
+                "или откройте встроенное приложение."
+            ),
         }
     return {"ok": True, "message": "План подготовлен. Изменения не применены.", "actions": actions}
 
