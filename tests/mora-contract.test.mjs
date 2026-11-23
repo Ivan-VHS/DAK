@@ -10,10 +10,10 @@ const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", i
 
 const appIds = [
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
 ];
 
-test("desktop exposes all seven first-party apps and six system tools", () => {
+test("desktop exposes all seven first-party apps and seven system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
