@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QDateTime, Qt, QTimer, QUrl
+from PySide6.QtCore import QDateTime, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -124,8 +124,6 @@ def _json_text(value: Any) -> str:
 
 
 class AppCard(QFrame):
-    from PySide6.QtCore import Signal
-
     activated = Signal()
 
     def mouseReleaseEvent(self, event: Any) -> None:
@@ -460,6 +458,10 @@ class MoraWindow(QMainWindow):
         layout.addWidget(meta)
 
         return card
+
+    def resizeEvent(self, event: Any) -> None:
+        super().resizeEvent(event)
+        QTimer.singleShot(0, self._render_apps)
 
     def _show_home(self) -> None:
         self.search_entry.clear()
