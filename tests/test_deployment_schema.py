@@ -85,7 +85,7 @@ class DeploymentSchemaTests(unittest.TestCase):
             Draft202012Validator.check_schema(layout_schema)
             Draft202012Validator.check_schema(schema)
             registry = Registry().with_resource(
-                "image-layout.v1.schema.json",
+                "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/image-layout.v1.schema.json",
                 Resource.from_contents(layout_schema),
             )
             Draft202012Validator(schema, registry=registry).validate(plan)
