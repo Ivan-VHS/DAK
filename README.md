@@ -18,11 +18,11 @@ Then open `http://localhost:8000/mora/`.
 | --- | --- | --- |
 | [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | Processor diagnostics and metrics | Win32 |
 | [Reaper](https://github.com/Ivan-VHS/Reaper) | Programming language and Studio IDE | Tk |
-| [OPlague](https://github.com/Ivan-VHS/OPlague) | Device and driver inspection | Tk |
+| [OPlague](https://github.com/Ivan-VHS/OPlague) | Device/driver inspection and reversible gaming profiles | Tk |
 | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | Procedural audio workstation | Qt |
 | DuckOS | OS and desktop shell | Mora web shell prototype |
 
-Mora shows the real desktop captures published by the native projects and links to their repositories/releases. It does **not** claim to execute native binaries in a browser. A permissioned OS launcher/IPC bridge is a separate integration layer and is not part of this web shell.
+Mora shows the real desktop captures published by the native projects and links to their repositories/releases. The **Mora Boost** workspace links to OPlague's gaming lab for hardware snapshots, reversible Windows power-plan sessions, measured frametime reports and validated local game profiles. Its capability schema is documented in [Gaming Performance Integration](docs/GAMING_PERFORMANCE_INTEGRATION.md); direct host control remains a native-service responsibility, not a browser permission. It does **not** claim to execute native binaries in a browser. A permissioned OS launcher/IPC bridge is a separate integration layer and is not part of this web shell.
 
 ## Existing OS specification
 
