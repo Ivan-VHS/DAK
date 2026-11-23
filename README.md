@@ -10,7 +10,7 @@ The default application suite contains seven first-party apps: Cockos, Kavun, Ka
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora retains the established indigo-to-rose sunset, layered hills, warm translucent panels and compact dock. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent dark/light theme and a scoped offline cache. It brings the seven application identities and six system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora retains the established indigo-to-rose sunset, layered hills, warm translucent panels and compact dock. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent dark/light theme and a scoped offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
 The system tools are:
 
@@ -65,6 +65,10 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
 
 No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
+
+## Katyuhen ecosystem
+
+**Katyuhen** unifies the project directory and cross-repository contracts for DuckOS/Mora, Reaper, OPlague, Pytyliki and VentuSample. Open the [Katyuhen hub in Mora](mora/index.html) or read the [ecosystem architecture](docs/KATYUHEN_ECOSYSTEM.md) and [versioned registry](ecosystem/katyuhen.v1.json).
 
 ## Documentation
 

@@ -394,3 +394,17 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
 :root[data-theme="light"] .system-notice {
   color:var(--mora-secondary);
 }
+
+
+/* Katyuhen project directory */
+.katyuhen-project-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:16px 0; }
+.katyuhen-project { min-width:0; display:flex; flex-direction:column; gap:7px; padding:14px; border:1px solid var(--mora-border); border-radius:14px; background:color-mix(in srgb,var(--mora-surface) 72%,transparent); }
+.katyuhen-project-tag { color:var(--mora-muted); font-size:8px; font-weight:700; letter-spacing:.12em; }
+.katyuhen-project strong { color:var(--mora-text); font-size:13px; }
+.katyuhen-project > span:not(.katyuhen-project-tag) { min-height:34px; color:var(--mora-secondary); font-size:10px; line-height:1.5; }
+.katyuhen-project a, .katyuhen-project-grid + .system-notice + .window-copy a { color:var(--mora-brand); font-size:10px; font-weight:650; text-decoration:none; }
+.katyuhen-project a:hover, .katyuhen-project-grid + .system-notice + .window-copy a:hover { color:var(--mora-brand-hover); text-decoration:underline; }
+@media (max-width: 620px) {
+  .katyuhen-project-grid { grid-template-columns:1fr; }
+  .katyuhen-project > span:not(.katyuhen-project-tag) { min-height:0; }
+}

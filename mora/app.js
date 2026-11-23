@@ -23,7 +23,8 @@ const appDefinitions = {
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#efad9a", glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#aebcf0", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#e9a4cd", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" }
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#d7c2f0", glyph: "⌁" },
+  katyuhen: { name: "Katyuhen", subtitle: "Экосистема проектов", color: "#c2a8ff", glyph: "✧" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -266,6 +267,19 @@ function panelMarkup(appId) {
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
+    case "katyuhen":
+      return '<p class="window-kicker">KATYUHEN · PROJECT FEDERATION</p>' +
+        '<h2 class="window-heading">Все проекты в одном пространстве</h2>' +
+        '<p class="window-copy">Katyuhen связывает самостоятельные инструменты общим каталогом, визуальными правилами Mora и проверяемыми контрактами. Каждый продукт сохраняет собственный runtime и ответственность за свои данные.</p>' +
+        '<div class="katyuhen-project-grid">' +
+        '<article class="katyuhen-project"><span class="katyuhen-project-tag">WORKSPACE · OS</span><strong>DuckOS / Mora</strong><span>Рабочий стол, системная среда и точка входа.</span><a href="https://github.com/Ivan-VHS/DuckOS" target="_blank" rel="noopener noreferrer">Открыть репозиторий ↗</a></article>' +
+        '<article class="katyuhen-project"><span class="katyuhen-project-tag">LANGUAGE · IDE</span><strong>Reaper</strong><span>Язык, runtime, Studio, LSP/DAP и native ABI.</span><a href="https://github.com/Ivan-VHS/Reaper" target="_blank" rel="noopener noreferrer">Открыть репозиторий ↗</a></article>' +
+        '<article class="katyuhen-project"><span class="katyuhen-project-tag">DEVICES · EVIDENCE</span><strong>OPlague</strong><span>Read-only инвентаризация устройств и анализ пакетов драйверов.</span><a href="https://github.com/Ivan-VHS/OPlague" target="_blank" rel="noopener noreferrer">Открыть репозиторий ↗</a></article>' +
+        '<article class="katyuhen-project"><span class="katyuhen-project-tag">CPU · SYSTEMS</span><strong>Pytyliki</strong><span>Процессорные данные, bounded measurements и анализ.</span><a href="https://github.com/Ivan-VHS/Pytyliki" target="_blank" rel="noopener noreferrer">Открыть репозиторий ↗</a></article>' +
+        '<article class="katyuhen-project"><span class="katyuhen-project-tag">AUDIO · DSP</span><strong>VentuSample</strong><span>Генерация сэмплов, офлайн DSP и экспорт паков.</span><a href="https://github.com/Ivan-VHS/VentuSample" target="_blank" rel="noopener noreferrer">Открыть репозиторий ↗</a></article>' +
+        '</div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>Каталог и контракты локальны. Внешние программы не запускаются, библиотеки не загружаются автоматически, системные права не выдаются.</span></div>' +
+        '<p class="window-copy"><a href="../ecosystem/katyuhen.v1.json" target="_blank" rel="noopener noreferrer">Открыть машинный реестр Katyuhen ↗</a> · <a href="../docs/KATYUHEN_ECOSYSTEM.md" target="_blank" rel="noopener noreferrer">Архитектура и правила ↗</a></p>';
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }

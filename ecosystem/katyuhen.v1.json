@@ -1,0 +1,139 @@
+{
+  "$schema": "../schemas/katyuhen.ecosystem.v1.schema.json",
+  "schema": "katyuhen.ecosystem.v1",
+  "version": 1,
+  "name": "Katyuhen",
+  "maintainer": "Ivan-VHS",
+  "description": "A federated workspace for independent Ivan-VHS products. Shared discovery, versioned contracts and consistent design; no monolithic runtime or implicit privilege sharing.",
+  "source_of_truth": "ecosystem/katyuhen.v1.json",
+  "workspace": {
+    "host_project": "duckos",
+    "desktop": "mora",
+    "hub_panel": "katyuhen",
+    "theme_contract": "mora.theme.v1"
+  },
+  "projects": [
+    {
+      "id": "duckos",
+      "name": "DuckOS / Mora",
+      "repository_url": "https://github.com/Ivan-VHS/DuckOS",
+      "manifest_url": "https://raw.githubusercontent.com/Ivan-VHS/DuckOS/main/integrations/katyuhen/manifest.json",
+      "role": "OS and desktop workspace",
+      "maturity": "partial",
+      "description": "Единая рабочая среда Mora и каталог всего семейства проектов; native OS services остаются отдельными уровнями DuckOS.",
+      "scope": "Current Mora hub and browser desktop are implemented; native kernel, process broker, compositor and driver services are not represented as shipped."
+    },
+    {
+      "id": "reaper",
+      "name": "Reaper",
+      "repository_url": "https://github.com/Ivan-VHS/Reaper",
+      "manifest_url": "https://raw.githubusercontent.com/Ivan-VHS/Reaper/main/integrations/katyuhen/manifest.json",
+      "role": "Language and developer tooling",
+      "maturity": "partial",
+      "description": "Язык Reaper, runtime, Studio IDE, LSP/DAP и версионируемый native ABI.",
+      "scope": "Python reference runtime and Studio tools are implemented; native C17 parity remains partial."
+    },
+    {
+      "id": "oplague",
+      "name": "OPlague",
+      "repository_url": "https://github.com/Ivan-VHS/OPlague",
+      "manifest_url": "https://raw.githubusercontent.com/Ivan-VHS/OPlague/main/integrations/katyuhen/manifest.json",
+      "role": "Device and driver inspection",
+      "maturity": "implemented",
+      "description": "Read-only обнаружение устройств Windows, проверка пакетов драйверов и доказательные отчёты.",
+      "scope": "Read-only workbench; no driver installation, payload execution or device mutation."
+    },
+    {
+      "id": "pytyliki",
+      "name": "Pytyliki",
+      "repository_url": "https://github.com/Ivan-VHS/Pytyliki",
+      "manifest_url": "https://raw.githubusercontent.com/Ivan-VHS/Pytyliki/main/integrations/katyuhen/manifest.json",
+      "role": "Processor systems workstation",
+      "maturity": "implemented",
+      "description": "C11 workstation для CPU, памяти, профилей, статистики и bounded hardware analysis.",
+      "scope": "Bounded local inspection and analysis; no host frequency, voltage or scheduler changes."
+    },
+    {
+      "id": "ventusample",
+      "name": "VentuSample",
+      "repository_url": "https://github.com/Ivan-VHS/VentuSample",
+      "manifest_url": "https://raw.githubusercontent.com/Ivan-VHS/VentuSample/main/integrations/katyuhen/manifest.json",
+      "role": "Audio workstation",
+      "maturity": "implemented",
+      "description": "C++20/Qt workstation для генерации сэмплов и офлайн-обработки аудио.",
+      "scope": "Deterministic offline rendering and DSP; optional bridges remain explicit and are not part of the real-time DSP path."
+    }
+  ],
+  "integrations": [
+    {
+      "id": "oplague-to-reaper-device-snapshot",
+      "source": "oplague",
+      "target": "reaper",
+      "contract": "device-snapshot.v1",
+      "transport": "versioned-json-file",
+      "status": "specified",
+      "evidence_url": "https://github.com/Ivan-VHS/Reaper/blob/main/docs/FEDERATED_INTEGRATION.md",
+      "description": "Explicit read-only device snapshot exchange; consumers validate schema, version, limits and provenance."
+    },
+    {
+      "id": "pytyliki-to-reaper-cabi",
+      "source": "pytyliki",
+      "target": "reaper",
+      "contract": "Pytyliki C ABI v1",
+      "transport": "explicit-trusted-c-abi",
+      "status": "specified",
+      "evidence_url": "https://github.com/Ivan-VHS/Reaper/blob/main/docs/FEDERATED_INTEGRATION.md",
+      "description": "Optional native interop. Consumer selects the exact trusted library; no implicit discovery."
+    },
+    {
+      "id": "ventusample-to-reaper-pack",
+      "source": "ventusample",
+      "target": "reaper",
+      "contract": "ventusample.pack.v1",
+      "transport": "versioned-json-file",
+      "status": "implemented",
+      "evidence_url": "https://github.com/Ivan-VHS/VentuSample/blob/main/docs/REAPER_PACK_AUDIT.md",
+      "description": "Reaper audits supported pack-v1 metadata only; it does not open WAV files or score audio quality."
+    },
+    {
+      "id": "reaper-to-ventusample-runtime",
+      "source": "reaper",
+      "target": "ventusample",
+      "contract": "Reaper C ABI v1",
+      "transport": "explicit-trusted-c-abi",
+      "status": "partial",
+      "evidence_url": "https://github.com/Ivan-VHS/VentuSample/blob/main/docs/REAPER_RUNTIME_INTEGRATION.md",
+      "description": "Optional build-time expression runtime from an explicitly selected Reaper checkout; not used in the real-time DSP path."
+    },
+    {
+      "id": "pytyliki-to-ventusample-cross-check",
+      "source": "pytyliki",
+      "target": "ventusample",
+      "contract": "Pytyliki C ABI v1",
+      "transport": "explicit-trusted-c-abi",
+      "status": "partial",
+      "evidence_url": "https://github.com/Ivan-VHS/VentuSample/blob/main/docs/REAPER_PACK_AUDIT.md",
+      "description": "Optional explicit-library cross-check. VentuSample remains standalone when disabled."
+    },
+    {
+      "id": "pytyliki-to-oplague-analysis",
+      "source": "pytyliki",
+      "target": "oplague",
+      "contract": "Pytyliki C ABI v1",
+      "transport": "explicit-trusted-c-abi",
+      "status": "specified",
+      "evidence_url": "https://github.com/Ivan-VHS/OPlague/blob/main/docs/FEDERATED_INTEGRATION.md",
+      "description": "Optional hardware-analysis interoperability; does not add driver write or install operations."
+    }
+  ],
+  "policies": [
+    "Each project remains independently buildable and useful without its peers.",
+    "Mora is the shared desktop identity and discovery surface; it does not imply native process launching or OS privilege.",
+    "Mora semantic theme tokens are the canonical visual contract. Native applications may adapt toolkit values locally and must not fetch theme assets at runtime.",
+    "JSON exchanges are versioned, size-bounded, validated and provenance-aware. Reject unknown major versions and malformed inputs.",
+    "Native libraries are loaded only from an explicit trusted path after ABI and platform checks. Never search PATH or load a manifest-supplied command.",
+    "Driver inspection and device mutation are separate. Katyuhen federation does not grant permission to install, load or alter drivers.",
+    "Automation must be typed, previewable, auditable and explicitly approved before any consequential action.",
+    "Project capabilities and integration maturity must be backed by source, tests and build evidence; a manifest is not proof of runtime availability."
+  ]
+}

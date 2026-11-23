@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Ivan-VHS/DuckOS/main/schemas/katyuhen.project.v1.schema.json",
+  "title": "Katyuhen project declaration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "id",
+    "name",
+    "role",
+    "repository",
+    "entrypoints",
+    "interfaces",
+    "capabilities",
+    "limits",
+    "security"
+  ],
+  "properties": {
+    "schema": {
+      "const": "katyuhen.project.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://github\\.com/Ivan-VHS/"
+    },
+    "entrypoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "path",
+          "kind",
+          "maturity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "not": {
+              "pattern": "(^/|(^|/)\\.\\.(/|$))"
+            }
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maturity": {
+            "enum": [
+              "implemented",
+              "partial",
+              "specified",
+              "planned"
+            ]
+          }
+        }
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "direction",
+          "version",
+          "transport",
+          "maturity",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$"
+          },
+          "direction": {
+            "enum": [
+              "provides",
+              "consumes"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "transport": {
+            "enum": [
+              "local-json",
+              "versioned-json-file",
+              "explicit-trusted-c-abi"
+            ]
+          },
+          "maturity": {
+            "enum": [
+              "implemented",
+              "partial",
+              "specified",
+              "planned"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$",
+        "maxLength": 80
+      }
+    },
+    "limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "network_policy",
+        "native_library_policy",
+        "driver_mutation_policy",
+        "process_execution_policy"
+      ],
+      "properties": {
+        "network_policy": {
+          "enum": [
+            "not_required",
+            "offline_by_default",
+            "optional"
+          ]
+        },
+        "native_library_policy": {
+          "enum": [
+            "not_supported",
+            "explicit_path_only"
+          ]
+        },
+        "driver_mutation_policy": {
+          "enum": [
+            "not_supported",
+            "operator_managed_external"
+          ]
+        },
+        "process_execution_policy": {
+          "enum": [
+            "not_supported",
+            "local_runtime",
+            "bounded_local_tools"
+          ]
+        }
+      }
+    }
+  }
+}
