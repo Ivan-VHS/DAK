@@ -10,34 +10,36 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
+const DUCK_ACCENT = "#FFD400";
+
 const appDefinitions = {
-  cockos: { name: "Cockos", subtitle: "Звук и запись", color: "#BDA27D", glyph: "∿" },
-  kavun: { name: "Kavun", subtitle: "Фотографии", color: "#AF806B", glyph: "◒" },
-  kabon: { name: "Ka-bon", subtitle: "Финансы", color: "#D58B3D", glyph: "₴" },
-  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: "#A78A8A", glyph: "ϟ" },
-  po: { name: "Po", subtitle: "Компас", color: "#AAA18A", glyph: "⌖" },
-  illidia: { name: "Illidia", subtitle: "Игры", color: "#82916F", glyph: "⌘" },
-  unify: { name: "Unify", subtitle: "Устройства", color: "#7C9387", glyph: "∞" },
-  sestem: { name: "Sestem", subtitle: "Статус системы", color: "#D2AA65", glyph: "♟" },
-  setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: "#B9C6A5", glyph: "✳" },
-  orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: "#C5A4A0", glyph: "▦" },
-  abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: "#C5B58C", glyph: "▤" },
-  olaab: { name: "Olaab", subtitle: "Медиатека", color: "#9EB7B2", glyph: "◈" },
-  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: "#D4A26F", glyph: "♫" },
-  "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: "#A6B6A0", glyph: "◇" },
-  "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: "#C49BAE", glyph: "♡" },
-  poi: { name: "Poi", subtitle: "Быстрые заметки", color: "#B7B2D2", glyph: "⌖" },
-  "poi-2": { name: "Poi-2", subtitle: "База знаний", color: "#A5B5C8", glyph: "▧" },
-  "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: "#A9B6A0", glyph: "➤" },
-  gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: "#BBA77D", glyph: "▣" },
-  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: "#A7AAB7", glyph: "E" },
-  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#C19A6A", glyph: "✦" },
-  security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
-  updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
-  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
-  workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
+  cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
+  kavun: { name: "Kavun", subtitle: "Фотографии", color: DUCK_ACCENT, glyph: "◒" },
+  kabon: { name: "Ka-bon", subtitle: "Финансы", color: DUCK_ACCENT, glyph: "₴" },
+  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: DUCK_ACCENT, glyph: "ϟ" },
+  po: { name: "Po", subtitle: "Компас", color: DUCK_ACCENT, glyph: "⌖" },
+  illidia: { name: "Illidia", subtitle: "Игры", color: DUCK_ACCENT, glyph: "⌘" },
+  unify: { name: "Unify", subtitle: "Устройства", color: DUCK_ACCENT, glyph: "∞" },
+  sestem: { name: "Sestem", subtitle: "Статус системы", color: DUCK_ACCENT, glyph: "♟" },
+  setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: DUCK_ACCENT, glyph: "✳" },
+  orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: DUCK_ACCENT, glyph: "▦" },
+  abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: DUCK_ACCENT, glyph: "▤" },
+  olaab: { name: "Olaab", subtitle: "Медиатека", color: DUCK_ACCENT, glyph: "◈" },
+  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: DUCK_ACCENT, glyph: "♫" },
+  "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: DUCK_ACCENT, glyph: "◇" },
+  "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: DUCK_ACCENT, glyph: "♡" },
+  poi: { name: "Poi", subtitle: "Быстрые заметки", color: DUCK_ACCENT, glyph: "⌖" },
+  "poi-2": { name: "Poi-2", subtitle: "База знаний", color: DUCK_ACCENT, glyph: "▧" },
+  "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: DUCK_ACCENT, glyph: "➤" },
+  gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: DUCK_ACCENT, glyph: "▣" },
+  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: DUCK_ACCENT, glyph: "E" },
+  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: DUCK_ACCENT, glyph: "✦" },
+  security: { name: "Sentinel", subtitle: "Права и доверие", color: DUCK_ACCENT, glyph: "◇" },
+  updates: { name: "Restore", subtitle: "Обновления и откат", color: DUCK_ACCENT, glyph: "↶" },
+  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: DUCK_ACCENT, glyph: "⇄" },
+  workspace: { name: "Control", subtitle: "Среда и питание", color: DUCK_ACCENT, glyph: "⌘" },
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -52,19 +54,10 @@ let pendingIntentPlan = null;
 
 function applyPreferences() {
   document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
-  document.documentElement.dataset.theme = preferences.appearance.theme;
+  document.documentElement.dataset.theme = "duck";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
 
-  const themeButton = document.querySelector('[data-action="toggle-theme"]');
-  if (themeButton) {
-    const currentTheme = preferences.appearance.theme;
-    const labels = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
-    themeButton.textContent = currentTheme === "amber" ? "A" : currentTheme === "dark" ? "◐" : "☼";
-    themeButton.setAttribute("aria-pressed", String(currentTheme !== "amber"));
-    themeButton.setAttribute("aria-label", "Текущая тема: " + labels[currentTheme] + ". Нажмите, чтобы переключить.");
-    themeButton.title = "Тема: " + labels[currentTheme];
-  }
 }
 
 function persistPreferences() {
@@ -572,91 +565,6 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 }
 
 document.addEventListener("click", (event) => {
-  const themeToggle = event.target.closest('[data-action="toggle-theme"]');
-  if (themeToggle) {
-    const nextTheme = { amber: "dark", dark: "light", light: "amber" };
-    preferences.appearance.theme = nextTheme[preferences.appearance.theme] || "amber";
-    persistPreferences();
-    const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
-    showToast("Тема: " + themeNames[preferences.appearance.theme]);
-    return;
-  }
-
-  const setupTheme = event.target.closest("[data-setup-theme]");
-  if (setupTheme) {
-    const theme = setupTheme.dataset.setupTheme;
-    if (!["amber", "dark", "light"].includes(theme)) return;
-    preferences.appearance.theme = theme;
-    persistPreferences();
-    applyPreferences();
-    const owner = setupTheme.closest(".app-window");
-    if (owner) owner.querySelectorAll("[data-setup-theme]").forEach((button) => {
-      const active = button.dataset.setupTheme === theme;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
-    showToast("Тема Mora обновлена");
-    return;
-  }
-
-  const setupComplete = event.target.closest('[data-action="setup-complete"]');
-  if (setupComplete) {
-    const status = setupComplete.closest(".app-window").querySelector("[data-setup-status]");
-    try {
-      localStorage.setItem("duckos.mora.setupup.v1", new Date().toISOString());
-      if (status) status.textContent = "Настройка Mora завершена и сохранена в профиле браузера.";
-      showToast("Первичная настройка Mora завершена");
-    } catch {
-      if (status) status.textContent = "Не удалось сохранить состояние настройки.";
-    }
-    return;
-  }
-
-  const extensionRemove = event.target.closest("[data-extension-remove]");
-  if (extensionRemove) {
-    const appId = extensionRemove.dataset.extensionApp;
-    const index = Number(extensionRemove.dataset.extensionRemove);
-    const entries = loadExtensionEntries(appId);
-    if (!EXTENSION_APP_IDS.has(appId) || !Number.isInteger(index) || index < 0 || index >= entries.length) return;
-    entries.splice(index, 1);
-    const owner = extensionRemove.closest(".app-window");
-    if (!saveExtensionEntries(appId, entries)) {
-      const status = owner && owner.querySelector("[data-extension-status]");
-      if (status) status.textContent = "Не удалось обновить локальный список.";
-      return;
-    }
-    if (owner) {
-      renderExtensionEntries(owner);
-      const status = owner.querySelector("[data-extension-status]");
-      if (status) status.textContent = "Запись удалена из локального списка.";
-    }
-    return;
-  }
-
-  const beatSave = event.target.closest('[data-action="save-beat-profile"]');
-  if (beatSave) {
-    const owner = beatSave.closest(".app-window");
-    const bpm = Number(owner.querySelector('[data-beat-range="bpm"]').value);
-    const swing = Number(owner.querySelector('[data-beat-range="swing"]').value);
-    try {
-      localStorage.setItem("duckos.mora.concrete-thump.v1", JSON.stringify({ bpm, swing, savedAt: new Date().toISOString() }));
-      owner.querySelector("[data-beat-status]").textContent = "Профиль " + bpm + " BPM / " + swing + "% сохранён локально.";
-      showToast("Ритмический профиль сохранён");
-    } catch {
-      owner.querySelector("[data-beat-status]").textContent = "Не удалось сохранить профиль браузера.";
-    }
-    return;
-  }
-
-  const shareReview = event.target.closest('[data-action="review-share"]');
-  if (shareReview) {
-    const owner = shareReview.closest(".app-window");
-    const total = owner.querySelectorAll("[data-share-check]").length;
-    const checked = owner.querySelectorAll("[data-share-check]:checked").length;
-    owner.querySelector("[data-share-status]").textContent =
-      checked + " из " + total + " пунктов отмечено. Проверьте получателя и содержимое передачи самостоятельно.";
-    return;
-  }
 
   const opener = event.target.closest("[data-app]");
   if (opener) {
