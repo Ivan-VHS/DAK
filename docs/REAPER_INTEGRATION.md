@@ -7,7 +7,7 @@
 
 ## Architecture
 
-DuckOS treats Reaper as its canonical systems-language and policy implementation while keeping the two repositories independently versioned. The Reaper source remains the pinned Git submodule at `projects/reaper`.
+DuckOS treats Reaper as its canonical systems-language and policy implementation while keeping the two repositories independently versioned. The Reaper source remains the pinned Git submodule at `projects/reaper`; the federation registry records the reviewed integration commit and the native-workbench status.
 
 The integration is intentionally a process boundary:
 
