@@ -289,6 +289,14 @@ def launch_app(app_id: str) -> dict[str, Any]:
     }
 
 
+def resolve_desktop_page(path: str) -> Path | None:
+    if path in {"/", "/index.html"}:
+        return ROOT / "prototype" / "mora-home.html"
+    if path in {"/projects", "/workspace"}:
+        return ROOT / "index.html"
+    return None
+
+
 class MoraHandler(BaseHTTPRequestHandler):
     server_version = "MoraLocal/1.0"
 
@@ -347,11 +355,8 @@ class MoraHandler(BaseHTTPRequestHandler):
         if path == "/api/apps":
             self._send(200, describe_apps())
             return
-        if path in {"/", "/index.html"}:
-            page_path = ROOT / "prototype" / "mora-home.html"
-        elif path in {"/projects", "/workspace"}:
-            page_path = ROOT / "index.html"
-        else:
+        page_path = resolve_desktop_page(path)
+        if page_path is None:
             self._send(404, {"error": "Страница не найдена."})
             return
         try:
