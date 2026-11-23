@@ -159,6 +159,8 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
 
     defaults = default_profile()
     for section in defaults:
+        if section == "locale":
+            continue
         if not isinstance(profile.get(section), dict):
             errors.append({"field": section, "message": "Раздел отсутствует или имеет неверный тип"})
     if errors:
