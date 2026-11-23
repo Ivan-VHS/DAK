@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "shell": {
+    "id": "ivan-vhs.duckos.mora",
+    "name": "Mora",
+    "data_policy": "fictional_demo_data"
+  },
+  "built_in_apps": [
+    { "id": "cockos", "name": "Cockos", "category": "audio", "panel": "mora/app.js#cockos" },
+    { "id": "kavun", "name": "Kavun", "category": "photos", "panel": "mora/app.js#kavun" },
+    { "id": "kabon", "name": "Ka-bon", "category": "finance", "panel": "mora/app.js#kabon" },
+    { "id": "gloverty", "name": "Gloverty", "category": "automation", "panel": "mora/app.js#gloverty" },
+    { "id": "po", "name": "Po", "category": "compass", "panel": "mora/app.js#po" },
+    { "id": "illidia", "name": "Illidia", "category": "games", "panel": "mora/app.js#illidia" },
+    { "id": "unify", "name": "Unify", "category": "devices", "panel": "mora/app.js#unify" }
+  ],
+  "widgets": [
+    { "id": "kabon.expenses_today", "app_id": "kabon", "kind": "expenses_summary" },
+    { "id": "unify.device_status", "app_id": "unify", "kind": "device_status" }
+  ],
+  "integration": {
+    "manifest_schema": "mora/app-manifest.schema.json",
+    "external_launch": "specified_not_enabled",
+    "execution_rule": "A future native launcher must resolve trusted installed paths and require explicit operator approval. Never execute manifest commands through a shell."
+  }
+}

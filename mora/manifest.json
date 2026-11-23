@@ -1,0 +1,27 @@
+{
+  "$schema": "https://github.com/Ivan-VHS/DuckOS/blob/main/mora/app-manifest.schema.json",
+  "schema_version": "1.0.0",
+  "application_id": "ivan-vhs.duckos.mora",
+  "project": "Ivan-VHS/DuckOS",
+  "display_name": "Mora",
+  "description": "DuckOS desktop home shell with seven built-in panels, widgets, dock and movable windows.",
+  "launch": {
+    "kind": "static_entrypoint",
+    "platforms": ["windows", "linux", "macos"],
+    "entrypoint": "mora/index.html",
+    "runtime": "browser",
+    "arguments": [],
+    "working_directory": "."
+  },
+  "policy": {
+    "integration_policy": "required",
+    "confirmation_required": true,
+    "shell_interpolation": false,
+    "trust_source": "bundled_os_component"
+  },
+  "maturity": {
+    "maturity_status": "implemented",
+    "verification_status": "not_run"
+  },
+  "capabilities": ["desktop-home", "app-panels", "movable-windows", "dashboard-widgets", "glass-dock"]
+}
