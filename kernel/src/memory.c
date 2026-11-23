@@ -205,7 +205,7 @@ static int split_large_page(uint64_t *directory_entry) {
     if (table == NULL) return 0;
     uint64_t base = old & UINT64_C(0x000fffffffe00000);
     uint64_t flags = old & (UINT64_C(0xfff) | PAGE_NX);
-    flags &= ~PAGE_LARGE;
+    flags &= ~(PAGE_LARGE | PAGE_USER);
     for (uint64_t i = 0u; i < 512u; ++i)
         table[i] = (base + i * DUCKOS_PAGE_SIZE) | flags;
     *directory_entry = ((uint64_t)(uintptr_t)table & PAGE_ADDRESS_MASK) |
