@@ -187,6 +187,13 @@
       "category": "gaming",
       "panel": "mora/app.js#mora-boost",
       "maturity": "external_native_workbench"
+    },
+    {
+      "id": "mora-commons",
+      "name": "Mora Commons",
+      "category": "application_catalogue",
+      "panel": "mora/app.js#mora-commons",
+      "maturity": "implemented_local_catalog"
     }
   ],
   "widgets": [
