@@ -10,7 +10,7 @@ The default application suite contains seven first-party apps: Cockos, Kavun, Ka
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and six system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
 The system tools are:
 
@@ -20,6 +20,7 @@ The system tools are:
 - **Bridge:** local PE/ELF header inspection. It does not load or launch executables.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
+- **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
 
