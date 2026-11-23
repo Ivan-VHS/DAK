@@ -1,0 +1,51 @@
+#!/bin/sh
+set -eu
+
+COMPOSITOR=/usr/bin/duckos-compositor
+MORA_ROOT=/usr/share/duckos/mora
+MORA_URL=http://127.0.0.1:8760
+
+if [ -z "${DISPLAY:-}" ]; then
+    echo "DuckOS Mora requires an Xorg display. Select the DuckOS session from an X11 display manager." >&2
+    exit 1
+fi
+if [ ! -x "$COMPOSITOR" ] || [ ! -d "$MORA_ROOT" ]; then
+    echo "DuckOS desktop files are missing. Reinstall the DuckOS desktop package." >&2
+    exit 1
+fi
+
+"$COMPOSITOR" --check
+"$COMPOSITOR" &
+compositor_pid=$!
+python3 -m http.server 8760 --bind 127.0.0.1 --directory "$MORA_ROOT" &
+web_pid=$!
+
+cleanup() {
+    kill "$web_pid" "$compositor_pid" 2>/dev/null || true
+    wait "$web_pid" "$compositor_pid" 2>/dev/null || true
+}
+trap cleanup EXIT HUP INT TERM
+
+python3 - "$MORA_URL" <<'PY'
+import sys
+import time
+import urllib.error
+import urllib.request
+
+url = sys.argv[1]
+for _ in range(40):
+    try:
+        with urllib.request.urlopen(url, timeout=0.5) as response:
+            if response.status == 200:
+                break
+    except (OSError, urllib.error.URLError):
+        time.sleep(0.25)
+else:
+    raise SystemExit("Mora local web server did not become ready")
+PY
+
+if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$MORA_URL" >/dev/null 2>&1 &
+fi
+
+wait "$compositor_pid"

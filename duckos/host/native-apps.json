@@ -1,0 +1,15 @@
+{
+  "schema": "duckos.native-applications.v1",
+  "applications": {
+    "mora-compositor": {
+      "name": "Mora X11 compositor and window manager",
+      "argv": ["/usr/bin/duckos-compositor"],
+      "capabilities": ["display.manage"]
+    },
+    "mora-web": {
+      "name": "Mora desktop web host",
+      "argv": ["/usr/bin/python3", "-m", "http.server", "8760", "--bind", "127.0.0.1", "--directory", "/usr/share/duckos/mora"],
+      "capabilities": ["desktop.start"]
+    }
+  }
+}

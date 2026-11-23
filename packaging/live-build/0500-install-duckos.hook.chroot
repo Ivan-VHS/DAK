@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+SOURCE=/usr/share/duckos/source
+BUILD=/tmp/duckos-native-build
+
+if [ ! -d "$SOURCE/duckos" ] || [ ! -d "$SOURCE/mora" ]; then
+    echo "DuckOS source overlay is incomplete" >&2
+    exit 1
+fi
+
+cmake -S "$SOURCE" -B "$BUILD" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+cmake --build "$BUILD" --parallel
+cmake --install "$BUILD"
+
+python3 -m pip install --break-system-packages --no-deps "$SOURCE"
+install -d -m 0755 /usr/share/duckos/mora /usr/share/duckos/docs /etc/duckos
+cp -a "$SOURCE/mora/." /usr/share/duckos/mora/
+cp -a "$SOURCE/docs/." /usr/share/duckos/docs/
+
+install -D -m 0755 "$SOURCE/packaging/live-build/duckos-session" /usr/bin/duckos-session
+install -D -m 0644 "$SOURCE/packaging/live-build/duckos.desktop" /usr/share/xsessions/duckos.desktop
+install -D -m 0644 "$SOURCE/systemd/duckos-hostd.service" /lib/systemd/system/duckos-hostd.service
+
+if [ -d /usr/share/duckos/Reaper ]; then
+    python3 -m pip install --break-system-packages --no-deps /usr/share/duckos/Reaper
+fi
+
+systemctl enable lightdm.service

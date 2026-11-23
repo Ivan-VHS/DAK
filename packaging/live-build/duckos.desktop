@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=DuckOS Mora
+Comment=DuckOS native X11 desktop and Mora shell
+Exec=duckos-session
+TryExec=duckos-session
+Type=Application
+DesktopNames=DuckOS

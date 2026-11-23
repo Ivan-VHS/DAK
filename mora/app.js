@@ -1,4 +1,5 @@
 import { initDesktopShell } from "./shell.js";
+import { initNativeHostBridge } from "./host-bridge.js";
 
 import {
   RECOVERY_KEY,
@@ -672,6 +673,8 @@ initDesktopShell({
   preferences,
   persistPreferences
 });
+
+initNativeHostBridge();
 
 if ("serviceWorker" in navigator &&
     (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {

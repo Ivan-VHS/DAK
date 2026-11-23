@@ -71,12 +71,44 @@
       <div class="active-app" id="active-app">Рабочий стол</div>
       <div class="system-status" aria-label="Состояние оболочки">
         <span class="status-item shell-runtime-label">WEB SHELL</span>
-        <span class="status-item shell-native-label">Native compositor: нет</span>
+        <span class="status-item shell-native-label">Mora X11 · Native Host</span>
+        <span class="status-item native-host-state" id="native-host-state" data-state="offline" aria-live="polite">Native Host: offline</span>
+        <button class="status-control native-host-connect" id="native-host-connect" type="button" aria-pressed="false">Подключить Host</button>
         <button class="status-control" data-app="workspace" aria-label="Открыть параметры системы">Система</button>
         <button class="status-control theme-control" data-action="toggle-theme" aria-label="Переключить цветовую тему" aria-pressed="false">◐</button>
         <time id="status-time">--:--</time>
       </div>
     </header>
+
+    <dialog class="native-host-dialog" id="native-host-dialog" aria-labelledby="native-host-title">
+      <div class="native-host-dialog-head">
+        <div>
+          <p class="eyebrow">DUCKOS · LOCAL PRIVILEGED SERVICE</p>
+          <h2 id="native-host-title">Native Host</h2>
+        </div>
+        <button class="window-close" type="button" data-native-host-action="disconnect" aria-label="Отключить и закрыть">×</button>
+      </div>
+      <p class="window-copy">Подключённый локальный брокер. Команды терминала ограничены диагностическим списком; произвольное выполнение команд из Mora недоступно.</p>
+      <div class="native-host-actions">
+        <button type="button" data-native-host-action="status">Состояние ОС</button>
+        <button type="button" data-native-host-action="drivers">Устройства и драйверы</button>
+        <button type="button" data-native-host-action="sessions">Процессы и сессии</button>
+        <button type="button" data-native-host-action="reaper">Reaper runtime</button>
+        <label class="native-host-terminal-label" for="native-host-command">Диагностическая команда</label>
+        <select id="native-host-command">
+          <option value="system">Система и ядро</option>
+          <option value="memory">Память</option>
+          <option value="storage">Хранилища</option>
+          <option value="processes">Процессы</option>
+          <option value="network">Сеть</option>
+          <option value="uptime">Время работы</option>
+          <option value="date">Дата и время</option>
+          <option value="home">Домашний каталог</option>
+        </select>
+        <button type="button" data-native-host-action="terminal">Выполнить проверку</button>
+      </div>
+      <pre class="native-host-output" id="native-host-output" aria-live="polite">Native Host не подключён.</pre>
+    </dialog>
 
     <div class="desktop-content">
       <aside class="time-panel">

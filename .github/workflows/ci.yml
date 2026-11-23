@@ -64,16 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build native targets when present
-        shell: bash
+      - name: Install X11 development and virtual-display dependencies
         run: |
-          set -euo pipefail
-          if [[ -f CMakeLists.txt ]]; then
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-            cmake --build build --parallel
-          elif find src include -type f -name '*.c' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cc' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cpp' -print -quit 2>/dev/null | grep -q .; then
-            echo "::error::Native source exists but no CMakeLists.txt build contract is defined."
-            exit 1
-          else
-            echo "::notice::No native C/C++ source tree or build target exists in this DuckOS repository revision; native compilation is not applicable yet."
-          fi
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libx11-dev libxcomposite-dev libxdamage-dev libxrender-dev libxfixes-dev libxext-dev xvfb
+      - name: Build native compositor
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure
+      - name: Verify X11 extension negotiation on a virtual display
+        run: xvfb-run -a ./build/duckos-compositor --check

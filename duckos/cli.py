@@ -2,7 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import secrets
+import stat
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +30,9 @@ from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .shell import host_status as shell_host_status, read_app_catalog, readiness_report
+from .host import CapabilityPolicy, NativeHostBroker
+from .host.runtime import HostError
+from .host.server import serve_native_host
 
 
 def _load(path: Path) -> Any:
@@ -170,6 +177,46 @@ def main(argv: list[str] | None = None) -> int:
     shell_verify.add_argument("--root", type=Path, help="DuckOS project root")
     shell_verify.add_argument("--catalogue", type=Path, help="alternate Mora app catalogue JSON")
 
+    host = commands.add_parser("host", help="native host broker, sessions, safe terminal, drivers and Reaper bridge")
+    host_commands = host.add_subparsers(dest="host_command", required=True)
+    host_commands.add_parser("status", help="show native host and Reaper runtime availability")
+
+    host_serve = host_commands.add_parser("serve", help="serve native host requests over a Unix socket")
+    host_serve.add_argument("--socket", type=Path, default=Path("/run/duckos/host.sock"))
+    host_serve.add_argument("--policy", type=Path, default=Path("/etc/duckos/host-policy.json"))
+    host_serve.add_argument("--http-host", choices=("127.0.0.1", "::1"))
+    host_serve.add_argument("--http-port", type=int, default=8765)
+    host_serve.add_argument("--token-file", type=Path)
+    host_serve.add_argument("--origin", action="append", default=[])
+    host_serve.add_argument("--socket-mode", type=lambda value: int(value, 8), default=0o660)
+    host_serve.add_argument("--socket-gid", type=int)
+
+    host_policy = host_commands.add_parser("policy-init", help="create an initial UID capability policy")
+    host_policy.add_argument("--path", type=Path, default=Path("host-policy.json"))
+    host_policy.add_argument("--uid", type=int, default=os.getuid())
+    host_policy.add_argument("--grant", action="append", default=[
+        "host.read", "session.read", "session.spawn", "session.stop",
+        "terminal.safe", "driver.inspect", "reaper.evaluate",
+    ])
+
+    host_token = host_commands.add_parser("token-create", help="create a Mora bridge token; raw token is shown once")
+    host_token.add_argument("--path", type=Path, default=Path("bridge-tokens.json"))
+    host_token.add_argument("--uid", type=int, default=os.getuid())
+
+    host_terminal = host_commands.add_parser("terminal", help="execute one fixed diagnostic command")
+    host_terminal.add_argument("command_id", choices=("system", "date", "uptime", "memory", "storage", "processes", "network", "home"))
+
+    host_driver = host_commands.add_parser("drivers", help="inspect safe Linux driver availability")
+    host_driver.add_argument("--load", nargs=2, metavar=("CATEGORY", "MODULE"))
+
+    host_reaper = host_commands.add_parser("reaper", help="inspect or evaluate an allowlisted Reaper contract")
+    host_reaper.add_argument("--contract", choices=(
+        "capability.permits", "desktop.command_policy",
+        "desktop.session_transition", "window.transition",
+    ))
+    host_reaper.add_argument("--arguments", type=Path, help="JSON object with contract arguments")
+
+
     try:
         args = parser.parse_args(argv)
         if args.command == "validate-manifest":
@@ -241,8 +288,59 @@ def main(argv: list[str] | None = None) -> int:
             result = shell_host_status()
         elif args.command == "shell" and args.shell_command == "apps":
             result = read_app_catalog()
-        elif args.command == "shell" and args.shell_command == "verify":
-            result = readiness_report(project_root=args.root, catalogue_path=args.catalogue)
+        elif args.command == "host" and args.host_command == "status":
+            broker = NativeHostBroker()
+            result = {
+                "schema": "duckos.host-status.v1",
+                "host": broker.dispatch(os.getuid(), {"id": "status", "method": "host.status"})["result"],
+                "drivers": broker.dispatch(os.getuid(), {"id": "drivers", "method": "driver.list"})["result"],
+                "reaper": broker.reaper.status(),
+            }
+        elif args.command == "host" and args.host_command == "policy-init":
+            from .host.config import write_policy
+            result = write_policy(args.path, args.uid, args.grant)
+        elif args.command == "host" and args.host_command == "token-create":
+            from .host.config import create_bridge_token
+            result = create_bridge_token(args.path, args.uid)
+        elif args.command == "host" and args.host_command == "terminal":
+            broker = NativeHostBroker()
+            result = broker.dispatch(os.getuid(), {
+                "id": "terminal", "method": "terminal.run",
+                "params": {"command_id": args.command_id},
+            })["result"]
+        elif args.command == "host" and args.host_command == "drivers":
+            broker = NativeHostBroker()
+            if args.load:
+                result = broker.dispatch(os.getuid(), {
+                    "id": "driver-load", "method": "driver.load",
+                    "params": {"category": args.load[0], "module": args.load[1]},
+                })["result"]
+            else:
+                result = broker.dispatch(os.getuid(), {"id": "driver-list", "method": "driver.list"})["result"]
+        elif args.command == "host" and args.host_command == "reaper":
+            broker = NativeHostBroker()
+            if not args.contract:
+                result = broker.reaper.status()
+            else:
+                arguments = _load(args.arguments) if args.arguments else {}
+                result = broker.dispatch(os.getuid(), {
+                    "id": "reaper", "method": "reaper.evaluate",
+                    "params": {"contract": args.contract, "arguments": arguments},
+                })["result"]
+        elif args.command == "host" and args.host_command == "serve":
+            policy = CapabilityPolicy.load(args.policy) if args.policy.exists() else CapabilityPolicy.for_current_user()
+            broker = NativeHostBroker(policy)
+            serve_native_host(
+                broker,
+                socket_path=args.socket,
+                http_host=args.http_host,
+                http_port=args.http_port,
+                token_file=args.token_file,
+                origins=set(args.origin) if args.origin else None,
+                socket_mode=args.socket_mode,
+                socket_gid=args.socket_gid,
+            )
+            return 0
         else:
             result = compatibility_status()
         _print_result(result)

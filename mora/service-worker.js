@@ -1,10 +1,11 @@
-const CACHE = "mora-shell-v5-desktop";
+const CACHE = "mora-shell-v6-native-host";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./shell.js",
+  "./host-bridge.js",
   "./core.js",
   "./apps.json",
   "./system-policy.json",

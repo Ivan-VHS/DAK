@@ -1,0 +1,32 @@
+[Unit]
+Description=DuckOS privileged native host broker
+Documentation=https://github.com/Ivan-VHS/DuckOS/blob/main/docs/NATIVE_RUNTIME.md
+After=local-fs.target
+ConditionPathExists=/etc/duckos/host-policy.json
+ConditionPathExists=/etc/duckos/bridge-tokens.json
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/duckos host serve --socket /run/duckos/host.sock --policy /etc/duckos/host-policy.json --http-host 127.0.0.1 --http-port 8765 --token-file /etc/duckos/bridge-tokens.json --origin http://127.0.0.1:8760 --origin http://localhost:8760 --socket-mode 0660
+RuntimeDirectory=duckos
+RuntimeDirectoryMode=0750
+Restart=on-failure
+RestartSec=2
+UMask=0077
+NoNewPrivileges=no
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectKernelModules=no
+PrivateDevices=no
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=CAP_SYS_MODULE CAP_SETUID CAP_SETGID
+LockPersonality=yes
+MemoryDenyWriteExecute=no
+LimitNOFILE=1024
+
+[Install]
+WantedBy=multi-user.target
