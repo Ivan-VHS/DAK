@@ -40,11 +40,18 @@ def _text(value: Any, field: str, limit: int = 512) -> str:
 
 def _resolved_path(value: str, base: Path, field: str) -> Path:
     candidate = Path(value).expanduser()
-    if not candidate.is_absolute():
+    relative = not candidate.is_absolute()
+    if relative:
         candidate = base / candidate
     if candidate.is_symlink():
         raise GameProfileError(f"{field} must not be a symbolic link")
-    return candidate.resolve(strict=True)
+    resolved = candidate.resolve(strict=True)
+    if relative:
+        try:
+            resolved.relative_to(base)
+        except ValueError as error:
+            raise GameProfileError(f"relative {field} must stay inside the profile directory") from error
+    return resolved
 
 
 def load_game_profile(path: str | Path) -> dict[str, Any]:
@@ -65,6 +72,8 @@ def load_game_profile(path: str | Path) -> dict[str, Any]:
 
 
 def validate_game_profile(payload: dict[str, Any], base_directory: str | Path = ".") -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise GameProfileError("profile root must be a JSON object")
     if payload.get("schema") != SCHEMA:
         raise GameProfileError(f"profile schema must be {SCHEMA}")
     game_id = _text(payload.get("id"), "id", 128)
@@ -278,7 +287,9 @@ def main(argv: list[str] | None = None) -> int:
         else:
             result = launch_game(profile, wine_binary=args.wine)
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        return 0 if result.get("status", "ready") in {"ready", "blocked"} else 0
+        if result.get("valid") is True or result.get("started") is True:
+            return 0
+        return 1 if result.get("status") == "blocked" else 0
     except (GameProfileError, OSError, ValueError) as error:
         print(f"duckos-game: {error}", file=sys.stderr)
         return 2
