@@ -73,6 +73,11 @@ class ExtendedTerminalTests(unittest.TestCase):
         with self.assertRaises(TerminalInputError):
             reloaded.execute('config set prompt "' + chr(27) + '[31m"', record_history=False)
 
+    def test_command_completion_follows_the_registered_command_tree(self):
+        self.assertEqual(self.terminal.completion_candidates("", "br"), ["bridge"])
+        self.assertEqual(self.terminal.completion_candidates("bridge ", "pl"), ["plan"])
+        self.assertEqual(self.terminal.completion_candidates("history ", ""), ["clear", "show"])
+
     def test_extensions_require_explicit_registration(self):
         command = CommandSpec(
             ("sample", "check"),
