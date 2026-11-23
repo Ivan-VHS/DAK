@@ -106,6 +106,7 @@ const UKRAINIAN = {
   "Показано 15 приложений":"Показано 15 застосунків",
   "Открыть приложение или настройку…":"Відкрити застосунок або параметр…",
   "Быстрый поиск":"Швидкий пошук",
+  "Закрыть окно":"Закрити вікно",
   "Русский":"Російська",
   "Українська":"Українська",
   "Язык интерфейса":"Мова інтерфейсу",
@@ -353,6 +354,7 @@ function renderTextNode(node) {
     sourceText.set(node, state);
   } else if (node.nodeValue !== state.rendered) {
     state.source = node.nodeValue;
+    state.variants = null;
   }
 
   const original = state.source;
@@ -361,7 +363,10 @@ function renderTextNode(node) {
   const leading = original.slice(0, leadingLength);
   const trailing = original.slice(trailingStart);
   const value = original.slice(leadingLength, trailingStart);
-  const next = leading + localizedValue(value, activeLocale) + trailing;
+  const localized = state.variants && typeof state.variants[activeLocale] === "string"
+    ? state.variants[activeLocale]
+    : localizedValue(value, activeLocale);
+  const next = leading + localized + trailing;
   state.rendered = next;
   if (node.nodeValue !== next) node.nodeValue = next;
 }
@@ -391,13 +396,20 @@ export function getLocale() {
   return activeLocale;
 }
 
-export function setLocalizedText(element, source) {
+export function setLocalizedText(element, source, variants = null) {
   if (!element) return;
   const original = String(source ?? "");
   element.textContent = original;
   const node = element.firstChild;
   if (node && node.nodeType === 3) {
-    sourceText.set(node, { source: original, rendered: original });
+    const localizedVariants = variants && typeof variants === "object"
+      ? { ru: String(variants.ru ?? original), uk: String(variants.uk ?? original) }
+      : null;
+    sourceText.set(node, {
+      source: original,
+      rendered: original,
+      variants: localizedVariants
+    });
     renderTextNode(node);
   }
 }
