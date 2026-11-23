@@ -66,6 +66,15 @@ class RepositoryFederationTests(unittest.TestCase):
         self.assertFalse(reaper["auto_build"])
         self.assertFalse(reaper["auto_execute"])
 
+    def test_all_specialist_projects_are_registered_for_native_launch(self):
+        launchable = {"pytyliki", "oplague", "ventusample"}
+        for project in self.manifest["repositories"]:
+            if project["id"] in launchable:
+                self.assertEqual(project["integration_status"], "native-app-launcher")
+                self.assertFalse(project["auto_build"])
+                self.assertFalse(project["auto_execute"])
+                self.assertTrue(any("launcher" in item for item in project["integration_mode"]))
+
     def test_ventusample_declares_only_an_optional_reaper_dependency(self):
         ventu = next(x for x in self.manifest["repositories"] if x["id"] == "ventusample")
         self.assertEqual(ventu["optional_dependencies"], ["reaper"])
