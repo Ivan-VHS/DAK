@@ -6,12 +6,18 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 add_library(duckos_dabi64 STATIC src/abi/dabi64.c)
-target_include_directories(duckos_dabi64 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(duckos_dabi64 PUBLIC \${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+add_library(duckos_runtime STATIC src/runtime/value.c)
+target_include_directories(duckos_runtime PUBLIC \${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(duckos_runtime PUBLIC duckos_dabi64)
 
 if(MSVC)
     target_compile_options(duckos_dabi64 PRIVATE /W4)
+    target_compile_options(duckos_runtime PRIVATE /W4)
 else()
     target_compile_options(duckos_dabi64 PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+    target_compile_options(duckos_runtime PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 endif()
 
 include(CTest)
@@ -19,4 +25,8 @@ if(BUILD_TESTING)
     add_executable(duckos-dabi64-tests tests/abi_dabi64.c)
     target_link_libraries(duckos-dabi64-tests PRIVATE duckos_dabi64)
     add_test(NAME duckos-dabi64-abi COMMAND duckos-dabi64-tests)
+
+    add_executable(duckos-runtime-tests tests/runtime_value.c)
+    target_link_libraries(duckos-runtime-tests PRIVATE duckos_runtime)
+    add_test(NAME duckos-runtime-values COMMAND duckos-runtime-tests)
 endif()

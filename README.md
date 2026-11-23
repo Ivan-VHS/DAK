@@ -1,22 +1,32 @@
 # DuckOS
 
-DuckOS is the target operating-system project for the Reaper language toolchain. Its first concrete integration artifact is the versioned DABI64 user-entry contract.
+DuckOS is being built as a standalone operating-system project with a versioned
+native calling convention for Reaper-generated programs.
 
-## Current implementation boundary
+## Current foundations
 
-- DABI64 v1 defines the x86-64 DuckOS function-entry registers, typed value layout, call frame, result object, status codes and ELF ABI-note identity.
-- src/abi/dabi64.c provides a host-buildable reference validator and typed result helpers.
-- CTest checks structure offsets, alignment, header validation, scalar argument tags and result handling.
-- The Reaper native compiler has a DABI64 LIR backend for a scalar subset: i64 locals and parameters, direct craft calls, checked arithmetic, when, loop while and :: pipe calls.
+- DABI64 v1 defines the x86-64 call-frame contract and a 16-byte tagged value.
+- The host ABI validator checks frame shape, alignment, version, argument count,
+  and the scalar \`i64\` calling path.
+- The runtime library provides owned values, strings, dynamic arrays, and
+  iterators through an injected allocator.
+- The DABI64 contract and runtime are host-buildable C17 components with tests.
 
-This is not yet a bootable operating system. There is no kernel, scheduler, syscall dispatcher, ELF loader, user-space allocator, I/O service or collection runtime in this repository. The reference validator cannot validate arbitrary virtual-memory mappings. Those capabilities must be implemented and tested separately.
+The current compiler integration is still a scalar \`i64\` subset. Runtime value
+tags do not yet mean that the Reaper native backend can generate string,
+collection, iterator, or I/O operations.
 
-## Build the ABI contract tests
+## Build and test
 
-~~~sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+\`\`\`sh
+cmake -S . -B build -DBUILD_TESTING=ON
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
-~~~
+\`\`\`
 
-See docs/abi/DABI64.md for the binary contract and src/abi/dabi64.c for its reference implementation.
+## Runtime boundary
+
+The runtime currently has no kernel heap binding, syscall dispatcher, console or
+file I/O, scheduler, ELF linker/loader, process startup, or bootable image.
+See [DABI64](docs/abi/DABI64.md) and
+[Runtime ownership](docs/runtime/OWNERSHIP.md) for the current contracts.

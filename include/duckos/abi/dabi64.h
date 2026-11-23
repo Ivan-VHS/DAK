@@ -19,7 +19,11 @@ extern "C" {
 
 typedef enum DuckValueKind {
     DUCK_VALUE_UNIT = 0u,
-    DUCK_VALUE_I64 = 1u
+    DUCK_VALUE_I64 = 1u,
+    DUCK_VALUE_BOOL = 2u,
+    DUCK_VALUE_STRING = 3u,
+    DUCK_VALUE_ARRAY = 4u,
+    DUCK_VALUE_ITERATOR = 5u
 } DuckValueKind;
 
 typedef struct DuckValue {
@@ -64,6 +68,10 @@ typedef enum DuckAbiStatus {
  * Entry registers: R10 = call frame, R11 = result; RAX = status on return.
  * The caller aligns RSP to 32 bytes before CALL. Data pointers are 16-byte
  * aligned. Captures and non-zero frame flags are reserved in v1.
+ *
+ * Value tags 0..5 are stable runtime tags. The initial machine-code entry
+ * path accepts scalar i64 arguments only; runtime tags do not by themselves
+ * extend the compiler backend's supported source-language types.
  */
 DuckAbiStatus duck_dabi64_validate_call(
     const DuckCallFrame *frame,
