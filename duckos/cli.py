@@ -145,6 +145,17 @@ def main(argv: list[str] | None = None) -> int:
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
 
+    reaper_syntax = reaper_commands.add_parser(
+        "syntax", help="discover, validate and run registered Reaper syntax frontends"
+    )
+    reaper_syntax.add_argument("--list", dest="syntax_list", action="store_true")
+    reaper_syntax.add_argument("source", nargs="?", type=Path)
+    reaper_syntax.add_argument("--syntax", default="auto")
+    reaper_syntax.add_argument("--check", action="store_true", help="validate without executing")
+    reaper_syntax.add_argument("--polyglot", action="store_true", help="process %% syntax blocks")
+    reaper_syntax.add_argument("--steps", type=int, default=1000000)
+    reaper_syntax.add_argument("--input", default="")
+
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
     )
@@ -294,6 +305,25 @@ def main(argv: list[str] | None = None) -> int:
                 return 0 if result["ok"] else 1
             elif args.reaper_command == "typecheck":
                 result = workbench.typecheck(args.source)
+                _print_result(result)
+                return 0 if result["ok"] else 1
+            elif args.reaper_command == "syntax":
+                if args.syntax_list:
+                    if args.source or args.check or args.polyglot:
+                        raise ValueError("reaper syntax --list cannot be combined with a source, --check or --polyglot")
+                    result = workbench.syntax_registry()
+                else:
+                    if args.source is None:
+                        raise ValueError("reaper syntax requires a source file unless --list is used")
+                    if args.check:
+                        result = workbench.check_syntax(
+                            args.source, syntax=args.syntax, polyglot=args.polyglot,
+                        )
+                    else:
+                        result = workbench.run_syntax(
+                            args.source, syntax=args.syntax, polyglot=args.polyglot,
+                            max_steps=args.steps, input_text=args.input,
+                        )
                 _print_result(result)
                 return 0 if result["ok"] else 1
             else:
