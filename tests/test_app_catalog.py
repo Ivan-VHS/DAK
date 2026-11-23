@@ -69,9 +69,11 @@ class ApplicationCatalogTests(unittest.TestCase):
     def test_native_shell_files_and_documentation_targets_exist(self) -> None:
         expected_paths = [
             "duckos/mora/native_ui.py",
+            "duckos/mora/qt_ui.py",
             "duckos/mora/model.py",
             "duckos/mora/data/apps.json",
             "duckos/mora/data/commons-catalog.json",
+            "duckos/mora/data/gui-toolkits.json",
             "docs/PREINSTALLED_APPLICATIONS.md",
             "docs/UNIFY_TRANSFER_FORMAT_V1.md",
             "schemas/unify.transfer.v1.schema.json",
@@ -88,8 +90,11 @@ class ApplicationCatalogTests(unittest.TestCase):
         self.assertTrue(expected.issubset(actual))
         self.assertTrue(all(item.get("runtime") == "pyside6" for item in registry["built_in_apps"]))
         native_source = (ROOT / "duckos/mora/native_ui.py").read_text(encoding="utf-8")
-        self.assertIn("QApplication", native_source)
-        self.assertIn("QMainWindow", (ROOT / "duckos/mora/qt_ui.py").read_text(encoding="utf-8"))
+        self.assertIn("PySide6", native_source)
+        qt_source = (ROOT / "duckos/mora/qt_ui.py").read_text(encoding="utf-8")
+        self.assertIn("QApplication", qt_source)
+        self.assertIn("QMainWindow", qt_source)
+        self.assertNotIn("tkinter", qt_source.casefold())
         for name in (
             "Cockos", "Kavun", "Ka-bon", "Gloverty", "Po", "Illidia", "Unify",
             "Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
