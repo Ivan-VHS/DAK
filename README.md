@@ -29,6 +29,16 @@ The system tools are:
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
+### Bilingual and deep-time platform layer
+
+Mora now boots in Russian and offers a persistent Ukrainian interface locale. The language selector updates visible shell text, accessible labels, app panels and the local command palette; the allowlisted intent parser accepts core Russian and Ukrainian command forms. The UI uses the shared Duck palette and a system-first Cyrillic font fallback stack.
+
+The Sestem panel also exposes a separate deep-time epoch of `86 452 654 432 564 423 644` years. It is represented as a decimal `BigInt` value with bounded parsing and comparison; it does not replace the computer's civil clock or Unix timestamps.
+
+Restore now wraps local Mora preference snapshots in a versioned integrity envelope, detects accidental changes with CRC32, retains generation linkage and can create bounded parent-linked state branches. CRC32 is corruption detection, not cryptographic authentication. The update panel builds a testable A/B plan with signature, compatibility and capacity gates, but does not install an OS image or switch boot slots. The service worker stages and verifies all shell assets before activation and keeps one previous cache generation.
+
+The local command palette opens with `Ctrl+K`, Control with `Ctrl+,`, and the top Mora window closes with `Ctrl+W`. These remain browser-shell shortcuts, not global desktop hotkeys.
+
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
 
 ## Visual system and offline support
