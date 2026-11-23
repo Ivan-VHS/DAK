@@ -101,6 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     mora_commands.add_parser("tui", help="open the optional native Textual terminal workspace")
     mora_commands.add_parser("gpu", help="open the separate Dear PyGui diagnostic utility")
     mora_commands.add_parser("plot", help="open the optional PyQtGraph CSV viewer")
+    mora_commands.add_parser("scene", help="open the native Qt Quick declarative scene preview")
     mora_commands.add_parser("bridges", help="report available native platform bridge capabilities")
 
     terminal = commands.add_parser(
@@ -290,6 +291,9 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "mora" and args.mora_command == "plot":
             from .mora.plotting import main as run_plot_viewer
             return run_plot_viewer()
+        elif args.command == "mora" and args.mora_command == "scene":
+            from .mora.qml_scene import main as run_qml_scene
+            return run_qml_scene()
         elif args.command == "mora" and args.mora_command == "bridges":
             from .mora.native_bridge import native_bridge_status
             result = native_bridge_status()
