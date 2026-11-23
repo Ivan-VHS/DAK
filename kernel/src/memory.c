@@ -144,36 +144,55 @@ int duckos_memory_init(uint64_t multiboot_info) {
     return memory_stats.free_pages != 0u;
 }
 
-void *duckos_alloc_page(void) {
+void *duckos_alloc_pages(uint64_t count) {
+    if (count == 0u || count > PAGE_COUNT - 256u) return NULL;
     uint64_t irq_flags = duckos_irq_save();
+    uint64_t run_start = 256u;
+    uint64_t run_length = 0u;
     for (uint64_t page = 256u; page < PAGE_COUNT; ++page) {
-        if (!page_is_used(page)) {
-            page_set_used(page);
-            memory_stats.free_pages--;
-            memory_stats.used_pages++;
-            duckos_irq_restore(irq_flags);
-            uint8_t *address = (uint8_t *)(uintptr_t)(page * DUCKOS_PAGE_SIZE);
-            for (uint32_t i = 0u; i < DUCKOS_PAGE_SIZE; ++i) address[i] = 0u;
-            return address;
+        if (page_is_used(page)) {
+            run_start = page + 1u;
+            run_length = 0u;
+            continue;
         }
+        run_length++;
+        if (run_length != count) continue;
+        for (uint64_t i = 0u; i < count; ++i) page_set_used(run_start + i);
+        memory_stats.free_pages -= count;
+        memory_stats.used_pages += count;
+        duckos_irq_restore(irq_flags);
+        uint8_t *address = (uint8_t *)(uintptr_t)(run_start * DUCKOS_PAGE_SIZE);
+        for (uint64_t i = 0u; i < count * DUCKOS_PAGE_SIZE; ++i) address[i] = 0u;
+        return address;
     }
     duckos_irq_restore(irq_flags);
     return NULL;
 }
 
-void duckos_free_page(void *address) {
+void duckos_free_pages(void *address, uint64_t count) {
     uint64_t physical = (uint64_t)(uintptr_t)address;
-    if ((physical & (DUCKOS_PAGE_SIZE - 1u)) != 0u ||
-        physical < 0x100000u || physical >= DUCKOS_MAX_PHYSICAL_ADDRESS)
+    if (count == 0u || (physical & (DUCKOS_PAGE_SIZE - 1u)) != 0u ||
+        physical < 0x100000u || physical >= DUCKOS_MAX_PHYSICAL_ADDRESS ||
+        count > (DUCKOS_MAX_PHYSICAL_ADDRESS - physical) / DUCKOS_PAGE_SIZE)
         return;
-    uint64_t page = physical / DUCKOS_PAGE_SIZE;
+    uint64_t first = physical / DUCKOS_PAGE_SIZE;
     uint64_t irq_flags = duckos_irq_save();
-    if (page_is_used(page)) {
-        page_set_free(page);
-        memory_stats.free_pages++;
-        memory_stats.used_pages--;
+    for (uint64_t i = 0u; i < count; ++i) {
+        if (page_is_used(first + i)) {
+            page_set_free(first + i);
+            memory_stats.free_pages++;
+            memory_stats.used_pages--;
+        }
     }
     duckos_irq_restore(irq_flags);
+}
+
+void *duckos_alloc_page(void) {
+    return duckos_alloc_pages(1u);
+}
+
+void duckos_free_page(void *address) {
+    duckos_free_pages(address, 1u);
 }
 
 static uint64_t *allocate_table(void) {
