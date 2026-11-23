@@ -60,7 +60,7 @@ The tests cover the browser-shell contracts and local helper logic; they do not 
 
 ## System architecture and maturity
 
-The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
+The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md). The coordinated architecture, shared interfaces, dependency gates and acceptance criteria for all eleven native-transition workstreams are defined in the [Mora-to-DuckOS native transition architecture](docs/NATIVE_TRANSITION_ARCHITECTURE.md).
 
 | Area | Current Mora shell | Native DuckOS work still required |
 |---|---|---|
