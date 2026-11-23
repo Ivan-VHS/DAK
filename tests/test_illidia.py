@@ -160,11 +160,9 @@ class IllidiaTests(unittest.TestCase):
 
             review = launcher.inspect_game(self.library, game)
             self.assertTrue(review["hash_changed"])
-            self.assertTrue(review["first_run_confirmation_required"])
+            self.assertFalse(review["first_run_confirmation_required"])
 
-            result = launcher.launch_game(
-                self.library, game.id, confirm_unverified=True, wait=True,
-            )
+            result = launcher.launch_game(self.library, game.id, wait=True)
 
         self.assertEqual(result["status"], "exited")
         self.assertTrue(result["hash_changed"])
