@@ -28,5 +28,6 @@ ctest --test-dir build --output-on-failure
 
 The runtime currently has no kernel heap binding, syscall dispatcher, console or
 file I/O, scheduler, ELF linker/loader, process startup, or bootable image.
-See [DABI64](docs/abi/DABI64.md) and
-[Runtime ownership](docs/runtime/OWNERSHIP.md) for the current contracts.
+See [DABI64](docs/abi/DABI64.md),
+[Runtime ownership](docs/runtime/OWNERSHIP.md), and the
+[implementation roadmap](docs/ROADMAP.md) for current contracts and next steps.
