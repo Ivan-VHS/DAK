@@ -3,6 +3,9 @@ const COMPONENTS = new Set([
   "corefonts", "d3dcompiler_47", "dotnet48", "dxvk",
   "vcrun2019", "vcrun2022", "vkd3d"
 ]);
+const MANAGERS = new Set([
+  "crossover", "bottles", "lutris", "heroic", "portproton", "playonlinux"
+]);
 
 export const COMPATIBILITY_ENTRIES = Object.freeze([
   { name: "Wine", group: "Запуск", state: "cli", detail: "Win32 API runtime; управляемые префиксы и нативный запуск через CLI DuckOS." },
@@ -46,6 +49,37 @@ function validPrefix(value) {
 export function buildCompatibilityCommand(action, values = {}) {
   if (action === "status") return "duckos compatibility status";
   if (action === "prefixes") return "duckos compatibility prefixes";
+
+  if (action === "open-manager") {
+    const manager = requiredText(values.manager, "Менеджер", 32);
+    if (!MANAGERS.has(manager)) throw new TypeError("Этот менеджер отсутствует в разрешённом списке.");
+    return "duckos compatibility open-manager --name " + shellQuote(manager);
+  }
+
+  if (action === "create-reactos-disk") {
+    const diskPath = requiredText(values.diskPath, "Путь к виртуальному диску");
+    if (!diskPath.toLowerCase().endsWith(".qcow2")) throw new TypeError("Файл виртуального диска должен иметь расширение .qcow2.");
+    const size = Number(values.sizeGiB);
+    if (!Number.isInteger(size) || size < 4 || size > 128) throw new TypeError("Размер диска должен быть от 4 до 128 GiB.");
+    return "duckos compatibility create-reactos-disk --path " + shellQuote(diskPath) +
+      " --size-gib " + size;
+  }
+
+  if (action === "launch-reactos") {
+    const disk = requiredText(values.reactosDisk, "Путь к диску ReactOS");
+    let command = "duckos compatibility launch-reactos --disk " + shellQuote(disk);
+    const iso = String(values.reactosIso ?? "").trim();
+    if (iso) {
+      requiredText(iso, "Путь к ISO");
+      if (!iso.toLowerCase().endsWith(".iso")) throw new TypeError("Установочный образ должен иметь расширение .iso.");
+      command += " --iso " + shellQuote(iso);
+    }
+    const memory = Number(values.reactosMemory);
+    const cpus = Number(values.reactosCpus);
+    if (!Number.isInteger(memory) || memory < 1024 || memory > 16384) throw new TypeError("Память ReactOS: от 1024 до 16384 MiB.");
+    if (!Number.isInteger(cpus) || cpus < 1 || cpus > 16) throw new TypeError("Число CPU: от 1 до 16.");
+    return command + " --memory-mib " + memory + " --cpus " + cpus;
+  }
 
   if (action === "create-prefix") {
     const name = validPrefix(values.prefix);
@@ -118,6 +152,17 @@ export function compatibilityPanelMarkup() {
     '<label class="compat-wide" data-compat-compatdata-wrap hidden>Путь Proton compatdata <input data-compat-compatdata placeholder="/путь/к/steamapps/compatdata/APPID"></label>' +
     '<label class="compat-wide">Полный путь к EXE <input data-compat-executable placeholder="/home/user/Games/setup.exe"></label>' +
     '</div><button class="action-button" data-compat-action="launch">Скопировать команду запуска</button></section>' +
+    '<section class="compat-actions"><h3>Внешние менеджеры</h3><p>Открыть установленный интерфейс; DuckOS не подменяет его собственный runtime или игровой каталог.</p>' +
+    '<label>Менеджер <select data-compat-manager><option value="crossover">CrossOver</option><option value="bottles">Bottles</option><option value="lutris">Lutris</option><option value="heroic">Heroic</option><option value="portproton">PortProton</option><option value="playonlinux">PlayOnLinux</option></select></label>' +
+    '<button class="action-button" data-compat-action="open-manager">Скопировать открытие менеджера</button></section>' +
+    '<section class="compat-actions"><h3>ReactOS в QEMU</h3><p>Создать qcow2-диск и загрузить отдельную гостевую ОС. Установочный ISO выбирается пользователем; сеть гостя отключена.</p>' +
+    '<div class="compat-form-grid"><label class="compat-wide">Путь к новому диску <input data-compat-reactos-disk value="/home/user/VM/reactos.qcow2"></label>' +
+    '<label>Размер диска, GiB <input data-compat-reactos-size type="number" min="4" max="128" value="16"></label>' +
+    '<label class="compat-wide">Путь к ISO ReactOS (необязательно) <input data-compat-reactos-iso placeholder="/home/user/Downloads/ReactOS.iso"></label>' +
+    '<label>Память, MiB <input data-compat-reactos-memory type="number" min="1024" max="16384" value="2048"></label>' +
+    '<label>CPU <input data-compat-reactos-cpus type="number" min="1" max="16" value="2"></label></div>' +
+    '<div class="compat-button-row"><button class="action-button" data-compat-action="create-reactos-disk">Создать диск</button>' +
+    '<button class="subtle-button" data-compat-action="launch-reactos">Скопировать запуск VM</button></div></section>' +
     '<section class="compat-actions"><h3>Графика и зависимости</h3><div class="compat-form-grid">' +
     '<label>Wine-префикс <input data-compat-prefix-component value="games" maxlength="48"></label>' +
     '<label>Компонент <select data-compat-component><option value="dxvk">DXVK</option><option value="vkd3d">vkd3d</option><option value="vcrun2022">Visual C++ 2022</option><option value="vcrun2019">Visual C++ 2019</option><option value="corefonts">Core Fonts</option><option value="d3dcompiler_47">D3DCompiler 47</option><option value="dotnet48">.NET 4.8</option></select></label>' +
