@@ -191,7 +191,11 @@ def build_intent_plan(raw_input: Any) -> dict[str, Any]:
         actions.append({"type": "set", "setting": "reducedMotion", "value": True})
 
     for app_id, aliases in APP_ALIASES.items():
-        if any(alias in normalized for alias in aliases):
+        if app_id == "po":
+            matched = bool(re.search(r"(?<!\\w)po(?!\\w)", normalized))
+        else:
+            matched = any(alias in normalized for alias in aliases)
+        if matched:
             actions.append({"type": "open-app", "appId": app_id})
             break
 
