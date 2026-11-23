@@ -23,7 +23,7 @@ from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .rights import (
     RightsAuditLog, build_transfer_manifest, validate_transfer_manifest,
-    verify_content_manifest, verify_entitlement,
+    verify_content_manifest, verify_entitlement, verify_licensed_content,
 )
 
 
@@ -188,6 +188,24 @@ def main(argv: list[str] | None = None) -> int:
     entitlement_check.add_argument("--audit-log", type=Path,
                                    help="append the decision to the local rights audit log")
 
+    package_check = rights_commands.add_parser(
+        "verify-package", help="verify one entitlement against its exact signed manifest and package files"
+    )
+    package_check.add_argument("entitlement", type=Path)
+    package_check.add_argument("manifest", type=Path)
+    package_check.add_argument("root", type=Path)
+    package_check.add_argument("--trusted-key", action="append", required=True,
+                               help="trusted publisher or store key as KEY_ID=/path/to/public-key.pem")
+    package_check.add_argument("--profile-id", help="current local profile identifier")
+    package_check.add_argument("--device-id", help="registered DuckOS home-device identifier")
+    package_check.add_argument("--region", help="current region code")
+    package_check.add_argument("--offline", action="store_true",
+                               help="apply the signed offline-valid-until deadline")
+    package_check.add_argument("--action", choices=(
+        "install", "launch", "download", "backup", "transfer", "stream",
+        "capture_screenshot", "capture_recording", "redistribute", "modify",
+    ), default="launch", help="required content right (defaults to launch)")
+
     content_check = rights_commands.add_parser(
         "verify-content", help="verify publisher signature and the exact package file set"
     )
@@ -311,6 +329,27 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
+        elif args.command == "rights" and args.rights_command == "verify-package":
+            result = verify_licensed_content(
+                _load(args.entitlement),
+                _load(args.manifest),
+                args.root,
+                _trusted_key_map(args.trusted_key),
+                profile_id=args.profile_id,
+                home_device_id=args.device_id,
+                region=args.region,
+                offline=args.offline,
+                required_action=args.action,
+            )
+            RightsAuditLog().append(
+                action="licensed-content.verify",
+                content_id=result.get("entitlement_decision", {}).get("content_id"),
+                entitlement_id=result.get("entitlement_decision", {}).get("entitlement_id"),
+                status=result.get("status", "blocked"),
+                reason_code=result.get("reason_code", "verification_error"),
+            )
+            _print_result(result)
+            return 0 if result.get("allowed") else 1
         elif args.command == "rights" and args.rights_command == "verify-entitlement":
             result = verify_entitlement(
                 _load(args.token),
