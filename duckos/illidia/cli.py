@@ -64,7 +64,7 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--external-id")
     add.add_argument("--arg", dest="arguments", action="append", default=[])
     add.add_argument("--working-directory", type=Path)
-    add.add_argument("--runtime", choices=("native", "wine", "proton", "crossover", "bottles", "qemu"), default="native")
+    add.add_argument("--runtime", choices=("native", "auto", "wine", "proton", "crossover", "bottles", "qemu"), default="native")
     add.add_argument("--runtime-command", action="append", default=[])
     add.add_argument("--prefix", type=Path)
     add.add_argument("--tag", action="append", default=[])
