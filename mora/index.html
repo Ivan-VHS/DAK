@@ -67,7 +67,7 @@
     </div>
 
     <header class="statusbar">
-      <div class="brand"><span class="brand-mark">m</span><span>Mora</span></div>
+      <button class="brand start-trigger" type="button" data-panel-toggle="start" aria-controls="start-menu" aria-expanded="false" aria-label="Открыть меню DuckOS"><span class="brand-mark">m</span><span>Mora</span><span class="start-chevron">⌄</span></button>
       <div class="active-app" id="active-app">Рабочий стол</div>
       <nav class="top-launchers" aria-label="Системные приложения">
         <button class="status-control" data-app="files" aria-label="Открыть Duck Files">Файлы</button>
@@ -217,6 +217,25 @@
       </nav>
     </footer>
 
+    <section class="desktop-flyout start-menu" id="start-menu" aria-label="Меню DuckOS" hidden>
+      <div class="flyout-heading"><strong>DuckOS · Mora</strong><button type="button" data-panel-close aria-label="Закрыть">×</button></div>
+      <label class="start-search"><span aria-hidden="true">⌕</span><input type="search" data-start-search placeholder="Найти приложение" aria-label="Найти приложение"></label>
+      <div class="start-app-grid" data-start-apps>
+        <button type="button" class="start-app" data-app="files"><span>▤</span><strong>Duck Files</strong><small>Файлы и папки</small></button>
+        <button type="button" class="start-app" data-app="terminal"><span>›_</span><strong>Terminal</strong><small>Локальные команды</small></button>
+        <button type="button" class="start-app" data-app="settings"><span>⚙</span><strong>Settings</strong><small>Настройки оболочки</small></button>
+        <button type="button" class="start-app" data-app="security"><span>◇</span><strong>Sentinel</strong><small>Права и доверие</small></button>
+        <button type="button" class="start-app" data-app="updates"><span>↶</span><strong>Restore</strong><small>Восстановление</small></button>
+        <button type="button" class="start-app" data-app="workspace"><span>⌘</span><strong>Control</strong><small>Среда Mora</small></button>
+        <button type="button" class="start-app" data-app="mora-ai"><span>✦</span><strong>Mora AI</strong><small>Планы и намерения</small></button>
+        <button type="button" class="start-app" data-app="mora-commons"><span>✣</span><strong>Mora Commons</strong><small>Каталог приложений</small></button>
+        <button type="button" class="start-app" data-app="cockos"><span>∿</span><strong>Cockos</strong><small>Звук и запись</small></button>
+        <button type="button" class="start-app" data-app="kavun"><span>◒</span><strong>Kavun</strong><small>Фотографии</small></button>
+        <button type="button" class="start-app" data-app="illidia"><span>⌘</span><strong>Illidia</strong><small>Игры</small></button>
+        <button type="button" class="start-app" data-app="unify"><span>∞</span><strong>Unify</strong><small>Устройства</small></button>
+      </div>
+      <p class="start-footnote">Приложения запускаются в текущем браузерном пространстве Mora.</p>
+    </section>
     <section class="desktop-flyout quick-panel" id="quick-panel" aria-label="Быстрые настройки" hidden>
       <div class="flyout-heading"><strong>Быстрые настройки</strong><button type="button" data-panel-close aria-label="Закрыть">×</button></div>
       <div class="quick-grid">
