@@ -12,7 +12,7 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+[The current Mora shell](../mora/index.html) — unified home screen, first-party application identities and system-tool panels, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
@@ -31,6 +31,12 @@
 ## Product specification
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
+
+## Roadmap and coordinated engineering plans
+
+[Repository-wide Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) governs the complete 32-file Markdown inventory, technical plans, document ownership, implementation evidence, dependency-aware parallel work, verification gates and coordinated documentation updates.
+
+[Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) retains the canonical 20 directions and their engineering outcomes. [Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) defines the shared adoption model. [Implementation status](IMPLEMENTATION_STATUS.md) remains the dated evidence-based snapshot; it is not a roadmap and must not be used to infer unimplemented work as delivered.
 
 ## Normative standard
 
