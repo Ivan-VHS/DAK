@@ -22,7 +22,7 @@ The previous HTML prototypes have been removed. Mora remains a user-space applic
 
 ## Native workbench
 
-[Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
+[Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel. [Native specialist applications](NATIVE_PROJECT_APPLICATIONS.md) documents the Mora launcher for Reaper, Pytyliki, OPlague and VentuSample.
 
 ## Desktop optimization
 
