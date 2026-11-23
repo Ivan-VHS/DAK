@@ -269,7 +269,14 @@ function showDialog(app) {
     frame.title = app.name + " — веб-приложение Mora";
     frame.allow = "microphone; camera; display-capture; clipboard-read; clipboard-write";
     frame.referrerPolicy = "same-origin";
-    frame.src = "../prototype/mora-home.html?app=" + encodeURIComponent(app.id) + "&embed=1";
+    frame.src = "../prototype/mora-home.html?app=" + encodeURIComponent(app.id)
+      + "&embed=1&theme=" + encodeURIComponent(document.documentElement.dataset.theme || "dark");
+    frame.addEventListener("load", () => {
+      frame.contentWindow?.postMessage({
+        type: "mora:theme",
+        theme: document.documentElement.dataset.theme || "dark"
+      }, location.origin);
+    });
     $("#dialogContent").append(frame);
   } else {
     const note = document.createElement("p");
@@ -470,6 +477,8 @@ function applyTheme(theme) {
 async function toggleTheme() {
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
   applyTheme(next);
+  const frame = document.querySelector(".app-frame");
+  frame?.contentWindow?.postMessage({ type: "mora:theme", theme: next }, location.origin);
 
   try {
     const response = await fetch("/api/theme", {
