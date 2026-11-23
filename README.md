@@ -20,6 +20,7 @@ The system tools are:
 - **Bridge:** local PE/ELF header inspection. It does not load or launch executables.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
+- **Compatibility:** Windows/DOS compatibility centre. Mora builds explicit CLI commands; the Linux host backend detects Wine/Proton/DOSBox, manages Wine prefixes, installs selected Winetricks components and launches chosen executables after a terminal command is run.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
 
@@ -60,7 +61,7 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 | Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
 | Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
 | Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
-| Windows/Linux compatibility | PE/ELF header inspection | executable loader, Win32/NT, graphics/audio translation and launcher integration |
+| Windows/Linux compatibility | PE/ELF inspection in Mora plus Linux host CLI for Wine/Proton/DOSBox, Wine prefixes and allowlisted Winetricks components | browser-to-host IPC, sandboxing, Windows NT kernel services, kernel drivers, complete audio/input integration and per-game verification |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
 
@@ -72,6 +73,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
+- [Windows compatibility runtime](docs/WINDOWS_COMPATIBILITY.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests. Architecture proposals and roadmap entries are not implementation evidence.
