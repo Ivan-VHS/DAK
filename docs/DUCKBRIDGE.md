@@ -74,15 +74,15 @@ Arguments are represented as a structured argv array; the planner never builds o
 
 ## Security and maturity
 
-- Both execution_started and prefix_created are always false in the plan schema.
-- The target file is never started, mapped into memory or uploaded.
-- The selected runtime is never started.
+- In inspection and planning operations, execution_started and prefix_created are always false in the plan schema.
+- Inspection and planning never start the target or selected runtime; `duckos illidia launch` is the explicit process-start operation.
+- Illidia creates only a per-game data directory. The external Wine/Proton runtime initializes and manages the compatibility-prefix contents.
 - The tool does not install packages, drivers, DLLs or graphics components.
 - No anti-cheat bypass, DRM circumvention, malware verdict or signer trust is claimed.
 - Runtime discovery does not prove ABI, graphics, audio, DRM or per-game compatibility.
 - Mora is a browser shell and cannot inspect installed host programs directly; use the native DuckOS CLI.
 
-DuckBridge is an orchestration and planning tool, not a PE loader, NT process manager, Win32 subsystem, Wine replacement, DirectX/Vulkan translation layer, sandbox or production launcher. Those native execution layers remain explicitly unimplemented in the Windows compatibility status report.
+DuckBridge and Illidia can orchestrate native ELF processes and external Wine-compatible runtimes, but they are not a PE loader, NT process manager, Win32 subsystem, Wine replacement, DirectX/Vulkan translation layer or kernel-enforced sandbox. Those native execution layers remain explicitly unimplemented in the Windows compatibility status report.
 
 
 
@@ -112,7 +112,7 @@ Run the complete Python suite:
 python -m unittest discover -s tests -v
 ~~~
 
-The DuckBridge tests use synthetic PE/ELF headers and temporary executable stubs. They do not invoke Wine, Proton, CrossOver, Bottles, Box64, QEMU or an inspected application. Existing Windows compatibility tests remain the source of truth for the shared PE parser and prefix tooling.
+The DuckBridge and Illidia tests use synthetic PE/ELF headers and temporary executable stubs. The launch test starts only a temporary test stub; it does not invoke an installed Wine/Proton runtime or a commercial game. Existing Windows compatibility tests remain the source of truth for the shared PE parser and prefix tooling.
 
 ## Attribution
 
