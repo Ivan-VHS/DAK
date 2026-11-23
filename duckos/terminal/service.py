@@ -139,6 +139,12 @@ class TerminalService:
         self._reserved_aliases = self.registry.roots() | {
             "alias", "unalias", "history", "config", "doctor", "exit", "quit"
         }
+        for name in self.config["aliases"]:
+            if name in self._reserved_aliases:
+                raise TerminalInputError("terminal config contains a reserved alias: " + name)
+            expanded = self._expand_alias([name])
+            if self.registry.resolve(expanded) is None:
+                raise TerminalInputError("terminal alias does not resolve to a registered command: " + name)
 
     @property
     def prompt(self) -> str:
@@ -232,13 +238,28 @@ class TerminalService:
         for name, target in aliases.items():
             if not isinstance(name, str) or not _ALIAS_NAME.fullmatch(name):
                 raise TerminalInputError("terminal config contains an invalid alias name")
-            if name in {"alias", "unalias", "history", "config", "doctor", "exit", "quit"}:
+            if name in {
+                "help", "version", "status", "hardware", "desktop", "bridge",
+                "compat", "module", "alias", "unalias", "history", "config",
+                "doctor", "exit", "quit",
+            }:
                 raise TerminalInputError("terminal config contains a reserved alias")
             if (
                 not isinstance(target, list)
                 or not target
                 or len(target) > MAX_ARGUMENTS
-                or any(not isinstance(item, str) or not item or len(item) > 1024 for item in target)
+                or any(
+                    not isinstance(item, str)
+                    or not item
+                    or len(item) > 1024
+                    or any(ord(char) < 32 or ord(char) == 127 for char in item)
+                    for item in target
+                )
+                or any(
+                    item.casefold() in _SECRET_OPTIONS
+                    or any(item.casefold().startswith(flag + "=") for flag in _SECRET_OPTIONS)
+                    for item in target
+                )
             ):
                 raise TerminalInputError("terminal config contains an invalid alias target")
         return {"schema": CONFIG_SCHEMA, "prompt": prompt, "history_limit": limit, "aliases": aliases}
@@ -395,8 +416,8 @@ class TerminalService:
             limit = int(arguments[0]) if arguments else 10
         except ValueError as error:
             raise TerminalInputError("ITEM_LIMIT must be an integer") from error
-        if not 1 <= limit <= 1000:
-            raise TerminalInputError("ITEM_LIMIT must be between 1 and 1000")
+        if not 1 <= limit <= 100:
+            raise TerminalInputError("ITEM_LIMIT must be between 1 and 100")
         return audit_desktop(item_limit=limit)
 
     def _startup_list(self, arguments: list[str]) -> Any:
