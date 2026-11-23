@@ -16,9 +16,10 @@ const extensionAppIds = [
 const systemAppIds = [
   "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
 ];
-const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
+const catalogAppIds = ["mora-commons"];
+const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds, ...catalogAppIds];
 
-test("desktop exposes 20 first-party apps and seven system tools", () => {
+test("desktop exposes 20 first-party apps, Mora Commons and seven system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
