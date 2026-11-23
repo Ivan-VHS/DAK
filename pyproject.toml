@@ -4,12 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "duckos-build-tools"
-version = "0.2.0"
-description = "DuckOS image, driver ABI and Windows-compatibility inspection tools."
+version = "0.3.0"
+description = "DuckOS native desktop, image, driver ABI and compatibility tools."
 requires-python = ">=3.10"
 
 [project.scripts]
 duckos = "duckos.cli:main"
+duckos-mora = "duckos.mora.native_ui:main"
 
 [tool.setuptools.packages.find]
 include = ["duckos*"]
+
+[tool.setuptools.package-data]
+"duckos.mora" = ["data/*.json"]
