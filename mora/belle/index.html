@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf3f5">
+  <meta name="description" content="Mora Belle — личное пространство стиля, заботы, дома и проектов в DuckOS.">
+  <title>Mora Belle — DuckOS</title>
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="back-link" href="../index.html">← Mora</a>
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">✿</span><span><strong>Mora Belle</strong><small>PERSONAL SPACE</small></span></a>
+      <div class="top-actions">
+        <button class="quiet-button" type="button" data-action="export">Экспорт</button>
+        <button class="quiet-button danger-quiet" type="button" data-action="clear">Очистить</button>
+        <button class="theme-button" type="button" data-action="theme" aria-label="Переключить тему">☾</button>
+      </div>
+    </header>
+    <main id="top">
+      <section class="hero-panel" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">ТВОЁ ПРОСТРАНСТВО · 15 ИНСТРУМЕНТОВ</p>
+          <h1 id="page-title">Немного нежности.<br><em>Много возможностей.</em></h1>
+          <p class="hero-description">Гардероб, уход, ритм жизни, домашние дела, карьера и любимые проекты — в одном спокойном месте, без навязанных стандартов.</p>
+          <div class="hero-actions"><a class="primary-button" href="#module-grid">Открыть коллекцию <span aria-hidden="true">↘</span></a><span class="local-indicator"><i aria-hidden="true"></i> Личные записи остаются в этом браузере</span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="lace-ring"></div><div class="hero-flower">✿</div><span class="art-note note-one">be kind</span><span class="art-note note-two">at your pace</span><span class="ribbon">BELLE</span></div>
+      </section>
+      <section class="collection" aria-labelledby="collection-title">
+        <div class="section-heading"><div><p class="eyebrow">ТВОИ МАЛЕНЬКИЕ ПОМОЩНИКИ</p><h2 id="collection-title">Коллекция Mora Belle</h2></div>
+          <label class="search-box"><span aria-hidden="true">⌕</span><span class="sr-only">Поиск по приложениям</span><input id="module-search" type="search" placeholder="Найти инструмент…" autocomplete="off"></label>
+        </div>
+        <nav class="category-nav" aria-label="Категории приложений">
+          <button type="button" class="filter-chip is-active" data-filter="all" aria-pressed="true">Все 15</button>
+          <button type="button" class="filter-chip" data-filter="style" aria-pressed="false">Стиль и уход</button>
+          <button type="button" class="filter-chip" data-filter="wellbeing" aria-pressed="false">Самочувствие</button>
+          <button type="button" class="filter-chip" data-filter="home" aria-pressed="false">Дом и поездки</button>
+          <button type="button" class="filter-chip" data-filter="growth" aria-pressed="false">Личное и карьера</button>
+          <span class="result-count" id="result-count" aria-live="polite">15 инструментов</span>
+        </nav>
+        <div class="module-grid" id="module-grid" aria-live="polite"></div>
+      </section>
+      <section class="privacy-note" aria-label="Приватность и ограничения">
+        <span class="privacy-flower" aria-hidden="true">✿</span>
+        <div><strong>Твои данные — твоя территория</strong><p>Записи хранятся локально в профиле браузера. Это не зашифрованное хранилище и не облачная синхронизация. Чек-ин цикла и настроения живёт только до закрытия страницы.</p></div>
+        <a href="../../docs/MORA_BELLE.md">О возможностях и границах ↗</a>
+      </section>
+    </main>
+    <footer class="page-footer"><span>✿ Mora Belle · часть DuckOS / Mora</span><span>Мягкий интерфейс, серьёзное отношение к данным.</span></footer>
+  </div>
+  <dialog class="module-dialog" id="module-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-header"><div><p class="eyebrow" id="dialog-eyebrow">MORA BELLE</p><h2 id="dialog-title">Инструмент</h2></div><button class="close-button" type="button" data-action="close" aria-label="Закрыть окно">×</button></div>
+    <div class="dialog-content" id="dialog-content"></div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -805,3 +805,71 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   :root[data-theme="amber"] .desktop-content {gap:26px}
   :root[data-theme="amber"] .dock-wrap {padding-bottom:14px}
 }
+
+
+/* Mora Belle — optional ruffle and rose profile. Ornament never covers controls. */
+:root[data-theme="belle"] {
+  color-scheme: light;
+  --mora-page:#fbf3f5;
+  --mora-surface:#fffaf9;
+  --mora-elevated:#f7e9ed;
+  --mora-text:#3d2934;
+  --mora-secondary:#6f5362;
+  --mora-muted:#8b7180;
+  --mora-brand:#a85878;
+  --mora-brand-hover:#bc7291;
+  --mora-secondary-accent:#526b57;
+  --mora-border:#ead6de;
+  --mora-selection:#f2dce4;
+  --mora-danger:#a33d50;
+  --ink:var(--mora-text);
+  --muted:rgba(111,83,98,.78);
+  --glass:rgba(255,250,249,.56);
+  --line:rgba(168,88,120,.22);
+  --panel:rgba(255,250,249,.95);
+}
+:root[data-theme="belle"] .wallpaper {
+  background:linear-gradient(145deg,#fff5f6 0%,#ecced9 56%,#c58ba6 100%);
+}
+:root[data-theme="belle"] .wallpaper svg {
+  filter:hue-rotate(294deg) saturate(.48) brightness(1.28);
+}
+:root[data-theme="belle"] .wallpaper::after {
+  background:linear-gradient(90deg,rgba(70,36,54,.08),transparent 55%,rgba(70,36,54,.1));
+}
+:root[data-theme="belle"] .app-grid::before,
+:root[data-theme="belle"] .dock-wrap::before {
+  border-color:rgba(168,88,120,.24);
+  box-shadow:0 0 0 8px rgba(255,250,249,.12),inset 0 0 42px rgba(255,250,249,.12);
+}
+:root[data-theme="belle"] .app-tile,
+:root[data-theme="belle"] .widget-card,
+:root[data-theme="belle"] .app-window,
+:root[data-theme="belle"] .dock {
+  border-color:rgba(168,88,120,.25);
+}
+:root[data-theme="belle"] .app-tile {
+  background:linear-gradient(145deg,rgba(255,250,249,.78),rgba(242,220,228,.42));
+}
+:root[data-theme="belle"] .app-tile::after {
+  content:"";
+  position:absolute;
+  inset:3px;
+  border:1px dashed rgba(168,88,120,.18);
+  border-radius:inherit;
+  pointer-events:none;
+}
+:root[data-theme="belle"] .app-name { color:#4a3040; }
+:root[data-theme="belle"] .app-subtitle { color:#76596a; }
+:root[data-theme="belle"] .statusbar,
+:root[data-theme="belle"] .dock {
+  background:rgba(255,250,249,.58);
+}
+:root[data-theme="belle"] .dock-item { color:#75475f; }
+:root[data-theme="belle"] .dock-item.is-running::after { background:#a85878; }
+@media (prefers-reduced-motion:reduce) {
+  :root[data-theme="belle"] *, :root[data-theme="belle"] *::before, :root[data-theme="belle"] *::after {
+    animation:none !important;
+    transition:none !important;
+  }
+}

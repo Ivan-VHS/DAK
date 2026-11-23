@@ -96,6 +96,13 @@
       "category": "gaming",
       "panel": "mora/app.js#mora-boost",
       "maturity": "external_native_workbench"
+    },
+    {
+      "id": "mora-belle",
+      "name": "Mora Belle",
+      "category": "personal",
+      "panel": "mora/belle/index.html",
+      "maturity": "partial_local_web_suite"
     }
   ],
   "widgets": [
@@ -154,7 +161,7 @@
     {
       "id": "theme-adapter",
       "maturity": "implemented",
-      "scope": "shared dark/light semantic tokens in Mora shell"
+      "scope": "shared semantic tokens for Amber, Dark, Light and Belle in the Mora shell"
     }
   ]
 }

@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v4-amber";
+const CACHE = "mora-shell-v5-belle";
 const ASSETS = [
   "./",
   "./index.html",
@@ -9,7 +9,11 @@ const ASSETS = [
   "./system-policy.json",
   "./theme.json",
   "./manifest.webmanifest",
-  "./icon.svg"
+  "./icon.svg",
+  "./belle/index.html",
+  "./belle/styles.css",
+  "./belle/app.js",
+  "./belle/theme.json"
 ];
 const SCOPE_PATH = new URL("./", self.location.href).pathname;
 
@@ -41,7 +45,7 @@ self.addEventListener("fetch", (event) => {
       try {
         return await fetch(request);
       } catch {
-        return (await caches.match("./index.html")) ||
+        return (await caches.match(request)) || (await caches.match("./index.html")) ||
           new Response("Mora is not available offline.", {
             status: 503,
             headers: { "Content-Type": "text/plain; charset=utf-8" }

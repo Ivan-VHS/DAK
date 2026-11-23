@@ -24,7 +24,8 @@ const appDefinitions = {
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
+  "mora-belle": { name: "Mora Belle", subtitle: "Личное пространство", color: "#A85878", glyph: "✿" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -46,8 +47,8 @@ function applyPreferences() {
   const themeButton = document.querySelector('[data-action="toggle-theme"]');
   if (themeButton) {
     const currentTheme = preferences.appearance.theme;
-    const labels = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
-    themeButton.textContent = currentTheme === "amber" ? "A" : currentTheme === "dark" ? "◐" : "☼";
+    const labels = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема", belle: "Mora Belle" };
+    themeButton.textContent = currentTheme === "belle" ? "✿" : currentTheme === "amber" ? "A" : currentTheme === "dark" ? "◐" : "☼";
     themeButton.setAttribute("aria-pressed", String(currentTheme !== "amber"));
     themeButton.setAttribute("aria-label", "Текущая тема: " + labels[currentTheme] + ". Нажмите, чтобы переключить.");
     themeButton.title = "Тема: " + labels[currentTheme];
@@ -330,6 +331,10 @@ function focusWindow(appWindow) {
 }
 
 function openApp(appId) {
+  if (appId === "mora-belle") {
+    window.location.assign("./belle/index.html");
+    return;
+  }
   const definition = appDefinitions[appId];
   if (!definition) return;
   let appWindow = windowLayer.querySelector('[data-window="' + appId + '"]');
@@ -409,10 +414,10 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 document.addEventListener("click", (event) => {
   const themeToggle = event.target.closest('[data-action="toggle-theme"]');
   if (themeToggle) {
-    const nextTheme = { amber: "dark", dark: "light", light: "amber" };
+    const nextTheme = { amber: "dark", dark: "light", light: "belle", belle: "amber" };
     preferences.appearance.theme = nextTheme[preferences.appearance.theme] || "amber";
     persistPreferences();
-    const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
+    const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема", belle: "Mora Belle" };
     showToast("Тема: " + themeNames[preferences.appearance.theme]);
     return;
   }

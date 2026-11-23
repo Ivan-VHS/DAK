@@ -1,5 +1,9 @@
 # DuckOS documentation
 
+## Personal workspace suite
+
+[Mora Belle](../mora/belle/index.html) adds fifteen personal tools for wardrobe, care, wellbeing, household planning, trips, career and projects. Its local prototype, privacy limits and native-service requirements are documented in [MORA_BELLE.md](MORA_BELLE.md), with a versioned [application catalog](../catalogs/mora-belle-applications.v1.json) and [schema](../schemas/mora-belle-applications.v1.schema.json).
+
 ## Desktop and application interfaces
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
