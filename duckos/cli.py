@@ -28,6 +28,14 @@ def _compatibility_command(args: argparse.Namespace) -> dict[str, Any]:
         return compatibility.compatibility_status()
     if args.compat_action == "prefixes":
         return compatibility.list_prefixes()
+    if args.compat_action == "open-manager":
+        return compatibility.open_manager(args.name)
+    if args.compat_action == "create-reactos-disk":
+        return compatibility.create_reactos_disk(args.path, args.size_gib)
+    if args.compat_action == "launch-reactos":
+        return compatibility.launch_reactos(
+            args.disk, iso=args.iso, memory_mib=args.memory_mib, cpus=args.cpus
+        )
     if args.compat_action == "create-prefix":
         return compatibility.create_prefix(args.name, args.arch)
     if args.compat_action == "install-component":
@@ -77,6 +85,25 @@ def main(argv: list[str] | None = None) -> int:
     compat_commands = compat.add_subparsers(dest="compat_action", required=True)
     compat_commands.add_parser("status", help="detect host runtimes, launchers and graphics tools")
     compat_commands.add_parser("prefixes", help="list managed Wine prefixes")
+
+    manager = compat_commands.add_parser(
+        "open-manager", help="open an installed third-party compatibility manager"
+    )
+    manager.add_argument("--name", required=True, choices=sorted(compatibility.MANAGER_COMMANDS))
+
+    vm_disk = compat_commands.add_parser(
+        "create-reactos-disk", help="create an isolated QEMU qcow2 disk for ReactOS"
+    )
+    vm_disk.add_argument("--path", type=Path, required=True)
+    vm_disk.add_argument("--size-gib", type=int, default=16)
+
+    vm = compat_commands.add_parser(
+        "launch-reactos", help="boot a user-supplied ReactOS installation in QEMU"
+    )
+    vm.add_argument("--disk", type=Path, required=True)
+    vm.add_argument("--iso", type=Path, help="optional ReactOS installation ISO")
+    vm.add_argument("--memory-mib", type=int, default=2048)
+    vm.add_argument("--cpus", type=int, default=2)
 
     create = compat_commands.add_parser("create-prefix", help="initialize a managed Wine prefix")
     create.add_argument("--name", required=True)
