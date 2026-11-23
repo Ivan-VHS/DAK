@@ -92,6 +92,62 @@ class CompatibilityTests(unittest.TestCase):
             ])
             self.assertNotIn("shell", popen.call_args.kwargs)
 
+    def test_open_manager_uses_an_allowlisted_command_without_a_shell(self):
+        with patch("duckos.compatibility._program", return_value="/usr/bin/bottles"), \
+             patch("duckos.compatibility.subprocess.Popen") as popen:
+            popen.return_value.pid = 812
+            result = compatibility.open_manager("bottles")
+
+        self.assertEqual(result["manager"], "bottles")
+        self.assertFalse(result["shell_used"])
+        self.assertEqual(popen.call_args.args[0], ["/usr/bin/bottles"])
+        self.assertNotIn("shell", popen.call_args.kwargs)
+        with self.assertRaises(compatibility.CompatibilityError):
+            compatibility.open_manager("../not-a-manager")
+
+    def test_reactos_vm_uses_qemu_without_network_or_shell(self):
+        with tempfile.TemporaryDirectory() as directory:
+            disk = Path(directory) / "reactos.qcow2"
+            disk.write_bytes(b"qcow2")
+            iso = Path(directory) / "ReactOS.iso"
+            iso.write_bytes(b"iso")
+            with patch("duckos.compatibility.platform.system", return_value="Linux"), \
+                 patch("duckos.compatibility._program", return_value="/usr/bin/qemu-system-x86_64"), \
+                 patch("duckos.compatibility.subprocess.Popen") as popen:
+                popen.return_value.pid = 913
+                result = compatibility.launch_reactos(
+                    disk, iso=iso, memory_mib=4096, cpus=4
+                )
+
+            command = popen.call_args.args[0]
+            self.assertTrue(result["started"])
+            self.assertEqual(result["network"], "disabled")
+            self.assertIn("-nic", command)
+            self.assertIn("none", command)
+            self.assertEqual(command[0], "/usr/bin/qemu-system-x86_64")
+            self.assertNotIn("shell", popen.call_args.kwargs)
+            with self.assertRaises(compatibility.CompatibilityError):
+                compatibility.launch_reactos(disk, memory_mib=512)
+
+    def test_reactos_disk_creation_uses_qemu_img_and_validates_destination(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "reactos.qcow2"
+
+            def create_disk(argv, **kwargs):
+                Path(argv[4]).write_bytes(b"qcow2")
+                return type("Completed", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+
+            with patch("duckos.compatibility.platform.system", return_value="Linux"), \
+                 patch("duckos.compatibility._program", return_value="/usr/bin/qemu-img"), \
+                 patch("duckos.compatibility.subprocess.run", side_effect=create_disk) as run:
+                result = compatibility.create_reactos_disk(target, size_gib=32)
+
+            self.assertTrue(result["created"])
+            self.assertEqual(result["size_gib"], 32)
+            self.assertEqual(run.call_args.args[0][-1], "32G")
+            with self.assertRaises(compatibility.CompatibilityError):
+                compatibility.create_reactos_disk(target, size_gib=256)
+
     def test_launch_rejects_missing_managed_prefix_before_starting_process(self):
         with tempfile.TemporaryDirectory() as directory:
             executable = Path(directory) / "game.exe"
