@@ -86,6 +86,24 @@ class GamingPolicyTests(unittest.TestCase):
         with self.assertRaises(GamingPolicyError):
             assess_capabilities({"process_catalog": {"available": "yes"}})
 
+    def test_builds_the_session_profile_expected_by_reaper(self):
+        from duckos.gaming import build_session_profile
+        profile = build_session_profile(
+            "sample-game", engine="directx12", worker_count=8,
+            multithreaded=True, audio_enabled=True,
+        )
+        self.assertEqual(profile["schema"], "duckos.gaming-session-profile.v1")
+        self.assertEqual(profile["worker_count"], 8)
+        self.assertFalse(profile["execution_performed"])
+        self.assertIn("GPR-13", profile["source_rules"])
+
+    def test_session_profile_builder_rejects_unsafe_inputs(self):
+        from duckos.gaming import build_session_profile
+        with self.assertRaises(GamingPolicyError):
+            build_session_profile("../escape")
+        with self.assertRaises(GamingPolicyError):
+            build_session_profile("sample", worker_count=1000)
+
     def test_session_lifecycle_is_explicit_and_non_executing(self):
         starting = plan_session_transition(
             "idle", "game_detected", profile_id="sample-game", process_identity="sample.exe"
