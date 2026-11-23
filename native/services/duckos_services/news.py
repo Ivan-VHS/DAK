@@ -314,12 +314,13 @@ class NewsService:
         self._stop_event = threading.Event()
         self._worker: threading.Thread | None = None
         saved = read_json(self.cache_path, {})
-        self._items = saved.get("items", []) if isinstance(saved, dict) else []
+        raw_items = saved.get("items", []) if isinstance(saved, dict) else []
+        self._items = raw_items if isinstance(raw_items, list) else []
         self._items = [item for item in self._items if self._valid_cached_item(item)]
-        self._updated_at = saved.get("updated_at") if isinstance(saved, dict) else None
-        self._source_status = saved.get("sources", []) if isinstance(saved, dict) else []
-        if not isinstance(self._source_status, list):
-            self._source_status = []
+        saved_updated_at = saved.get("updated_at") if isinstance(saved, dict) else None
+        self._updated_at = saved_updated_at if isinstance(saved_updated_at, str) else None
+        raw_sources = saved.get("sources", []) if isinstance(saved, dict) else []
+        self._source_status = [item for item in raw_sources if isinstance(item, dict)] if isinstance(raw_sources, list) else []
 
     @staticmethod
     def _valid_cached_item(item: Any) -> bool:
@@ -329,6 +330,10 @@ class NewsService:
             and isinstance(item.get("title"), str)
             and isinstance(item.get("url"), str)
             and item["url"].startswith("https://")
+            and all(
+                item.get(field) is None or isinstance(item.get(field), str)
+                for field in ("summary", "source", "source_id", "category", "language", "author", "published_at")
+            )
         )
 
     def status(self) -> dict[str, Any]:
