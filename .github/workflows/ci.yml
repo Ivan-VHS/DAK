@@ -24,9 +24,11 @@ jobs:
       - name: Install DuckOS tools
         run: python -m pip install -e ./tools
       - name: Compile Python sources
-        run: python -m compileall -q tools/src tools/tests
+        run: python -m compileall -q tools/src tools/tests native/services/duckos_services native/services/tests
       - name: Run tests
         run: python -m unittest discover -s tools/tests -v
+      - name: Test native user-space services
+        run: make -C native services-test
       - name: Validate JSON manifests
         run: python -c "import json,pathlib; [json.loads(p.read_text(encoding='utf-8')) for p in pathlib.Path('.').rglob('*.json') if '.git' not in p.parts]"
   shell:
@@ -34,4 +36,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check JavaScript syntax
-        run: node --check desktop/app.js
+        run: node --check desktop/app.js && node --check desktop/newsroom/newsroom.js

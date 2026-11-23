@@ -9,6 +9,7 @@
 
   const appDetails = {
     'Обзор': 'Сводка рабочего пространства DuckOS.',
+    'Новости': 'Вечерний курьер — актуальные новости из открытых RSS/Atom-источников с автообновлением, поиском и избранным.',
     'Файлы': 'Локальные пространства, документы и недавние файлы.',
     'Приложения': 'Каталог приложений федерации Ivan-VHS.',
     'Система': 'Системные метрики, диагностика и пользовательские инструменты DuckOS.',
@@ -44,10 +45,19 @@
     }
 
     const details = description || appDetails[name] || 'Локальное приложение DuckOS.';
-    document.getElementById('dialogTitle').textContent = name;
-    document.getElementById('dialogSubtitle').textContent = coreServiceApps.has(name)
-      ? 'DuckOS Core Services · пользовательский прототип'
-      : 'Приложение DuckOS';
+    const isNewsroom = name === 'Новости';
+    const genericBody = document.querySelector('#appDialog .dialog-body');
+    const newsroomFrame = document.getElementById('newsroomFrame');
+    genericBody.hidden = isNewsroom;
+    newsroomFrame.hidden = !isNewsroom;
+    appDialog.classList.toggle('newsroom-open', isNewsroom);
+
+    document.getElementById('dialogTitle').textContent = isNewsroom ? 'Вечерний курьер' : name;
+    document.getElementById('dialogSubtitle').textContent = isNewsroom
+      ? 'DuckOS Newsroom · live RSS/Atom'
+      : (coreServiceApps.has(name)
+        ? 'DuckOS Core Services · пользовательский прототип'
+        : 'Приложение DuckOS');
     document.getElementById('dialogHeading').textContent = name;
     document.getElementById('dialogDescription').textContent = details;
     if (typeof appDialog.showModal === 'function' && !appDialog.open) appDialog.showModal();
@@ -151,6 +161,11 @@
 
   document.getElementById('dialogClose').addEventListener('click', () => appDialog.close());
   document.getElementById('dialogOk').addEventListener('click', () => appDialog.close());
+  appDialog.addEventListener('close', () => {
+    appDialog.classList.remove('newsroom-open');
+    document.getElementById('newsroomFrame').hidden = true;
+    document.querySelector('#appDialog .dialog-body').hidden = false;
+  });
   appDialog.addEventListener('click', (event) => {
     if (event.target === appDialog) appDialog.close();
   });

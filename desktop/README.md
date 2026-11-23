@@ -1,26 +1,38 @@
-# DuckOS Desktop Shell Preview
+# DuckOS Desktop Shell
 
-Это статическая демонстрация интерфейса. Она не запускает системные команды и не получает доступ к файлам, CPU, GPU или сетевым интерфейсам хоста.
+The browser shell contains a built-in application window for **«Вечерний курьер»**.
+The newspaper interface is bundled at newsroom/ and reads only from the local
+DuckOS Newsroom API; it never calls publisher domains directly from the browser.
 
-## Запуск
+## Start the desktop
 
-Из корня репозитория:
+From the repository root:
 
-~~~bash
-python -m http.server 4173 --directory desktop
-~~~
+    python -m http.server 4173 --directory desktop
 
-Откройте http://127.0.0.1:4173.
+Open http://127.0.0.1:4173. Select «Новости» in the sidebar or dock, or press
+Ctrl+K and search for «Вечерний курьер».
 
-## Действия
+## Start live news
 
-- Ctrl+K — палитра приложений.
-- Нажмите на приложение в sidebar или dock, чтобы открыть информационное окно.
-- Quick Settings меняет состояние переключателей демонстрации.
-- Theme переключает dark/light; Reduce Motion отключает переходы.
-- Уведомления можно прокрутить к панели и очистить.
-- Данные CPU/GPU/RAM/SSD/сети — статические preview values, а не измерения вашего компьютера.
+In a second terminal, from the repository root:
 
-## Дальше
+    PYTHONPATH=native/services python -m duckos_services news serve
 
-Для живых показаний нужен отдельный локальный backend с узким API, origin/CSRF policy, ограниченными разрешениями и audit log. Не подключайте к странице прямое выполнение команд или произвольный shell endpoint.
+The service listens on 127.0.0.1:8765, fetches free public RSS/Atom sources on
+startup and refreshes every five minutes. It keeps the last successful cache
+under ~/.local/state/duckos/news-cache.json. It is safe to start the UI without
+the service; the newsroom explains how to connect instead of showing invented
+headlines.
+
+## Shell actions
+
+- Ctrl+K — app and command search.
+- Sidebar, dock, and search all launch «Вечерний курьер».
+- Theme and Reduce Motion remain shell settings.
+- News search, category tabs, unread filter, saved articles, manual refresh,
+  and original-publisher links are available inside the app.
+
+The CPU/GPU/RAM/SSD cards on the home screen remain demonstration values. The
+Newsroom is separate: its source status and publication times come from real
+RSS/Atom responses and are not represented as host telemetry.

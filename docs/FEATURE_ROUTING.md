@@ -32,3 +32,9 @@
 - **Out of scope** — нарушает границы проекта или небезопасно для системного default.
 
 Ни один пункт каталога не объявляется реализованным только из-за наличия названия в JSON или документации.
+
+### Newsroom
+
+- Public news feeds, RSS/Atom parsing, source attribution, refresh scheduling, and cached snapshots belong to DuckOS Newsroom.
+- The shell only hosts the reader UI; it does not contact publishers or accept arbitrary feed URLs.
+- Full article text, photos, corrections, and publication rights remain with the source publisher. The reader opens the original story.

@@ -72,7 +72,8 @@ class CockosTests(unittest.TestCase):
         audio = PipeWireAudioBus(runner=runner)
         with self.assertRaises(ServiceError):
             audio.connect("not-a-port", "speakers:playback_FL")
-        self.assertEqual(len(runner.calls), 1)
+        # The service validates output and input inventories before connecting.
+        self.assertEqual([call[1] for call in runner.calls], ["-o", "-i"])
 
 
 class KavunTests(unittest.TestCase):

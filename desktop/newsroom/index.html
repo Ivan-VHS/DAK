@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2e1c10">
+  <meta name="description" content="Вечерний курьер — новостная лента DuckOS из открытых RSS-источников">
+  <title>Вечерний курьер · DuckOS</title>
+  <link rel="stylesheet" href="newsroom.css">
+  <script src="newsroom.js" defer></script>
+</head>
+<body>
+  <div class="desk">
+    <div class="ring" aria-hidden="true"></div>
+    <main class="paper">
+      <div class="clip" aria-hidden="true"></div>
+      <header class="mast">
+        <div class="ears">
+          <span>НОВОСТИ УКРАИНЫ И МИРА</span>
+          <span>«Всё, что стоит печати»</span>
+        </div>
+        <h1 class="title">Вечерний курьер</h1>
+        <div class="dateline">
+          <span id="dateLine">Загрузка даты…</span>
+          <span id="editionLine">Живая лента · открытые источники</span>
+          <span class="live-indicator"><i></i><span id="liveText">Подключение…</span></span>
+        </div>
+      </header>
+
+      <section class="tools" aria-label="Управление новостной лентой">
+        <nav class="tabs" id="tabs" role="tablist" aria-label="Разделы газеты"></nav>
+        <div class="toolbar">
+          <label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="Найти материал…" autocomplete="off" aria-label="Поиск по новостям">
+            <kbd>/</kbd>
+          </label>
+          <button class="filter-button" id="unreadButton" type="button" aria-pressed="false">Непрочитанные</button>
+          <button class="filter-button" id="savedButton" type="button" aria-pressed="false">★ Сохранённые</button>
+          <button class="refresh-button" id="refreshButton" type="button"><span aria-hidden="true">↻</span> Обновить</button>
+        </div>
+      </section>
+
+      <div class="rule"></div>
+
+      <section class="source-strip" aria-label="Источники новостей">
+        <span class="source-label">ИСТОЧНИКИ</span>
+        <div class="source-list" id="sourceList"><span class="source-chip muted">Ожидание ответа службы…</span></div>
+        <span class="updated-at" id="updatedAt">Обновление ещё не выполнено</span>
+      </section>
+
+      <div class="status-banner" id="statusBanner" role="status" aria-live="polite" hidden></div>
+      <section class="feed" id="feed" aria-live="polite" aria-busy="true">
+        <div class="empty-state"><span class="empty-icon">📰</span><strong>Редакция готовит выпуск</strong><small>Подключаем локальную службу новостей DuckOS…</small></div>
+      </section>
+
+      <footer class="foot">
+        <span>Материалы принадлежат их издателям. Заголовки и анонсы — из RSS/Atom.</span>
+        <span id="countLine">Источники: 0 · Материалов: 0 · Прочитано: 0</span>
+      </footer>
+    </main>
+  </div>
+
+  <dialog class="article-dialog" id="articleDialog" aria-labelledby="articleTitle">
+    <article class="clipping">
+      <span class="tape tape-left" aria-hidden="true"></span>
+      <span class="tape tape-right" aria-hidden="true"></span>
+      <button class="close-button" id="closeArticle" type="button" aria-label="Закрыть статью">Закрыть ×</button>
+      <div class="kicker" id="articleCategory"></div>
+      <h2 id="articleTitle"></h2>
+      <div class="byline" id="articleMeta"></div>
+      <p class="article-summary" id="articleSummary"></p>
+      <div class="publisher-note">Это краткий анонс из RSS-ленты. Полная публикация и все права на неё остаются у издателя.</div>
+      <a class="original-link" id="originalLink" href="#" target="_blank" rel="noopener noreferrer">Читать оригинал у издателя ↗</a>
+    </article>
+  </dialog>
+</body>
+</html>
