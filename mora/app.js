@@ -21,7 +21,7 @@ const appDefinitions = {
   "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#C19A6A", glyph: "✦" },
   security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
-  runtime: { name: "Bridge", subtitle: "PE и ELF инспектор", color: "#948F7D", glyph: "⇄" },
+  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
@@ -264,11 +264,17 @@ function panelMarkup(appId) {
         '<div class="intent-status" data-update-preview>Проверка только сформирует локальный план. Скачивания и установки не будет.</div>' +
         '<p class="window-copy">Сейчас сохраняются только настройки Mora в локальном хранилище браузера — не раздел ОС, приложения или пользовательские файлы.</p>';
     case "runtime":
-      return '<p class="window-kicker">BRIDGE · INSPECTION ONLY</p><h2 class="window-heading">Инспектор исполняемых файлов</h2>' +
-        '<p class="window-copy">Выберите локальный EXE, DLL или ELF. Mora проверит заголовок и разрядность, не запуская файл и не отправляя его в сеть.</p>' +
-        '<label class="file-picker">Выбрать файл<input type="file" data-executable-file accept=".exe,.dll,.so"></label>' +
+      return '<p class="window-kicker">BRIDGE · WINDOWS COMPATIBILITY</p><h2 class="window-heading">Совместимость Windows-приложений</h2>' +
+        '<p class="window-copy">Bridge проверяет выбранные EXE/DLL локально. В Mora доступна быстрая проверка заголовка; расширенный PE-анализ, список импортируемых DLL, профили приложений и диагностика доступны через инструменты DuckOS CLI.</p>' +
+        '<label class="file-picker">Проверить EXE или DLL<input type="file" data-executable-file accept=".exe,.dll"></label>' +
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Запуск Windows-программ, DirectX/Vulkan translation и античитов через этот браузерный интерфейс невозможен. Native runtime пока не подключён.</span></div>';
+        '<div class="setting-block"><strong>Инструменты DuckOS</strong><span>После установки пакета duckos-build-tools в среде разработки:</span>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos inspect-pe ./game.exe — заголовки PE32/PE32+, секции и импортируемые DLL</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DuckOS ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
+        '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
