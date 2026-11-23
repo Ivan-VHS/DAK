@@ -538,8 +538,546 @@ function initializeCommonsPanel(appWindow) {
   renderGrid();
 }
 
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[char]);
+}
+
+function formatBytes(value) {
+  if (!value) return "0 B";
+  if (value < 1024) return value + " B";
+  if (value < 1024 * 1024) return (value / 1024).toFixed(1) + " KB";
+  return (value / (1024 * 1024)).toFixed(2) + " MB";
+}
+
+function filesPanelMarkup() {
+  return '<p class="window-kicker">DUCK FILES · LOCAL WORKSPACE</p>' +
+    '<h2 class="window-heading">Файлы и папки</h2>' +
+    '<div class="files-toolbar">' +
+      '<button type="button" data-files-action="back" aria-label="Назад" disabled>←</button>' +
+      '<button type="button" data-files-action="forward" aria-label="Вперёд" disabled>→</button>' +
+      '<button type="button" data-files-action="up" aria-label="Вверх">↑</button>' +
+      '<input type="search" data-files-search placeholder="Поиск файлов и папок" aria-label="Поиск файлов и папок">' +
+      '<button type="button" data-files-action="new-folder">+ Новая папка</button>' +
+      '<button type="button" data-files-action="new-file">Новый файл</button>' +
+      '<button type="button" data-files-action="upload">Загрузить</button>' +
+      '<input type="file" data-files-upload accept=".txt,.md,.json,.rpr,.duck,.csv,.log,.xml,.html,.css,.js" multiple hidden>' +
+      '<select data-files-sort aria-label="Сортировка"><option value="name">Имя</option><option value="date">Дата</option><option value="size">Размер</option><option value="type">Тип</option></select>' +
+      '<button type="button" data-files-action="view" data-files-view="list" aria-label="Сменить вид">▦</button>' +
+    '</div>' +
+    '<div class="files-layout" data-files-root>' +
+      '<nav class="files-sidebar" aria-label="Папки">' +
+        '<button type="button" data-files-folder="home" class="active">⌂ Home</button>' +
+        '<button type="button" data-files-folder="desktop">▣ Desktop</button>' +
+        '<button type="button" data-files-folder="documents">▤ Documents</button>' +
+        '<button type="button" data-files-folder="downloads">↓ Downloads</button>' +
+        '<button type="button" data-files-folder="pictures">▧ Pictures</button>' +
+        '<button type="button" data-files-folder="applications">◇ Applications</button>' +
+        '<button type="button" data-files-folder="system">⚙ System</button>' +
+      '</nav>' +
+      '<div class="files-main">' +
+        '<nav class="files-breadcrumb" data-files-breadcrumb aria-label="Путь"></nav>' +
+        '<ul class="files-list" data-files-list aria-label="Содержимое папки"></ul>' +
+      '</div>' +
+    '</div>' +
+    '<section class="files-preview" data-files-preview aria-live="polite">' +
+      '<h3 data-files-preview-title>Предпросмотр</h3><p data-files-preview-meta>Выберите файл для просмотра.</p>' +
+      '<pre data-files-preview-content data-user-content></pre>' +
+      '<button type="button" data-files-action="download" hidden>Скачать файл</button>' +
+    '</section>' +
+    '<p class="files-status" data-files-status role="status">Готово · локальное виртуальное пространство</p>' +
+    '<p class="files-footnote">Виртуальное пространство Duck Files хранится в профиле браузера. Оно не является доступом к диску или настоящей файловой системе DuckOS. Текстовые файлы ограничены 2 MiB.</p>';
+}
+
+function filesAncestorChain(folderId) {
+  const chain = [];
+  let item = virtualWorkspace.get(folderId);
+  while (item) {
+    chain.unshift(item);
+    item = item.parentId ? virtualWorkspace.get(item.parentId) : null;
+  }
+  return chain;
+}
+
+function navigateFiles(panel, folderId, remember = true) {
+  const target = virtualWorkspace.get(folderId);
+  if (!target || target.type !== "folder") return;
+  const state = panel._filesState;
+  if (remember && state.currentFolder !== folderId) {
+    state.back.push(state.currentFolder);
+    state.forward = [];
+  }
+  state.currentFolder = folderId;
+  currentDirectoryId = folderId;
+  state.selectedId = null;
+  renderFileManager(panel);
+}
+
+function renderFileManager(panel) {
+  const state = panel._filesState;
+  if (!state) return;
+  const folder = virtualWorkspace.get(state.currentFolder);
+  if (!folder || folder.type !== "folder") {
+    state.currentFolder = "home";
+    currentDirectoryId = "home";
+  }
+  const search = panel.querySelector("[data-files-search]");
+  const query = search ? search.value.trim() : "";
+  let items = query ? virtualWorkspace.search(query) : virtualWorkspace.list(state.currentFolder);
+  const sort = panel.querySelector("[data-files-sort]")?.value || state.sort || "name";
+  state.sort = sort;
+  const compare = {
+    name: (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    date: (a, b) => b.updatedAt.localeCompare(a.updatedAt),
+    size: (a, b) => b.size - a.size,
+    type: (a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name)
+  }[sort] || ((a, b) => a.name.localeCompare(b.name));
+  items = items.slice().sort((a, b) => a.type !== b.type ? (a.type === "folder" ? -1 : 1) : compare(a, b));
+
+  const list = panel.querySelector("[data-files-list]");
+  list.classList.toggle("grid-view", state.view === "grid");
+  list.innerHTML = "";
+  if (!items.length) {
+    const empty = document.createElement("li");
+    empty.className = "notification-empty";
+    empty.textContent = query ? "Ничего не найдено." : "Нет элементов в этой папке.";
+    list.append(empty);
+  } else {
+    items.forEach((item, index) => {
+      const row = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "files-item" + (state.selectedId === item.id ? " selected" : "");
+      button.dataset.fileOpen = item.id;
+      button.dataset.fileId = item.id;
+      button.style.animationDelay = Math.min(index * 18, 160) + "ms";
+      const icon = document.createElement("span");
+      icon.className = "files-item-icon";
+      icon.textContent = item.type === "folder" ? "▣" : (item.name.endsWith(".json") ? "{}" : "▤");
+      const name = document.createElement("span");
+      name.className = "files-item-name";
+      name.textContent = item.name;
+      const meta = document.createElement("span");
+      meta.className = "files-item-meta";
+      meta.textContent = item.type === "folder" ? "Папка" : formatBytes(item.size);
+      button.append(icon, name, meta);
+      row.append(button);
+      list.append(row);
+    });
+  }
+
+  const breadcrumbs = panel.querySelector("[data-files-breadcrumb]");
+  breadcrumbs.innerHTML = "";
+  const chain = filesAncestorChain(state.currentFolder);
+  chain.forEach((item, index) => {
+    if (index) {
+      const separator = document.createElement("span");
+      separator.textContent = "›";
+      separator.setAttribute("aria-hidden", "true");
+      breadcrumbs.append(separator);
+    }
+    const crumb = document.createElement("button");
+    crumb.type = "button";
+    crumb.textContent = item.name;
+    crumb.dataset.filesFolder = item.id;
+    crumb.classList.toggle("active", index === chain.length - 1);
+    breadcrumbs.append(crumb);
+  });
+
+  panel.querySelectorAll("[data-files-folder]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.filesFolder === state.currentFolder);
+  });
+  panel.querySelector('[data-files-action="back"]').disabled = state.back.length === 0;
+  panel.querySelector('[data-files-action="forward"]').disabled = state.forward.length === 0;
+  const selected = state.selectedId ? virtualWorkspace.get(state.selectedId) : null;
+  const title = panel.querySelector("[data-files-preview-title]");
+  const meta = panel.querySelector("[data-files-preview-meta]");
+  const content = panel.querySelector("[data-files-preview-content]");
+  const download = panel.querySelector('[data-files-action="download"]');
+  if (!selected) {
+    title.textContent = "Предпросмотр";
+    meta.textContent = "Выберите файл для просмотра.";
+    content.textContent = "";
+    download.hidden = true;
+  } else {
+    title.textContent = selected.name;
+    meta.textContent = selected.type === "folder" ? "Папка · " + virtualWorkspace.path(selected.id).join(" / ") :
+      formatBytes(selected.size) + " · " + selected.mime + (selected.readonly ? " · образец только для чтения" : "");
+    content.textContent = selected.type === "file" ? (selected.content.slice(0, 1800) || "Этот файл пуст.") : "Папка содержит " +
+      virtualWorkspace.list(selected.id).length + " элементов.";
+    download.hidden = selected.type !== "file";
+  }
+}
+
+function initializeFileManager(appWindow) {
+  const panel = appWindow.querySelector("[data-files-root]");
+  if (!panel) return;
+  panel._filesState = { currentFolder: "home", back: [], forward: [], selectedId: null, sort: "name", view: "list" };
+  panel.querySelector("[data-files-search]").addEventListener("input", () => renderFileManager(panel));
+  panel.querySelector("[data-files-sort]").addEventListener("change", () => renderFileManager(panel));
+  renderFileManager(panel);
+}
+
+function setFilesStatus(panel, message) {
+  const status = panel.querySelector("[data-files-status]");
+  if (status) status.textContent = message;
+}
+
+function downloadWorkspaceFile(item) {
+  if (!item || item.type !== "file") return;
+  const blob = new Blob([item.content], { type: item.mime || "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = item.name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function handleFilesAction(button) {
+  const panel = button.closest(".app-window");
+  const root = panel?.querySelector("[data-files-root]");
+  if (!panel || !root?._filesState) return;
+  const state = root._filesState;
+  const action = button.dataset.filesAction;
+  if (action === "back" && state.back.length) {
+    state.forward.push(state.currentFolder);
+    state.currentFolder = state.back.pop();
+    state.selectedId = null;
+    renderFileManager(root);
+    return;
+  }
+  if (action === "forward" && state.forward.length) {
+    state.back.push(state.currentFolder);
+    state.currentFolder = state.forward.pop();
+    state.selectedId = null;
+    renderFileManager(root);
+    return;
+  }
+  if (action === "up") {
+    const current = virtualWorkspace.get(state.currentFolder);
+    if (current?.parentId) navigateFiles(root, current.parentId);
+    return;
+  }
+  if (action === "new-folder") {
+    const name = window.prompt("Имя новой папки");
+    if (name === null) return;
+    try {
+      virtualWorkspace.createFolder(name, state.currentFolder);
+      renderFileManager(root);
+      setFilesStatus(panel, "Папка создана.");
+    } catch (error) { setFilesStatus(panel, error.message); }
+    return;
+  }
+  if (action === "new-file") {
+    const name = window.prompt("Имя текстового файла", "Новая заметка.txt");
+    if (name === null) return;
+    try {
+      const item = virtualWorkspace.createFile(name, "", state.currentFolder);
+      state.selectedId = item.id;
+      renderFileManager(root);
+      setFilesStatus(panel, "Файл добавлен в виртуальное пространство.");
+    } catch (error) { setFilesStatus(panel, error.message); }
+    return;
+  }
+  if (action === "upload") {
+    panel.querySelector("[data-files-upload]").click();
+    return;
+  }
+  if (action === "view") {
+    state.view = state.view === "list" ? "grid" : "list";
+    button.setAttribute("aria-label", state.view === "grid" ? "Показать список" : "Показать сетку");
+    renderFileManager(root);
+    return;
+  }
+  if (action === "download") {
+    const item = state.selectedId ? virtualWorkspace.get(state.selectedId) : null;
+    if (item?.type === "file") downloadWorkspaceFile(item);
+  }
+}
+
+function runTerminalCommand(root, rawCommand) {
+  const output = root.querySelector("[data-terminal-output]");
+  const command = String(rawCommand || "").trim();
+  if (!command) return;
+  const [verb, ...parts] = command.split(/\s+/);
+  const argument = parts.join(" ").trim();
+  const lines = ["mora:" + virtualWorkspace.path(currentDirectoryId).join("/") + "$ " + command];
+  const folderItems = () => virtualWorkspace.list(currentDirectoryId);
+  const current = () => virtualWorkspace.get(currentDirectoryId);
+  const findChild = (name) => folderItems().find((item) => item.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+
+  try {
+    switch (verb.toLowerCase()) {
+      case "help":
+        lines.push("help  ls  pwd  cd DIR  cat FILE  mkdir DIR  touch FILE  rm ITEM  date  whoami  neofetch  clear");
+        lines.push("Only the local Duck Files workspace is available. No host shell commands are executed.");
+        break;
+      case "clear":
+        output.textContent = "";
+        return;
+      case "pwd":
+        lines.push("/" + virtualWorkspace.path(currentDirectoryId).join("/"));
+        break;
+      case "ls":
+        lines.push(...folderItems().map((item) => (item.type === "folder" ? "[DIR] " : "      ") + item.name));
+        if (!folderItems().length) lines.push("(empty)");
+        break;
+      case "cd": {
+        if (!argument || argument === "/") { currentDirectoryId = "home"; break; }
+        if (argument === "..") {
+          currentDirectoryId = current()?.parentId || "home";
+          break;
+        }
+        const target = findChild(argument);
+        if (!target || target.type !== "folder") throw new Error("Directory not found: " + argument);
+        currentDirectoryId = target.id;
+        break;
+      }
+      case "cat": {
+        if (!argument) throw new Error("Usage: cat FILE");
+        const target = findChild(argument);
+        if (!target || target.type !== "file") throw new Error("File not found: " + argument);
+        lines.push(target.content || "(empty file)");
+        break;
+      }
+      case "mkdir":
+        if (!argument) throw new Error("Usage: mkdir DIR");
+        virtualWorkspace.createFolder(argument, currentDirectoryId);
+        lines.push("Directory created.");
+        break;
+      case "touch":
+        if (!argument) throw new Error("Usage: touch FILE");
+        virtualWorkspace.createFile(argument, "", currentDirectoryId);
+        lines.push("File created.");
+        break;
+      case "rm": {
+        if (!argument) throw new Error("Usage: rm ITEM");
+        const target = findChild(argument);
+        if (!target) throw new Error("Item not found: " + argument);
+        virtualWorkspace.remove(target.id);
+        lines.push("Removed from virtual workspace.");
+        break;
+      }
+      case "date":
+        lines.push(new Date().toLocaleString(currentLocale === "uk" ? "uk-UA" : currentLocale === "en" ? "en-US" : "ru-RU"));
+        break;
+      case "whoami":
+        lines.push("mora-local-user (browser profile)");
+        break;
+      case "neofetch":
+        lines.push("   DUCKOS / MORA");
+        lines.push("   Workspace: browser-local");
+        lines.push("   Locale: " + currentLocale.toUpperCase());
+        lines.push("   Native shell: not connected");
+        break;
+      default:
+        lines.push("Command not found. Type help. Native shell execution is disabled.");
+    }
+  } catch (error) {
+    lines.push("error: " + error.message);
+  }
+  output.textContent += (output.textContent ? "\n" : "") + lines.join("\n");
+  output.scrollTop = output.scrollHeight;
+  const prompt = root.querySelector("[data-terminal-prompt]");
+  if (prompt) prompt.textContent = "mora:" + virtualWorkspace.path(currentDirectoryId).join("/") + "$";
+}
+
+function settingsPanelMarkup() {
+  return '<p class="window-kicker">MORA · SHELL SETTINGS</p><h2 class="window-heading">Настройки оболочки</h2>' +
+    '<div class="settings-grid">' +
+      '<label class="settings-control"><div><strong>Язык интерфейса</strong><small>RU · UK · EN · выбор сохраняется локально</small></div>' +
+        '<select data-locale-select><option value="ru"' + (currentLocale === "ru" ? " selected" : "") + '>Русский</option>' +
+        '<option value="uk"' + (currentLocale === "uk" ? " selected" : "") + '>Українська</option>' +
+        '<option value="en"' + (currentLocale === "en" ? " selected" : "") + '>English</option></select></label>' +
+      '<div class="settings-control"><div><strong>Движение интерфейса</strong><small>Учитывает системное предпочтение уменьшения движения</small></div>' +
+        '<button class="permission-toggle" data-setting="reducedMotion" aria-pressed="' + String(preferences.appearance.reducedMotion) + '">' +
+        (preferences.appearance.reducedMotion ? "Включено" : "Выключено") + '</button></div>' +
+      '<div class="settings-control"><div><strong>Режим фокуса</strong><small>Приглушить второстепенные виджеты</small></div>' +
+        '<button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' +
+        (preferences.focusMode ? "Включено" : "Выключено") + '</button></div>' +
+      '<div class="settings-control"><div><strong>Акцент DuckOS</strong><small>Единая палитра не переключается</small></div><strong>#FFD400</strong></div>' +
+    '</div>' +
+    '<div class="system-notice"><span class="notice-dot"></span><span>Только локальные настройки оболочки. Системные службы и оборудование браузеру не управляются.</span></div>';
+}
+
+function initializeTerminal(appWindow) {
+  const root = appWindow.querySelector("[data-terminal-root]");
+  const form = root?.querySelector("[data-terminal-form]");
+  if (!root || !form) return;
+  const prompt = root.querySelector("[data-terminal-prompt]");
+  if (prompt) prompt.textContent = "mora:" + virtualWorkspace.path(currentDirectoryId).join("/") + "$";
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = form.querySelector("[data-terminal-command]");
+    runTerminalCommand(root, input.value);
+    input.value = "";
+  });
+}
+
+function persistNotifications() {
+  try {
+    localStorage.setItem("duckos.mora.notifications.v1", JSON.stringify(notifications.filter((item) => item.read).map((item) => item.id)));
+  } catch {
+    showToast("Не удалось сохранить состояние уведомлений.");
+  }
+}
+
+function renderNotifications() {
+  const list = document.querySelector("[data-notification-list]");
+  if (!list) return;
+  list.innerHTML = "";
+  if (!notifications.length) {
+    const empty = document.createElement("p");
+    empty.className = "notification-empty";
+    empty.textContent = "Новых уведомлений нет.";
+    list.append(empty);
+  } else {
+    notifications.forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "notification-card" + (item.read ? "" : " unread");
+      button.dataset.notificationOpen = item.id;
+      const title = document.createElement("strong");
+      title.textContent = item.title;
+      const body = document.createElement("span");
+      body.textContent = item.body;
+      const time = document.createElement("time");
+      time.textContent = item.read ? "Прочитано" : "Новое";
+      button.append(title, body, time);
+      list.append(button);
+    });
+  }
+  applyTranslations(document.getElementById("notification-panel"), currentLocale);
+}
+
+function toggleFlyout(name, force) {
+  const target = document.getElementById(name === "quick" ? "quick-panel" : "notification-panel");
+  if (!target) return;
+  const shouldOpen = force ?? target.hidden;
+  document.querySelectorAll(".desktop-flyout").forEach((panel) => { panel.hidden = panel !== target || !shouldOpen; });
+  document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
+    const active = button.dataset.panelToggle === name && shouldOpen;
+    button.setAttribute("aria-expanded", String(active));
+  });
+  if (shouldOpen && name === "notifications") renderNotifications();
+}
+
+function saveActiveWorkspace() {
+  try { localStorage.setItem("duckos.mora.active-workspace.v1", String(activeWorkspace)); } catch {}
+}
+
+function switchWorkspace(number) {
+  if (![1, 2, 3].includes(number) || number === activeWorkspace) return;
+  activeWorkspace = number;
+  saveActiveWorkspace();
+  const desktop = document.querySelector(".desktop");
+  desktop.dataset.workspace = String(number);
+  desktop.classList.remove("workspace-changing");
+  void desktop.offsetWidth;
+  desktop.classList.add("workspace-changing");
+  document.querySelectorAll("[data-workspace-select]").forEach((button) => {
+    const active = Number(button.dataset.workspaceSelect) === number;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  windowLayer.querySelectorAll(".app-window").forEach((appWindow) => {
+    appWindow.hidden = Number(appWindow.dataset.workspace || 1) !== activeWorkspace;
+  });
+  updateActiveApp();
+}
+
+function updateDemoMetrics() {
+  const values = {
+    cpu: 18 + Math.round(Math.random() * 34),
+    memory: 42 + Math.round(Math.random() * 19),
+    disk: 56 + Math.round(Math.random() * 12)
+  };
+  Object.entries(values).forEach(([key, value]) => {
+    const row = document.querySelector('[data-metric="' + key + '"]');
+    if (!row) return;
+    row.querySelector("strong").textContent = value + "%";
+    row.querySelector("b").style.width = value + "%";
+  });
+}
+
+function renderDesktopContextMenu(x, y, items) {
+  const menu = document.getElementById("desktop-context-menu");
+  menu.innerHTML = items.map((item) => '<button type="button" role="menuitem" data-context-action="' +
+    escapeHtml(item.action) + '"' + (item.disabled ? " disabled" : "") + '>' + escapeHtml(item.label) + '</button>').join("");
+  menu.hidden = false;
+  const left = Math.max(8, Math.min(x, window.innerWidth - menu.offsetWidth - 8));
+  const top = Math.max(8, Math.min(y, window.innerHeight - menu.offsetHeight - 8));
+  menu.style.left = left + "px";
+  menu.style.top = top + "px";
+}
+
+function handleContextAction(action) {
+  const menu = document.getElementById("desktop-context-menu");
+  menu.hidden = true;
+  if (action === "files") { openApp("files"); return; }
+  if (action === "terminal") { openApp("terminal"); return; }
+  if (action === "settings") { openApp("settings"); return; }
+  if (!contextTargetFile) {
+    if (action === "new-folder") {
+      const name = window.prompt("Имя новой папки");
+      if (name === null) return;
+      try {
+        virtualWorkspace.createFolder(name, "home");
+        showToast("Папка создана.");
+      } catch (error) { showToast(error.message); }
+    }
+    return;
+  }
+  const item = virtualWorkspace.get(contextTargetFile);
+  const owner = contextOwnerPanel;
+  if (!item) return;
+  if (action === "open") {
+    if (item.type === "folder" && owner) navigateFiles(owner, item.id);
+    else if (item.type === "file" && owner) {
+      owner._filesState.selectedId = item.id;
+      renderFileManager(owner);
+    }
+  } else if (action === "rename") {
+    const name = window.prompt("Новое имя", item.name);
+    if (name === null) return;
+    try {
+      virtualWorkspace.rename(item.id, name);
+      if (owner) renderFileManager(owner);
+      showToast("Изменения сохранены локально.");
+    } catch (error) { showToast(error.message); }
+  } else if (action === "delete") {
+    if (!window.confirm("Удалить «" + item.name + "» из виртуального пространства?")) return;
+    try {
+      virtualWorkspace.remove(item.id);
+      if (owner) {
+        if (owner._filesState.selectedId === item.id) owner._filesState.selectedId = null;
+        renderFileManager(owner);
+      }
+      showToast("Удалено из локального пространства.");
+    } catch (error) { showToast(error.message); }
+  } else if (action === "download") {
+    downloadWorkspaceFile(item);
+  }
+  contextTargetFile = null;
+  contextOwnerPanel = null;
+}
+
 function panelMarkup(appId) {
   switch (appId) {
+    case "files":
+      return filesPanelMarkup();
+    case "terminal":
+      return '<p class="window-kicker">MORA TERMINAL · VIRTUAL MODE</p><h2 class="window-heading">Терминал</h2>' +
+        '<div class="terminal-panel" data-terminal-root><p class="window-copy">Доступ к настоящему терминалу не подключён. Команды выполняются только в виртуальном пространстве Mora.</p>' +
+        '<div class="terminal-window"><pre data-terminal-output data-user-content>DuckOS Mora local workspace\\nType help to see available commands.</pre></div>' +
+        '<form class="terminal-form" data-terminal-form><label data-terminal-prompt>mora:/Home$</label><input data-terminal-command autocomplete="off" spellcheck="false" aria-label="Команда" placeholder="help"></form></div>';
+    case "settings":
+      return settingsPanelMarkup();
     case "cockos":
       return '<p class="window-kicker">АУДИОЦЕНТР · ДЕМО</p>' +
         '<h2 class="window-heading">Звук под контролем</h2>' +
@@ -735,6 +1273,9 @@ function openApp(appId) {
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
   if (appId === "mora-commons") initializeCommonsPanel(appWindow);
+  if (appId === "files") initializeFileManager(appWindow);
+  if (appId === "terminal") initializeTerminal(appWindow);
+  applyTranslations(appWindow, currentLocale);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
