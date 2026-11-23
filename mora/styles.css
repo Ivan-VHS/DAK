@@ -3,6 +3,26 @@
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  --mora-page: #211913;
+  --mora-surface: #33261d;
+  --mora-elevated: #493326;
+  --mora-text: #fff3e2;
+  --mora-secondary: #e7d2b8;
+  --mora-muted: #c4a98a;
+  --mora-brand: #d58b3d;
+  --mora-brand-hover: #eaa653;
+  --mora-secondary-accent: #6f8062;
+  --mora-border: #75543a;
+  --mora-selection: #60442e;
+  --mora-danger: #b64a40;
+  --ink: var(--mora-text);
+  --muted: rgba(231, 210, 184, .72);
+  --glass: rgba(51, 38, 29, .5);
+  --line: rgba(213, 169, 119, .24);
+  --panel: rgba(33, 25, 19, .94);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
   --mora-page: #10142a;
   --mora-surface: #191e39;
   --mora-elevated: #252b4b;
@@ -43,7 +63,7 @@
 }
 * { box-sizing: border-box; }
 html, body { width: 100%; min-width: 320px; min-height: 100%; margin: 0; }
-body { min-height: 100vh; overflow: hidden; background: #17172b; color: var(--ink); }
+body { min-height: 100vh; overflow: hidden; background: var(--mora-page); color: var(--ink); }
 button { color: inherit; font: inherit; }
 button:focus-visible { outline: 2px solid #ffe1b7; outline-offset: 4px; }
 .desktop { position: relative; isolation: isolate; width: 100%; min-height: 100vh; overflow: hidden; }
@@ -394,3 +414,38 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
 :root[data-theme="light"] .system-notice {
   color:var(--mora-secondary);
 }
+
+
+/* Mora Amber: warm drapery rhythm, walnut centre and restrained olive glass. */
+:root[data-theme="amber"] .wallpaper {
+  background: radial-gradient(ellipse at 50% 48%, #090806 0 7%, #17100c 24%, #2b1d14 47%, #6d482b 76%, #a87843 100%);
+}
+:root[data-theme="amber"] .wallpaper svg {
+  opacity:.12;
+  filter:sepia(.9) saturate(.55) brightness(.58);
+}
+:root[data-theme="amber"] .wallpaper::after {
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(5,4,3,.92) 0%, rgba(13,9,7,.66) 23%, rgba(31,19,12,.14) 56%, rgba(9,7,5,.3) 100%),
+    repeating-linear-gradient(90deg,
+      rgba(255,220,166,.12) 0,
+      rgba(255,220,166,.025) 2.5%,
+      rgba(14,9,6,.42) 6%,
+      rgba(218,160,95,.14) 10%,
+      rgba(61,38,24,.5) 14%,
+      rgba(239,190,128,.08) 18%,
+      rgba(11,8,6,.28) 22%);
+}
+:root[data-theme="amber"] .statusbar { background:rgba(20,14,10,.58); border-bottom-color:rgba(226,181,131,.22); }
+:root[data-theme="amber"] .app-tile { border-color:rgba(213,169,119,.24); background:linear-gradient(145deg,rgba(87,61,39,.54),rgba(34,25,19,.68)); }
+:root[data-theme="amber"] .app-tile:hover { border-color:rgba(234,166,83,.48); background:linear-gradient(145deg,rgba(105,72,43,.66),rgba(43,30,21,.78)); }
+:root[data-theme="amber"] .widget-card { border-color:rgba(213,169,119,.28); background:linear-gradient(145deg,rgba(48,35,26,.88),rgba(30,23,18,.82)); }
+:root[data-theme="amber"] .dock { border-color:rgba(213,169,119,.3); background:rgba(36,26,19,.78); }
+:root[data-theme="amber"] .window-titlebar,
+:root[data-theme="amber"] .permission-row { border-color:rgba(213,169,119,.2); }
+:root[data-theme="amber"] .intent-preview { border-color:rgba(213,139,61,.38); background:rgba(213,139,61,.08); }
+:root[data-theme="amber"] .system-notice { border-color:rgba(111,128,98,.34); background:rgba(111,128,98,.12); }
+:root[data-theme="amber"] .system-notice.warning { border-color:rgba(182,74,64,.4); background:rgba(182,74,64,.1); }
+:root[data-theme="amber"] .action-button { background:var(--mora-brand); color:#211913; }
+:root[data-theme="amber"] .action-button:hover { background:var(--mora-brand-hover); }
+:root[data-theme="amber"] button:focus-visible { outline-color:#f3c16b; }

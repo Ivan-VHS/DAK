@@ -44,10 +44,12 @@ function applyPreferences() {
 
   const themeButton = document.querySelector('[data-action="toggle-theme"]');
   if (themeButton) {
-    const isLight = preferences.appearance.theme === "light";
-    themeButton.textContent = isLight ? "☾" : "☼";
-    themeButton.setAttribute("aria-pressed", String(isLight));
-    themeButton.setAttribute("aria-label", isLight ? "Включить тёмную тему" : "Включить светлую тему");
+    const currentTheme = preferences.appearance.theme;
+    const labels = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
+    themeButton.textContent = currentTheme === "amber" ? "A" : currentTheme === "dark" ? "◐" : "☼";
+    themeButton.setAttribute("aria-pressed", String(currentTheme !== "amber"));
+    themeButton.setAttribute("aria-label", "Текущая тема: " + labels[currentTheme] + ". Нажмите, чтобы переключить.");
+    themeButton.title = "Тема: " + labels[currentTheme];
   }
 }
 
@@ -386,9 +388,11 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 document.addEventListener("click", (event) => {
   const themeToggle = event.target.closest('[data-action="toggle-theme"]');
   if (themeToggle) {
-    preferences.appearance.theme = preferences.appearance.theme === "light" ? "dark" : "light";
+    const nextTheme = { amber: "dark", dark: "light", light: "amber" };
+    preferences.appearance.theme = nextTheme[preferences.appearance.theme] || "amber";
     persistPreferences();
-    showToast(preferences.appearance.theme === "light" ? "Светлая тема включена" : "Тёмная тема включена");
+    const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
+    showToast("Тема: " + themeNames[preferences.appearance.theme]);
     return;
   }
 

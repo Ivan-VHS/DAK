@@ -67,3 +67,22 @@ test("the desktop remains self-contained and responsive", () => {
   assert.ok(css.includes("prefers-reduced-motion"));
   assert.ok(css.includes(".reduce-motion"));
 });
+
+
+const theme = JSON.parse(await readFile(new URL("../mora/theme.json", import.meta.url), "utf8"));
+const manifest = JSON.parse(await readFile(new URL("../mora/manifest.webmanifest", import.meta.url), "utf8"));
+const serviceWorker = await readFile(new URL("../mora/service-worker.js", import.meta.url), "utf8");
+
+test("Mora design system exposes Amber, Dark and Light themes", () => {
+  assert.equal(theme.schema, "mora.theme.v1");
+  assert.equal(theme.palettes.amber.brand, "#D58B3D");
+  assert.equal(theme.palettes.dark.brand, "#A78BFA");
+  assert.equal(theme.palettes.light.brand, "#5B43B5");
+  assert.equal(manifest.name, "Mora — DuckOS Desktop");
+  assert.equal(manifest.theme_color, "#211913");
+  assert.ok(css.includes(':root[data-theme="amber"]'));
+  assert.ok(css.includes("repeating-linear-gradient(90deg"));
+  assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
+  assert.ok(serviceWorker.includes("./core.js"));
+  assert.ok(serviceWorker.includes("self.location.origin"));
+});
