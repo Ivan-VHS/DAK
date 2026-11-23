@@ -1,16 +1,16 @@
 const projects=[
-{id:"pytyliki",name:"Pytyliki",category:"system",role:"Processor diagnostics",description:"CPU-профили, измерения, мониторинг и локальные отчёты.",icon:"▣",colors:["#5ed9ef","#1769b5"],repo:"https://github.com/Ivan-VHS/Pytyliki",image:"https://raw.githubusercontent.com/Ivan-VHS/Pytyliki/main/assets/screenshots/pytyliki-workstation.png"},
-{id:"reaper",name:"Reaper",category:"developer",role:"Language & Studio IDE",description:"Язык Reaper, редактор, запуск, отладчик, LSP и DAP.",icon:"R",colors:["#c0a7ff","#5d3bc0"],repo:"https://github.com/Ivan-VHS/Reaper",image:"https://raw.githubusercontent.com/Ivan-VHS/Reaper/main/assets/screenshots/reaper-studio.png"},
-{id:"oplague",name:"OPlague",category:"system",role:"Hardware workbench",description:"Инвентаризация устройств и безопасная инспекция пакетов.",icon:"O",colors:["#ff9eaa","#a91f49"],repo:"https://github.com/Ivan-VHS/OPlague",image:"https://raw.githubusercontent.com/Ivan-VHS/OPlague/main/assets/screenshots/oplague-workbench.png"},
-{id:"ventu",name:"VentuSample",category:"creative",role:"Sample workstation",description:"Создание лупов, сэмплов и офлайн-обработка аудио.",icon:"V",colors:["#e6a3ff","#7043b6"],repo:"https://github.com/Ivan-VHS/VentuSample",image:"https://raw.githubusercontent.com/Ivan-VHS/VentuSample/main/assets/screenshots/ventusample-studio.png"},
-{id:"duckos",name:"DuckOS",category:"system",role:"Operating system",description:"Системная платформа и домашний экран Mora.",icon:"🦆",colors:["#ffd36d","#bb781e"],repo:"https://github.com/Ivan-VHS/DuckOS",image:""},
-{id:"cockos",name:"Cockos",category:"creative",role:"Звук и запись",description:"Микшер по приложениям, входные устройства и запись.",icon:"♫",colors:["#ff83ad","#bd3e74"]},
-{id:"kavun",name:"Kavun",category:"creative",role:"Фото и галерея",description:"Альбомы, изображения и быстрый просмотр.",icon:"◉",colors:["#75e4a9","#219d6b"]},
-{id:"kabon",name:"Ka-bon",category:"system",role:"Финансы",description:"Расходы, категории, лимиты и локальные отчёты.",icon:"₴",colors:["#ffd45c","#c28a1d"]},
-{id:"gloverty",name:"Gloverty",category:"system",role:"Автоматизация",description:"Сценарии, условия и действия для повседневных задач.",icon:"ϟ",colors:["#ad98ff","#5c43bd"]},
-{id:"po",name:"Po",category:"developer",role:"Браузер",description:"Поиск, вкладки, команды и рабочие ссылки.",icon:"⌕",colors:["#82bfff","#275fba"]},
-{id:"illidia",name:"Illidia",category:"creative",role:"Игры",description:"Игровая библиотека, ярлыки и коллекции.",icon:"⌘",colors:["#6ce4e0","#168c9c"]},
-{id:"unify",name:"Unify",category:"system",role:"Устройства",description:"Статусы устройств и передача файлов между инструментами.",icon:"⌁",colors:["#d8dcff","#7788cc"]}
+{id:"pytyliki",name:"Pytyliki",category:"system",role:"Processor diagnostics",description:"CPU-профили, измерения, мониторинг и локальные отчёты.",icon:"▣",colors:["#D5AA75","#78543A"],repo:"https://github.com/Ivan-VHS/Pytyliki",image:"https://raw.githubusercontent.com/Ivan-VHS/Pytyliki/main/assets/screenshots/pytyliki-workstation.png"},
+{id:"reaper",name:"Reaper",category:"developer",role:"Language & Studio IDE",description:"Язык Reaper, редактор, запуск, отладчик, LSP и DAP.",icon:"R",colors:["#B2A0A1","#62556A"],repo:"https://github.com/Ivan-VHS/Reaper",image:"https://raw.githubusercontent.com/Ivan-VHS/Reaper/main/assets/screenshots/reaper-studio.png"},
+{id:"oplague",name:"OPlague",category:"system",role:"Hardware workbench",description:"Инвентаризация устройств и безопасная инспекция пакетов.",icon:"O",colors:["#A7A08B","#5E624B"],repo:"https://github.com/Ivan-VHS/OPlague",image:"https://raw.githubusercontent.com/Ivan-VHS/OPlague/main/assets/screenshots/oplague-workbench.png"},
+{id:"ventu",name:"VentuSample",category:"creative",role:"Sample workstation",description:"Создание лупов, сэмплов и офлайн-обработка аудио.",icon:"V",colors:["#AF6C60","#5C302A"],repo:"https://github.com/Ivan-VHS/VentuSample",image:"https://raw.githubusercontent.com/Ivan-VHS/VentuSample/main/assets/screenshots/ventusample-studio.png"},
+{id:"duckos",name:"DuckOS",category:"system",role:"Operating system",description:"Системная платформа и домашний экран Mora.",icon:"🦆",colors:["#D6A65E","#80562F"],repo:"https://github.com/Ivan-VHS/DuckOS",image:""},
+{id:"cockos",name:"Cockos",category:"creative",role:"Звук и запись",description:"Микшер по приложениям, входные устройства и запись.",icon:"♫",colors:["#A37E61","#5A3828"]},
+{id:"kavun",name:"Kavun",category:"creative",role:"Фото и галерея",description:"Альбомы, изображения и быстрый просмотр.",icon:"◉",colors:["#A6AB87","#55634B"]},
+{id:"kabon",name:"Ka-bon",category:"system",role:"Финансы",description:"Расходы, категории, лимиты и локальные отчёты.",icon:"₴",colors:["#D58B3D","#80562F"]},
+{id:"gloverty",name:"Gloverty",category:"system",role:"Автоматизация",description:"Сценарии, условия и действия для повседневных задач.",icon:"ϟ",colors:["#A7A1A0","#5D5150"]},
+{id:"po",name:"Po",category:"developer",role:"Браузер",description:"Поиск, вкладки, команды и рабочие ссылки.",icon:"⌕",colors:["#A5B4B0","#4D6963"]},
+{id:"illidia",name:"Illidia",category:"creative",role:"Игры",description:"Игровая библиотека, ярлыки и коллекции.",icon:"⌘",colors:["#72908A","#354F4B"]},
+{id:"unify",name:"Unify",category:"system",role:"Устройства",description:"Статусы устройств и передача файлов между инструментами.",icon:"⌁",colors:["#D9C4A4","#78634B"]}
 ];
 const $=s=>document.querySelector(s), apps=$("#apps"), projectGrid=$("#projectGrid"), dialog=$("#appDialog"), search=$("#search");
 let filter="all";
@@ -32,10 +32,24 @@ document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>{fil
 document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("selected",x===b));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.filter===filter));render()}));
 function projectCard(app){const el=document.createElement("article");el.className="project-card";const img=document.createElement("img");img.className="project-image";img.alt=app.name+" desktop capture";img.loading="lazy";if(app.image)img.src=app.image;img.onerror=()=>img.removeAttribute("src");const info=document.createElement("div");const h=document.createElement("h3");h.textContent=app.name;const p=document.createElement("p");p.textContent=app.description;const actions=document.createElement("div");actions.className="actions";const repo=document.createElement("a");repo.href=app.repo;repo.target="_blank";repo.rel="noreferrer";repo.textContent="Репозиторий ↗";const details=document.createElement("a");details.href="#";details.textContent="Подробнее";details.onclick=e=>{e.preventDefault();openApp(app.id)};actions.append(repo,details);info.append(h,p,actions);el.append(img,info);return el}
 projectGrid.replaceChildren(...projects.map(projectCard));
-$("#theme").onclick=()=>{const next=document.documentElement.dataset.theme==="light"?"dark":"light";document.documentElement.dataset.theme=next;localStorage.setItem("mora-theme",next)};
+const themeOrder=["amber","light","dark"];
+function setTheme(theme){
+  if(theme==="amber") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme=theme;
+  localStorage.setItem("mora-theme",theme);
+}
+$("#theme").onclick=()=>{
+  const current=document.documentElement.dataset.theme||"amber";
+  const index=themeOrder.indexOf(current);
+  setTheme(themeOrder[(index+1)%themeOrder.length]);
+};
 $("#closeDialog").onclick=()=>dialog.close();dialog.addEventListener("click",e=>{if(e.target===dialog)dialog.close()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&dialog.open)dialog.close()});
-$("#projectsJump").onclick=()=>$("#projects").scrollIntoView({behavior:"smooth"});
+$("#projectsJump").onclick=()=>$("#projects").scrollIntoView({
+  behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"
+});
 function tick(){const now=new Date();$("#clock").textContent=new Intl.DateTimeFormat("ru-RU",{hour:"2-digit",minute:"2-digit"}).format(now);$("#heroClock").textContent=$("#clock").textContent;$("#date").textContent=new Intl.DateTimeFormat("ru-RU",{weekday:"long",day:"numeric",month:"long"}).format(now)}
-const saved=localStorage.getItem("mora-theme");if(saved==="light"||saved==="dark")document.documentElement.dataset.theme=saved;else if(matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.dataset.theme="light";
+const saved=localStorage.getItem("mora-theme");
+if(themeOrder.includes(saved)) setTheme(saved);
+else setTheme("amber");
 tick();setInterval(tick,10000);render();
 if("serviceWorker"in navigator&&location.protocol!=="file:")addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
