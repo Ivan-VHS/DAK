@@ -1115,7 +1115,7 @@ function rightsPanelMarkup() {
     '<p class="window-copy">Единое место для лицензий, сохранений, авторства и проверки целостности. Подлинность подтверждается только нативным модулем DuckOS с доверенным ключом издателя.</p>' +
     '<div class="rights-status-grid">' +
       '<article class="rights-status-card"><strong>Доверенные издатели</strong><span class="rights-status status-unconfigured">НЕ НАСТРОЕНО</span><small>Ключи издателей не встроены и не выдумываются.</small></article>' +
-      '<article class="rights-status-card"><strong>Нативная проверка</strong><span class="rights-status status-unverified">CLI / OPENSSL</span><small>Ed25519 + SHA-256 · проверка пакета до доверенного запуска.</small></article>' +
+      '<article class="rights-status-card"><strong>Нативная проверка</strong><span class="rights-status status-unverified">CLI / OPENSSL</span><small>Ed25519 + SHA-256 · CLI проверка; блокировка запуска ещё не подключена.</small></article>' +
       '<article class="rights-status-card"><strong>Офлайн-доступ</strong><span class="rights-status status-policy">SIGNED TOKEN</span><small>Кэшированный токен действует только до offline_valid_until.</small></article>' +
       '<article class="rights-status-card"><strong>Журнал прав</strong><span class="rights-status status-policy">HASH CHAIN</span><small>Локальная цепочка событий; не неизменяемое хранилище.</small></article>' +
     '</div>' +
@@ -1678,6 +1678,7 @@ document.addEventListener("click", (event) => {
   if (panelClose) {
     toggleFlyout("start", false);
     toggleFlyout("quick", false);
+    toggleFlyout("clock", false);
     toggleFlyout("notifications", false);
     return;
   }
