@@ -111,3 +111,16 @@ Already running native processes are not remotely repainted. Restart the process
     python mora_host.py --no-browser
 
 The CI test suite checks the browser shell, Mora core contracts, application registry, local host routes and the safe fixed-target launcher. Native app readiness/build remains platform-specific and is checked in the respective project repositories.
+
+## 9. Relationship to the 1,000-program catalogue
+
+The 1,000-program adoption manifest is an ownership and integration contract, not a list of native desktop tiles and not a package installation plan. The four native tools in Mora are the user-facing entry points for the specialist repositories; the catalogue's assigned ranges and wider capabilities remain governed by [PROGRAM_CATALOGUE_INTEGRATION.md](PROGRAM_CATALOGUE_INTEGRATION.md) and [ivan-vhs-program-adoption.v1.json](../manifests/ivan-vhs-program-adoption.v1.json).
+
+Mora does not expose every catalogue item as an individual process. Integration happens through reviewed, versioned APIs and reports:
+
+- Pytyliki provides bounded host/CPU inventory and evidence; no hardware writes are implied.
+- Reaper provides language and developer tooling in user space; it is not a kernel runtime.
+- OPlague provides read-only device/package inspection; it does not install or load inspected drivers.
+- VentuSample owns audio/DSP and offline render jobs; it does not become a kernel audio callback or system audio-device host.
+
+A catalogue capability is considered implemented only when the owning repository has source, tests, a versioned interface and documented platform/safety limits.
