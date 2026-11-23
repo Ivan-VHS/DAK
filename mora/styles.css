@@ -1323,7 +1323,7 @@ a:hover, .text-link:hover, .widget-link:hover { color:var(--mora-info); }
 
 
 /* Responsive workspace profiles: compact screens, classic desktop, 4K and 8K. */
-@media (min-width:761px) and (min-width:1151px) {
+@media (min-width:1151px) {
   .desktop { min-height:100svh; }
   .statusbar {
     min-height:58px;
@@ -1421,6 +1421,12 @@ a:hover, .text-link:hover, .widget-link:hover { color:var(--mora-info); }
   .widget-card { padding:15px; }
   .dock-wrap { bottom:12px; }
   .app-window { max-height:calc(100svh - 98px); }
+}
+
+/* Full HD and QHD baseline before the UHD profiles below. */
+@media (min-width:1920px) {
+  .desktop-content { width:min(88vw,2400px); }
+  .app-window { width:min(900px,78vw); }
 }
 
 /* UHD / DCI and 4K displays. */
