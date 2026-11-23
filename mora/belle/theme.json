@@ -1,0 +1,10 @@
+{
+  "schema":"mora.belle.theme.v1",
+  "name":"Mora Belle",
+  "version":1,
+  "palette":{"page":"#FBF3F5","surface":"#FFFAF9","card":"#FFFFFF","raised":"#F7E9ED","text":"#3D2934","secondary":"#6F5362","muted":"#8B7180","brand":"#A85878","brandStrong":"#86425F","brandSoft":"#F2DCE4","sage":"#738776","gold":"#B58C55","border":"#EAD6DE","danger":"#A33D50"},
+  "nightPalette":{"page":"#211A25","surface":"#2D2331","card":"#342838","raised":"#443347","text":"#FFF3F6","secondary":"#E7D2DD","muted":"#C3A8B7","brand":"#E5A9C2","brandStrong":"#F0BFD3","brandSoft":"#503648","sage":"#B3C6B4","gold":"#E1BF89","border":"#624B60","danger":"#F2A2B2"},
+  "ornament":{"motifs":["scalloped-edge","soft-lace","ribbon","flower-medallion"],"decorativeOnly":true,"minimumInteractiveTargetPx":44},
+  "motion":{"transitionMs":180,"reducedMotionRespected":true},
+  "defaultPalette":"blush"
+}
