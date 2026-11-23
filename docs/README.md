@@ -45,3 +45,7 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Windows application compatibility
 
 [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
+
+## Current ecosystem engineering baseline
+
+[ECOSYSTEM_ENGINEERING_STANDARD.md](ECOSYSTEM_ENGINEERING_STANDARD.md) defines the current five-repository ownership map, stack-specific build/test commands, shared quality requirements, audit sequence and release gates. It complements this repository's own architecture and engineering contracts; source, tests and CI remain the evidence for implementation status.
