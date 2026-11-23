@@ -10,6 +10,7 @@ from .compat import (
     compatibility_status, create_prefix, diagnose_binary,
     inspect_pe_file, plan_launch, read_prefix,
 )
+from . import compatibility as host_compatibility
 from .hardware_inventory import collect_host_inventory
 from .image_layout import plan_image
 from .manifest import validate_manifest
@@ -74,6 +75,57 @@ def main(argv: list[str] | None = None) -> int:
 
     commands.add_parser("compat-status", help="show implemented and pending Windows-runtime components")
 
+    compat = commands.add_parser(
+        "compatibility", help="run installed Wine/Proton/DOS compatibility tools on a Linux host"
+    )
+    compat_commands = compat.add_subparsers(dest="compat_action", required=True)
+    compat_commands.add_parser("status", help="detect host runtimes, launchers and graphics tools")
+    compat_commands.add_parser("prefixes", help="list DuckOS-managed Wine prefixes")
+
+    manager = compat_commands.add_parser(
+        "open-manager", help="open an installed third-party compatibility manager"
+    )
+    manager.add_argument(
+        "--name", required=True, choices=sorted(host_compatibility.MANAGER_COMMANDS)
+    )
+
+    vm_disk = compat_commands.add_parser(
+        "create-reactos-disk", help="create a qcow2 virtual disk for a separate ReactOS guest"
+    )
+    vm_disk.add_argument("--path", type=Path, required=True)
+    vm_disk.add_argument("--size-gib", type=int, default=16)
+
+    vm = compat_commands.add_parser(
+        "launch-reactos", help="boot a user-supplied ReactOS installation in QEMU"
+    )
+    vm.add_argument("--disk", type=Path, required=True)
+    vm.add_argument("--iso", type=Path, help="optional ReactOS installation ISO")
+    vm.add_argument("--memory-mib", type=int, default=2048)
+    vm.add_argument("--cpus", type=int, default=2)
+
+    create_runtime_prefix = compat_commands.add_parser(
+        "create-prefix", help="initialize a real Wine prefix with wineboot"
+    )
+    create_runtime_prefix.add_argument("--name", required=True)
+    create_runtime_prefix.add_argument("--arch", choices=("win32", "win64"), default="win64")
+
+    component = compat_commands.add_parser(
+        "install-component", help="install an allowlisted Winetricks component"
+    )
+    component.add_argument("--prefix", required=True)
+    component.add_argument(
+        "--component", required=True, choices=sorted(host_compatibility.COMPONENTS)
+    )
+
+    run = compat_commands.add_parser(
+        "launch", help="launch a file through Wine, Steam Proton or DOSBox"
+    )
+    run.add_argument("--engine", choices=("wine", "proton", "dosbox"), default="wine")
+    run.add_argument("--prefix", help="DuckOS-managed Wine prefix name")
+    run.add_argument("--compat-data", type=Path, help="existing Steam compatdata directory for Proton")
+    run.add_argument("executable", type=Path)
+    run.add_argument("arguments", nargs=argparse.REMAINDER)
+
     try:
         args = parser.parse_args(argv)
         if args.command == "validate-manifest":
@@ -108,6 +160,36 @@ def main(argv: list[str] | None = None) -> int:
             result = diagnose_binary(args.file, args.prefix)
         elif args.command == "compat-plan":
             result = plan_launch(args.file, args.prefix)
+        elif args.command == "compatibility":
+            if args.compat_action == "status":
+                result = host_compatibility.compatibility_status()
+            elif args.compat_action == "prefixes":
+                result = host_compatibility.list_prefixes()
+            elif args.compat_action == "open-manager":
+                result = host_compatibility.open_manager(args.name)
+            elif args.compat_action == "create-reactos-disk":
+                result = host_compatibility.create_reactos_disk(args.path, args.size_gib)
+            elif args.compat_action == "launch-reactos":
+                result = host_compatibility.launch_reactos(
+                    args.disk, iso=args.iso, memory_mib=args.memory_mib, cpus=args.cpus
+                )
+            elif args.compat_action == "create-prefix":
+                result = host_compatibility.create_prefix(args.name, args.arch)
+            elif args.compat_action == "install-component":
+                result = host_compatibility.install_component(args.prefix, args.component)
+            elif args.compat_action == "launch":
+                arguments = list(args.arguments)
+                if arguments and arguments[0] == "--":
+                    arguments.pop(0)
+                result = host_compatibility.launch_program(
+                    args.executable,
+                    engine=args.engine,
+                    prefix=args.prefix,
+                    compat_data=args.compat_data,
+                    arguments=arguments,
+                )
+            else:
+                raise ValueError("unknown compatibility operation")
         else:
             result = compatibility_status()
         _print_result(result)
