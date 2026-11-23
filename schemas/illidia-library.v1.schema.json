@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/illidia-library.v1.schema.json",
+  "title": "Illidia local game library",
+  "type": "object",
+  "required": ["schema", "games"],
+  "properties": {
+    "schema": { "const": "duckos.illidia-library.v1" },
+    "games": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "executable", "format", "architecture", "backend",
+          "bottle", "arguments", "added_at", "last_launched_at", "last_exit_code"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,47}$" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "executable": { "type": "string", "minLength": 1 },
+          "format": { "enum": ["PE32", "PE32+", "ELF"] },
+          "architecture": { "type": "string", "minLength": 1 },
+          "backend": { "enum": ["auto", "wine", "proton", "crossover", "bottles"] },
+          "bottle": { "type": ["string", "null"], "maxLength": 128 },
+          "arguments": { "type": "array", "items": { "type": "string" } },
+          "added_at": { "type": "string", "format": "date-time" },
+          "last_launched_at": { "type": ["string", "null"], "format": "date-time" },
+          "last_exit_code": { "type": ["integer", "null"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
