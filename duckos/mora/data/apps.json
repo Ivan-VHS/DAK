@@ -300,8 +300,15 @@
   ],
   "integration": {
     "manifest_schema": "mora/app-manifest.schema.json",
-    "external_launch": "specified_not_enabled",
-    "execution_rule": "A future native launcher must resolve trusted installed paths and require explicit operator approval. Never execute manifest commands through a shell."
+    "external_launch": "implemented_allowlisted_user_space_launcher",
+    "execution_rule": "Only fixed registered project IDs and verified entry points inside pinned projects checkouts can launch after explicit user action. Use argv with shell=false; never build or execute manifest-provided commands.",
+    "launcher_module": "duckos.desktop.native_apps.NativeApplicationHub",
+    "registered_project_apps": [
+      "reaper",
+      "pytyliki",
+      "oplague",
+      "ventusample"
+    ]
   },
   "system_services": [
     {
