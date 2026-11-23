@@ -19,6 +19,7 @@
         "kind": { "enum": ["local_process", "static_entrypoint"] },
         "platforms": { "type": "array", "items": { "enum": ["windows", "linux", "macos"] }, "uniqueItems": true },
         "entrypoint": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "platform_entrypoints": { "type": "object", "propertyNames": { "enum": ["windows", "linux", "macos"] }, "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 240 } },
         "runtime": { "type": "string", "maxLength": 80 },
         "arguments": { "type": "array", "items": { "type": "string", "maxLength": 240 }, "maxItems": 32 },
         "working_directory": { "type": "string", "maxLength": 240 }
