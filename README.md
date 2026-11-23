@@ -129,6 +129,18 @@ duckos desktop startup list
 
 It does not claim to be the native compositor or manage machine-wide services. See [Duck Desktop optimization](docs/DESKTOP_OPTIMIZATION.md) for commands, safety boundaries and implementation status.
 
+## Duck Foundry industrial operations console
+
+Duck Foundry is a native user-space operations workbench. It correlates the existing read-only Duck Desktop resource/workspace audit, PCI/USB or Windows PnP inventory and DuckBridge runtime discovery. It produces threshold-based findings, versioned local reports and manual runbooks for routine checks, preventive maintenance, incident review and commissioning.
+
+~~~sh
+duckos foundry gui
+duckos foundry audit
+duckos foundry plan --profile preventive
+~~~
+
+Foundry does not control machinery, modify hardware or drivers, stop processes, change system services or perform automatic remediation. Its recovery and security entries remain explicitly marked as specified until native enforcement exists. See [Duck Foundry](docs/FOUNDRY.md).
+
 ## Windows application compatibility
 
 DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.
