@@ -1,6 +1,10 @@
 :root {
   color-scheme: dark;
-  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  --mora-font-ui: Inter, "Segoe UI", system-ui, sans-serif;
+  --mora-font-display: "Lobster", "Pacifico", "Segoe UI", sans-serif;
+  --mora-font-script: "Caveat", "Marck Script", "Bad Script", cursive;
+  --mora-font-script-latin: "Great Vibes", "Alex Brush", "Allura", cursive;
+  font-family: var(--mora-font-ui);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --mora-page: #080808;
@@ -33,7 +37,7 @@ button:focus-visible { outline: 2px solid #ffd400; outline-offset: 4px; }
 .wallpaper svg { display: block; width: 100%; height: 100%; min-height: 100vh; object-fit: cover; }
 .wallpaper::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(8,8,8,.22),transparent 55%,rgba(8,8,8,.17)); }
 .statusbar { height: 52px; display:flex; align-items:center; gap:24px; padding:0 34px; border-bottom:1px solid rgba(255,255,255,.14); background:rgba(8,8,8,.25); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); font-size:12px; letter-spacing:.02em; }
-.brand { display:flex; align-items:center; gap:9px; font-weight:700; font-size:14px; letter-spacing:.02em; }
+.brand { display:flex; align-items:center; gap:9px; font-family:var(--mora-font-display); font-weight:700; font-size:16px; letter-spacing:.02em; }
 .brand-mark { display:grid; place-items:center; width:23px; height:23px; border-radius:8px; color:#3a3100; background:linear-gradient(140deg,#ffd400,#ffd400); font-family:Georgia,serif; font-size:18px; font-style:italic; }
 .active-app { color:rgba(255,255,255,.72); }
 .system-status { margin-left:auto; display:flex; align-items:center; gap:18px; color:rgba(255,255,255,.83); font-variant-numeric:tabular-nums; }
@@ -46,13 +50,13 @@ button:focus-visible { outline: 2px solid #ffd400; outline-offset: 4px; }
 .time-panel { align-self:center; padding-bottom:35px; }
 .eyebrow { display:block; margin:0 0 15px; color:rgba(255,255,255,.62); font-size:9px; font-weight:700; letter-spacing:.17em; }
 .hero-clock { display:block; font-size:clamp(64px,7.8vw,112px); line-height:.98; letter-spacing:-.075em; font-weight:300; text-shadow:0 7px 45px rgba(8,8,8,.16); font-variant-numeric:tabular-nums; }
-.hero-date { margin:18px 0 0; color:rgba(255,255,255,.9); font-size:clamp(16px,1.6vw,20px); font-weight:400; }
-.welcome-note { margin-top:62px; max-width:210px; display:flex; align-items:flex-start; gap:11px; color:rgba(255,255,255,.7); font-size:12px; line-height:1.65; }
+.hero-date { margin:18px 0 0; color:rgba(255,255,255,.9); font-family:var(--mora-font-script); font-size:clamp(20px,1.9vw,25px); font-weight:400; line-height:1.25; }
+.welcome-note { margin-top:62px; max-width:230px; display:flex; align-items:flex-start; gap:11px; color:rgba(255,255,255,.82); font-family:var(--mora-font-script); font-size:17px; line-height:1.45; }
 .sun-glyph { color:#ffd400; font-size:21px; line-height:1; }
 .app-area { min-width:0; }
 .section-heading { display:flex; align-items:end; justify-content:space-between; margin-bottom:23px; }
 .section-heading .eyebrow { margin-bottom:8px; }
-.section-heading h1 { margin:0; font-size:25px; font-weight:500; letter-spacing:-.04em; }
+.section-heading h1 { margin:0; font-family:var(--mora-font-display); font-size:28px; font-weight:500; letter-spacing:-.025em; }
 .tiny-counter { padding:6px 8px; border:1px solid var(--line); border-radius:20px; color:rgba(255,255,255,.65); font-size:8px; letter-spacing:.12em; white-space:nowrap; }
 .app-grid { display:grid; grid-template-columns:repeat(3,minmax(100px,1fr)); gap:12px; }
 .app-tile { min-height:142px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:6px; padding:17px; border:1px solid rgba(255,255,255,.15); border-radius:19px; background:linear-gradient(145deg,rgba(255,255,255,.19),rgba(255,255,255,.055)); box-shadow:0 12px 34px rgba(8,8,8,.09); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); text-align:left; cursor:pointer; transition:transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease; }
@@ -105,7 +109,7 @@ button:focus-visible { outline: 2px solid #ffd400; outline-offset: 4px; }
 .window-close:hover { color:#ffffff; background:rgba(255,212,0,.35); }
 .window-body { padding:22px; overflow:auto; }
 .window-kicker { margin:0 0 7px; color:rgba(255,255,255,.48); font-size:9px; letter-spacing:.14em; font-weight:700; }
-.window-heading { margin:0 0 18px; font-size:24px; font-weight:550; letter-spacing:-.045em; }
+.window-heading { margin:0 0 18px; font-family:var(--mora-font-script); font-size:29px; font-weight:550; letter-spacing:-.025em; line-height:1.2; }
 .window-copy { color:rgba(255,255,255,.67); font-size:12px; line-height:1.6; }
 .control-row { display:flex; align-items:center; gap:15px; padding:13px 0; border-top:1px solid rgba(255,255,255,.09); }
 .control-copy { flex:1; min-width:0; }
@@ -821,3 +825,6 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
 input[type="range"] { accent-color: #FFD400; }
 .theme-control { color: #FFD400; }
 .extension-theme-options { display: none; }
+
+/* Optional ornamental Latin lettering; use only for Latin-script content. */
+.latin-calligraphy { font-family: var(--mora-font-script-latin); }
