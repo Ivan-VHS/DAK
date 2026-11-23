@@ -45,7 +45,7 @@ duckos reaper check ./examples/program.rpr
 duckos reaper typecheck ./examples/program.rpr
 ```
 
-The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+Reaper Studio is also available directly from the native Mora launcher and through `duckos reaper studio`. Native launch is handled by the DuckOS user-space integration. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
 ## Visual system and offline support
 
@@ -63,15 +63,15 @@ The versioned [hardware inventory contract](schemas/hardware-inventory.v1.schema
 
 ## Run and validate
 
-Open **mora/index.html** in a modern browser. The shell has no external runtime dependencies. A secure browser context may be needed for Web Crypto file hashing.
-
-Run the JavaScript contract tests with Node.js 18 or newer:
+Install and launch the native desktop (Python must include Tk support):
 
 ```sh
-npm test
+python -m pip install .
+duckos mora gui
+# or: duckos-mora
 ```
 
-The existing Python validation remains available:
+Run the Python validation suite:
 
 ```sh
 python -m pip install jsonschema
@@ -79,7 +79,7 @@ python -m unittest discover -s tests -v
 python tools/validate_app_catalog.py
 ```
 
-The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+The tests cover the native user-space shell and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
 
 ## Release packaging and deployment planning
 
@@ -91,21 +91,21 @@ See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce
 
 The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
 
-| Area | Current Mora shell | Native DuckOS work still required |
+| Area | Current native Mora shell | Native DuckOS work still required |
 |---|---|---|
 | Intent UI and approvals | Limited allowlisted local actions with review | privileged action broker, audit and rollback |
 | Local models and AI-native scheduling | Not connected | local inference runtime, NPU discovery and kernel scheduler |
 | Immutable atomic updates | Local settings snapshot only | signed images, A/B slots, boot verification and recovery |
 | Sandboxing and zero trust | Preferences only | per-process isolation, capability checks and device broker |
 | Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
-| Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
+| Adaptive workspace | Native Tk launcher, search, category filters and reduced-motion preference | native compositor, display migration, virtual workspaces and XR runtime |
 | Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
 | Windows/Linux compatibility | PE32/PE32+ header, section and import inspection; prefix scaffolding and CLI diagnostics | native executable loader, Win32/NT APIs, graphics/audio translation and launcher integration |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
 | Hardware inventory | Read-only PCI/USB (Linux) and PnP (Windows) snapshot | PCI/USB/ACPI enumeration in kernel, signed driver installation and device recovery |
 
-No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
+No Mora user-space control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
 
 ## DuckOS Extended Terminal
 
@@ -119,7 +119,7 @@ duckos terminal run "bridge runtimes"
 
 ## Native Duck Desktop optimizer
 
-The native user-space maintenance utility complements the Mora browser shell. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
+The native user-space maintenance utility complements the Mora launcher. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
 
 ~~~sh
 duckos desktop audit
