@@ -1,13 +1,13 @@
 # Mora Design System
 
 **Canonical source:** DuckOS / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.  
-**Palette set:** Solar, Amber, Arctic, Amethyst and Jade.
+**Palette set:** Obsidian Solar, Graphite Gold, Ivory Signal, Carbon Signal and Slate Signal.
 
 Mora is the shared desktop identity for the Ivan-VHS application family. The shell owns wallpaper, workspace navigation, application catalogue, status area and app presentation. Each native tool keeps its specialist layout and product indicators while sharing semantic surfaces, spacing, typography, focus, motion and a restrained material language.
 
 ## Visual direction
 
-The default desktop palette is **Obsidian Solar**: near-black graphite, clean white and a focused solar-yellow action accent. **Mora Amber** remains the warm signature option: amber-sand drapery with a repeating vertical fold rhythm, a deep near-black radial centre, graphite and walnut surfaces, subdued olive glass and a single controlled red critical marker. Depth comes from light and shadow, edge highlights and recognizable material response — not neon fill or scattered gradients.
+The default desktop palette is **Obsidian Solar**: near-black graphite, clean white and a focused solar-yellow action accent. All five presets stay inside the same black, white, neutral-grey and yellow family. They vary luminance, surface depth and yellow intensity rather than introducing unrelated cyan, green, purple, red or brown hues. Depth comes from light, shadow and edge contrast; task content stays more prominent than decoration.
 
 The standard workspace remains visually stable at the centre. Secondary content and controls are arranged symmetrically around it; decorative treatment never obscures task content.
 
@@ -17,17 +17,17 @@ The standard workspace remains visually stable at the centre. Secondary content 
 
 | Palette | Core colors | Visual role |
 |---|---|---|
-| **Obsidian Solar** | Graphite black · clean white · solar yellow | High-contrast, focused desktop; default palette |
-| **Mora Amber** | Walnut · sand · copper · muted olive | Warm signature material palette |
-| **Arctic Glass** | Ice white · slate · deep cyan · teal | Bright, calm workspace |
-| **Amethyst Night** | Deep plum · lavender · mint | Creative, low-glare night palette |
-| **Forest Jade** | Pine graphite · cream · jade · soft gold | Natural, restrained green palette |
+| **Obsidian Solar** | Graphite black · clean white · solar yellow | High-contrast default workspace |
+| **Graphite Gold** | Charcoal · cool white · golden yellow | Dense dark workspace with a restrained gold accent |
+| **Ivory Signal** | Soft ivory · charcoal · ochre yellow | Bright workspace with dark, readable controls |
+| **Carbon Signal** | Deep black · silver white · lemon yellow | Maximum-dark creative workspace |
+| **Slate Signal** | Slate graphite · cool white · muted yellow | Neutral low-glare workspace |
 
 Each palette defines the same roles: page, surface, elevated surface, primary/secondary/muted text, brand and hover colors, on-brand text, secondary accent and its foreground, border, selection, danger and on-danger foreground. Components must consume semantic roles rather than hard-coded palette colors.
 
-Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 or higher. The automated design-system contract checks every palette's text, secondary text, muted text, main action, secondary action and danger contrast. Meaning is never communicated through hue alone. Red is reserved for destructive or critical states.
+Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 or higher. The automated design-system contract checks every palette's text, secondary text, muted text, main action, secondary action and danger contrast. Meaning is never communicated through hue alone. Status and destructive states also use labels, icons and explicit confirmation; yellow remains the only chromatic accent.
 
-Legacy saved values migrate safely: `dark` maps to **Amethyst Night** and `light` maps to **Arctic Glass**. Existing `amber` preferences remain unchanged.
+Saved identifiers remain stable: `dark` maps to **Carbon Signal** (`amethyst`), `light` maps to **Ivory Signal** (`arctic`), and the former `amber` identifier now selects **Graphite Gold**. The previous non-neutral palette colors are intentionally retired.
 
 ## Composition and geometry
 
