@@ -71,7 +71,7 @@ python agent/duckos_hardware_agent.py scan-driver-updates --output driver-offers
 python agent/duckos_hardware_agent.py install-driver-update --update-id 00000000-0000-0000-0000-000000000000 --backup-dir D:\DuckOSDriverBackup
 ```
 
-The final command is Windows-only and interactive. Replace the example update ID with one returned by the scanner. It aborts if the update is not found exactly once, if the driver-store export fails, or if Windows cannot create the recovery checkpoint. It never silently installs all offered drivers.
+The final command is Windows-only and interactive. Replace the example update ID with one returned by the scanner. It aborts if the update is not found exactly once, if the driver-store export fails, if Windows cannot create the recovery checkpoint, or if the update EULA has not already been accepted by the user in Windows Update Settings. It never silently installs all offered drivers.
 
 On Linux, the snapshot reader uses `/sys`, `/proc`, DMI and EFI variable metadata when readable. It does not run package-manager commands or unload/reload kernel modules. Run with ordinary user privileges first; unavailable metrics remain absent.
 
