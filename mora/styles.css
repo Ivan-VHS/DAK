@@ -805,3 +805,191 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   :root[data-theme="amber"] .desktop-content {gap:26px}
   :root[data-theme="amber"] .dock-wrap {padding-bottom:14px}
 }
+
+
+/* Mora Commons — shared application catalogue. */
+.commons-intro {
+  margin: 0 0 15px;
+  color: var(--mora-secondary, rgba(255,246,241,.7));
+  font-size: 11px;
+  line-height: 1.6;
+}
+.commons-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 0;
+  padding: 0 12px;
+  border: 1px solid var(--line, rgba(255,255,255,.15));
+  border-radius: 12px;
+  background: var(--mora-surface, rgba(255,255,255,.06));
+}
+.commons-search span { color: var(--mora-muted, rgba(255,255,255,.5)); }
+.commons-search input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  outline: 0;
+  color: var(--mora-text, #fff);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+}
+.commons-search:focus-within { border-color: var(--mora-brand-hover, #eaa653); }
+.commons-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 12px;
+}
+.commons-filter {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--line, rgba(255,255,255,.13));
+  border-radius: 999px;
+  color: var(--mora-secondary, rgba(255,255,255,.7));
+  background: rgba(255,255,255,.045);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.commons-filter[aria-pressed="true"] {
+  border-color: var(--mora-brand, #d58b3d);
+  color: var(--mora-on-brand, #211913);
+  background: var(--mora-brand, #d58b3d);
+}
+.commons-count {
+  margin: 0 0 10px;
+  color: var(--mora-muted, rgba(255,255,255,.5));
+  font-size: 9px;
+}
+.commons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.commons-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--line, rgba(255,255,255,.12));
+  border-radius: 14px;
+  background: var(--mora-surface, rgba(255,255,255,.045));
+}
+.commons-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.commons-card-glyph {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  color: var(--mora-brand-hover, #eaa653);
+  background: rgba(213,139,61,.12);
+  font-size: 13px;
+  font-weight: 700;
+}
+.commons-favorite {
+  min-width: 34px;
+  min-height: 34px;
+  border: 1px solid var(--line, rgba(255,255,255,.12));
+  border-radius: 10px;
+  color: var(--mora-secondary, rgba(255,255,255,.7));
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.commons-favorite[aria-pressed="true"] { color: var(--mora-brand-hover, #eaa653); }
+.commons-card h3 {
+  margin: 0;
+  color: var(--mora-text, #fff);
+  font-size: 12px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.commons-card p {
+  margin: 0;
+  color: var(--mora-secondary, rgba(255,255,255,.65));
+  font-size: 9px;
+  line-height: 1.5;
+}
+.commons-card-category {
+  color: var(--mora-muted, rgba(255,255,255,.46));
+  font-size: 8px;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+.commons-card-actions { margin-top: auto; }
+.commons-card-actions button {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--line, rgba(255,255,255,.15));
+  border-radius: 10px;
+  color: var(--mora-text, #fff);
+  background: rgba(255,255,255,.06);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.commons-card-actions button:hover { background: rgba(255,255,255,.12); }
+.commons-empty {
+  grid-column: 1 / -1;
+  padding: 20px 12px;
+  border: 1px dashed var(--line, rgba(255,255,255,.2));
+  border-radius: 12px;
+  color: var(--mora-secondary, rgba(255,255,255,.65));
+  font-size: 10px;
+  text-align: center;
+}
+.commons-detail {
+  margin-top: 13px;
+  padding: 15px;
+  border: 1px solid rgba(213,139,61,.28);
+  border-radius: 14px;
+  background: rgba(213,139,61,.07);
+}
+.commons-detail[hidden] { display: none; }
+.commons-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.commons-detail h3 {
+  margin: 0;
+  color: var(--mora-text, #fff);
+  font-size: 14px;
+}
+.commons-detail p,
+.commons-detail li {
+  color: var(--mora-secondary, rgba(255,255,255,.72));
+  font-size: 10px;
+  line-height: 1.55;
+}
+.commons-detail ul { display: grid; gap: 5px; padding-left: 18px; }
+.commons-detail-status {
+  padding-top: 9px;
+  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+  color: var(--mora-muted, rgba(255,255,255,.55)) !important;
+}
+.commons-detail-close {
+  min-width: 34px;
+  min-height: 34px;
+  border: 1px solid var(--line, rgba(255,255,255,.15));
+  border-radius: 9px;
+  color: var(--mora-text, #fff);
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+}
+@media (max-width:760px) {
+  .commons-grid { grid-template-columns: 1fr; }
+  .commons-filters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .commons-filter { border-radius: 10px; }
+}

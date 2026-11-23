@@ -74,7 +74,7 @@
       "name": "Bridge",
       "category": "compatibility",
       "panel": "mora/app.js#runtime",
-      "maturity": "header_inspection_only"
+      "maturity": "partial_pe_cli_and_prefix_foundation"
     },
     {
       "id": "workspace",
@@ -96,6 +96,13 @@
       "category": "gaming",
       "panel": "mora/app.js#mora-boost",
       "maturity": "external_native_workbench"
+    },
+    {
+      "id": "mora-commons",
+      "name": "Mora Commons",
+      "category": "application_catalogue",
+      "panel": "mora/app.js#mora-commons",
+      "maturity": "implemented_local_catalog"
     }
   ],
   "widgets": [
@@ -134,7 +141,7 @@
     {
       "id": "compat-runtime",
       "maturity": "partial",
-      "scope": "PE and ELF header inspection; no process execution"
+      "scope": "PE32/PE32+ headers, sections and import DLL inspection; isolated prefix scaffold and CLI diagnostics; no native process execution"
     },
     {
       "id": "provenance-verifier",

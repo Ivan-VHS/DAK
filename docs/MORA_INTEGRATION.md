@@ -19,8 +19,9 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 | Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
+| Mora Commons | Discover and organize task-oriented application specifications | Local search, category filters, details and favourites; the fifteen listed products are not executable app packages |
 
-The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
+The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; Mora Commons is the shared, gender-neutral application catalogue. The Commons catalogue contains fifteen specified products, not fifteen installed native applications.
 
 ## Run and validate
 
