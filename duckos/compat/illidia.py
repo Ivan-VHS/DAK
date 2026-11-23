@@ -101,9 +101,9 @@ def _write_library(path: Path, payload: dict[str, Any]) -> None:
 
         temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
         try:
-            with temporary.open("x", encoding="utf-8", newline="\\n") as handle:
+            with temporary.open("x", encoding="utf-8", newline="\n") as handle:
                 json.dump(payload, handle, ensure_ascii=False, indent=2, allow_nan=False)
-                handle.write("\\n")
+                handle.write("\n")
                 handle.flush()
                 os.fsync(handle.fileno())
             os.replace(temporary, path)
