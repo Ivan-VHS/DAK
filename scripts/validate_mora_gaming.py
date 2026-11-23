@@ -72,7 +72,7 @@ def main() -> int:
 
     source = MORA_NATIVE.read_text(encoding="utf-8")
     require("def _build_boost_panel" in source, "Native Mora Boost panel is missing")
-    require("Игровая производительность" in source, "Mora Boost does not explain its workspace")
+    require("Игровая лаборатория" in source, "Mora Boost does not explain its workspace")
     catalog = json.loads(APP_CATALOG.read_text(encoding="utf-8"))
     require(
         any(item.get("id") == "mora-boost" and item.get("runtime") == "native-tk"
