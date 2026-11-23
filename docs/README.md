@@ -1,5 +1,9 @@
 # DuckOS documentation
 
+## Illidia game library and launcher
+
+[Illidia universal game library and launcher](ILLIDIA_GAME_LAUNCHER.md) documents the local SQLite library, Steam/Epic/GOG manifest adapters, custom executable registration, signature/hash review, launch profiles and host-side process controls. The browser Mora panel is a status surface and is not yet connected to an authenticated native launcher service.
+
 ## Native architecture and execution plan
 
 [Native transition architecture: Mora to DuckOS](NATIVE_TRANSITION_ARCHITECTURE.md) is the coordinated engineering baseline for the eleven native workstreams. It defines target layer boundaries, shared capability/IPC/audit/transaction contracts, subsystem acceptance gates, dependency order, CI and release evidence. It is an architecture specification, not evidence that the native subsystems are already implemented.
