@@ -101,16 +101,21 @@ function profileButton(id, title) {
 function recoveryStatus() {
   try {
     const raw = localStorage.getItem(RECOVERY_KEY);
-    if (!raw) return "Точка восстановления оболочки ещё не создана.";
+    if (!raw) return getLocale() === "uk"
+      ? "Точку відновлення оболонки ще не створено."
+      : "Точка восстановления оболочки ещё не создана.";
     const stored = JSON.parse(raw);
     const envelope = validateStorageEnvelope(stored);
     const snapshot = validateRecoverySnapshot(envelope ? envelope.payload : stored);
     const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
     return snapshot
-      ? "Последняя точка оболочки: " + new Date(snapshot.createdAt).toLocaleString(locale)
-      : "Сохранённая точка повреждена или имеет неизвестную версию.";
+      ? (getLocale() === "uk" ? "Остання точка оболонки: " : "Последняя точка оболочки: ") +
+        new Date(snapshot.createdAt).toLocaleString(locale)
+      : (getLocale() === "uk"
+        ? "Збережена точка пошкоджена або має невідому версію."
+        : "Сохранённая точка повреждена или имеет неизвестную версию.");
   } catch {
-    return "Хранилище браузера недоступно.";
+    return getLocale() === "uk" ? "Сховище браузера недоступне." : "Хранилище браузера недоступно.";
   }
 }
 
@@ -179,7 +184,7 @@ function executeApprovedPlan() {
 
 function setRecoveryStatus(message) {
   const status = windowLayer.querySelector('[data-window="updates"] [data-recovery-status]');
-  if (status) status.textContent = message;
+  if (status) status.textContent = translate(message);
 }
 
 function updateSecurityPanel() {
@@ -1186,11 +1191,16 @@ document.addEventListener("click", (event) => {
       });
       const nextBranches = [...branches, branch].slice(-12);
       localStorage.setItem(RECOVERY_BRANCHES_KEY, JSON.stringify(nextBranches));
-      if (status) status.textContent = "Создана ветка " + branch.id + " · ревизия " + branch.revision +
-        (branch.parentId ? " · родитель " + branch.parentId : " · корневая ветка");
+      if (status) status.textContent = getLocale() === "uk"
+        ? "Створено гілку " + branch.id + " · ревізія " + branch.revision +
+          (branch.parentId ? " · батьківська " + branch.parentId : " · коренева гілка")
+        : "Создана ветка " + branch.id + " · ревизия " + branch.revision +
+          (branch.parentId ? " · родитель " + branch.parentId : " · корневая ветка");
       showToast("Ветка настроек создана локально.");
     } catch {
-      if (status) status.textContent = "Не удалось создать ветку: хранилище недоступно или данные повреждены.";
+      if (status) status.textContent = getLocale() === "uk"
+        ? "Не вдалося створити гілку: сховище недоступне або дані пошкоджені."
+        : "Не удалось создать ветку: хранилище недоступно или данные повреждены.";
     }
     return;
   }
@@ -1206,8 +1216,8 @@ document.addEventListener("click", (event) => {
     ];
     const lines = checks.map(([label, passed]) => label + ": " + (passed ? "OK" : "не проверено"));
     output.textContent = "A/B-план · текущий слот " + plan.currentSlot + " · целевой слот " + plan.targetSlot +
-      "\\n" + lines.join("\\n") + "\\n\\nЭтапы: " + plan.steps.join(" → ") +
-      "\\n\\n" + plan.note + " Execution: " + plan.execution + ".";
+      "\n" + lines.join("\n") + "\n\n" + (getLocale() === "uk" ? "Етапи: " : "Этапы: ") + plan.steps.join(" → ") +
+      "\n\n" + plan.note + " · " + (getLocale() === "uk" ? "режим" : "режим") + ": " + plan.execution + ".";
   }
 });
 
