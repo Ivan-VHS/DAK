@@ -10,7 +10,7 @@ DuckOS задуман как самостоятельная рабочая ср�
 
 - **DuckOS Shell** — адаптивный рабочий стол с окнами-приложениями, доком, палитрой команд, быстрыми настройками, уведомлениями, переключением темы и Reduce Motion.
 - **DuckOS Tools** — Python 3.10+ CLI без сторонних runtime-зависимостей. В наборе: монитор CPU/RAM/swap/interrupts, просмотр FD по PID, mmap benchmark с page faults, сравнение деревьев каталогов, безопасный дамп process environment, поиск дисковых hotspots, аудит mount flags, карта OOM scores, анализ IRQ, clock jitter, entropy gauge, snapshot системы, атомарная запись, поиск проблемных symlink, гистограмма возраста файлов и probe размера страницы.
-- **Core Services** — Cockos (PipeWire audio routing), Kavun (window geometry), Ka-bon (contextual shortcuts), Gloverty (themes and contrast), Po (safe command registry), Illidia (session snapshots) и Unify (profiles and event bus). Это пользовательский сервисный слой, а не модули freestanding-ядра.
+- **Core Services** — Cockos (PipeWire audio routing), Kavun (window geometry), Ka-bon (contextual shortcuts), Gloverty (themes and contrast), Po (safe command registry), Illidia (session snapshots), Unify (profiles and event bus) и Newsroom (актуальная новостная лента RSS/Atom). Это пользовательский сервисный слой, а не модули freestanding-ядра.
 - **Federation** — Pytyliki, Reaper, OPlague и VentuSample подключаются как Git submodules. История, лицензия и собственная сборка каждого проекта остаются на месте.
 - **Release hygiene** — CI, тесты базовых операций, схема федерации, архитектурные и security-заметки.
 
@@ -115,3 +115,7 @@ make -C native kernel initramfs test
 ~~~
 
 Сборка Wayland compositor требует wlroots 0.18 и Wayland development headers. ISO требует Limine BIOS/UEFI assets, xorriso и Limine host utility; см. [инструкцию](https://github.com/Ivan-VHS/DuckOS/blob/work/native-os-foundation/native/README.md).
+
+## Newsroom — «Вечерний курьер»
+
+Newsroom собирает бесплатные публичные RSS/Atom-ленты BBC News Україна, The Kyiv Independent и BBC News World. Служба обновляет источники при запуске и затем каждые пять минут, сохраняет последний успешный кэш и показывает ссылки на оригинальные публикации. Запуск, API, ограничения и тесты описаны в [docs/NEWSROOM.md](docs/NEWSROOM.md).
