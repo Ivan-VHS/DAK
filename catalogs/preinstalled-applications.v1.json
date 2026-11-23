@@ -22,7 +22,11 @@
         "Per-application control depends on host audio-session support",
         "Not specified as a professional DAW or hidden recorder"
       ],
-      "naming_review": "required_before_public_distribution"
+      "naming_review": "required_before_public_distribution",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
+      ]
     },
     {
       "id": "kavun",
@@ -43,6 +47,10 @@
         "Slices are logical groups and need not duplicate source files",
         "Location and image indexing are user-controllable",
         "Private media metadata requires privacy controls"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
       ]
     },
     {
@@ -62,6 +70,10 @@
         "Extracted values require user confirmation",
         "No payment execution or automatic transfers are specified",
         "Financial and family data require explicit access controls"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
       ]
     },
     {
@@ -80,6 +92,10 @@
         "Rules expose triggers actions scope and enabled state",
         "Privileged or destructive actions require permission and confirmation",
         "Loop prevention and failure behavior are required"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
       ]
     },
     {
@@ -97,6 +113,10 @@
         "Tracker protection is not anonymity",
         "Site permissions and private browsing state must be understandable",
         "Commands must be distinguishable from URLs and searches"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
       ]
     },
     {
@@ -116,6 +136,10 @@
         "Cloud saves require a compatible provider and conflict handling",
         "Clip capture and sharing require user control",
         "Do Not Disturb must be reversible"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
       ]
     },
     {
@@ -135,6 +159,10 @@
         "Pairing must be authenticated and revocable",
         "Sharing permissions are configurable per data type",
         "Lost-device discovery is not guaranteed live location tracking"
+      ],
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "prototype/mora-home.html"
       ]
     }
   ],
@@ -184,5 +212,45 @@
     "retry_cancellation_and_duplicate_handling",
     "visible_result",
     "retention_and_privacy_policy"
-  ]
+  ],
+  "prototype": {
+    "path": "prototype/mora-home.html",
+    "maturity_status": "partial",
+    "runtime": "browser",
+    "storage": [
+      "localStorage",
+      "IndexedDB"
+    ],
+    "scope": "Interactive local prototype. It is not a native DuckOS system application or proof of integration with OS services.",
+    "app_boundaries": {
+      "cockos": [
+        "Microphone recording and local track import/mixdown are available where browser media APIs permit.",
+        "Per-application volume settings are stored as preferences and do not change OS audio sessions."
+      ],
+      "kavun": [
+        "Local media import, event slices, metadata search and non-destructive preview/export are available.",
+        "Image understanding and automatic location recognition are not connected."
+      ],
+      "ka-bon": [
+        "Local expense, receipt attachment, subscription and family-member records are available.",
+        "Receipt OCR, banking and cloud family sharing are not connected."
+      ],
+      "gloverty": [
+        "Rules can be created, enabled and manually run against supported local actions.",
+        "OS-wide scheduling, input gestures and global shortcuts are not connected."
+      ],
+      "po": [
+        "Tab records, external navigation and pasted-text reading view are available.",
+        "The network stack, browser-engine isolation and tracker blocking are not connected."
+      ],
+      "illidia": [
+        "Local game catalogue, progress, achievements and user-authorized screen clips are available.",
+        "Native executable launch, cloud saves and platform achievement providers are not connected."
+      ],
+      "unify": [
+        "Local clipboard APIs and manual JSON export/import for tabs, clips and selected settings are available.",
+        "Secure device pairing, live sync, phone notifications and lost-device discovery are not connected."
+      ]
+    }
+  }
 }
