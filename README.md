@@ -2,7 +2,7 @@
 
 **DuckOS** — самостоятельная операционная система и системная среда, развиваемая в экосистеме Ivan-VHS.
 
-> **Текущий статус:** репозиторий находится на стадии архитектурной основы. На текущем `main` опубликован только первоначальный README; готовое ядро, загрузчик, initramfs, compositor, пакетный менеджер, драйверный ABI и GPU-драйвер пока не поставляются. Документы ниже задают проверяемую последовательность разработки и не объявляют эти компоненты реализованными.
+> **Текущий статус:** репозиторий находится на стадии архитектурной основы. На текущем `main` готовое ядро, загрузчик, initramfs, compositor, пакетный менеджер, драйверный ABI и GPU-драйвер пока не поставляются. В рабочей ветке подготовлен первый host-testable C11 контракт передачи boot-информации; это проверяемая основа, но не загрузчик, ядро или загрузочный образ.
 
 ## Замысел
 
@@ -37,6 +37,20 @@ DuckOS должна стать цельной локальной вычисли�
 
 - [Foundation Architecture](docs/FOUNDATION_ARCHITECTURE.md) — границы подсистем, ABI, безопасность и вертикальные срезы.
 - [Engineering Profile](docs/IVAN_VHS_ENGINEERING_PROFILE.md) — стиль реализации, критерии качества и порядок релизов.
+- [Boot Handoff Contract v1](docs/BOOT_INFO_V1.md) — версия структуры загрузочной информации, карта памяти и проверка диапазонов.
+
+
+## Foundation build and tests
+
+The first executable foundation component is a host-testable C11 validator for the bootloader-to-kernel handoff record. It checks versioning, physical ranges, optional initramfs data, framebuffer dimensions and sorted non-overlapping memory-map entries.
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
+The same contract runs in [Foundation CI](.github/workflows/ci.yml) with AddressSanitizer and UndefinedBehaviorSanitizer enabled. This validates the handoff data contract only; it does not create a bootable OS image.
 
 ## Первый релизный критерий
 
