@@ -10,6 +10,7 @@ requires-python = ">=3.10"
 
 [project.scripts]
 duckos = "duckos.cli:main"
+illidia = "duckos.illidia.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["duckos*"]
