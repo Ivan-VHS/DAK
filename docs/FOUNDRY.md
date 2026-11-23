@@ -32,7 +32,7 @@ duckos foundry plan --profile commissioning
 duckos foundry audit --output ./foundry-report.json
 ~~~
 
-The graphical workbench is a native Tk user-space application. The CLI produces versioned JSON, and an optional export creates a new private report file. Existing report files are never overwritten.
+The graphical workbench is a native Tk user-space application. The CLI produces versioned JSON, and an optional export creates a new file with exclusive-create semantics; an existing destination is rejected. POSIX files use owner-only permissions. On Windows, access follows the ACL inherited from the selected folder.
 
 ## Operational model
 
