@@ -957,7 +957,7 @@ input[type="range"] { accent-color: #FFD400; }
 .files-footnote { margin:9px 0 0; color:rgba(255,255,255,.43); font-size:8px; line-height:1.5; }
 
 .terminal-panel { display:grid; gap:10px; }
-.terminal-window { min-height:240px; max-height:340px; overflow:auto; padding:13px; border:1px solid rgba(255,212,0,.18); border-radius:12px; color:#eaeaea; background:#090909; }
+.terminal-window { min-height:240px; max-height:340px; overflow:auto; padding:13px; border:1px solid rgba(255,212,0,.18); border-radius:12px; color:#eaeaea; background:#080808; }
 .terminal-window pre { margin:0; font:10px/1.65 "Cascadia Code",Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
 .terminal-form { display:flex; align-items:center; gap:8px; }
 .terminal-form label { color:#ffd400; font:12px "Cascadia Code",monospace; }
@@ -969,7 +969,7 @@ input[type="range"] { accent-color: #FFD400; }
 .settings-control strong { color:rgba(255,255,255,.88); font-size:10px; }
 .settings-control small { color:rgba(255,255,255,.48); font-size:8px; line-height:1.4; }
 .settings-control select,.settings-control input[type="range"] { max-width:150px; }
-.settings-control select { min-height:32px; padding:5px 8px; border:1px solid rgba(255,255,255,.15); border-radius:8px; color:#fff; background:#191919; font:inherit; font-size:10px; }
+.settings-control select { min-height:32px; padding:5px 8px; border:1px solid rgba(255,255,255,.15); border-radius:8px; color:#fff; background:#151515; font:inherit; font-size:10px; }
 
 .desktop-context-menu { position:fixed; z-index:30; min-width:155px; padding:5px; border:1px solid rgba(255,255,255,.16); border-radius:11px; background:rgba(17,17,17,.97); box-shadow:0 15px 45px rgba(0,0,0,.42); backdrop-filter:blur(18px); }
 .desktop-context-menu button { display:block; width:100%; min-height:33px; padding:7px 9px; border:0; border-radius:7px; color:rgba(255,255,255,.8); background:transparent; font:inherit; font-size:10px; text-align:left; cursor:pointer; }
@@ -1110,7 +1110,7 @@ input[type="range"] { accent-color: #FFD400; }
 .rights-rule { display:grid; gap:4px; padding:11px 13px; margin-top:7px; border:1px solid rgba(255,255,255,.1); border-radius:10px; background:rgba(255,255,255,.035); }
 .rights-rule strong { color:rgba(255,255,255,.9); font-size:11px; }
 .rights-rule span { color:rgba(255,255,255,.55); font-size:9px; line-height:1.5; }
-.rights-cli { max-width:100%; overflow:auto; margin:10px 0 0; padding:13px; border:1px solid rgba(255,212,0,.18); border-radius:10px; color:rgba(255,255,255,.82); background:#090909; font:9px/1.7 "Cascadia Code",Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
+.rights-cli { max-width:100%; overflow:auto; margin:10px 0 0; padding:13px; border:1px solid rgba(255,212,0,.18); border-radius:10px; color:rgba(255,255,255,.82); background:#080808; font:9px/1.7 "Cascadia Code",Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
 .game-card { width:100%; color:inherit; font:inherit; text-align:left; cursor:pointer; }
 .game-card .rights-status { margin-top:9px; }
 .game-card[aria-pressed="true"] { border-color:#ffd400; background:rgba(255,212,0,.1); }
