@@ -12,11 +12,11 @@ DuckOS models the predictable XP-era game launch chain as a versioned profile an
 - XP SP3 compatibility metadata and bounded display settings, including 8/16/24/32-bit color and refresh rate.
 - An allowlist for environment overrides; `PATH`, `LD_PRELOAD`, shell fragments and arbitrary variables cannot be injected through a profile.
 - An argv-only launch plan and an explicit Wine launch operation using `subprocess.Popen(..., shell=False)`.
-- Optional use of an already-existing prefix. The launcher never creates it, changes its Windows version, installs redistributables or downloads components.
+- Launch requires an explicitly selected, already-initialized Wine prefix containing `system.reg` and `drive_c`; no default-prefix bootstrap is allowed. DuckOS does not run prefix setup, install redistributables or download components. Wine itself may update its selected prefix while the game runs.
 
 ## Honest runtime boundary
 
-The Wine adapter starts an external, already-installed runtime. It is not a native Win32 subsystem and does not recreate XP's XPDM driver model, DirectX 9 device, DirectSound hardware acceleration, EAX, DirectPlay, IPX/SPX or SafeDisc/SecuROM drivers. The requested Windows XP SP3 target is recorded but is **not enforced** by this launcher; the operator must verify the runtime's prefix configuration. Native NT/Win32 execution remains unavailable.
+The Wine adapter starts an external, already-installed runtime in an explicitly selected existing prefix. The external runtime may write its own registry, caches and other prefix state during execution; DuckOS does not perform those writes itself. It is not a native Win32 subsystem and does not recreate XP's XPDM driver model, DirectX 9 device, DirectSound hardware acceleration, EAX, DirectPlay, IPX/SPX or SafeDisc/SecuROM drivers. The requested Windows XP SP3 target is recorded but is **not enforced** by this launcher; the operator must verify the runtime's prefix configuration. Native NT/Win32 execution remains unavailable.
 
 The tool does not bypass DRM, anti-cheat or kernel-driver checks. A missing runtime, invalid PE, unsupported architecture or missing prefix produces an explicit blocker rather than an attempted launch.
 
