@@ -119,6 +119,7 @@ class MoraIntentTests(unittest.TestCase):
         self.assertFalse(build_intent_plan("запусти powershell")["ok"])
         self.assertFalse(build_intent_plan("x" * 321)["ok"])
         self.assertFalse(build_intent_plan("")["ok"])
+        self.assertFalse(build_intent_plan("open\\x00app")["ok"])
 
     def test_intents_accept_russian_and_ukrainian_phrasing(self):
         russian = build_intent_plan("включи режим фокуса и экономию энергии")
