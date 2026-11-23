@@ -454,6 +454,34 @@ def verify_licensed_content(
             "content_verification": content_result,
         }
 
+    capture_action = {
+        "capture_screenshot": "screenshot",
+        "capture_recording": "recording",
+        "stream": "streaming",
+    }.get(required_action)
+    capture_decision = None
+    if capture_action is not None:
+        capture_decision = evaluate_capture_policy(
+            content_result.get("capture_policy"),
+            capture_action,
+            manifest_verified=True,
+        )
+        if not capture_decision.get("allowed"):
+            return {
+                "schema": "duckos.licensed-content-decision.v1",
+                "allowed": False,
+                "valid": False,
+                "status": "blocked",
+                "reason_code": capture_decision.get("reason_code", "capture_not_granted"),
+                "message": capture_decision.get("message", "The publisher's capture policy does not allow this action."),
+                "next_step": "Respect the publisher's capture policy or request the required permission from the rights holder.",
+                "manifest_sha256": manifest_digest,
+                "entitlement_decision": decision,
+                "content_verification": content_result,
+                "capture_decision": capture_decision,
+                "native_enforcement": False,
+            }
+
     return {
         "schema": "duckos.licensed-content-decision.v1",
         "allowed": True,
@@ -467,7 +495,9 @@ def verify_licensed_content(
         "entitlement_decision": decision,
         "content_verification": content_result,
         "capture_policy": content_result.get("capture_policy"),
+        "capture_decision": capture_decision,
         "native_launch_enforcement": False,
+        "native_enforcement": False,
     }
 
 
