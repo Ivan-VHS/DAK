@@ -4,7 +4,7 @@
 
 DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
 
-The shell reuses the original indigo, rose and gold sunset wallpaper, layered hills, glass panels, explicit fine borders and compact dock. Existing app IDs remain stable.
+The default Mora Amber profile uses warm vertical drapery with a repeating fold rhythm, a deep radial workspace centre, walnut/graphite panels, muted olive support surfaces and one restrained red critical marker. Material depth comes from soft light, edge highlights and tonal separation rather than neon fills. The compact dock and existing app IDs remain stable; Dark and Light remain selectable alternatives.
 
 ## Shell components
 
