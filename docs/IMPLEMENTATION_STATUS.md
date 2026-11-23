@@ -78,3 +78,26 @@ The runtime inventory and plan generator do not invoke a discovered runtime or t
 - [ ] Physical-hardware validation and release image.
 
 The architecture baseline is documentation and planning work only. It does not change any subsystem from specified or contract-tested to native-implemented. Existing Reaper policies, Python host tools and browser-shell features retain their previously documented maturity.
+
+
+## Illidia universal game launcher — 2026-11-23
+
+- [x] Local SQLite library with source-aware records, tags, metadata, launch profile and indexed search fields.
+- [x] Read-only Steam appmanifest/library-folder discovery.
+- [x] Read-only Epic Games Launcher .item manifest discovery with install-root path containment.
+- [x] Read-only GOG goggame-*.info discovery with primary play-task selection.
+- [x] User-selected custom executable scanning and manual registration.
+- [x] Local JSON library import/export and missing-install detection.
+- [x] Per-game argv, working directory, runtime command, prefix and environment profile.
+- [x] Windows Authenticode query; unknown/unavailable signature state on platforms without the verifier.
+- [x] SHA-256 fingerprinting and digest-scoped first-run approval for unsigned/unverified direct binaries.
+- [x] Direct host process launch with shell=False, separate process group, log capture and stop request.
+- [x] Official Steam/Epic/GOG launch URI delegation.
+- [x] Mora Illidia panel updated to remove fictional demo games and disclose the host-tool boundary.
+- [ ] Authenticated native DuckOS Illidia broker and browser IPC integration.
+- [ ] Kernel-enforced per-game sandbox, process handles and stable process-generation tracking.
+- [ ] Provider-specific Battle.net/EA manifest adapters and session APIs.
+- [ ] Cloud-save sync/conflict resolution, achievements and clip-session integration.
+- [ ] Native compositor/window-mode integration and validated per-device performance profiles.
+
+The current implementation is a Python host tool, not a native DuckOS daemon. Store-delegated launch sessions are owned by the store client and cannot be fully supervised by the URI opener. Direct process tracking is best effort pending a native process manager. See [Illidia game launcher](ILLIDIA_GAME_LAUNCHER.md) and [tests](../tests/test_illidia.py).
