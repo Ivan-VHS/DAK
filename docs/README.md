@@ -8,6 +8,8 @@
 
 [`prototype/mora-home.html`](../prototype/mora-home.html) — local browser implementation of the Mora home screen and seven application workflows. Its prototype limits and native integration gaps are recorded in [PREINSTALLED_APPLICATIONS.md](PREINSTALLED_APPLICATIONS.md).
 
+[Mora Amber design system](MORA_AMBER_DESIGN_SYSTEM.md) documents the shell palette, folded backdrop, radial composition, material surfaces and reduced-motion behavior.
+
 ## Product specification
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
