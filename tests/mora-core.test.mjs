@@ -102,10 +102,10 @@ test("PE inspection recognises a 64-bit image without attempting to launch it", 
 });
 
 
-test("theme settings accept only Amber, Dark and Light palettes", () => {
+test("all legacy appearance settings normalize to the single DuckOS palette", () => {
   const defaults = createDefaultPreferences();
-  assert.equal(defaults.appearance.theme, "amber");
-  assert.equal(normalizePreferences({ appearance: { theme: "light" } }).appearance.theme, "light");
-  assert.equal(normalizePreferences({ appearance: { theme: "dark" } }).appearance.theme, "dark");
-  assert.equal(normalizePreferences({ appearance: { theme: "system" } }).appearance.theme, "amber");
+  assert.equal(defaults.appearance.theme, "duck");
+  for (const theme of ["amber", "dark", "light", "system", "custom", null]) {
+    assert.equal(normalizePreferences({ appearance: { theme } }).appearance.theme, "duck");
+  }
 });
