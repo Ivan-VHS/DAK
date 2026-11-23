@@ -1,0 +1,228 @@
+const STORAGE_KEY = "duckos.mora.language.v1";
+const SUPPORTED_LOCALES = new Set(["ru", "uk"]);
+
+const UKRAINIAN = {
+  "Рабочий стол":"Робочий стіл",
+  "Открыть параметры системы":"Відкрити параметри системи",
+  "ПОНЕДЕЛЬНИК · РАБОЧЕЕ ПРОСТРАНСТВО":"РОБОЧИЙ ПРОСТІР",
+  "Загрузка даты…":"Завантаження дати…",
+  "Спокойный вечер начинается с порядка.":"Спокійний вечір починається з ладу.",
+  "ВАШЕ ПРОСТРАНСТВО":"ВАШ ПРОСТІР",
+  "Приложения":"Застосунки",
+  "ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ":"ЗАСТОСУНКІВ ТА ІНСТРУМЕНТІВ",
+  "РАСШИРЕННЫЙ НАБОР":"РОЗШИРЕНИЙ НАБІР",
+  "Новые приложения DuckOS":"Нові застосунки DuckOS",
+  "13 дополнительных инструментов Mora":"13 додаткових інструментів Mora",
+  "СИСТЕМА MORA":"СИСТЕМА MORA",
+  "Инструменты рабочего пространства":"Інструменти робочого простору",
+  "Локальные функции и центры управления":"Локальні функції та центри керування",
+  "Виджеты":"Віджети",
+  "Открыть":"Відкрити",
+  "РАСХОДЫ СЕГОДНЯ":"ВИТРАТИ СЬОГОДНІ",
+  "План на день":"План на день",
+  "УСТРОЙСТВА":"ПРИСТРОЇ",
+  "подключено":"підключено",
+  "ОФЛАЙН":"ОФЛАЙН",
+  "Панель приложений":"Панель застосунків",
+  "Звук и запись":"Звук і запис",
+  "Фотографии":"Фотографії",
+  "Финансы":"Фінанси",
+  "Сценарии":"Сценарії",
+  "Компас":"Компас",
+  "Игры":"Ігри",
+  "Устройства":"Пристрої",
+  "Статус системы":"Стан системи",
+  "Первичная настройка":"Початкове налаштування",
+  "Задачи и проекты":"Завдання та проєкти",
+  "Архивы и файлы":"Архіви та файли",
+  "Медиатека":"Медіатека",
+  "Ритм и темп":"Ритм і темп",
+  "Проверка обмена":"Перевірка обміну",
+  "Личный дневник":"Особистий щоденник",
+  "Быстрые заметки":"Швидкі нотатки",
+  "База знаний":"База знань",
+  "Маршруты и точки":"Маршрути й точки",
+  "Игровая библиотека":"Ігрова бібліотека",
+  "EXE-инспектор":"Інспектор EXE",
+  "Намерения и планы":"Наміри та плани",
+  "Права и доверие":"Дозволи й довіра",
+  "Обновления и откат":"Оновлення та відкат",
+  "Среда и питание":"Середовище й живлення",
+  "Файлы и SHA-256":"Файли й SHA-256",
+  "Игровая производительность":"Ігрова продуктивність",
+  "Оптимизация рабочего пространства":"Оптимізація робочого простору",
+  "Единый центр приложений":"Єдиний центр застосунків",
+  "Состояние DuckOS":"Стан DuckOS",
+  "Настройте рабочее пространство":"Налаштуйте робочий простір",
+  "Цветовая схема":"Колірна схема",
+  "Единая палитра DuckOS: чёрный, белый и жёлтый.":"Єдина палітра DuckOS: чорний, білий і жовтий.",
+  "Завершить настройку":"Завершити налаштування",
+  "Первичная настройка Mora уже завершена.":"Початкове налаштування Mora вже завершено.",
+  "Настройка ещё не завершена.":"Налаштування ще не завершено.",
+  "Добавить":"Додати",
+  "Добавить пункт":"Додати пункт",
+  "Удалить":"Видалити",
+  "Сохранить профиль":"Зберегти профіль",
+  "Восстановить":"Відновити",
+  "Подтвердить план":"Підтвердити план",
+  "Отклонить":"Відхилити",
+  "План не подготовлен.":"План не підготовлено.",
+  "Разрешено в профиле":"Дозволено в профілі",
+  "Запрещено":"Заборонено",
+  "Включено":"Увімкнено",
+  "Выключено":"Вимкнено",
+  "Микрофон":"Мікрофон",
+  "Камера":"Камера",
+  "Геолокация":"Геолокація",
+  "Личные файлы":"Особисті файли",
+  "Сеть":"Мережа",
+  "Буфер обмена":"Буфер обміну",
+  "Доступы и изоляция":"Дозволи та ізоляція",
+  "По умолчанию — запрет":"Типово — заборонено",
+  "Каждое право должно быть запрошено отдельно.":"Кожен дозвіл потрібно запитувати окремо.",
+  "Обновления без сюрпризов":"Оновлення без несподіванок",
+  "Системный updater не подключён":"Системний засіб оновлення не підключено",
+  "Точка восстановления Mora":"Точка відновлення Mora",
+  "Проверить план обновления":"Перевірити план оновлення",
+  "Рабочая среда Mora":"Робоче середовище Mora",
+  "Профиль ресурсов":"Профіль ресурсів",
+  "Режим фокуса":"Режим фокусування",
+  "Снижение движения":"Зменшення руху",
+  "Экономия":"Економія",
+  "Баланс":"Баланс",
+  "Производительность":"Продуктивність",
+  "Проверка файла":"Перевірка файлу",
+  "Выбрать файл для проверки":"Вибрати файл для перевірки",
+  "Выбрать архив":"Вибрати архів",
+  "Выбрать исполняемый файл":"Вибрати виконуваний файл",
+  "Файл ещё не выбран.":"Файл ще не вибрано.",
+  "Сформулируйте задачу":"Сформулюйте завдання",
+  "Что нужно сделать?":"Що потрібно зробити?",
+  "Подготовить план":"Підготувати план",
+  "ПЛАН НА ПРОВЕРКУ":"ПЛАН ДЛЯ ПЕРЕВІРКИ",
+  "Ничего не найдено. Измените запрос или выберите другую категорию.":"Нічого не знайдено. Змініть запит або виберіть іншу категорію.",
+  "Все приложения":"Усі застосунки",
+  "Поиск по названию, функциям и ключевым словам":"Пошук за назвою, функціями та ключовими словами",
+  "Показано 15 приложений":"Показано 15 застосунків",
+  "Открыть приложение или настройку…":"Відкрити застосунок або параметр…",
+  "Быстрый поиск":"Швидкий пошук",
+  "Русский":"Російська",
+  "Українська":"Українська",
+  "Язык интерфейса":"Мова інтерфейсу",
+  "Глубокая эпоха":"Глибока епоха",
+  "лет":"років",
+  "Ветка настроек создана локально.":"Гілку налаштувань створено локально.",
+  "Система обновлений пока не подключена.":"Систему оновлень поки не підключено.",
+  "Записи доступны только в текущем профиле браузера.":"Записи доступні лише в поточному профілі браузера.",
+  "Пока пусто. Записи сохраняются только в этом профиле Mora.":"Поки порожньо. Записи зберігаються лише в цьому профілі Mora."
+};
+
+const sourceText = new WeakMap();
+const sourceAttributes = new WeakMap();
+
+function readSavedLocale() {
+  try {
+    const saved = globalThis.localStorage?.getItem(STORAGE_KEY);
+    return SUPPORTED_LOCALES.has(saved) ? saved : "ru";
+  } catch {
+    return "ru";
+  }
+}
+
+let activeLocale = readSavedLocale();
+
+function localizedValue(source, locale) {
+  return locale === "uk" ? (UKRAINIAN[source] || source) : source;
+}
+
+function originalText(node) {
+  if (!sourceText.has(node)) sourceText.set(node, node.nodeValue);
+  return sourceText.get(node);
+}
+
+function originalAttribute(element, name) {
+  let values = sourceAttributes.get(element);
+  if (!values) {
+    values = new Map();
+    sourceAttributes.set(element, values);
+  }
+  if (!values.has(name)) values.set(name, element.getAttribute(name));
+  return values.get(name);
+}
+
+export function getLocale() {
+  return activeLocale;
+}
+
+export function translate(source, locale = activeLocale) {
+  return localizedValue(String(source ?? ""), locale);
+}
+
+export function applyLocale(root = globalThis.document) {
+  if (!root || typeof root.querySelectorAll !== "function") return;
+  const doc = root.ownerDocument || root;
+  if (doc.documentElement) doc.documentElement.lang = activeLocale === "uk" ? "uk" : "ru";
+
+  const walker = doc.createTreeWalker(root, 4);
+  let node = walker.nextNode();
+  while (node) {
+    const parentName = node.parentElement?.tagName;
+    if (parentName !== "SCRIPT" && parentName !== "STYLE" && parentName !== "TEXTAREA") {
+      const original = originalText(node);
+      const leading = original.match(/^\s*/)?.[0] || "";
+      const trailing = original.match(/\s*$/)?.[0] || "";
+      const content = original.slice(leading.length, original.length - trailing.length);
+      const next = leading + localizedValue(content, activeLocale) + trailing;
+      if (node.nodeValue !== next) node.nodeValue = next;
+    }
+    node = walker.nextNode();
+  }
+
+  for (const element of root.querySelectorAll("[placeholder], [aria-label], [title]")) {
+    for (const name of ["placeholder", "aria-label", "title"]) {
+      if (!element.hasAttribute(name)) continue;
+      const original = originalAttribute(element, name);
+      const next = localizedValue(original, activeLocale);
+      if (element.getAttribute(name) !== next) element.setAttribute(name, next);
+    }
+  }
+}
+
+export function setLocale(locale) {
+  if (!SUPPORTED_LOCALES.has(locale)) return activeLocale;
+  activeLocale = locale;
+  try {
+    globalThis.localStorage?.setItem(STORAGE_KEY, locale);
+  } catch {
+    // The current session still changes language when storage is unavailable.
+  }
+  applyLocale();
+  return activeLocale;
+}
+
+if (typeof document !== "undefined" && typeof MutationObserver !== "undefined" && document.documentElement) {
+  const observer = new MutationObserver((records) => {
+    for (const record of records) {
+      for (const added of record.addedNodes) {
+        if (added.nodeType === 1) applyLocale(added);
+        else if (added.nodeType === 3) {
+          const original = originalText(added);
+          const leading = original.match(/^\s*/)?.[0] || "";
+          const trailing = original.match(/\s*$/)?.[0] || "";
+          const content = original.slice(leading.length, original.length - trailing.length);
+          const next = leading + localizedValue(content, activeLocale) + trailing;
+          if (added.nodeValue !== next) added.nodeValue = next;
+        }
+      }
+      if (record.type === "characterData" && record.target.nodeType === 3) {
+        const original = originalText(record.target);
+        const leading = original.match(/^\s*/)?.[0] || "";
+        const trailing = original.match(/\s*$/)?.[0] || "";
+        const content = original.slice(leading.length, original.length - trailing.length);
+        const next = leading + localizedValue(content, activeLocale) + trailing;
+        if (record.target.nodeValue !== next) record.target.nodeValue = next;
+      }
+    }
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+}
