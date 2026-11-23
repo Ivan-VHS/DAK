@@ -574,6 +574,17 @@ function panelMarkup(appId) {
         '<div class="setting-block"><strong>Безопасная организация</strong><span>Перенос выбранных файлов в Inbox без удаления и перезаписи; операции выполняются после подтверждения.</span></div>' +
         '<div class="setting-block"><strong>Автозагрузка</strong><span>Только текущий пользователь; отключение можно восстановить.</span></div>' +
         '<p class="window-copy">Браузерная Mora показывает только точку входа. Она не изображает системный монитор, оконный менеджер или привилегированный доступ.</p>';
+    case "foundry":
+      return '<p class="window-kicker">FOUNDRY · INDUSTRIAL OPERATIONS</p>' +
+        '<h2 class="window-heading">Операционный центр DuckOS</h2>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>Индустриальная консоль для контроля состояния подсистем, сигналов, регламентов и безопасного обслуживания.</span></div>' +
+        '<div class="setting-block"><strong>Сигналы и нагрузка</strong><span>CPU, память, активные процессы и рекомендации Duck Desktop — из существующего локального диагностического источника.</span></div>' +
+        '<div class="setting-block"><strong>Устройства и совместимость</strong><span>PCI/USB или Windows PnP-инвентаризация и обнаружение Wine, Proton, CrossOver, Bottles и QEMU без их запуска.</span></div>' +
+        '<div class="setting-block"><strong>Регламенты оператора</strong><span>Пусковой контроль, профилактическое обслуживание, разбор инцидента и ввод в эксплуатацию. Каждый шаг остаётся ручным и проверяемым.</span></div>' +
+        '<div class="setting-block"><strong>Нативное приложение</strong><span>Запустите <code>duckos foundry gui</code> для графической консоли или <code>duckos foundry audit</code> для JSON-слепка.</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>План: <code>duckos foundry plan --profile preventive</code> — сформировать профилактический маршрут.</span></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Браузерная оболочка Mora не запускает диагностику хоста и не меняет системные параметры. Операции доступны через отдельное нативное приложение DuckOS.</span></div>' +
+        '<p class="window-copy">Foundry не является музыкальным инструментом и не управляет физическим оборудованием, промышленными контроллерами, драйверами или ядром.</p>';
     case "mora-commons":
       return commonsPanelMarkup();
     case "mora-ai":
