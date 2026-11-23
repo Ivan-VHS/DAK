@@ -1620,3 +1620,17 @@ a:hover, .text-link:hover, .widget-link:hover { color:var(--mora-info); }
   .dock-wrap { position:fixed; }
   .app-window { max-height:calc(100dvh - 62px); }
 }
+
+
+/* Touch targets remain comfortably sized even when the dock needs to scroll. */
+@media (pointer:coarse) {
+  .window-close { width:44px; height:44px; min-width:44px; min-height:44px; }
+  .dock {
+    max-width:calc(100vw - 24px);
+    justify-content:flex-start;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .dock::-webkit-scrollbar { display:none; }
+  .dock-item { width:44px; height:44px; min-width:44px; min-height:44px; flex:0 0 44px; }
+}
