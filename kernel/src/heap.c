@@ -103,28 +103,11 @@ void *duckos_kmalloc(size_t size) {
     if (pages == 0u || pages > UINT32_MAX) return NULL;
 
     uint64_t irq_flags = duckos_irq_save();
-    void *base = NULL;
-    for (uint64_t i = 0u; i < pages; ++i) {
-        void *page = duckos_alloc_page();
-        if (page == NULL) {
-            if (base != NULL) {
-                for (uint64_t j = 0u; j < i; ++j)
-                    duckos_free_page((uint8_t *)base + j * DUCKOS_PAGE_SIZE);
-            }
-            duckos_irq_restore(irq_flags);
-            return NULL;
-        }
-        if (i == 0u) base = page;
-        else if ((uint8_t *)page != (uint8_t *)base + i * DUCKOS_PAGE_SIZE) {
-            /* Physical allocation is not guaranteed to be contiguous. */
-            duckos_free_page(page);
-            for (uint64_t j = 0u; j < i; ++j)
-                duckos_free_page((uint8_t *)base + j * DUCKOS_PAGE_SIZE);
-            duckos_irq_restore(irq_flags);
-            return NULL;
-        }
+    void *base = duckos_alloc_pages(pages);
+    if (base == NULL) {
+        duckos_irq_restore(irq_flags);
+        return NULL;
     }
-
     DuckOsAllocHeader *header = (DuckOsAllocHeader *)base;
     header->owner = pages;
     header->magic = LARGE_MAGIC;
@@ -144,8 +127,7 @@ void duckos_kfree(void *pointer) {
         if (pages == 0u || pages > UINT32_MAX) return;
         uint64_t irq_flags = duckos_irq_save();
         header->magic = 0u;
-        for (uint64_t i = 0u; i < pages; ++i)
-            duckos_free_page((uint8_t *)header + i * DUCKOS_PAGE_SIZE);
+        duckos_free_pages(header, pages);
         duckos_irq_restore(irq_flags);
         return;
     }
