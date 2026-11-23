@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v5-commons";
+const CACHE = "mora-shell-v6-duck-palette";
 const ASSETS = [
   "./",
   "./index.html",
