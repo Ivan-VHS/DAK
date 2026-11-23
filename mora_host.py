@@ -289,12 +289,29 @@ def launch_app(app_id: str) -> dict[str, Any]:
     }
 
 
+STATIC_ASSETS: dict[str, tuple[Path, str]] = {
+    "/mora/": (ROOT / "mora" / "index.html", "text/html; charset=utf-8"),
+    "/mora/index.html": (ROOT / "mora" / "index.html", "text/html; charset=utf-8"),
+    "/mora/mora.css": (ROOT / "mora" / "mora.css", "text/css; charset=utf-8"),
+    "/mora/mora.js": (ROOT / "mora" / "mora.js", "application/javascript; charset=utf-8"),
+    "/mora/service-worker.js": (ROOT / "mora" / "service-worker.js", "application/javascript; charset=utf-8"),
+    "/mora/manifest.webmanifest": (ROOT / "mora" / "manifest.webmanifest", "application/manifest+json; charset=utf-8"),
+    "/mora/icon.svg": (ROOT / "mora" / "icon.svg", "image/svg+xml"),
+    "/prototype/mora-home.html": (ROOT / "prototype" / "mora-home.html", "text/html; charset=utf-8"),
+    "/projects": (ROOT / "index.html", "text/html; charset=utf-8"),
+    "/projects/": (ROOT / "index.html", "text/html; charset=utf-8"),
+    "/MORA_DESIGN_SYSTEM.md": (ROOT / "MORA_DESIGN_SYSTEM.md", "text/markdown; charset=utf-8"),
+    "/docs/MORA_DESKTOP.md": (ROOT / "docs" / "MORA_DESKTOP.md", "text/markdown; charset=utf-8"),
+}
+
+
 def resolve_desktop_page(path: str) -> Path | None:
-    if path in {"/", "/index.html"}:
-        return ROOT / "prototype" / "mora-home.html"
-    if path in {"/projects", "/workspace"}:
-        return ROOT / "index.html"
-    return None
+    asset = STATIC_ASSETS.get(path)
+    return asset[0] if asset else None
+
+
+def resolve_static_asset(path: str) -> tuple[Path, str] | None:
+    return STATIC_ASSETS.get(path)
 
 
 class MoraHandler(BaseHTTPRequestHandler):
@@ -322,7 +339,11 @@ class MoraHandler(BaseHTTPRequestHandler):
             self.send_header(
                 "Content-Security-Policy",
                 "default-src 'self'; style-src 'self' 'unsafe-inline'; "
-                "script-src 'self' 'unsafe-inline'; img-src 'self' data:",
+                "script-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: https://raw.githubusercontent.com; "
+                "frame-src 'self'; connect-src 'self'; media-src 'self' blob:; "
+                "font-src 'self' data:; object-src 'none'; base-uri 'self'; "
+                "form-action 'self'",
             )
         self.end_headers()
         self.wfile.write(body)
@@ -349,24 +370,34 @@ class MoraHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         path = urlsplit(self.path).path
+        if path in {"/", "/index.html", "/mora"}:
+            self.send_response(302)
+            self.send_header("Location", "/mora/")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            return
         if path == "/api/health":
             self._send(200, {"ok": True, "service": "Mora Local Host"})
             return
         if path == "/api/apps":
             self._send(200, describe_apps())
             return
-        page_path = resolve_desktop_page(path)
-        if page_path is None:
+
+        asset = resolve_static_asset(path)
+        if asset is None:
             self._send(404, {"error": "Страница не найдена."})
             return
+
+        asset_path, content_type = asset
         try:
-            page = page_path.read_bytes()
+            content = asset_path.read_bytes()
         except OSError:
-            self._send(500, {"error": "Не найдена страница Mora: " + str(page_path.relative_to(ROOT))})
+            self._send(
+                500,
+                {"error": "Не найден файл Mora: " + str(asset_path.relative_to(ROOT))},
+            )
             return
-        self._send(200, page, "text/html; charset=utf-8")
-        return
-        self._send(404, {"error": "Страница не найдена."})
+        self._send(200, content, content_type)
 
     def do_POST(self) -> None:
         if not self._origin_allowed():
