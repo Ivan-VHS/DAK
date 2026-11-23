@@ -49,6 +49,47 @@ const appDefinitions = {
 const windowLayer = document.getElementById("window-layer");
 const activeAppLabel = document.getElementById("active-app");
 const toastElement = document.getElementById("toast");
+
+const bladeLauncher = document.getElementById("blade-launcher");
+const bladeStrip = document.getElementById("blade-strip");
+const bladeCounter = document.getElementById("blade-counter");
+const bladeStatus = document.getElementById("blade-status");
+const bladeDetails = document.getElementById("blade-details");
+const BLADE_FAVORITES_KEY = "duckos.mora.launcher-favorites.v1";
+
+const BLADE_CHANNELS = Object.freeze({
+  all: { label: "Все", appIds: null },
+  favorites: { label: "Избранное", appIds: null },
+  creation: {
+    label: "Создание",
+    appIds: ["cockos", "kavun", "gloverty", "olaab", "concrete-thump", "orriganize", "poi", "poi-2", "love-il"]
+  },
+  games: { label: "Игры", appIds: ["illidia", "gamecharager", "mora-boost"] },
+  media: { label: "Медиа", appIds: ["kavun", "olaab", "cockos"] },
+  tools: { label: "Инструменты", appIds: ["kabon", "po", "unify", "abriganza", "seu-beu", "po-2", "exedotexe"] },
+  system: {
+    label: "Система",
+    appIds: ["sestem", "setupup", "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "desktop", "mora-commons"]
+  }
+});
+
+function loadBladeFavorites() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(BLADE_FAVORITES_KEY) || "[]");
+    if (!Array.isArray(saved)) return new Set();
+    return new Set(saved.filter((id) => Object.prototype.hasOwnProperty.call(appDefinitions, id)));
+  } catch {
+    return new Set();
+  }
+}
+
+const bladeState = {
+  channel: "all",
+  index: 0,
+  apps: [],
+  favorites: loadBladeFavorites()
+};
+
 let nextZIndex = 10;
 let toastTimeout = null;
 
@@ -669,6 +710,9 @@ function updateActiveApp() {
   document.querySelectorAll(".dock-item").forEach((item) => {
     item.classList.toggle("is-running", Boolean(windowLayer.querySelector('[data-window="' + item.getAttribute("data-app") + '"]')));
   });
+  const runningCount = document.getElementById("blade-running-count");
+  if (runningCount) runningCount.textContent = String(windows.length);
+  updateBladeRunningIndicators();
 }
 
 function focusWindow(appWindow) {
@@ -721,6 +765,293 @@ function closeTopWindow() {
   if (!windows.length) return;
   windows.sort((a, b) => Number(b.style.zIndex) - Number(a.style.zIndex));
   closeWindow(windows[0]);
+}
+
+
+function getBladeAppIds() {
+  if (bladeState.channel === "favorites") {
+    return Object.keys(appDefinitions).filter((appId) => bladeState.favorites.has(appId));
+  }
+  const channel = BLADE_CHANNELS[bladeState.channel];
+  if (!channel) return Object.keys(appDefinitions);
+  return channel.appIds
+    ? channel.appIds.filter((appId) => Object.prototype.hasOwnProperty.call(appDefinitions, appId))
+    : Object.keys(appDefinitions);
+}
+
+function updateBladeRunningIndicators() {
+  if (!bladeStrip) return;
+  bladeStrip.querySelectorAll("[data-blade-app]").forEach((card) => {
+    const appId = card.dataset.bladeApp;
+    const running = Boolean(windowLayer.querySelector('[data-window="' + appId + '"]'));
+    card.classList.toggle("is-running", running);
+    const stateLabel = card.querySelector(".blade-card-state");
+    if (stateLabel) {
+      stateLabel.textContent = running ? "ОТКРЫТО" : (bladeState.favorites.has(appId) ? "ИЗБРАННОЕ" : "ПРИЛОЖЕНИЕ");
+      stateLabel.classList.toggle("is-running", running);
+    }
+  });
+}
+
+function selectBladeCard(index, focusCard = false, scrollCard = false) {
+  const cards = bladeStrip.querySelectorAll("[data-blade-app]");
+  if (!cards.length) {
+    bladeState.index = 0;
+    bladeCounter.textContent = "00 / 00";
+    return;
+  }
+
+  bladeState.index = (index + cards.length) % cards.length;
+  const selectedCard = cards[bladeState.index];
+
+  cards.forEach((card, cardIndex) => {
+    const selected = cardIndex === bladeState.index;
+    card.classList.toggle("is-selected", selected);
+    card.setAttribute("aria-pressed", String(selected));
+  });
+
+  const appId = selectedCard.dataset.bladeApp;
+  const definition = appDefinitions[appId];
+  bladeCounter.textContent =
+    String(bladeState.index + 1).padStart(2, "0") + " / " +
+    String(cards.length).padStart(2, "0");
+  bladeStatus.textContent = definition.name + " · " + definition.subtitle;
+
+  if (scrollCard) {
+    const reduceMotion = document.documentElement.classList.contains("reduce-motion") ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    selectedCard.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      inline: "center",
+      block: "nearest"
+    });
+  }
+  if (focusCard) selectedCard.focus({ preventScroll: true });
+}
+
+function renderBladeStrip(options = {}) {
+  bladeState.apps = getBladeAppIds();
+  bladeStrip.replaceChildren();
+
+  bladeState.apps.forEach((appId, index) => {
+    const definition = appDefinitions[appId];
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "blade-card";
+    card.dataset.bladeApp = appId;
+    card.dataset.bladeIndex = String(index);
+    card.dataset.app = appId;
+    card.setAttribute("aria-pressed", "false");
+    card.setAttribute("aria-label", definition.name + ". " + definition.subtitle);
+
+    const top = document.createElement("span");
+    top.className = "blade-card-top";
+
+    const glyph = document.createElement("span");
+    glyph.className = "blade-card-glyph";
+    glyph.setAttribute("aria-hidden", "true");
+    glyph.textContent = definition.glyph;
+
+    const stateLabel = document.createElement("span");
+    stateLabel.className = "blade-card-state";
+    stateLabel.textContent = bladeState.favorites.has(appId) ? "ИЗБРАННОЕ" : "ПРИЛОЖЕНИЕ";
+    top.append(glyph, stateLabel);
+
+    const copy = document.createElement("span");
+    copy.className = "blade-card-copy";
+    const title = document.createElement("strong");
+    title.textContent = definition.name;
+    const subtitle = document.createElement("span");
+    subtitle.textContent = definition.subtitle;
+    copy.append(title, subtitle);
+
+    const bottom = document.createElement("span");
+    bottom.className = "blade-card-bottom";
+    const marker = document.createElement("span");
+    marker.className = "blade-card-index";
+    marker.textContent = String(index + 1).padStart(2, "0");
+    const indicator = document.createElement("span");
+    indicator.className = "blade-card-index";
+    indicator.textContent = "DUCK";
+    bottom.append(marker, indicator);
+
+    card.append(top, copy, bottom);
+    bladeStrip.appendChild(card);
+  });
+
+  if (!bladeState.apps.length) {
+    const empty = document.createElement("div");
+    empty.className = "blade-empty";
+    empty.textContent = "Избранных приложений пока нет. Перейдите в раздел «Все» и нажмите X, чтобы сохранить приложение здесь.";
+    bladeStrip.appendChild(empty);
+    bladeCounter.textContent = "00 / 00";
+    bladeStatus.textContent = "Список избранного пуст";
+    return;
+  }
+
+  bladeState.index = Math.min(bladeState.index, bladeState.apps.length - 1);
+  selectBladeCard(bladeState.index, options.focus === true, options.scroll === true);
+  updateBladeRunningIndicators();
+}
+
+function saveBladeFavorites() {
+  try {
+    localStorage.setItem(BLADE_FAVORITES_KEY, JSON.stringify(Array.from(bladeState.favorites)));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function toggleBladeFavorite(appId) {
+  if (!Object.prototype.hasOwnProperty.call(appDefinitions, appId)) return false;
+
+  const wasFavorite = bladeState.favorites.has(appId);
+  if (wasFavorite) bladeState.favorites.delete(appId);
+  else bladeState.favorites.add(appId);
+
+  if (!saveBladeFavorites()) {
+    if (wasFavorite) bladeState.favorites.add(appId);
+    else bladeState.favorites.delete(appId);
+    showToast("Не удалось сохранить избранное: локальное хранилище недоступно");
+    return false;
+  }
+
+  showToast(wasFavorite ? "Убрано из избранного" : "Добавлено в избранное");
+  if (bladeState.channel === "favorites") {
+    renderBladeStrip();
+  } else {
+    updateBladeRunningIndicators();
+  }
+
+  if (bladeDetails.open && bladeDetails.dataset.app === appId) {
+    updateBladeDetailsFavorite();
+  }
+  return true;
+}
+
+function updateBladeDetailsFavorite() {
+  const favoriteButton = bladeDetails.querySelector("[data-blade-favorite]");
+  const appId = bladeDetails.dataset.app;
+  if (!favoriteButton || !appId) return;
+  favoriteButton.textContent = bladeState.favorites.has(appId) ? "Убрать из избранного" : "В избранное";
+}
+
+function openBladeDetails() {
+  const appId = bladeState.apps[bladeState.index];
+  const definition = appDefinitions[appId];
+  if (!definition) return;
+
+  bladeDetails.dataset.app = appId;
+  bladeDetails.querySelector("#blade-details-title").textContent = definition.name;
+  bladeDetails.querySelector("#blade-details-subtitle").textContent = definition.subtitle;
+
+  const categories = Object.entries(BLADE_CHANNELS)
+    .filter(([key, channel]) => key !== "all" && key !== "favorites" && channel.appIds.includes(appId))
+    .map(([, channel]) => channel.label);
+  bladeDetails.querySelector("#blade-details-category").textContent = categories.length
+    ? categories.join(" · ")
+    : "Все приложения";
+
+  const isRunning = Boolean(windowLayer.querySelector('[data-window="' + appId + '"]'));
+  bladeDetails.querySelector("#blade-details-state").textContent = isRunning ? "Открыто" : "Закрыто";
+  const openButton = bladeDetails.querySelector("#blade-details-open");
+  openButton.dataset.app = appId;
+  updateBladeDetailsFavorite();
+
+  if (typeof bladeDetails.showModal === "function") bladeDetails.showModal();
+  else bladeDetails.setAttribute("open", "");
+}
+
+function closeBladeDetails() {
+  if (bladeDetails.open && typeof bladeDetails.close === "function") bladeDetails.close();
+  else bladeDetails.removeAttribute("open");
+}
+
+function setBladeChannel(channelName) {
+  if (!Object.prototype.hasOwnProperty.call(BLADE_CHANNELS, channelName)) return;
+  bladeState.channel = channelName;
+  bladeState.index = 0;
+  bladeLauncher.querySelectorAll("[data-launch-channel]").forEach((button) => {
+    const active = button.dataset.launchChannel === channelName;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  renderBladeStrip({ scroll: true });
+}
+
+function initializeBladeLauncher() {
+  bladeLauncher.addEventListener("click", (event) => {
+    const channelButton = event.target.closest("[data-launch-channel]");
+    if (channelButton) {
+      setBladeChannel(channelButton.dataset.launchChannel);
+      return;
+    }
+
+    const card = event.target.closest("[data-blade-index]");
+    if (card) {
+      selectBladeCard(Number(card.dataset.bladeIndex));
+      return;
+    }
+
+    const actionButton = event.target.closest("[data-blade-action]");
+    if (!actionButton) return;
+
+    const appId = bladeState.apps[bladeState.index];
+    if (!appId) return;
+
+    if (actionButton.dataset.bladeAction === "open") openApp(appId);
+    else if (actionButton.dataset.bladeAction === "favorite") toggleBladeFavorite(appId);
+    else if (actionButton.dataset.bladeAction === "details") openBladeDetails();
+  });
+
+  bladeDetails.addEventListener("click", (event) => {
+    if (event.target === bladeDetails || event.target.closest("[data-blade-close]")) {
+      closeBladeDetails();
+      return;
+    }
+
+    const favoriteButton = event.target.closest("[data-blade-favorite]");
+    if (favoriteButton) {
+      toggleBladeFavorite(bladeDetails.dataset.app);
+      return;
+    }
+
+    if (event.target.closest("#blade-details-open")) closeBladeDetails();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!bladeLauncher.contains(document.activeElement) || bladeDetails.open ||
+        event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.target.closest("input, textarea, select, [contenteditable='true']")) return;
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      selectBladeCard(bladeState.index + 1, true, true);
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      selectBladeCard(bladeState.index - 1, true, true);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      selectBladeCard(0, true, true);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      selectBladeCard(bladeState.apps.length - 1, true, true);
+    } else if (event.key.toLowerCase() === "a") {
+      event.preventDefault();
+      const appId = bladeState.apps[bladeState.index];
+      if (appId) openApp(appId);
+    } else if (event.key.toLowerCase() === "x") {
+      event.preventDefault();
+      const appId = bladeState.apps[bladeState.index];
+      if (appId) toggleBladeFavorite(appId);
+    } else if (event.key.toLowerCase() === "y") {
+      event.preventDefault();
+      openBladeDetails();
+    }
+  });
+
+  renderBladeStrip();
 }
 
 function startWindowDrag(appWindow, header, pointerEvent) {
@@ -908,7 +1239,7 @@ windowLayer.addEventListener("pointerdown", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
+  if (event.key === "Escape" && !bladeDetails.open) {
     closeTopWindow();
   }
 });
@@ -1108,6 +1439,7 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+initializeBladeLauncher();
 applyPreferences();
 updateClock();
 window.setInterval(updateClock, 1000);
