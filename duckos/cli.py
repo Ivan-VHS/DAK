@@ -22,6 +22,7 @@ from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .terminal import TerminalService, run_interactive
+from .gaming import assess_capabilities, plan_session_transition
 
 
 def _load(path: Path) -> Any:
@@ -94,6 +95,23 @@ def main(argv: list[str] | None = None) -> int:
     startup_disable.add_argument("entry_id")
     startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
     startup_restore.add_argument("entry_id")
+
+    gaming_assess = commands.add_parser(
+        "gaming-assess", help="report evidence-backed readiness for the 66 gaming rules"
+    )
+    gaming_assess.add_argument(
+        "--capabilities", type=Path,
+        help="JSON object containing provider availability evidence (missing providers stay unavailable)",
+    )
+
+    gaming_transition = commands.add_parser(
+        "gaming-transition", help="plan one explicit gaming-session lifecycle transition"
+    )
+    gaming_transition.add_argument("state", choices=("idle", "starting", "active", "background", "restoring"))
+    gaming_transition.add_argument("event")
+    gaming_transition.add_argument("--profile-id")
+    gaming_transition.add_argument("--process-identity")
+    gaming_transition.add_argument("--snapshot-id")
 
     terminal = commands.add_parser(
         "terminal", help="open the separate DuckOS extended terminal"
@@ -213,6 +231,18 @@ def main(argv: list[str] | None = None) -> int:
                 result = TerminalService().execute(args.command_line)
             else:
                 raise ValueError("unsupported terminal action")
+        elif args.command == "gaming-assess":
+            payload = _load(args.capabilities) if args.capabilities else {}
+            if isinstance(payload, dict) and "capabilities" in payload:
+                payload = payload["capabilities"]
+            result = assess_capabilities(payload)
+        elif args.command == "gaming-transition":
+            result = plan_session_transition(
+                args.state, args.event,
+                profile_id=args.profile_id,
+                process_identity=args.process_identity,
+                snapshot_id=args.snapshot_id,
+            )
         elif args.command == "validate-manifest":
             result = validate_manifest(_load(args.manifest), args.root, verify_files=not args.metadata_only)
         elif args.command == "plan-image":
