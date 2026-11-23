@@ -26,6 +26,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
         (package / "desktop.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "typecheck.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "native_compiler.py").write_text("COMPILER = True\n", encoding="utf-8")
+        (package / "multisyntax.py").write_text("FRONTENDS = ('reaper', 'brainfuck')\n", encoding="utf-8")
         self.source = self.root / "example.rpr"
         self.source.write_text("emit 42\n", encoding="utf-8")
         self.workbench = ReaperWorkbench(self.root, python_executable="python-test")
@@ -37,7 +38,8 @@ class ReaperWorkbenchTests(unittest.TestCase):
         self.assertEqual(result["repository"], str(self.root))
         self.assertEqual(
             result["capabilities"],
-            ["reference_runtime", "cli", "native_studio", "static_typecheck", "native_aot_subset"],
+            ["reference_runtime", "cli", "native_studio", "static_typecheck", "native_aot_subset",
+             "multi_syntax_frontends", "polyglot_runner", "syntax_validation"],
         )
 
     def test_check_invokes_reaper_cli_without_a_shell(self):
@@ -67,6 +69,55 @@ class ReaperWorkbenchTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(run.call_args.args[0][2:4], ["reaper", "typecheck"])
         self.assertIn(str(self.source.resolve()), run.call_args.args[0])
+
+    def test_syntax_registry_uses_the_local_reaper_checkout(self):
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0,
+            stdout=json.dumps({"syntaxes": [{"name": "brainfuck"}]}), stderr="",
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.syntax_registry()
+        self.assertEqual(result["result"]["syntaxes"][0]["name"], "brainfuck")
+        self.assertEqual(run.call_args.args[0][2:], ["reaper", "syntax", "--list", "--json"])
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_syntax_check_accepts_python_subset_and_uses_validation_only(self):
+        source = self.root / "sample.py"
+        source.write_text("print(42)\\n", encoding="utf-8")
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0,
+            stdout=json.dumps({"valid": True, "execution_performed": False}), stderr="",
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.check_syntax(source, syntax="python")
+        self.assertTrue(result["ok"])
+        arguments = run.call_args.args[0]
+        self.assertEqual(arguments[2:7], ["reaper", "syntax", "--check", "--json", "--syntax"])
+        self.assertIn("python", arguments)
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_polyglot_run_preserves_steps_and_uses_the_shared_runtime(self):
+        source = self.root / "demo.polyglot"
+        source.write_text("%% brainfuck\\n+.", encoding="utf-8")
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0,
+            stdout=json.dumps({"block_count": 1, "steps": 2}), stderr="",
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.run_syntax(source, polyglot=True, max_steps=500)
+        self.assertEqual(result["result"]["block_count"], 1)
+        self.assertIn("--polyglot", run.call_args.args[0])
+        self.assertIn("500", run.call_args.args[0])
+
+    def test_syntax_source_extensions_are_validated_without_trusting_symlinks(self):
+        unsupported = self.root / "sample.exe"
+        unsupported.write_text("not source", encoding="utf-8")
+        with self.assertRaisesRegex(ReaperIntegrationError, "supported syntax extension"):
+            self.workbench.check_syntax(unsupported)
+        link = self.root / "linked.py"
+        link.symlink_to(self.root / "sample.py")
+        with self.assertRaisesRegex(ReaperIntegrationError, "symbolic links"):
+            self.workbench.run_syntax(link)
 
     def test_studio_launch_uses_a_separate_process(self):
         fake_process = object()
