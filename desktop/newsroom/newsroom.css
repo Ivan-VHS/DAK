@@ -137,8 +137,11 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   padding: 0 0 13px; border-bottom: 1px solid rgba(29,26,20,.48);
 }
 .story.lead {
-  display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; column-span: all;
+  display: block; column-span: all;
   padding-bottom: 17px; margin-bottom: 17px; border-bottom: 3px double var(--ink);
+}
+.story-open.lead-open {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: start;
 }
 .story-open {
   display: block; width: 100%; padding: 0; text-align: left; color: inherit; font: inherit;
@@ -215,7 +218,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .original-link:hover { background: #8a3a24; }
 @media (max-width: 860px) {
   .feed { column-count: 2; }
-  .story.lead { grid-template-columns: 1fr; }
+  .story-open.lead-open { grid-template-columns: 1fr; }
   .story.lead .photo { min-height: 170px; }
 }
 @media (max-width: 580px) {
