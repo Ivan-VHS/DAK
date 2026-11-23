@@ -1,18 +1,33 @@
 # Mora desktop — unified web and native workspace
 
-**Canonical host:** DuckOS / Mora  
-**Manifest contract:** mora-app.json, schema version 1  
-**Local endpoint:** http://127.0.0.1:43860
+**Canonical shell:** mora/index.html  
+**Canonical theme:** mora/theme.json · schema mora.theme.v1  
+**Design contract:** MORA_DESIGN_SYSTEM.md  
+**Local host:** http://127.0.0.1:43860
 
-Mora provides one desktop, one app catalogue and one shared theme for two kinds of application content: the seven browser-based DuckOS apps and the four existing native Ivan-VHS project tools. Both groups are visible on the same home screen. Their runtime boundaries remain explicit.
+Mora is one desktop for two runtime types: seven browser-based applications and four native project tools. The canonical PWA shell supplies the home screen, app catalogue, category navigation, search, shared theme, application details and native launch controls. Both groups are visible in the same workspace.
 
-## One home screen, two runtime types
+## Canonical routes and runtime
 
-The default route / serves prototype/mora-home.html. The center of the desktop contains the seven browser applications and, immediately below them, the native tools. There is no second desktop or duplicate app launcher.
+| Route | Purpose |
+|---|---|
+| / | Redirect to /mora/ |
+| /mora/ | Canonical Mora PWA desktop |
+| /projects | Detailed native project catalogue |
+| /prototype/mora-home.html | Existing seven-app browser workspace; also used as the embedded module runtime |
+| /api/apps | Local app discovery, availability and current theme |
+| /api/theme | Persist the dark/light preference |
+| /api/launch/{id} | Launch one fixed native app ID |
 
-### Web applications
+The full experience runs with:
 
-The seven app identities remain Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. They open inside the browser desktop's own application-window surface and use local browser storage/APIs where available.
+    python mora_host.py
+
+The host binds to 127.0.0.1, serves the PWA and its embedded web-module runtime, persists the desktop theme and exposes the allowlisted native launcher. Opening mora/index.html through a static web server still gives the web catalogue and embedded browser apps, but native-launch controls remain unavailable because no local process bridge exists.
+
+## Web applications inside Mora
+
+The seven product identities remain Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Clicking a web-app card opens its current working browser surface inside a Mora application window. The module content comes from the maintained seven-app prototype at prototype/mora-home.html; it is loaded in embedded mode rather than copied into a second implementation.
 
 | App | Current browser scope | Native/OS integration still missing |
 |---|---|---|
@@ -24,26 +39,28 @@ The seven app identities remain Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and
 | Illidia | Local game catalogue, progress, achievements and user-authorized screen clips | Native executable launcher, cloud saves and platform achievement providers |
 | Unify | Local device labels, browser clipboard and bounded JSON export/import | Authenticated pairing, live synchronization and phone notification service |
 
-These browser features are prototype behavior, not evidence of fully implemented native DuckOS services. The authoritative maturity and safety specification remains [PREINSTALLED_APPLICATIONS.md](PREINSTALLED_APPLICATIONS.md), with the catalog in catalogs/preinstalled-applications.v1.json.
+These are existing browser-prototype capabilities, not claims that the corresponding native DuckOS services are complete. Browser permissions such as microphone, camera, display capture and clipboard remain controlled by the browser and require user permission. Local application data stays in the same browser origin.
 
-### Native applications
+The authoritative product maturity and safety specification remains PREINSTALLED_APPLICATIONS.md, with its machine-readable catalog in catalogs/preinstalled-applications.v1.json.
 
-The same home screen discovers the native application manifests and asks /api/apps for current availability. A native icon is enabled only when the local repository is found and its known entry point exists. Selecting it posts its fixed ID to /api/launch/{id}; the host starts the existing executable as a separate OS-managed process.
+## Native applications in the same catalogue
+
+Mora queries /api/apps and matches each known app ID to its repository and build target. It enables launch only when the directory and expected entry point are present. Selecting an available app posts a fixed ID to /api/launch/{id}; the host uses a per-app launch allowlist and starts the program as a separate native process.
 
 | Project | Role | Launch target |
 |---|---|---|
-| Reaper Studio | MOST/Reaper language, IDE, check/run, debugger and LSP/DAP | reaper_desktop.py via the current Python interpreter |
-| OPlague | Read-only device inventory and INF/ZIP/PE inspection | oplague_app.py via Python |
+| Reaper Studio | MOST/Reaper language, IDE, check/run, debugger and LSP/DAP | reaper_desktop.py through the current Python interpreter |
+| OPlague | Read-only device inventory and INF/ZIP/PE inspection | oplague_app.py through Python |
 | VentuSample | C++20 / Qt 6 sample workstation and offline DSP | Existing built VentuSample desktop target |
-| Pytyliki | C11 processor-systems workbench and Win32 GUI | Existing built pytyliki-gui.exe on Windows |
+| Pytyliki | C11 processor-systems workstation and Win32 GUI | Existing built pytyliki-gui.exe on Windows |
 
-Mora does not embed native windows in iframes. The browser desktop is the common launcher and design surface; the operating system owns native window placement, focus and lifetime. A missing repository or build is shown as unavailable rather than represented by a mock window.
+A local repository checkout can be discovered by its expected directory even if its descriptive mora-app.json has not yet merged. The manifest is used for metadata, never as executable configuration. The actual launch target remains fixed in mora_host.py. Missing folders or unbuilt executables are shown as unavailable, not simulated.
 
-The /projects route is a details/catalogue page for the native group. It supplements the combined home screen; it is not a separate shell.
+Mora does not embed native windows in iframes. The browser shell is the common desktop and launch surface; the operating system owns native window placement, focus, DPI, privileges and lifetime.
 
-## Start
+## Repository discovery
 
-Place DuckOS, Reaper, OPlague, VentuSample and Pytyliki side by side:
+Place the repositories beside DuckOS:
 
     workspace/
     ├── DuckOS/
@@ -52,15 +69,7 @@ Place DuckOS, Reaper, OPlague, VentuSample and Pytyliki side by side:
     ├── VentuSample/
     └── Pytyliki/
 
-From DuckOS:
-
-    python mora_host.py
-
-The server listens on 127.0.0.1 only. The root URL serves the combined web/native home screen; /projects serves the native project catalogue. Python 3.10 or newer is required for the local host. Native Qt and Windows builds retain their own compiler, toolkit and platform prerequisites.
-
-## Repository discovery
-
-By default Mora checks sibling repositories, a workspace subdirectory, and Projects directories under the current user's home. For other local layouts, configure paths in workspace.json:
+Mora also checks a workspace subdirectory and Projects directories in the current user's home. For other layouts, configure paths in workspace.json:
 
     {
       "version": 1,
@@ -73,38 +82,36 @@ By default Mora checks sibling repositories, a workspace subdirectory, and Proje
       }
     }
 
-The file is stored in the normal per-user configuration directory: %APPDATA%/Ivan-VHS/Mora/workspace.json on Windows, ~/Library/Application Support/Mora/workspace.json on macOS, or $XDG_CONFIG_HOME/mora/workspace.json on Linux. Relative paths resolve from the DuckOS repository root.
+The file is stored under %APPDATA%/Ivan-VHS/Mora/workspace.json on Windows, ~/Library/Application Support/Mora/workspace.json on macOS, or $XDG_CONFIG_HOME/mora/workspace.json on Linux. Relative paths resolve from the DuckOS repository root.
 
-## Shared design and theme
+## One shared design and theme contract
 
-Both groups share Mora's dark navy background, translucent surfaces, blue primary actions, restrained red signal accents, typography, focus treatment, spacing and desktop navigation. The seven web apps retain distinct identity colors for their icons. Native application windows retain their native widgets and control layout.
+MORA_DESIGN_SYSTEM.md and mora/theme.json define the canonical palette, spacing, shapes, typography, focus, reduced-motion and motion tokens. The PWA shell and its embedded web modules share the indigo/purple foundation, teal secondary accent, translucent surfaces and semantic danger color.
 
-Mora persists one dark or light startup preference. The web home screen reads it from /api/apps and can change it through /api/theme. Before each native launch, the host passes MORA_THEME_MODE=dark or light. Reaper, OPlague, VentuSample and Pytyliki read the value before their first theme is applied. Existing application theme controls remain available.
+VentuSample and Pytyliki already consume the Mora light/dark tokens in their native theme adapters. Reaper and OPlague map their Tk palettes to the same canonical light/dark roles. The host passes MORA_THEME_MODE=dark or light before the native UI starts.
 
-A theme change does not remotely repaint already-running native processes. New native windows use the current Mora theme; restart an existing native app to apply a changed startup theme.
+The theme API is persisted locally. A theme change immediately updates the shell and open browser modules. Existing native windows are not remotely repainted; restart them to apply the current startup theme.
 
 ## Security and product boundaries
 
-- The local HTTP host binds only to 127.0.0.1 and applies same-origin checks to state-changing requests.
-- Browser code can request one of four fixed native app IDs; it cannot provide a shell command or executable path.
-- The launcher has a per-project allowlist and starts apps as separate native processes.
-- App manifests supply descriptive metadata. Their entrypoint strings are not executed by the host.
+- The local host binds only to 127.0.0.1 and applies same-origin checks to state-changing requests.
+- The browser sends a fixed native app ID only; it cannot supply a shell command or executable path.
+- Launch targets are a per-app allowlist in mora_host.py. Manifest entrypoint strings are metadata and are never executed.
+- Browser app permissions remain explicit and user-controlled.
+- The service worker skips /api responses so cached state cannot misrepresent native availability or theme changes.
 - OPlague remains read-only; Mora does not elevate privileges or install drivers.
 - VentuSample remains an offline renderer and DSP workstation, not a DAW or audio-device host.
 - Pytyliki does not gain scheduler, affinity, voltage, clock or firmware controls.
 - Reaper's language/runtime and compiler tracks remain independent of the desktop shell.
-- The seven browser app prototypes retain their own consent, data-retention and capability boundaries; see PREINSTALLED_APPLICATIONS.md and UNIFY_TRANSFER_FORMAT_V1.md.
 
-## Application manifest schema
+## Manifest and verification
 
-Each native repository carries mora-app.json using schemas/mora-app.v1.schema.json. The schema describes app identity, category, capabilities, platform declaration, expected entry point and Mora theme hand-off. It is metadata, not executable configuration.
+Each native repository carries mora-app.json following schemas/mora-app.v1.schema.json. The schema describes identity, capabilities, platforms and theme integration. The host still resolves the actual executable through fixed code.
 
-For safety, the actual native launch command is separately fixed in mora_host.py. To add a project, update the schema-compatible manifest, the fixed launcher allowlist, the desktop catalogue and the associated tests together.
-
-## Verification
+Run:
 
     python -m unittest discover -s tests -v
     python tools/validate_app_catalog.py
     python mora_host.py --no-browser
 
-CI validates the seven-app product catalog and the local host. Native GUI verification remains platform-specific and must use the actual Qt 6 or Windows build jobs.
+The CI checks Python tests, the seven-app catalog and JavaScript syntax. Native GUI builds remain platform-specific and must use the actual Qt 6 or Windows build jobs.
