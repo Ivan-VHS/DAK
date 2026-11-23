@@ -1,6 +1,7 @@
 """Tk-based native user-space maintenance window for Duck Desktop."""
 from __future__ import annotations
 
+import json
 import os
 import queue
 import subprocess
@@ -10,8 +11,10 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 from typing import Any, Callable
+from pathlib import Path
 
 from .service import DesktopService, move_desktop_items_to_inbox
+from .settings_panel import SettingsPanel
 from .reaper import ReaperIntegrationError, ReaperWorkbench
 
 COLORS = {
@@ -66,12 +69,12 @@ class DesktopWindow:
 
         tabs = ttk.Notebook(self.root)
         tabs.pack(fill="both", expand=True, padx=20, pady=(4, 20))
-        overview, clean, startup, processes, rules, reaper_tab = [
-            ttk.Frame(tabs, padding=18) for _ in range(6)
+        overview, clean, startup, processes, rules, reaper_tab, settings_tab = [
+            ttk.Frame(tabs, padding=18) for _ in range(7)
         ]
         for tab, title in zip(
-            (overview, clean, startup, processes, rules, reaper_tab),
-            ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила", "Reaper"),
+            (overview, clean, startup, processes, rules, reaper_tab, settings_tab),
+            ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила", "Reaper", "Настройки"),
         ):
             tabs.add(tab, text=title)
 
@@ -140,6 +143,7 @@ class DesktopWindow:
             ttk.Label(row, text=statement, wraplength=820, justify="left").pack(side="left", fill="x", expand=True)
 
         self._build_reaper_tab(reaper_tab)
+        SettingsPanel(settings_tab).pack(fill="both", expand=True)
         self.refresh()
 
     def _build_reaper_tab(self, tab: ttk.Frame) -> None:
