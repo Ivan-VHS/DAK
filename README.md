@@ -124,6 +124,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [Mora Commons unified application catalogue](docs/MORA_COMMONS.md)
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
+- [Mora language, chronology and recovery contracts](docs/MORA_LANGUAGE_AND_CHRONOLOGY.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
