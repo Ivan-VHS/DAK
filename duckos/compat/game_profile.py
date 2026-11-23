@@ -209,6 +209,12 @@ def plan_game_launch(
     if runtime_path is None:
         blockers.append(f"Wine runtime '{runtime_hint}' was not found as an executable on PATH.")
     prefix = clean["runtime"]["prefix"]
+    if not prefix:
+        blockers.append("Select an existing Wine prefix; implicit default-prefix creation is not allowed.")
+    else:
+        prefix_root = Path(prefix)
+        if not (prefix_root / "system.reg").is_file() or not (prefix_root / "drive_c").is_dir():
+            blockers.append("The selected directory is not an initialized Wine prefix (system.reg and drive_c are required).")
     argv = [runtime_path, str(executable), *clean["arguments"]] if runtime_path else []
     return {
         "schema": "duckos.game-launch-plan.v1",
