@@ -67,9 +67,22 @@ class SettingsPanel(ttk.Frame):
         self.tabs.pack(fill="both", expand=True)
         self.pages: dict[str, ttk.Frame] = {}
         for section in self.SECTIONS:
-            page = ttk.Frame(self.tabs, padding=12)
+            shell = ttk.Frame(self.tabs)
+            canvas = tk.Canvas(
+                shell,
+                highlightthickness=0,
+                background=ttk.Style(self).lookup("TFrame", "background") or "#101010",
+            )
+            scrollbar = ttk.Scrollbar(shell, orient="vertical", command=canvas.yview)
+            canvas.configure(yscrollcommand=scrollbar.set)
+            page = ttk.Frame(canvas, padding=12)
+            window_id = canvas.create_window((0, 0), window=page, anchor="nw")
+            page.bind("<Configure>", lambda _event, target=canvas: target.configure(scrollregion=target.bbox("all")))
+            canvas.bind("<Configure>", lambda event, target=canvas, item=window_id: target.itemconfigure(item, width=event.width))
+            canvas.pack(side="left", fill="both", expand=True)
+            scrollbar.pack(side="right", fill="y")
             self.pages[section] = page
-            self.tabs.add(page, text=self.TITLES[section])
+            self.tabs.add(shell, text=self.TITLES[section])
 
         self._build_network(self.pages["network"])
         self._build_power(self.pages["power"])
@@ -209,6 +222,7 @@ class SettingsPanel(ttk.Frame):
         if not self._loading:
             self._dirty = True
             self.status.set("Есть несохранённые изменения формы.")
+            self._update_preview()
 
     def _section_values(self, section: str) -> dict[str, Any]:
         result: dict[str, Any] = {}
@@ -262,6 +276,10 @@ class SettingsPanel(ttk.Frame):
         theme = self._variables["appearance.theme"].get()
         scale = self._variables["appearance.ui_scale"].get()
         self.preview.configure(text=f"Предпросмотр · {theme} · {accent} · масштаб {scale}")
+        try:
+            self.preview.configure(foreground=accent)
+        except tk.TclError:
+            pass
 
     def _open_search_result(self, _event: tk.Event | None = None) -> None:
         selection = self.search_results.curselection()
