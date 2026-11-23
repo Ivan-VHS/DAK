@@ -86,33 +86,34 @@ function contrastRatio(foreground, background) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-test("Mora design system exposes Amber, Dark and Light themes", () => {
+test("Mora exposes one accessible black, white and yellow DuckOS palette", () => {
   assert.equal(theme.schema, "mora.theme.v1");
-  assert.equal(theme.defaultPalette, "amber");
-  assert.equal(theme.palettes.amber.page, "#211913");
-  assert.equal(theme.palettes.amber.surface, "#33261D");
-  assert.equal(theme.palettes.amber.text, "#FFF3E2");
-  assert.equal(theme.palettes.amber.brand, "#D58B3D");
-  assert.equal(theme.palettes.amber.secondaryAccent, "#526347");
-  assert.equal(theme.palettes.amber.danger, "#B64A40");
-  assert.ok(contrastRatio(theme.palettes.amber.text, theme.palettes.amber.page) >= 7);
-  assert.ok(contrastRatio(theme.palettes.amber.onBrand, theme.palettes.amber.brand) >= 4.5);
-  assert.ok(contrastRatio(theme.palettes.amber.onSecondaryAccent, theme.palettes.amber.secondaryAccent) >= 4.5);
-  assert.equal(theme.palettes.dark.brand, "#A78BFA");
-  assert.equal(theme.palettes.light.brand, "#5B43B5");
+  assert.equal(theme.defaultPalette, "duck");
+  assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
+  const palette = theme.palettes.duck;
+  assert.equal(palette.page, "#080808");
+  assert.equal(palette.surface, "#151515");
+  assert.equal(palette.text, "#FFFFFF");
+  assert.equal(palette.brand, "#FFD400");
+  assert.equal(palette.danger, "#FFD400");
+  assert.ok(contrastRatio(palette.text, palette.page) >= 7);
+  assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
+  assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5);
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
-  assert.equal(manifest.theme_color, "#211913");
-  assert.equal(manifest.background_color, "#211913");
+  assert.equal(manifest.theme_color, "#FFD400");
+  assert.equal(manifest.background_color, "#080808");
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
-  assert.ok(css.includes(':root[data-theme="amber"]'));
-  assert.ok(css.includes("repeating-linear-gradient(90deg"));
-  assert.ok(css.includes("Mora Amber — final visual pass"));
+  assert.ok(html.includes('Единая палитра DuckOS'));
+  assert.ok(css.includes(':root[data-theme="duck"]'));
+  assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
+  assert.ok(css.includes("#FFD400"));
   assert.ok(css.includes(".app-grid::before"));
   assert.ok(css.includes(".dock-wrap::before"));
-  assert.ok(css.includes("#526347"));
-  assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v5-commons"));
+  assert.ok(js.includes('document.documentElement.dataset.theme = "duck"'));
+  assert.ok(!js.includes("nextTheme"));
+  assert.ok(!html.includes('data-action="toggle-theme"'));
+  assert.ok(serviceWorker.includes("mora-shell-v6-duck-palette"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
