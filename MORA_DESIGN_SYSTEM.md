@@ -109,3 +109,14 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 Mora remains a browser desktop shell, not a native process launcher. Native application capabilities and security boundaries remain owned by their respective projects; a permissioned launcher/IPC layer must be implemented and verified separately.
 
+
+
+## Blade launcher and dashboard interaction
+
+The Mora desktop uses a horizontal, focus-led application rail inspired by console blade navigation. Channel buttons filter the existing application registry: all apps, local favorites, creation, games, media, tools and system utilities. The selected card grows slightly and receives the Duck-yellow focus surface; neighboring cards remain graphite. This is a navigation treatment over the existing Mora panels, not a second application catalogue.
+
+The rail supports pointer, touch scrolling and keyboard operation. Left/Right move between cards, Home/End jump to the first/last card, **A** opens the selected panel, **X** toggles its local favorite state and **Y** opens accessible details. Enter activates the focused native button. Escape closes the details dialog or the top Mora window. The shell honors reduced-motion preferences when scrolling.
+
+The profile tile is deliberately a local session summary: it shows the number of currently open Mora windows and opens Control. It does not imply an authenticated Duck account, online presence, hardware health, achievements or a gamerscore. Favorites are stored in the browser's local profile under a versioned key; they are not synced to a remote account.
+
+App cards open the existing panel by its registered app ID. They do not launch arbitrary executables or claim native operating-system process control. Any native launch path must remain separately permissioned and implemented by an appropriate Duck service.
