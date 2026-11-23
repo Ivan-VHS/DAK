@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/preinstalled-applications.v1.schema.json",
+  "title": "DuckOS preinstalled applications catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "operating_system",
+    "maturity_status",
+    "distribution_intent",
+    "applications",
+    "workflows"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.preinstalled-applications.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "operating_system": {
+      "const": "DuckOS"
+    },
+    "maturity_status": {
+      "enum": [
+        "not_assessed",
+        "specified",
+        "planned",
+        "partial",
+        "implemented",
+        "verified",
+        "deprecated",
+        "unsupported",
+        "not_applicable"
+      ]
+    },
+    "distribution_intent": {
+      "enum": [
+        "preinstalled",
+        "optional",
+        "downloadable"
+      ]
+    },
+    "note": {
+      "type": "string"
+    },
+    "applications": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "domain",
+          "maturity_status",
+          "capabilities",
+          "boundaries"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maturity_status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "concepts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "naming_review": {
+            "enum": [
+              "required_before_public_distribution",
+              "not_assessed",
+              "cleared"
+            ]
+          }
+        }
+      }
+    },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "target",
+          "trigger",
+          "action",
+          "maturity_status",
+          "user_consent_required"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maturity_status": {
+            "enum": [
+              "not_assessed",
+              "specified",
+              "planned",
+              "partial",
+              "implemented",
+              "verified",
+              "deprecated",
+              "unsupported",
+              "not_applicable"
+            ]
+          },
+          "user_consent_required": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "integration_contract_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
