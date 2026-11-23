@@ -104,7 +104,7 @@ def main(argv: list[str] | None = None) -> int:
     foundry_audit = foundry_commands.add_parser("audit", help="collect a local industrial operations snapshot")
     foundry_audit.add_argument("--skip-devices", action="store_true")
     foundry_audit.add_argument("--skip-runtimes", action="store_true")
-    foundry_audit.add_argument("--output", type=Path, help="export the snapshot to a new private JSON file")
+    foundry_audit.add_argument("--output", type=Path, help="create a new JSON report; existing files are not overwritten")
     foundry_plan = foundry_commands.add_parser("plan", help="create a manual operator runbook")
     foundry_plan.add_argument(
         "--profile", choices=("routine", "preventive", "incident", "commissioning"),
