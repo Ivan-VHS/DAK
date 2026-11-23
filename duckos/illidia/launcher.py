@@ -301,15 +301,15 @@ def launch_game(
 
     if review["launch_mode"] == "store" and not direct:
         uri = review["store_uri"]
-        pid, command = _open_store_uri(uri)
+        handler_pid, command = _open_store_uri(uri)
         launch_id = library.record_launch(
-            game.id, pid=pid, process_group=None, launch_kind="store-delegated",
+            game.id, pid=None, process_group=None, launch_kind="store-delegated",
             command=command, log_path=None,
         )
         return {
             "launch_id": launch_id,
             "status": "delegated_to_store",
-            "pid": pid,
+            "handler_pid": handler_pid,
             "message": "The official store client received the game launch request. The store owns overlay and cloud-save behavior; Illidia cannot supervise the game's full process tree through a browser or URI handler.",
             "command": command,
         }
@@ -322,9 +322,6 @@ def launch_game(
     digest = review["sha256"]
     if review["first_run_confirmation_required"] and confirm_unverified:
         library.approve(game.id, digest, "unverified")
-    if library.fingerprint(game.id) is None or update_fingerprint:
-        library.set_fingerprint(game.id, digest)
-
     command, runtime_environment, runtime_warnings = _execution_plan(game)
     cwd = _working_directory(game)
     env = _environment(game)
@@ -343,6 +340,13 @@ def launch_game(
             log_stream.write("Warning: " + warning + "\n")
         log_stream.flush()
         _run_hooks(game, "pre_launch", cwd, log_stream)
+        current_digest = sha256_file(game.executable_path or "")
+        if current_digest != digest:
+            raise LaunchError(
+                "The executable changed while pre-launch hooks were running. Review its new SHA-256 before launching again."
+            )
+        if library.fingerprint(game.id) is None or update_fingerprint:
+            library.set_fingerprint(game.id, digest)
         creation_flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) if os.name == "nt" else 0
         process = subprocess.Popen(
             command,
