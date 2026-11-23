@@ -22,7 +22,7 @@ from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .terminal import TerminalService, run_interactive
-from .gaming import assess_capabilities, plan_session_transition
+from .gaming import assess_capabilities, detect_game_processes, load_game_profiles, plan_session_transition
 
 
 def _load(path: Path) -> Any:
@@ -95,6 +95,11 @@ def main(argv: list[str] | None = None) -> int:
     startup_disable.add_argument("entry_id")
     startup_restore = startup_commands.add_parser("restore", help="restore a previously disabled startup entry")
     startup_restore.add_argument("entry_id")
+
+    gaming_detect = commands.add_parser(
+        "gaming-detect", help="find game-process candidates from a local profile catalog"
+    )
+    gaming_detect.add_argument("--profiles", type=Path, required=True, help="path to a duckos.game-profile-catalog.v1 JSON file")
 
     gaming_assess = commands.add_parser(
         "gaming-assess", help="report evidence-backed readiness for the 66 gaming rules"
@@ -231,6 +236,9 @@ def main(argv: list[str] | None = None) -> int:
                 result = TerminalService().execute(args.command_line)
             else:
                 raise ValueError("unsupported terminal action")
+        elif args.command == "gaming-detect":
+            profiles = load_game_profiles(args.profiles)
+            result = detect_game_processes(profiles)
         elif args.command == "gaming-assess":
             payload = _load(args.capabilities) if args.capabilities else {}
             if isinstance(payload, dict) and "capabilities" in payload:
