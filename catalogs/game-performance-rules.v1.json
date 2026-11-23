@@ -220,7 +220,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -237,7 +238,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -254,7 +256,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -271,7 +274,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -288,7 +292,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -305,7 +310,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -322,7 +328,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -339,7 +346,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -356,7 +364,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -373,7 +382,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -390,7 +400,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
@@ -407,7 +418,8 @@
         "interrupt_telemetry",
         "power_telemetry",
         "timer_provider",
-        "frame_time"
+        "frame_time",
+        "cpu_telemetry"
       ],
       "execution": "observe_or_recommend",
       "requires_consent": false,
