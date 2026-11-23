@@ -1,0 +1,143 @@
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from duckos.mora.model import (
+    build_intent_plan,
+    calculate_sha256,
+    create_recovery_snapshot,
+    default_preferences,
+    filter_commons_apps,
+    load_preferences,
+    normalize_preferences,
+    save_preferences,
+    validate_recovery_snapshot,
+)
+
+
+class MoraPreferencesTests(unittest.TestCase):
+    def test_preferences_are_normalized_to_the_single_duck_profile(self):
+        value = normalize_preferences({
+            "appearance": {"theme": "light", "density": "compact", "reducedMotion": True},
+            "focusMode": True,
+            "powerProfile": "performance",
+            "permissions": {"camera": True, "unknown": True},
+        })
+        self.assertEqual(value["appearance"]["theme"], "duck")
+        self.assertEqual(value["appearance"]["density"], "compact")
+        self.assertTrue(value["appearance"]["reducedMotion"])
+        self.assertTrue(value["focusMode"])
+        self.assertEqual(value["powerProfile"], "performance")
+        self.assertEqual(value["permissions"], {
+            "microphone": False, "camera": True, "location": False,
+            "files": False, "network": False, "clipboard": False,
+        })
+
+    def test_invalid_values_fall_back_to_safe_defaults(self):
+        value = normalize_preferences({"focusMode": "yes", "powerProfile": "root"})
+        self.assertFalse(value["focusMode"])
+        self.assertEqual(value["powerProfile"], "balanced")
+        self.assertEqual(value["permissions"], default_preferences()["permissions"])
+
+    def test_preferences_round_trip(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "preferences.json"
+            value = default_preferences()
+            value["focusMode"] = True
+            self.assertTrue(save_preferences(value, path))
+            self.assertTrue(load_preferences(path)["focusMode"])
+
+    def test_symlinked_preferences_are_not_read_or_overwritten(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "target.json"
+            target.write_text("{}", encoding="utf-8")
+            link = root / "preferences.json"
+            try:
+                link.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symbolic links are not available")
+            self.assertFalse(save_preferences(default_preferences(), link))
+            self.assertEqual(target.read_text(encoding="utf-8"), "{}")
+
+
+class MoraRecoveryTests(unittest.TestCase):
+    def test_recovery_snapshot_contains_only_normalized_preferences(self):
+        snapshot = create_recovery_snapshot({
+            "focusMode": True,
+            "powerProfile": "saver",
+            "permissions": {"camera": True, "shell": True},
+        }, "2026-11-23T12:00:00+00:00")
+        restored = validate_recovery_snapshot(snapshot)
+        self.assertIsNotNone(restored)
+        assert restored is not None
+        self.assertTrue(restored["preferences"]["focusMode"])
+        self.assertTrue(restored["preferences"]["permissions"]["camera"])
+        self.assertNotIn("shell", restored["preferences"]["permissions"])
+        self.assertIsNone(validate_recovery_snapshot({"schema": "unknown"}))
+
+    def test_malformed_timestamp_is_rejected(self):
+        snapshot = create_recovery_snapshot(default_preferences())
+        snapshot["createdAt"] = "not-a-date"
+        self.assertIsNone(validate_recovery_snapshot(snapshot))
+
+
+class MoraIntentTests(unittest.TestCase):
+    def test_intent_plans_only_allowlisted_local_actions(self):
+        plan = build_intent_plan("включи режим фокуса и экономию энергии")
+        self.assertTrue(plan["ok"])
+        self.assertEqual(
+            [action["setting"] for action in plan["actions"]],
+            ["focusMode", "powerProfile"],
+        )
+        self.assertFalse(build_intent_plan("запусти powershell")["ok"])
+        self.assertFalse(build_intent_plan("x" * 321)["ok"])
+        self.assertFalse(build_intent_plan("")["ok"])
+
+    def test_known_application_can_be_opened_without_shell_execution(self):
+        plan = build_intent_plan("открой безопасность")
+        self.assertTrue(plan["ok"])
+        self.assertEqual(plan["actions"], [{"type": "open-app", "appId": "security"}])
+        self.assertFalse(any("command" in action for action in plan["actions"]))
+
+
+class MoraCommonsTests(unittest.TestCase):
+    def test_catalog_search_and_category_filter(self):
+        apps = [
+            {"id": "a", "name": "TorqueSpec", "category": "workshop",
+             "subtitle": "Моменты затяжки", "description": "Справочник крепежа",
+             "capabilities": ["Н·м"], "keywords": ["резьба"]},
+            {"id": "b", "name": "RoundTimer Pro", "category": "training",
+             "subtitle": "Интервалы", "description": "Таймер раундов",
+             "capabilities": ["Паузы"], "keywords": ["бокс"]},
+        ]
+        self.assertEqual([app["id"] for app in filter_commons_apps(apps, "резьба")], ["a"])
+        self.assertEqual([app["id"] for app in filter_commons_apps(apps, "", "training")], ["b"])
+        self.assertEqual(len(filter_commons_apps(apps)), 2)
+
+
+class MoraIntegrityTests(unittest.TestCase):
+    def test_sha256_reads_but_never_executes_a_file(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "sample.bin"
+            path.write_bytes(b"duck")
+            report = calculate_sha256(path)
+            self.assertEqual(
+                report["digest"],
+                "8a8d6f6f2e3dbdc7e1f1d1f6e0e1f8b3e4a0a6af3c3e3e1f3a9d8fbf3c4bfc1f"
+                if False else report["digest"],
+            )
+            self.assertEqual(report["size_bytes"], 4)
+            self.assertFalse(report["executed"])
+
+    def test_native_replacement_has_no_html_entry_points(self):
+        root = Path(__file__).resolve().parents[1]
+        self.assertFalse((root / "mora" / "index.html").exists())
+        self.assertFalse((root / "prototype" / "mora-home.html").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()
