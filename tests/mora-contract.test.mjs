@@ -10,7 +10,7 @@ const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", i
 
 const appIds = [
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "hardware-studio"
 ];
 
 test("desktop exposes all seven first-party apps and six system tools", () => {
@@ -25,7 +25,7 @@ test("desktop exposes all seven first-party apps and six system tools", () => {
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 8);
+  assert.equal(registry.system_services.length, 12);
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {
@@ -57,6 +57,10 @@ test("shell policy keeps prototype and native-service maturity separate", () => 
   assert.equal(policy.capabilities.immutable_updates.maturity, "planned");
   assert.equal(policy.capabilities.compatibility.maturity, "partial");
   assert.ok(policy.capabilities.zero_trust_permissions.scope.includes("no kernel enforcement"));
+  assert.equal(policy.capabilities.hardware_inventory.maturity, "partial");
+  assert.equal(policy.capabilities.driver_update_install.maturity, "partial");
+  assert.equal(policy.capabilities.firmware_access.maturity, "partial");
+  assert.ok(policy.capabilities.firmware_access.scope.includes("read-only"));
 });
 
 test("the desktop remains self-contained and responsive", () => {
