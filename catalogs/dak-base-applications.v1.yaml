@@ -238,3 +238,10 @@ applications:
     category: development
     permissions: [files.read.selected, executable.inspect]
     services: [dak.executable-inspection.v1]
+
+  - id: dak.foundry
+    name: Foundry
+    entry: app://dak.foundry/main
+    category: system
+    permissions: [system.status.read, processes.read, desktop.audit.read, hardware.inventory.read, compat.runtime.inspect, reports.export.user]
+    services: [dak.system-status.v1, dak.desktop-audit.v1, dak.hardware-inventory.v1, dak.compatibility-discovery.v1, dak.maintenance-runbooks.v1]
