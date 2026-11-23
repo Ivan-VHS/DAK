@@ -1,37 +1,33 @@
 # Mora Design System
 
-**Canonical source:** DuckOS / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.
+**Canonical source:** DuckOS / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.  
+**Palette set:** Obsidian Solar, Graphite Gold, Ivory Signal, Carbon Signal and Slate Signal.
 
 Mora is the shared desktop identity for the Ivan-VHS application family. The shell owns wallpaper, workspace navigation, application catalogue, status area and app presentation. Each native tool keeps its specialist layout and product indicators while sharing semantic surfaces, spacing, typography, focus, motion and a restrained material language.
 
 ## Visual direction
 
-The primary desktop profile is **Mora Amber**: warm amber-sand drapery with a repeating vertical fold rhythm, a deep near-black radial centre, graphite and walnut surfaces, muted mauve/grey textiles, subdued olive glass and a single controlled red critical marker. Depth comes from light and shadow, edge highlights and recognizable material response — not neon fill or scattered gradients.
+The default desktop palette is **Obsidian Solar**: near-black graphite, clean white and a focused solar-yellow action accent. All five presets stay inside the same black, white, neutral-grey and yellow family. They vary luminance, surface depth and yellow intensity rather than introducing unrelated cyan, green, purple, red or brown hues. Depth comes from light, shadow and edge contrast; task content stays more prominent than decoration.
 
 The standard workspace remains visually stable at the centre. Secondary content and controls are arranged symmetrically around it; decorative treatment never obscures task content.
 
-## Semantic palette
+## Semantic palettes
 
-| Token | Mora Amber | Role |
+`mora/theme.json` is the canonical source for five complete semantic palettes. Users can change the active palette in **Control → Цветовая палитра**; the choice is applied immediately and persisted in the local preference profile. The compact palette control in the status bar cycles through the same five presets.
+
+| Palette | Core colors | Visual role |
 |---|---|---|
-| Page | `#211913` | Deep walnut workspace |
-| Surface | `#33261D` | Primary panel |
-| Elevated | `#493326` | Secondary panel |
-| Text | `#FFF3E2` | Main copy |
-| Secondary | `#E7D2B8` | Supporting copy |
-| Muted | `#C4A98A` | Quiet metadata |
-| Brand | `#D58B3D` | Normal action and progress |
-| Brand hover / focus | `#EAA653` / `#F3C16B` | Hover and keyboard focus |
-| Brand text | `#211913` | Text on amber |
-| Secondary accent | `#526347` | Subdued olive / glass |
-| Border | `#75543A` | Warm structural edge |
-| Selection | `#60442E` | Selected content |
-| Critical | `#B64A40` | Destructive state / progress marker |
-| Critical text | `#FFF3E2` | Text on critical |
+| **Obsidian Solar** | Graphite black · clean white · solar yellow | High-contrast default workspace |
+| **Graphite Gold** | Charcoal · cool white · golden yellow | Dense dark workspace with a restrained gold accent |
+| **Ivory Signal** | Soft ivory · charcoal · ochre yellow | Bright workspace with dark, readable controls |
+| **Carbon Signal** | Deep black · silver white · lemon yellow | Maximum-dark creative workspace |
+| **Slate Signal** | Slate graphite · cool white · muted yellow | Neutral low-glare workspace |
 
-Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone. Red is not used for routine emphasis.
+Each palette defines the same roles: page, surface, elevated surface, primary/secondary/muted text, brand and hover colors, on-brand text, secondary accent and its foreground, border, selection, danger and on-danger foreground. Components must consume semantic roles rather than hard-coded palette colors.
 
-Light and Dark remain available as alternate themes. `mora/theme.json` is the portable, versioned source for all three palettes.
+Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 or higher. The automated design-system contract checks every palette's text, secondary text, muted text, main action, secondary action and danger contrast. Meaning is never communicated through hue alone. Status and destructive states also use labels, icons and explicit confirmation; yellow remains the only chromatic accent.
+
+Saved identifiers remain stable: `dark` maps to **Carbon Signal** (`amethyst`), `light` maps to **Ivory Signal** (`arctic`), and the former `amber` identifier now selects **Graphite Gold**. The previous non-neutral palette colors are intentionally retired.
 
 ## Composition and geometry
 

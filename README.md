@@ -10,7 +10,7 @@ The default application suite contains seven first-party apps: Cockos, Kavun, Ka
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Obsidian Solar is the default visual profile: near-black graphite, clean white and a focused solar-yellow accent. Mora Amber, Arctic Glass, Amethyst Night and Forest Jade are selectable alternatives in Control → Цветовая палитра. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies five shared semantic token sets; the shell persists the selected palette locally and updates its offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
 The system tools are:
 
@@ -60,7 +60,7 @@ The tests cover the browser-shell contracts and local helper logic; they do not 
 
 ## System architecture and maturity
 
-The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
+The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md). The coordinated architecture, shared interfaces, dependency gates and acceptance criteria for all eleven native-transition workstreams are defined in the [Mora-to-DuckOS native transition architecture](docs/NATIVE_TRANSITION_ARCHITECTURE.md).
 
 | Area | Current Mora shell | Native DuckOS work still required |
 |---|---|---|
@@ -91,6 +91,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
+- [Illidia universal game library and launcher](docs/ILLIDIA_GAME_LAUNCHER.md)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
 

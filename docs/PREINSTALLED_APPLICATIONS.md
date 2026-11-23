@@ -119,6 +119,8 @@ Boundaries and design rules:
 
 **Purpose:** a game library and companion workspace for play sessions.
 
+A local host-side Python implementation now provides a unified SQLite library, Steam/Epic/GOG manifest discovery, custom executable scanning, manual registration, per-game runtime profiles, SHA-256 review and direct process launch. This is not yet a native DuckOS service and is not connected to the browser shell through privileged IPC. See [Illidia universal game library and launcher](ILLIDIA_GAME_LAUNCHER.md).
+
 Initial capability scope:
 
 - Local game library and launch organization.
@@ -242,7 +244,7 @@ The catalogue deliberately keeps two maturity values separate:
 | Ka-bon | Expense ledger, category totals, receipt-photo attachment, subscription reminders and local family-member entries | Receipt OCR, bank connections, cloud synchronization and shared multi-user accounts |
 | Gloverty | Local rule creation, enable/disable controls and manual execution of supported actions | Background scheduler, OS event bus, global shortcuts and touchpad/touchscreen gesture service |
 | Po | Local tab list, external navigation, address commands and a reading view for pasted text | Native browser engine, isolated tab processes, network-level tracker filtering and download management |
-| Illidia | Local game library, progress and achievement entries, user-authorized screen recording and clip export | Launching installed executables, cloud saves, provider-backed achievements and OS-level Do Not Disturb |
+| Illidia | Browser prototype: local metadata and clip export. Host tool: SQLite library, store manifest discovery, custom executable scanning and launch/session CLI | Authenticated native IPC, kernel-enforced per-game sandbox, full store-session tracking, cloud saves, provider achievements and OS-level Do Not Disturb |
 | Unify | Browser clipboard access where permitted and manual JSON export/import for tabs, clips and selected settings | Authenticated pairing, live device sync, phone notifications and lost-device discovery |
 
 The prototype stores app metadata in browser `localStorage` and media blobs in `IndexedDB`. Data is local to the browser profile and is not shared automatically between devices. Microphone and screen capture use browser permission prompts and may require HTTPS or localhost. External links open in the host browser.

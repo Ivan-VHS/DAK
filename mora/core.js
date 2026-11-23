@@ -8,6 +8,8 @@ export const APP_IDS = Object.freeze([
 
 const CAPABILITIES = ["microphone", "camera", "location", "files", "network", "clipboard"];
 const POWER_PROFILES = ["saver", "balanced", "performance"];
+const THEME_IDS = ["solar", "amber", "arctic", "amethyst", "jade"];
+const THEME_ALIASES = { dark: "amethyst", light: "arctic" };
 
 export function createDefaultPreferences() {
   return {
@@ -15,7 +17,7 @@ export function createDefaultPreferences() {
     appearance: {
       reducedMotion: false,
       density: "comfortable",
-      theme: "amber"
+      theme: "solar"
     },
     focusMode: false,
     powerProfile: "balanced",
@@ -38,7 +40,9 @@ export function normalizePreferences(value) {
     appearance: {
       reducedMotion: appearance.reducedMotion === true,
       density: appearance.density === "compact" ? "compact" : defaults.appearance.density,
-      theme: ["amber", "dark", "light"].includes(appearance.theme) ? appearance.theme : defaults.appearance.theme
+      theme: THEME_IDS.includes(appearance.theme)
+        ? appearance.theme
+        : (THEME_ALIASES[appearance.theme] || defaults.appearance.theme)
     },
     focusMode: source.focusMode === true,
     powerProfile: POWER_PROFILES.includes(source.powerProfile)

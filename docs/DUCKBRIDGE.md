@@ -97,3 +97,8 @@ The DuckBridge tests use synthetic PE/ELF headers and temporary executable stubs
 ## Attribution
 
 Project author/developer: **Ivan-VHS**. Existing contributor credits and third-party copyright notices remain unchanged.
+
+
+## Illidia launcher integration
+
+Illidia consumes DuckBridge runtime discovery and compatibility plans, but owns the game-library model, source adapters, trust review and play-session records. When a game uses `auto`, `wine`, `proton`, `crossover`, `bottles` or `qemu` without an explicit command override, Illidia calls `build_launch_plan`, requires a `ready` result and starts the returned argv with the returned environment after its own trust review. The planner still never executes a runtime or target. The subsequent host-side process launch is performed by Illidia and is not yet protected by kernel-enforced DuckOS sandboxing. See [Illidia universal game library and launcher](ILLIDIA_GAME_LAUNCHER.md).

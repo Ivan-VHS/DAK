@@ -1,5 +1,13 @@
 # DuckOS documentation
 
+## Illidia game library and launcher
+
+[Illidia universal game library and launcher](ILLIDIA_GAME_LAUNCHER.md) documents the local SQLite library, Steam/Epic/GOG manifest adapters, custom executable registration, signature/hash review, launch profiles and host-side process controls. The browser Mora panel is a status surface and is not yet connected to an authenticated native launcher service.
+
+## Native architecture and execution plan
+
+[Native transition architecture: Mora to DuckOS](NATIVE_TRANSITION_ARCHITECTURE.md) is the coordinated engineering baseline for the eleven native workstreams. It defines target layer boundaries, shared capability/IPC/audit/transaction contracts, subsystem acceptance gates, dependency order, CI and release evidence. It is an architecture specification, not evidence that the native subsystems are already implemented.
+
 ## Desktop and application interfaces
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
@@ -33,3 +41,10 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Windows application compatibility
 
 [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
+
+
+## Cross-project engineering
+
+- [Engineering Evolution Framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — the versioned 20-domain contract, 40 engineering practices and evidence-led adoption cycle.
+- [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) — the 20 requested directions, their project applicability, dependency rules and testable outcomes.
+- [Machine-readable contract](../engineering-evolution.v1.json) and [JSON Schema](../schemas/engineering-evolution.v1.schema.json), validated by [the repository tool](../tools/validate_engineering_evolution.py).
