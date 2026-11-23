@@ -89,6 +89,13 @@
       "category": "provenance",
       "panel": "mora/app.js#provenance",
       "maturity": "sha256_only"
+    },
+    {
+      "id": "mora-boost",
+      "name": "Mora Boost",
+      "category": "gaming",
+      "panel": "mora/app.js#mora-boost",
+      "maturity": "external_native_workbench"
     }
   ],
   "widgets": [

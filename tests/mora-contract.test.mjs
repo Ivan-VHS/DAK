@@ -10,14 +10,14 @@ const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", i
 
 const appIds = [
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
 ];
 
-test("desktop exposes all seven first-party apps and six system tools", () => {
+test("desktop exposes all seven first-party apps and seven system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
-    const appKey = id === "mora-ai" ? '"mora-ai":' : id + ":";
+    const appKey = ["mora-ai", "mora-boost"].includes(id) ? '"' + id + '":' : id + ":";
     assert.ok(js.includes(appKey), id + " must have a panel definition");
   }
   for (const id of appIds.slice(0, 7)) {
@@ -112,7 +112,7 @@ test("Mora design system exposes Amber, Dark and Light themes", () => {
   assert.ok(css.includes(".dock-wrap::before"));
   assert.ok(css.includes("#526347"));
   assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v3-amber"));
+  assert.ok(serviceWorker.includes("mora-shell-v4-amber"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
