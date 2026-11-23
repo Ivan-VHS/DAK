@@ -5,7 +5,8 @@ const appDefinitions = {
   gloverty: { name: "Gloverty", subtitle: "Сценарии", color: "#e9a0cf", glyph: "ϟ" },
   po: { name: "Po", subtitle: "Компас", color: "#a8b6ee", glyph: "⌖" },
   illidia: { name: "Illidia", subtitle: "Игры", color: "#9dce9b", glyph: "⌘" },
-  unify: { name: "Unify", subtitle: "Устройства", color: "#9bd8c5", glyph: "∞" }
+  unify: { name: "Unify", subtitle: "Устройства", color: "#9bd8c5", glyph: "∞" },
+  serein: { name: "Serein", subtitle: "Нативная консоль", color: "#a8b6ee", glyph: "⌘" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -55,6 +56,8 @@ function panelMarkup(appId) {
         '<div class="game-card"><div class="game-top"><strong>Moonfall Keep</strong><span>34%</span></div><div class="progress-track"><i style="width:34%"></i></div><div class="game-bottom"><span>Сохранение найдено</span><span>Глава 03</span></div></div>' +
         '<div class="game-card"><div class="game-top"><strong>Wild Meridian</strong><span>12%</span></div><div class="progress-track"><i style="width:12%"></i></div><div class="game-bottom"><span>Новое приключение</span><span>Глава 01</span></div></div>' +
         '</div><div class="control-row"><div class="control-copy"><strong>Игровой режим</strong><span>Профиль производительности (демо)</span></div><button class="action-button" data-action="game-mode">Включить</button></div>';
+    case "serein":
+      return '<p class="window-kicker">СИСТЕМНАЯ УТИЛИТА · NATIVE C++20</p><h2 class="window-heading">Serein Console</h2><p class="window-copy">Serein — нативный менеджер установленных приложений DuckOS. Он проверяет манифест Mora, ограничивает пути каталогом приложения и запускает процессы напрямую, без shell-интерпретации.</p><div class="serein-terminal"><div class="serein-terminal-head"><span class="terminal-dot"></span><span>ЛОКАЛЬНАЯ КОНСОЛЬ</span><span class="terminal-state">COMMANDS</span></div><div class="serein-command"><span>serein ›</span> apps</div><div class="serein-command"><span>serein ›</span> inspect ivan-vhs.reaper-studio</div><div class="serein-command"><span>serein ›</span> run ivan-vhs.reaper-studio</div><div class="serein-command"><span>serein ›</span> ps</div><div class="serein-command"><span>serein ›</span> stop 12345</div></div><div class="serein-note"><strong>Важно:</strong> эта панель — справка интерфейса. Браузерная версия Mora не может запускать процессы ОС. Откройте системный терминал и выполните <code>serein</code>, чтобы использовать настоящий менеджер.</div><p class="window-copy">Регистрация: <code>serein register integrations/mora/manifest.json --root ПУТЬ_К_ПРОЕКТУ</code>. Первый запуск и регистрация требуют подтверждения пользователя.</p>';
     case "unify":
       return '<p class="window-kicker">ПОДКЛЮЧЕНИЯ · ДЕМО</p><h2 class="window-heading">Ваши устройства</h2>' +
         '<div class="device-list">' +
