@@ -26,7 +26,7 @@
       "build_system": "CMake / C11",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "native-workbench",
+      "integration_status": "source-pinned-only",
       "auto_build": false,
       "auto_execute": false
     },
@@ -52,7 +52,7 @@
       "build_system": "CMake / C17 plus Python reference runtime",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "source-pinned-only",
+      "integration_status": "native-workbench",
       "auto_build": false,
       "auto_execute": false
     },
