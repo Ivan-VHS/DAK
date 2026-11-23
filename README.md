@@ -17,7 +17,7 @@ The system tools are:
 - **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
 - **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
 - **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
-- **Bridge:** local PE/ELF header inspection. It does not load or launch executables.
+- **Bridge:** local PE/DOS/COM/legacy/ELF/Mach-O header inspection plus a searchable reference matrix of fifteen non-Windows, non-Linux systems and four execution models. It does not load or launch executables.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
 - **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
 
@@ -60,7 +60,7 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 | Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
 | Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
 | Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
-| Windows/Linux compatibility | PE/ELF header inspection | executable loader, Win32/NT, graphics/audio translation and launcher integration |
+| Windows/DOS compatibility | PE, DOS, ELF and Mach-O header inspection; fifteen-system reference matrix | native process manager, PE/DOS loaders, Win32/NT, CPU translation, graphics/audio adapters, VM manager and launcher integration |
 | Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
 | Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
 
@@ -73,6 +73,8 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
+- [Executable compatibility architecture](docs/EXECUTABLE_COMPATIBILITY.md)
+- [Fifteen-system compatibility catalog](catalogs/compatibility-targets.v1.json)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests. Architecture proposals and roadmap entries are not implementation evidence.
 

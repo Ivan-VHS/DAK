@@ -57,7 +57,7 @@
     },
     "compatibility": {
       "maturity": "partial",
-      "scope": "PE/ELF header inspection only; no Win32, DirectX, Vulkan or anti-cheat runtime"
+      "scope": "Local PE/DOS/COM/legacy/ELF/Mach-O header inspection and a versioned fifteen-system reference matrix. No native process manager, Win32/NT runtime, DOSBox, CPU translator, VM or graphics/audio translation is integrated."
     },
     "declarative_configuration": {
       "maturity": "partial",

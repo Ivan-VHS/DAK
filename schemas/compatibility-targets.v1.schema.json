@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/compatibility-targets.v1.schema.json",
+  "title": "DuckOS executable compatibility reference catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema","version","maintainer","purpose","mechanisms","targets","duckos_runtime"],
+  "properties": {
+    "schema": {"const":"duckos.compatibility-targets.v1"},
+    "version": {"const":1},
+    "maintainer": {"type":"string","minLength":1},
+    "purpose": {"type":"string","minLength":1},
+    "mechanisms": {
+      "type":"array","minItems":4,"maxItems":4,
+      "items": {
+        "type":"object","additionalProperties":false,
+        "required":["id","name","description"],
+        "properties":{
+          "id":{"enum":["native-execution","api-translation","binary-translation","emulation-virtualization"]},
+          "name":{"type":"string","minLength":1},
+          "description":{"type":"string","minLength":1}
+        }
+      }
+    },
+    "targets": {
+      "type":"array","minItems":15,"maxItems":15,
+      "items":{
+        "type":"object","additionalProperties":false,
+        "required":["id","name","mechanism","formats","approach","caveat"],
+        "properties":{
+          "id":{"type":"string","pattern":"^[a-z0-9-]+$"},
+          "name":{"type":"string","minLength":1},
+          "mechanism":{"enum":["native-execution","api-translation","binary-translation","emulation-virtualization"]},
+          "formats":{"type":"array","minItems":1,"items":{"type":"string"}},
+          "approach":{"type":"string","minLength":1},
+          "caveat":{"type":"string","minLength":1}
+        }
+      }
+    },
+    "duckos_runtime":{
+      "type":"object","additionalProperties":false,
+      "required":["host_shell","pe_execution","dos_execution","native_bridge","status","note"],
+      "properties":{
+        "host_shell":{"const":"browser"},
+        "pe_execution":{"const":"not_available"},
+        "dos_execution":{"const":"not_available"},
+        "native_bridge":{"const":"not_implemented"},
+        "status":{"const":"analysis_ui_only"},
+        "note":{"type":"string","minLength":1}
+      }
+    }
+  }
+}

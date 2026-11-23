@@ -102,3 +102,26 @@ test("theme settings accept only the two supported palettes", () => {
   assert.equal(normalizePreferences({ appearance: { theme: "light" } }).appearance.theme, "light");
   assert.equal(normalizePreferences({ appearance: { theme: "system" } }).appearance.theme, "dark");
 });
+
+
+test("DOS MZ images without a PE signature are reported as DOS candidates", async () => {
+  const bytes = new Uint8Array(96);
+  bytes[0] = 0x4d;
+  bytes[1] = 0x5a;
+  new DataView(bytes.buffer).setUint32(0x3c, 64, true);
+  const file = new Blob([bytes]);
+  Object.defineProperty(file, "name", { value: "legacy.exe" });
+  const result = await inspectExecutable(file);
+  assert.equal(result.valid, true);
+  assert.equal(result.format, "DOS MZ candidate");
+  assert.match(result.detail, /запуск не выполнялся/);
+});
+
+test("DOS COM is identified as a candidate without claiming a verified signature", async () => {
+  const file = new Blob([new Uint8Array([0x90, 0x90, 0xcd, 0x20])]);
+  Object.defineProperty(file, "name", { value: "GAME.COM" });
+  const result = await inspectExecutable(file);
+  assert.equal(result.valid, true);
+  assert.equal(result.format, "DOS COM candidate");
+  assert.match(result.detail, /по расширению/);
+});

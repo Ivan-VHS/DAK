@@ -47,11 +47,15 @@ Restore can save and restore the normalized Mora preference object using a versi
 
 The future updater should download signed metadata, verify the complete payload, stage an inactive system slot, check capacity and compatibility, run health tests, switch boot selection atomically and preserve the previous slot until first boot is accepted. Recovery must work when an update is interrupted. This flow is currently displayed as an architecture preview only.
 
-## Compatibility boundary
+## Executable compatibility
 
-Bridge reads a user-selected local file and inspects PE or ELF headers without executing it or uploading it. Detecting an x86/x64/ARM64 machine value is not evidence that the corresponding ABI or graphics stack can run.
+Bridge reads a user-selected file locally and inspects PE, DOS MZ/COM, legacy NE/LE/LX, ELF and Mach-O headers. For PE it reports the machine architecture, PE32/PE32+ format and subsystem when present. A DOS COM file is reported as a candidate based on its extension because it has no required signature. No inspected file is executed or uploaded.
 
-A native compatibility environment still needs PE loading, Win32/NT services, process and memory mapping, API translation, DirectX/Vulkan/OpenGL support, audio, input, prefixes, launchers and a clear anti-cheat compatibility policy. Anti-cheat bypass is not part of this design.
+The Bridge panel also shows the four execution models — native loading, API translation, binary translation and emulation/virtualization — plus a searchable reference matrix for fifteen non-Windows, non-Linux systems. The matrix records practical caveats: FreeBSD Linuxulator is a Linux ABI path, Rosetta translates CPU instructions rather than Win32, and a VM or zone is not itself a Windows API implementation.
+
+The browser UI does not install runtimes, expose host filesystem paths or claim that any compatibility layer is available. The native process manager and adapters for DOSBox, a Wine-compatible Win32 environment, CPU translation and QEMU/VM execution remain unimplemented. See [Executable compatibility architecture](EXECUTABLE_COMPATIBILITY.md) and the [versioned target catalog](../catalogs/compatibility-targets.v1.json) for the required boundaries and process-manager contract.
+
+A complete gaming runtime additionally needs graphics translation, audio, input, controller mapping, window presentation, save paths and an explicit anti-cheat/DRM policy. Anti-cheat bypass is not part of this design.
 
 ## Provenance
 

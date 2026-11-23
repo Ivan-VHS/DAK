@@ -193,59 +193,82 @@ export function buildIntentPlan(rawInput) {
 }
 
 export async function inspectExecutable(file) {
-  if (!file || typeof file.slice !== "function") {
-    throw new TypeError("Ожидался локальный файл.");
+  if (!file || typeof file.slice !== "function") throw new TypeError("Ожидался локальный файл.");
+  const extension = typeof file.name === "string" && file.name.includes(".")
+    ? file.name.split(".").pop().toLowerCase() : "";
+
+  if (extension === "com" && file.size > 0 && file.size <= 0xff00) {
+    return {valid:true,format:"DOS COM candidate",architecture:"x86 · 16-bit DOS",
+      detail:"COM не имеет обязательной сигнатуры. Формат предполагается по расширению; запуск не выполнялся."};
   }
   if (file.size < 4) {
-    return { valid: false, format: "Неизвестный", architecture: "Не определена", detail: "Файл слишком мал для проверки заголовка." };
+    return {valid:false,format:"Неизвестный",architecture:"Не определена",
+      detail:"Файл слишком мал для проверки известных заголовков."};
   }
 
-  const bytes = new Uint8Array(await file.slice(0, Math.min(file.size, 1024 * 1024)).arrayBuffer());
-
-  if (bytes[0] === 0x4d && bytes[1] === 0x5a) {
-    if (bytes.length < 64) {
-      return { valid: false, format: "DOS/PE", architecture: "Не определена", detail: "Заголовок MZ найден, но DOS-заголовок неполный." };
+  const prefix = new Uint8Array(await file.slice(0,Math.min(file.size,64)).arrayBuffer());
+  if (prefix[0] === 0x4d && prefix[1] === 0x5a) {
+    if (prefix.length < 64) {
+      return {valid:false,format:"DOS/PE",architecture:"Не определена",
+        detail:"Заголовок MZ найден, но DOS-заголовок неполный."};
     }
-
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const peOffset = view.getUint32(0x3c, true);
-    if (peOffset + 6 > bytes.length ||
-        bytes[peOffset] !== 0x50 || bytes[peOffset + 1] !== 0x45 ||
-        bytes[peOffset + 2] !== 0 || bytes[peOffset + 3] !== 0) {
-      return { valid: false, format: "DOS/PE", architecture: "Не определена", detail: "MZ найден, но корректная сигнатура PE не обнаружена в проверенной области." };
+    const dosView = new DataView(prefix.buffer,prefix.byteOffset,prefix.byteLength);
+    const peOffset = dosView.getUint32(0x3c,true);
+    if (peOffset >= 64 && peOffset <= file.size - 6) {
+      const header = new Uint8Array(await file.slice(peOffset,Math.min(file.size,peOffset+256)).arrayBuffer());
+      const signature = String.fromCharCode(...header.slice(0,4));
+      if (signature === "PE\u0000\u0000" && header.length >= 24) {
+        const view = new DataView(header.buffer,header.byteOffset,header.byteLength);
+        const machine = view.getUint16(4,true);
+        const optionalHeaderSize = view.getUint16(20,true);
+        const optionalMagic = optionalHeaderSize >= 2 && header.length >= 26 ? view.getUint16(24,true) : 0;
+        const architectures = {
+          0x014c:"x86 · 32-bit",0x8664:"x86-64 · 64-bit",0xaa64:"ARM64",
+          0x01c0:"ARM · 32-bit",0x01c4:"ARMv7 · 32-bit",0xa641:"ARM64EC",
+          0x5032:"RISC-V 32",0x5064:"RISC-V 64"
+        };
+        let detail = "Заголовок PE распознан. Это только проверка формата и архитектуры; запуск не выполнялся.";
+        if (optionalHeaderSize >= 70 && header.length >= 24 + 70) {
+          const subsystem = view.getUint16(24+68,true);
+          const names = {2:"GUI",3:"Console",10:"EFI application"};
+          detail += " Подсистема: " + (names[subsystem] || "код " + subsystem) + ".";
+        }
+        return {valid:true,format:"Windows PE",
+          architecture:(architectures[machine] || "Неизвестная архитектура (0x"+machine.toString(16)+")")+
+            (optionalMagic===0x20b?" · PE32+":optionalMagic===0x10b?" · PE32":""),
+          detail};
+      }
+      const legacy = signature.slice(0,2);
+      if (["NE","LE","LX"].includes(legacy)) {
+        return {valid:true,format:"Legacy "+legacy,architecture:"x86 · legacy",
+          detail:"Обнаружен старый формат NE/LE/LX. Нужен подходящий DOS extender или гостевая среда; запуск не выполнялся."};
+      }
     }
-
-    const machine = view.getUint16(peOffset + 4, true);
-    const architectures = {
-      0x014c: "x86 · 32-bit",
-      0x8664: "x86-64 · 64-bit",
-      0xaa64: "ARM64",
-      0x01c4: "ARM · 32-bit"
-    };
-
-    return {
-      valid: true,
-      format: "Windows PE",
-      architecture: architectures[machine] || "Неизвестная архитектура (0x" + machine.toString(16) + ")",
-      detail: "Заголовок PE распознан. Это только проверка формата и архитектуры; запуск не выполнялся."
-    };
+    return {valid:true,format:"DOS MZ candidate",architecture:"x86 · 16-bit DOS",
+      detail:"Найден MZ-заголовок без подтверждённой PE-сигнатуры. Это может быть DOS-программа или нестандартный файл; запуск не выполнялся."};
   }
 
-  if (bytes[0] === 0x7f && bytes[1] === 0x45 && bytes[2] === 0x4c && bytes[3] === 0x46) {
-    return {
-      valid: true,
-      format: "ELF",
-      architecture: bytes[4] === 2 ? "64-bit ELF" : bytes[4] === 1 ? "32-bit ELF" : "Неизвестный класс ELF",
-      detail: "Заголовок ELF распознан. Это только проверка формата; запуск не выполнялся."
-    };
+  if (prefix[0]===0x7f && prefix[1]===0x45 && prefix[2]===0x4c && prefix[3]===0x46) {
+    const bytes = new Uint8Array(await file.slice(0,Math.min(file.size,20)).arrayBuffer());
+    const littleEndian = bytes[5] !== 2;
+    const machine = bytes.length >= 20 ? new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength).getUint16(18,littleEndian) : 0;
+    const architectures = {3:"x86 · 32-bit",40:"ARM · 32-bit",62:"x86-64 · 64-bit",183:"ARM64",243:"RISC-V"};
+    return {valid:true,format:"ELF",
+      architecture:(bytes[4]===2?"64-bit · ":bytes[4]===1?"32-bit · ":"")+(architectures[machine]||"архитектура не определена"),
+      detail:"Заголовок ELF распознан. Это не Windows PE; запуск не выполнялся."};
   }
 
-  return {
-    valid: false,
-    format: "Неизвестный",
-    architecture: "Не определена",
-    detail: "Сигнатура PE или ELF не найдена."
+  const magic = Array.from(prefix.slice(0,4),byte=>byte.toString(16).padStart(2,"0")).join("");
+  const machO = {
+    feedface:"Mach-O · 32-bit big-endian",feedfacf:"Mach-O · 64-bit big-endian",
+    cefaedfe:"Mach-O · 32-bit little-endian",cffaedfe:"Mach-O · 64-bit little-endian",
+    cafebabe:"Mach-O fat binary",bebafeca:"Mach-O fat binary"
   };
+  if (machO[magic]) return {valid:true,format:"Mach-O",architecture:machO[magic],
+    detail:"Распознан формат исполняемого файла Apple. Для запуска нужна совместимая macOS-среда; запуск не выполнялся."};
+
+  return {valid:false,format:"Неизвестный",architecture:"Не определена",
+    detail:"Сигнатуры PE, DOS MZ/COM, ELF или Mach-O не найдены."};
 }
 
 export async function hashFile(file) {
