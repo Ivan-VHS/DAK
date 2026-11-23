@@ -41,6 +41,36 @@ class GamingPolicyTests(unittest.TestCase):
         self.assertEqual(report["summary"]["unavailable"], 66)
         self.assertFalse(report["system_settings_changed"])
 
+    def test_accepts_federated_oplage_evidence_document(self):
+        from duckos.gaming import assess_capability_document
+        report = assess_capability_document({
+            "schema": "oplague.duckos-gaming-evidence.v1",
+            "system_mutations_performed": False,
+            "providers": {
+                "process_catalog": {
+                    "available": True,
+                    "provider": "OPlague",
+                    "version": "read-only",
+                    "reason": None,
+                }
+            },
+        })
+        self.assertEqual(report["rules"][0]["status"], "partial")
+        self.assertFalse(report["system_settings_changed"])
+
+    def test_accepts_pytyliki_provider_evidence_document(self):
+        from duckos.gaming import assess_capability_document
+        report = assess_capability_document({
+            "schema": "duckos.gaming-provider-evidence.v1",
+            "capabilities": {
+                "cpu_telemetry": {
+                    "available": True, "provider": "Pytyliki", "version": "measured", "reason": None
+                }
+            },
+        })
+        cpu_rule = next(item for item in report["rules"] if item["domain"] == "cpu")
+        self.assertEqual(cpu_rule["status"], "partial")
+
     def test_provider_evidence_controls_readiness(self):
         catalog = load_rule_catalog()
         required = catalog["rules"][0]["providers"]
