@@ -73,7 +73,7 @@
     },
     "shared_design_system": {
       "maturity": "implemented",
-      "scope": "versioned Amber/Dark/Light semantic palette, geometry, spacing, typography and motion tokens; native adapters remain distinct"
+      "scope": "versioned single Duck palette with the black/white/yellow base triad plus 22 neutral, warm and cool semantic colors; shared roles across Mora CSS and native Duck Desktop Tk UI, contrast-checked status pairs, geometry, spacing, typography, focus and motion tokens"
     },
     "installable_workspace": {
       "maturity": "partial",
