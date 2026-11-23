@@ -169,8 +169,8 @@ export function createAtomicUpdatePlan({
     ready,
     steps: [
       "verify-signed-metadata-and-payload",
+      "verify-compatibility-and-capacity",
       "stage-inactive-slot",
-      "verify-capacity-and-compatibility",
       "run-health-checks",
       "switch-boot-entry-atomically",
       "retain-previous-slot-until-accepted-boot"
