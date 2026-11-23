@@ -241,8 +241,12 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
         if not isinstance(doh, str):
             fail("network.doh_url", "DoH должен быть HTTPS URL")
         else:
-            parsed = urlparse(doh)
-            if parsed.scheme != "https" or not parsed.hostname:
+            try:
+                parsed = urlparse(doh)
+                valid_doh = parsed.scheme == "https" and bool(parsed.hostname)
+            except ValueError:
+                valid_doh = False
+            if not valid_doh:
                 fail("network.doh_url", "DoH должен использовать HTTPS и содержать имя узла")
 
     dot = network.get("dot_server", "")
@@ -256,8 +260,12 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
     if not isinstance(network.get("proxy_url"), str):
         fail("network.proxy_url", "Адрес прокси должен быть строкой")
     elif network.get("proxy_url"):
-        parsed = urlparse(network["proxy_url"])
-        if parsed.scheme not in {"http", "https", "socks5"} or not parsed.hostname:
+        try:
+            parsed = urlparse(network["proxy_url"])
+            valid_proxy = parsed.scheme in {"http", "https", "socks5"} and bool(parsed.hostname)
+        except ValueError:
+            valid_proxy = False
+        if not valid_proxy:
             fail("network.proxy_url", "Поддерживаются адреса http(s):// или socks5://")
 
     if power.get("mode") not in {"eco", "quiet", "balanced", "performance", "maximum"}:
