@@ -81,7 +81,7 @@ No browser control is described as a native kernel, driver, sandbox, updater or 
 
 ## Windows application compatibility
 
-DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.
+DuckOS includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and structured runtime planning. **Illidia** adds a real local game library and can launch native matching-architecture ELF games or start installed Wine/Proton/CrossOver/Bottles runtimes for Windows games. It is not a Wine replacement: native NT/Win32 process execution, graphics/audio translation inside DuckOS and kernel-enforced sandboxing remain future work. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md), [DuckBridge](docs/DUCKBRIDGE.md) and [Illidia](docs/ILLIDIA.md) for supported workflows and boundaries.
 
 ## Documentation
 
@@ -90,6 +90,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
+- [Illidia game library and launcher](docs/ILLIDIA.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
 
