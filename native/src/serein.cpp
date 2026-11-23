@@ -1170,14 +1170,16 @@ std::string platformName() {
 
 fs::path defaultRegistryPath() {
 #ifdef _WIN32
-    wchar_t* localAppData = nullptr;
-    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &localAppData)) && localAppData) {
-        fs::path result(localAppData);
-        CoTaskMemFree(localAppData);
-        return result / "DuckOS" / "Mora" / "registry";
+    wchar_t localPath[32768]{};
+    const DWORD localLength = GetEnvironmentVariableW(L"LOCALAPPDATA", localPath, static_cast<DWORD>(std::size(localPath)));
+    if (localLength > 0 && localLength < std::size(localPath)) {
+        return fs::path(localPath) / L"DuckOS" / L"Mora" / L"registry";
     }
-    const char* profile = std::getenv("USERPROFILE");
-    if (profile) return fs::u8path(profile) / "AppData" / "Local" / "DuckOS" / "Mora" / "registry";
+    wchar_t profilePath[32768]{};
+    const DWORD profileLength = GetEnvironmentVariableW(L"USERPROFILE", profilePath, static_cast<DWORD>(std::size(profilePath)));
+    if (profileLength > 0 && profileLength < std::size(profilePath)) {
+        return fs::path(profilePath) / L"AppData" / L"Local" / L"DuckOS" / L"Mora" / L"registry";
+    }
 #else
     const char* stateHome = std::getenv("XDG_DATA_HOME");
     if (stateHome && *stateHome) return fs::u8path(stateHome) / "duckos" / "mora" / "registry";
@@ -1186,7 +1188,6 @@ fs::path defaultRegistryPath() {
 #endif
     return fs::current_path() / ".duckos" / "mora" / "registry";
 }
-
 bool parseManifestText(const std::string& source, Manifest& manifest, std::string& error) {
     if (source.empty() || source.size() > 1024 * 1024) {
         error = "Manifest must be between 1 byte and 1 MiB";
