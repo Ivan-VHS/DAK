@@ -68,3 +68,18 @@ The implemented foundation never executes a Windows binary and does not install 
 - [ ] Native target process creation, compatibility-prefix management for third-party runtimes, sandbox enforcement and graphics/audio translation.
 
 The runtime inventory and plan generator do not invoke a discovered runtime or target. Both execution_started and prefix_created are false in the versioned plan.
+
+
+## Illidia game library and launcher — 2026-11-23
+
+- [x] Versioned per-user game library with add, list and remove operations.
+- [x] PE/ELF executable validation before a game is registered.
+- [x] Real process launch for native matching-architecture ELF targets and detected Wine, Proton, CrossOver or Bottles backends.
+- [x] Per-game compatibility-data directories for Wine and Proton, with WINEPREFIX or STEAM_COMPAT_DATA_PATH passed to the runtime.
+- [x] Argument-vector process creation with shell execution disabled.
+- [x] Optional GameMode and MangoHud wrappers and opt-in Proton WineD3D/esync/fsync switches.
+- [x] Launch timestamps, optional exit-code collection and versioned library/launch schemas.
+- [ ] Native NT/Win32 process execution, kernel-enforced process isolation and a native authenticated Mora host service.
+- [ ] Automatic game/runtime installation, cloud saves, clip capture, achievements and native session Do Not Disturb integration.
+
+Illidia starts external runtimes; it does not replace Wine/Proton or guarantee per-game graphics, DRM or anti-cheat compatibility. The launch tests use synthetic PE files and temporary runtime stubs, not commercial games.
