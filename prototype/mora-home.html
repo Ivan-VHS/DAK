@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#292653">
 <title>Mora OS — рабочий стол и приложения</title>
 <style>
-:root{color-scheme:dark;--glass:rgba(255,255,255,.14);--glass-hi:rgba(6,14,60,.88);--line:rgba(255,255,255,.25);--txt:#fff;--muted:rgba(255,255,255,.72);--shadow:0 24px 70px rgba(5,12,51,.48);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-*{box-sizing:border-box}html,body{height:100%;margin:0}body{overflow:hidden;color:var(--txt);background:#071a2d;user-select:none}
-button,input,select,textarea{font:inherit}button{color:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #fff;outline-offset:3px}
+:root{color-scheme:dark;--glass:rgba(25,30,57,.82);--glass-hi:rgba(25,30,57,.96);--line:rgba(198,192,255,.2);--txt:#F5F4FF;--muted:#A8ADC8;--shadow:0 24px 70px rgba(4,6,22,.42);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{overflow:hidden;color:var(--txt);background:#10142a;user-select:none}
+button,input,select,textarea{font:inherit}button{color:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #38d4b7;outline-offset:3px}
 #wall{position:fixed;inset:0;width:100%;height:100%;z-index:-1}.screen{height:100%;min-height:580px;display:grid;grid-template-rows:auto 1fr auto;padding:env(safe-area-inset-top) clamp(14px,3vw,38px) calc(14px + env(safe-area-inset-bottom));gap:10px}
 .bar{height:48px;display:flex;justify-content:space-between;align-items:center;padding:0 4px;font-size:.88rem}.bar-left,.bar-right{display:flex;align-items:center;gap:15px}.logo{font-weight:800;letter-spacing:.17em;text-transform:lowercase;font-size:1.05rem}.status{padding:5px 10px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.1);font-size:.76rem;color:var(--muted)}
 .main{display:grid;grid-template-columns:minmax(190px,1fr) minmax(320px,540px) minmax(220px,1fr);gap:clamp(12px,2.6vw,36px);align-items:center;min-height:0}.clock{align-self:center}.clock-time{font-size:clamp(3.2rem,8vw,6.2rem);line-height:1;font-weight:250;letter-spacing:-.055em;text-shadow:0 4px 28px rgba(20,20,70,.35)}.clock-date{margin-top:9px;color:var(--muted);font-size:1rem;text-transform:capitalize}.clock-hint{margin-top:18px;color:rgba(255,255,255,.54);font-size:.78rem;max-width:250px;line-height:1.5}
@@ -37,13 +37,13 @@ button,input,select,textarea{font:inherit}button{color:inherit}button:focus-visi
 
 .status-link{display:inline-block;text-decoration:none;cursor:pointer;transition:background .15s}
 .status-link:hover{background:rgba(255,255,255,.22)}
-body[data-mora-theme="light"]{color-scheme:light;--glass:rgba(255,255,255,.68);--glass-hi:rgba(255,255,255,.96);--line:rgba(18,44,69,.18);--txt:#122c45;--muted:rgba(18,44,69,.68);--shadow:0 24px 70px rgba(18,44,69,.16);background:#f4f8fd}
+body[data-mora-theme="light"]{color-scheme:light;--glass:rgba(255,255,255,.86);--glass-hi:rgba(255,255,255,.98);--line:rgba(76,63,130,.17);--txt:#211F31;--muted:#66627A;--shadow:0 24px 70px rgba(18,16,40,.14);background:#F5F3FA}
 body[data-mora-theme="light"] #wall{opacity:.34}
 body[data-mora-theme="light"] .status{background:rgba(255,255,255,.7);color:var(--muted)}
 body[data-mora-theme="light"] .widget,body[data-mora-theme="light"] .dock,body[data-mora-theme="light"] .panel,body[data-mora-theme="light"] .list-row,body[data-mora-theme="light"] .empty{border-color:var(--line)}
-body[data-mora-theme="light"] .btn{color:var(--txt);background:rgba(18,44,69,.06);border-color:var(--line)}
-body[data-mora-theme="light"] .btn.primary{color:#fff;background:#004e98;border-color:#004e98}
-body[data-mora-theme="light"] .btn.danger{color:#fff;background:#b5122d;border-color:#b5122d}
+body[data-mora-theme="light"] .btn{color:var(--txt);background:rgba(33,31,49,.06);border-color:var(--line)}
+body[data-mora-theme="light"] .btn.primary{color:#fff;background:#5B43B5;border-color:#5B43B5}
+body[data-mora-theme="light"] .btn.danger{color:#fff;background:#A91F49;border-color:#A91F49}
 body[data-mora-theme="light"] .field input,body[data-mora-theme="light"] .field select,body[data-mora-theme="light"] .field textarea,body[data-mora-theme="light"] .input{color:#122c45;background:#fff;border-color:rgba(18,44,69,.2)}
 body[data-mora-theme="light"] .field option{color:#122c45;background:#fff}
 body[data-mora-theme="light"] .window-close{color:#122c45;background:rgba(18,44,69,.08)}
@@ -51,6 +51,14 @@ body[data-mora-theme="light"] .app-name{ text-shadow:none }
 body[data-mora-theme="light"] .clock-hint{color:rgba(18,44,69,.62)}
 body[data-mora-theme="light"] .note.warn{color:#715018;background:#fff8e8;border-color:#d7b46c}
 body[data-mora-theme="light"] .note.good{color:#17563d;background:#e8f8ef;border-color:#9acbb0}
+
+body.app-embed{overflow:hidden;min-height:100vh;background:var(--glass-hi);user-select:auto}
+body.app-embed #wall,body.app-embed .screen{display:none!important}
+body.app-embed #win{display:flex!important;position:fixed;inset:0;width:100%;height:100vh;max-height:none;left:0;top:0;transform:none;border:0;border-radius:0;box-shadow:none;background:transparent;backdrop-filter:none}
+body.app-embed #win.open{animation:none}
+body.app-embed #win .window-head{display:none}
+body.app-embed #win .window-body{height:100vh;max-height:100vh;padding:18px;overflow:auto}
+@media(max-width:560px){body.app-embed #win .window-body{padding:12px}}
 </style>
 </head>
 <body>
@@ -171,7 +179,7 @@ function appIcon(app){return `<span class="ico" style="--c1:${app.c1};--c2:${app
 function makeAppButton(app,named){const b=document.createElement('button');b.className='app';b.dataset.id=app.id;b.setAttribute('aria-label',app.name);b.innerHTML=appIcon(app)+(named?`<span class="app-name">${app.name}</span>`:'');b.addEventListener('click',()=>openApp(app.id));return b}
 function initDesktop(){const grid=document.querySelector('#app-grid'),dock=document.querySelector('#dock');APPS.forEach(a=>grid.append(makeAppButton(a,true)));renderNativeApps();loadNativeApps();['po','kavun','unify','kabon'].forEach(id=>dock.append(makeAppButton(APPS.find(a=>a.id===id),false)));document.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click',()=>openApp(el.dataset.open)));document.querySelector('#window-close').addEventListener('click',closeApp);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeApp();if(e.ctrlKey&&e.altKey&&!e.repeat){const shortcuts={k:'cockos',m:'kavun',b:'kabon',g:'gloverty',p:'po',i:'illidia',u:'unify'};if(shortcuts[e.key.toLowerCase()]){e.preventDefault();openApp(shortcuts[e.key.toLowerCase()])}}});document.querySelector('#window-body').addEventListener('click',handleClick);document.querySelector('#window-body').addEventListener('submit',handleSubmit);document.querySelector('#window-body').addEventListener('input',handleInput);document.querySelector('#window-body').addEventListener('change',handleChange);renderWidgets()}
 function openApp(id){const app=APPS.find(a=>a.id===id);if(!app)return;currentApp=id;document.querySelector('#window-icon').innerHTML=appIcon(app);document.querySelector('#window-title').innerHTML=`${esc(app.name)}<small>${esc(app.sub)}</small>`;document.querySelector('#current-label').textContent=app.name;document.querySelector('#win').classList.add('open');document.querySelector('#win').style.left='50%';document.querySelector('#win').style.top='50%';document.querySelector('#win').style.transform='translate(-50%,-50%)';document.querySelectorAll('.dock .app').forEach(el=>el.classList.toggle('run',el.dataset.id===id));renderApp()}
-function closeApp(){document.querySelector('#win').classList.remove('open');document.querySelector('#current-label').textContent='Домашний экран';document.querySelectorAll('.dock .app').forEach(el=>el.classList.remove('run'));currentApp=null}
+function closeApp(){document.querySelector('#win').classList.remove('open');document.querySelector('#current-label').textContent='Домашний экран';document.querySelectorAll('.dock .app').forEach(el=>el.classList.remove('run'));currentApp=null;if(document.body.classList.contains('app-embed')&&window.parent!==window)window.parent.postMessage({type:'mora:close-app'},location.origin)}
 function shellNote(text,type=''){return `<div class="note ${type}">${text}</div>`}
 function empty(text){return `<div class="empty">${esc(text)}</div>`}
 function btn(label,action,extra=''){return `<button type="button" class="btn ${extra}" data-action="${action}">${label}</button>`}
@@ -232,7 +240,7 @@ async function syncMoraTheme(){try{const response=await fetch('/api/apps',{cache
 async function toggleMoraTheme(){const next=document.body.dataset.moraTheme==='light'?'dark':'light';try{const response=await fetch('/api/theme',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme:next})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Не удалось изменить тему');document.body.dataset.moraTheme=data.theme;await syncMoraTheme();notify('Тема Mora обновлена. Новые нативные окна откроются с этой темой.')}catch(error){notify(error.message)}}
 document.querySelector('#mora-theme-toggle')?.addEventListener('click',toggleMoraTheme);
 window.addEventListener('focus',()=>{syncMoraTheme();loadNativeApps()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncMoraTheme();loadNativeApps()}});
-if(state.reduceMotion)document.body.classList.add('reduce-motion');initDesktop();addToastStatus();setInterval(addToastStatus,10000);syncMoraTheme();
+const moraParams=new URLSearchParams(window.location.search);const embeddedApp=moraParams.get('embed')==='1';if(embeddedApp)document.body.classList.add('app-embed');if(state.reduceMotion)document.body.classList.add('reduce-motion');initDesktop();addToastStatus();setInterval(addToastStatus,10000);syncMoraTheme();if(embeddedApp){const appId=moraParams.get('app');if(APPS.some(app=>app.id===appId))openApp(appId);else document.querySelector('#window-body').textContent='Неизвестное веб-приложение Mora.'}
 </script>
 </body>
 </html>
