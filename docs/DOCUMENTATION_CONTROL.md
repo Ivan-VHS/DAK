@@ -1,6 +1,7 @@
 # Documentation control
 
-**Scope:** DuckOS repository documentation, Markdown entry points, machine-readable contracts and cross-links.
+**Scope:** DuckOS repository documentation, Markdown entry points, machine-readable contracts, plans and cross-links.  
+**Repository-wide execution plan:** [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md).
 
 This policy governs information quality; it does not define product behavior. Implementation claims must be supported by current source, schemas, tests or reproducible CI evidence.
 
@@ -39,5 +40,15 @@ Before merging documentation changes:
 3. Add meaningful links from the root entry or the nearest relevant specification.
 4. Run the Markdown quality diagnostic and repository validation workflows where applicable.
 5. Preserve existing author, contributor, trademark and third-party license notices.
+
+## Coordinated execution and plan control
+
+The [Markdown and Roadmap Execution Plan](MARKDOWN_AND_ROADMAP_EXECUTION_PLAN.md) is the canonical repository-wide lifecycle for all 32 maintained Markdown files and the plans they describe. Apply it together with the [Unified Documentation Standard](UNIFIED_DOCUMENTATION_STANDARD.md) and the 20 [repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md).
+
+Every plan must distinguish the current source-backed baseline from intended work, identify dependencies and ownership, define parallel-safe work packages, preserve serialized ordering for shared contracts and state, and provide acceptance criteria, verification, migration and recovery notes. A plan is not an implementation record.
+
+Parallel work is permitted only for independent tasks with stable interfaces. Shared schemas, registries, migrations, build configuration, release branches and other shared state must be changed in dependency order. "Immediately", "at once" and similar wording never removes review, security, compatibility, test or rollback gates.
+
+For changes that affect more than one document, update the canonical specification first, then its summaries and indexes in the same reviewed change. Do not copy a normative contract into several files. Unchanged pages remain governed by the standard; do not add repetitive boilerplate solely to create the appearance of a mass rewrite.
 
 See the [DuckOS documentation index](README.md) and [project overview](clusters/project-overview.md) for current navigation.
