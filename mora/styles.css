@@ -1021,3 +1021,100 @@ input[type="range"] { accent-color: #FFD400; }
   outline:2px solid #ffd400;
   outline-offset:2px;
 }
+
+
+/* DuckOS console-first navigation: original Mora layout, oversized TV controls. */
+.console-strip,.console-focus-hint { display:none; }
+.console-mode .console-strip { display:flex; align-items:center; flex-wrap:wrap; gap:9px; margin:0 0 18px; padding:8px; border:1px solid rgba(255,212,0,.28); border-radius:16px; background:rgba(8,8,8,.64); backdrop-filter:blur(18px); }
+.console-tab { min-height:44px; padding:10px 18px; border:1px solid transparent; border-radius:11px; color:rgba(255,255,255,.8); background:rgba(255,255,255,.055); font:inherit; font-size:13px; font-weight:650; cursor:pointer; }
+.console-tab.is-active,.console-tab[aria-current="page"] { color:#080808; border-color:#ffd400; background:#ffd400; }
+.console-mode .console-focus-hint { display:block; margin:-7px 0 16px; color:rgba(255,255,255,.7); font-size:11px; letter-spacing:.025em; }
+.console-mode .desktop-content { padding-top:46px; padding-bottom:118px; }
+.console-mode .section-heading h1 { font-size:36px; }
+.console-mode .eyebrow { font-size:11px; }
+.console-mode .app-grid { gap:16px; }
+.console-mode .app-tile { min-height:178px; padding:22px; border-width:2px; border-radius:22px; }
+.console-mode .app-icon { width:52px; height:52px; margin-bottom:8px; border-radius:16px; }
+.console-mode .app-icon svg { width:34px; height:34px; }
+.console-mode .app-name { font-size:18px; }
+.console-mode .app-subtitle { font-size:13px; }
+.console-mode .system-app-grid .app-tile { min-height:132px; }
+.console-mode .widget-card { padding:24px; border-radius:23px; }
+.console-mode .widget-title { font-size:20px; }
+.console-mode .widget-caption { font-size:10px; }
+.console-mode .dock { gap:12px; padding:11px 16px; }
+.console-mode .dock-item { width:54px; height:54px; border-radius:16px; }
+.console-mode .dock-glyph { font-size:27px; }
+.console-mode .statusbar { min-height:62px; }
+.console-mode .status-control,.console-mode .status-trigger { min-height:42px; font-size:12px; }
+.console-mode .app-window { width:min(760px,calc(100vw - 44px)); max-height:calc(100vh - 145px); border-width:2px; border-radius:22px; }
+.console-mode .window-titlebar { min-height:64px; }
+.console-mode .window-title { font-size:17px; }
+.console-mode .window-body { padding:28px; }
+.console-mode .window-heading { font-size:36px; }
+.console-mode .window-copy { font-size:15px; }
+.console-mode .window-body button,.console-mode .window-body input,.console-mode .window-body select { min-height:44px; font-size:13px; }
+.console-mode .files-item { min-height:58px; }
+.console-mode .files-item-name { font-size:13px; }
+.console-mode .files-item-meta { font-size:10px; }
+.console-mode :focus-visible {
+  outline:4px solid #ffd400 !important;
+  outline-offset:4px !important;
+  box-shadow:0 0 0 2px #080808,0 0 0 7px rgba(255,212,0,.24) !important;
+}
+.console-mode .app-tile:focus-visible,.console-mode .start-app:focus-visible {
+  transform:translateY(-3px) scale(1.025);
+  border-color:#ffd400;
+  background:linear-gradient(145deg,rgba(255,212,0,.24),rgba(255,255,255,.08));
+}
+.console-mode .game-card[aria-pressed="true"] { border-color:#ffd400; background:rgba(255,212,0,.12); }
+.console-mode .rights-status { font-size:11px; }
+.console-mode .rights-section h3 { font-size:19px; }
+.console-mode .rights-rule { padding:16px; }
+.console-mode .rights-rule strong { font-size:14px; }
+.console-mode .rights-rule span { font-size:12px; }
+.console-mode .rights-meta-list dt,.console-mode .rights-meta-list dd { font-size:12px; }
+.console-mode .console-mode-trigger { color:#080808; border-color:#ffd400; background:#ffd400; }
+.console-mode .app-window button:focus-visible { outline:4px solid #ffd400; }
+@media (max-width:760px) {
+  .console-mode .console-strip { gap:6px; }
+  .console-mode .console-tab { flex:1 1 44%; padding-inline:8px; font-size:11px; }
+  .console-mode .app-tile { min-height:150px; padding:15px; }
+  .console-mode .app-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .console-mode .console-strip,.console-mode .app-tile,.console-mode .dock-item { transition:none !important; animation:none !important; }
+}
+
+.rights-status-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin:16px 0 22px; }
+.rights-status-card { min-width:0; display:grid; align-content:start; gap:8px; padding:14px; border:1px solid rgba(255,255,255,.13); border-radius:13px; background:rgba(255,255,255,.045); }
+.rights-status-card > strong { color:rgba(255,255,255,.9); font-size:11px; }
+.rights-status-card small { color:rgba(255,255,255,.52); font-size:9px; line-height:1.5; }
+.rights-status { display:inline-flex; align-items:center; width:max-content; max-width:100%; padding:5px 8px; border:1px solid rgba(255,255,255,.16); border-radius:7px; font-size:8px; font-weight:800; letter-spacing:.06em; }
+.status-unconfigured { color:#ffd400; border-color:rgba(255,212,0,.4); background:rgba(255,212,0,.09); }
+.status-unverified { color:#ffd400; border-color:rgba(255,212,0,.38); background:rgba(255,212,0,.08); }
+.status-policy { color:rgba(255,255,255,.78); border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.045); }
+.rights-section { margin:20px 0 0; padding-top:17px; border-top:1px solid rgba(255,255,255,.1); }
+.rights-section h3 { margin:0 0 8px; color:rgba(255,255,255,.92); font-size:15px; font-weight:650; }
+.rights-section > p { margin:0 0 12px; color:rgba(255,255,255,.58); font-size:10px; line-height:1.6; }
+.rights-import-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.rights-import-row .file-picker { min-width:0; margin:0; }
+.rights-document-preview { display:grid; gap:10px; margin-top:12px; padding:14px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(255,255,255,.04); }
+.rights-document-preview > strong { color:rgba(255,255,255,.9); font-size:12px; }
+.rights-document-preview > span:not(.rights-status) { color:rgba(255,255,255,.52); font-size:9px; line-height:1.5; }
+.rights-meta-list { display:grid; gap:0; margin:0; }
+.rights-meta-list > div { display:grid; grid-template-columns:minmax(100px, .7fr) minmax(0,1.3fr); gap:10px; padding:7px 0; border-top:1px solid rgba(255,255,255,.07); }
+.rights-meta-list dt { color:rgba(255,255,255,.46); font-size:9px; }
+.rights-meta-list dd { margin:0; color:rgba(255,255,255,.84); font-size:9px; overflow-wrap:anywhere; }
+.rights-warning { margin:12px 0 0 !important; padding:10px 12px; border:1px solid rgba(255,212,0,.2); border-radius:10px; color:rgba(255,255,255,.74) !important; background:rgba(255,212,0,.06); font-size:9px !important; line-height:1.6; }
+.rights-rule { display:grid; gap:4px; padding:11px 13px; margin-top:7px; border:1px solid rgba(255,255,255,.1); border-radius:10px; background:rgba(255,255,255,.035); }
+.rights-rule strong { color:rgba(255,255,255,.9); font-size:11px; }
+.rights-rule span { color:rgba(255,255,255,.55); font-size:9px; line-height:1.5; }
+.rights-cli { max-width:100%; overflow:auto; margin:10px 0 0; padding:13px; border:1px solid rgba(255,212,0,.18); border-radius:10px; color:rgba(255,255,255,.82); background:#090909; font:9px/1.7 "Cascadia Code",Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
+.game-card { width:100%; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.game-card .rights-status { margin-top:9px; }
+.game-card[aria-pressed="true"] { border-color:#ffd400; background:rgba(255,212,0,.1); }
+@media (max-width:520px) {
+  .rights-status-grid,.rights-import-row { grid-template-columns:1fr; }
+  .rights-meta-list > div { grid-template-columns:1fr; gap:3px; }
+}
