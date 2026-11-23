@@ -213,7 +213,7 @@ function panelMarkup(appId) {
         '<p class="window-copy">Добавить игру: <code>duckos illidia add ./game.exe --name "My Game"</code></p>' +
         '<p class="window-copy">Посмотреть каталог: <code>duckos illidia list</code></p>' +
         '<p class="window-copy">Запустить игру: <code>duckos illidia launch my-game</code></p>' +
-        '<p class="window-copy">Этот Mora-панель пока не подключён к привилегированному локальному сервису. Запуск выполняется через DuckOS CLI; браузер не запускает программы напрямую.</p>';
+        '<p class="window-copy">Эта панель Mora пока не подключена к привилегированному локальному сервису. Запуск выполняется через DuckOS CLI; браузер не запускает программы напрямую.</p>';
     case "unify":
       return '<p class="window-kicker">ПОДКЛЮЧЕНИЯ · ДЕМО</p><h2 class="window-heading">Ваши устройства</h2>' +
         '<div class="device-list">' +
