@@ -161,7 +161,7 @@
 
     const open = document.createElement("button");
     open.type = "button";
-    open.className = "story-open";
+    open.className = "story-open" + (index === 0 ? " lead-open" : "");
     open.setAttribute("aria-label", "Открыть материал: " + item.title);
 
     const content = document.createElement("div");
