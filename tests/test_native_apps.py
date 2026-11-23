@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -37,7 +39,7 @@ class NativeApplicationHubTests(unittest.TestCase):
         self.assertTrue(all(item["status"] == "checkout_missing" for item in states))
         self.assertTrue(all(item["available"] is False for item in states))
 
-    def test_pytiliki_requires_a_built_windows_gui(self) -> None:
+    def test_pytyliki_requires_a_built_windows_gui(self) -> None:
         project = self.project("pytyliki")
         (project / "build" / "Release").mkdir(parents=True)
         (project / "build" / "Release" / "pytyliki-gui.exe").write_bytes(b"test")
@@ -45,7 +47,7 @@ class NativeApplicationHubTests(unittest.TestCase):
         self.assertEqual(state["status"], "ready")
         self.assertTrue(state["available"])
 
-    def test_pytiliki_is_not_advertised_as_native_on_linux(self) -> None:
+    def test_pytyliki_is_not_advertised_as_native_on_linux(self) -> None:
         self.project("pytyliki")
         state = self.hub("linux").inspect("pytyliki")
         self.assertEqual(state["status"], "unsupported_platform")
@@ -96,7 +98,7 @@ class NativeApplicationHubTests(unittest.TestCase):
         self.assertFalse(launch.call_args.kwargs["shell"])
         self.assertEqual(launch.call_args.kwargs["cwd"], project.resolve())
 
-    def test_pytiliki_launch_uses_only_the_verified_binary(self) -> None:
+    def test_pytyliki_launch_uses_only_the_verified_binary(self) -> None:
         project = self.project("pytyliki")
         (project / "build" / "Release").mkdir(parents=True)
         binary = project / "build" / "Release" / "pytyliki-gui.exe"
@@ -110,7 +112,7 @@ class NativeApplicationHubTests(unittest.TestCase):
 
     def test_project_symlink_is_rejected(self) -> None:
         external = Path(tempfile.mkdtemp())
-        self.addCleanup(lambda: __import__("shutil").rmtree(external, ignore_errors=True))
+        self.addCleanup(lambda: shutil.rmtree(external, ignore_errors=True))
         try:
             (self.root / "projects" / "oplague").symlink_to(external, target_is_directory=True)
         except OSError:
@@ -130,6 +132,29 @@ class NativeApplicationHubTests(unittest.TestCase):
         state = self.hub().inspect("reaper")
         self.assertEqual(state["status"], "ready")
         self.assertTrue(state["available"])
+
+    def test_mora_registry_exposes_all_federated_projects(self) -> None:
+        registry_path = Path(__file__).resolve().parents[1] / "duckos" / "mora" / "data" / "apps.json"
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        ids = {item["id"] for item in registry["built_in_apps"]}
+        self.assertTrue({"reaper", "pytyliki", "oplague", "ventusample"}.issubset(ids))
+        for item in registry["built_in_apps"]:
+            if item["id"] in {"reaper", "pytyliki", "oplague", "ventusample"}:
+                self.assertEqual(item["scope"], "user-space")
+                self.assertTrue(item["source"].startswith("projects/"))
+
+    def test_native_binary_resolving_outside_project_is_rejected(self) -> None:
+        project = self.project("ventusample")
+        external = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(external, ignore_errors=True))
+        (external / "VentuSample").write_bytes(b"test")
+        try:
+            (project / "build").symlink_to(external, target_is_directory=True)
+        except OSError:
+            self.skipTest("directory symlinks are unavailable in this environment")
+        state = self.hub("linux").inspect("ventusample")
+        self.assertEqual(state["status"], "not_built")
+        self.assertFalse(state["available"])
 
     def test_unknown_app_id_is_rejected(self) -> None:
         with self.assertRaisesRegex(NativeApplicationError, "Unknown native application"):
