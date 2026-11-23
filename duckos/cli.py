@@ -10,6 +10,11 @@ from .compat import (
     compatibility_status, create_prefix, diagnose_binary,
     inspect_pe_file, plan_launch, read_prefix,
 )
+from .compat.bridge import (
+    build_launch_plan as bridge_launch_plan,
+    detect_runtimes as detect_bridge_runtimes,
+    inspect_binary as inspect_bridge_binary,
+)
 from .hardware_inventory import collect_host_inventory
 from .image_layout import plan_image
 from .manifest import validate_manifest
@@ -74,6 +79,33 @@ def main(argv: list[str] | None = None) -> int:
 
     commands.add_parser("compat-status", help="show implemented and pending Windows-runtime components")
 
+
+    bridge = commands.add_parser(
+        "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
+    )
+    bridge_commands = bridge.add_subparsers(dest="bridge_command", required=True)
+    bridge_commands.add_parser(
+        "runtimes", help="list detected Wine, Proton, CrossOver, Bottles and CPU translators"
+    )
+    bridge_inspect = bridge_commands.add_parser(
+        "inspect", help="inspect a local PE or ELF executable without running it"
+    )
+    bridge_inspect.add_argument("file", type=Path)
+    bridge_plan = bridge_commands.add_parser(
+        "plan", help="prepare a JSON launch plan without creating a process"
+    )
+    bridge_plan.add_argument("file", type=Path)
+    bridge_plan.add_argument("--purpose", choices=("application", "game"), default="application")
+    bridge_plan.add_argument(
+        "--backend", choices=("auto", "wine", "proton", "crossover", "bottles"), default="auto"
+    )
+    bridge_plan.add_argument("--bottle", help="name of an existing CrossOver or Bottles bottle")
+    bridge_plan.add_argument("--compat-data", type=Path, help="Proton compatibility-data directory")
+    bridge_plan.add_argument(
+        "--arg", dest="arguments", action="append", default=[],
+        help="append one target argument; repeat to add more than one",
+    )
+
     try:
         args = parser.parse_args(argv)
         if args.command == "validate-manifest":
@@ -108,6 +140,19 @@ def main(argv: list[str] | None = None) -> int:
             result = diagnose_binary(args.file, args.prefix)
         elif args.command == "compat-plan":
             result = plan_launch(args.file, args.prefix)
+        elif args.command == "bridge" and args.bridge_command == "runtimes":
+            result = detect_bridge_runtimes()
+        elif args.command == "bridge" and args.bridge_command == "inspect":
+            result = inspect_bridge_binary(args.file)
+        elif args.command == "bridge" and args.bridge_command == "plan":
+            result = bridge_launch_plan(
+                args.file,
+                purpose=args.purpose,
+                backend=args.backend,
+                bottle=args.bottle,
+                compat_data=args.compat_data,
+                arguments=args.arguments,
+            )
         else:
             result = compatibility_status()
         _print_result(result)

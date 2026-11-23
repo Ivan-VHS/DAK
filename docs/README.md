@@ -32,4 +32,4 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 ## Windows application compatibility
 
-[Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics, the current non-executing boundary and implementation status against the 66-point specification.
+[Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.

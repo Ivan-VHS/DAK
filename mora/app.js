@@ -272,7 +272,9 @@ function panelMarkup(appId) {
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos inspect-pe ./game.exe — заголовки PE32/PE32+, секции и импортируемые DLL</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge runtimes — поиск Wine, Proton, CrossOver, Bottles, Box64 и QEMU без запуска этих программ</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge plan ./game.exe --purpose game --compat-data PATH — подготовка структуры команды Proton без её выполнения</span></div></div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DuckOS ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
         '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
     case "workspace":

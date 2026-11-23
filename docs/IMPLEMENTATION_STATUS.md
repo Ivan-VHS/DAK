@@ -56,3 +56,15 @@ A Reaper script passing on the reference runtime proves only that the script and
 - [ ] DirectX/Vulkan, audio, input, network, device and launcher bridges.
 
 The implemented foundation never executes a Windows binary and does not install drivers or runtime DLLs. See [Windows compatibility](WINDOWS_COMPATIBILITY.md) for the full 66-point traceability table and exact CLI use.
+
+
+## DuckBridge runtime orchestration — 2026-11-23
+
+- [x] PE inspection reuses the shared PE32/PE32+ parser, including section and import metadata.
+- [x] ELF header inspection reports architecture, bitness and endianness.
+- [x] Read-only runtime discovery for Wine, Proton, CrossOver, Bottles, Box64 and supported QEMU user-mode tools.
+- [x] Purpose-aware backend selection and structured argv/environment planning for supported targets.
+- [x] Versioned JSON plan schema and synthetic-file/runtime-stub test coverage.
+- [ ] Native target process creation, compatibility-prefix management for third-party runtimes, sandbox enforcement and graphics/audio translation.
+
+The runtime inventory and plan generator do not invoke a discovered runtime or target. Both execution_started and prefix_created are false in the versioned plan.
