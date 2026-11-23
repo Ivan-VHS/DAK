@@ -24,6 +24,17 @@ Then open `http://localhost:8000/mora/`.
 
 Mora shows the real desktop captures published by the native projects and links to their repositories/releases. It does **not** claim to execute native binaries in a browser. A permissioned OS launcher/IPC bridge is a separate integration layer and is not part of this web shell.
 
+## Existing OS specification
+
+Mora is the updated shared workspace, not a replacement for the operating-system specifications. Keep the earlier material alongside it:
+
+- [Documentation index](docs/README.md)
+- [Preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md)
+- [Unified documentation standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md)
+- [Original seven-app home-screen prototype](prototype/mora-home.html)
+
+The original prototype and product specifications remain useful references for the seven built-in applications. The new `mora/` directory is the integrated DuckOS shell that brings those modules and the five native project workspaces into one desktop catalogue.
+
 ## Shared design language
 
 [MORA_DESIGN_SYSTEM.md](MORA_DESIGN_SYSTEM.md) defines the canonical palette, shapes, spacing, typography, motion and accessibility contract. Each native repository keeps its own specialist layout and adopts the shared semantic tokens through its native toolkit.
