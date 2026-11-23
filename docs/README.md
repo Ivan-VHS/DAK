@@ -20,6 +20,10 @@
 
 [DuckOS Extended Terminal](EXTENDED_TERMINAL.md) documents the separate allowlisted user-space command environment, command registry, local configuration, bounded history, extension contract and security boundaries.
 
+## Native workbench
+
+[Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
+
 ## Desktop optimization
 
 [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.

@@ -2,13 +2,17 @@
 from __future__ import annotations
 
 import os
+import queue
 import subprocess
 import sys
+import threading
 import tkinter as tk
-from tkinter import messagebox, ttk
-from typing import Any
+from tkinter import filedialog, messagebox, ttk
+from tkinter.scrolledtext import ScrolledText
+from typing import Any, Callable
 
 from .service import DesktopService, move_desktop_items_to_inbox
+from .reaper import ReaperIntegrationError, ReaperWorkbench
 
 COLORS = {
     "background": "#101010", "surface": "#1B1B1B", "raised": "#252525",
@@ -22,12 +26,18 @@ class DesktopWindow:
         self.root = root
         self.service = DesktopService()
         self.report: dict[str, Any] = {}
+        self.reaper = ReaperWorkbench()
+        self.reaper_source: Path | None = None
+        self._reaper_queue: queue.Queue[tuple[str, dict[str, Any] | None, str | None]] = queue.Queue()
+        self._reaper_busy = False
+        self._reaper_studio_process: subprocess.Popen[str] | None = None
         root.title("Duck Desktop — обслуживание рабочего пространства")
         root.geometry("1040x700")
         root.minsize(820, 560)
         root.configure(bg=COLORS["background"])
         self._style()
         self._build()
+        self.root.after(100, self._poll_reaper_queue)
 
     def _style(self) -> None:
         style = ttk.Style(self.root)
@@ -56,8 +66,13 @@ class DesktopWindow:
 
         tabs = ttk.Notebook(self.root)
         tabs.pack(fill="both", expand=True, padx=20, pady=(4, 20))
-        overview, clean, startup, processes, rules = [ttk.Frame(tabs, padding=18) for _ in range(5)]
-        for tab, title in zip((overview, clean, startup, processes, rules), ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила")):
+        overview, clean, startup, processes, rules, reaper_tab = [
+            ttk.Frame(tabs, padding=18) for _ in range(6)
+        ]
+        for tab, title in zip(
+            (overview, clean, startup, processes, rules, reaper_tab),
+            ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила", "Reaper"),
+        ):
             tabs.add(tab, text=title)
 
         self.overview = tk.Text(overview, wrap="word", bg=COLORS["surface"], fg=COLORS["text"], insertbackground=COLORS["accent"], relief="flat", padx=18, pady=16, font=("Segoe UI", 11), state="disabled")
@@ -123,7 +138,192 @@ class DesktopWindow:
             row.pack(fill="x", pady=(0, 12))
             ttk.Label(row, text="•", foreground=COLORS["accent"]).pack(side="left", padx=(0, 10))
             ttk.Label(row, text=statement, wraplength=820, justify="left").pack(side="left", fill="x", expand=True)
+
+        self._build_reaper_tab(reaper_tab)
         self.refresh()
+
+    def _build_reaper_tab(self, tab: ttk.Frame) -> None:
+        ttk.Label(tab, text="REAPER WORKBENCH", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(
+            tab,
+            text=(
+                "Нативная интеграция системного языка Reaper. DuckOS использует "
+                "закреплённый исходный checkout и запускает его CLI отдельным процессом."
+            ),
+            style="Muted.TLabel",
+            wraplength=850,
+            justify="left",
+        ).pack(anchor="w", pady=(4, 12))
+
+        self.reaper_status = tk.StringVar(value="Проверка исходного checkout…")
+        self.reaper_location = tk.StringVar(value="Репозиторий ещё не обнаружен")
+        self.reaper_selected = tk.StringVar(value="Исходный файл не выбран")
+
+        status_panel = ttk.Frame(tab, padding=12)
+        status_panel.pack(fill="x", pady=(0, 10))
+        ttk.Label(status_panel, textvariable=self.reaper_status, style="Title.TLabel").pack(anchor="w")
+        ttk.Label(status_panel, textvariable=self.reaper_location, style="Muted.TLabel", wraplength=850).pack(anchor="w", pady=(4, 0))
+        ttk.Label(tab, textvariable=self.reaper_selected, style="Muted.TLabel", wraplength=850).pack(anchor="w", pady=(0, 8))
+
+        actions = ttk.Frame(tab)
+        actions.pack(fill="x", pady=(0, 10))
+        ttk.Button(actions, text="Обновить статус", command=self._refresh_reaper_status).pack(side="left")
+        ttk.Button(actions, text="Открыть Reaper Studio", style="Accent.TButton", command=self._open_reaper_studio).pack(side="left", padx=8)
+        ttk.Button(actions, text="Выбрать .rpr", command=self._choose_reaper_source).pack(side="left", padx=8)
+        ttk.Button(actions, text="Проверить", command=self._check_reaper_source).pack(side="left")
+        ttk.Button(actions, text="Проверить типы", command=self._typecheck_reaper_source).pack(side="left", padx=8)
+
+        ttk.Label(
+            tab,
+            text="Результаты проверки · JSON / диагностика",
+            style="Muted.TLabel",
+        ).pack(anchor="w", pady=(2, 5))
+        self.reaper_output = ScrolledText(
+            tab,
+            height=15,
+            wrap="word",
+            bg=COLORS["surface"],
+            fg=COLORS["text"],
+            insertbackground=COLORS["accent"],
+            relief="flat",
+            padx=12,
+            pady=10,
+            font=("Cascadia Code", 9),
+            state="disabled",
+        )
+        self.reaper_output.pack(fill="both", expand=True)
+        self._refresh_reaper_status()
+
+    def _append_reaper_output(self, value: str) -> None:
+        self.reaper_output.configure(state="normal")
+        self.reaper_output.insert("end", value.rstrip() + "\n")
+        self.reaper_output.see("end")
+        self.reaper_output.configure(state="disabled")
+
+    def _refresh_reaper_status(self) -> None:
+        state = self.reaper.inspect()
+        if not state["available"]:
+            self.reaper_status.set("REAPER · checkout не найден")
+            self.reaper_location.set(state["message"])
+            self._append_reaper_output(state["message"])
+            return
+
+        capabilities = state["capabilities"]
+        labels = {
+            "reference_runtime": "reference runtime",
+            "cli": "CLI",
+            "native_studio": "native Studio",
+            "static_typecheck": "static type analysis",
+            "native_aot_subset": "experimental native AOT",
+        }
+        available = ", ".join(labels[item] for item in capabilities if item in labels)
+        self.reaper_status.set("REAPER · доступен")
+        self.reaper_location.set(f"{state['repository']} · {available}")
+        self._append_reaper_output("Reaper integration ready")
+        self._append_reaper_output(json.dumps(state, ensure_ascii=False, indent=2))
+
+    def _choose_reaper_source(self) -> None:
+        filename = filedialog.askopenfilename(
+            parent=self.root,
+            title="Выбрать исходный файл Reaper",
+            filetypes=[
+                ("Reaper source", "*.rpr *.most"),
+                ("All files", "*.*"),
+            ],
+        )
+        if not filename:
+            return
+        self.reaper_source = Path(filename)
+        self.reaper_selected.set(str(self.reaper_source))
+
+    def _start_reaper_task(
+        self,
+        label: str,
+        operation: Callable[[], dict[str, Any]],
+    ) -> None:
+        if self._reaper_busy:
+            messagebox.showinfo("Reaper", "Предыдущая проверка ещё выполняется.", parent=self.root)
+            return
+        if self.reaper_source is None:
+            self._choose_reaper_source()
+            if self.reaper_source is None:
+                return
+
+        source = self.reaper_source
+        self._reaper_busy = True
+        self.reaper_status.set(f"REAPER · {label}…")
+
+        def worker() -> None:
+            try:
+                result = operation()
+                self._reaper_queue.put((label, result, None))
+            except (OSError, ValueError, RuntimeError, ReaperIntegrationError) as error:
+                self._reaper_queue.put((label, None, str(error)))
+            except Exception as error:
+                self._reaper_queue.put((label, None, f"{type(error).__name__}: {error}"))
+
+        threading.Thread(
+            target=worker,
+            name="duckos-reaper-check",
+            daemon=True,
+        ).start()
+
+    def _check_reaper_source(self) -> None:
+        self._start_reaper_task(
+            "Проверка",
+            lambda: self.reaper.check(self.reaper_source),
+        )
+
+    def _typecheck_reaper_source(self) -> None:
+        self._start_reaper_task(
+            "Анализ типов",
+            lambda: self.reaper.typecheck(self.reaper_source),
+        )
+
+    def _poll_reaper_queue(self) -> None:
+        try:
+            while True:
+                label, result, error = self._reaper_queue.get_nowait()
+                self._reaper_busy = False
+                if error:
+                    self.reaper_status.set(f"REAPER · {label}: ошибка")
+                    self._append_reaper_output(f"{label} failed: {error}")
+                    continue
+                assert result is not None
+                state = "успешно" if result["ok"] else f"ошибка ({result['exit_code']})"
+                self.reaper_status.set(f"REAPER · {label}: {state}")
+                payload = result.get("result")
+                rendered = (
+                    json.dumps(payload, ensure_ascii=False, indent=2)
+                    if payload is not None
+                    else result.get("stdout", "")
+                )
+                if rendered:
+                    self._append_reaper_output(rendered)
+                if result.get("stderr"):
+                    self._append_reaper_output("STDERR:\n" + result["stderr"])
+        except queue.Empty:
+            pass
+        try:
+            if self.root.winfo_exists():
+                self.root.after(100, self._poll_reaper_queue)
+        except tk.TclError:
+            return
+
+    def _open_reaper_studio(self) -> None:
+        try:
+            state = self.reaper.inspect()
+            if not state["available"] or "native_studio" not in state["capabilities"]:
+                raise ReaperIntegrationError(
+                    "Reaper Studio is unavailable. Initialize the Reaper source checkout first."
+                )
+            process = self.reaper.open_studio()
+        except (OSError, ValueError, RuntimeError, ReaperIntegrationError) as error:
+            messagebox.showerror("Reaper Studio", str(error), parent=self.root)
+            return
+        self._reaper_studio_process = process
+        self.reaper_status.set("REAPER · Studio запущена")
+        self._append_reaper_output("Reaper Studio started as a separate user-space process.")
 
     @staticmethod
     def _bytes(value: int | None) -> str:
