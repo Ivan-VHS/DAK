@@ -1691,21 +1691,13 @@ document.addEventListener("click", (event) => {
   if (!event.target.closest(".desktop-flyout")) {
     toggleFlyout("start", false);
     toggleFlyout("quick", false);
+    toggleFlyout("clock", false);
     toggleFlyout("notifications", false);
   }
 
   const consoleModeToggle = event.target.closest("[data-console-mode-toggle]");
   if (consoleModeToggle) {
     setConsoleMode(!consoleMode);
-    return;
-  }
-  const consoleAudioToggle = event.target.closest("[data-console-audio-toggle]");
-  if (consoleAudioToggle) {
-    consoleAudioEnabled = !consoleAudioEnabled;
-    try { localStorage.setItem("duckos.mora.console-audio.v1", String(consoleAudioEnabled)); } catch {}
-    consoleAudioToggle.setAttribute("aria-pressed", String(consoleAudioEnabled));
-    consoleAudioToggle.textContent = consoleAudioEnabled ? "Включено" : "Выключено";
-    showToast(consoleAudioEnabled ? "Аудиосигналы включены." : "Аудиосигналы выключены.");
     return;
   }
   const consoleTab = event.target.closest("[data-console-target]");
