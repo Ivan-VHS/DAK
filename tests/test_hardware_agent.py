@@ -30,7 +30,7 @@ class LinuxSnapshotTests(unittest.TestCase):
             self._write(proc_root, "cpuinfo", "processor : 0\nmodel name : Example CPU\n")
             self._write(proc_root, "meminfo", "MemTotal:       16384000 kB\nMemAvailable:    8192000 kB\nSwapTotal:       1024 kB\n")
 
-            pci = sys_root / "bus/pci/devices/0000:01:00.0"
+            pci = sys_root / "devices/pci0000:00/0000:01:00.0"
             self._write(pci, "vendor", "0x10de")
             self._write(pci, "device", "0x2684")
             self._write(pci, "class", "0x030000")
@@ -41,18 +41,33 @@ class LinuxSnapshotTests(unittest.TestCase):
             module_dir.mkdir(parents=True)
             self._write(module_dir, "version", "555.1")
             (pci / "driver").symlink_to(driver_dir, target_is_directory=True)
-            (pci / "driver/module").symlink_to(module_dir, target_is_directory=True)
+            (driver_dir / "module").symlink_to(module_dir, target_is_directory=True)
+            pci_bus = sys_root / "bus/pci/devices"
+            pci_bus.mkdir(parents=True)
+            (pci_bus / "0000:01:00.0").symlink_to(pci, target_is_directory=True)
 
-            usb = sys_root / "bus/usb/devices/1-1"
+            usb = sys_root / "devices/platform/usb1/1-1"
             self._write(usb, "idVendor", "046d")
             self._write(usb, "idProduct", "c548")
             self._write(usb, "product", "Test USB receiver")
+            usb_bus = sys_root / "bus/usb/devices"
+            usb_bus.mkdir(parents=True)
+            (usb_bus / "1-1").symlink_to(usb, target_is_directory=True)
 
-            self._write(sys_root, "block/nvme0n1/size", "2000000")
-            self._write(sys_root, "block/nvme0n1/device/model", "Example NVMe")
-            self._write(sys_root, "block/nvme0n1/removable", "0")
-            self._write(sys_root, "class/thermal/thermal_zone0/type", "cpu-thermal")
-            self._write(sys_root, "class/thermal/thermal_zone0/temp", "52500")
+            disk = sys_root / "devices/pci0000:00/0000:02:00.0/block/nvme0n1"
+            self._write(disk, "size", "2000000")
+            self._write(disk, "device/model", "Example NVMe")
+            self._write(disk, "removable", "0")
+            block_root = sys_root / "block"
+            block_root.mkdir(parents=True)
+            (block_root / "nvme0n1").symlink_to(disk, target_is_directory=True)
+
+            thermal = sys_root / "devices/virtual/thermal/thermal_zone0"
+            self._write(thermal, "type", "cpu-thermal")
+            self._write(thermal, "temp", "52500")
+            thermal_root = sys_root / "class/thermal"
+            thermal_root.mkdir(parents=True)
+            (thermal_root / "thermal_zone0").symlink_to(thermal, target_is_directory=True)
 
             report = hardware.collect_snapshot(sys_root=sys_root, proc_root=proc_root, system="Linux")
 
@@ -67,6 +82,24 @@ class LinuxSnapshotTests(unittest.TestCase):
             self.assertEqual(report["devices"][-1]["bus"], "USB")
             self.assertEqual(report["storage"][0]["size_bytes"], 2000000 * 512)
             self.assertEqual(report["sensors"][0]["value"], 52.5)
+
+    def test_sysfs_device_links_must_resolve_inside_sys_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            sys_root = root / "sys"
+            proc_root = root / "proc"
+            outside = root / "outside-device"
+            self._write(outside, "vendor", "0x10de")
+            self._write(outside, "device", "0x2684")
+            self._write(outside, "class", "0x030000")
+            bus = sys_root / "bus/pci/devices"
+            bus.mkdir(parents=True)
+            (bus / "0000:01:00.0").symlink_to(outside, target_is_directory=True)
+
+            report = hardware.collect_snapshot(sys_root=sys_root, proc_root=proc_root, system="Linux")
+
+            self.assertEqual(report["devices"], [])
+            self.assertEqual(report["gpu"], [])
 
     def test_missing_secure_boot_is_unknown_not_false(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
