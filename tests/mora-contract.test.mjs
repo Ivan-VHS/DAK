@@ -7,6 +7,7 @@ const css = await readFile(new URL("../mora/styles.css", import.meta.url), "utf8
 const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
+const nativeDesktop = await readFile(new URL("../duckos/desktop/native_ui.py", import.meta.url), "utf8");
 
 const coreAppIds = ["cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"];
 const extensionAppIds = [
@@ -130,9 +131,47 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
   assert.ok(css.includes("#FFD400"));
   assert.ok(css.includes(".commons-grid"));
+  assert.equal(theme.version, 3);
+  assert.deepEqual(Object.keys(theme.colorScale), ["base", "neutral", "warm", "cool"]);
+  assert.equal(Object.keys(theme.colorScale.base).length, 3);
+  assert.equal(Object.keys(theme.colorScale.neutral).length, 10);
+  assert.equal(Object.keys(theme.colorScale.warm).length, 6);
+  assert.equal(Object.keys(theme.colorScale.cool).length, 6);
+  assert.equal(palette.page, "#080808");
+  assert.equal(palette.text, "#FFFFFF");
+  assert.equal(palette.brand, "#FFD400");
+  assert.equal(palette.surface, "#111111");
+  assert.equal(palette.elevated, "#1A1A1A");
+  assert.equal(palette.warning, "#FFC42E");
+  assert.equal(palette.danger, "#FF473A");
+  assert.equal(palette.success, "#8CE63C");
+  assert.equal(palette.info, "#5CE1E6");
+  assert.equal(palette.link, "#3B82F6");
+  assert.ok(contrastRatio(palette.brand, palette.page) >= 4.5);
+  assert.ok(contrastRatio(palette.warning, palette.warningSurface) >= 4.5);
+  assert.ok(contrastRatio(palette.danger, palette.deepest) >= 4.5);
+  assert.ok(contrastRatio(palette.success, palette.successSurface) >= 4.5);
+  assert.ok(contrastRatio(palette.info, palette.infoSurface) >= 4.5);
+  assert.ok(contrastRatio(palette.link, palette.page) >= 4.5);
+  assert.ok(css.includes("--duck-neon-lime:#8CE63C"));
+  assert.ok(css.includes("--duck-signal-red:#FF473A"));
+  assert.ok(css.includes(".system-notice.warning"));
+  assert.ok(css.includes(".system-notice.danger"));
+  assert.ok(css.includes(".system-notice.success"));
+  assert.ok(css.includes(".badge-info"));
+  assert.ok(html.includes("var(--duck-sun-amber)"));
+  assert.ok(nativeDesktop.includes('"success": "#8CE63C"'));
+  assert.ok(nativeDesktop.includes('"warning": "#FFC42E"'));
+  assert.ok(nativeDesktop.includes('"danger": "#FF473A"'));
+  assert.ok(nativeDesktop.includes('"info": "#5CE1E6"'));
+  assert.ok(nativeDesktop.includes('tag_configure("safe"'));
+  assert.ok(nativeDesktop.includes('tag_configure("enabled"'));
+
   const allowedColors = new Set([
-    "#080808", "#151515", "#242424", "#3A3A3A", "#3A3100",
-    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C"
+    ...Object.values(theme.colorScale.base),
+    ...Object.values(theme.colorScale.neutral),
+    ...Object.values(theme.colorScale.warm),
+    ...Object.values(theme.colorScale.cool)
   ].map((color) => color.toLowerCase()));
   const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
