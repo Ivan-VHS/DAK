@@ -743,7 +743,7 @@ class RuntimeManager:
     def _runtime_policy(self, adapter: dict[str, Any]) -> dict[str, Any]:
         return {
             "requires_unisolated_approval": adapter["requires_unisolated_approval"],
-            "isolation": adapter["isolation"],
+            "isolation": adapter.get("isolation", "host process"),
         }
 
     def _wine_command(
@@ -1053,18 +1053,22 @@ class RuntimeManager:
         name: str,
         *,
         approved: bool = False,
+        allow_unisolated: bool = False,
         allow_network: bool = False,
         persistent: bool = False,
+        allow_persistent: bool = False,
     ) -> dict[str, Any]:
         if not approved:
             raise RuntimePermissionError("VM launch requires explicit user approval")
+        if not allow_unisolated:
+            raise RuntimePermissionError("QEMU host process is not sandboxed; explicitly approve an unisolated launch")
+        if persistent and not allow_persistent:
+            raise RuntimePermissionError("persistent guest writes require a separate explicit approval")
         vm = self.store.get_vm(name)
         adapter = next(item for item in self.detect_runtimes() if item["id"] == "qemu-x86_64")
         executable = adapter.get("executable")
         if not executable:
             raise RuntimeUnavailable("QEMU system x86_64 was not found")
-        if persistent and not approved:
-            raise RuntimePermissionError("persistent guest writes require a separate explicit approval")
         disk_driver = vm["disk_format"]
         file_block = {"driver": "file", "filename": vm["disk_path"], "node-name": "duckos-file"}
         image_block = {

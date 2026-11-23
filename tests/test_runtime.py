@@ -25,8 +25,8 @@ def pe_fixture(*, dll: bool = False) -> bytes:
     struct.pack_into("<I", image, 0x3C, 64)
     image[64:68] = b"PE\x00\x00"
     struct.pack_into("<H", image, 68, 0x8664)
-    struct.pack_into("<H", image, 84, 0x2000 if dll else 0x0022)
-    struct.pack_into("<H", image, 84 + 2, 0xF0)
+    struct.pack_into("<H", image, 84, 0xF0)
+    struct.pack_into("<H", image, 86, 0x2000 if dll else 0x0022)
     struct.pack_into("<H", image, 88, 0x020B)
     struct.pack_into("<H", image, 88 + 68, 3)
     return bytes(image)
@@ -91,7 +91,7 @@ class ApplicationStoreTests(unittest.TestCase):
             store = AppStore(root / "duckos-state")
             app = store.import_source(source, display_name="Example Game")
             self.assertEqual(app["name"], "Example Game")
-            self.assertEqual(app["format"], "windows-pe")
+            self.assertEqual(app["executable"]["format"], "windows-pe")
             self.assertEqual(app["trust_state"], "untrusted")
             verified = store.get_app(app["id"])
             self.assertEqual(verified["entrypoint"], "game.exe")
@@ -120,7 +120,7 @@ class ApplicationStoreTests(unittest.TestCase):
                 store.import_source(archive)
             app = store.import_source(archive, entrypoint="Game/game.exe")
             self.assertEqual(app["entrypoint"], "Game/game.exe")
-            self.assertEqual(app["file_count"], 3)
+            self.assertEqual(len(app["files"]), 3)
 
     def test_zip_path_traversal_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -194,6 +194,7 @@ class RuntimeManagerTests(unittest.TestCase):
                 "kind": "windows-pe",
                 "available": True,
                 "requires_unisolated_approval": True,
+                "isolation": "host process",
             }
             calls = {}
 
