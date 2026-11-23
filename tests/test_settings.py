@@ -68,6 +68,23 @@ class SettingsValidationTests(unittest.TestCase):
         self.assertTrue(rows)
         self.assertTrue(all("Сеть" in row["path"] for row in rows))
 
+    def test_malformed_import_values_return_validation_errors(self):
+        payload = default_settings()
+        payload["active_profile"] = []
+        self.assertTrue(validate_settings(payload))
+
+        payload = default_settings()
+        payload["profiles"]["Дом"]["network"]["ipv4_method"] = []
+        self.assertTrue(validate_settings(payload))
+
+        payload = default_settings()
+        payload["profiles"]["Дом"]["power"]["mode"] = {}
+        self.assertTrue(validate_settings(payload))
+
+        payload = default_settings()
+        payload["profiles"]["Дом"]["appearance"]["theme"] = []
+        self.assertTrue(validate_settings(payload))
+
 
 class SettingsStoreTests(unittest.TestCase):
     def setUp(self):
