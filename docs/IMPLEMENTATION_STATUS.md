@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-22
+Updated: 2026-11-23
 
 ## Implemented in Reaper source
 
@@ -68,3 +68,24 @@ The implemented foundation never executes a Windows binary and does not install 
 - [ ] Native target process creation, compatibility-prefix management for third-party runtimes, sandbox enforcement and graphics/audio translation.
 
 The runtime inventory and plan generator do not invoke a discovered runtime or target. Both execution_started and prefix_created are false in the versioned plan.
+
+
+## Desktop application and bench contracts — 2026-11-23
+
+- [x] Separate versioned catalogue for fifteen system utilities, with packaged copy, JSON Schema and validator.
+- [x] Stable numbered launcher assignments, duplicate protection and structured launch requests.
+- [x] Bounded streaming SHA-256 inspection and explicit unsigned approval bound to one exact digest.
+- [x] A/B image-slot state machine with inactive-slot planning, verified-signature gate, native-backend requirement, boot confirmation and fallback state.
+- [x] Board-profile validation, fresh-telemetry checks, power-rail voltage/current, PCIe/USB link, GPU/NPU and calibrated-probe interlocks, plus a fail-closed bench state machine.
+- [x] Hash-chained append-only audit journal and serial-line capture with basic secret redaction.
+- [x] Mora System Apps catalogue entry for the fifteen utility identities.
+- [x] Host-side tests and CI catalogue validation.
+
+- [ ] Native process manager, IPC launcher service and kernel-enforced per-process sandbox.
+- [ ] Cryptographic package signature verifier, signer trust roots, revocation and package installation transaction.
+- [ ] Native A/B image writer, verified boot integration, boot-success signal and firmware boot-target adapter.
+- [ ] Board-specific power controller, calibrated sensors/probes, PCIe/USB/NPU telemetry driver and hardware emergency cutoff.
+- [ ] Native UART/USB-serial collector and real TTY0 integration.
+- [ ] Native applications and compositor integration for all fifteen utilities.
+
+The current Python layer is a host-side executable contract and CI-tested state machine, not a running kernel service. A/B and bench hardware mutations are deliberately unavailable until their native adapters are implemented and reviewed. SHA-256 does not establish publisher identity; the current CLI does not claim to verify package signatures.

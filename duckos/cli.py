@@ -19,6 +19,10 @@ from .hardware_inventory import collect_host_inventory
 from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
+from .desktop import (
+    ABUpdateManager, AuditLog, LauncherRegistry, PackageTrustStore,
+    load_bench_profile, load_system_catalog, system_app_ids,
+)
 
 
 def _load(path: Path) -> Any:
@@ -106,6 +110,41 @@ def main(argv: list[str] | None = None) -> int:
         help="append one target argument; repeat to add more than one",
     )
 
+    desktop = commands.add_parser("desktop", help="DuckOS desktop application and bench contracts")
+    desktop_commands = desktop.add_subparsers(dest="desktop_command", required=True)
+    desktop_commands.add_parser("catalog", help="show the fifteen system utility applications")
+
+    slots = desktop_commands.add_parser("slots", help="manage persistent numbered launcher slots")
+    slots.add_argument("--state", type=Path, required=True, help="launcher state JSON path")
+    slot_commands = slots.add_subparsers(dest="slot_action", required=True)
+    slot_commands.add_parser("list", help="list all numbered slots")
+    assign_slot = slot_commands.add_parser("assign", help="assign an application to a slot")
+    assign_slot.add_argument("slot", type=int)
+    assign_slot.add_argument("app_id")
+    assign_slot.add_argument("--replace", action="store_true", help="explicitly replace an occupied slot")
+    assign_slot.add_argument("--unpin", action="store_true", help="assign without pinning")
+    unassign_slot = slot_commands.add_parser("unassign", help="clear a slot without shifting other slots")
+    unassign_slot.add_argument("slot", type=int)
+    resolve_slot = slot_commands.add_parser("resolve", help="resolve a slot to its application identity")
+    resolve_slot.add_argument("slot", type=int)
+
+    package_verify = desktop_commands.add_parser("package-verify", help="calculate SHA-256 and evaluate local package trust")
+    package_verify.add_argument("file", type=Path)
+    package_verify.add_argument("--trust-store", type=Path, required=True)
+    package_approve = desktop_commands.add_parser("package-approve", help="approve one unsigned file by exact SHA-256")
+    package_approve.add_argument("file", type=Path)
+    package_approve.add_argument("--trust-store", type=Path, required=True)
+    package_approve.add_argument("--confirm-unsigned", action="store_true", help="confirm this exact unsigned file")
+
+    image_state = desktop_commands.add_parser("image-state", help="show the local A/B image-slot state")
+    image_state.add_argument("--state", type=Path, required=True)
+
+    bench_profile = desktop_commands.add_parser("bench-profile", help="validate a board-specific hardware bench profile")
+    bench_profile.add_argument("file", type=Path)
+
+    audit_verify = desktop_commands.add_parser("audit-verify", help="verify an audit/serial journal hash chain")
+    audit_verify.add_argument("file", type=Path)
+
     try:
         args = parser.parse_args(argv)
         if args.command == "validate-manifest":
@@ -153,6 +192,48 @@ def main(argv: list[str] | None = None) -> int:
                 compat_data=args.compat_data,
                 arguments=args.arguments,
             )
+        elif args.command == "desktop":
+            if args.desktop_command == "catalog":
+                result = load_system_catalog()
+            elif args.desktop_command == "slots":
+                registry = LauncherRegistry(args.state, app_ids=system_app_ids())
+                if args.slot_action == "list":
+                    result = {"schema": "duckos.launcher-slots.v1", "slots": registry.list_slots()}
+                elif args.slot_action == "assign":
+                    result = registry.assign(
+                        args.slot, args.app_id, pinned=not args.unpin, replace=args.replace
+                    )
+                elif args.slot_action == "unassign":
+                    result = {
+                        "slot": args.slot,
+                        "removed": registry.unassign(args.slot),
+                        "other_slots_shifted": False,
+                    }
+                else:
+                    app_id = registry.resolve(args.slot)
+                    result = {
+                        "slot": args.slot,
+                        "app_id": app_id,
+                        "launch_request": registry.prepare_launch_request(args.slot) if app_id else None,
+                    }
+            elif args.desktop_command == "package-verify":
+                result = PackageTrustStore(args.trust_store).verify(args.file)
+            elif args.desktop_command == "package-approve":
+                result = PackageTrustStore(args.trust_store).approve_unsigned(
+                    args.file, confirmed=args.confirm_unsigned
+                )
+            elif args.desktop_command == "image-state":
+                result = ABUpdateManager(args.state).status()
+            elif args.desktop_command == "bench-profile":
+                result = {
+                    "profile": load_bench_profile(args.file),
+                    "hardware_access_enabled": False,
+                    "native_adapter_required": True,
+                }
+            elif args.desktop_command == "audit-verify":
+                result = AuditLog(args.file).verify()
+            else:
+                raise ValueError("unsupported DuckOS desktop command")
         else:
             result = compatibility_status()
         _print_result(result)

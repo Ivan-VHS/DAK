@@ -1,0 +1,173 @@
+{
+  "schema": "duckos.system-applications.v1",
+  "version": 1,
+  "operating_system": "DuckOS",
+  "desktop": "Mora",
+  "maturity_status": "specified",
+  "distribution_intent": "preinstalled",
+  "note": "System utility application contract. Catalogue entries are not native packages; the Mora catalogue UI and host-side service contracts are separate maturity dimensions.",
+  "applications": [
+    {
+      "id": "sys-settings",
+      "name": "Настройки",
+      "category": "system",
+      "role": "Единая панель параметров оболочки, разрешений, питания, изоляции и управления системными слотами A/B.",
+      "capabilities": ["theme_and_display_profiles", "permission_preferences", "power_policy_view", "sandbox_profile_selection", "ab_image_status"],
+      "system_apis": ["os.settings.v1", "os.permissions.v1", "os.images.v1", "os.bench.v1"],
+      "permissions": ["settings.read", "settings.write", "images.status", "bench.telemetry.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "pkg-center",
+      "name": "Магазин приложений",
+      "category": "packages",
+      "role": "Каталоги магазинов и локальных сборок, проверка манифестов, SHA-256, подписей и разрешений пакетов.",
+      "capabilities": ["repository_catalogues", "package_manifest_validation", "sha256_integrity_check", "signature_status", "hash_bound_unsigned_approval", "dependency_preview"],
+      "system_apis": ["os.packages.v1", "os.trust.v1", "os.launcher.v1", "os.audit.v1"],
+      "permissions": ["packages.read", "packages.install", "trust.approve-unsigned"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "web-browser",
+      "name": "Веб-браузер",
+      "category": "network",
+      "role": "Документация, локальные диагностические панели и веб-ресурсы в отдельном сетевом профиле без прямого доступа к host-шинам.",
+      "capabilities": ["isolated_tabs", "local_documentation", "diagnostic_proxy", "site_permission_controls", "download_inspection"],
+      "system_apis": ["os.network.v1", "os.sandbox.v1", "os.storage.v1"],
+      "permissions": ["network.connect", "storage.user-selected"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "mail-client",
+      "name": "Почта",
+      "category": "communication",
+      "role": "Почта, уведомления, отправка согласованных отчётов испытаний и вложений.",
+      "capabilities": ["mail_accounts", "message_search", "test_report_attachments", "session_notifications", "account_secret_storage"],
+      "system_apis": ["os.secrets.v1", "os.notifications.v1", "os.storage.v1", "os.audit.v1"],
+      "permissions": ["network.connect", "secrets.mail-account", "storage.user-selected"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "contacts-dir",
+      "name": "Контакты",
+      "category": "communication",
+      "role": "Справочник команды, инженеров, владельцев модулей и ответственных за тестовые конфигурации.",
+      "capabilities": ["contact_records", "team_groups", "module_ownership", "build_responsibility_links", "vcard_import_export"],
+      "system_apis": ["os.identity.v1", "os.storage.v1"],
+      "permissions": ["contacts.read", "contacts.write"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "file-manager",
+      "name": "Файловый менеджер",
+      "category": "files",
+      "role": "Работа с пользовательскими файлами, staging-пакетами, образами, дампами и логами; слоты образа доступны как отдельные пространства.",
+      "capabilities": ["user_file_navigation", "image_slot_browsing", "package_staging", "log_export", "external_volume_access"],
+      "system_apis": ["os.storage.v1", "os.packages.v1", "os.images.v1", "os.audit.v1"],
+      "permissions": ["storage.user-selected", "images.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "quick-notes",
+      "name": "Заметки",
+      "category": "productivity",
+      "role": "Быстрые заметки, гипотезы, команды, параметры стенда и привязка к номерным слотам лаунчера.",
+      "capabilities": ["markdown_notes", "tagged_diagnostics", "launcher_slot_links", "session_annotations", "local_search"],
+      "system_apis": ["os.storage.v1", "os.launcher.v1", "os.audit.v1"],
+      "permissions": ["storage.user-selected", "launcher.slots.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "todo-tasks",
+      "name": "Задачи",
+      "category": "productivity",
+      "role": "Очередь инженерных задач, тестовых прогонов, исправлений и контрольных проверок.",
+      "capabilities": ["task_queue", "test_run_checklists", "dependency_links", "progress_tracking", "bench_job_links"],
+      "system_apis": ["os.scheduler.v1", "os.bench.v1", "os.notifications.v1", "os.storage.v1"],
+      "permissions": ["tasks.read", "tasks.write", "bench.jobs.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "os-calendar",
+      "name": "Календарь",
+      "category": "productivity",
+      "role": "Расписание релизов, окон обслуживания, длительных тестов и контрольных точек.",
+      "capabilities": ["release_calendar", "maintenance_windows", "test_reservations", "reminders", "schedule_export"],
+      "system_apis": ["os.scheduler.v1", "os.notifications.v1", "os.storage.v1"],
+      "permissions": ["calendar.read", "calendar.write", "notifications.create"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "clocks-timers",
+      "name": "Часы и таймеры",
+      "category": "system",
+      "role": "Системное время, таймеры прогрева и охлаждения, секундомер и временные интервалы телеметрии.",
+      "capabilities": ["status_clock", "countdown_timers", "stopwatch", "cooldown_timers", "telemetry_interval_presets"],
+      "system_apis": ["os.clock.v1", "os.notifications.v1", "os.telemetry.v1"],
+      "permissions": ["clock.read", "notifications.create", "telemetry.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "os-calc",
+      "name": "Калькулятор",
+      "category": "productivity",
+      "role": "Расчёты энергопотребления, бюджетов, единиц измерения, временных интервалов и систем счисления.",
+      "capabilities": ["standard_calculation", "engineering_units", "voltage_current_power_calculation", "number_base_conversion", "calculation_history"],
+      "system_apis": ["os.units.v1", "os.storage.v1", "os.telemetry.v1"],
+      "permissions": ["storage.user-selected", "telemetry.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "text-doc-view",
+      "name": "Текст и документы",
+      "category": "files",
+      "role": "Просмотр и редактирование манифестов, конфигураций, скриптов, спецификаций и текстовых журналов.",
+      "capabilities": ["text_editing", "json_validation", "manifest_view", "log_view", "diff_preview"],
+      "system_apis": ["os.storage.v1", "os.packages.v1", "os.audit.v1"],
+      "permissions": ["storage.user-selected", "packages.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "media-gallery",
+      "name": "Галерея",
+      "category": "media",
+      "role": "Просмотр скриншотов, фотографий стенда, осциллограмм, схем и визуальных артефактов испытаний.",
+      "capabilities": ["image_and_video_browsing", "test_session_albums", "waveform_preview", "metadata_inspection", "non_destructive_annotations"],
+      "system_apis": ["os.storage.v1", "os.devices.v1", "os.bench.v1"],
+      "permissions": ["storage.user-selected", "devices.metadata.read"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "av-player",
+      "name": "Аудио и видео",
+      "category": "media",
+      "role": "Воспроизведение контрольных файлов, тестовых сигналов, записей экрана и отчётных видеоматериалов.",
+      "capabilities": ["audio_playback", "video_playback", "test_tone_playback", "audio_output_selection", "media_session_controls"],
+      "system_apis": ["os.media.v1", "os.audio.v1", "os.devices.v1"],
+      "permissions": ["media.play", "audio.output.select"],
+      "maturity_status": "specified"
+    },
+    {
+      "id": "term-sysmon",
+      "name": "Терминал и монитор",
+      "category": "diagnostics",
+      "role": "Диагностическая консоль, процессы, CPU/NPU, PCIe/USB-инвентаризация, TTY0 и serial-log в рамках выданных полномочий.",
+      "capabilities": ["structured_command_console", "process_observation", "cpu_npu_telemetry", "pci_usb_inventory", "tty0_serial_log_view", "bench_session_diagnostics"],
+      "system_apis": ["os.processes.v1", "os.telemetry.v1", "os.devices.v1", "os.bench.v1", "os.audit.v1"],
+      "permissions": ["processes.read", "telemetry.read", "devices.metadata.read", "bench.logs.read"],
+      "maturity_status": "specified"
+    }
+  ],
+  "shared_contracts": [
+    "Versioned application identity and lifecycle",
+    "Numbered launcher slots are stable assignments and never silently reindex",
+    "No shell interpolation for application launch requests",
+    "SHA-256 proves byte integrity, not publisher identity",
+    "Unsigned approval is bound to one exact SHA-256 digest",
+    "A/B image slots are distinct from physical fixture slots A/B",
+    "Hardware access is mediated by benchd and named test profiles",
+    "Power and bus limits come from the verified board profile",
+    "Serial log records include UTC time, fixture slot and test-session identity",
+    "Native process isolation and privileged driver enforcement remain kernel responsibilities"
+  ]
+}

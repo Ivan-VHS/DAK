@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/bench-profile.v1.schema.json",
+  "title": "DuckOS hardware bench profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "board_id",
+    "fixture_slots",
+    "serial_ports",
+    "max_telemetry_age_seconds",
+    "rails",
+    "buses",
+    "accelerators",
+    "probes",
+    "tests"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.bench-profile.v1"
+    },
+    "board_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,47}$"
+    },
+    "fixture_slots": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "A",
+          "B"
+        ]
+      }
+    },
+    "serial_ports": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      }
+    },
+    "max_telemetry_age_seconds": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "rails": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "min_voltage_v",
+          "max_voltage_v",
+          "max_current_a",
+          "max_temperature_c",
+          "cooldown_temperature_c"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,47}$"
+          },
+          "min_voltage_v": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "max_voltage_v": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1000
+          },
+          "max_current_a": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 10000
+          },
+          "max_temperature_c": {
+            "type": "number",
+            "minimum": -40,
+            "maximum": 200
+          },
+          "cooldown_temperature_c": {
+            "type": "number",
+            "minimum": -40,
+            "maximum": 200
+          }
+        }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "max_duration_seconds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,47}$"
+          },
+          "max_duration_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        }
+      }
+    },
+    "buses": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "max_link_width",
+          "max_link_speed_gbps",
+          "must_be_present"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,47}$"
+          },
+          "kind": {
+            "enum": [
+              "pcie",
+              "usb",
+              "i2c",
+              "spi"
+            ]
+          },
+          "max_link_width": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "max_link_speed_gbps": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 256
+          },
+          "must_be_present": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "accelerators": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "max_temperature_c",
+          "max_utilization_percent",
+          "must_be_present"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,47}$"
+          },
+          "kind": {
+            "enum": [
+              "gpu",
+              "npu"
+            ]
+          },
+          "max_temperature_c": {
+            "type": "number",
+            "minimum": -40,
+            "maximum": 200
+          },
+          "max_utilization_percent": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "must_be_present": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "probes": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "unit",
+          "min_value",
+          "max_value",
+          "max_age_seconds",
+          "must_be_present"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,47}$"
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16
+          },
+          "min_value": {
+            "type": "number",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "max_value": {
+            "type": "number",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "max_age_seconds": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "must_be_present": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

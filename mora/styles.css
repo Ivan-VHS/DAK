@@ -805,3 +805,50 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
   :root[data-theme="amber"] .desktop-content {gap:26px}
   :root[data-theme="amber"] .dock-wrap {padding-bottom:14px}
 }
+
+/* DuckOS system utility catalogue */
+.system-utility-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+  margin:15px 0;
+}
+.system-utility-card {
+  min-width:0;
+  min-height:112px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:5px;
+  padding:13px 12px 11px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:14px;
+  color:var(--text);
+  background:rgba(255,255,255,.045);
+  text-align:left;
+  cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
+}
+.system-utility-card:hover,
+.system-utility-card:focus-visible {
+  transform:translateY(-2px);
+  border-color:var(--utility-accent,#D58B3D);
+  background:rgba(213,139,61,.10);
+}
+.system-utility-number {font-size:9px;letter-spacing:.12em;color:var(--muted);font-variant-numeric:tabular-nums}
+.system-utility-glyph {font-size:19px;line-height:1;color:var(--utility-accent,#D58B3D)}
+.system-utility-card strong {font-size:11px;line-height:1.3}
+.system-utility-card small {font-size:9px;line-height:1.35;color:var(--muted)}
+:root[data-theme="amber"] .system-utility-card {border-color:rgba(231,194,145,.16);background:rgba(231,194,145,.055)}
+:root[data-theme="amber"] .system-utility-card:hover {border-color:#D58B3D;background:rgba(213,139,61,.13)}
+@media (max-width:560px) {
+  .system-utility-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .system-utility-card {min-height:104px;padding:11px 10px}
+}
+
+@media (max-width:420px) {
+  .dock {gap:2px;padding:5px}
+  .dock-item {width:33px;height:33px}
+  .dock-glyph {font-size:20px}
+}

@@ -10,7 +10,7 @@ The default application suite contains seven first-party apps: Cockos, Kavun, Ka
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven first-party application identities and seven existing system tools into one workspace. A separate, versioned catalogue now defines fifteen additional system utilities without changing the seven-product suite. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
 The system tools are:
 
@@ -54,6 +54,7 @@ The existing Python validation remains available:
 python -m pip install jsonschema
 python -m unittest discover -s tests -v
 python tools/validate_app_catalog.py
+python tools/validate_system_apps.py
 ```
 
 The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
@@ -78,6 +79,21 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 
 No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
 
+## Fifteen system utilities and hardware bench contracts
+
+The additional system utility catalogue is kept separate from the seven first-party DuckOS products: [catalogue](catalogs/system-applications.v1.json), [JSON Schema](schemas/system-applications.v1.schema.json) and [runtime guide](docs/DESKTOP_RUNTIME.md). Mora exposes a System Apps entry with all fifteen identities. The host-side `duckos.desktop` package provides numbered launcher slots, exact-hash unsigned approvals, A/B image state transitions, board-profile interlocks and hash-chained audit/serial records.
+
+Useful commands:
+
+```sh
+duckos desktop catalog
+duckos desktop slots --state ~/.local/state/duckos/launcher.json list
+duckos desktop package-verify ./candidate.pkg --trust-store ~/.local/state/duckos/trust.json
+duckos desktop bench-profile ./bench/board-rev-a.json
+```
+
+The launcher currently creates structured requests rather than processes. Image activation and bench operation require explicit native adapters; the repository does not yet provide physical power switching, PCIe/NPU register access, probe sampling or UART device drivers.
+
 ## Windows application compatibility
 
 DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.
@@ -91,6 +107,8 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
+- [Fifteen system utilities and bench runtime](docs/DESKTOP_RUNTIME.md)
+- [System utility catalogue](catalogs/system-applications.v1.json)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
 

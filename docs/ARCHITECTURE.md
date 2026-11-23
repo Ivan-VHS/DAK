@@ -89,3 +89,20 @@ This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS gua
 10. Reproducible installer and bootable image.
 
 Each gate needs a conformance suite and target hardware or emulator evidence. Do not skip a gate by relabelling a reference-runtime test as a hardware test.
+
+
+## Desktop utilities, launcher and hardware bench
+
+The Mora-facing utility suite has a separate versioned catalogue of fifteen system applications; it does not replace the seven first-party DuckOS products. The catalogue is packaged for the Python host tools and validated against a JSON Schema.
+
+The host-side `duckos.desktop` layer defines bounded state contracts for stable numbered launcher slots, package SHA-256 checks and digest-bound unsigned approvals, an A/B image update state machine, and a profile-bound bench controller. These contracts are testable on ordinary development hosts and do not claim to be kernel services.
+
+Privileged boundaries remain explicit:
+
+- Launcher resolution returns a structured request. A native process manager, executable path resolver and kernel-enforced sandbox must perform the actual launch.
+- A/B activation requires a board/image backend and verified signature evidence. The default implementation only reports state and plans; no disk image or boot variable is modified.
+- Bench control accepts only a named board profile, checks fresh telemetry and enforces configured voltage/current, PCIe/USB link, GPU/NPU temperature/utilization and calibrated-probe limits before a test. Without a board-specific native adapter it remains disconnected and fail-closed.
+- The serial journal records session, fixture slot, port and redacted line data with a hash chain. A native UART/USB serial adapter must supply the lines.
+- PCIe, USB, NPU and probe access remains read-only inventory/telemetry until a real driver and restricted device broker exist. No generic register write interface is exposed.
+
+The system-image A/B pair and hardware fixture A/B pair are independent namespaces. The former selects an OS image for boot; the latter labels the physical test fixture. See [Desktop runtime contracts](DESKTOP_RUNTIME.md) for the application catalogue and CLI workflow.
