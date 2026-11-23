@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/user-content-record.v1.schema.json",
+  "title": "DuckOS user-created content attribution record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "content",
+    "attribution",
+    "files",
+    "save_data_separate_from_protected_package",
+    "signature_status"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.user-content-record.v1"
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "kind": {
+          "enum": [
+            "save",
+            "theme",
+            "avatar",
+            "preset",
+            "mod",
+            "user_asset"
+          ]
+        }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "required": [
+        "creator",
+        "source",
+        "copyright_notice",
+        "license_id",
+        "status"
+      ],
+      "properties": {
+        "creator": {
+          "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "type",
+            "description"
+          ],
+          "properties": {
+            "type": {
+              "const": "user_declared"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        },
+        "copyright_notice": {
+          "type": "string"
+        },
+        "license_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "const": "self_declared_not_publisher_verified"
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "size_bytes",
+          "sha256"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "save_data_separate_from_protected_package": {
+      "type": "boolean"
+    },
+    "signature_status": {
+      "const": "unsigned_user_metadata"
+    }
+  }
+}
