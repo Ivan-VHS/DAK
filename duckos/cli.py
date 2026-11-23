@@ -23,6 +23,10 @@ from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .terminal import TerminalService, run_interactive
 from .settings import SettingsStore, network_probe
+from .toolbox import (
+    convert_json_xml, convert_text_encoding, convert_units, generate_secret,
+    inspect_csv, list_listening_ports, read_rss, sha256_file, text_statistics, verify_tls,
+)
 
 
 def _load(path: Path) -> Any:
@@ -123,6 +127,38 @@ def main(argv: list[str] | None = None) -> int:
     network_test = settings_actions.add_parser("network-test", help="resolve a host and test a TCP endpoint")
     network_test.add_argument("host")
     network_test.add_argument("--port", type=int, default=443)
+
+    toolbox = commands.add_parser("tools", help="run bounded, safe user-space utilities")
+    toolbox_actions = toolbox.add_subparsers(dest="tool_action", required=True)
+    secret = toolbox_actions.add_parser("secret", help="generate a cryptographically random secret")
+    secret.add_argument("--length", type=int, default=32)
+    text_stats = toolbox_actions.add_parser("text-stats", help="count words, characters, lines and paragraphs")
+    text_stats.add_argument("file", type=Path)
+    csv_inspect = toolbox_actions.add_parser("csv-inspect", help="inspect CSV headers, row widths and preview")
+    csv_inspect.add_argument("file", type=Path)
+    csv_inspect.add_argument("--delimiter", default=",")
+    data_convert = toolbox_actions.add_parser("data-convert", help="convert JSON to XML or XML to JSON")
+    data_convert.add_argument("file", type=Path)
+    data_convert.add_argument("--to", choices=("json", "xml"), required=True)
+    data_convert.add_argument("--output", type=Path)
+    encoding = toolbox_actions.add_parser("encoding-convert", help="convert a text file encoding and line endings")
+    encoding.add_argument("file", type=Path)
+    encoding.add_argument("output", type=Path)
+    encoding.add_argument("--from-encoding", dest="source_encoding", required=True)
+    encoding.add_argument("--to-encoding", dest="target_encoding", required=True)
+    encoding.add_argument("--line-endings", choices=("preserve", "lf", "crlf", "cr"), default="preserve")
+    units = toolbox_actions.add_parser("units", help="convert common SI, time, data and temperature units")
+    units.add_argument("value")
+    units.add_argument("source_unit")
+    units.add_argument("target_unit")
+    tls = toolbox_actions.add_parser("tls-check", help="verify a remote TLS endpoint using system trust")
+    tls.add_argument("host")
+    tls.add_argument("--port", type=int, default=443)
+    rss = toolbox_actions.add_parser("rss", help="parse a local RSS or Atom feed")
+    rss.add_argument("file", type=Path)
+    checksum = toolbox_actions.add_parser("sha256", help="calculate SHA-256 for a regular file")
+    checksum.add_argument("file", type=Path)
+    toolbox_actions.add_parser("ports", help="list listening TCP ports using a local read-only provider")
 
     release_build = commands.add_parser(
         "build-release", help="create a deterministic, optionally signed component bundle"
@@ -233,6 +269,52 @@ def main(argv: list[str] | None = None) -> int:
                 result = TerminalService().execute(args.command_line)
             else:
                 raise ValueError("unsupported terminal action")
+        elif args.command == "tools":
+            if args.tool_action == "secret":
+                result = {"secret": generate_secret(args.length), "length": args.length, "algorithm": "OS CSPRNG"}
+            elif args.tool_action == "text-stats":
+                if args.file.is_symlink() or not args.file.is_file() or args.file.stat().st_size > 4 * 1024 * 1024:
+                    raise ValueError("Text input must be a regular file no larger than 4 MiB")
+                result = text_statistics(args.file.read_text(encoding="utf-8"))
+            elif args.tool_action == "csv-inspect":
+                if args.file.is_symlink() or not args.file.is_file() or args.file.stat().st_size > 4 * 1024 * 1024:
+                    raise ValueError("CSV input must be a regular file no larger than 4 MiB")
+                result = inspect_csv(args.file.read_text(encoding="utf-8"), delimiter=args.delimiter)
+            elif args.tool_action == "data-convert":
+                if args.file.is_symlink() or not args.file.is_file() or args.file.stat().st_size > 4 * 1024 * 1024:
+                    raise ValueError("Data input must be a regular file no larger than 4 MiB")
+                converted = convert_json_xml(args.file.read_text(encoding="utf-8"), args.to)
+                if args.output:
+                    if args.output.is_symlink():
+                        raise ValueError("Output path cannot be a symbolic link")
+                    args.output.write_text(converted + "\n", encoding="utf-8", newline="\n")
+                    result = {"converted": True, "output": str(args.output), "format": args.to}
+                else:
+                    print(converted)
+                    return 0
+            elif args.tool_action == "encoding-convert":
+                if args.file.is_symlink() or not args.file.is_file() or args.file.stat().st_size > 4 * 1024 * 1024:
+                    raise ValueError("Encoding input must be a regular file no larger than 4 MiB")
+                if args.output.is_symlink():
+                    raise ValueError("Output path cannot be a symbolic link")
+                output_bytes = convert_text_encoding(args.file.read_bytes(), args.source_encoding, args.target_encoding, line_endings=args.line_endings)
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                args.output.write_bytes(output_bytes)
+                result = {"converted": True, "output": str(args.output), "size_bytes": len(output_bytes)}
+            elif args.tool_action == "units":
+                result = {"value": args.value, "source_unit": args.source_unit, "target_unit": args.target_unit, "result": convert_units(args.value, args.source_unit, args.target_unit)}
+            elif args.tool_action == "tls-check":
+                result = verify_tls(args.host, args.port)
+            elif args.tool_action == "rss":
+                if args.file.is_symlink() or not args.file.is_file() or args.file.stat().st_size > 4 * 1024 * 1024:
+                    raise ValueError("Feed input must be a regular file no larger than 4 MiB")
+                result = read_rss(args.file.read_text(encoding="utf-8"))
+            elif args.tool_action == "sha256":
+                result = sha256_file(args.file)
+            elif args.tool_action == "ports":
+                result = list_listening_ports()
+            else:
+                raise ValueError("unsupported toolbox action")
         elif args.command == "settings":
             store = SettingsStore()
             if args.settings_action == "show":
