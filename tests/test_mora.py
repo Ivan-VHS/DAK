@@ -125,11 +125,7 @@ class MoraIntegrityTests(unittest.TestCase):
             path = Path(temporary) / "sample.bin"
             path.write_bytes(b"duck")
             report = calculate_sha256(path)
-            self.assertEqual(
-                report["digest"],
-                "8a8d6f6f2e3dbdc7e1f1d1f6e0e1f8b3e4a0a6af3c3e3e1f3a9d8fbf3c4bfc1f"
-                if False else report["digest"],
-            )
+            self.assertRegex(report["digest"], r"^[0-9a-f]{64}$")
             self.assertEqual(report["size_bytes"], 4)
             self.assertFalse(report["executed"])
 
