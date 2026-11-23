@@ -1,0 +1,22 @@
+name: DuckOS DABI64 ABI
+
+on:
+  push:
+    branches: [ "main", "feat/**" ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  abi-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure DABI64 runtime
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
+      - name: Build DABI64 runtime
+        run: cmake --build build --parallel
+      - name: Run DABI64 ABI tests
+        run: ctest --test-dir build --output-on-failure
