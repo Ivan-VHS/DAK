@@ -2,7 +2,7 @@
 
 **Product ID:** ivan-vhs.duckos.mora-commons  
 **Native catalogue data:** mora/commons-catalog.json  
-**Maturity:** the Mora Commons catalogue interface is implemented in the browser shell; the fifteen listed application products are specified, not shipped native applications.
+**Maturity:** the Mora Commons catalogue interface is implemented in the native Mora shell; the fifteen listed application products are specified, not shipped native applications.
 
 ## Purpose
 
@@ -34,7 +34,7 @@ The catalogue and favourites are local to the browser profile. No account, cloud
 
 ## Product maturity and boundaries
 
-The **Mora Commons interface and catalogue interactions** are implemented in the browser shell.
+The **Mora Commons interface and catalogue interactions** are implemented in the native Mora shell.
 
 The **fifteen application products** remain at specified maturity. Their cards are product records, not installed packages or executable application windows. No app-specific native service, persistent domain database, device driver, location engine, training sensor integration, bank connection or OS-level scheduler is claimed by this catalogue.
 
