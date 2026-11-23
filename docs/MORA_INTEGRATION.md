@@ -1,54 +1,75 @@
 # Mora native desktop
 
-Mora is DuckOS's native user-space desktop application and application launcher. It is implemented with Python's Tk toolkit and is started with `duckos mora gui` or `duckos-mora`.
+Mora is DuckOS's native user-space desktop application and application launcher. Its primary GUI is **PySide6 / Qt 6 Widgets** and it starts with `duckos mora gui` or `duckos-mora`.
 
 ## Runtime boundary
 
-Mora is a regular host desktop process. It uses native Tk widgets directly and does not contain or load HTML, CSS, browser JavaScript, a WebView, a browser engine, a web manifest or a service worker.
+Mora is a normal host desktop process. It uses Qt Widgets directly and does not create or load HTML, CSS browser documents, JavaScript, a WebView, a browser engine, a web manifest or a service worker. Tkinter has been removed from the Mora runtime. Optional GPU and terminal utilities are separate processes, not embedded widget families.
 
-This does not make Mora the DuckOS compositor. The production compositor, window manager, virtual workspaces, system notification service, process manager and kernel-enforced capability broker remain planned system components. The Mora process does not claim to boot DuckOS or replace the host desktop.
+This does not make Mora the DuckOS compositor. The production compositor, window manager, virtual workspaces, system notification service, process manager and kernel-enforced capability broker remain separate system components. Mora does not claim to boot DuckOS or replace the host desktop.
 
 ## Included native surfaces
 
-- Application launcher with search and category filters, populated from the versioned Mora registry.
+- PySide6 launcher with search, category filtering, responsive app cards and dedicated app dialogs.
 - One black, white and yellow Duck palette, with shared JSON design tokens.
-- Local shell preferences for focus mode, reduced motion, density and a user-selected preference profile.
-- A bounded rule-based intent preview with explicit approval. Only listed local actions are supported; arbitrary command execution is not available.
+- Local shell preferences for focus mode, reduced motion, density and a user-selected profile.
+- Bounded intent preview with explicit approval. Only allowlisted local actions are supported.
 - Sentinel preference switches. These are local profile values, not device or process permissions.
-- Restore export and import of normalized Mora preferences only. It is not an OS updater or partition rollback system.
-- Proof SHA-256 for a selected regular local file, with a 512 MiB file-size limit. A digest is not proof of authorship or signature validity.
-- Bridge / EXEdotEXE read-only PE and ELF inspection through DuckOS's compatibility parser. Selecting a file does not execute it, load a DLL or install a runtime.
-- Mora Commons catalogue search from packaged JSON data.
-- Duck Desktop and Reaper Studio entry points to their existing native user-space tools.
+- Restore export/import of normalized Mora preferences only, not an OS updater or partition rollback system.
+- Proof SHA-256 for a selected regular local file, with a 512 MiB size limit.
+- Bridge / EXEdotEXE read-only PE and ELF inspection; selected targets are never executed.
+- Mora Commons search from packaged JSON data.
+- Duck Desktop and Reaper Studio process entry points.
 
-## Data and safety
+## Optional toolkit adapters
 
-Settings are written to the per-user DuckOS/Mora configuration directory using an atomic JSON replacement. Unknown fields and capability names are discarded during normalization. The settings backup contains only the known preference schema.
-
-The Sentinel panel describes preferences only. The shell cannot enforce device access or process capabilities. Do not treat a checkbox as a kernel permission.
-
-The Bridge panel only inspects file structure. It never launches the selected target. The Proof panel calculates SHA-256 from local bytes and does not establish publisher identity, signing trust or content provenance.
-
-## Visual system
-
-The single Duck palette is black, white and yellow. Yellow is used for primary actions, active navigation and keyboard focus. Reduced-motion and density preferences are persisted, but they do not alter the host window manager or global desktop.
-
-## Build and run
-
-Install the package in the current environment and start the native shell:
+The primary desktop dependency is installed separately:
 
 ```sh
-python -m pip install .
+python -m pip install '.[native-ui]'
 duckos mora gui
 ```
 
-Python must include Tk support. On minimal Linux installations this may require the distribution's `python3-tk` package. No Node.js, browser or web runtime is required.
+Optional capabilities are isolated behind extras and entry points:
 
-## Maturity vocabulary
+| Extra | Command | Function |
+|---|---|---|
+| `terminal-ui` | `duckos mora tui` | Textual terminal dashboard with searchable app registry |
+| `gpu-tools` | `duckos mora gpu` | Separate Dear PyGui GPU-accelerated read-only diagnostic window |
+| `plots` | `duckos mora plot` | PyQtGraph numeric CSV viewer in a native Qt window |
+| `windows-native` | `duckos mora bridges` | Optional PyWin32 functions on Windows |
+| `native-ffi` | `duckos mora bridges` | CFFI availability for explicit native plugin contracts |
 
-- **Implemented:** the native user-space behavior is present and covered by tests.
-- **Partial:** a bounded local panel exists; the complete service or persistent app data layer is absent.
-- **Specified:** a design or catalogue entry exists, but no native behavior is claimed.
-- **Planned:** implementation is not present.
+Install only the profiles that are needed:
 
-A native panel does not prove that the corresponding kernel service, driver or bootable OS component exists.
+```sh
+python -m pip install '.[native-ui,terminal-ui,plots]'
+python -m pip install '.[gpu-tools]'
+```
+
+The 66-item toolkit evaluation is maintained in [GUI framework architecture](GUI_FRAMEWORK_ARCHITECTURE.md) and [gui-toolkits.json](../duckos/mora/data/gui-toolkits.json). It is a review matrix, not a requirement to install all 66 frameworks. Tk-based packages are retired, web-first/HTML/WebView stacks are excluded, game engines remain application renderers, and optional adapters run in separate processes or behind explicit extras.
+
+## Data and safety
+
+Preferences are written to the per-user DuckOS/Mora configuration directory using an atomic JSON replacement. Unknown fields and capability names are discarded during normalization. Backups contain only the known preference schema.
+
+The Sentinel panel does not enforce device access or process capabilities. The Bridge panel inspects file structure and does not launch targets. Proof calculates SHA-256 and does not establish publisher identity, signing trust or content provenance. Native FFI is restricted to reviewed function signatures and validated handles.
+
+## Build and validation
+
+Python 3.10+ is required. PySide6 wheels are installed with the `native-ui` extra. On CI, the Qt desktop is smoke-tested with the offscreen Qt platform plugin.
+
+```sh
+python -m pip install -e '.[native-ui]'
+QT_QPA_PLATFORM=offscreen python -m unittest discover -s tests -p 'test_mora_qt.py' -v
+python -m unittest discover -s tests -v
+```
+
+## Maturity
+
+- **Implemented:** native Mora Qt shell, launcher, settings and documented local panels.
+- **Partial:** bounded diagnostic and platform-adapter entry points.
+- **Specified:** product concepts and optional toolkit adapters that have not been installed or implemented as app services.
+- **Planned:** compositor, boot shell, native window manager, process manager, notifications, capability broker and per-application native services.
+
+A native panel does not prove that the corresponding kernel service, driver, bootloader or bootable OS image exists.
