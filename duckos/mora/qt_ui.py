@@ -279,7 +279,8 @@ class MoraWindow(QMainWindow):
                 border-color: {ACCENT_HOVER};
             }}
             QLineEdit:focus, QComboBox:focus, QSpinBox:focus,
-            QPlainTextEdit:focus, QListWidget:focus {{
+            QPlainTextEdit:focus, QListWidget:focus,
+            QPushButton:focus, QCheckBox:focus {{
                 border: 2px solid {ACCENT_HOVER};
             }}
             QCheckBox {{ spacing: 9px; padding: 5px; }}
