@@ -95,6 +95,10 @@ python -m pip install '.[gpu-tools]'
 duckos mora gpu
 
 duckos mora scene
+
+# Platform-only extras when needed:
+python -m pip install '.[windows-native]'  # Windows
+python -m pip install '.[macos-native]'    # macOS
 duckos mora bridges
 ```
 
