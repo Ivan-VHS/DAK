@@ -56,6 +56,23 @@ class GameLaunchProfileTests(unittest.TestCase):
             self.assertEqual(profile["compatibility"]["display"]["color_depth"], 16)
             self.assertEqual(profile["arguments"], ["-window", "-language", "en"])
 
+    def test_rejects_relative_path_escape(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "profile"
+            root.mkdir()
+            outside = Path(temporary) / "outside.exe"
+            outside.write_bytes(minimal_pe64())
+            (root / "prefix").mkdir()
+            payload = {
+                "schema": "duckos.game-launch-profile.v1",
+                "id": "sample-game", "name": "Sample Game",
+                "executable": "../outside.exe", "working_directory": ".",
+                "runtime": {"backend": "wine", "executable": "wine", "prefix": "prefix"},
+                "compatibility": {"windows_version": "windows-xp", "service_pack": 3},
+            }
+            with self.assertRaisesRegex(GameProfileError, "stay inside"):
+                validate_game_profile(payload, root)
+
     def test_rejects_shell_injection_environment_and_unknown_backends(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
