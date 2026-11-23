@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v9-blade-launcher";
+const CACHE = "mora-shell-v10-responsive-workspace";
 const ASSETS = [
   "./",
   "./index.html",
