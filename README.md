@@ -91,6 +91,18 @@ The 2026 OS design directions are tracked as service contracts in [Mora system p
 
 No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
 
+## Native Duck Desktop optimizer
+
+The native user-space maintenance utility complements the Mora browser shell. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
+
+~~~sh
+duckos desktop audit
+duckos desktop gui
+duckos desktop startup list
+~~~
+
+It does not claim to be the native compositor or manage machine-wide services. See [Duck Desktop optimization](docs/DESKTOP_OPTIMIZATION.md) for commands, safety boundaries and implementation status.
+
 ## Windows application compatibility
 
 DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.

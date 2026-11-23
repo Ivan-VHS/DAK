@@ -1,9 +1,10 @@
-const CACHE = "mora-shell-v5-amber";
+const CACHE = "mora-shell-v6-duck-desktop-commons";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./commons-catalog.js",
   "./core.js",
   "./apps.json",
   "./system-policy.json",
