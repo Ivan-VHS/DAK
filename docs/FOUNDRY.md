@@ -49,13 +49,14 @@ Runbooks are checklists, not executable automation. The operator can use them to
 
 - Desktop resources and processes come from DesktopService.audit().
 - Device information comes from collect_host_inventory(). Raw device instance IDs are not included; the inventory provider emits a per-snapshot keyed identity hash.
+- On Windows, fixed read-only PowerShell/PnP queries and, when psutil is unavailable, tasklist may run as bounded diagnostic helpers. They do not execute user-supplied commands.
 - Compatibility runtimes are discovered by DuckBridge without launching them or contacting the network.
 - Unsupported or unavailable collectors are represented as unavailable and recorded in collection_errors; one unsupported source does not discard successful diagnostics.
 - The report records the capture time, data sources, execution boundaries and privacy properties.
 
 ## Safety boundary
 
-Foundry is read-only and local. It does not terminate or reprioritize processes, install or remove drivers, change power plans, edit the registry, modify services, mount disks, change firmware, alter boot settings, install packages or run arbitrary shell commands. It does not control PLCs, industrial machinery or physical actuators.
+Foundry is read-only and local. On Windows, fixed PowerShell and tasklist helpers may be started to read device and process information; arbitrary user commands are never executed. Foundry does not terminate or reprioritize processes, install or remove drivers, change power plans, edit the registry, modify services, mount disks, change firmware, alter boot settings or install packages. It does not control PLCs, industrial machinery or physical actuators.
 
 The recovery and security sections are marked specified, not available: DuckOS still requires a native A/B updater, boot verification, recovery implementation, capability broker and process isolation before those can be represented as enforced services.
 
