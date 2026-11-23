@@ -134,7 +134,17 @@ class MoraQtDesktopTests(unittest.TestCase):
         self.assertIs(window._app_dialogs["workspace"], settings)
 
         settings.close()
+        self.application.processEvents()
+        self.assertTrue(window.isVisible())
+        self.assertNotIn("workspace", window._app_dialogs)
+
+        window.open_app("workspace")
+        reopened = window._app_dialogs["workspace"]
+        self.assertIsNot(reopened, settings)
+        self.assertTrue(reopened.isVisible())
+
         security.close()
+        reopened.close()
         self.application.processEvents()
         window.close()
 
