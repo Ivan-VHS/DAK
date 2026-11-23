@@ -1,0 +1,319 @@
+{
+  "schema": "duckos.personal-suite.v1",
+  "version": 1,
+  "operating_system": "DuckOS",
+  "desktop": "Mora",
+  "maturity_status": "partial",
+  "runtime": "Mora browser shell",
+  "distribution_intent": "integrated_local_first_application_suite",
+  "note": "The fifteen applications are integrated into the Mora browser shell. This catalogue does not assert native packages, kernel services, cloud sync or a bootable image.",
+  "storage": {
+    "provider": "browser-localStorage",
+    "key": "mora.personal-suite.v1",
+    "cloud_sync": false,
+    "network_requests": false,
+    "encryption_at_rest": false,
+    "user_export": "per_application_json",
+    "user_import": "per_application_json",
+    "profile_scope": "one browser profile on one device"
+  },
+  "integration_contract": {
+    "version": "mora.personal-suite.events.v1",
+    "transport": "same_window_custom_events_and_shared_local_state",
+    "consent": "user_initiated_cross_application_actions",
+    "no_background_jobs": true
+  },
+  "applications": [
+    {
+      "id": "lumina-cycle",
+      "name": "LuminaCycle",
+      "domain": "health",
+      "privacy_class": "sensitive",
+      "maturity_status": "partial",
+      "capabilities": [
+        "cycle_date_log",
+        "self_reported_energy_notes",
+        "calendar_estimates"
+      ],
+      "boundaries": [
+        "No diagnosis or medical recommendations.",
+        "Calendar estimates are approximate, not fertility predictions."
+      ]
+    },
+    {
+      "id": "nura-calm",
+      "name": "NuraCalm",
+      "domain": "health",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "mood_journal",
+        "stress_self_rating",
+        "guided_breathing_timer"
+      ],
+      "boundaries": [
+        "Not a medical or therapy tool.",
+        "Breathing practice is optional and can be stopped."
+      ]
+    },
+    {
+      "id": "verba-rest",
+      "name": "VerbaRest",
+      "domain": "health",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "rest_routine_log",
+        "break_planning",
+        "workday_boundary_notes"
+      ],
+      "boundaries": [
+        "Reminders do not run after the shell closes.",
+        "No system-wide focus control."
+      ]
+    },
+    {
+      "id": "sora-glow",
+      "name": "SoraGlow",
+      "domain": "health",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "product_diary",
+        "routine_notes",
+        "personal_reaction_log"
+      ],
+      "boundaries": [
+        "No diagnosis or ingredient safety rating.",
+        "Weather-aware recommendations are not connected."
+      ]
+    },
+    {
+      "id": "kora-closet",
+      "name": "KoraCloset",
+      "domain": "style",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "wardrobe_catalog",
+        "seasonal_tags",
+        "outfit_notes"
+      ],
+      "boundaries": [
+        "Weather-aware recommendations are not connected.",
+        "No retailer tracking."
+      ]
+    },
+    {
+      "id": "mirra-fit",
+      "name": "MirraFit",
+      "domain": "style",
+      "privacy_class": "sensitive",
+      "maturity_status": "partial",
+      "capabilities": [
+        "measurement_history",
+        "fit_notes",
+        "dated_comparisons"
+      ],
+      "boundaries": [
+        "No body assessment or health interpretation.",
+        "Values remain local."
+      ]
+    },
+    {
+      "id": "talia-palette",
+      "name": "TaliaPalette",
+      "domain": "style",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "saved_color_swatches",
+        "hex_palette_export",
+        "usage_tags"
+      ],
+      "boundaries": [
+        "No automatic lighting analysis.",
+        "No skin-tone classification."
+      ]
+    },
+    {
+      "id": "zara-loom",
+      "name": "ZaraLoom",
+      "domain": "style",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "manual_maker_directory",
+        "material_notes",
+        "saved_reference_links"
+      ],
+      "boundaries": [
+        "No live marketplace or seller verification.",
+        "Links are user-supplied."
+      ]
+    },
+    {
+      "id": "bela-notes",
+      "name": "BelaNotes",
+      "domain": "creative",
+      "privacy_class": "sensitive",
+      "maturity_status": "partial",
+      "capabilities": [
+        "quick_notes",
+        "tagged_search",
+        "local_drafts"
+      ],
+      "boundaries": [
+        "No cloud sync or shared editing.",
+        "Notes remain local unless exported."
+      ]
+    },
+    {
+      "id": "rina-craft",
+      "name": "RinaCraft",
+      "domain": "creative",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "craft_project_board",
+        "materials_inventory_notes",
+        "stage_tracking"
+      ],
+      "boundaries": [
+        "No marketplace or external storage."
+      ]
+    },
+    {
+      "id": "olea-kitchen",
+      "name": "OleaKitchen",
+      "domain": "creative",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "recipe_book",
+        "ingredient_lists",
+        "manual_meal_tags",
+        "shopping_task_handoff"
+      ],
+      "boundaries": [
+        "No medical diet calculation.",
+        "No grocery provider integration."
+      ]
+    },
+    {
+      "id": "veda-bloom",
+      "name": "VedaBloom",
+      "domain": "creative",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "goal_list",
+        "reading_and_learning_log",
+        "non_punitive_progress"
+      ],
+      "boundaries": [
+        "No penalties for missed days.",
+        "Progress is self-reported."
+      ]
+    },
+    {
+      "id": "mila-nest",
+      "name": "MilaNest",
+      "domain": "home",
+      "privacy_class": "private",
+      "maturity_status": "partial",
+      "capabilities": [
+        "household_task_list",
+        "due_date_tags",
+        "manual_assignment",
+        "shopping_handoff"
+      ],
+      "boundaries": [
+        "No shared household account or background notifications.",
+        "Assignments are local labels."
+      ]
+    },
+    {
+      "id": "daria-ledger",
+      "name": "DariaLedger",
+      "domain": "home",
+      "privacy_class": "sensitive",
+      "maturity_status": "partial",
+      "capabilities": [
+        "personal_budget_entries",
+        "savings_goals",
+        "income_expense_totals"
+      ],
+      "boundaries": [
+        "No bank connection or payment execution.",
+        "Data is local and not encrypted by this module."
+      ]
+    },
+    {
+      "id": "elda-circle",
+      "name": "EldaCircle",
+      "domain": "home",
+      "privacy_class": "sensitive",
+      "maturity_status": "partial",
+      "capabilities": [
+        "private_event_planner",
+        "book_club_notes",
+        "recommendation_exchange_list"
+      ],
+      "boundaries": [
+        "No public social network, messaging or contact uploads.",
+        "No automatic invitations."
+      ]
+    }
+  ],
+  "cross_app_workflows": [
+    {
+      "id": "nura-calm.verba-rest.v1",
+      "source": "nura-calm",
+      "target": "verba-rest",
+      "trigger": "user_selects_log_break",
+      "action": "create_local_rest_entry",
+      "consent_required": true
+    },
+    {
+      "id": "olea-kitchen.mila-nest.v1",
+      "source": "olea-kitchen",
+      "target": "mila-nest",
+      "trigger": "user_selects_add_shopping_list",
+      "action": "create_local_household_task",
+      "consent_required": true
+    },
+    {
+      "id": "lumina-cycle.nura-calm.v1",
+      "source": "lumina-cycle",
+      "target": "nura-calm",
+      "trigger": "user_selects_open_calm_space",
+      "action": "open_local_application",
+      "consent_required": true
+    },
+    {
+      "id": "kora-closet.talia-palette.v1",
+      "source": "kora-closet",
+      "target": "talia-palette",
+      "trigger": "user_selects_open_palette",
+      "action": "open_local_application",
+      "consent_required": true
+    },
+    {
+      "id": "bela-notes.rina-craft.v1",
+      "source": "bela-notes",
+      "target": "rina-craft",
+      "trigger": "user_selects_open_project_planner",
+      "action": "open_local_application",
+      "consent_required": true
+    },
+    {
+      "id": "veda-bloom.bela-notes.v1",
+      "source": "veda-bloom",
+      "target": "bela-notes",
+      "trigger": "user_selects_open_notes",
+      "action": "open_local_application",
+      "consent_required": true
+    }
+  ]
+}
