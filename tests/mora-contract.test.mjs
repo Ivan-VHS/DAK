@@ -7,6 +7,7 @@ const css = await readFile(new URL("../mora/styles.css", import.meta.url), "utf8
 const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
+const rightsSource = await readFile(new URL("../duckos/rights.py", import.meta.url), "utf8");
 
 const coreAppIds = ["cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"];
 const extensionAppIds = [
@@ -54,8 +55,8 @@ test("TV mode exposes controller actions, large-card navigation and Rights Cente
   }
   assert.ok(js.includes("createGamepadInput"));
   assert.ok(js.includes("findDirectionalTarget"));
-  assert.ok(js.includes("capture-policy"));
-  assert.ok(js.includes("signature_status"));
+  assert.ok(rightsSource.includes("capture_policy"));
+  assert.ok(rightsSource.includes("signature_status"));
   assert.ok(css.includes(".console-mode"));
   assert.ok(css.includes(".rights-status-grid"));
   assert.ok(serviceWorker.includes("./console-navigation.js"));
