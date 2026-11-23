@@ -86,33 +86,49 @@ function contrastRatio(foreground, background) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-test("Mora design system exposes Amber, Dark and Light themes", () => {
+test("Mora design system exposes five accessible selectable palettes", () => {
+  const paletteIds = ["solar", "amber", "arctic", "amethyst", "jade"];
   assert.equal(theme.schema, "mora.theme.v1");
-  assert.equal(theme.defaultPalette, "amber");
+  assert.equal(theme.defaultPalette, "solar");
+  assert.deepEqual(Object.keys(theme.palettes), paletteIds);
+  assert.equal(theme.palettes.solar.page, "#080A0D");
+  assert.equal(theme.palettes.solar.text, "#F6F7F8");
+  assert.equal(theme.palettes.solar.brand, "#F2C94C");
   assert.equal(theme.palettes.amber.page, "#211913");
-  assert.equal(theme.palettes.amber.surface, "#33261D");
-  assert.equal(theme.palettes.amber.text, "#FFF3E2");
   assert.equal(theme.palettes.amber.brand, "#D58B3D");
-  assert.equal(theme.palettes.amber.secondaryAccent, "#526347");
-  assert.equal(theme.palettes.amber.danger, "#B64A40");
-  assert.ok(contrastRatio(theme.palettes.amber.text, theme.palettes.amber.page) >= 7);
-  assert.ok(contrastRatio(theme.palettes.amber.onBrand, theme.palettes.amber.brand) >= 4.5);
-  assert.ok(contrastRatio(theme.palettes.amber.onSecondaryAccent, theme.palettes.amber.secondaryAccent) >= 4.5);
-  assert.equal(theme.palettes.dark.brand, "#A78BFA");
-  assert.equal(theme.palettes.light.brand, "#5B43B5");
+  assert.equal(theme.palettes.arctic.brand, "#006A93");
+  assert.equal(theme.palettes.amethyst.brand, "#B49AF7");
+  assert.equal(theme.palettes.jade.brand, "#7FC49A");
+
+  for (const palette of Object.values(theme.palettes)) {
+    assert.ok(contrastRatio(palette.text, palette.page) >= 7, palette.label + " body text");
+    assert.ok(contrastRatio(palette.secondary, palette.surface) >= 4.5, palette.label + " secondary text");
+    assert.ok(contrastRatio(palette.muted, palette.surface) >= 4.5, palette.label + " muted text");
+    assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5, palette.label + " primary control");
+    assert.ok(contrastRatio(palette.brand, palette.page) >= 4.5, palette.label + " accent");
+    assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5, palette.label + " secondary control");
+    assert.ok(contrastRatio(palette.onDanger, palette.danger) >= 4.5, palette.label + " destructive control");
+  }
+
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
-  assert.equal(manifest.theme_color, "#211913");
-  assert.equal(manifest.background_color, "#211913");
+  assert.equal(manifest.theme_color, "#080A0D");
+  assert.equal(manifest.background_color, "#080A0D");
+  assert.ok(html.includes('data-theme="solar"'));
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
-  assert.ok(css.includes(':root[data-theme="amber"]'));
-  assert.ok(css.includes("repeating-linear-gradient(90deg"));
+  for (const id of paletteIds) {
+    assert.ok(css.includes(':root[data-theme="' + id + '"]'), id + " palette styles are missing");
+    assert.ok(js.includes('id: "' + id + '"'), id + " selector preview is missing");
+  }
+  assert.ok(js.includes("paletteChoicesMarkup"));
+  assert.ok(js.includes("updatePalettePanel"));
+  assert.ok(js.includes("selectPalette"));
+  assert.ok(css.includes(".palette-choice[aria-pressed=\"true\"]"));
   assert.ok(css.includes("Mora Amber — final visual pass"));
+  assert.ok(css.includes("repeating-linear-gradient(90deg"));
   assert.ok(css.includes(".app-grid::before"));
   assert.ok(css.includes(".dock-wrap::before"));
-  assert.ok(css.includes("#526347"));
-  assert.ok(js.includes('const nextTheme = { amber: "dark", dark: "light", light: "amber" }'));
-  assert.ok(serviceWorker.includes("mora-shell-v4-amber"));
+  assert.ok(serviceWorker.includes("mora-shell-v5-palettes"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
