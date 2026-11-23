@@ -348,13 +348,19 @@ class MoraHandler(BaseHTTPRequestHandler):
             self._send(200, describe_apps())
             return
         if path in {"/", "/index.html"}:
-            try:
-                page = (ROOT / "index.html").read_bytes()
-            except OSError:
-                self._send(500, {"error": "Не найден index.html."})
-                return
-            self._send(200, page, "text/html; charset=utf-8")
+            page_path = ROOT / "prototype" / "mora-home.html"
+        elif path in {"/projects", "/workspace"}:
+            page_path = ROOT / "index.html"
+        else:
+            self._send(404, {"error": "Страница не найдена."})
             return
+        try:
+            page = page_path.read_bytes()
+        except OSError:
+            self._send(500, {"error": "Не найдена страница Mora: " + str(page_path.relative_to(ROOT))})
+            return
+        self._send(200, page, "text/html; charset=utf-8")
+        return
         self._send(404, {"error": "Страница не найдена."})
 
     def do_POST(self) -> None:
