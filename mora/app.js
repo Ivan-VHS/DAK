@@ -1133,7 +1133,8 @@ function rightsPanelMarkup() {
       '<div class="rights-rule"><strong>Захват экрана и клипы</strong><span>Политика capture может быть прочитана, но блокировка записи требует нативного compositor/capture broker.</span></div>' +
     '</section>' +
     '<section class="rights-section"><h3>Нативные команды проверки</h3>' +
-      '<pre class="rights-cli">duckos rights verify-entitlement license.json --trusted-key studio=/path/studio.pub --profile-id PROFILE --device-id DEVICE --offline --action launch\n' +
+      '<pre class="rights-cli">duckos rights verify-package entitlement.json manifest.json ./package --trusted-key store=/path/store.pub --trusted-key studio=/path/studio.pub --profile-id PROFILE --device-id DEVICE --offline --action launch\n' +
+      'duckos rights verify-entitlement license.json --trusted-key studio=/path/studio.pub --profile-id PROFILE --device-id DEVICE --offline --action launch\n' +
       'duckos rights verify-content manifest.json ./package --trusted-key studio=/path/studio.pub\n' +
       'duckos rights build-transfer records.json rights-transfer.json\n' +
       'duckos rights validate-transfer rights-transfer.json\n' +
