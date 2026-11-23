@@ -2,11 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(DuckOS VERSION 0.2.0 LANGUAGES CXX)
 
-option(DUCKOS_BUILD_TESTS "Build DuckOS native contract tests" ON)
-
-if(DUCKOS_BUILD_TESTS)
-    include(CTest)
-endif()
+include(CTest)
 
 add_subdirectory(native)
 
