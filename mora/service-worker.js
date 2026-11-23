@@ -1,9 +1,10 @@
-const CACHE = "mora-shell-v9-duckos-interactive-desktop";
+const CACHE = "mora-shell-v10-console-rights-center";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./console-navigation.js",
   "./workspace.js",
   "./i18n.js",
   "./commons-catalog.js",
