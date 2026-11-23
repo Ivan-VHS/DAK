@@ -203,12 +203,17 @@ function panelMarkup(appId) {
         '<div class="compass-layout"><div class="compass-rose"><span class="compass-north">N</span><span class="compass-needle">✦</span></div><div class="compass-details"><strong data-direction>Северо-восток</strong><span data-bearing>Азимут 045°</span><div class="compass-tabs"><button class="compass-tab active" data-direction-tab="Северо-восток" data-bearing-value="045">Северо-восток</button><button class="compass-tab" data-direction-tab="Юго-восток" data-bearing-value="135">Юго-восток</button><button class="compass-tab" data-direction-tab="Юго-запад" data-bearing-value="225">Юго-запад</button><button class="compass-tab" data-direction-tab="Северо-запад" data-bearing-value="315">Северо-запад</button></div></div></div>' +
         '<p class="window-copy">Направления иллюстративные. Геолокация и датчики компаса не используются.</p>';
     case "illidia":
-      return '<p class="window-kicker">БИБЛИОТЕКА · ДЕМО</p><h2 class="window-heading">Продолжить приключение</h2>' +
-        '<div class="game-list">' +
-        '<div class="game-card"><div class="game-top"><strong>Echoes of Aster</strong><span>68%</span></div><div class="progress-track"><i style="width:68%"></i></div><div class="game-bottom"><span>Последняя игра: вчера</span><span>Глава 08</span></div></div>' +
-        '<div class="game-card"><div class="game-top"><strong>Moonfall Keep</strong><span>34%</span></div><div class="progress-track"><i style="width:34%"></i></div><div class="game-bottom"><span>Сохранение найдено</span><span>Глава 03</span></div></div>' +
-        '<div class="game-card"><div class="game-top"><strong>Wild Meridian</strong><span>12%</span></div><div class="progress-track"><i style="width:12%"></i></div><div class="game-bottom"><span>Новое приключение</span><span>Глава 01</span></div></div>' +
-        '</div><div class="control-row"><div class="control-copy"><strong>Игровой режим</strong><span>Профиль производительности (демо)</span></div><button class="action-button" data-action="game-mode">Включить</button></div>';
+      return '<p class="window-kicker">ILLIDIA · УНИВЕРСАЛЬНАЯ ИГРОВАЯ БИБЛИОТЕКА</p>' +
+        '<h2 class="window-heading">Все игры в одном месте</h2>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>Локальный движок Illidia добавлен в DuckOS: единая SQLite-библиотека, импорт магазинов, ручное добавление, профили запуска, проверка SHA-256 и журналы сеансов.</span></div>' +
+        '<div class="setting-block"><strong>Официальные магазины</strong><span>Локальное обнаружение установленных игр Steam, Epic Games Store и GOG. Запуск через URI клиента сохраняет ответственность магазина за оверлеи и облачные сохранения.</span></div>' +
+        '<div class="setting-block"><strong>Сторонние и неподписанные сборки</strong><span>Сканирование выбранных папок и ручное добавление EXE/ELF. Неподписанный или непроверенный файл получает предупреждение и требует явного подтверждения первого запуска для текущего SHA-256.</span></div>' +
+        '<div class="setting-block"><strong>Профили и Bridge</strong><span>Отдельные аргументы, рабочая папка, переменные окружения, runtime-команда Wine/Proton и префикс для каждой игры. Профиль не загружает DLL и не меняет драйверы.</span></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Окно Mora работает в браузере и пока не подключено к нативному IPC-брокеру. Запуск, сканирование дисков и управление процессами выполняются локальным инструментом Illidia, а не этой веб-панелью.</span></div>' +
+        '<div class="setting-block"><strong>Быстрые команды</strong><span>illidia discover --import-stores<br>illidia scan ~/Games<br>illidia list<br>illidia inspect GAME_ID<br>illidia launch GAME_ID</span></div>' +
+        '<div class="approval-actions"><a class="action-button" href="https://github.com/Ivan-VHS/DuckOS/blob/feat/illidia-universal-game-launcher/docs/ILLIDIA_GAME_LAUNCHER.md" target="_blank" rel="noopener noreferrer">Инструкция Illidia ↗</a>' +
+        '<a class="subtle-button" href="https://github.com/Ivan-VHS/DuckOS/tree/feat/illidia-universal-game-launcher/duckos/illidia" target="_blank" rel="noopener noreferrer">Исходный код ↗</a></div>' +
+        '<p class="window-copy">Store-адаптеры Steam/Epic/GOG работают по локальным манифестам. Battle.net, EA и другие клиенты можно зарегистрировать вручную; автоматическое обнаружение этих магазинов пока не заявляется.</p>';
     case "unify":
       return '<p class="window-kicker">ПОДКЛЮЧЕНИЯ · ДЕМО</p><h2 class="window-heading">Ваши устройства</h2>' +
         '<div class="device-list">' +
