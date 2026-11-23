@@ -9,6 +9,7 @@ from typing import Any
 
 from .common import ServiceError
 from .gloverty import audit_palette
+from .news import NewsService, serve_api
 from .kavun import compute_layout
 from .unify import PROFILES, DuckOSHub
 
@@ -85,6 +86,14 @@ def _parser() -> argparse.ArgumentParser:
     dispatch.add_argument("chord")
     dispatch.add_argument("--context", default="global")
 
+    news = commands.add_parser("news", help="run the DuckOS live news desk")
+    news_commands = news.add_subparsers(dest="news_command", required=True)
+    news_commands.add_parser("status", help="show feed and cache status")
+    news_commands.add_parser("refresh", help="refresh all trusted public feeds")
+    serve = news_commands.add_parser("serve", help="run the loopback JSON API")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8765)
+
     return parser
 
 
@@ -93,6 +102,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        if args.command == "news":
+            news_service = NewsService(args.state_dir)
+            if args.news_command == "status":
+                _print(news_service.status())
+            elif args.news_command == "refresh":
+                _print(news_service.refresh())
+            else:
+                serve_api(news_service, args.host, args.port)
+            return 0
+
         if args.command == "theme":
             _print(audit_palette(args.name))
             return 0
