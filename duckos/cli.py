@@ -22,6 +22,7 @@ from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .terminal import TerminalService, run_interactive
+from .settings import SettingsStore, network_probe
 
 
 def _load(path: Path) -> Any:
@@ -103,6 +104,25 @@ def main(argv: list[str] | None = None) -> int:
         "run", help="run one quoted command through the trusted terminal registry"
     )
     terminal_run.add_argument("command_line", help="one terminal command, for example 'hardware inventory'")
+
+    settings = commands.add_parser("settings", help="inspect and manage user-scoped Duck settings")
+    settings_actions = settings.add_subparsers(dest="settings_action", required=True)
+    settings_actions.add_parser("show", help="show the active settings profile")
+    settings_export = settings_actions.add_parser("export", help="export validated settings to JSON")
+    settings_export.add_argument("output", type=Path)
+    settings_import = settings_actions.add_parser("import", help="validate and import settings from JSON")
+    settings_import.add_argument("source", type=Path)
+    profiles = settings_actions.add_parser("profile", help="manage configuration profiles")
+    profile_actions = profiles.add_subparsers(dest="profile_action", required=True)
+    profile_actions.add_parser("list", help="list saved profile names")
+    profile_create = profile_actions.add_parser("create", help="create a copy of an existing profile")
+    profile_create.add_argument("name")
+    profile_create.add_argument("--clone-from")
+    profile_activate = profile_actions.add_parser("activate", help="select the active settings profile")
+    profile_activate.add_argument("name")
+    network_test = settings_actions.add_parser("network-test", help="resolve a host and test a TCP endpoint")
+    network_test.add_argument("host")
+    network_test.add_argument("--port", type=int, default=443)
 
     release_build = commands.add_parser(
         "build-release", help="create a deterministic, optionally signed component bundle"
@@ -213,6 +233,24 @@ def main(argv: list[str] | None = None) -> int:
                 result = TerminalService().execute(args.command_line)
             else:
                 raise ValueError("unsupported terminal action")
+        elif args.command == "settings":
+            store = SettingsStore()
+            if args.settings_action == "show":
+                result = store.load()
+            elif args.settings_action == "export":
+                result = store.export_to(args.output)
+            elif args.settings_action == "import":
+                result = store.import_from(args.source)
+            elif args.settings_action == "profile" and args.profile_action == "list":
+                result = {"schema": "duckos.settings-profiles.v1", "active": store.load()["active_profile"], "profiles": store.list_profiles()}
+            elif args.settings_action == "profile" and args.profile_action == "create":
+                result = store.create_profile(args.name, clone_from=args.clone_from)
+            elif args.settings_action == "profile" and args.profile_action == "activate":
+                result = store.activate_profile(args.name)
+            elif args.settings_action == "network-test":
+                result = network_probe(args.host, args.port)
+            else:
+                raise ValueError("unsupported settings action")
         elif args.command == "validate-manifest":
             result = validate_manifest(_load(args.manifest), args.root, verify_files=not args.metadata_only)
         elif args.command == "plan-image":
