@@ -1,6 +1,6 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
 import { VirtualWorkspace, MAX_WORKSPACE_FILE_BYTES } from "./workspace.js";
-import { applyTranslations, detectLocale, LOCALE_STORAGE_KEY, translateText } from "./i18n.js";
+import { applyTranslations, detectLocale, formatItemCount, LOCALE_STORAGE_KEY, translateText } from "./i18n.js";
 
 import {
   RECOVERY_KEY,
@@ -564,6 +564,7 @@ function filesPanelMarkup() {
       '<button type="button" data-files-action="upload">Загрузить</button>' +
       '<input type="file" data-files-upload accept=".txt,.md,.json,.rpr,.duck,.csv,.log,.xml,.html,.css,.js" multiple hidden>' +
       '<select data-files-sort aria-label="Сортировка"><option value="name">Имя</option><option value="date">Дата</option><option value="size">Размер</option><option value="type">Тип</option></select>' +
+      '<span class="files-count" data-files-count></span>' +
       '<button type="button" data-files-action="view" data-files-view="list" aria-label="Сменить вид">▦</button>' +
     '</div>' +
     '<div class="files-layout" data-files-root>' +
@@ -634,6 +635,8 @@ function renderFileManager(panel) {
     type: (a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name)
   }[sort] || ((a, b) => a.name.localeCompare(b.name));
   items = items.slice().sort((a, b) => a.type !== b.type ? (a.type === "folder" ? -1 : 1) : compare(a, b));
+  const count = panel.querySelector("[data-files-count]");
+  if (count) count.textContent = formatItemCount(items.length, currentLocale);
 
   const list = panel.querySelector("[data-files-list]");
   list.classList.toggle("grid-view", state.view === "grid");
