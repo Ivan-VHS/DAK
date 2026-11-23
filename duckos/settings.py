@@ -228,16 +228,22 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
     for field in ("dns_primary", "dns_secondary"):
         value = network.get(field, "")
         if value:
-            try:
-                ipaddress.ip_address(value)
-            except ValueError:
-                fail(f"network.{field}", "DNS должен быть IPv4- или IPv6-адресом")
+            if not isinstance(value, str):
+                fail(f"network.{field}", "DNS должен быть строкой с IPv4- или IPv6-адресом")
+            else:
+                try:
+                    ipaddress.ip_address(value)
+                except ValueError:
+                    fail(f"network.{field}", "DNS должен быть IPv4- или IPv6-адресом")
 
     doh = network.get("doh_url", "")
     if doh:
-        parsed = urlparse(doh)
-        if parsed.scheme != "https" or not parsed.hostname:
-            fail("network.doh_url", "DoH должен использовать HTTPS и содержать имя узла")
+        if not isinstance(doh, str):
+            fail("network.doh_url", "DoH должен быть HTTPS URL")
+        else:
+            parsed = urlparse(doh)
+            if parsed.scheme != "https" or not parsed.hostname:
+                fail("network.doh_url", "DoH должен использовать HTTPS и содержать имя узла")
 
     dot = network.get("dot_server", "")
     if dot and (not isinstance(dot, str) or any(char.isspace() for char in dot) or len(dot) > 253):
@@ -288,7 +294,8 @@ def validate_profile(profile: Any) -> list[dict[str, str]]:
         fail("security.auto_lock_minutes", "Автоблокировка: от 0 до 120 минут")
     if not isinstance(security.get("lock_on_sleep"), bool):
         fail("security.lock_on_sleep", "Ожидается логическое значение")
-    if not isinstance(profile.get("locale"), str) or not 2 <= len(profile["locale"]) <= 16:
+    locale = profile.get("locale")
+    if not isinstance(locale, str) or not 2 <= len(locale) <= 16:
         fail("locale", "Укажите короткий код языка, например ru, uk или en")
     return errors
 
@@ -298,6 +305,8 @@ def validate_settings(payload: Any) -> list[dict[str, str]]:
         return [{"field": "root", "message": "Настройки должны быть JSON-объектом"}]
     if payload.get("schema") != SCHEMA:
         return [{"field": "schema", "message": f"Ожидается схема {SCHEMA}"}]
+    if payload.get("version") != 1:
+        return [{"field": "version", "message": "Неподдерживаемая версия настроек"}]
     profiles = payload.get("profiles")
     if not isinstance(profiles, dict) or not 1 <= len(profiles) <= 32:
         return [{"field": "profiles", "message": "Нужно от 1 до 32 профилей"}]
