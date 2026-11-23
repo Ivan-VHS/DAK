@@ -28,7 +28,8 @@ def minimal_pe64() -> bytes:
 
 def fixture(folder: Path) -> dict:
     (folder / "game.exe").write_bytes(minimal_pe64())
-    (folder / "prefix").mkdir()
+    (folder / "prefix" / "drive_c").mkdir(parents=True)
+    (folder / "prefix" / "system.reg").write_text("WINE REGISTRY Version 2\\n", encoding="utf-8")
     return {
         "schema": "duckos.game-launch-profile.v1",
         "id": "sample-game",
@@ -106,6 +107,15 @@ class GameLaunchProfileTests(unittest.TestCase):
             self.assertFalse(plan["execution_performed"])
             self.assertFalse(plan["shell_used"])
             self.assertIn("Wine runtime", plan["blockers"][0])
+
+    def test_plan_requires_an_initialized_explicit_prefix(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            profile = fixture(root)
+            (root / "prefix" / "system.reg").unlink()
+            plan = plan_game_launch(validate_game_profile(profile, root), wine_binary="/missing/wine")
+            self.assertTrue(any("initialized Wine prefix" in item for item in plan["blockers"]))
+            self.assertFalse(plan["execution_performed"])
 
     def test_launch_uses_argument_vector_and_explicit_working_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
