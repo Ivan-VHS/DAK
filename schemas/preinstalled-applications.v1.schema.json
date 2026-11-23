@@ -51,7 +51,7 @@
     "applications": {
       "type": "array",
       "minItems": 7,
-      "maxItems": 7,
+      "maxItems": 64,
       "items": {
         "type": "object",
         "additionalProperties": false,

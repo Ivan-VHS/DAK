@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-22
+Updated: 2026-11-23
 
 ## Implemented in Reaper source
 
@@ -90,3 +90,17 @@ The runtime inventory and plan generator do not invoke a discovered runtime or t
 - [ ] Firmware, VM and hardware boot qualification.
 
 The release bundle is a component archive, not a bootable image. Deployment plans are dry-run descriptions and do not write disks. HTTPS transport does not by itself establish UEFI Secure Boot. The Secure Boot plan therefore remains `ready: false`, and the cloud-format list records intended targets rather than completed conversions. See [DEPLOYMENT.md](DEPLOYMENT.md) for commands, boundaries and signing-key handling.
+
+
+## Mora extended application suite — 2026-11-23
+
+- [x] Register 13 additional app identities in the Mora launcher, app registry and shared panel router.
+- [x] Provide local profile lists with safe text rendering and bounded entries for Orriganize, Olaab, Love-IL, Poi, Poi-2, Po-2 and GameCharager.
+- [x] Provide SetupUP theme onboarding and a local completion marker.
+- [x] Provide Abriganza archive filename/size inspection without extraction.
+- [x] Provide Concrete Thump BPM/swing profile controls without audio playback or synthesis.
+- [x] Provide Seu-Beu's user-operated sharing checklist without claiming encryption or identity verification.
+- [x] Reuse local PE/ELF header inspection and SHA-256 helpers in GameCharager and EXEdotEXE without executing targets.
+- [ ] Native implementations of the proposed DAK services, system-wide persistent storage, archive extraction, native audio, GPS/navigation, game process creation, OS installation and kernel-enforced capabilities.
+
+These are partial browser-shell features. The new DAK package catalog remains at design maturity and does not indicate that the corresponding native services ship in an OS image.

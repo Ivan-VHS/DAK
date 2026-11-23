@@ -5,9 +5,9 @@
 **Maturity:** `specified`  
 **Distribution intent:** seven default applications in the DuckOS product design
 
-This document defines the intended roles, first-scope capabilities and cross-application workflows for the DuckOS default application suite. It is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have already been implemented or shipped.
+This document defines the intended roles, first-scope capabilities and cross-application workflows for 20 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
 
-The machine-readable inventory is maintained in [`preinstalled-applications.v1.json`](../catalogs/preinstalled-applications.v1.json). Shared terminology and maturity rules come from the [Ivan-VHS Unified Documentation and Semantics Standard](UNIFIED_DOCUMENTATION_STANDARD.md).
+The machine-readable inventory is maintained in [`preinstalled-applications.v1.json`](../catalogs/preinstalled-applications.v1.json). The separate DAK package-design catalog is [`dak-base-applications.v1.yaml`](../catalogs/dak-base-applications.v1.yaml). Shared terminology and maturity rules come from the [Ivan-VHS Unified Documentation and Semantics Standard](UNIFIED_DOCUMENTATION_STANDARD.md).
 
 ## 1. Suite overview
 
@@ -20,6 +20,19 @@ The machine-readable inventory is maintained in [`preinstalled-applications.v1.j
 | **Po** | Web browser | Browse with vertical tabs, reading mode, tracker protection and command-capable address bar |
 | **Illidia** | Games | Manage games, saves, clips, achievements and focused play sessions |
 | **Unify** | Device connectivity | Connect devices for clipboard, notifications, file transfer and state continuity |
+| **Sestem** | System overview | Show documented shell status and subsystem maturity |
+| **SetupUP** | First-run setup | Choose Mora theme and record completion of local setup |
+| **Orriganize** | Projects and tasks | Keep lightweight local project and task lists |
+| **Abriganza** | Archive inspection | Read selected archive name, format and size without extraction |
+| **Olaab** | Media collections | Organize local album labels and text references to media |
+| **Concrete Thump** | Rhythm planning | Create BPM and swing profiles for later manual use |
+| **Seu-Beu** | Sharing review | Check recipient, selected content and retention before a hand-off |
+| **Love-IL** | Private journal | Keep personal text notes in the local browser profile |
+| **Poi** | Quick capture | Save short notes for later sorting |
+| **Poi-2** | Knowledge cards | Collect short reference cards locally |
+| **Po-2** | Route planning | Arrange manually entered stops without GPS |
+| **GameCharager** | Game library | Track local game profiles and inspect selected executables |
+| **EXEdotEXE** | Executable inspection | Inspect PE/ELF metadata and calculate a local SHA-256 digest |
 
 The names are product working names. **Cockos** is flagged for a naming and trademark review before public distribution. No trademark clearance is asserted for Cockos or the other names by this specification.
 
@@ -153,6 +166,28 @@ Boundaries and design rules:
 - Transfers and synchronization must expose progress, errors and conflict behavior.
 - Lost-device features depend on device availability and consent; they must not be described as guaranteed live location tracking.
 - No background collection or sharing should be inferred from pairing alone.
+
+### 2.8 Extended Mora application concepts
+
+The following scope is intentionally modest because these 13 names arrived without product briefs. Each Mora panel reuses the existing window manager, theme tokens, toast feedback and profile storage. No new native process, filesystem, networking or audio privileges are implied.
+
+| App | Implemented in the Mora panel | Boundary |
+|---|---|---|
+| Sestem | Project-status summary and shortcuts to system tools | Reads documented shell maturity; no native sensor collection |
+| SetupUP | Theme selection and local setup-completion marker | Not an OS installer or bootloader configurator |
+| Orriganize | Add and remove project/task text entries | Browser-profile storage only; no system scheduler or sync |
+| Abriganza | Inspect selected archive filename, extension and size | No extraction, malware scanning or execution |
+| Olaab | Local album and media-collection labels | Stores text references, not media files |
+| Concrete Thump | BPM and swing controls with saved local profiles | No audio synthesis, recording or device routing |
+| Seu-Beu | Manual checklist before sharing selected material | Not encryption, recipient authentication or OS security |
+| Love-IL | Local personal text entries | No cloud sync or secure-vault claim |
+| Poi | Quick text capture | No system-wide search or global shortcut |
+| Poi-2 | Local knowledge-card list | No semantic index or external knowledge backend |
+| Po-2 | Manually ordered route-stop list | No GPS, live map or navigation service |
+| GameCharager | Local game list and read-only executable inspection | Does not launch games or install drivers |
+| EXEdotEXE | PE/ELF inspection and SHA-256 report for a selected file | Not an antivirus, signature verifier or executable runtime |
+
+Entries are namespaced by app in the Mora browser profile. Each text collection is limited to 100 entries and 160 characters per entry. File inspection is user initiated and remains local to the browser. The mora/apps.json registry and core.js app ID list are updated together so the launcher and panel router share one inventory.
 
 ## 3. Cross-application workflows
 

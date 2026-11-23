@@ -24,8 +24,11 @@ class MemoryStorage {
   }
 }
 
-test("the shell registry exposes the seven user apps and seven system tools", () => {
-  assert.equal(APP_IDS.length, 14);
+test("the shell registry exposes 20 user apps and seven system tools", () => {
+  assert.equal(APP_IDS.length, 27);
+  for (const id of ["sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump", "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"]) {
+    assert.ok(APP_IDS.includes(id), id + " must be registered");
+  }
   assert.ok(APP_IDS.includes("mora-ai"));
   assert.ok(APP_IDS.includes("security"));
   assert.ok(APP_IDS.includes("runtime"));

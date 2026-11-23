@@ -1,5 +1,3 @@
-import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
-
 import {
   RECOVERY_KEY,
   buildIntentPlan,
@@ -20,14 +18,26 @@ const appDefinitions = {
   po: { name: "Po", subtitle: "Компас", color: "#AAA18A", glyph: "⌖" },
   illidia: { name: "Illidia", subtitle: "Игры", color: "#82916F", glyph: "⌘" },
   unify: { name: "Unify", subtitle: "Устройства", color: "#7C9387", glyph: "∞" },
+  sestem: { name: "Sestem", subtitle: "Статус системы", color: "#D2AA65", glyph: "♟" },
+  setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: "#B9C6A5", glyph: "✳" },
+  orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: "#C5A4A0", glyph: "▦" },
+  abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: "#C5B58C", glyph: "▤" },
+  olaab: { name: "Olaab", subtitle: "Медиатека", color: "#9EB7B2", glyph: "◈" },
+  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: "#D4A26F", glyph: "♫" },
+  "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: "#A6B6A0", glyph: "◇" },
+  "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: "#C49BAE", glyph: "♡" },
+  poi: { name: "Poi", subtitle: "Быстрые заметки", color: "#B7B2D2", glyph: "⌖" },
+  "poi-2": { name: "Poi-2", subtitle: "База знаний", color: "#A5B5C8", glyph: "▧" },
+  "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: "#A9B6A0", glyph: "➤" },
+  gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: "#BBA77D", glyph: "▣" },
+  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: "#A7AAB7", glyph: "E" },
   "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: "#C19A6A", glyph: "✦" },
   security: { name: "Sentinel", subtitle: "Права и доверие", color: "#829078", glyph: "◇" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: "#A97866", glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: "#D58B3D", glyph: "✣" }
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -171,184 +181,153 @@ function updateWorkspacePanel() {
   });
 }
 
-function commonsPanelMarkup() {
-  const filters = MORA_COMMONS_CATEGORIES.map((category) =>
-    '<button class="commons-filter" type="button" data-commons-filter="' + category.id +
-    '" aria-pressed="false">' + category.title + '</button>'
-  ).join("");
 
-  return '<p class="window-kicker">MORA COMMONS · ЕДИНЫЙ КАТАЛОГ</p>' +
-    '<h2 class="window-heading">Пространство возможностей</h2>' +
-    '<p class="commons-intro">Пятнадцать направлений собраны по задачам, а не по полу. Каждый инструмент открыт каждому пользователю. Настраивайте каталог под свои интересы.</p>' +
-    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Mora Commons"></label>' +
-    '<div class="commons-filters" data-commons-filters aria-label="Категории приложений">' +
-    '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
-    filters +
-    '</div>' +
-    '<p class="commons-count" data-commons-count aria-live="polite">Показано 15 приложений</p>' +
-    '<div class="commons-grid" data-commons-grid></div>' +
-    '<section class="commons-detail" data-commons-detail aria-live="polite" hidden></section>' +
-    '<p class="window-copy">Каталог и избранное работают локально. Карточки описывают спецификации новых продуктов; отдельные исполняемые модули ещё не подключены.</p>';
+const EXTENSION_STORAGE_PREFIX = "duckos.mora.extension.";
+const EXTENSION_APP_IDS = new Set([
+  "orriganize", "olaab", "love-il", "poi", "poi-2", "po-2", "gamecharager"
+]);
+
+function extensionStorageKey(appId) {
+  return EXTENSION_STORAGE_PREFIX + appId + ".v1";
 }
 
-function loadCommonsFavorites() {
+function loadExtensionEntries(appId) {
   try {
-    const stored = JSON.parse(localStorage.getItem("mora.commons.favorites.v1") || "[]");
-    const knownIds = new Set(MORA_COMMONS_APPS.map((app) => app.id));
-    return new Set(Array.isArray(stored) ? stored.filter((id) => knownIds.has(id)) : []);
+    const value = JSON.parse(localStorage.getItem(extensionStorageKey(appId)) || "[]");
+    return Array.isArray(value) ? value.filter((entry) => typeof entry === "string").slice(0, 100) : [];
   } catch {
-    return new Set();
+    return [];
   }
 }
 
-let commonsFavorites = loadCommonsFavorites();
-
-function saveCommonsFavorites() {
+function saveExtensionEntries(appId, entries) {
   try {
-    localStorage.setItem("mora.commons.favorites.v1", JSON.stringify([...commonsFavorites]));
+    localStorage.setItem(extensionStorageKey(appId), JSON.stringify(entries.slice(0, 100)));
     return true;
   } catch {
-    showToast("Избранное недоступно в этом профиле браузера");
     return false;
   }
 }
 
-function makeCommonsText(tagName, className, value) {
-  const element = document.createElement(tagName);
-  if (className) element.className = className;
-  element.textContent = value;
-  return element;
-}
+function renderExtensionEntries(appWindow) {
+  const list = appWindow.querySelector("[data-extension-list]");
+  if (!list) return;
+  const appId = list.dataset.extensionList;
+  const entries = loadExtensionEntries(appId);
+  list.replaceChildren();
 
-function renderCommonsDetails(detailPanel, app) {
-  detailPanel.replaceChildren();
-
-  const category = MORA_COMMONS_CATEGORIES.find((item) => item.id === app.category);
-  const header = document.createElement("div");
-  header.className = "commons-detail-head";
-  header.appendChild(makeCommonsText("h3", "", app.name));
-
-  const close = makeCommonsText("button", "commons-detail-close", "×");
-  close.type = "button";
-  close.dataset.commonsCloseDetail = "true";
-  close.setAttribute("aria-label", "Закрыть описание приложения");
-  header.appendChild(close);
-  detailPanel.appendChild(header);
-
-  detailPanel.appendChild(makeCommonsText("p", "commons-card-category", category ? category.title : ""));
-  detailPanel.appendChild(makeCommonsText("p", "", app.description));
-
-  const list = document.createElement("ul");
-  for (const capability of app.capabilities) {
-    list.appendChild(makeCommonsText("li", "", capability));
-  }
-  detailPanel.appendChild(list);
-
-  detailPanel.appendChild(makeCommonsText(
-    "p",
-    "commons-detail-status",
-    "Статус: спецификация. Каталог Mora Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
-  ));
-  detailPanel.hidden = false;
-}
-
-function initializeCommonsPanel(appWindow) {
-  const search = appWindow.querySelector("[data-commons-search]");
-  const filters = appWindow.querySelector("[data-commons-filters]");
-  const grid = appWindow.querySelector("[data-commons-grid]");
-  const count = appWindow.querySelector("[data-commons-count]");
-  const details = appWindow.querySelector("[data-commons-detail]");
-  let activeCategory = "all";
-
-  function renderGrid() {
-    const matches = filterCommonsApps(search.value, activeCategory);
-    grid.replaceChildren();
-
-    count.textContent = "Показано " + matches.length + " из " + MORA_COMMONS_APPS.length;
-
-    if (!matches.length) {
-      grid.appendChild(makeCommonsText("p", "commons-empty", "Ничего не найдено. Измените запрос или выберите другую категорию."));
-      details.hidden = true;
-      return;
-    }
-
-    for (const app of matches) {
-      const category = MORA_COMMONS_CATEGORIES.find((item) => item.id === app.category);
-      const card = document.createElement("article");
-      card.className = "commons-card";
-
-      const top = document.createElement("div");
-      top.className = "commons-card-top";
-      top.appendChild(makeCommonsText("span", "commons-card-glyph", app.glyph));
-
-      const isFavorite = commonsFavorites.has(app.id);
-      const favorite = makeCommonsText("button", "commons-favorite", isFavorite ? "★" : "☆");
-      favorite.type = "button";
-      favorite.dataset.commonsFavorite = app.id;
-      favorite.setAttribute("aria-pressed", String(isFavorite));
-      favorite.setAttribute(
-        "aria-label",
-        (isFavorite ? "Убрать из избранного: " : "Добавить в избранное: ") + app.name
-      );
-      top.appendChild(favorite);
-      card.appendChild(top);
-
-      card.appendChild(makeCommonsText("h3", "", app.name));
-      card.appendChild(makeCommonsText("span", "commons-card-category", category ? category.title : ""));
-      card.appendChild(makeCommonsText("p", "", app.subtitle));
-      card.appendChild(makeCommonsText("p", "", app.description));
-
-      const actions = document.createElement("div");
-      actions.className = "commons-card-actions";
-      const detailsButton = makeCommonsText("button", "", "Подробнее");
-      detailsButton.type = "button";
-      detailsButton.dataset.commonsDetails = app.id;
-      actions.appendChild(detailsButton);
-      card.appendChild(actions);
-      grid.appendChild(card);
-    }
+  if (entries.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "extension-empty";
+    empty.textContent = "Пока пусто. Записи сохраняются только в этом профиле Mora.";
+    list.append(empty);
+    return;
   }
 
-  filters.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-commons-filter]");
-    if (!button) return;
-    activeCategory = button.dataset.commonsFilter;
-    filters.querySelectorAll("[data-commons-filter]").forEach((item) => {
-      item.setAttribute("aria-pressed", String(item === button));
-    });
-    renderGrid();
+  entries.forEach((entry, index) => {
+    const item = document.createElement("li");
+    item.className = "extension-entry";
+    const value = document.createElement("span");
+    value.className = "extension-entry-text";
+    value.textContent = entry;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "extension-entry-remove";
+    remove.dataset.extensionRemove = String(index);
+    remove.dataset.extensionApp = appId;
+    remove.textContent = "Удалить";
+    remove.setAttribute("aria-label", "Удалить запись");
+    item.append(value, remove);
+    list.append(item);
   });
+}
 
-  search.addEventListener("input", renderGrid);
+function localCollectionPanel(appId, kicker, title, description, placeholder, label) {
+  return '<p class="window-kicker">' + kicker + '</p><h2 class="window-heading">' + title + '</h2>' +
+    '<p class="window-copy">' + description + '</p>' +
+    '<form class="extension-form" data-extension-form data-extension-app="' + appId + '">' +
+    '<label for="extension-entry-' + appId + '">' + label + '</label>' +
+    '<div class="intent-input-row"><input id="extension-entry-' + appId + '" data-extension-input maxlength="160" autocomplete="off" placeholder="' + placeholder + '">' +
+    '<button class="action-button" type="submit">Добавить</button></div></form>' +
+    '<ul class="extension-entry-list" data-extension-list="' + appId + '" aria-live="polite"></ul>' +
+    '<p class="extension-status" data-extension-status>Записи доступны только в текущем профиле браузера.</p>';
+}
 
-  grid.addEventListener("click", (event) => {
-    const favorite = event.target.closest("[data-commons-favorite]");
-    if (favorite) {
-      const appId = favorite.dataset.commonsFavorite;
-      if (commonsFavorites.has(appId)) commonsFavorites.delete(appId);
-      else commonsFavorites.add(appId);
-      const saved = saveCommonsFavorites();
-      renderGrid();
-      if (saved) {
-        showToast(commonsFavorites.has(appId) ? "Добавлено в избранное" : "Убрано из избранного");
-      }
-      return;
+function extensionPanelMarkup(appId) {
+  switch (appId) {
+    case "sestem":
+      return '<p class="window-kicker">SESTEM · ОБЗОР СИСТЕМЫ</p><h2 class="window-heading">Состояние DuckOS</h2>' +
+        '<div class="extension-status-grid"><div class="extension-status-card"><strong>Mora Desktop</strong><span>Браузерная оболочка · активна</span></div>' +
+        '<div class="extension-status-card"><strong>Контракты ядра</strong><span>Reaper reference runtime · проверяемая политика</span></div>' +
+        '<div class="extension-status-card"><strong>DuckBridge</strong><span>Инспекция и планы запуска · без выполнения</span></div>' +
+        '<div class="extension-status-card"><strong>Native boot</strong><span>Нативный загрузочный образ ещё не готов</span></div></div>' +
+        '<div class="approval-actions"><button class="action-button" data-app="workspace">Открыть Control</button><button class="subtle-button" data-app="security">Открыть Sentinel</button></div>' +
+        '<p class="window-copy">Панель показывает подтверждённую зрелость компонентов. Она не читает аппаратные датчики и не выдаёт статус оболочки за состояние ядра.</p>';
+    case "setupup": {
+      let complete = false;
+      try { complete = Boolean(localStorage.getItem("duckos.mora.setupup.v1")); } catch {}
+      const currentTheme = preferences.appearance.theme;
+      const themeButton = (theme,label) => '<button class="extension-theme-button' + (currentTheme === theme ? ' active' : '') +
+        '" data-setup-theme="' + theme + '" aria-pressed="' + String(currentTheme === theme) + '">' + label + '</button>';
+      return '<p class="window-kicker">SETUPUP · МАСТЕР MORA</p><h2 class="window-heading">Настройте рабочее пространство</h2>' +
+        '<p class="window-copy">Выберите тему и отметьте завершение локальной настройки. Установка ОС, разметка диска и настройка загрузчика здесь не выполняются.</p>' +
+        '<div class="setting-block"><strong>Цветовая тема</strong><div class="extension-theme-options">' +
+        themeButton("amber","Amber") + themeButton("dark","Dark") + themeButton("light","Light") +
+        '</div></div><div class="approval-actions"><button class="action-button" data-action="setup-complete">Завершить настройку</button></div>' +
+        '<p class="extension-status" data-setup-status>' + (complete ? 'Первичная настройка Mora уже завершена.' : 'Настройка ещё не завершена.') + '</p>';
     }
-
-    const detailsButton = event.target.closest("[data-commons-details]");
-    if (detailsButton) {
-      const app = MORA_COMMONS_APPS.find((item) => item.id === detailsButton.dataset.commonsDetails);
-      if (app) renderCommonsDetails(details, app);
+    case "orriganize":
+      return localCollectionPanel("orriganize","ORRIGANIZE · ПОРЯДОК ДЕЛ","Проекты и задачи","Собирайте рабочие пункты и идеи в локальном списке. Gloverty остаётся отдельным центром автоматизаций; системное расписание и синхронизация не подключены.","Новая задача или проект","Добавить пункт");
+    case "abriganza":
+      return '<p class="window-kicker">ABRIGANZA · АРХИВНЫЙ ИНСПЕКТОР</p><h2 class="window-heading">Проверка архивного файла</h2>' +
+        '<p class="window-copy">Прочитать имя, формат и размер выбранного архива. Содержимое не извлекается, не изменяется и не отправляется в сеть.</p>' +
+        '<label class="file-picker">Выбрать архив<input type="file" data-archive-file accept=".zip,.7z,.rar,.tar,.gz,.bz2,.xz"></label>' +
+        '<div class="inspection-report" data-archive-report>Архив ещё не выбран.</div>' +
+        '<p class="window-copy">Полноценный распаковщик требует отдельного безопасного системного сервиса.</p>';
+    case "olaab":
+      return localCollectionPanel("olaab","OLAAB · МЕДИАТЕКА","Подборки и медиатеги","Создавайте названия альбомов и подборок. Здесь сохраняются текстовые ссылки и метки, а не сами медиафайлы.","Название альбома или подборки","Новая подборка");
+    case "concrete-thump": {
+      let bpm = 150, swing = 57;
+      try {
+        const saved = JSON.parse(localStorage.getItem("duckos.mora.concrete-thump.v1") || "null");
+        if (saved && Number.isInteger(saved.bpm) && saved.bpm >= 40 && saved.bpm <= 240 &&
+            Number.isInteger(saved.swing) && saved.swing >= 50 && saved.swing <= 75) ({bpm,swing} = saved);
+      } catch {}
+      return '<p class="window-kicker">CONCRETE THUMP · RHYTHM LAB</p><h2 class="window-heading">Ритмический профиль</h2>' +
+        '<div class="extension-range-row"><div class="extension-range-heading"><label for="beat-bpm">Темп</label><output data-beat-value="bpm">' + bpm + ' BPM</output></div>' +
+        '<input id="beat-bpm" type="range" min="40" max="240" value="' + bpm + '" data-beat-range="bpm"></div>' +
+        '<div class="extension-range-row"><div class="extension-range-heading"><label for="beat-swing">Swing</label><output data-beat-value="swing">' + swing + '%</output></div>' +
+        '<input id="beat-swing" type="range" min="50" max="75" value="' + swing + '" data-beat-range="swing"></div>' +
+        '<button class="action-button" data-action="save-beat-profile">Сохранить профиль</button>' +
+        '<p class="extension-status" data-beat-status>Локальные параметры. Генерация и воспроизведение аудио не подключены.</p>';
     }
-  });
-
-  details.addEventListener("click", (event) => {
-    if (event.target.closest("[data-commons-close-detail]")) {
-      details.hidden = true;
-    }
-  });
-
-  renderGrid();
+    case "seu-beu":
+      return '<p class="window-kicker">SEU-BEU · SHARE REVIEW</p><h2 class="window-heading">Проверка перед обменом</h2>' +
+        '<p class="window-copy">Ручной список для проверки получателя, состава передачи и срока хранения. Это не шифрование и не системная защита.</p>' +
+        '<div class="extension-checklist"><label class="extension-check"><input type="checkbox" data-share-check> Получатель и адрес передачи проверены</label>' +
+        '<label class="extension-check"><input type="checkbox" data-share-check> Выбраны только нужные материалы</label>' +
+        '<label class="extension-check"><input type="checkbox" data-share-check> Срок хранения и использование понятны</label></div>' +
+        '<button class="action-button" data-action="review-share">Проверить список</button><p class="extension-status" data-share-status>Проверка ещё не запускалась.</p>';
+    case "love-il":
+      return localCollectionPanel("love-il","LOVE-IL · ЛИЧНОЕ ПРОСТРАНСТВО","Заметки для себя","Личные текстовые записи остаются в профиле браузера. Облачная синхронизация и медицинские функции не предполагаются.","Новая личная запись","Сохранить заметку");
+    case "poi":
+      return localCollectionPanel("poi","POI · QUICK CAPTURE","Быстрые заметки","Сохраняйте короткие мысли отдельно от проектных списков Orriganize.","Быстрая заметка","Добавить заметку");
+    case "poi-2":
+      return localCollectionPanel("poi-2","POI-2 · KNOWLEDGE CARDS","Карточки знаний","Личная база коротких справок в текущем браузерном профиле; системная индексация не подключена.","Новая карточка знаний","Добавить карточку");
+    case "po-2":
+      return localCollectionPanel("po-2","PO-2 · ROUTE PLANNER","Маршрут и точки","Ручной список остановок без GPS, геолокации и навигации в реальном времени.","Название точки или остановки","Добавить точку");
+    case "gamecharager":
+      return localCollectionPanel("gamecharager","GAMECHARAGER · GAME DESK","Игровая библиотека","Локальные игровые профили и read-only инспекция выбранного файла. Запуск игр и установка драйверов не выполняются.","Название игры или профиль","Добавить игру") +
+        '<div class="setting-block"><strong>Проверка исполняемого файла</strong><label class="file-picker">Выбрать EXE или ELF<input type="file" data-executable-file accept=".exe,.dll,.elf"></label><div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div></div>';
+    case "exedotexe":
+      return '<p class="window-kicker">EXEDOTEXE · EXECUTABLE INSPECTOR</p><h2 class="window-heading">Инспекция EXE и DLL</h2>' +
+        '<p class="window-copy">Локальная проверка заголовка PE/ELF и контрольной суммы файла. Файл не запускается и не отправляется на сервер.</p>' +
+        '<label class="file-picker">Выбрать исполняемый файл<input type="file" data-executable-file accept=".exe,.dll,.elf"></label>' +
+        '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Это не антивирус, не проверка подписи издателя и не Windows runtime.</span></div>';
+    default:
+      return extensionPanelMarkup(appId);
+  }
 }
 
 function panelMarkup(appId) {
@@ -474,8 +453,6 @@ function panelMarkup(appId) {
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
-    case "mora-commons":
-      return commonsPanelMarkup();
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }
@@ -537,7 +514,7 @@ function openApp(appId) {
     '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
-  if (appId === "mora-commons") initializeCommonsPanel(appWindow);
+  renderExtensionEntries(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
@@ -602,6 +579,82 @@ document.addEventListener("click", (event) => {
     persistPreferences();
     const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
     showToast("Тема: " + themeNames[preferences.appearance.theme]);
+    return;
+  }
+
+  const setupTheme = event.target.closest("[data-setup-theme]");
+  if (setupTheme) {
+    const theme = setupTheme.dataset.setupTheme;
+    if (!["amber", "dark", "light"].includes(theme)) return;
+    preferences.appearance.theme = theme;
+    persistPreferences();
+    applyPreferences();
+    const owner = setupTheme.closest(".app-window");
+    if (owner) owner.querySelectorAll("[data-setup-theme]").forEach((button) => {
+      const active = button.dataset.setupTheme === theme;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    showToast("Тема Mora обновлена");
+    return;
+  }
+
+  const setupComplete = event.target.closest('[data-action="setup-complete"]');
+  if (setupComplete) {
+    const status = setupComplete.closest(".app-window").querySelector("[data-setup-status]");
+    try {
+      localStorage.setItem("duckos.mora.setupup.v1", new Date().toISOString());
+      if (status) status.textContent = "Настройка Mora завершена и сохранена в профиле браузера.";
+      showToast("Первичная настройка Mora завершена");
+    } catch {
+      if (status) status.textContent = "Не удалось сохранить состояние настройки.";
+    }
+    return;
+  }
+
+  const extensionRemove = event.target.closest("[data-extension-remove]");
+  if (extensionRemove) {
+    const appId = extensionRemove.dataset.extensionApp;
+    const index = Number(extensionRemove.dataset.extensionRemove);
+    const entries = loadExtensionEntries(appId);
+    if (!EXTENSION_APP_IDS.has(appId) || !Number.isInteger(index) || index < 0 || index >= entries.length) return;
+    entries.splice(index, 1);
+    const owner = extensionRemove.closest(".app-window");
+    if (!saveExtensionEntries(appId, entries)) {
+      const status = owner && owner.querySelector("[data-extension-status]");
+      if (status) status.textContent = "Не удалось обновить локальный список.";
+      return;
+    }
+    if (owner) {
+      renderExtensionEntries(owner);
+      const status = owner.querySelector("[data-extension-status]");
+      if (status) status.textContent = "Запись удалена из локального списка.";
+    }
+    return;
+  }
+
+  const beatSave = event.target.closest('[data-action="save-beat-profile"]');
+  if (beatSave) {
+    const owner = beatSave.closest(".app-window");
+    const bpm = Number(owner.querySelector('[data-beat-range="bpm"]').value);
+    const swing = Number(owner.querySelector('[data-beat-range="swing"]').value);
+    try {
+      localStorage.setItem("duckos.mora.concrete-thump.v1", JSON.stringify({ bpm, swing, savedAt: new Date().toISOString() }));
+      owner.querySelector("[data-beat-status]").textContent = "Профиль " + bpm + " BPM / " + swing + "% сохранён локально.";
+      showToast("Ритмический профиль сохранён");
+    } catch {
+      owner.querySelector("[data-beat-status]").textContent = "Не удалось сохранить профиль браузера.";
+    }
+    return;
+  }
+
+  const shareReview = event.target.closest('[data-action="review-share"]');
+  if (shareReview) {
+    const owner = shareReview.closest(".app-window");
+    const total = owner.querySelectorAll("[data-share-check]").length;
+    const checked = owner.querySelectorAll("[data-share-check]:checked").length;
+    owner.querySelector("[data-share-status]").textContent =
+      checked + " из " + total + " пунктов отмечено. Проверьте получателя и содержимое передачи самостоятельно.";
     return;
   }
 
@@ -677,6 +730,12 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const beatRange = event.target.closest("[data-beat-range]");
+  if (beatRange) {
+    const output = beatRange.closest(".extension-range-row").querySelector('[data-beat-value="' + beatRange.dataset.beatRange + '"]');
+    if (output) output.textContent = beatRange.dataset.beatRange === "bpm" ? beatRange.value + " BPM" : beatRange.value + "%";
+    return;
+  }
   const range = event.target.closest("[data-range]");
   if (!range) return;
   const valueLabel = range.closest(".control-row").querySelector('[data-range-value="' + range.dataset.range + '"]');
@@ -699,6 +758,34 @@ document.addEventListener("keydown", (event) => {
 
 
 document.addEventListener("submit", (event) => {
+  const extensionForm = event.target.closest("[data-extension-form]");
+  if (extensionForm) {
+    event.preventDefault();
+    const appId = extensionForm.dataset.extensionApp;
+    const input = extensionForm.querySelector("[data-extension-input]");
+    const value = input ? input.value.trim() : "";
+    const status = extensionForm.closest(".app-window").querySelector("[data-extension-status]");
+    if (!EXTENSION_APP_IDS.has(appId)) return;
+    if (!value) {
+      if (status) status.textContent = "Введите текст перед добавлением.";
+      return;
+    }
+    const entries = loadExtensionEntries(appId);
+    if (entries.length >= 100) {
+      if (status) status.textContent = "Достигнут предел в 100 записей для этого списка.";
+      return;
+    }
+    entries.push(value.slice(0, 160));
+    if (!saveExtensionEntries(appId, entries)) {
+      if (status) status.textContent = "Хранилище браузера недоступно или заполнено.";
+      return;
+    }
+    input.value = "";
+    renderExtensionEntries(extensionForm.closest(".app-window"));
+    if (status) status.textContent = "Сохранено локально · " + entries.length + " записей.";
+    return;
+  }
+
   const form = event.target.closest("[data-intent-form]");
   if (!form) return;
   event.preventDefault();
@@ -803,6 +890,25 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const archiveInput = event.target.closest("[data-archive-file]");
+  if (archiveInput) {
+    const report = archiveInput.closest(".app-window").querySelector("[data-archive-report]");
+    const file = archiveInput.files && archiveInput.files[0];
+    if (!file) return;
+    const supported = /\.(zip|7z|rar|tar|gz|bz2|xz)$/i.test(file.name);
+    if (!supported) {
+      report.textContent = "Неподдерживаемое расширение архива.";
+      return;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      report.textContent = "Файл превышает локальный предел проверки 100 МБ.";
+      return;
+    }
+    report.textContent = "Файл: " + file.name + "\nРазмер: " + file.size.toLocaleString("ru-RU") +
+      " байт\nМетаданные прочитаны. Извлечение содержимого не выполнялось.";
+    return;
+  }
+
   const executableInput = event.target.closest("[data-executable-file]");
   if (executableInput) {
     const report = executableInput.closest(".app-window").querySelector("[data-runtime-report]");
@@ -811,8 +917,12 @@ document.addEventListener("change", async (event) => {
     report.textContent = "Читаю заголовок файла локально…";
     try {
       const result = await inspectExecutable(file);
-      report.textContent = file.name + "\n" + file.size.toLocaleString("ru-RU") + " байт\n" +
+      let details = file.name + "\n" + file.size.toLocaleString("ru-RU") + " байт\n" +
         result.format + " · " + result.architecture + "\n" + result.detail;
+      if (executableInput.closest('[data-window="exedotexe"]')) {
+        details += "\nSHA-256\n" + await hashFile(file);
+      }
+      report.textContent = details;
     } catch (error) {
       report.textContent = error.message || "Не удалось прочитать файл.";
     }

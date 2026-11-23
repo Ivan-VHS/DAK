@@ -807,189 +807,149 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
 }
 
 
-/* Mora Commons — shared application catalogue. */
-.commons-intro {
-  margin: 0 0 15px;
-  color: var(--mora-secondary, rgba(255,246,241,.7));
-  font-size: 11px;
-  line-height: 1.6;
-}
-.commons-search {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 12px 0;
-  padding: 0 12px;
-  border: 1px solid var(--line, rgba(255,255,255,.15));
-  border-radius: 12px;
-  background: var(--mora-surface, rgba(255,255,255,.06));
-}
-.commons-search span { color: var(--mora-muted, rgba(255,255,255,.5)); }
-.commons-search input {
-  width: 100%;
-  min-width: 0;
-  height: 42px;
-  border: 0;
-  outline: 0;
-  color: var(--mora-text, #fff);
-  background: transparent;
-  font: inherit;
-  font-size: 11px;
-}
-.commons-search:focus-within { border-color: var(--mora-brand-hover, #eaa653); }
-.commons-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin: 0 0 12px;
-}
-.commons-filter {
-  min-height: 34px;
-  padding: 7px 10px;
-  border: 1px solid var(--line, rgba(255,255,255,.13));
-  border-radius: 999px;
-  color: var(--mora-secondary, rgba(255,255,255,.7));
-  background: rgba(255,255,255,.045);
-  font: inherit;
-  font-size: 9px;
-  cursor: pointer;
-}
-.commons-filter[aria-pressed="true"] {
-  border-color: var(--mora-brand, #d58b3d);
-  color: var(--mora-on-brand, #211913);
-  background: var(--mora-brand, #d58b3d);
-}
-.commons-count {
-  margin: 0 0 10px;
-  color: var(--mora-muted, rgba(255,255,255,.5));
-  font-size: 9px;
-}
-.commons-grid {
+/* Extended first-party application suite */
+.extension-section-heading { margin-top: 28px; }
+.extension-app-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 26px;
 }
-.commons-card {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  padding: 12px;
-  border: 1px solid var(--line, rgba(255,255,255,.12));
-  border-radius: 14px;
-  background: var(--mora-surface, rgba(255,255,255,.045));
+.extension-app-grid .app-tile {
+  min-height: 108px;
+  padding: 12px 13px;
+  border-radius: 16px;
 }
-.commons-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-.commons-card-glyph {
-  display: grid;
-  place-items: center;
+.extension-app-grid .app-icon {
   width: 34px;
   height: 34px;
+  margin-bottom: 2px;
   border-radius: 11px;
-  color: var(--mora-brand-hover, #eaa653);
-  background: rgba(213,139,61,.12);
-  font-size: 13px;
-  font-weight: 700;
 }
-.commons-favorite {
-  min-width: 34px;
-  min-height: 34px;
-  border: 1px solid var(--line, rgba(255,255,255,.12));
-  border-radius: 10px;
-  color: var(--mora-secondary, rgba(255,255,255,.7));
-  background: transparent;
-  font: inherit;
+.extension-app-grid .system-glyph { font-size: 17px; }
+.extension-form { margin: 16px 0 12px; }
+.extension-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255,249,243,.8);
+  font-size: 11px;
+  font-weight: 600;
+}
+.extension-entry-list {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.extension-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 11px;
+  background: rgba(255,255,255,.045);
+}
+.extension-entry-text {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+  color: rgba(255,249,243,.88);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.extension-entry-remove {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  padding: 5px 8px;
+  color: rgba(255,249,243,.72);
+  background: rgba(255,255,255,.06);
+  font-size: 10px;
   cursor: pointer;
 }
-.commons-favorite[aria-pressed="true"] { color: var(--mora-brand-hover, #eaa653); }
-.commons-card h3 {
-  margin: 0;
-  color: var(--mora-text, #fff);
-  font-size: 12px;
-  font-weight: 650;
-  overflow-wrap: anywhere;
+.extension-entry-remove:hover { border-color: var(--mora-danger); color: #fff; }
+.extension-empty {
+  padding: 13px;
+  border: 1px dashed rgba(255,255,255,.18);
+  border-radius: 11px;
+  color: rgba(255,249,243,.52);
+  font-size: 11px;
 }
-.commons-card p {
-  margin: 0;
-  color: var(--mora-secondary, rgba(255,255,255,.65));
-  font-size: 9px;
+.extension-status {
+  min-height: 18px;
+  margin: 10px 0 0;
+  color: var(--mora-muted);
+  font-size: 10px;
   line-height: 1.5;
 }
-.commons-card-category {
-  color: var(--mora-muted, rgba(255,255,255,.46));
-  font-size: 8px;
-  letter-spacing: .045em;
-  text-transform: uppercase;
+.extension-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+  margin: 15px 0;
 }
-.commons-card-actions { margin-top: auto; }
-.commons-card-actions button {
-  width: 100%;
-  min-height: 36px;
-  border: 1px solid var(--line, rgba(255,255,255,.15));
-  border-radius: 10px;
-  color: var(--mora-text, #fff);
-  background: rgba(255,255,255,.06);
-  font: inherit;
-  font-size: 9px;
-  cursor: pointer;
-}
-.commons-card-actions button:hover { background: rgba(255,255,255,.12); }
-.commons-empty {
-  grid-column: 1 / -1;
-  padding: 20px 12px;
-  border: 1px dashed var(--line, rgba(255,255,255,.2));
+.extension-status-card {
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.12);
   border-radius: 12px;
-  color: var(--mora-secondary, rgba(255,255,255,.65));
+  background: rgba(255,255,255,.045);
+}
+.extension-status-card strong,
+.extension-status-card span { display: block; }
+.extension-status-card strong { margin-bottom: 5px; font-size: 11px; }
+.extension-status-card span { color: var(--mora-muted); font-size: 10px; line-height: 1.45; }
+.extension-theme-options {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+  margin: 13px 0;
+}
+.extension-theme-button {
+  min-height: 38px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 10px;
+  color: var(--ink);
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
   font-size: 10px;
-  text-align: center;
 }
-.commons-detail {
-  margin-top: 13px;
-  padding: 15px;
-  border: 1px solid rgba(213,139,61,.28);
-  border-radius: 14px;
-  background: rgba(213,139,61,.07);
+.extension-theme-button.active,
+.extension-theme-button[aria-pressed="true"] {
+  border-color: var(--mora-brand);
+  background: color-mix(in srgb,var(--mora-brand) 20%,transparent);
 }
-.commons-detail[hidden] { display: none; }
-.commons-detail-head {
+.extension-range-row { margin: 15px 0; }
+.extension-range-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  margin-bottom: 7px;
+  font-size: 11px;
 }
-.commons-detail h3 {
-  margin: 0;
-  color: var(--mora-text, #fff);
-  font-size: 14px;
+.extension-range-heading output {
+  color: var(--mora-brand-hover);
+  font-variant-numeric: tabular-nums;
 }
-.commons-detail p,
-.commons-detail li {
-  color: var(--mora-secondary, rgba(255,255,255,.72));
-  font-size: 10px;
-  line-height: 1.55;
+.extension-range-row input { width: 100%; accent-color: var(--mora-brand); }
+.extension-checklist { display: grid; gap: 10px; margin: 15px 0; }
+.extension-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: rgba(255,249,243,.8);
+  font-size: 11px;
+  line-height: 1.5;
 }
-.commons-detail ul { display: grid; gap: 5px; padding-left: 18px; }
-.commons-detail-status {
-  padding-top: 9px;
-  border-top: 1px solid var(--line, rgba(255,255,255,.12));
-  color: var(--mora-muted, rgba(255,255,255,.55)) !important;
-}
-.commons-detail-close {
-  min-width: 34px;
-  min-height: 34px;
-  border: 1px solid var(--line, rgba(255,255,255,.15));
-  border-radius: 9px;
-  color: var(--mora-text, #fff);
-  background: rgba(255,255,255,.06);
-  cursor: pointer;
+.extension-check input { margin-top: 2px; accent-color: var(--mora-brand); }
+@media (max-width:1150px) {
+  .extension-app-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 @media (max-width:760px) {
-  .commons-grid { grid-template-columns: 1fr; }
-  .commons-filters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .commons-filter { border-radius: 10px; }
+  .extension-app-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+  .extension-app-grid .app-tile { min-height: 100px; padding: 9px; }
+  .extension-status-grid { gap: 7px; }
 }

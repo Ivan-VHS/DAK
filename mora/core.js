@@ -3,6 +3,8 @@ export const RECOVERY_KEY = "duckos.mora.recovery.v1";
 
 export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
+  "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
+  "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
   "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
 ]);
 
