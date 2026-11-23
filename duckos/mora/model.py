@@ -192,7 +192,7 @@ def build_intent_plan(raw_input: Any) -> dict[str, Any]:
 
     for app_id, aliases in APP_ALIASES.items():
         if app_id == "po":
-            matched = bool(re.search(r"(?<!\\w)po(?!\\w)", normalized))
+            matched = bool(re.search(r"(?<!\w)po(?!\w)", normalized))
         else:
             matched = any(alias in normalized for alias in aliases)
         if matched:
