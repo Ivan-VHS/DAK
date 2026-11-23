@@ -203,3 +203,19 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+
+.console-shortcut { display:flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid rgba(255,255,255,.19); border-radius:11px; background:rgba(255,255,255,.09); color:#e6ddff; font-size:11px; cursor:pointer; transition:background .18s,border-color .18s; }
+.console-shortcut:hover { border-color:rgba(211,199,255,.45); background:rgba(255,255,255,.16); }
+.console-shortcut:first-letter { color:#c8b8ff; }
+.serein-terminal { overflow:hidden; margin:16px 0; border:1px solid rgba(170,163,220,.21); border-radius:13px; background:rgba(8,11,25,.62); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+.serein-terminal-head { display:flex; align-items:center; gap:8px; padding:11px 13px; border-bottom:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.54); font-size:8px; letter-spacing:.13em; }
+.terminal-dot { width:7px; height:7px; border-radius:50%; background:#9bd8c5; box-shadow:0 0 9px rgba(155,216,197,.7); }
+.terminal-state { margin-left:auto; color:#a9d5c2; }
+.serein-command { padding:8px 13px; color:#e8e8f5; font-size:10px; white-space:nowrap; overflow-x:auto; }
+.serein-command span { margin-right:8px; color:#b9aaff; }
+.serein-note { margin:14px 0; padding:12px 14px; border-left:2px solid #b9aaff; border-radius:0 10px 10px 0; background:rgba(185,170,255,.08); color:rgba(255,255,255,.72); font-size:11px; line-height:1.6; }
+.serein-note strong { color:#e4dcff; }
+.window-copy code { color:#e4dcff; font-size:.95em; }
+@media (max-width:760px) {
+  .console-shortcut { margin-left:auto; padding:6px 8px; font-size:10px; }
+}
