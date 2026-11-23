@@ -30,4 +30,4 @@
 
 ## Review state
 
-This record is committed with the DuckOS architecture PR. The corresponding source changes are held in per-repository branches and will be linked here after the pull requests are opened. CI status is determined by the checks attached to those pull requests; adding a workflow is not itself evidence that it passed.
+This record is committed with [DuckOS PR #13](https://github.com/Ivan-VHS/DuckOS/pull/13). The corresponding implementation PRs are [Pytyliki #198](https://github.com/Ivan-VHS/Pytyliki/pull/198), [Reaper #227](https://github.com/Ivan-VHS/Reaper/pull/227), [OPlague #147](https://github.com/Ivan-VHS/OPlague/pull/147) and [VentuSample #111](https://github.com/Ivan-VHS/VentuSample/pull/111). CI status is determined by the checks attached to those pull requests; adding a workflow is not itself evidence that it passed.
