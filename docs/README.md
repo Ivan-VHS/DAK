@@ -16,6 +16,10 @@
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
+## Windows compatibility
+
+[Windows compatibility runtime](WINDOWS_COMPATIBILITY.md) documents the Wine/Proton/DOSBox host CLI, Wine prefix management, Winetricks component allowlist, Mora command builder and unsupported platform boundaries.
+
 ## Product specification
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
