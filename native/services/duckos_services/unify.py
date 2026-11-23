@@ -15,6 +15,7 @@ from .illidia import SnapshotStore
 from .kabon import InputRouter
 from .kavun import compute_layout
 from .po import CommandRegistry
+from .news import NewsService
 
 
 PROFILES = {
@@ -49,6 +50,7 @@ class DuckOSHub:
 
         self.events = EventBus()
         self.audio = PipeWireAudioBus()
+        self.news = NewsService(self.state_directory)
         self.snapshots = SnapshotStore(self.state_directory / "snapshots")
         self.input = InputRouter()
         self.commands = CommandRegistry()
@@ -99,6 +101,16 @@ class DuckOSHub:
             "audio.ports", "Аудиопорты",
             "Показать входы и выходы графа PipeWire",
             lambda args: self.audio.list(args.get("direction", "outputs")),
+        )
+        self.commands.register(
+            "news.status", "Состояние новостной ленты",
+            "Показать кэш, источники и время последнего обновления",
+            lambda _args: self.news.status(),
+        )
+        self.commands.register(
+            "news.refresh", "Обновить новостную ленту",
+            "Получить материалы из доверенных публичных RSS/Atom-источников",
+            lambda _args: self.refresh_news(),
         )
         self.commands.register(
             "snapshot.create", "Сохранить сессию",
@@ -169,10 +181,20 @@ class DuckOSHub:
                     "status": "user-space-ready",
                     "capability": "settings, event bus and service command registry",
                 },
+                "Newsroom": {
+                    **self.news.status(),
+                    "backend": "trusted HTTPS RSS/Atom feeds",
+                    "api": "loopback JSON API; start with duckos news serve",
+                },
             },
             "wayland_session": bool(os.environ.get("WAYLAND_DISPLAY")),
             "pipewire_cli": audio_installed,
         }
+
+    def refresh_news(self) -> dict[str, Any]:
+        result = self.news.refresh()
+        self.events.publish("news.updated", "newsroom", result)
+        return result
 
     def set_theme(self, theme: str) -> dict[str, Any]:
         colors = palette(theme)
