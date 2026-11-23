@@ -139,3 +139,5 @@ The desktop is responsive to CSS viewport size rather than assuming one fixed mo
 Wide desktop layouts use three columns; 16:10, 3:2 and 4:3 workspaces use a two-column composition to protect the central content width. Short landscape viewports reduce vertical spacing instead of clipping the launcher or dock. The shell uses dynamic/small viewport units where browser chrome can change the visible height, and includes safe-area insets for notched devices.
 
 The 8K profile intentionally caps the centered working surface rather than stretching controls across the entire wall. Typography and cards grow with resolution but stop at readable maximum sizes. Application windows remain bounded by both viewport width and height. On small screens, the page becomes scrollable, while app windows and dialogs stay within the visible viewport.
+
+Touch-first devices keep their primary controls at or above 44 CSS pixels. When seven dock shortcuts cannot fit in a narrow viewport, the dock scrolls horizontally instead of shrinking the hit areas.
