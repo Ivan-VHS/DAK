@@ -103,7 +103,7 @@ The release bundle is a component archive, not a bootable image. Deployment plan
 - [x] Reuse local PE/ELF header inspection and SHA-256 helpers in GameCharager and EXEdotEXE without executing targets.
 - [ ] Native implementations of the proposed DAK services, system-wide persistent storage, archive extraction, native audio, GPS/navigation, game process creation, OS installation and kernel-enforced capabilities.
 
-These are partial browser-shell features. The new DAK package catalog remains at design maturity and does not indicate that the corresponding native services ship in an OS image.
+These were partial browser-shell features. The native Mora launcher now exposes catalogue entries, while the corresponding native services remain partial or planned. The DAK package catalog remains at design maturity and does not indicate that those services ship in an OS image.
 
 
 ## Duck Desktop optimizer — 2026-11-23
