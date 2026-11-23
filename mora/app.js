@@ -273,8 +273,18 @@ function panelMarkup(appId) {
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div></div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DuckOS ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
-        '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
+        '<div class="setting-block"><strong>Upstream runtime adapters</strong><span>DuckBridge подключает уже установленные движки, не подменяя их внутреннюю логику:</span>' +
+        '<div class="runtime-adapter-grid">' +
+        '<div class="runtime-adapter"><strong>Proton</strong><span>Steam Play</span></div>' +
+        '<div class="runtime-adapter"><strong>Lutris</strong><span>Игровые магазины</span></div>' +
+        '<div class="runtime-adapter"><strong>Bottles</strong><span>Изолированные среды</span></div>' +
+        '<div class="runtime-adapter"><strong>CrossOver</strong><span>CodeWeavers · коммерческий</span></div>' +
+        '</div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos runtime-status — обнаружение установленных движков</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos runtime-recommend steam-game — выбор движка для Steam</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos runtime-recommend multi-store — Lutris и сторонние магазины</span></div></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Host CLI может явно запускать приложение через установленный upstream runtime. В браузерной Mora запуска процессов нет; нативный NT/Win32 runtime, DirectX backend и песочница DuckOS всё ещё не реализованы.</span></div>' +
+        '<p class="window-copy">PE-инспектор и профили DuckOS остаются отдельным фундаментом. Proton, Lutris, Bottles и CrossOver предоставляют собственные Wine/игровые среды и лицензии.</p>';
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +

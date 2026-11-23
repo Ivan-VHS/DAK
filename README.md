@@ -82,6 +82,8 @@ No browser control is described as a native kernel, driver, sandbox, updater or 
 
 DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for commands, scope and the 66-point implementation map.
 
+The separate upstream adapters for Proton, Lutris, Bottles, CrossOver and Wine are documented in [Upstream Windows compatibility engines](docs/UPSTREAM_COMPATIBILITY_ENGINES.md). They launch through an explicit Linux host CLI action and do not activate a native DuckOS NT/Win32 process runtime.
+
 ## Documentation
 
 Start with the [DuckOS documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines terminology, maturity states, runtime claims and evidence requirements.

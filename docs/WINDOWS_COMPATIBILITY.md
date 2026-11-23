@@ -90,3 +90,12 @@ DXVK/VKD3D, QEMU/CPU translation or other upstream components may be evaluated a
 ## Verification
 
 The focused Python tests cover valid and malformed PE metadata, import enumeration, prefix creation and validation, DLL search diagnostics, non-executing launch plans and CLI status output. They do not prove native ABI compatibility, graphics performance, anti-cheat support or game execution.
+
+
+## Upstream Linux runtime adapters — 2026-11-23
+
+The read-only PE diagnostics above remain separate from the Linux host adapters. DuckOS now has a dedicated upstream adapter module at duckos/compat/upstream.py for discovering and coordinating Proton, Lutris, Bottles, CrossOver and Wine.
+
+Use duckos runtime-status and duckos runtime-recommend <scenario> to inspect and select available tools. Explicit launch commands use duckos runtime-launch; new environments are created with duckos runtime-create. See [Upstream Windows compatibility engines](UPSTREAM_COMPATIBILITY_ENGINES.md) for command syntax, per-engine behavior and security boundaries.
+
+This host integration delegates execution to upstream programs. It does not change the existing compat-plan guarantee: DuckOS's own PE/Win32 process runtime remains unavailable and its native launch report continues to be non-executing.
