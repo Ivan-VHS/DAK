@@ -12,6 +12,8 @@ The default application suite contains seven first-party apps: Cockos, Kavun, Ka
 
 Mora Amber is the default visual profile: walnut surfaces, amber-sand highlights, muted olive glass and a controlled vertical fold rhythm around a deep radial centre. Dark and Light remain available alternatives. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies shared semantic tokens; the shell adds an installable web manifest, persistent Amber/Dark/Light theme and a scoped offline cache. It brings the seven application identities and seven system tools into one workspace. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
+The shell also includes four virtual workspaces (Home, Studio, Play and System), movable/minimizable/maximizable windows and a Ctrl+K command palette with an explicit allowlist. The system settings panel contains the searchable 20-direction engineering matrix from the OS prototype; each row is marked partial, specified or planned rather than assigned a fictional completion percentage. These are browser-shell features backed by Reaper policy contracts, not a native compositor. See [Mora shell implementation](docs/MORA_SHELL.md).
+
 The system tools are:
 
 - **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
@@ -47,6 +49,13 @@ Run the JavaScript contract tests with Node.js 18 or newer:
 
 ```sh
 npm test
+```
+
+The Reaper policy source files are syntax-checked and exercised by the separate Reaper contract workflow. The browser shell modules can also be syntax-checked directly:
+
+```sh
+node --check mora/app.js
+node --check mora/shell.js
 ```
 
 The existing Python validation remains available:
