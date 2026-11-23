@@ -23,6 +23,14 @@ COMPONENTS = frozenset({
     "corefonts", "d3dcompiler_47", "dotnet48", "dxvk",
     "vcrun2019", "vcrun2022", "vkd3d",
 })
+MANAGER_COMMANDS = {
+    "crossover": ("cxoffice", "crossover"),
+    "bottles": ("bottles",),
+    "lutris": ("lutris",),
+    "heroic": ("heroic", "heroic-games-launcher"),
+    "portproton": ("portproton",),
+    "playonlinux": ("playonlinux",),
+}
 
 
 class CompatibilityError(ValueError):
