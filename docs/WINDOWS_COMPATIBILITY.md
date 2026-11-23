@@ -15,7 +15,7 @@ DuckOS now has a read-only PE inspection engine, isolated prefix scaffolding and
 - Static DLL search-path checks and a dry-run launch report with explicit blockers.
 - JSON output through the DuckOS CLI and the Bridge panel in Mora.
 
-No executable image is mapped, no Windows API is implemented by this milestone, and no EXE or DLL is launched. Prefix creation does not download DLLs, install redistributables, populate the registry or grant host administrator rights.
+No PE image is mapped by the native DuckOS compatibility foundation, no Windows API is implemented by this milestone, and the native DuckOS loader does not launch an EXE or DLL. Separately, Illidia can invoke an already-installed external Wine/Proton runtime to run a registered Windows game; this is delegated execution, not native Win32 support. Prefix scaffolding does not download DLLs, install redistributables, populate the registry or grant host administrator rights.
 
 ## CLI
 
