@@ -3,7 +3,7 @@ export const RECOVERY_KEY = "duckos.mora.recovery.v1";
 
 export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "mora-belle"
 ]);
 
 const CAPABILITIES = ["microphone", "camera", "location", "files", "network", "clipboard"];
@@ -38,7 +38,7 @@ export function normalizePreferences(value) {
     appearance: {
       reducedMotion: appearance.reducedMotion === true,
       density: appearance.density === "compact" ? "compact" : defaults.appearance.density,
-      theme: ["amber", "dark", "light"].includes(appearance.theme) ? appearance.theme : defaults.appearance.theme
+      theme: ["amber", "dark", "light", "belle"].includes(appearance.theme) ? appearance.theme : defaults.appearance.theme
     },
     focusMode: source.focusMode === true,
     powerProfile: POWER_PROFILES.includes(source.powerProfile)
