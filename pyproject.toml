@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "duckos-build-tools"
 version = "0.2.0"
-description = "DuckOS image, driver ABI and Windows-compatibility inspection tools."
+description = "DuckOS build, compatibility inspection and Illidia game-library tools."
 requires-python = ">=3.10"
 
 [project.scripts]
