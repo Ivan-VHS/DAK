@@ -20,6 +20,11 @@ class GamingPolicyTests(unittest.TestCase):
         self.assertEqual([rule["number"] for rule in catalog["rules"]], list(range(1, 67)))
         self.assertEqual(len({rule["id"] for rule in catalog["rules"]}), 66)
 
+    def test_package_catalog_matches_the_repository_catalog(self):
+        root = Path(__file__).resolve().parents[1] / "catalogs" / "game-performance-rules.v1.json"
+        packaged = Path(__file__).resolve().parents[1] / "duckos" / "gaming" / "game-performance-rules.v1.json"
+        self.assertEqual(packaged.read_bytes(), root.read_bytes())
+
     def test_rejects_duplicate_or_missing_rule_numbers(self):
         catalog = load_rule_catalog()
         catalog["rules"][-1]["number"] = 65
