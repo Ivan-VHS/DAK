@@ -96,6 +96,7 @@ function validateItems(value) {
 export class VirtualWorkspace {
   constructor(storage = defaultStorage()) {
     this.storage = storage;
+    this.persistenceAvailable = Boolean(storage);
     this.items = this.load();
   }
 
@@ -113,11 +114,16 @@ export class VirtualWorkspace {
   }
 
   save() {
-    if (!this.storage) return false;
+    if (!this.storage) {
+      this.persistenceAvailable = false;
+      return false;
+    }
     try {
       this.storage.setItem(STORAGE_KEY, JSON.stringify(this.items));
+      this.persistenceAvailable = true;
       return true;
     } catch {
+      this.persistenceAvailable = false;
       return false;
     }
   }
