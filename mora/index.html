@@ -92,72 +92,72 @@
       <section class="app-area" aria-label="Приложения">
         <div class="section-heading">
           <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1>Приложения</h1></div>
-          <span class="tiny-counter">27 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
+          <span class="tiny-counter">29 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
         </div>
-        <div class="app-grid" id="app-grid">
-          <button class="app-tile" data-app="cockos" style="--accent:var(--mora-brand)">
-            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M5 25h5l4-11 7 23 7-30 7 27 4-9h4" /></svg></span>
-            <span class="app-name">Cockos</span><span class="app-subtitle">Звук и запись</span>
-          </button>
-          <button class="app-tile" data-app="kavun" style="--accent:var(--mora-brand)">
-            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M24 7c-3-5-10-5-13 0M24 7c3-5 10-5 13 0"/><path d="M24 8C12 8 5 17 7 28c2 10 10 15 17 15s15-5 17-15C43 17 36 8 24 8Z"/><path d="M24 10v31M11 18l24 16M37 18 13 34"/></svg></span>
-            <span class="app-name">Kavun</span><span class="app-subtitle">Фотографии</span>
-          </button>
-          <button class="app-tile" data-app="kabon" style="--accent:var(--mora-brand)">
-            <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M29 16c-1.5-2-9-3-10 2-1.1 5 12 3 11 9-.8 5-9 6-13 2M24 11v26"/></svg></span>
-            <span class="app-name">Ka-bon</span><span class="app-subtitle">Финансы</span>
-          </button>
-          <button class="app-tile" data-app="gloverty" style="--accent:var(--mora-brand)">
-            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M27 4 10 27h12l-2 17 18-25H25Z"/></svg></span>
-            <span class="app-name">Gloverty</span><span class="app-subtitle">Сценарии</span>
-          </button>
-          <button class="app-tile" data-app="po" style="--accent:var(--mora-brand)">
-            <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="m30 13-4 13-13 9 4-13Z"/><circle cx="24" cy="24" r="2"/></svg></span>
-            <span class="app-name">Po</span><span class="app-subtitle">Компас</span>
-          </button>
-          <button class="app-tile" data-app="illidia" style="--accent:var(--mora-brand)">
-            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M15 15h18c6 0 10 6 11 15 1 8-5 10-10 3l-4-5H18l-4 5c-5 7-11 5-10-3 1-9 5-15 11-15Z"/><path d="M15 20v10M10 25h10M32 22h.1M37 28h.1"/></svg></span>
-            <span class="app-name">Illidia</span><span class="app-subtitle">Игры</span>
-          </button>
-          <button class="app-tile" data-app="unify" style="--accent:var(--mora-brand)">
-            <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M19 29 14 34a9 9 0 0 1-13-13l8-8a9 9 0 0 1 13 0l3 3M29 19l5-5a9 9 0 0 1 13 13l-8 8a9 9 0 0 1-13 0l-3-3M16 32l16-16"/></svg></span>
-            <span class="app-name">Unify</span><span class="app-subtitle">Устройства</span>
-          </button>
+        <div class="blade-launcher" id="blade-launcher">
+          <div class="blade-topline">
+            <div class="blade-intro">
+              <span class="eyebrow">БЫСТРЫЙ ЗАПУСК</span>
+              <h2 class="blade-heading">Рабочие разделы</h2>
+            </div>
+            <button class="blade-profile" type="button" data-app="workspace" aria-label="Открыть Control и настройки сеанса">
+              <span class="blade-avatar" aria-hidden="true">D</span>
+              <span class="blade-profile-copy">
+                <strong>Локальный профиль</strong>
+                <small><span id="blade-running-count">0</span> открытых окон</small>
+              </span>
+              <span class="blade-profile-mark" aria-hidden="true">⌘</span>
+            </button>
+          </div>
+
+          <nav class="blade-channels" aria-label="Разделы быстрого запуска">
+            <button class="blade-channel is-active" type="button" data-launch-channel="all" aria-pressed="true">Все</button>
+            <button class="blade-channel" type="button" data-launch-channel="favorites" aria-pressed="false">Избранное</button>
+            <button class="blade-channel" type="button" data-launch-channel="creation" aria-pressed="false">Создание</button>
+            <button class="blade-channel" type="button" data-launch-channel="games" aria-pressed="false">Игры</button>
+            <button class="blade-channel" type="button" data-launch-channel="media" aria-pressed="false">Медиа</button>
+            <button class="blade-channel" type="button" data-launch-channel="tools" aria-pressed="false">Инструменты</button>
+            <button class="blade-channel" type="button" data-launch-channel="system" aria-pressed="false">Система</button>
+          </nav>
+
+          <div class="blade-strip-wrap">
+            <div class="blade-strip" id="blade-strip" role="group" aria-label="Приложения выбранного раздела"></div>
+          </div>
+
+          <div class="blade-toolbar">
+            <div class="blade-meta">
+              <span class="blade-counter" id="blade-counter" aria-live="polite">01 / 29</span>
+              <span class="blade-status" id="blade-status" role="status" aria-live="polite">Выберите приложение</span>
+            </div>
+            <div class="blade-actions" aria-label="Действия с выбранным приложением">
+              <button class="blade-action" type="button" data-blade-action="open"><span class="blade-key">A</span><span>Открыть</span></button>
+              <button class="blade-action" type="button" data-blade-action="favorite"><span class="blade-key">X</span><span>Избранное</span></button>
+              <button class="blade-action" type="button" data-blade-action="details"><span class="blade-key">Y</span><span>Сведения</span></button>
+            </div>
+          </div>
         </div>
-        <div class="system-section-heading extension-section-heading">
-          <div><span class="eyebrow">РАСШИРЕННЫЙ НАБОР</span><h2>Новые приложения DuckOS</h2></div>
-          <span class="system-section-note">13 дополнительных инструментов Mora</span>
-        </div>
-        <div class="extension-app-grid" id="extension-app-grid">
-          <button class="app-tile" data-app="sestem" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">♟</span></span><span class="app-name">Sestem</span><span class="app-subtitle">Статус системы</span></button>
-          <button class="app-tile" data-app="setupup" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">✳</span></span><span class="app-name">SetupUP</span><span class="app-subtitle">Первичная настройка</span></button>
-          <button class="app-tile" data-app="orriganize" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Orriganize</span><span class="app-subtitle">Задачи и проекты</span></button>
-          <button class="app-tile" data-app="abriganza" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">▤</span></span><span class="app-name">Abriganza</span><span class="app-subtitle">Архивы и файлы</span></button>
-          <button class="app-tile" data-app="olaab" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">◈</span></span><span class="app-name">Olaab</span><span class="app-subtitle">Медиатека</span></button>
-          <button class="app-tile" data-app="concrete-thump" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">♫</span></span><span class="app-name">Concrete Thump</span><span class="app-subtitle">Ритм и темп</span></button>
-          <button class="app-tile" data-app="seu-beu" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Seu-Beu</span><span class="app-subtitle">Проверка обмена</span></button>
-          <button class="app-tile" data-app="love-il" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">♡</span></span><span class="app-name">Love-IL</span><span class="app-subtitle">Личный дневник</span></button>
-          <button class="app-tile" data-app="poi" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">⌖</span></span><span class="app-name">Poi</span><span class="app-subtitle">Быстрые заметки</span></button>
-          <button class="app-tile" data-app="poi-2" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">▧</span></span><span class="app-name">Poi-2</span><span class="app-subtitle">База знаний</span></button>
-          <button class="app-tile" data-app="po-2" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">➤</span></span><span class="app-name">Po-2</span><span class="app-subtitle">Маршруты и точки</span></button>
-          <button class="app-tile" data-app="gamecharager" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">▣</span></span><span class="app-name">GameCharager</span><span class="app-subtitle">Игровая библиотека</span></button>
-          <button class="app-tile" data-app="exedotexe" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph"><></span></span><span class="app-name">EXEdotEXE</span><span class="app-subtitle">EXE-инспектор</span></button>
-        </div>
-        <div class="system-section-heading">
-          <div><span class="eyebrow">СИСТЕМА MORA</span><h2>Инструменты рабочего пространства</h2></div>
-          <span class="system-section-note">Локальные функции и центры управления</span>
-        </div>
-        <div class="system-app-grid" id="system-app-grid">
-          <button class="app-tile" data-app="mora-ai" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
-          <button class="app-tile" data-app="security" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Sentinel</span><span class="app-subtitle">Права и доверие</span></button>
-          <button class="app-tile" data-app="updates" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
-          <button class="app-tile" data-app="runtime" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
-          <button class="app-tile" data-app="workspace" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
-          <button class="app-tile" data-app="provenance" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">⌁</span></span><span class="app-name">Proof</span><span class="app-subtitle">Файлы и SHA-256</span></button>
-          <button class="app-tile" data-app="mora-boost" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">⚡</span></span><span class="app-name">Mora Boost</span><span class="app-subtitle">Игровая производительность</span></button>
-          <button class="app-tile" data-app="desktop" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Duck Desktop</span><span class="app-subtitle">Оптимизация рабочего пространства</span></button>
-          <button class="app-tile" data-app="mora-commons" style="--accent:var(--mora-brand)"><span class="app-icon"><span class="system-glyph">✣</span></span><span class="app-name">Mora Commons</span><span class="app-subtitle">Единый каталог приложений</span></button>
-        </div>
+
+        <dialog class="blade-dialog" id="blade-details" aria-labelledby="blade-details-title">
+          <div class="blade-dialog-card">
+            <header class="blade-dialog-head">
+              <div>
+                <span class="eyebrow">СВЕДЕНИЯ О ПРИЛОЖЕНИИ</span>
+                <h2 id="blade-details-title">Приложение</h2>
+              </div>
+              <button class="blade-dialog-close" type="button" data-blade-close aria-label="Закрыть сведения">×</button>
+            </header>
+            <div class="blade-dialog-body">
+              <p id="blade-details-subtitle" class="blade-dialog-subtitle"></p>
+              <div class="blade-spec-row"><span>Разделы</span><strong id="blade-details-category">DuckOS</strong></div>
+              <div class="blade-spec-row"><span>Состояние</span><strong id="blade-details-state">Закрыто</strong></div>
+              <p class="blade-dialog-note">Приложение открывается в рабочем пространстве Mora. Доступные действия и их ограничения указаны внутри соответствующей панели.</p>
+            </div>
+            <footer class="blade-dialog-actions">
+              <button class="blade-dialog-secondary" type="button" data-blade-favorite>В избранное</button>
+              <button class="blade-dialog-primary" id="blade-details-open" type="button">Открыть приложение</button>
+            </footer>
+          </div>
+        </dialog>
       </section>
 
       <aside class="widgets" aria-label="Виджеты">
