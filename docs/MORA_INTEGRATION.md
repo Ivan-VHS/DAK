@@ -88,3 +88,14 @@ A native launcher must discover manifests only in trusted installation roots, va
 - **Verified:** reserved for a feature with repeatable tests and evidence at the layer being claimed.
 
 Never promote a feature to native/verified status because its UI panel exists.
+
+
+## Hardware Studio integration
+
+Mora exposes **Hardware Studio** as a first-party system workspace. It contains fifteen focused tools for device inventory, Driver Store capture, official driver discovery, INF inspection, exact-ID compatibility mapping, restore preparation, BIOS/UEFI inventory, platform security signals, PCIe, GPU, CPU, memory, storage, thermal telemetry and gaming frame pacing.
+
+The shell registry points the app to `mora/hardware/index.html`; the dedicated workspace uses the same Mora palette and is included in the scoped offline cache. The 15-module machine-readable catalogue and its schema live in `catalogs/hardware-performance-suite.v1.json` and `schemas/hardware-performance-suite.v1.schema.json`.
+
+The native Python agent is a separate local process. Windows inventory uses CIM/PnP, and Linux inventory uses sysfs/procfs/DMI/EFI where readable. Windows driver support is limited to Driver Store export, Windows Update discovery and one explicit update after a backup, recovery checkpoint, exact-ID confirmation and user-accepted EULA. It is not a signed system service and there is no authenticated IPC bridge to the browser shell yet.
+
+BIOS/UEFI and platform security inventory are read-only. No generic firmware flashing, kernel driver binary patching, voltage/clock writes or arbitrary hardware-register writes are provided. Browser frame pacing and local profiles are not evidence of native game FPS or a system-level performance change. See [Hardware Performance Suite](HARDWARE_PERFORMANCE_SUITE.md) for agent commands, evidence rules and platform limitations.

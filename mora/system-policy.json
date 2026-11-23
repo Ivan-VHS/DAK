@@ -8,12 +8,15 @@
     "Intent actions are limited to a reviewed local allowlist and require explicit approval.",
     "Unconfigured capabilities default to denied in the shell preference profile.",
     "File inspection and hashing run locally; uploads are not performed by the shell.",
-    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected."
+    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected.",
+    "Hardware inventory must label its source and distinguish native operating-system evidence from browser-only estimates.",
+    "Driver installation is limited to exact, signed, operating-system-managed packages with a backup, recovery path and explicit approval.",
+    "Firmware inventory is read-only; universal BIOS, EC or VBIOS flashing and arbitrary register writes are not safe defaults."
   ],
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and six system tools"
+      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels, six existing system tools and Hardware Studio"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -78,6 +81,30 @@
     "installable_workspace": {
       "maturity": "partial",
       "scope": "web manifest and scoped offline cache; not an OS installer"
+    },
+    "hardware_inventory": {
+      "maturity": "partial",
+      "scope": "native Windows CIM/PnP and Linux sysfs/procfs snapshot agent; macOS device inventory is not implemented"
+    },
+    "driver_store_backup": {
+      "maturity": "partial",
+      "scope": "Windows pnputil Driver Store export with a SHA-256 manifest; no binary patching"
+    },
+    "driver_update_discovery": {
+      "maturity": "partial",
+      "scope": "Windows Update driver offer scanning and explicit Microsoft Update Catalog lookups; OEM sources require exact vendor evidence"
+    },
+    "driver_update_install": {
+      "maturity": "partial",
+      "scope": "one exact Windows Update driver ID with confirmation, Driver Store export, System Restore checkpoint and previously accepted EULA"
+    },
+    "firmware_access": {
+      "maturity": "partial",
+      "scope": "read-only BIOS/UEFI/DMI/Secure Boot/TPM information; firmware flashing is not implemented"
+    },
+    "gaming_telemetry": {
+      "maturity": "partial",
+      "scope": "browser frame pacing probe and local game profiles; native ETW/PresentMon/GPU vendor telemetry is not connected"
     }
   },
   "not_in_scope_as_implemented_features": [

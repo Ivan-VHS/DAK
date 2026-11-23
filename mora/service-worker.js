@@ -9,7 +9,10 @@ const ASSETS = [
   "./system-policy.json",
   "./theme.json",
   "./manifest.webmanifest",
-  "./icon.svg"
+  "./icon.svg",
+  "./hardware/index.html",
+  "./hardware/hardware.css",
+  "./hardware/hardware.js"
 ];
 const SCOPE_PATH = new URL("./", self.location.href).pathname;
 
@@ -41,7 +44,8 @@ self.addEventListener("fetch", (event) => {
       try {
         return await fetch(request);
       } catch {
-        return (await caches.match("./index.html")) ||
+        return (await caches.match(request)) ||
+          (await caches.match("./index.html")) ||
           new Response("Mora is not available offline.", {
             status: 503,
             headers: { "Content-Type": "text/plain; charset=utf-8" }
