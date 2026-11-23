@@ -1,0 +1,240 @@
+# Draft package catalog for the DAK OS foundational application suite.
+# Based on the supplied apps.yaml draft and extended with 13 Mora applications.
+# API and capability identifiers are proposals; register them in platform policy/API
+# registries and implement service providers before production packaging.
+schema_version: 1
+suite:
+  id: dak.base-suite
+  name: DAK OS Base Applications
+  version: 1.1.0
+  status: design
+  minimum_platform_api: 1
+
+services:
+  - dak.identity.v1
+  - dak.policy.v1
+  - dak.settings.v1
+  - dak.vfs.v1
+  - dak.search.v1
+  - dak.notifications.v1
+  - dak.clock.v1
+  - dak.network.v1
+  - dak.power.v1
+  - dak.display.v1
+  - dak.audio.v1
+  - dak.media.v1
+  - dak.documents.v1
+  - dak.sync.v1
+  - dak.secrets.v1
+  - dak.packages.v1
+  - dak.processes.v1
+  - dak.system-status.v1
+  - dak.setup.v1
+  - dak.workspace.v1
+  - dak.archive-inspection.v1
+  - dak.media-library.v1
+  - dak.rhythm-profiles.v1
+  - dak.sharing-review.v1
+  - dak.journal.v1
+  - dak.quick-capture.v1
+  - dak.knowledge-cards.v1
+  - dak.route-planner.v1
+  - dak.game-library.v1
+  - dak.executable-inspection.v1
+
+applications:
+  - id: dak.settings
+    name: Settings
+    entry: app://dak.settings/main
+    category: system
+    permissions: [system.settings.read, system.settings.write, users.read, users.manage, permissions.manage]
+    services: [dak.identity.v1, dak.policy.v1, dak.settings.v1, dak.network.v1, dak.power.v1, dak.display.v1, dak.audio.v1, dak.packages.v1]
+
+  - id: dak.files
+    name: Files
+    entry: app://dak.files/main
+    category: system
+    permissions: [files.read.user, files.write.user, volumes.enumerate, volumes.mount.request, network.shares.request]
+    services: [dak.vfs.v1, dak.search.v1, dak.notifications.v1]
+
+  - id: dak.calendar
+    name: Calendar
+    entry: app://dak.calendar/main
+    category: productivity
+    permissions: [calendar.read, calendar.write, notifications.schedule, sync.configure]
+    services: [dak.clock.v1, dak.notifications.v1, dak.sync.v1]
+
+  - id: dak.clock
+    name: Clock
+    entry: app://dak.clock/main
+    category: system
+    permissions: [alarms.manage, notifications.schedule]
+    services: [dak.clock.v1, dak.notifications.v1]
+
+  - id: dak.notes
+    name: Notes
+    entry: app://dak.notes/main
+    category: productivity
+    permissions: [notes.read, notes.write, files.attach.selected, sync.configure]
+    services: [dak.vfs.v1, dak.sync.v1, dak.search.v1]
+
+  - id: dak.tasks
+    name: Tasks and Reminders
+    entry: app://dak.tasks/main
+    category: productivity
+    permissions: [tasks.read, tasks.write, notifications.schedule, sync.configure]
+    services: [dak.clock.v1, dak.notifications.v1, dak.sync.v1]
+
+  - id: dak.calculator
+    name: Calculator
+    entry: app://dak.calculator/main
+    category: utilities
+    permissions: []
+    services: []
+
+  - id: dak.browser
+    name: Web Browser
+    entry: app://dak.browser/main
+    category: internet
+    permissions: [network.access, sites.permissions.request, files.download.selected]
+    services: [dak.network.v1, dak.secrets.v1, dak.vfs.v1]
+
+  - id: dak.mail
+    name: Mail
+    entry: app://dak.mail/main
+    category: internet
+    permissions: [network.access, mail.accounts.manage, files.attach.selected, notifications.publish, secrets.use.mail]
+    services: [dak.network.v1, dak.secrets.v1, dak.notifications.v1, dak.vfs.v1, dak.sync.v1]
+
+  - id: dak.contacts
+    name: Contacts
+    entry: app://dak.contacts/main
+    category: productivity
+    permissions: [contacts.read, contacts.write, sync.configure]
+    services: [dak.sync.v1, dak.search.v1]
+
+  - id: dak.gallery
+    name: Gallery
+    entry: app://dak.gallery/main
+    category: multimedia
+    permissions: [files.read.user, files.write.selected, media.decode]
+    services: [dak.vfs.v1, dak.media.v1, dak.documents.v1]
+
+  - id: dak.media
+    name: Audio and Video Player
+    entry: app://dak.media/main
+    category: multimedia
+    permissions: [files.read.selected, network.stream.request, audio.output.manage]
+    services: [dak.vfs.v1, dak.network.v1, dak.audio.v1, dak.media.v1]
+
+  - id: dak.editor
+    name: Text Editor and Document Viewer
+    entry: app://dak.editor/main
+    category: productivity
+    permissions: [files.read.selected, files.write.selected, documents.render, documents.export]
+    services: [dak.vfs.v1, dak.documents.v1, dak.search.v1]
+
+  - id: dak.system-tools
+    name: Terminal and System Monitor
+    entry: app://dak.system-tools/main
+    category: system
+    permissions: [terminal.execute, processes.read, processes.signal.own, processes.signal.elevated.request, system.logs.read]
+    services: [dak.processes.v1, dak.notifications.v1]
+
+  - id: dak.software-center
+    name: Software Center and Updates
+    entry: app://dak.software-center/main
+    category: system
+    permissions: [packages.read, packages.install.request, packages.remove.request, system.updates.manage]
+    services: [dak.packages.v1, dak.policy.v1, dak.notifications.v1]
+
+  - id: dak.sestem
+    name: Sestem
+    entry: app://dak.sestem/main
+    category: system
+    permissions: [system.status.read, system.logs.read]
+    services: [dak.system-status.v1, dak.notifications.v1]
+
+  - id: dak.setupup
+    name: SetupUP
+    entry: app://dak.setupup/main
+    category: system
+    permissions: [system.settings.read, system.settings.write]
+    services: [dak.setup.v1, dak.settings.v1, dak.display.v1]
+
+  - id: dak.orriganize
+    name: Orriganize
+    entry: app://dak.orriganize/main
+    category: productivity
+    permissions: [workspace.items.read, workspace.items.write]
+    services: [dak.workspace.v1, dak.search.v1]
+
+  - id: dak.abriganza
+    name: Abriganza
+    entry: app://dak.abriganza/main
+    category: utilities
+    permissions: [files.read.selected]
+    services: [dak.archive-inspection.v1]
+
+  - id: dak.olaab
+    name: Olaab
+    entry: app://dak.olaab/main
+    category: multimedia
+    permissions: [media.collections.read, media.collections.write, files.read.selected]
+    services: [dak.media-library.v1, dak.media.v1, dak.vfs.v1]
+
+  - id: dak.concrete-thump
+    name: Concrete Thump
+    entry: app://dak.concrete-thump/main
+    category: multimedia
+    permissions: [audio.profiles.read, audio.profiles.write]
+    services: [dak.rhythm-profiles.v1, dak.audio.v1]
+
+  - id: dak.seu-beu
+    name: Seu-Beu
+    entry: app://dak.seu-beu/main
+    category: security
+    permissions: [sharing.review.read, sharing.review.write]
+    services: [dak.sharing-review.v1, dak.policy.v1]
+
+  - id: dak.love-il
+    name: Love-IL
+    entry: app://dak.love-il/main
+    category: productivity
+    permissions: [journal.entries.read, journal.entries.write]
+    services: [dak.journal.v1, dak.vfs.v1]
+
+  - id: dak.poi
+    name: Poi
+    entry: app://dak.poi/main
+    category: productivity
+    permissions: [capture.entries.read, capture.entries.write]
+    services: [dak.quick-capture.v1, dak.search.v1]
+
+  - id: dak.poi-2
+    name: Poi-2
+    entry: app://dak.poi-2/main
+    category: productivity
+    permissions: [knowledge.cards.read, knowledge.cards.write]
+    services: [dak.knowledge-cards.v1, dak.search.v1]
+
+  - id: dak.po-2
+    name: Po-2
+    entry: app://dak.po-2/main
+    category: utilities
+    permissions: [routes.read, routes.write]
+    services: [dak.route-planner.v1]
+
+  - id: dak.gamecharager
+    name: GameCharager
+    entry: app://dak.gamecharager/main
+    category: gaming
+    permissions: [games.library.read, games.library.write, files.read.selected]
+    services: [dak.game-library.v1, dak.executable-inspection.v1]
+
+  - id: dak.exedotexe
+    name: EXEdotEXE
+    entry: app://dak.exedotexe/main
+    category: development
+    permissions: [files.read.selected, executable.inspect]
+    services: [dak.executable-inspection.v1]
