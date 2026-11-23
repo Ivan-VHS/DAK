@@ -42,7 +42,7 @@ The registry is machine-readable at `federation/repositories.v1.json`; its contr
 ## How projects fit together
 
 - **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. DuckOS should call narrow versioned interfaces or consume JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.
-- **Reaper** is the user-space language and toolchain. It can implement system policy and developer tools, but imported interpreters, plugins and programs never become kernel code.
+- **Reaper** is the user-space language and toolchain. Its federation status is `native-workbench`: Duck Desktop and the `duckos reaper` CLI can launch Studio or request static checks through a bounded subprocess bridge. It can implement system policy and developer tools, but imported interpreters, plugins and programs never become kernel code.
 - **OPlague** provides read-only device, package and driver evidence. Device matches are candidates, not permission to install a driver.
 - **VentuSample** owns audio generation and offline DSP. Its CMake project supports an optional local Reaper source path; this is recorded as an optional dependency, not a mandatory boot dependency. Real-time audio and device access need a separate service design.
 
