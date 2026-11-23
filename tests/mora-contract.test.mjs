@@ -26,7 +26,7 @@ test("desktop exposes the first-party suite, system tools and system-apps catalo
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 8);
+  assert.equal(registry.system_services.length, 10);
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {
