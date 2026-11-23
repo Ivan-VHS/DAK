@@ -18,8 +18,9 @@ The shell reuses the original indigo, rose and gold sunset wallpaper, layered hi
 | Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
+| Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
 
-The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify.
+The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. The seventh system tool, Mora Boost, is an integration entry point to the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
 
 ## Run and validate
 
@@ -59,7 +60,7 @@ Proof computes SHA-256 through Web Crypto when available. A digest can identify 
 
 ## Installable web shell
 
-The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript, policy and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
+The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript, policy, catalogue and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
 
 The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser shell provides a persisted light/dark preference; native toolkit adapters must implement the same semantic tokens independently.
 
