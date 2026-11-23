@@ -119,8 +119,11 @@ def inspect_game(library: IllidiaLibrary, game: GameRecord) -> dict[str, Any]:
     signature = signature_report(executable)
     previous = library.fingerprint(game.id)
     changed = previous is not None and previous != digest
-    requires_confirmation = signature["status"] in {"unsigned", "not_checked", "invalid"}
-    approved = library.has_approval(game.id, digest)
+    requires_confirmation = (
+        previous is None
+        and signature["status"] in {"unsigned", "not_checked", "invalid"}
+        and not library.has_approval(game.id, digest)
+    )
     warnings = []
     if signature["status"] == "unsigned":
         warnings.append("The executable has no valid Authenticode signature.")
