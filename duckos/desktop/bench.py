@@ -508,7 +508,7 @@ class BenchController:
             self.fixture_slot = fixture_slot
             self.adapter.start_test(test_id, fixture_slot, duration_seconds)
             self.state = "running"
-            self._audit("bench.test_started", {
+            self._audit("bench.test-started", {
                 "board_id": self.profile["board_id"],
                 "test_id": test_id,
                 "fixture_slot": fixture_slot,
@@ -528,7 +528,7 @@ class BenchController:
         try:
             self.adapter.stop_test()
             self.state = "cooling"
-            self._audit("bench.test_stopped", {
+            self._audit("bench.test-stopped", {
                 "board_id": self.profile["board_id"],
                 "fixture_slot": self.fixture_slot,
                 "session_id": self.session_id,
@@ -556,7 +556,7 @@ class BenchController:
         self.state = "safe-idle"
         self.session_id = None
         self.fixture_slot = None
-        self._audit("bench.cooling_complete", {"board_id": self.profile["board_id"]})
+        self._audit("bench.cooling-complete", {"board_id": self.profile["board_id"]})
         return self.status()
 
     def emergency_shutdown(self, reason: str = "operator-request") -> dict[str, Any]:
@@ -579,7 +579,7 @@ class BenchController:
                 raise
             raise BenchError(f"bench fault cannot be reset: {error}") from error
         self.state = "safe-idle"
-        self._audit("bench.fault_reset", {"board_id": self.profile["board_id"]})
+        self._audit("bench.fault-reset", {"board_id": self.profile["board_id"]})
         return self.status()
 
     def status(self) -> dict[str, Any]:

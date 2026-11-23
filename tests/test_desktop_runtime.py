@@ -278,6 +278,7 @@ class FakeBenchAdapter:
                     "voltage_v": self.voltage,
                     "current_a": self.current,
                     "temperature_c": self.temperature,
+                    "enabled": self.rail_enabled,
                 }
             },
             "buses": {
@@ -316,9 +317,6 @@ class FakeBenchAdapter:
 
     def emergency_disable(self):
         self.emergency_calls += 1
-        self.rail_enabled = False
-        self.voltage = 0.0
-        self.current = 0.0
         self.rail_enabled = False
         self.voltage = 0.0
         self.current = 0.0
@@ -472,7 +470,7 @@ class AuditTests(unittest.TestCase):
     def test_audit_chain_and_serial_log_redact_secrets(self):
         with tempfile.TemporaryDirectory() as temporary:
             log = AuditLog(Path(temporary) / "audit.jsonl")
-            log.append("bench.test_started", {"test_id": "smoke"})
+            log.append("bench.test-started", {"test_id": "smoke"})
             writer = SerialLogWriter(log, allowed_ports=["/dev/ttyUSB0"])
             writer.append(
                 session_id="session-01", port="/dev/ttyUSB0",
