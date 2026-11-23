@@ -394,3 +394,25 @@ input[type="range"] { width:160px; accent-color:#e6b9a1; cursor:pointer; }
 :root[data-theme="light"] .system-notice {
   color:var(--mora-secondary);
 }
+
+
+/* Native project tools use the same app-tile surface and token system. */
+.native-section-heading{margin-top:22px}
+.native-app-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.native-app-grid .app-tile{min-height:105px;padding:13px;border-radius:16px}
+.native-app-grid .app-icon{width:35px;height:35px;margin-bottom:2px;border-radius:11px}
+.native-app-grid .system-glyph{font-size:20px;font-weight:750}
+.native-app-grid .app-subtitle{max-width:100%;overflow-wrap:anywhere}
+.native-app-grid .app-subtitle.native-ready{color:var(--mora-secondary-accent);font-weight:650}
+.native-runtime-card{display:flex;align-items:flex-start;gap:10px;margin:16px 0;padding:13px 14px;border:1px solid var(--mora-border);border-radius:13px;background:var(--mora-surface);color:var(--mora-secondary);font-size:11px;line-height:1.55}
+.native-runtime-card .notice-dot{flex:0 0 auto;margin-top:4px}
+.native-panel-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0}
+.native-panel-actions a{color:var(--mora-secondary-accent);font-size:11px;text-decoration:none}
+.native-panel-actions a:hover{text-decoration:underline}
+.native-launch-button{min-width:200px}
+.native-launch-button:disabled{opacity:.52;cursor:not-allowed}
+.app-window:has(.embedded-web-app){width:min(920px,calc(100vw - 32px));height:min(82vh,850px);max-height:calc(100vh - 82px)}
+.app-window .window-body:has(.embedded-web-app){display:flex;flex:1;min-height:0;padding:0;overflow:hidden}
+.embedded-web-app{display:block;flex:1;width:100%;height:100%;min-height:460px;border:0;background:var(--mora-panel,var(--mora-surface))}
+@media(max-width:760px){.native-app-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.native-section-heading{margin-top:16px}.native-launch-button{width:100%}.app-window:has(.embedded-web-app){width:calc(100vw - 16px);height:calc(100vh - 88px);max-height:calc(100vh - 80px);top:64px!important;left:8px!important}}
+@media(max-width:420px){.native-app-grid{grid-template-columns:1fr}.native-app-grid .app-tile{min-height:88px}}
