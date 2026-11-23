@@ -20,7 +20,7 @@ from typing import Any, Iterable
 
 SCHEMA = "duckos.illidia-library.v1"
 SOURCES = {"steam", "epic", "gog", "battlenet", "ea", "custom"}
-RUNTIMES = {"native", "wine", "proton", "crossover", "bottles", "qemu"}
+RUNTIMES = {"native", "auto", "wine", "proton", "crossover", "bottles", "qemu"}
 MAX_SCAN_RESULTS = 10_000
 _EXECUTABLE_SUFFIXES = {".exe", ".com", ".appimage", ".bin"}
 
@@ -255,7 +255,7 @@ class IllidiaLibrary:
 
         profile = dict(launch_profile or {})
         allowed_profile_keys = {
-            "environment", "window_mode", "launch_via_store",
+            "environment", "window_mode", "launch_via_store", "bottle_name",
             "pre_launch", "post_launch", "allow_hooks",
         }
         if set(profile) - allowed_profile_keys:
@@ -283,6 +283,8 @@ class IllidiaLibrary:
             raise IllidiaError("window_mode must be default, windowed, borderless or fullscreen")
         if "launch_via_store" in profile and not isinstance(profile["launch_via_store"], bool):
             raise IllidiaError("launch_via_store must be boolean")
+        if "bottle_name" in profile and (not isinstance(profile["bottle_name"], str) or len(profile["bottle_name"]) > 128):
+            raise IllidiaError("bottle_name must be text of at most 128 characters")
 
         now = _utc_now()
         game_id = str(uuid.uuid4())
