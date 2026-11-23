@@ -287,6 +287,7 @@ def main(argv: list[str] | None = None) -> int:
                 if args.output:
                     if args.output.is_symlink():
                         raise ValueError("Output path cannot be a symbolic link")
+                    args.output.parent.mkdir(parents=True, exist_ok=True)
                     args.output.write_text(converted + "\n", encoding="utf-8", newline="\n")
                     result = {"converted": True, "output": str(args.output), "format": args.to}
                 else:
