@@ -40,6 +40,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .controls import MoraSlider
 from .model import (
     build_intent_plan,
     calculate_sha256,
@@ -136,6 +137,12 @@ class MoraWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.preferences = load_preferences()
+        self._display_scale = self.preferences["appearance"]["uiScale"]
+        self._app_dialogs: dict[str, QDialog] = {}
+        self.theme = _read_packaged_json("theme.json", {})
+        glass = self.theme.get("materials", {}).get("glass", {})
+        self.glass_surface = str(glass.get("surface", "rgba(21, 21, 21, 236)"))
+        self.glass_border = str(glass.get("border", "rgba(255, 255, 255, 30)"))
         registry = _read_packaged_json("apps.json", {"built_in_apps": []})
         commons = _read_packaged_json("commons-catalog.json", {"apps": [], "categories": []})
         self.apps = list(registry.get("built_in_apps", []))
@@ -156,33 +163,39 @@ class MoraWindow(QMainWindow):
 
         shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
         shortcut.activated.connect(self.search_entry.setFocus)
+        shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
         clear_shortcut = QShortcut(QKeySequence("Escape"), self)
+        clear_shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
         clear_shortcut.activated.connect(self._clear_search)
 
     def _apply_palette(self) -> None:
+        scale = self._display_scale / 100
+        scaled = lambda points: f"{points * scale:.2f}pt"
         self.setStyleSheet(f"""
             QWidget {{
                 background: {PAGE};
                 color: {TEXT};
                 font-family: "Segoe UI";
-                font-size: 10pt;
+                font-size: {scaled(10)};
             }}
             QMainWindow, QDialog {{ background: {PAGE}; }}
             QFrame#Sidebar {{
                 background: {SURFACE};
-                border: 1px solid {BORDER};
+                background: {self.glass_surface};
+                border: 1px solid {self.glass_border};
                 border-radius: 18px;
             }}
             QFrame#Card, QFrame#Hero, QFrame#Panel {{
                 background: {SURFACE};
-                border: 1px solid {BORDER};
+                background: {self.glass_surface};
+                border: 1px solid {self.glass_border};
                 border-radius: 16px;
             }}
             QLabel#Brand {{ color: {ACCENT}; font-size: 10pt; font-weight: 800; }}
-            QLabel#Wordmark {{ color: {TEXT}; font-size: 27pt; font-weight: 800; }}
-            QLabel#PageTitle {{ color: {TEXT}; font-size: 23pt; font-weight: 700; }}
-            QLabel#SectionTitle {{ color: {TEXT}; font-size: 14pt; font-weight: 700; }}
-            QLabel#Eyebrow {{ color: {ACCENT}; font-size: 8pt; font-weight: 800; }}
+            QLabel#Wordmark {{ color: {TEXT}; font-size: {scaled(27)}; font-weight: 800; }}
+            QLabel#PageTitle {{ color: {TEXT}; font-size: {scaled(23)}; font-weight: 700; }}
+            QLabel#SectionTitle {{ color: {TEXT}; font-size: {scaled(14)}; font-weight: 700; }}
+            QLabel#Eyebrow {{ color: {ACCENT}; font-size: {scaled(8)}; font-weight: 800; }}
             QLabel#Muted {{ color: {MUTED}; }}
             QLabel#Clock {{ color: {TEXT}; font-size: 19pt; font-weight: 700; }}
             QPushButton {{
@@ -215,7 +228,7 @@ class MoraWindow(QMainWindow):
                 background: {ELEVATED};
                 border-color: {BORDER};
             }}
-            QLineEdit, QComboBox, QPlainTextEdit, QListWidget {{
+            QLineEdit, QComboBox, QPlainTextEdit, QListWidget, QSpinBox {{
                 background: {SURFACE};
                 color: {TEXT};
                 border: 1px solid {BORDER};
@@ -229,6 +242,45 @@ class MoraWindow(QMainWindow):
                 color: {TEXT};
                 selection-background-color: {ACCENT};
                 selection-color: {ON_ACCENT};
+            }}
+            QSpinBox {{
+                background: {SURFACE};
+                color: {TEXT};
+                border: 1px solid {BORDER};
+                border-radius: 9px;
+                padding: 5px 7px;
+                min-height: 22px;
+                font-variant-numeric: tabular-nums;
+            }}
+            QSlider::groove:horizontal {{
+                height: 6px;
+                border-radius: 3px;
+                background: {BORDER};
+            }}
+            QSlider::sub-page:horizontal {{
+                border-radius: 3px;
+                background: {ACCENT};
+            }}
+            QSlider::add-page:horizontal {{
+                border-radius: 3px;
+                background: {ELEVATED};
+            }}
+            QSlider::handle:horizontal {{
+                width: 18px;
+                height: 18px;
+                margin: -7px 0;
+                border: 2px solid {PAGE};
+                border-radius: 9px;
+                background: {ACCENT};
+            }}
+            QSlider::handle:horizontal:hover,
+            QSlider::handle:horizontal:focus {{
+                background: {ACCENT_HOVER};
+                border-color: {ACCENT_HOVER};
+            }}
+            QLineEdit:focus, QComboBox:focus, QSpinBox:focus,
+            QPlainTextEdit:focus, QListWidget:focus {{
+                border: 2px solid {ACCENT_HOVER};
             }}
             QCheckBox {{ spacing: 9px; padding: 5px; }}
             QCheckBox::indicator {{
@@ -393,6 +445,14 @@ class MoraWindow(QMainWindow):
     def _clear_search(self) -> None:
         if self.search_entry.hasFocus():
             self.search_entry.clear()
+
+    def _preview_ui_scale(self, value: int) -> None:
+        self._display_scale = int(value)
+        self._apply_palette()
+
+    def _restore_ui_scale_preview(self, *_args: Any) -> None:
+        self._display_scale = self.preferences["appearance"]["uiScale"]
+        self._apply_palette()
 
     def _render_apps(self, *_args: Any) -> None:
         while self.app_grid.count():
