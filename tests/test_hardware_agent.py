@@ -83,6 +83,20 @@ class LinuxSnapshotTests(unittest.TestCase):
             self.assertEqual(report["storage"][0]["size_bytes"], 2000000 * 512)
             self.assertEqual(report["sensors"][0]["value"], 52.5)
 
+    def test_numeric_processor_index_is_not_reported_as_cpu_model(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            proc_root = root / "proc"
+            self._write(proc_root, "cpuinfo", "processor : 0\\nprocessor : 1\\n")
+
+            report = hardware.collect_snapshot(
+                sys_root=root / "sys",
+                proc_root=proc_root,
+                system="Linux",
+            )
+
+            self.assertNotIn("name", report["cpu"])
+
     def test_sysfs_device_links_must_resolve_inside_sys_root(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
