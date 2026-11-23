@@ -63,6 +63,7 @@ test("required dashboard surfaces and launch affordances are present", () => {
 
 test("Mora layout scales across 8K, 5K, 4K, standard desktop, tablets and phones", () => {
   for (const marker of [
+    "@media (min-width:1151px)",
     "@media (min-width:1920px)",
     "@media (min-width:2560px)",
     "@media (min-width:3840px)",
