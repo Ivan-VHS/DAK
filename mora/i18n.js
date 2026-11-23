@@ -215,6 +215,17 @@ export function getLocale() {
   return activeLocale;
 }
 
+export function setLocalizedText(element, source) {
+  if (!element) return;
+  const original = String(source ?? "");
+  element.textContent = original;
+  const node = element.firstChild;
+  if (node && node.nodeType === 3) {
+    sourceText.set(node, { source: original, rendered: original });
+    renderTextNode(node);
+  }
+}
+
 export function translate(source, locale = activeLocale) {
   return localizedValue(String(source ?? ""), locale);
 }
