@@ -31,13 +31,24 @@ static uint8_t vfs_initialized;
 static int valid_path(const char *path) {
     if (path == NULL || path[0] != '/') return 0;
     size_t length = 0u;
-    while (path[length] != '\0') {
-        if (length >= DUCKOS_MAX_PATH_LENGTH) return 0;
-        if (path[length] == '.' && path[length + 1u] == '.') return 0;
+    while (length <= DUCKOS_MAX_PATH_LENGTH && path[length] != '\0') {
         if ((uint8_t)path[length] < 0x20u) return 0;
         length++;
     }
-    return length > 1u;
+    if (length <= 1u || length > DUCKOS_MAX_PATH_LENGTH) return 0;
+
+    size_t component_start = 1u;
+    for (size_t i = 1u; i <= length; ++i) {
+        if (i != length && path[i] != '/') continue;
+        size_t component_length = i - component_start;
+        if ((component_length == 1u && path[component_start] == '.') ||
+            (component_length == 2u && path[component_start] == '.' &&
+             path[component_start + 1u] == '.'))
+            return 0;
+        if (component_length == 0u && i != length) return 0;
+        component_start = i + 1u;
+    }
+    return 1;
 }
 
 static DuckOsVfsNode *find_node(const char *path) {
