@@ -40,7 +40,7 @@ class ApplicationCatalogTests(unittest.TestCase):
         self.assertEqual(self.catalog["maturity_status"], "specified")
         native_shell = self.catalog["native_shell"]
         self.assertEqual(native_shell["maturity_status"], "implemented")
-        self.assertEqual(native_shell["runtime"], "python-tk")
+        self.assertEqual(native_shell["runtime"], "pyside6")
         self.assertIn("not the DuckOS compositor", native_shell["scope"])
         for app in self.catalog["applications"]:
             self.assertEqual(app["maturity_status"], "specified")
@@ -86,9 +86,10 @@ class ApplicationCatalogTests(unittest.TestCase):
         expected = {"kabon" if item["id"] == "ka-bon" else item["id"] for item in self.catalog["applications"]}
         actual = {item["id"] for item in registry["built_in_apps"]}
         self.assertTrue(expected.issubset(actual))
-        self.assertTrue(all(item.get("runtime") == "native-tk" for item in registry["built_in_apps"]))
+        self.assertTrue(all(item.get("runtime") == "pyside6" for item in registry["built_in_apps"]))
         native_source = (ROOT / "duckos/mora/native_ui.py").read_text(encoding="utf-8")
-        self.assertIn("tk.Tk()", native_source)
+        self.assertIn("QApplication", native_source)
+        self.assertIn("QMainWindow", (ROOT / "duckos/mora/qt_ui.py").read_text(encoding="utf-8"))
         for name in (
             "Cockos", "Kavun", "Ka-bon", "Gloverty", "Po", "Illidia", "Unify",
             "Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
