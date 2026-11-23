@@ -4,7 +4,9 @@ This implementation extends the existing DuckOS Mora shell instead of replacing 
 
 ## Desktop interaction
 
+- The searchable start menu opens from the Mora mark and launches installed-in-shell app panels.
 - Three local workspaces are selectable with the numbered pills or `Alt+1`, `Alt+2`, and `Alt+3`.
+- Wi-Fi and Sound status buttons open quick controls, the power indicator opens Control, and the clock opens the locale-aware time/date panel. These controls do not switch physical radios or device settings.
 - Application windows support pointer dragging, focus/z-order, minimize, maximize/restore and animated close.
 - The dock restores minimized windows. Clicking the active dock icon minimizes the matching window.
 - The top-right quick panel and notification panel close with Escape or an outside click.
