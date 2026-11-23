@@ -384,7 +384,6 @@ class TerminalService:
         return Path(arguments[0])
 
     def _hardware_inventory(self, arguments: list[str]) -> Any:
-        root = self._require_path("hardware inventory [SYSFS_ROOT]", arguments). if False else None
         if len(arguments) > 1:
             raise TerminalInputError("usage: hardware inventory [SYSFS_ROOT]")
         return collect_host_inventory(sysfs_root=Path(arguments[0]) if arguments else None)
@@ -505,8 +504,18 @@ class TerminalService:
             target = arguments[1:]
             if any(token in _SECRET_OPTIONS or any(token.casefold().startswith(flag + "=") for flag in _SECRET_OPTIONS) for token in target):
                 raise TerminalInputError("aliases cannot store secret-bearing options")
+            previous = self.config["aliases"].get(name)
             self.config["aliases"][name] = target
-            self._expand_alias([name])
+            try:
+                expanded = self._expand_alias([name])
+                if self.registry.resolve(expanded) is None:
+                    raise TerminalInputError("alias target must resolve to a registered DuckOS command")
+            except Exception:
+                if previous is None:
+                    self.config["aliases"].pop(name, None)
+                else:
+                    self.config["aliases"][name] = previous
+                raise
             self._save_config()
             return {"name": name, "command": target, "saved": True}
         if command == "unalias":
@@ -570,7 +579,7 @@ class TerminalService:
             if record_history:
                 self._record_history(original_tokens, "failed")
             raise
-        if record_history:
+        if record_history and tokens != ["history", "clear"]:
             self._record_history(original_tokens, "completed")
         return {
             "schema": RESULT_SCHEMA,
@@ -599,9 +608,9 @@ def run_interactive(service: TerminalService | None = None) -> int:
         except (OSError, RuntimeError, TypeError, ValueError, ImportError) as error:
             print("error: " + str(error))
             continue
-        if response.get("result", {}).get("exit") is True:
-            print(response["result"].get("message", "Goodbye."))
-            return 0
         payload = response.get("result")
+        if isinstance(payload, dict) and payload.get("exit") is True:
+            print(payload.get("message", "Goodbye."))
+            return 0
         if payload is not None:
             print(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False))
