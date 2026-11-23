@@ -49,6 +49,7 @@ class FoundrySnapshotTests(unittest.TestCase):
         self.assertEqual(snapshot["metrics"]["compatibility_runtimes"], 1)
         self.assertTrue(snapshot["execution_policy"]["read_only"])
         self.assertFalse(snapshot["execution_policy"]["network_access"])
+        self.assertFalse(snapshot["execution_policy"]["arbitrary_user_commands_started"])
         self.assertFalse(snapshot["execution_policy"]["processes_terminated"])
         self.assertFalse(snapshot["execution_policy"]["drivers_changed"])
         self.assertFalse(snapshot["execution_policy"]["external_machinery_control"])
