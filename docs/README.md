@@ -1,20 +1,16 @@
 # DuckOS documentation
 
-## Desktop and application interfaces
+## Application interfaces
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md).
+[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
-[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
+## Runnable prototype
 
-## Visual design
+[prototype/mora-home.html](../prototype/mora-home.html) is the seven-app Mora home screen and browser prototype. Its prototype limits and native integration gaps are recorded in [PREINSTALLED_APPLICATIONS.md](PREINSTALLED_APPLICATIONS.md).
 
-[Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical interface standard; [mora/theme.json](../mora/theme.json) contains the versioned color, shape, spacing, typography and motion tokens.
+## Unified desktop workspace
 
-## Runnable prototypes
-
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and six system tools, with local intent, preference, recovery and file-inspection contracts.
-
-[The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
+[Mora desktop integration](MORA_DESKTOP.md) documents the common local desktop, seven-app home screen, linked native project catalogue, theme contract and allowlisted launcher. Start Mora from the DuckOS repository with python mora_host.py.
 
 ## Product specification
 
