@@ -60,7 +60,10 @@ export function validateStorageEnvelope(value) {
       value.version !== 1 || !Number.isSafeInteger(value.generation) || value.generation < 1 ||
       value.encoding !== "utf-8" || !Number.isSafeInteger(value.byteLength) ||
       !value.integrity || value.integrity.algorithm !== "CRC32" ||
-      typeof value.integrity.digest !== "string" || !value.payload) {
+      typeof value.integrity.digest !== "string" ||
+      (value.previousDigest !== null && value.previousDigest !== undefined &&
+        (typeof value.previousDigest !== "string" || !/^[0-9a-f]{8}$/i.test(value.previousDigest))) ||
+      !value.payload) {
     return null;
   }
 
@@ -113,7 +116,8 @@ export function createStateBranch({
 export function validateStateBranch(value) {
   if (!value || typeof value !== "object" || value.schema !== BRANCH_SCHEMA ||
       typeof value.id !== "string" || !/^[a-z0-9._-]{1,80}$/i.test(value.id) ||
-      (value.parentId !== null && typeof value.parentId !== "string") ||
+      (value.parentId !== null && (typeof value.parentId !== "string" ||
+        !/^[a-z0-9._-]{1,80}$/i.test(value.parentId))) ||
       !Number.isSafeInteger(value.revision) || value.revision < 1 ||
       typeof value.createdAt !== "string" || !value.integrity ||
       value.integrity.algorithm !== "CRC32" || typeof value.integrity.digest !== "string") {
