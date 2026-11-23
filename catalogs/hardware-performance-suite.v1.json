@@ -1,0 +1,402 @@
+{
+  "$schema": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/hardware-performance-suite.v1.schema.json",
+  "schema": "duckos.hardware-performance-suite.v1",
+  "version": 1,
+  "operating_system": "DuckOS",
+  "maturity_status": "partial",
+  "distribution_intent": "preinstalled",
+  "maintainer": "Ivan-VHS",
+  "note": "15 приложений Mora. Веб-интерфейс и read-only агентный прототип реализуются отдельно от привилегированных драйверных операций; карточка приложения не означает наличия универсального драйвера.",
+  "agent": {
+    "id": "duckos.hardware-agent.v1",
+    "entrypoint": "agent/duckos_hardware_agent.py",
+    "runtime": "Python 3 standard library",
+    "platforms": {
+      "windows": "Hardware snapshot, PnP/driver metadata, Driver Store export and opt-in Windows Update driver search/install.",
+      "linux": "Read-only sysfs/procfs inventory, DMI/UEFI, PCI/USB, modules, memory, storage and exposed sensors.",
+      "macos": "Host identification only; detailed native inventory adapter is not yet implemented."
+    },
+    "privilege_model": [
+      "Snapshot collection is read-only and should run without elevation where the OS permits.",
+      "Driver Store export requires administrator rights and only copies installed packages.",
+      "Windows Update driver installation requires an exact update ID, interactive confirmation, a successful driver backup and a System Restore checkpoint.",
+      "No driver binary patching, kernel memory writes, arbitrary register writes or unattended firmware flashing."
+    ]
+  },
+  "applications": [
+    {
+      "id": "device-atlas",
+      "name": "Device Atlas",
+      "domain": "hardware_performance",
+      "role": "Аппаратная инвентаризация",
+      "description": "PCI, USB, ACPI, CPU, RAM, GPU, накопители и реальные Hardware IDs.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#device-atlas",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.pnp",
+        "linux.sysfs",
+        "macos.system-profiler"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "аппаратная_инвентаризация"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "driver-capture",
+      "name": "Driver Capture",
+      "domain": "hardware_performance",
+      "role": "Снимок и резервная копия драйверов",
+      "description": "Экспорт Windows Driver Store, SHA-256-манифест и журнал происхождения пакетов.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#driver-capture",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.pnputil"
+      ],
+      "operation_mode": "export-only",
+      "capabilities": [
+        "снимок_и_резервная_копия_драйверов"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "driver-scout",
+      "name": "Driver Scout",
+      "domain": "hardware_performance",
+      "role": "Поиск официальных обновлений",
+      "description": "Поиск доступных драйверов через Windows Update и точечные запросы по Hardware ID.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#driver-scout",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.update-agent",
+        "vendor-catalogs"
+      ],
+      "operation_mode": "network-read",
+      "capabilities": [
+        "поиск_официальных_обновлений"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "driver-lab",
+      "name": "Driver Lab",
+      "domain": "hardware_performance",
+      "role": "Проверка INF и пакета",
+      "description": "Разбор INF, архитектуры, целевых ОС, Hardware IDs, каталога подписи и хешей.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#driver-lab",
+      "native_agent_required": true,
+      "data_sources": [
+        "oplague.inf",
+        "oplague.authenticode"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "проверка_inf_и_пакета"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "driver-graph",
+      "name": "Driver Graph",
+      "domain": "hardware_performance",
+      "role": "Граф совместимости",
+      "description": "Точное сопоставление устройств и драйверов без угадывания по названию.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#driver-graph",
+      "native_agent_required": true,
+      "data_sources": [
+        "oplague.device-graph"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "граф_совместимости"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "driver-restore",
+      "name": "Driver Restore",
+      "domain": "hardware_performance",
+      "role": "Восстановление драйверов",
+      "description": "Просмотр резервных пакетов, проверка целостности и подготовка проверенного отката.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#driver-restore",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.pnputil",
+        "driver-capture-manifest"
+      ],
+      "operation_mode": "explicit-apply",
+      "capabilities": [
+        "восстановление_драйверов"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "firmware-atlas",
+      "name": "Firmware Atlas",
+      "domain": "hardware_performance",
+      "role": "BIOS, UEFI и прошивки",
+      "description": "Инвентаризация BIOS/UEFI, платы и доступных firmware-версий.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#firmware-atlas",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.cim",
+        "linux.dmi",
+        "efi-vars"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "bios,_uefi_и_прошивки"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "uefi-guard",
+      "name": "UEFI Guard",
+      "domain": "hardware_performance",
+      "role": "Безопасность платформы",
+      "description": "Secure Boot, TPM, режим загрузки и сигналы риска прошивки.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#uefi-guard",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.tpm",
+        "linux.efi"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "безопасность_платформы"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "pcie-scope",
+      "name": "PCIe Scope",
+      "domain": "hardware_performance",
+      "role": "PCI Express и шины",
+      "description": "PCIe ID, класс, драйвер, доступная скорость/ширина линии и Resizable BAR.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#pcie-scope",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.pnp",
+        "linux.sysfs-pci"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "pci_express_и_шины"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "gpu-deck",
+      "name": "GPU Deck",
+      "domain": "hardware_performance",
+      "role": "Графический процессор",
+      "description": "GPU, версия драйвера, доступные температуры/частоты и графический API.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#gpu-deck",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.cim",
+        "linux.pci",
+        "webgl-fallback"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "графический_процессор"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "cpu-lab",
+      "name": "CPU Lab",
+      "domain": "hardware_performance",
+      "role": "Процессор и планирование",
+      "description": "Модель CPU, потоки, частоты, governor и поддерживаемые аппаратные счётчики.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#cpu-lab",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.cim",
+        "linux.procfs",
+        "pytyliki"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "процессор_и_планирование"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "memory-lens",
+      "name": "Memory Lens",
+      "domain": "hardware_performance",
+      "role": "Оперативная память",
+      "description": "Объём RAM, доступная память, commit/pressure и безопасные рекомендации.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#memory-lens",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.cim",
+        "linux.procfs",
+        "browser-fallback"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "оперативная_память"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "storage-pulse",
+      "name": "Storage Pulse",
+      "domain": "hardware_performance",
+      "role": "Накопители и ввод-вывод",
+      "description": "NVMe/SATA-устройства, доступная SMART/NVMe-информация и пропускная способность.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#storage-pulse",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.cim",
+        "linux.sysfs",
+        "smartmontools-optional"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "накопители_и_ввод-вывод"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "thermal-core",
+      "name": "Thermal Core",
+      "domain": "hardware_performance",
+      "role": "Температуры и питание",
+      "description": "Температуры, powercap, признаки thermal/power throttling и вентиляторы при наличии датчиков.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#thermal-core",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.vendor-api",
+        "linux.hwmon",
+        "pytyliki"
+      ],
+      "operation_mode": "read-only",
+      "capabilities": [
+        "температуры_и_питание"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    },
+    {
+      "id": "gameframe",
+      "name": "GameFrame",
+      "domain": "hardware_performance",
+      "role": "Игровые профили и frame pacing",
+      "description": "Профили игр, измерение frame time/FPS, сравнение прогонов и безопасные игровые настройки.",
+      "maturity_status": "specified",
+      "prototype_status": "partial",
+      "entrypoint": "mora/hardware/index.html#gameframe",
+      "native_agent_required": true,
+      "data_sources": [
+        "windows.etw",
+        "gpu-vendor-api",
+        "browser-benchmark"
+      ],
+      "operation_mode": "profile-only",
+      "capabilities": [
+        "игровые_профили_и_frame_pacing"
+      ],
+      "safety_boundaries": [
+        "Report source and evidence quality must remain visible.",
+        "Missing host permissions or unavailable hardware counters must be reported as unknown, never guessed.",
+        "Any privileged or system-changing action requires a separate native confirmation."
+      ]
+    }
+  ],
+  "integration": {
+    "mora_theme": "mora/theme.json",
+    "driver_inspection": "https://github.com/Ivan-VHS/OPlague",
+    "cpu_and_sensor_analysis": "https://github.com/Ivan-VHS/Pytyliki",
+    "snapshot_schema": "duckos.hardware-snapshot.v1",
+    "local_import_only": true,
+    "network_runtime_required": false
+  }
+}
