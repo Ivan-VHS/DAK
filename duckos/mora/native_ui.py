@@ -10,6 +10,7 @@ import json
 import subprocess
 import sys
 import tkinter as tk
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -737,6 +738,11 @@ class MoraWindow:
                   style="Muted.TLabel", wraplength=690).pack(anchor="w")
         ttk.Label(parent, text="Mora не меняет драйверы, частоты, напряжение, приоритеты процессов или параметры ядра. Для игровой диагностики используйте самостоятельные команды DuckOS и OPlague.",
                   style="Muted.TLabel", wraplength=690).pack(anchor="w", pady=(12, 0))
+        ttk.Button(
+            parent,
+            text="Открыть проект OPlague",
+            command=lambda: webbrowser.open("https://github.com/Ivan-VHS/OPlague", new=2),
+        ).pack(anchor="w", pady=(14, 0))
         ttk.Button(parent, text="Показать статус интеграции",
                    command=lambda: messagebox.showinfo(
                        "Mora Boost",
