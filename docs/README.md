@@ -3,10 +3,9 @@
 ## Federated source projects
 
 [Repository federation](REPOSITORY_FEDERATION.md) documents the four pinned project checkouts, their commit and licence registry, synchronization tool and service boundaries. The machine-readable source registry is [repositories.v1.json](../federation/repositories.v1.json).
-
 ## Desktop and application interfaces
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md).
+[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
 
 [Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
@@ -16,7 +15,7 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and six system tools, with local intent, preference, recovery and file-inspection contracts.
+[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and seven system tools, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
