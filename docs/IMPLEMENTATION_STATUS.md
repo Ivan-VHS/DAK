@@ -89,9 +89,12 @@ The architecture baseline is documentation and planning work only. It does not c
 - [x] User-selected custom executable scanning and manual registration.
 - [x] Local JSON library import/export and missing-install detection.
 - [x] Per-game argv, working directory, runtime command, prefix and environment profile.
+- [x] Automatic and named Wine/Proton/CrossOver/Bottles/QEMU selection through DuckBridge ready plans, with explicit command override.
 - [x] Windows Authenticode query; unknown/unavailable signature state on platforms without the verifier.
 - [x] SHA-256 fingerprinting and digest-scoped first-run approval for unsigned/unverified direct binaries.
 - [x] Direct host process launch with shell=False, separate process group, log capture and stop request.
+- [x] Post-hook SHA-256 recheck before process creation; abort when a pre-launch hook replaced the approved executable.
+- [x] Store URI handoff is recorded as delegated, not confused with the URI-handler process.
 - [x] Official Steam/Epic/GOG launch URI delegation.
 - [x] Mora Illidia panel updated to remove fictional demo games and disclose the host-tool boundary.
 - [ ] Authenticated native DuckOS Illidia broker and browser IPC integration.
