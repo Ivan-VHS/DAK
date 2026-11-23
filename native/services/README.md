@@ -46,3 +46,19 @@ The default state directory is ~/.local/state/duckos; use the global
 These services are not linked into the freestanding kernel. They are an
 executable host-side foundation that can later be attached to the native
 session manager and compositor through stable adapters.
+
+
+## Newsroom — «Вечерний курьер»
+
+Newsroom aggregates public RSS/Atom sources through a bounded, loopback-only
+HTTP API. It is a user-space service, not a kernel component.
+
+    PYTHONPATH=native/services python -m duckos_services news status
+    PYTHONPATH=native/services python -m duckos_services news refresh
+    PYTHONPATH=native/services python -m duckos_services news serve
+
+The API uses trusted HTTPS feeds, host allow-lists, bounded request/response
+sizes, a five-minute refresh schedule, and an atomic cache under the DuckOS state
+directory. It does not fetch client-supplied URLs, expose a generic proxy, or
+execute shell commands. Read docs/NEWSROOM.md for source attribution and API
+details.
