@@ -1,4 +1,13 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { getLocale, setLocale, applyLocale, translate } from "./i18n.js";
+import { DEEP_TIME_EPOCH_YEARS, formatEpochYears } from "./chrono.js";
+import {
+  createAtomicUpdatePlan,
+  createStateBranch,
+  createStorageEnvelope,
+  validateStateBranch,
+  validateStorageEnvelope
+} from "./platform-contracts.js";
 
 import {
   RECOVERY_KEY,
@@ -49,6 +58,12 @@ const appDefinitions = {
 const windowLayer = document.getElementById("window-layer");
 const activeAppLabel = document.getElementById("active-app");
 const toastElement = document.getElementById("toast");
+const languageSelect = document.getElementById("language-select");
+const commandOverlay = document.getElementById("command-overlay");
+const commandInput = document.getElementById("command-search-input");
+const commandResults = document.getElementById("command-results");
+const commandTrigger = document.getElementById("command-search-trigger");
+const RECOVERY_BRANCHES_KEY = "duckos.mora.recovery-branches.v1";
 let nextZIndex = 10;
 let toastTimeout = null;
 
@@ -87,10 +102,26 @@ function recoveryStatus() {
   try {
     const raw = localStorage.getItem(RECOVERY_KEY);
     if (!raw) return "Точка восстановления оболочки ещё не создана.";
-    const snapshot = validateRecoverySnapshot(JSON.parse(raw));
-    return snapshot ? "Последняя точка оболочки: " + new Date(snapshot.createdAt).toLocaleString("ru-RU") : "Сохранённая точка повреждена или имеет неизвестную версию.";
+    const stored = JSON.parse(raw);
+    const envelope = validateStorageEnvelope(stored);
+    const snapshot = validateRecoverySnapshot(envelope ? envelope.payload : stored);
+    const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
+    return snapshot
+      ? "Последняя точка оболочки: " + new Date(snapshot.createdAt).toLocaleString(locale)
+      : "Сохранённая точка повреждена или имеет неизвестную версию.";
   } catch {
     return "Хранилище браузера недоступно.";
+  }
+}
+
+function loadRecoveryBranches() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(RECOVERY_BRANCHES_KEY) || "[]");
+    return Array.isArray(stored)
+      ? stored.map(validateStateBranch).filter(Boolean).slice(-12)
+      : [];
+  } catch {
+    return [];
   }
 }
 
@@ -258,8 +289,10 @@ function extensionPanelMarkup(appId) {
         '<div class="extension-status-card"><strong>Контракты ядра</strong><span>Reaper reference runtime · проверяемая политика</span></div>' +
         '<div class="extension-status-card"><strong>DuckBridge</strong><span>Инспекция и планы запуска · без выполнения</span></div>' +
         '<div class="extension-status-card"><strong>Native boot</strong><span>Нативный загрузочный образ ещё не готов</span></div></div>' +
-        '<div class="approval-actions"><button class="action-button" data-app="workspace">Открыть Control</button><button class="subtle-button" data-app="security">Открыть Sentinel</button></div>' +
-        '<p class="window-copy">Панель показывает подтверждённую зрелость компонентов. Она не читает аппаратные датчики и не выдаёт статус оболочки за состояние ядра.</p>';
+        '<div class="extension-status-card deep-time-card"><strong>Глубокая эпоха Duck</strong><span>' + formatEpochYears(DEEP_TIME_EPOCH_YEARS, getLocale()) + ' · отдельная BigInt-шкала, не системные часы</span></div>' +
+        '<div class="extension-status-card"><strong>Целостность локального состояния</strong><span>CRC32-конверты, поколения сохранений и ветвление точек восстановления</span></div>' +
+        '<div class="approval-actions"><button class="action-button" data-app="workspace">Открыть Control</button><button class="subtle-button" data-app="security">Открыть Sentinel</button><button class="subtle-button" data-app="updates">Открыть Restore</button></div>' +
+        '<p class="window-copy">Панель показывает подтверждённую зрелость компонентов. Она не читает аппаратные датчики и не выдаёт статус оболочки за состояние ядра. Глубокая эпоха не изменяет гражданскую дату компьютера.</p>';
     case "setupup": {
       let complete = false;
       try { complete = Boolean(localStorage.getItem("duckos.mora.setupup.v1")); } catch {}
@@ -604,7 +637,9 @@ function panelMarkup(appId) {
         '<div class="update-state"><span class="state-mark">↶</span><div><strong>Системный updater не подключён</strong><span>Атомарные A/B-образы и откат — целевая архитектура DuckOS.</span></div></div>' +
         '<div class="recovery-card"><strong>Точка восстановления Mora</strong><span data-recovery-status>' + recoveryStatus() + '</span>' +
         '<div class="approval-actions"><button class="action-button" data-action="save-recovery">Сохранить профиль</button>' +
-        '<button class="subtle-button" data-action="restore-recovery">Восстановить</button></div></div>' +
+        '<button class="subtle-button" data-action="restore-recovery">Восстановить</button>' +
+        '<button class="subtle-button" data-action="fork-recovery">Создать ветку</button></div>' +
+        '<p class="extension-status" data-branch-status>Сохранения имеют поколение и контроль CRC32; это профиль Mora, не системный раздел.</p></div>' +
         '<button class="wide-action" data-action="preview-update">Проверить план обновления</button>' +
         '<div class="intent-status" data-update-preview>Проверка только сформирует локальный план. Скачивания и установки не будет.</div>' +
         '<p class="window-copy">Сейчас сохраняются только настройки Mora в локальном хранилище браузера — не раздел ОС, приложения или пользовательские файлы.</p>';
@@ -643,15 +678,16 @@ function panelMarkup(appId) {
 
 function updateClock() {
   const now = new Date();
-  const time = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" }).format(now);
-  const date = new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now);
+  const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
+  const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(now);
+  const date = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now);
   document.getElementById("hero-clock").textContent = time;
   document.getElementById("status-time").textContent = time;
-  document.getElementById("hero-date").textContent = date.charAt(0).toLocaleUpperCase("ru-RU") + date.slice(1);
+  document.getElementById("hero-date").textContent = date.charAt(0).toLocaleUpperCase(locale) + date.slice(1);
 }
 
 function showToast(message) {
-  toastElement.textContent = message;
+  toastElement.textContent = translate(message);
   toastElement.classList.add("visible");
   window.clearTimeout(toastTimeout);
   toastTimeout = window.setTimeout(() => toastElement.classList.remove("visible"), 2200);
@@ -660,7 +696,7 @@ function showToast(message) {
 function updateActiveApp() {
   const windows = Array.from(windowLayer.querySelectorAll(".app-window"));
   if (windows.length === 0) {
-    activeAppLabel.textContent = "Рабочий стол";
+    activeAppLabel.textContent = translate("Рабочий стол");
   } else {
     windows.sort((a, b) => Number(b.style.zIndex) - Number(a.style.zIndex));
     const topWindow = windows[0];
@@ -907,8 +943,92 @@ windowLayer.addEventListener("pointerdown", (event) => {
   if (header && event.button === 0) startWindowDrag(appWindow, header, event);
 });
 
+function renderCommandResults(query = "") {
+  if (!commandResults) return;
+  const normalized = String(query).trim().toLocaleLowerCase(getLocale() === "uk" ? "uk-UA" : "ru-RU");
+  const matches = Object.entries(appDefinitions).filter(([id, app]) => {
+    const haystack = [id, app.name, app.subtitle, translate(app.subtitle)]
+      .join(" ")
+      .toLocaleLowerCase(getLocale() === "uk" ? "uk-UA" : "ru-RU");
+    return !normalized || haystack.includes(normalized);
+  }).slice(0, 12);
+
+  commandResults.replaceChildren();
+  if (!matches.length) {
+    const empty = document.createElement("p");
+    empty.className = "command-empty";
+    empty.textContent = getLocale() === "uk"
+      ? "Нічого не знайдено. Спробуйте іншу назву."
+      : "Ничего не найдено. Попробуйте другое название.";
+    commandResults.append(empty);
+    return;
+  }
+
+  for (const [id, app] of matches) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "command-result";
+    button.dataset.commandApp = id;
+    button.setAttribute("role", "option");
+    const glyph = document.createElement("span");
+    glyph.className = "command-result-glyph";
+    glyph.textContent = app.glyph;
+    const copy = document.createElement("span");
+    copy.className = "command-result-copy";
+    const name = document.createElement("strong");
+    name.textContent = app.name;
+    const subtitle = document.createElement("span");
+    subtitle.textContent = translate(app.subtitle);
+    copy.append(name, subtitle);
+    button.append(glyph, copy);
+    commandResults.append(button);
+  }
+}
+
+function openCommandSearch() {
+  if (!commandOverlay || !commandInput) return;
+  commandOverlay.hidden = false;
+  renderCommandResults();
+  commandInput.value = "";
+  commandInput.focus();
+}
+
+function closeCommandSearch() {
+  if (!commandOverlay) return;
+  commandOverlay.hidden = true;
+  if (commandTrigger) commandTrigger.focus();
+}
+
+commandTrigger?.addEventListener("click", openCommandSearch);
+commandInput?.addEventListener("input", () => renderCommandResults(commandInput.value));
+commandResults?.addEventListener("click", (event) => {
+  const choice = event.target.closest("[data-command-app]");
+  if (!choice || !appDefinitions[choice.dataset.commandApp]) return;
+  const appId = choice.dataset.commandApp;
+  closeCommandSearch();
+  openApp(appId);
+});
+commandOverlay?.querySelector("[data-command-close]")?.addEventListener("click", closeCommandSearch);
+
 document.addEventListener("keydown", (event) => {
+  const modifier = event.ctrlKey || event.metaKey;
   if (event.key === "Escape") {
+    if (commandOverlay && !commandOverlay.hidden) closeCommandSearch();
+    else closeTopWindow();
+    return;
+  }
+  if (modifier && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+    openCommandSearch();
+    return;
+  }
+  if (modifier && event.key === ",") {
+    event.preventDefault();
+    openApp("workspace");
+    return;
+  }
+  if (modifier && event.key.toLowerCase() === "w" && windowLayer.querySelector(".app-window")) {
+    event.preventDefault();
     closeTopWindow();
   }
 });
@@ -1009,8 +1129,15 @@ document.addEventListener("click", (event) => {
   if (saveRecovery) {
     const snapshot = createRecoverySnapshot(preferences);
     try {
-      localStorage.setItem(RECOVERY_KEY, JSON.stringify(snapshot));
-      setRecoveryStatus("Профиль Mora сохранён: " + new Date(snapshot.createdAt).toLocaleString("ru-RU"));
+      const previousRaw = localStorage.getItem(RECOVERY_KEY);
+      const previous = previousRaw ? validateStorageEnvelope(JSON.parse(previousRaw)) : null;
+      const envelope = createStorageEnvelope(snapshot, {
+        generation: (previous?.generation || 0) + 1,
+        previousDigest: previous?.integrity?.digest || null
+      });
+      localStorage.setItem(RECOVERY_KEY, JSON.stringify(envelope));
+      const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
+      setRecoveryStatus("Профиль Mora сохранён: " + new Date(snapshot.createdAt).toLocaleString(locale));
       showToast("Точка настроек Mora сохранена");
     } catch {
       setRecoveryStatus("Не удалось сохранить профиль: локальное хранилище недоступно.");
@@ -1022,7 +1149,11 @@ document.addEventListener("click", (event) => {
   if (restoreRecovery) {
     try {
       const raw = localStorage.getItem(RECOVERY_KEY);
-      const snapshot = raw ? validateRecoverySnapshot(JSON.parse(raw)) : null;
+      const stored = raw ? JSON.parse(raw) : null;
+      const envelope = stored ? validateStorageEnvelope(stored) : null;
+      const snapshot = stored
+        ? validateRecoverySnapshot(envelope ? envelope.payload : stored)
+        : null;
       if (!snapshot) {
         setRecoveryStatus("Нет действительной точки восстановления настроек Mora.");
         return;
@@ -1031,7 +1162,8 @@ document.addEventListener("click", (event) => {
       persistPreferences();
       updateSecurityPanel();
       updateWorkspacePanel();
-      setRecoveryStatus("Настройки Mora восстановлены из точки от " + new Date(snapshot.createdAt).toLocaleString("ru-RU"));
+      const locale = getLocale() === "uk" ? "uk-UA" : "ru-RU";
+      setRecoveryStatus("Настройки Mora восстановлены из точки от " + new Date(snapshot.createdAt).toLocaleString(locale));
       showToast("Профиль Mora восстановлен");
     } catch {
       setRecoveryStatus("Восстановление невозможно: хранилище недоступно или данные повреждены.");
@@ -1039,10 +1171,43 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const forkRecovery = event.target.closest('[data-action="fork-recovery"]');
+  if (forkRecovery) {
+    const status = forkRecovery.closest(".app-window").querySelector("[data-branch-status]");
+    try {
+      const branches = loadRecoveryBranches();
+      const latest = branches.at(-1) || null;
+      const revision = branches.reduce((max, branch) => Math.max(max, branch.revision), 0) + 1;
+      const branch = createStateBranch({
+        id: "mora-" + Date.now(),
+        parentId: latest ? latest.id : null,
+        revision,
+        state: createRecoverySnapshot(preferences)
+      });
+      const nextBranches = [...branches, branch].slice(-12);
+      localStorage.setItem(RECOVERY_BRANCHES_KEY, JSON.stringify(nextBranches));
+      if (status) status.textContent = "Создана ветка " + branch.id + " · ревизия " + branch.revision +
+        (branch.parentId ? " · родитель " + branch.parentId : " · корневая ветка");
+      showToast("Ветка настроек создана локально.");
+    } catch {
+      if (status) status.textContent = "Не удалось создать ветку: хранилище недоступно или данные повреждены.";
+    }
+    return;
+  }
+
   const updatePreview = event.target.closest('[data-action="preview-update"]');
   if (updatePreview) {
     const output = updatePreview.closest(".app-window").querySelector("[data-update-preview]");
-    output.textContent = "План: проверить подпись пакета → проверить свободное место → подготовить новый слот → выполнить smoke-test → оставить текущий слот для отката. Это архитектурный preview; updater и образы не подключены.";
+    const plan = createAtomicUpdatePlan({ activeSlot: "A" });
+    const checks = [
+      ["Подпись пакета", plan.checks.signatureVerified],
+      ["Совместимость", plan.checks.compatible],
+      ["Свободное место", plan.checks.capacityAvailable]
+    ];
+    const lines = checks.map(([label, passed]) => label + ": " + (passed ? "OK" : "не проверено"));
+    output.textContent = "A/B-план · текущий слот " + plan.currentSlot + " · целевой слот " + plan.targetSlot +
+      "\\n" + lines.join("\\n") + "\\n\\nЭтапы: " + plan.steps.join(" → ") +
+      "\\n\\n" + plan.note + " Execution: " + plan.execution + ".";
   }
 });
 
@@ -1101,14 +1266,17 @@ document.addEventListener("change", async (event) => {
   }
 });
 
-document.addEventListener("keydown", (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-    event.preventDefault();
-    openApp("mora-ai");
-  }
-});
+if (languageSelect) {
+  languageSelect.value = getLocale();
+  languageSelect.addEventListener("change", () => {
+    setLocale(languageSelect.value);
+    updateClock();
+    renderCommandResults(commandInput?.value || "");
+  });
+}
 
 applyPreferences();
+applyLocale(document);
 updateClock();
 window.setInterval(updateClock, 1000);
 updateActiveApp();
