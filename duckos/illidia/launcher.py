@@ -137,6 +137,8 @@ def inspect_game(library: IllidiaLibrary, game: GameRecord) -> dict[str, Any]:
         "game_id": game.id,
         "name": game.name,
         "launch_mode": "direct",
+        "runtime": game.runtime,
+        "runtime_prefix": game.runtime_prefix,
         "executable_path": str(executable),
         "working_directory": str(working_directory),
         "installed": True,
@@ -163,6 +165,36 @@ def _runtime_command(game: GameRecord) -> list[str]:
     if game.runtime == "proton":
         return [*command, "run", executable, *game.arguments]
     return [*command, executable, *game.arguments]
+
+
+def _execution_plan(game: GameRecord) -> tuple[list[str], dict[str, str], list[str]]:
+    """Resolve a configured runtime through DuckBridge without starting it."""
+    if game.runtime == "native" or game.runtime_command:
+        return _runtime_command(game), {}, []
+
+    from ..compat.bridge import DuckBridgeError, build_launch_plan
+
+    backend = "auto" if game.runtime in {"auto", "qemu"} else game.runtime
+    try:
+        plan = build_launch_plan(
+            game.executable_path or "",
+            purpose="game",
+            backend=backend,
+            bottle=game.launch_profile.get("bottle_name"),
+            compat_data=game.runtime_prefix,
+            arguments=game.arguments,
+        )
+    except (DuckBridgeError, OSError, ValueError) as error:
+        raise LaunchError(f"DuckBridge could not prepare this game: {error}") from error
+
+    if plan.get("status") != "ready" or not plan.get("argv"):
+        details = plan.get("warnings") or plan.get("required_configuration") or []
+        detail_text = "; ".join(str(item) for item in details) or "No compatible runtime is ready."
+        raise LaunchError(f"DuckBridge launch plan is not ready: {detail_text}")
+    if plan.get("execution_started") is not False or plan.get("prefix_created") is not False:
+        raise LaunchError("DuckBridge returned an invalid plan: planning must not execute or create prefixes.")
+
+    return list(plan["argv"]), dict(plan.get("environment") or {}), list(plan.get("warnings") or [])
 
 
 def _working_directory(game: GameRecord) -> Path:
@@ -293,9 +325,11 @@ def launch_game(
     if library.fingerprint(game.id) is None or update_fingerprint:
         library.set_fingerprint(game.id, digest)
 
-    command = _runtime_command(game)
+    command, runtime_environment, runtime_warnings = _execution_plan(game)
     cwd = _working_directory(game)
     env = _environment(game)
+    env.update(runtime_environment)
+    review["warnings"].extend(runtime_warnings)
     launch_id = str(uuid.uuid4())
     log_path = _log_directory(library) / f"{launch_id}.log"
 
