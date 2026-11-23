@@ -67,6 +67,18 @@ def _link_name(path: Path) -> str | None:
     return Path(value).name or None
 
 
+def _is_sysfs_directory(path: Path, sys_root: Path) -> bool:
+    """Follow normal sysfs device links, but never leave the supplied sysfs root."""
+    try:
+        if not path.is_dir():
+            return False
+        resolved_root = sys_root.resolve(strict=True)
+        resolved_path = path.resolve(strict=True)
+        return resolved_path.is_relative_to(resolved_root)
+    except (OSError, RuntimeError):
+        return False
+
+
 def _read_secure_boot(sys_root: Path) -> bool | None:
     efi_root = sys_root / "firmware/efi/efivars"
     try:
@@ -159,7 +171,7 @@ def _linux_snapshot(sys_root: Path = Path("/sys"), proc_root: Path = Path("/proc
 
     pci_root = sys_root / "bus/pci/devices"
     try:
-        pci_paths = sorted(p for p in pci_root.iterdir() if p.is_dir() and not p.is_symlink())[:MAX_DEVICES]
+        pci_paths = sorted(p for p in pci_root.iterdir() if _is_sysfs_directory(p, sys_root))[:MAX_DEVICES]
     except OSError:
         pci_paths = []
 
@@ -198,7 +210,7 @@ def _linux_snapshot(sys_root: Path = Path("/sys"), proc_root: Path = Path("/proc
 
     usb_root = sys_root / "bus/usb/devices"
     try:
-        usb_paths = sorted(p for p in usb_root.iterdir() if p.is_dir() and not p.is_symlink())[:MAX_DEVICES]
+        usb_paths = sorted(p for p in usb_root.iterdir() if _is_sysfs_directory(p, sys_root))[:MAX_DEVICES]
     except OSError:
         usb_paths = []
     for path in usb_paths:
@@ -218,7 +230,7 @@ def _linux_snapshot(sys_root: Path = Path("/sys"), proc_root: Path = Path("/proc
 
     block_root = sys_root / "block"
     try:
-        block_paths = sorted(p for p in block_root.iterdir() if p.is_dir() and not p.is_symlink())[:256]
+        block_paths = sorted(p for p in block_root.iterdir() if _is_sysfs_directory(p, sys_root))[:256]
     except OSError:
         block_paths = []
     for path in block_paths:
@@ -233,7 +245,7 @@ def _linux_snapshot(sys_root: Path = Path("/sys"), proc_root: Path = Path("/proc
 
     thermal_root = sys_root / "class/thermal"
     try:
-        zones = sorted(p for p in thermal_root.glob("thermal_zone*") if p.is_dir() and not p.is_symlink())[:MAX_SENSORS]
+        zones = sorted(p for p in thermal_root.glob("thermal_zone*") if _is_sysfs_directory(p, sys_root))[:MAX_SENSORS]
     except OSError:
         zones = []
     for zone in zones:
@@ -249,7 +261,7 @@ def _linux_snapshot(sys_root: Path = Path("/sys"), proc_root: Path = Path("/proc
 
     hwmon_root = sys_root / "class/hwmon"
     try:
-        hwmon_paths = sorted(p for p in hwmon_root.glob("hwmon*") if p.is_dir() and not p.is_symlink())[:64]
+        hwmon_paths = sorted(p for p in hwmon_root.glob("hwmon*") if _is_sysfs_directory(p, sys_root))[:64]
     except OSError:
         hwmon_paths = []
     for hwmon in hwmon_paths:
@@ -272,7 +284,7 @@ def _linux_snapshot(sys_root: Path = Path("/sys"), proc_root: Path = Path("/proc
 
     module_root = sys_root / "module"
     try:
-        modules = sorted(p.name for p in module_root.iterdir() if p.is_dir() and not p.is_symlink())[:MAX_DRIVERS]
+        modules = sorted(p.name for p in module_root.iterdir() if _is_sysfs_directory(p, sys_root))[:MAX_DRIVERS]
     except OSError:
         modules = []
     report["kernel_modules"] = modules
