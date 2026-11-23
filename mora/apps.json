@@ -156,5 +156,34 @@
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
     }
+  ],
+  "personal_suites": [
+    {
+      "id": "mora-personal-suite",
+      "name": "Mora Personal Suite",
+      "catalog": "catalogs/personal-suite.v1.json",
+      "schema": "schemas/personal-suite.v1.schema.json",
+      "application_ids": [
+        "lumina-cycle",
+        "nura-calm",
+        "verba-rest",
+        "sora-glow",
+        "kora-closet",
+        "mirra-fit",
+        "talia-palette",
+        "zara-loom",
+        "bela-notes",
+        "rina-craft",
+        "olea-kitchen",
+        "veda-bloom",
+        "mila-nest",
+        "daria-ledger",
+        "elda-circle"
+      ],
+      "data_policy": "local_only",
+      "maturity_status": "partial",
+      "storage_key": "mora.personal-suite.v1",
+      "cloud_sync": false
+    }
   ]
 }

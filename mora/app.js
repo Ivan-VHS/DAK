@@ -1,3 +1,5 @@
+import { personalAppDefinitions, renderPersonalApp, installPersonalSuite } from "./personal-suite.js";
+
 import {
   RECOVERY_KEY,
   buildIntentPlan,
@@ -24,7 +26,8 @@ const appDefinitions = {
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: "#948F7D", glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: "#A08B98", glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
+  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" },
+  ...personalAppDefinitions
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -292,7 +295,7 @@ function panelMarkup(appId) {
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
     default:
-      return '<h2 class="window-heading">Приложение не найдено</h2>';
+      return renderPersonalApp(appId);
   }
 }
 
@@ -653,6 +656,12 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     openApp("mora-ai");
   }
+});
+
+installPersonalSuite();
+window.addEventListener("mora:open-app", (event) => {
+  const appId = event.detail && event.detail.appId;
+  if (appId && appDefinitions[appId]) openApp(appId);
 });
 
 applyPreferences();
