@@ -101,7 +101,7 @@ void duckos_process_exit(int64_t exit_code) {
     current_process->exit_code = exit_code;
     current_process->state = DUCKOS_PROCESS_ZOMBIE;
     duckos_context_switch((uint64_t **)&current_process->saved_stack,
-                          &scheduler_stack);
+                          scheduler_stack);
     duckos_cli();
     for (;;) duckos_hlt();
 }
