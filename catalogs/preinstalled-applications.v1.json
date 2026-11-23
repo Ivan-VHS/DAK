@@ -4,7 +4,7 @@
   "operating_system": "DuckOS",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
+  "note": "Product specification and implementation evidence for the DuckOS application suite. The 21 application entries include native user-space Foundry; browser panels remain bounded prototypes and do not prove kernel services or boot-image inclusion.",
   "applications": [
     {
       "id": "cockos",
@@ -436,6 +436,38 @@
       "prototype_evidence": [
         "mora/index.html",
         "mora/app.js"
+      ]
+    },
+    {
+      "id": "foundry",
+      "name": "Foundry",
+      "domain": "industrial_system_operations",
+      "maturity_status": "partial",
+      "capabilities": [
+        "read_only_resource_and_process_overview",
+        "workspace_and_startup_audit",
+        "hardware_inventory_correlation",
+        "compatibility_runtime_discovery",
+        "operator_runbook_generation",
+        "explicit_local_report_export"
+      ],
+      "boundaries": [
+        "Native user-space diagnostic console; does not implement a kernel service",
+        "Combines existing Duck Desktop, hardware inventory and DuckBridge read-only sources",
+        "Runbooks are manual operator checklists and are never auto-executed",
+        "Does not terminate processes, modify drivers, services, power settings, registry, firmware or boot configuration",
+        "Does not control PLCs, industrial machinery or physical actuators",
+        "Mora browser panel is informational and launches no host processes"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "duckos/foundry.py",
+        "duckos/foundry_ui.py",
+        "duckos/cli.py",
+        "mora/app.js",
+        "tests/test_foundry.py",
+        "tests/test_foundry_cli.py"
       ]
     }
   ],
