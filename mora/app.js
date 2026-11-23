@@ -1170,11 +1170,17 @@ function initializeRightsPanel(appWindow) {
         ["Контент", content.title ?? content.id ?? "не указан"],
         ["Тип контента", content.kind ?? "не указан"],
         ["Издатель / подписант", publisher.id ?? "не указан"],
+        ["Ключ издателя", publisher.key_id ?? "не указан"],
+        ["Контент SHA-256", content.manifest_sha256 ?? "не указан"],
         ["Профиль", license.profile_id ?? "не привязан"],
         ["Домашнее устройство", license.home_device_id ?? "не привязано"],
         ["Область лицензии", license.scope ?? "не указана"],
+        ["Регион", license.region ?? "не указан"],
         ["Права", Array.isArray(license.rights) ? license.rights.join(", ") : "не указаны"],
-        ["Срок", license.expires_at ?? "не указан"],
+        ["Действует до", typeof license.expires_at === "number" ? new Date(license.expires_at * 1000).toLocaleString(localeTag()) : "не указан"],
+        ["Офлайн до", typeof license.offline_valid_until === "number" ? new Date(license.offline_valid_until * 1000).toLocaleString(localeTag()) : "не указан"],
+        ["Capture запрещён", Array.isArray(documentData.capture_policy?.denied_actions) ? documentData.capture_policy.denied_actions.join(", ") : "не объявлено"],
+        ["Capture разрешён", Array.isArray(documentData.capture_policy?.allowed_actions) ? documentData.capture_policy.allowed_actions.join(", ") : "не объявлено"],
         ["Создатель", typeof attribution.creator === "string" ? attribution.creator : (attribution.creator?.display_name ?? "не указан")],
         ["Источник", attribution.source?.reference ?? attribution.source?.description ?? "не указан"]
       ];
@@ -1321,7 +1327,7 @@ function handleConsoleAction(action) {
   }
 }
 
-function setConsoleMode(enabled) {
+function setConsoleMode(enabled, notify = true) {
   consoleMode = Boolean(enabled);
   document.documentElement.classList.toggle("console-mode", consoleMode);
   try { localStorage.setItem("duckos.mora.console-mode.v1", String(consoleMode)); } catch {}
@@ -1331,7 +1337,7 @@ function setConsoleMode(enabled) {
   });
   if (consoleMode) gamepadInput.start();
   else gamepadInput.stop();
-  showToast(consoleMode ? "Режим ТВ включён · D-pad / A / B / X / Y" : "Обычный режим Mora");
+  if (notify) showToast(consoleMode ? "Режим ТВ включён · D-pad / A / B / X / Y" : "Обычный режим Mora");
 }
 
 const gamepadInput = createGamepadInput({
@@ -2318,7 +2324,7 @@ document.addEventListener("keydown", (event) => {
 
 applyPreferences();
 switchWorkspace(activeWorkspace);
-setConsoleMode(consoleMode);
+setConsoleMode(consoleMode, false);
 updateClock();
 window.setInterval(updateClock, 1000);
 updateDemoMetrics();
