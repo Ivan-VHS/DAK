@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/executable-app.v1.schema.json",
+  "title": "DuckOS imported executable application v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "name", "entrypoint", "executable", "files", "imported_at", "trust_state", "requested_capabilities", "signature_state"],
+  "properties": {
+    "schema": {"const": "duckos.executable-app.v1"},
+    "id": {"type": "string", "pattern": "^[0-9a-f]{24}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "entrypoint": {"type": "string", "minLength": 1, "maxLength": 1024},
+    "executable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "architecture", "bits", "machine", "subsystem", "is_dll", "size_bytes"],
+      "properties": {
+        "format": {"enum": ["windows-pe", "dos-mz", "dos-com", "dos-legacy"]},
+        "architecture": {"type": "string", "minLength": 1, "maxLength": 32},
+        "bits": {"type": ["integer", "null"], "enum": [16, 32, 64, null]},
+        "machine": {"type": ["integer", "null"]},
+        "subsystem": {"type": ["integer", "null"]},
+        "is_dll": {"type": "boolean"},
+        "size_bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "size_bytes", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1, "maxLength": 1024},
+          "size_bytes": {"type": "integer", "minimum": 0, "maximum": 8589934592},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "imported_at": {"type": "string", "format": "date-time"},
+    "trust_state": {"const": "untrusted"},
+    "requested_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["graphics", "audio", "input", "filesystem.appdata"]}
+    },
+    "signature_state": {"const": "not_verified"}
+  }
+}
