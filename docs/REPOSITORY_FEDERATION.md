@@ -69,3 +69,16 @@ cmake --build build/ventusample --parallel
 ```
 
 This is a developer build of those user-space projects; it is not part of DuckOS's boot chain and is not automatically invoked by the OS build.
+
+## Upstream pin refresh — 23 November 2026
+
+The four specialist source links are advanced together to the exact upstream `main` commits observed during this reviewed refresh. The update preserves each repository's independent history, license and runtime boundary; it does not turn a source checkout into a built or enabled DuckOS service.
+
+| Project | Previous pin | Refreshed pin | Upstream review |
+|---|---|---|---|
+| Pytyliki | `6a20e4d4bc02a62b6fe91a8d2717f6275b75661e` | `f5b552c8634d5ae7fee852f260ba9bc15df9bcfa` | [PR #209](https://github.com/Ivan-VHS/Pytyliki/pull/209) |
+| Reaper | `02a1008bb071de50f2890d3f045aef0d50b9dc04` | `f8f3448ba476abd68dce534e961d53e16970372b` | [PR #244](https://github.com/Ivan-VHS/Reaper/pull/244) |
+| OPlague | `c0ebba86d8a851c8b1d6abbcd660909be4bd50ca` | `521f45f8d4324b3e99c8cfd2c5cd457e5ec8199e` | [PR #162](https://github.com/Ivan-VHS/OPlague/pull/162) |
+| VentuSample | `f98aa06fd407823cb289acaf4590c864ff29cb0e` | `658cf5c9d4a571621d23e358c4bfa57f7de98b56` | [PR #123](https://github.com/Ivan-VHS/VentuSample/pull/123) |
+
+The registry and superproject Git links must move in the same commit. The existing federation validator checks that pairing. The policy remains `auto_build=false`, `auto_execute=false`, and `integration_status=source-pinned-only` for every upstream project. Review the upstream CI at each linked pull request before adopting a new pin; during this snapshot, two Reaper macOS check-runs were still queued.
