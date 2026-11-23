@@ -1,0 +1,1171 @@
+{
+  "schema": "duckos.gaming-rule-catalog.v1",
+  "version": 1,
+  "rule_count": 66,
+  "source": "User-provided 66-rule operating-system gaming performance specification",
+  "policy": "Capability-driven; unavailable providers remain unavailable and are never simulated.",
+  "rules": [
+    {
+      "id": "GPR-01",
+      "number": 1,
+      "domain": "detection",
+      "title": "Automatic game process detection",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-02",
+      "number": 2,
+      "domain": "detection",
+      "title": "Immediate gaming-mode activation",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-03",
+      "number": 3,
+      "domain": "detection",
+      "title": "Automatic return to normal mode",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-04",
+      "number": 4,
+      "domain": "detection",
+      "title": "Per-game and per-engine profiles",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-05",
+      "number": 5,
+      "domain": "detection",
+      "title": "Game versus overlay classification",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-06",
+      "number": 6,
+      "domain": "detection",
+      "title": "Power-source and dock awareness",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-07",
+      "number": 7,
+      "domain": "detection",
+      "title": "Loading-screen and cutscene recognition",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-08",
+      "number": 8,
+      "domain": "detection",
+      "title": "Refresh-rate and VRR awareness",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-09",
+      "number": 9,
+      "domain": "detection",
+      "title": "Active-session prioritization",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-10",
+      "number": 10,
+      "domain": "detection",
+      "title": "Deferral of non-urgent background work",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-11",
+      "number": 11,
+      "domain": "detection",
+      "title": "Quiet notification policy",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-12",
+      "number": 12,
+      "domain": "detection",
+      "title": "Visible gaming-mode state",
+      "providers": [
+        "process_catalog",
+        "window_manager",
+        "graphics_context",
+        "display_info",
+        "power_source",
+        "session_coordinator"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-13",
+      "number": 13,
+      "domain": "cpu",
+      "title": "Main and render thread protection",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-14",
+      "number": 14,
+      "domain": "cpu",
+      "title": "CPU topology aware placement",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-15",
+      "number": 15,
+      "domain": "cpu",
+      "title": "Reduced thread migration",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-16",
+      "number": 16,
+      "domain": "cpu",
+      "title": "Stable audio-thread scheduling",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-17",
+      "number": 17,
+      "domain": "cpu",
+      "title": "ISR and DPC pressure monitoring",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-18",
+      "number": 18,
+      "domain": "cpu",
+      "title": "Adaptive CPU frequency governor",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-19",
+      "number": 19,
+      "domain": "cpu",
+      "title": "Thermal-aware power ceiling",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-20",
+      "number": 20,
+      "domain": "cpu",
+      "title": "Stable timer and sleep precision",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-21",
+      "number": 21,
+      "domain": "cpu",
+      "title": "Bounded background worker concurrency",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-22",
+      "number": 22,
+      "domain": "cpu",
+      "title": "Legacy and multithreaded engine compatibility",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-23",
+      "number": 23,
+      "domain": "cpu",
+      "title": "Frame-time aware scheduling",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-24",
+      "number": 24,
+      "domain": "cpu",
+      "title": "Fast response to scene-load spikes",
+      "providers": [
+        "scheduler",
+        "cpu_topology",
+        "interrupt_telemetry",
+        "power_telemetry",
+        "timer_provider",
+        "frame_time"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-25",
+      "number": 25,
+      "domain": "memory",
+      "title": "Working-set reservation for the game",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-26",
+      "number": 26,
+      "domain": "memory",
+      "title": "Reduced paging during gameplay",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-27",
+      "number": 27,
+      "domain": "memory",
+      "title": "Adaptive memory compression",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-28",
+      "number": 28,
+      "domain": "memory",
+      "title": "Game-aware file-cache policy",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-29",
+      "number": 29,
+      "domain": "memory",
+      "title": "Predictable allocation and fragmentation control",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-30",
+      "number": 30,
+      "domain": "memory",
+      "title": "Prefetch of upcoming game assets",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-31",
+      "number": 31,
+      "domain": "memory",
+      "title": "Post-session memory and cache cleanup",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-32",
+      "number": 32,
+      "domain": "memory",
+      "title": "Memory-pressure escalation policy",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-33",
+      "number": 33,
+      "domain": "memory",
+      "title": "Coordinated RAM and VRAM pressure",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-34",
+      "number": 34,
+      "domain": "memory",
+      "title": "Background memory-leak containment",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-35",
+      "number": 35,
+      "domain": "memory",
+      "title": "Deferred heavy cache maintenance",
+      "providers": [
+        "memory_pressure",
+        "swap_metrics",
+        "compression",
+        "page_cache",
+        "storage_prefetch",
+        "vram_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-36",
+      "number": 36,
+      "domain": "graphics",
+      "title": "Shortest safe frame presentation path",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-37",
+      "number": 37,
+      "domain": "graphics",
+      "title": "Reduced desktop compositor overhead",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-38",
+      "number": 38,
+      "domain": "graphics",
+      "title": "Bounded frame queue and pre-render depth",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-39",
+      "number": 39,
+      "domain": "graphics",
+      "title": "VRR and adaptive-sync support",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-40",
+      "number": 40,
+      "domain": "graphics",
+      "title": "Reliable display-mode transitions",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-41",
+      "number": 41,
+      "domain": "graphics",
+      "title": "GPU command-queue balancing",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-42",
+      "number": 42,
+      "domain": "graphics",
+      "title": "HDR and colour-profile coordination",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-43",
+      "number": 43,
+      "domain": "graphics",
+      "title": "Graphics-stack recovery after driver reset",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-44",
+      "number": 44,
+      "domain": "graphics",
+      "title": "Resolution and DPI coordination",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-45",
+      "number": 45,
+      "domain": "graphics",
+      "title": "Reduced work on static frames",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-46",
+      "number": 46,
+      "domain": "graphics",
+      "title": "GPU thermal telemetry and limits",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-47",
+      "number": 47,
+      "domain": "graphics",
+      "title": "Game-context GPU scheduling priority",
+      "providers": [
+        "compositor",
+        "gpu_queue",
+        "display_info",
+        "vrr",
+        "hdr",
+        "gpu_telemetry",
+        "graphics_recovery"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-48",
+      "number": 48,
+      "domain": "io",
+      "title": "Game-aware storage I/O priority",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-49",
+      "number": 49,
+      "domain": "io",
+      "title": "NVMe, SSD and HDD queue policy",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-50",
+      "number": 50,
+      "domain": "io",
+      "title": "Game traffic latency and jitter monitoring",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-51",
+      "number": 51,
+      "domain": "io",
+      "title": "Predictable input-device polling",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-52",
+      "number": 52,
+      "domain": "io",
+      "title": "USB input power-state coordination",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-53",
+      "number": 53,
+      "domain": "io",
+      "title": "Deferral of cloud sync and background transfers",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-54",
+      "number": 54,
+      "domain": "io",
+      "title": "Non-blocking logging and telemetry",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-55",
+      "number": 55,
+      "domain": "io",
+      "title": "Bounded background scanning",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-56",
+      "number": 56,
+      "domain": "io",
+      "title": "Safe hot-plug handling",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-57",
+      "number": 57,
+      "domain": "io",
+      "title": "PCIe and SATA contention visibility",
+      "providers": [
+        "storage_io",
+        "network_metrics",
+        "input_devices",
+        "usb_power",
+        "background_sync",
+        "event_log",
+        "pcie_metrics"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-58",
+      "number": 58,
+      "domain": "power",
+      "title": "Task-aware system power profile",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "reversible_with_snapshot",
+      "requires_consent": true,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-59",
+      "number": 59,
+      "domain": "power",
+      "title": "Predictive thermal headroom management",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-60",
+      "number": 60,
+      "domain": "power",
+      "title": "Adaptive fan and cooling integration",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-61",
+      "number": 61,
+      "domain": "power",
+      "title": "Isolation of auxiliary-process failures",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-62",
+      "number": 62,
+      "domain": "power",
+      "title": "Compatibility safeguards for legacy APIs",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-63",
+      "number": 63,
+      "domain": "power",
+      "title": "Hardware-profile adaptation",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-64",
+      "number": 64,
+      "domain": "power",
+      "title": "Hard safety limits for all tuning",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "observe_or_recommend",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-65",
+      "number": 65,
+      "domain": "power",
+      "title": "Gradual exit from gaming mode",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "reversible_with_snapshot",
+      "requires_consent": true,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    },
+    {
+      "id": "GPR-66",
+      "number": 66,
+      "domain": "power",
+      "title": "Stable low-overhead gaming experience",
+      "providers": [
+        "power_plan",
+        "thermal_control",
+        "fan_control",
+        "reliability_events",
+        "compatibility_profiles",
+        "hardware_profile",
+        "consent_manager",
+        "session_snapshot"
+      ],
+      "execution": "goal",
+      "requires_consent": false,
+      "safe_default": "defer_when_provider_or_evidence_is_missing"
+    }
+  ]
+}
