@@ -181,6 +181,34 @@ class IllidiaTests(unittest.TestCase):
 
         self.assertEqual(command, [str(binary.resolve()), "one;two", "$(do-not-run)", "space value"])
 
+    def test_auto_runtime_uses_duckbridge_plan_without_executing_it(self) -> None:
+        binary = self.executable(self.root / "runtime-game.exe")
+        game = self.library.add_game(
+            name="Runtime game",
+            source="custom",
+            executable_path=binary,
+            runtime="auto",
+            runtime_prefix=self.root / "prefix",
+        )
+        expected = {
+            "status": "ready",
+            "argv": ["/usr/bin/wine", str(binary.resolve()), "--test"],
+            "environment": {"WINEPREFIX": str(self.root / "prefix")},
+            "warnings": ["test runtime plan"],
+            "execution_started": False,
+            "prefix_created": False,
+        }
+        with patch("duckos.compat.bridge.build_launch_plan", return_value=expected) as build_plan:
+            command, environment, warnings = launcher._execution_plan(game)
+
+        self.assertEqual(command, expected["argv"])
+        self.assertEqual(environment, expected["environment"])
+        self.assertEqual(warnings, expected["warnings"])
+        self.assertEqual(build_plan.call_args.kwargs["purpose"], "game")
+        self.assertEqual(build_plan.call_args.kwargs["backend"], "auto")
+        self.assertFalse(expected["execution_started"])
+        self.assertFalse(expected["prefix_created"])
+
     def test_unsupported_store_uri_is_rejected(self) -> None:
         with self.assertRaises(launcher.LaunchError):
             launcher._open_store_uri("file:///etc/passwd")
