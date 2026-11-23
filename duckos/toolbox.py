@@ -322,6 +322,8 @@ def list_listening_ports() -> dict[str, Any]:
         return {"source": "psutil", "ports": rows, "read_only": True}
     except ImportError:
         pass
+    except OSError:
+        pass
 
     proc = Path("/proc/net/tcp")
     if not proc.is_file():
