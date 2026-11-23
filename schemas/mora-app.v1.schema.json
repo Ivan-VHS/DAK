@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/mora-app.v1.schema.json",
+  "title": "Mora desktop application manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "name", "summary", "description", "category", "capabilities", "entrypoint", "integration"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "category": { "enum": ["desktop", "developer", "system", "audio", "compute"] },
+    "accent": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "capabilities": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 60 }, "maxItems": 16, "uniqueItems": true },
+    "entrypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "platforms"],
+      "properties": {
+        "kind": { "enum": ["python", "native", "shell"] },
+        "path": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "platforms": { "type": "array", "items": { "enum": ["windows", "linux", "macos"] }, "minItems": 1, "uniqueItems": true },
+        "requires": { "type": "array", "items": { "type": "string", "maxLength": 120 }, "maxItems": 8 }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["theme_environment", "themes", "window_mode", "local_only"],
+      "properties": {
+        "theme_environment": { "const": "MORA_THEME_MODE" },
+        "themes": { "type": "array", "items": { "enum": ["dark", "light"] }, "minItems": 2, "uniqueItems": true },
+        "window_mode": { "enum": ["shell", "separate-native-window"] },
+        "local_only": { "const": true }
+      }
+    }
+  }
+}
