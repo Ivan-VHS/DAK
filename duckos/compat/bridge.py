@@ -307,6 +307,7 @@ def _needs_configuration(plan: dict[str, Any], runtime: dict[str, Any],
 def build_launch_plan(path: str | Path, *, purpose: str = "application",
                       backend: str = "auto", bottle: str | None = None,
                       compat_data: str | Path | None = None,
+                      wine_prefix: str | Path | None = None,
                       arguments: list[str] | None = None,
                       search_path: str | None = None,
                       home: str | Path | None = None,
@@ -445,6 +446,8 @@ def build_launch_plan(path: str | Path, *, purpose: str = "application",
             argv.extend(["-a", shlex.join(extra_args)])
     else:
         environment = {}
+        if runtime_id == "wine" and wine_prefix is not None:
+            environment["WINEPREFIX"] = str(Path(wine_prefix).expanduser().resolve())
         argv = [*command, str(resolved), *extra_args]
 
     plan.update({
