@@ -28,6 +28,9 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#if defined(__linux__)
+#include <sys/syscall.h>
+#endif
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -1117,8 +1120,8 @@ bool launchNativeProcess(const fs::path& executable,
 #endif
 
 bool terminateProcess(const ProcessRecord& record, std::string& error) {
-    if (!processIdentityMatches(record)) {
-        error = "The process is no longer running, or its PID has been reused";
+    if (record.startToken == 0) {
+        error = "The process start identity is missing";
         return false;
     }
 #ifdef _WIN32
@@ -1146,6 +1149,28 @@ bool terminateProcess(const ProcessRecord& record, std::string& error) {
         return false;
     }
 #else
+#if defined(__linux__) && defined(SYS_pidfd_open) && defined(SYS_pidfd_send_signal)
+    const int processHandle = static_cast<int>(::syscall(SYS_pidfd_open, static_cast<pid_t>(record.processId), 0));
+    if (processHandle >= 0) {
+        if (processStartToken(record.processId) != record.startToken) {
+            ::close(processHandle);
+            error = "Process identity changed before stop";
+            return false;
+        }
+        const int sent = static_cast<int>(::syscall(SYS_pidfd_send_signal, processHandle, SIGTERM, nullptr, 0));
+        const int signalError = errno;
+        ::close(processHandle);
+        if (sent != 0) {
+            error = "pidfd_send_signal failed: " + std::string(std::strerror(signalError));
+            return false;
+        }
+        return true;
+    }
+#endif
+    if (!processIdentityMatches(record)) {
+        error = "The process is no longer running, or its PID has been reused";
+        return false;
+    }
     if (::kill(static_cast<pid_t>(record.processId), SIGTERM) != 0) {
         error = "SIGTERM failed: " + std::string(std::strerror(errno));
         return false;
@@ -1413,8 +1438,17 @@ bool registerApplication(const fs::path& manifestPath,
 
     std::error_code ec;
     const fs::path root = fs::canonical(installRoot, ec);
-    if (ec || !fs::is_directory(root, ec) || ec) {
+    if (ec) {
         error = "The supplied installation root is not an existing directory";
+        return false;
+    }
+    if (!fs::is_directory(root, ec) || ec) {
+        error = "The supplied installation root is not an existing directory";
+        return false;
+    }
+    const std::string rootText = pathToUtf8(root);
+    if (rootText.find_first_of("\r\n\t") != std::string::npos) {
+        error = "Installation paths containing tabs or line breaks cannot be registered";
         return false;
     }
 
