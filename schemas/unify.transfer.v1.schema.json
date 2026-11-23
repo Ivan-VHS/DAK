@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/unify.transfer.v1.schema.json",
+  "title": "Unify manual transfer package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "createdAt",
+    "tabs",
+    "clips"
+  ],
+  "properties": {
+    "schema": {
+      "const": "unify.transfer.v1"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tabs": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https?://"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "clips": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "mime",
+          "dataUrl"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "mime": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "dataUrl": {
+            "type": "string",
+            "maxLength": 16777216,
+            "pattern": "^data:[^;]+;base64,"
+          }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reduceMotion": {
+          "type": "boolean"
+        },
+        "doNotDisturb": {
+          "type": "boolean"
+        },
+        "trackerProtection": {
+          "type": "boolean"
+        },
+        "volumePrefs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      }
+    }
+  }
+}
