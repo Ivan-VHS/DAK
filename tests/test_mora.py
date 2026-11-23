@@ -119,6 +119,23 @@ class MoraCommonsTests(unittest.TestCase):
         self.assertEqual(len(filter_commons_apps(apps)), 2)
 
 
+
+class MoraRegistryTests(unittest.TestCase):
+    def test_packaged_registry_has_the_expected_native_inventory(self):
+        root = Path(__file__).resolve().parents[1] / "duckos" / "mora" / "data"
+        registry = json.loads((root / "apps.json").read_text(encoding="utf-8"))
+        self.assertEqual(registry["schema_version"], "1.3.0")
+        self.assertGreaterEqual(len(registry["built_in_apps"]), 29)
+        self.assertTrue(all(app.get("runtime") == "native-tk" for app in registry["built_in_apps"]))
+        self.assertTrue(all("panel" not in app for app in registry["built_in_apps"]))
+
+    def test_commons_catalog_is_valid_json(self):
+        root = Path(__file__).resolve().parents[1] / "duckos" / "mora" / "data"
+        catalogue = json.loads((root / "commons-catalog.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(catalogue["apps"]), 15)
+        self.assertEqual(len({app["id"] for app in catalogue["apps"]}), 15)
+
+
 class MoraIntegrityTests(unittest.TestCase):
     def test_sha256_reads_but_never_executes_a_file(self):
         with tempfile.TemporaryDirectory() as temporary:
