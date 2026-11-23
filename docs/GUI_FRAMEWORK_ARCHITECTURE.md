@@ -20,7 +20,7 @@ Qt Quick / QML is reserved for separate declarative scenes where it provides a c
 | Layer | Selected implementation | Scope |
 |---|---|---|
 | Main desktop | PySide6 Qt Widgets | Mora launcher, app windows, system panels, dialogs, accessibility and input |
-| Declarative scenes | Qt Quick / QML, optional | Isolated animated/scene-based interfaces, not an HTML canvas |
+| Declarative scenes | Qt Quick / QML, optional (`duckos mora scene`) | Standalone animated native scene; no HTML canvas |
 | Charts | PyQtGraph, optional | Native Qt plots and numeric visualizations |
 | GPU diagnostics | Dear PyGui, separate process | GPU-accelerated engineering/diagnostic utility; not the desktop shell |
 | TUI | Textual, optional | Terminal-based recovery and remote administration |
@@ -43,6 +43,8 @@ Tkinter wrappers and themes are retired because the primary shell no longer uses
 - `terminal-ui`: Textual, Rich and Prompt Toolkit for terminal surfaces.
 - `windows-native`: PyWin32 on Windows only.
 - `native-ffi`: CFFI for explicitly built native ABI adapters.
+- `macos-native`: PyObjC/AppKit adapter on macOS only.
+- `native-ui` also provides a standalone Qt Quick scene preview through `duckos mora scene`.
 
 Do not install every alternative framework. The base install remains lightweight; desktop, charts, GPU and TUI capabilities are installed only when requested. The app launcher does not import optional modules until their command or feature is selected.
 
