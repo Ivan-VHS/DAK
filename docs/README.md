@@ -1,5 +1,9 @@
 # DuckOS documentation
 
+## Native architecture and execution plan
+
+[Native transition architecture: Mora to DuckOS](NATIVE_TRANSITION_ARCHITECTURE.md) is the coordinated engineering baseline for the eleven native workstreams. It defines target layer boundaries, shared capability/IPC/audit/transaction contracts, subsystem acceptance gates, dependency order, CI and release evidence. It is an architecture specification, not evidence that the native subsystems are already implemented.
+
 ## Desktop and application interfaces
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
