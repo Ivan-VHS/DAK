@@ -1,32 +1,45 @@
-# Mora desktop — общая оболочка проектов
+# Mora desktop — unified workspace
 
-**Канонический проект:** [DuckOS](https://github.com/Ivan-VHS/DuckOS)  
-**Версия контракта приложений:** mora-app.json v1
+**Canonical host:** DuckOS / Mora  
+**Manifest contract:** mora-app.json, schema version 1  
+**Local endpoint:** http://127.0.0.1:43860
 
-Mora — единая локальная рабочая область для приложений семейства Ivan‑VHS. DuckOS хранит оболочку и локальный узел запуска; прикладные репозитории остаются самостоятельными программами со своими зависимостями, циклами выпуска и границами безопасности.
+Mora is the shared desktop entry point for the DuckOS seven-app prototype and the connected Ivan-VHS native development tools. It provides a common visual language, local home screen, project catalogue, startup theme and allowlisted application launcher. It does not conflate a browser prototype with a native operating-system service.
 
-## Что делает оболочка
+## Two connected layers
 
-- Показывает обнаруженные проекты в одном каталоге, разбитом по назначению.
-- Запускает разрешённые точки входа приложений отдельным нативным окном.
-- Сохраняет выбор тёмной или светлой темы и передаёт его новым процессам.
-- Показывает отсутствие репозитория или нативной сборки как отдельное состояние, а не подменяет их демонстрационным окном.
-- Не передаёт shell-команды из браузера и не исполняет строку запуска из манифеста.
+### Seven-app Mora home screen
 
-## Приложения и фактические роли
+The default desktop opens prototype/mora-home.html. Its seven app identities remain Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. The prototype uses local browser storage and browser APIs where available. Its capabilities are partial and platform-dependent; the native applications and missing OS services are not claimed as implemented.
 
-| Приложение | Репозиторий | Роль |
+| App | Prototype scope | Native gap |
 |---|---|---|
-| Reaper Studio | [Reaper](https://github.com/Ivan-VHS/Reaper) | Язык MOST/Reaper, IDE, check/run, debugger и LSP/DAP |
-| OPlague | [OPlague](https://github.com/Ivan-VHS/OPlague) | Read-only инвентаризация устройств и инспекция пакетов |
-| VentuSample | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | Процедурная генерация сэмплов и офлайн-DSP |
-| Pytyliki | [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | Процессорная инвентаризация, измерения и анализ |
+| Cockos | Browser microphone capture, local tracks and mixdown | System-wide per-app audio sessions and native recorder service |
+| Kavun | Local media library, slices and non-destructive preview/export | Image understanding and automatic location indexing |
+| Ka-bon | Local expenses, attached receipts, subscriptions and family records | Receipt OCR, bank integrations and cloud sharing |
+| Gloverty | User-authored local rules and manually invoked supported actions | OS scheduling, global gestures and global shortcuts |
+| Po | Local tab records, external navigation and reading view | Browser-engine isolation and tracker-blocking network stack |
+| Illidia | Local game catalogue, progress, achievements and user-authorized screen clips | Native executable launcher, cloud saves and platform achievement providers |
+| Unify | Local device labels, browser clipboard and bounded JSON export/import | Authenticated pairing, live synchronization and phone notification service |
 
-Mora сама является рабочим столом; отдельный дублирующий пункт DuckOS в списке пользовательских приложений не нужен.
+The authoritative maturity and safety specification remains [PREINSTALLED_APPLICATIONS.md](PREINSTALLED_APPLICATIONS.md), with the catalog in catalogs/preinstalled-applications.v1.json. The home screen does not replace or rewrite that catalog.
 
-## Запуск
+### Connected native project workspace
 
-Разместите репозитории рядом:
+The top-bar link **Проекты Ivan-VHS** opens /projects. These entries are independent repositories, not additional members of the seven-app product catalog.
+
+| Project | Repository role | Launch target |
+|---|---|---|
+| Reaper Studio | MOST/Reaper language tools, IDE, check/run, debugger and LSP/DAP | reaper_desktop.py via the current Python interpreter |
+| OPlague | Local read-only device inventory and INF/ZIP/PE inspection | oplague_app.py via Python |
+| VentuSample | C++20 / Qt 6 procedural sample workstation and offline DSP | Existing built VentuSample desktop target |
+| Pytyliki | C11 processor-systems workbench and Win32 GUI | Existing built pytyliki-gui.exe on Windows |
+
+Mora shows an external project as unavailable when its repository or executable target is missing. It does not create fake windows for unbuilt binaries.
+
+## Start
+
+Place DuckOS, Reaper, OPlague, VentuSample and Pytyliki side by side:
 
     workspace/
     ├── DuckOS/
@@ -35,13 +48,17 @@ Mora сама является рабочим столом; отдельный �
     ├── VentuSample/
     └── Pytyliki/
 
-Из каталога DuckOS выполните:
+From DuckOS:
 
     python mora_host.py
 
-Узел слушает только 127.0.0.1:43860 и открывает локальную страницу. Без mora_host.py страница остаётся статическим интерфейсом без доступа к запуску процессов.
+The server listens on 127.0.0.1 only. The root URL serves the seven-app home screen; /projects serves the external project catalogue. The /api/launch endpoint accepts only the four fixed project IDs and known entry points.
 
-Если проекты находятся в других местах, задайте пути в файле workspace.json. Его расположение: %APPDATA%/Ivan-VHS/Mora/workspace.json (Windows), ~/Library/Application Support/Mora/workspace.json (macOS) или $XDG_CONFIG_HOME/mora/workspace.json (Linux).
+Python 3.10 or newer is needed for the local host. Native Qt and Windows builds retain their own compiler, toolkit and platform prerequisites.
+
+## Repository discovery
+
+By default Mora checks sibling repositories, a workspace subdirectory, and Projects directories under the current user's home. For other local layouts, configure paths in workspace.json:
 
     {
       "version": 1,
@@ -54,39 +71,38 @@ Mora сама является рабочим столом; отдельный �
       }
     }
 
-Относительные пути в этом файле разрешаются от каталога DuckOS. Значения repositories — локальные пути; браузер не может передавать произвольную команду или исполняемый файл.
+The file is stored in the normal per-user configuration directory: %APPDATA%/Ivan-VHS/Mora/workspace.json on Windows, ~/Library/Application Support/Mora/workspace.json on macOS, or $XDG_CONFIG_HOME/mora/workspace.json on Linux. Relative paths resolve from the DuckOS repository root.
 
-## Единая тема Mora
+## Shared visual and theme contract
 
-Поддерживаются режимы dark и light. Они согласованы с существующими сине-красными палитрами приложений:
+The two workspace surfaces use Mora's dark navy, glass surfaces, blue primary actions and restrained red signal accents. The seven app icons may keep distinct identity colors; this does not change shared layout, typography, focus, spacing or window behavior.
 
-| Роль | Dark | Light |
-|---|---|---|
-| Фон | #071A2D | #F4F8FD |
-| Поверхность | #0F2A45 | #FFFFFF |
-| Поднятая поверхность | #173A5E | #EAF1FA |
-| Текст | #E8EDF2 | #122C45 |
-| Акцент | #70A5FF | #004E98 |
-| Сигнальный | #FF7B86 | #B5122D |
+Mora persists a dark or light startup preference. It passes MORA_THEME_MODE=dark or light to new native processes. Reaper, OPlague, VentuSample and Pytyliki read the value before their first theme is applied. Existing application theme controls remain available. The seven-app home screen reads the same preference on page load and when it regains focus.
 
-Узел перед запуском устанавливает MORA_THEME_MODE=dark или light. Приложение применяет этот режим при старте; запущенные процессы не перерисовываются удалённо. Локальный выбор темы, если он предусмотрен самим приложением, остаётся доступным.
+A theme change does not remotely repaint already-running native processes. Restart an application to apply the current Mora theme to its startup surface.
 
-## Контракт манифеста
+## Security and product boundaries
 
-Каждый прикладной репозиторий содержит mora-app.json, соответствующий схеме schemas/mora-app.v1.schema.json. Манифест описывает назначение, категорию, возможности, платформы и ожидаемую точку входа. Он служит метаданными и не является разрешением на исполнение произвольной команды.
+- The local HTTP host binds only to 127.0.0.1 and applies same-origin checks to state-changing requests.
+- Browser code can request a fixed app ID; it cannot provide a shell command or executable path.
+- The launcher has a per-project allowlist and starts apps as separate native processes.
+- App manifests supply descriptive metadata. Their entrypoint strings are not executed by the host.
+- OPlague remains read-only; Mora does not elevate privileges or install drivers.
+- VentuSample remains an offline renderer and DSP workstation, not a DAW or audio-device host.
+- Pytyliki does not gain scheduler, affinity, voltage, clock or firmware controls.
+- Reaper's language/runtime and compiler tracks remain independent of the desktop shell.
+- The seven browser app prototypes retain their own consent, data-retention and capability boundaries; see PREINSTALLED_APPLICATIONS.md and UNIFY_TRANSFER_FORMAT_V1.md.
 
-Путь и способ запуска для каждого приложения дополнительно закреплены в mora_host.py. Это намеренная allowlist: Reaper запускается через Python Studio entry point, VentuSample — только после сборки Qt 6 desktop target, а Pytyliki — только при наличии Windows GUI target.
+## Application manifest schema
 
-## Границы интеграции
+Each external repository carries mora-app.json using schemas/mora-app.v1.schema.json. The schema describes the app identity, category, capabilities, platform declaration, expected entry point and Mora theme hand-off. It is metadata, not executable configuration.
 
-- Mora управляет каталогом, темой и запуском; не внедряет код в память приложений и не подменяет их окна.
-- Приложения работают в отдельных процессах и используют штатный оконный менеджер ОС.
-- OPlague остаётся read-only и не получает команды установки драйверов.
-- VentuSample сохраняет офлайн-рендеринг и не становится DAW или аудиохостом.
-- Pytyliki не меняет планировщик, частоты, напряжения или прошивки.
-- Reaper не меняет модель исполнения языка ради оболочки.
+For safety, the actual native launch command is separately fixed in mora_host.py. To add a new repository, update the schema-compatible manifest, the fixed launcher allowlist, the app catalogue and the associated tests together.
 
-## Проверка
+## Verification
 
     python -m unittest discover -s tests -v
+    python tools/validate_app_catalog.py
     python mora_host.py --no-browser
+
+The existing CI validates the seven-app catalog and runs unit tests under Python 3.10, 3.11 and 3.12. Native GUI verification remains platform-specific and must use the actual Qt 6 or Windows build jobs.
