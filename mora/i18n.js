@@ -383,6 +383,13 @@ Object.assign(translations, {
 
 Object.assign(translations, {
   "Открыть меню DuckOS": ["Відкрити меню DuckOS", "Open DuckOS menu"],
+  "Wi-Fi · быстрые настройки": ["Wi-Fi · швидкі налаштування", "Wi-Fi · quick settings"],
+  "Питание · открыть Control": ["Живлення · відкрити Control", "Power · open Control"],
+  "Звук · открыть громкость": ["Звук · відкрити гучність", "Sound · open volume"],
+  "Часы и дата": ["Годинник і дата", "Clock and date"],
+  "Время и дата": ["Час і дата", "Time and date"],
+  "Питание и Control": ["Живлення й Control", "Power and Control"],
+  "Загрузка даты…": ["Завантаження дати…", "Loading date…"],
   "Найти приложение": ["Знайти застосунок", "Find an app"],
   "Локальные команды": ["Локальні команди", "Local commands"],
   "Настройки оболочки": ["Налаштування оболонки", "Shell settings"],
@@ -394,8 +401,7 @@ Object.assign(translations, {
   "Приложения запускаются в текущем браузерном пространстве Mora.": [
     "Застосунки запускаються в поточному браузерному просторі Mora.",
     "Apps open in the current Mora browser workspace."
-  ],
-  "Локальные команды": ["Локальні команди", "Local commands"]
+  ]
 });
 
 export function detectLocale(savedLocale, browserLanguage = globalThis.navigator?.language ?? "ru") {
