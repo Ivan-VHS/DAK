@@ -285,7 +285,8 @@ def collect_foundry_snapshot(
         "execution_policy": {
             "read_only": True,
             "network_access": False,
-            "processes_started": False,
+            "read_only_helper_processes_may_start": platform.system() == "Windows",
+            "arbitrary_user_commands_started": False,
             "processes_terminated": False,
             "drivers_changed": False,
             "system_settings_changed": False,
