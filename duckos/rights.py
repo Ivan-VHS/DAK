@@ -8,6 +8,7 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import hmac
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -486,7 +487,7 @@ def evaluate_capture_policy(
     permitted = capture_policy.get("allowed_actions", [])
     if not isinstance(denied, list) or not isinstance(permitted, list):
         raise RightsError("capture policy action lists must be arrays")
-    if any(item not in CAPTURE_ACTIONS for item in denied + permitted):
+    if any(not isinstance(item, str) or item not in CAPTURE_ACTIONS for item in denied + permitted):
         raise RightsError("capture policy contains an unsupported action")
     if action in denied:
         return {
@@ -704,7 +705,7 @@ class RightsAuditLog:
                         "valid": False, "events": events,
                         "reason": f"broken sequence on line {line_number}",
                     }
-                if not isinstance(supplied_hash, str) or not hashlib.compare_digest(supplied_hash, expected_hash):
+                if not isinstance(supplied_hash, str) or not hmac.compare_digest(supplied_hash, expected_hash):
                     return {
                         "schema": "duckos.rights-audit-verification.v1",
                         "valid": False, "events": events,
@@ -735,9 +736,12 @@ class RightsAuditLog:
         verification = self.verify()
         if not verification["valid"]:
             raise RightsError("rights audit chain is invalid; refusing to append new evidence")
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        if self.path.parent.is_symlink():
+        for parent in reversed(self.path.parent.parents):
+            if parent.is_symlink():
+                raise RightsError("rights audit path must not cross a symlinked directory")
+        if self.path.parent.exists() and self.path.parent.is_symlink():
             raise RightsError("rights audit directory must not be a symlink")
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         body = {
             "schema": AUDIT_SCHEMA,
             "sequence": verification["events"] + 1,
