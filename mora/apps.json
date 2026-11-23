@@ -49,6 +49,13 @@
       "panel": "mora/app.js#unify"
     },
     {
+      "id": "mora-belle",
+      "name": "Mora Belle",
+      "category": "personal",
+      "panel": "mora/belle/index.html",
+      "maturity": "partial_local_web_suite"
+    },
+    {
       "id": "mora-ai",
       "name": "Mora AI",
       "category": "system",
@@ -154,7 +161,7 @@
     {
       "id": "theme-adapter",
       "maturity": "implemented",
-      "scope": "shared dark/light semantic tokens in Mora shell"
+      "scope": "shared semantic tokens for Amber, Dark, Light and Belle in the Mora shell"
     }
   ]
 }
