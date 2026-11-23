@@ -93,6 +93,9 @@ test("the desktop remains self-contained and responsive", () => {
 const theme = JSON.parse(await readFile(new URL("../mora/theme.json", import.meta.url), "utf8"));
 const manifest = JSON.parse(await readFile(new URL("../mora/manifest.webmanifest", import.meta.url), "utf8"));
 const serviceWorker = await readFile(new URL("../mora/service-worker.js", import.meta.url), "utf8");
+const paletteValues = Object.values(theme.colorScale)
+  .flatMap((group) => Object.values(group))
+  .map((color) => color.toLowerCase());
 
 function relativeLuminance(hex) {
   const channels = hex.match(/[0-9a-f]{2}/gi).map((part) => parseInt(part, 16) / 255);
@@ -171,7 +174,8 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(legacyPrototype.includes("background:#FFD400"));
   assert.ok(legacyPrototype.includes(".btn.danger"));
   assert.ok(!/#(?:24234F|775EE9|9B8BFF|755BE7|5A36D6|FF9AB6|FF6FA3|C2335F|9A7DFF|5FB2FF|2058D8|4FE0E0|1590A8|E8EDFF|9AA8E6|AD3A62AA|FFF3D0)/i.test(legacyPrototype));
-  assert.ok(byDesignTokensAreUsed(css, theme));
+  assert.ok(paletteValues.every((color) => css.toLowerCase().includes(color)));
+  assert.ok(paletteValues.every((color) => nativeDesktop.toLowerCase().includes(color)));
 
 
   const allowedColors = new Set([
