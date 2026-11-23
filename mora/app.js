@@ -1215,37 +1215,47 @@ function panelMarkup(appId) {
   }
 }
 
+function localeTag() {
+  return currentLocale === "uk" ? "uk-UA" : currentLocale === "en" ? "en-US" : "ru-RU";
+}
+
 function updateClock() {
   const now = new Date();
-  const time = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" }).format(now);
-  const date = new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now);
+  const locale = localeTag();
+  const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(now);
+  const date = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now);
   document.getElementById("hero-clock").textContent = time;
   document.getElementById("status-time").textContent = time;
-  document.getElementById("hero-date").textContent = date.charAt(0).toLocaleUpperCase("ru-RU") + date.slice(1);
+  document.getElementById("hero-date").textContent = date.charAt(0).toLocaleUpperCase(locale) + date.slice(1);
 }
 
 function showToast(message) {
-  toastElement.textContent = message;
+  toastElement.textContent = translateText(message, currentLocale);
   toastElement.classList.add("visible");
   window.clearTimeout(toastTimeout);
   toastTimeout = window.setTimeout(() => toastElement.classList.remove("visible"), 2200);
 }
 
 function updateActiveApp() {
-  const windows = Array.from(windowLayer.querySelectorAll(".app-window"));
+  const windows = Array.from(windowLayer.querySelectorAll(".app-window"))
+    .filter((item) => !item.hidden && Number(item.dataset.workspace || 1) === activeWorkspace);
   if (windows.length === 0) {
-    activeAppLabel.textContent = "Рабочий стол";
+    activeAppLabel.textContent = translateText("Рабочий стол", currentLocale);
   } else {
     windows.sort((a, b) => Number(b.style.zIndex) - Number(a.style.zIndex));
     const topWindow = windows[0];
-    activeAppLabel.textContent = appDefinitions[topWindow.dataset.window].name;
+    activeAppLabel.textContent = translateText(appDefinitions[topWindow.dataset.window].name, currentLocale);
   }
   document.querySelectorAll(".dock-item").forEach((item) => {
-    item.classList.toggle("is-running", Boolean(windowLayer.querySelector('[data-window="' + item.getAttribute("data-app") + '"]')));
+    const appWindow = windowLayer.querySelector('[data-window="' + item.getAttribute("data-app") + '"]');
+    item.classList.toggle("is-running", Boolean(appWindow));
+    item.classList.toggle("is-active", Boolean(appWindow && !appWindow.hidden && Number(appWindow.dataset.workspace || 1) === activeWorkspace));
   });
 }
 
 function focusWindow(appWindow) {
+  appWindow.hidden = false;
+  appWindow.classList.remove("is-minimizing", "is-closing");
   appWindow.style.zIndex = String(++nextZIndex);
   updateActiveApp();
 }
@@ -1255,20 +1265,28 @@ function openApp(appId) {
   if (!definition) return;
   let appWindow = windowLayer.querySelector('[data-window="' + appId + '"]');
   if (appWindow) {
+    appWindow.dataset.workspace = String(activeWorkspace);
     focusWindow(appWindow);
     return;
   }
 
+  const displayName = translateText(definition.name, currentLocale);
   appWindow = document.createElement("section");
   appWindow.className = "app-window";
   appWindow.dataset.window = appId;
+  appWindow.dataset.workspace = String(activeWorkspace);
   appWindow.setAttribute("role", "dialog");
   appWindow.setAttribute("aria-modal", "false");
-  appWindow.setAttribute("aria-label", definition.name);
+  appWindow.setAttribute("aria-label", displayName);
   appWindow.style.setProperty("--accent", definition.color);
   appWindow.style.zIndex = String(++nextZIndex);
   appWindow.innerHTML =
-    '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
+    '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + escapeHtml(displayName) + '</span>' +
+      '<div class="window-titlebar-actions">' +
+        '<button type="button" data-window-action="minimize" aria-label="Свернуть" title="Свернуть">−</button>' +
+        '<button type="button" data-window-action="maximize" aria-label="Развернуть" title="Развернуть">□</button>' +
+        '<button type="button" class="window-close" data-action="close" aria-label="Закрыть">×</button>' +
+      '</div></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
@@ -1278,19 +1296,43 @@ function openApp(appId) {
   applyTranslations(appWindow, currentLocale);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
-  const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
+  const top = Math.max(58, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
   appWindow.style.left = left + "px";
   appWindow.style.top = top + "px";
   appWindow.style.transform = "none";
   focusWindow(appWindow);
   appWindow.querySelector(".window-close").focus();
-  showToast(definition.name + " открыто");
+  showToast(displayName + " открыто");
+}
+
+function minimizeWindow(appWindow) {
+  if (!appWindow || appWindow.hidden) return;
+  appWindow.classList.add("is-minimizing");
+  window.setTimeout(() => {
+    appWindow.hidden = true;
+    appWindow.classList.remove("is-minimizing");
+    updateActiveApp();
+  }, 190);
+}
+
+function maximizeWindow(appWindow) {
+  if (!appWindow) return;
+  const maximized = appWindow.classList.toggle("is-maximized");
+  const button = appWindow.querySelector('[data-window-action="maximize"]');
+  if (button) {
+    button.textContent = maximized ? "❐" : "□";
+    button.setAttribute("aria-label", maximized ? "Восстановить" : "Развернуть");
+    button.title = button.getAttribute("aria-label");
+  }
 }
 
 function closeWindow(appWindow) {
   if (!appWindow) return;
-  appWindow.remove();
-  updateActiveApp();
+  appWindow.classList.add("is-closing");
+  window.setTimeout(() => {
+    appWindow.remove();
+    updateActiveApp();
+  }, 170);
 }
 
 function closeTopWindow() {
