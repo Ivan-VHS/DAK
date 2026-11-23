@@ -971,7 +971,12 @@ function renderNotifications() {
 }
 
 function toggleFlyout(name, force) {
-  const target = document.getElementById(name === "quick" ? "quick-panel" : "notification-panel");
+  const panelIds = {
+    start: "start-menu",
+    quick: "quick-panel",
+    notifications: "notification-panel"
+  };
+  const target = document.getElementById(panelIds[name]);
   if (!target) return;
   const shouldOpen = force ?? target.hidden;
   document.querySelectorAll(".desktop-flyout").forEach((panel) => { panel.hidden = panel !== target || !shouldOpen; });
@@ -980,6 +985,10 @@ function toggleFlyout(name, force) {
     button.setAttribute("aria-expanded", String(active));
   });
   if (shouldOpen && name === "notifications") renderNotifications();
+  if (shouldOpen && name === "start") {
+    const search = target.querySelector("[data-start-search]");
+    if (search) window.setTimeout(() => search.focus(), 40);
+  }
 }
 
 function saveActiveWorkspace() {
@@ -1407,11 +1416,13 @@ document.addEventListener("click", (event) => {
   }
   const panelClose = event.target.closest("[data-panel-close]");
   if (panelClose) {
+    toggleFlyout("start", false);
     toggleFlyout("quick", false);
     toggleFlyout("notifications", false);
     return;
   }
   if (!event.target.closest(".desktop-flyout")) {
+    toggleFlyout("start", false);
     toggleFlyout("quick", false);
     toggleFlyout("notifications", false);
   }
@@ -1578,6 +1589,7 @@ document.addEventListener("click", (event) => {
 
   const opener = event.target.closest("[data-app]");
   if (opener) {
+    toggleFlyout("start", false);
     openApp(opener.dataset.app);
     return;
   }
@@ -1648,6 +1660,15 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const startSearch = event.target.closest("[data-start-search]");
+  if (startSearch) {
+    const query = startSearch.value.trim().toLocaleLowerCase();
+    document.querySelectorAll("[data-start-app]").forEach((item) => {
+      const haystack = item.textContent.toLocaleLowerCase();
+      item.hidden = Boolean(query) && !haystack.includes(query);
+    });
+    return;
+  }
   const quickRange = event.target.closest("[data-quick-range]");
   if (quickRange) {
     const output = document.querySelector('[data-quick-value="' + quickRange.dataset.quickRange + '"]');
@@ -1696,7 +1717,9 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     const menu = document.getElementById("desktop-context-menu");
     if (menu && !menu.hidden) { menu.hidden = true; return; }
-    if (!document.getElementById("quick-panel").hidden || !document.getElementById("notification-panel").hidden) {
+    const openFlyout = document.querySelector(".desktop-flyout:not([hidden])");
+    if (openFlyout) {
+      toggleFlyout("start", false);
       toggleFlyout("quick", false);
       toggleFlyout("notifications", false);
       return;
