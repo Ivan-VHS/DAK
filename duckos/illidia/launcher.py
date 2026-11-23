@@ -146,7 +146,7 @@ def inspect_game(library: IllidiaLibrary, game: GameRecord) -> dict[str, Any]:
         "sha256": digest,
         "previous_sha256": previous,
         "hash_changed": changed,
-        "first_run_confirmation_required": requires_confirmation and not approved,
+        "first_run_confirmation_required": requires_confirmation,
         "warnings": warnings,
     }
 
