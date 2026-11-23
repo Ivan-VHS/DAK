@@ -49,6 +49,7 @@
       <div class="system-status" aria-label="Состояние системы">
         <span class="status-item"><span class="status-dot wifi-dot"></span> Wi-Fi</span>
         <span class="status-item battery"><span class="battery-shape"><i></i></span> 86%</span>
+        <button class="status-control" data-app="workspace" aria-label="Открыть параметры системы">Система</button>
         <time id="status-time">--:--</time>
       </div>
     </header>
@@ -67,7 +68,7 @@
       <section class="app-area" aria-label="Приложения">
         <div class="section-heading">
           <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1>Приложения</h1></div>
-          <span class="tiny-counter">07 ПРИЛОЖЕНИЙ</span>
+          <span class="tiny-counter">13 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
         </div>
         <div class="app-grid" id="app-grid">
           <button class="app-tile" data-app="cockos" style="--accent:#78c9d1">
@@ -98,6 +99,18 @@
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M19 29 14 34a9 9 0 0 1-13-13l8-8a9 9 0 0 1 13 0l3 3M29 19l5-5a9 9 0 0 1 13 13l-8 8a9 9 0 0 1-13 0l-3-3M16 32l16-16"/></svg></span>
             <span class="app-name">Unify</span><span class="app-subtitle">Устройства</span>
           </button>
+        </div>
+        <div class="system-section-heading">
+          <div><span class="eyebrow">СИСТЕМА MORA</span><h2>Инструменты рабочего пространства</h2></div>
+          <span class="system-section-note">Локальные функции и центры управления</span>
+        </div>
+        <div class="system-app-grid" id="system-app-grid">
+          <button class="app-tile" data-app="mora-ai" style="--accent:#f2c58d"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
+          <button class="app-tile" data-app="security" style="--accent:#92d7c5"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Sentinel</span><span class="app-subtitle">Права и доверие</span></button>
+          <button class="app-tile" data-app="updates" style="--accent:#efad9a"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
+          <button class="app-tile" data-app="runtime" style="--accent:#aebcf0"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
+          <button class="app-tile" data-app="workspace" style="--accent:#e9a4cd"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
+          <button class="app-tile" data-app="provenance" style="--accent:#d7c2f0"><span class="app-icon"><span class="system-glyph">⌁</span></span><span class="app-name">Proof</span><span class="app-subtitle">Файлы и SHA-256</span></button>
         </div>
       </section>
 
