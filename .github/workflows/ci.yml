@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-      - run: python -m pip install --upgrade pip jsonschema
+      - run: python -m pip install --upgrade pip jsonschema pyyaml
       - run: python -m unittest discover -s tests -v
       - run: python tools/validate_app_catalog.py
 
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python -m pip install --upgrade pip jsonschema
+      - run: python -m pip install --upgrade pip jsonschema pyyaml
       - run: python -m unittest discover -s tests -v
       - run: python tools/validate_app_catalog.py
 
@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install --upgrade pip jsonschema
+      - run: python -m pip install --upgrade pip jsonschema pyyaml
       - run: python -m unittest discover -s tests -v
       - run: python tools/validate_app_catalog.py
 
