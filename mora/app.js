@@ -26,6 +26,49 @@ const appDefinitions = {
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: "#8A8A76", glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: "#A6A17D", glyph: "⚡" }
 };
+const paletteDefinitions = [
+  {
+    id: "solar",
+    name: "Obsidian Solar",
+    description: "Чёрный · белый · солнечный жёлтый",
+    glyph: "◒",
+    page: "#080A0D",
+    swatches: ["#080A0D", "#F6F7F8", "#F2C94C", "#AEB8C2"]
+  },
+  {
+    id: "amber",
+    name: "Mora Amber",
+    description: "Орех · песок · медь",
+    glyph: "A",
+    page: "#211913",
+    swatches: ["#211913", "#FFF3E2", "#D58B3D", "#526347"]
+  },
+  {
+    id: "arctic",
+    name: "Arctic Glass",
+    description: "Лёд · графит · глубокий циан",
+    glyph: "❄",
+    page: "#EAF3F8",
+    swatches: ["#EAF3F8", "#102C3A", "#006A93", "#147D75"]
+  },
+  {
+    id: "amethyst",
+    name: "Amethyst Night",
+    description: "Слива · лаванда · мята",
+    glyph: "✦",
+    page: "#14111F",
+    swatches: ["#14111F", "#F5F0FF", "#B49AF7", "#70D6C2"]
+  },
+  {
+    id: "jade",
+    name: "Forest Jade",
+    description: "Хвоя · кремовый · нефрит",
+    glyph: "◈",
+    page: "#0E1915",
+    swatches: ["#0E1915", "#EEF7F0", "#7FC49A", "#E0B86E"]
+  }
+];
+
 
 const windowLayer = document.getElementById("window-layer");
 const activeAppLabel = document.getElementById("active-app");
@@ -43,14 +86,16 @@ function applyPreferences() {
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
 
+  const palette = paletteDefinitions.find((item) => item.id === preferences.appearance.theme)
+    || paletteDefinitions[0];
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) themeColor.content = palette.page;
+
   const themeButton = document.querySelector('[data-action="toggle-theme"]');
   if (themeButton) {
-    const currentTheme = preferences.appearance.theme;
-    const labels = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
-    themeButton.textContent = currentTheme === "amber" ? "A" : currentTheme === "dark" ? "◐" : "☼";
-    themeButton.setAttribute("aria-pressed", String(currentTheme !== "amber"));
-    themeButton.setAttribute("aria-label", "Текущая тема: " + labels[currentTheme] + ". Нажмите, чтобы переключить.");
-    themeButton.title = "Тема: " + labels[currentTheme];
+    themeButton.textContent = palette.glyph;
+    themeButton.setAttribute("aria-label", "Текущая палитра: " + palette.name + ". Нажмите, чтобы переключить.");
+    themeButton.title = "Палитра: " + palette.name;
   }
 }
 
@@ -72,6 +117,38 @@ function profileButton(id, title) {
   return '<button class="profile-choice' + (active ? ' active' : '') +
     '" data-power-profile="' + id + '" aria-pressed="' + String(active) + '">' + title + '</button>';
 }
+function paletteChoicesMarkup() {
+  return '<div class="palette-options" role="group" aria-label="Выбор цветовой палитры">' +
+    paletteDefinitions.map((palette) => {
+      const active = preferences.appearance.theme === palette.id;
+      const swatches = palette.swatches.map((color) =>
+        '<i class="palette-swatch" style="--swatch-color:' + color + '"></i>'
+      ).join("");
+      return '<button class="palette-choice" type="button" data-palette="' + palette.id +
+        '" aria-pressed="' + String(active) + '">' +
+        '<span class="palette-choice-copy"><strong>' + palette.name + '</strong>' +
+        '<small>' + palette.description + '</small></span>' +
+        '<span class="palette-swatches" aria-hidden="true">' + swatches + '</span></button>';
+    }).join("") +
+    '</div>';
+}
+
+function updatePalettePanel(panel = windowLayer.querySelector('[data-window="workspace"]')) {
+  if (!panel) return;
+  panel.querySelectorAll("[data-palette]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.palette === preferences.appearance.theme));
+  });
+}
+
+function selectPalette(paletteId) {
+  if (!paletteDefinitions.some((palette) => palette.id === paletteId)) return;
+  preferences.appearance.theme = paletteId;
+  persistPreferences();
+  updatePalettePanel();
+  const palette = paletteDefinitions.find((item) => item.id === paletteId);
+  showToast("Палитра: " + palette.name);
+}
+
 
 function recoveryStatus() {
   try {
@@ -166,6 +243,7 @@ function updateWorkspacePanel() {
     button.setAttribute("aria-pressed", String(enabled));
     button.textContent = enabled ? "Включено" : "Выключено";
   });
+  updatePalettePanel(panel);
 }
 
 function panelMarkup(appId) {
@@ -284,6 +362,8 @@ function panelMarkup(appId) {
         '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
     case "workspace":
       return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
+        '<div class="setting-block"><strong>Цветовая палитра</strong><span>Пять согласованных наборов для всей оболочки. Выбор сохраняется локально.</span>' +
+        paletteChoicesMarkup() + '</div>' +
         '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
         '<div class="profile-options">' + profileButton("saver", "Экономия") + profileButton("balanced", "Баланс") + profileButton("performance", "Производительность") + '</div></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>Режим фокуса</strong><span>Приглушить второстепенные элементы оболочки</span></div><button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' + (preferences.focusMode ? "Включено" : "Выключено") + '</button></div>' +
@@ -416,11 +496,15 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 document.addEventListener("click", (event) => {
   const themeToggle = event.target.closest('[data-action="toggle-theme"]');
   if (themeToggle) {
-    const nextTheme = { amber: "dark", dark: "light", light: "amber" };
-    preferences.appearance.theme = nextTheme[preferences.appearance.theme] || "amber";
-    persistPreferences();
-    const themeNames = { amber: "Mora Amber", dark: "Тёмная тема", light: "Светлая тема" };
-    showToast("Тема: " + themeNames[preferences.appearance.theme]);
+    const currentIndex = paletteDefinitions.findIndex((palette) => palette.id === preferences.appearance.theme);
+    const nextPalette = paletteDefinitions[(currentIndex + 1) % paletteDefinitions.length];
+    selectPalette(nextPalette.id);
+    return;
+  }
+
+  const paletteChoice = event.target.closest("[data-palette]");
+  if (paletteChoice) {
+    selectPalette(paletteChoice.dataset.palette);
     return;
   }
 
