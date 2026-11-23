@@ -198,6 +198,14 @@ def main(argv: list[str] | None = None) -> int:
     content_check.add_argument("--audit-log", type=Path,
                                help="append the result to the local rights audit log")
 
+    transfer_build = rights_commands.add_parser(
+        "build-transfer", help="export content, save and signed-license metadata without changing ownership"
+    )
+    transfer_build.add_argument("records", type=Path,
+                                help="JSON object with an items array of content manifests and entitlements")
+    transfer_build.add_argument("output", type=Path,
+                                help="new transfer-manifest path; existing files are never overwritten")
+
     transfer_check = rights_commands.add_parser(
         "validate-transfer", help="check a rights-preserving metadata export without reassigning licenses"
     )
@@ -335,6 +343,23 @@ def main(argv: list[str] | None = None) -> int:
             )
             _print_result(result)
             return 0 if result.get("valid") else 1
+        elif args.command == "rights" and args.rights_command == "build-transfer":
+            records = _load(args.records)
+            items = records.get("items") if isinstance(records, dict) else records
+            result = build_transfer_manifest(items)
+            if args.output.is_symlink() or args.output.exists():
+                raise ValueError("transfer output must be a new path and must not be a symlink")
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            with args.output.open("x", encoding="utf-8", newline="\\n") as stream:
+                json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
+                stream.write("\\n")
+            _print_result({
+                "schema": result["schema"],
+                "written": str(args.output.resolve()),
+                "items": len(result["items"]),
+                "authorization_granted": False,
+            })
+            return 0
         elif args.command == "rights" and args.rights_command == "validate-transfer":
             result = validate_transfer_manifest(_load(args.manifest))
         elif args.command == "rights" and args.rights_command == "audit-log":
