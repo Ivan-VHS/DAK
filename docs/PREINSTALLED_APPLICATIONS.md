@@ -187,7 +187,7 @@ The following scope is intentionally modest because these 13 names arrived witho
 | GameCharager | Local game list and read-only executable inspection | Does not launch games or install drivers |
 | EXEdotEXE | PE/ELF inspection and SHA-256 report for a selected file | Not an antivirus, signature verifier or executable runtime |
 
-Entries are namespaced by app in the Mora browser profile. Each text collection is limited to 100 entries and 160 characters per entry. File inspection is user initiated and remains local to the browser. The mora/apps.json registry and core.js app ID list are updated together so the launcher and panel router share one inventory.
+The native Mora registry is maintained in mora/apps.json and packaged with the Python application. Each product identity is separate from the maturity of its native services. File inspection is user initiated and remains local to the host process.
 
 ## 3. Cross-application workflows
 
