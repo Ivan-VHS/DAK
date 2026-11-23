@@ -287,14 +287,18 @@ int duckos_vm_create_address_space(uint64_t *root_physical) {
     if (root_physical == NULL) return 0;
     uint64_t *root = allocate_table();
     uint64_t *pdpt = allocate_table();
-    if (root == NULL || pdpt == NULL) {
+    uint64_t *directory = allocate_table();
+    if (root == NULL || pdpt == NULL || directory == NULL) {
         if (root != NULL) duckos_free_page(root);
         if (pdpt != NULL) duckos_free_page(pdpt);
+        if (directory != NULL) duckos_free_page(directory);
         return 0;
     }
+    for (uint32_t i = 0u; i < 512u; ++i) directory[i] = boot_pd[i];
     root[0] = ((uint64_t)(uintptr_t)pdpt & PAGE_ADDRESS_MASK) |
               PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-    pdpt[0] = boot_pdpt[0];
+    pdpt[0] = ((uint64_t)(uintptr_t)directory & PAGE_ADDRESS_MASK) |
+              PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
     *root_physical = (uint64_t)(uintptr_t)root;
     return 1;
 }
