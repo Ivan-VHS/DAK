@@ -112,10 +112,10 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
   const palette = theme.palettes.duck;
   assert.equal(palette.page, "#080808");
-  assert.equal(palette.surface, "#151515");
+  assert.equal(palette.surface, "#111111");
   assert.equal(palette.text, "#FFFFFF");
   assert.equal(palette.brand, "#FFD400");
-  assert.equal(palette.danger, "#FFD400");
+  assert.equal(palette.danger, "#FF473A");
   assert.ok(contrastRatio(palette.text, palette.page) >= 7);
   assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
   assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5);
