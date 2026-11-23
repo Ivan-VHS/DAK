@@ -535,6 +535,8 @@ class MoraWindow(QMainWindow):
 
         current = self._app_dialogs.get(app_id)
         if current is not None:
+            if current.isMinimized():
+                current.showNormal()
             current.raise_()
             current.activateWindow()
             return
@@ -607,6 +609,9 @@ class MoraWindow(QMainWindow):
         layout.addWidget(close_button, alignment=Qt.AlignmentFlag.AlignRight)
 
         self._app_dialogs[app_id] = dialog
+        dialog.finished.connect(
+            lambda _result, key=app_id: self._app_dialogs.pop(key, None)
+        )
         dialog.destroyed.connect(
             lambda *_args, key=app_id: self._app_dialogs.pop(key, None)
         )
@@ -952,6 +957,8 @@ class MoraWindow(QMainWindow):
         workbench = ReaperWorkbench()
         current = self._app_dialogs.get("reaper")
         if current is not None:
+            if current.isMinimized():
+                current.showNormal()
             current.raise_()
             current.activateWindow()
             return
@@ -986,6 +993,9 @@ class MoraWindow(QMainWindow):
 
         launch.clicked.connect(start)
         self._app_dialogs["reaper"] = dialog
+        dialog.finished.connect(
+            lambda _result: self._app_dialogs.pop("reaper", None)
+        )
         dialog.destroyed.connect(
             lambda *_args: self._app_dialogs.pop("reaper", None)
         )
