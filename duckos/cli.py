@@ -22,6 +22,7 @@ from .manifest import validate_manifest
 from .module_abi import resolve_load_order
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .terminal import TerminalService, run_interactive
+from . import foundry as foundry_service
 
 
 def _load(path: Path) -> Any:
