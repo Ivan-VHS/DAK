@@ -974,7 +974,8 @@ function toggleFlyout(name, force) {
   const panelIds = {
     start: "start-menu",
     quick: "quick-panel",
-    notifications: "notification-panel"
+    notifications: "notification-panel",
+    clock: "clock-panel"
   };
   const target = document.getElementById(panelIds[name]);
   if (!target) return;
@@ -985,6 +986,7 @@ function toggleFlyout(name, force) {
     button.setAttribute("aria-expanded", String(active));
   });
   if (shouldOpen && name === "notifications") renderNotifications();
+  if (shouldOpen && name === "clock") updateClock();
   if (shouldOpen && name === "start") {
     const search = target.querySelector("[data-start-search]");
     if (search) window.setTimeout(() => search.focus(), 40);
@@ -1258,6 +1260,10 @@ function updateClock() {
   document.getElementById("hero-clock").textContent = time;
   document.getElementById("status-time").textContent = time;
   document.getElementById("hero-date").textContent = date.charAt(0).toLocaleUpperCase(locale) + date.slice(1);
+  const panelTime = document.querySelector("[data-panel-clock-time]");
+  const panelDate = document.querySelector("[data-panel-clock-date]");
+  if (panelTime) panelTime.textContent = time;
+  if (panelDate) panelDate.textContent = date.charAt(0).toLocaleUpperCase(locale) + date.slice(1);
 }
 
 function showToast(message) {
