@@ -6,6 +6,11 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 The default application suite contains seven first-party apps: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Their roles, data boundaries and proposed integrations remain defined by the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and the [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
+## Federated source workspace
+
+DuckOS keeps the four specialist Ivan-VHS projects as independent, commit-pinned Git submodules under `projects/`: [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [Reaper](https://github.com/Ivan-VHS/Reaper), [OPlague](https://github.com/Ivan-VHS/OPlague) and [VentuSample](https://github.com/Ivan-VHS/VentuSample). The checked-in registry records their source pins, licenses, roles and integration boundaries.
+
+Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
 ## Mora desktop
 
 **Start here:** [Mora desktop shell](mora/index.html).

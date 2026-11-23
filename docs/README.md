@@ -1,5 +1,8 @@
 # DuckOS documentation
 
+## Federated source projects
+
+[Repository federation](REPOSITORY_FEDERATION.md) documents the four pinned project checkouts, their commit and licence registry, synchronization tool and service boundaries. The machine-readable source registry is [repositories.v1.json](../federation/repositories.v1.json).
 ## Desktop and application interfaces
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
