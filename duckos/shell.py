@@ -137,23 +137,31 @@ def read_app_catalog(path: str | Path | None = None) -> dict[str, Any]:
     except (OSError, json.JSONDecodeError) as error:
         raise ShellError(f"cannot read app catalogue: {error}") from error
 
-    if not isinstance(payload, list):
-        raise ShellError("app catalogue must be a JSON array")
+    if not isinstance(payload, dict) or not isinstance(payload.get("schema_version"), str):
+        raise ShellError("app catalogue must contain a schema_version and named sections")
+
+    app_entries = payload.get("built_in_apps")
+    service_entries = payload.get("system_services")
+    if not isinstance(app_entries, list) or not isinstance(service_entries, list):
+        raise ShellError("app catalogue must contain built_in_apps and system_services arrays")
 
     apps: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for index, entry in enumerate(payload):
+    services: list[dict[str, Any]] = []
+    seen_apps: set[str] = set()
+    seen_services: set[str] = set()
+
+    for index, entry in enumerate(app_entries):
         if not isinstance(entry, dict):
-            raise ShellError(f"app catalogue entry {index} must be an object")
+            raise ShellError(f"built-in app entry {index} must be an object")
         app_id = entry.get("id")
         name = entry.get("name")
         category = entry.get("category")
         panel = entry.get("panel")
         if not all(isinstance(value, str) and value.strip() for value in (app_id, name, category, panel)):
-            raise ShellError(f"app catalogue entry {index} is missing id, name, category or panel")
-        if app_id in seen:
+            raise ShellError(f"built-in app entry {index} is missing id, name, category or panel")
+        if app_id in seen_apps:
             raise ShellError(f"duplicate app id: {app_id}")
-        seen.add(app_id)
+        seen_apps.add(app_id)
         apps.append({
             "id": app_id,
             "name": name,
@@ -162,11 +170,27 @@ def read_app_catalog(path: str | Path | None = None) -> dict[str, Any]:
             "maturity": entry.get("maturity", "specified"),
         })
 
+    for index, entry in enumerate(service_entries):
+        if not isinstance(entry, dict):
+            raise ShellError(f"system service entry {index} must be an object")
+        service_id = entry.get("id")
+        maturity = entry.get("maturity")
+        scope = entry.get("scope")
+        if not all(isinstance(value, str) and value.strip() for value in (service_id, maturity, scope)):
+            raise ShellError(f"system service entry {index} is missing id, maturity or scope")
+        if service_id in seen_services:
+            raise ShellError(f"duplicate system service id: {service_id}")
+        seen_services.add(service_id)
+        services.append({"id": service_id, "maturity": maturity, "scope": scope})
+
     return {
         "schema": SHELL_APPS_SCHEMA,
+        "catalogue_version": payload["schema_version"],
+        "shell": payload.get("shell"),
         "catalogue": str(catalog_path.resolve()),
         "count": len(apps),
         "apps": apps,
+        "system_services": services,
     }
 
 
