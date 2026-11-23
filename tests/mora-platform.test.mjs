@@ -8,6 +8,7 @@ import {
   validateStateBranch,
   validateStorageEnvelope
 } from "../mora/platform-contracts.js";
+import { getLocale, setLocale, translate } from "../mora/i18n.js";
 import {
   compareChronoStamps,
   createChronoStamp,
@@ -15,6 +16,15 @@ import {
   formatEpochYears,
   parseEpochYears
 } from "../mora/chrono.js";
+
+test("Russian and Ukrainian locale changes are persistent at the UI contract layer", () => {
+  assert.equal(getLocale(), "ru");
+  setLocale("uk");
+  assert.equal(getLocale(), "uk");
+  assert.equal(translate("Приложения"), "Застосунки");
+  setLocale("ru");
+  assert.equal(translate("Приложения"), "Приложения");
+});
 
 test("the deep-time epoch keeps the full integer without Number conversion", () => {
   const epoch = parseEpochYears(DEEP_TIME_EPOCH_YEARS);
@@ -55,6 +65,7 @@ test("state branches keep parent lineage and validate their payload", () => {
 test("A/B update plans never claim execution and require all preconditions", () => {
   const blocked = createAtomicUpdatePlan({ activeSlot: "A" });
   assert.equal(blocked.ready, false);
+  assert.equal(blocked.checks.capacityAvailable, false);
   assert.equal(blocked.targetSlot, "B");
   assert.equal(blocked.execution, "plan-only");
   const ready = createAtomicUpdatePlan({
@@ -65,6 +76,7 @@ test("A/B update plans never claim execution and require all preconditions", () 
     requiredBytes: 400
   });
   assert.equal(ready.ready, true);
+  assert.equal(ready.checks.capacityAvailable, true);
   assert.equal(ready.targetSlot, "A");
   assert.equal(ready.execution, "plan-only");
 });
