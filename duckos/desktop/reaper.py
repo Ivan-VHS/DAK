@@ -18,7 +18,7 @@ COMMAND_TIMEOUT_SECONDS = 30
 SOURCE_SUFFIXES = {".rpr", ".most"}
 SYNTAX_SOURCE_SUFFIXES = {
     ".rpr", ".most", ".py", ".pipe", ".ppl", ".lisp", ".lsp", ".scm",
-    ".forth", ".fs", ".bf", ".b", ".bf93", ".befunge",
+    ".forth", ".fs", ".bf", ".b", ".bf93", ".befunge", ".polyglot",
 }
 MAX_SYNTAX_STEPS = 10_000_000
 
