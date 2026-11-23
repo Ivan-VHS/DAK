@@ -15,7 +15,7 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 | Mora AI | Parse safe local intents, preview plan, request approval | Allowlisted rules, no model or shell |
 | Sentinel | Show and store capability preferences | No native process enforcement |
 | Restore | Save/restore shell settings and preview an update sequence | No OS image update/rollback |
-| Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
+| Bridge | Inspect PE/ELF headers and open the compatibility centre | Browser shell does not load or launch executables |
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 
@@ -51,7 +51,9 @@ The future updater should download signed metadata, verify the complete payload,
 
 Bridge reads a user-selected local file and inspects PE or ELF headers without executing it or uploading it. Detecting an x86/x64/ARM64 machine value is not evidence that the corresponding ABI or graphics stack can run.
 
-A native compatibility environment still needs PE loading, Win32/NT services, process and memory mapping, API translation, DirectX/Vulkan/OpenGL support, audio, input, prefixes, launchers and a clear anti-cheat compatibility policy. Anti-cheat bypass is not part of this design.
+The compatibility centre now builds explicit commands for the DuckOS host CLI. The Linux CLI detects Wine, Proton, DOSBox, Winetricks, Vulkan loader presence and selected external launchers; it can create/list Wine prefixes, install an allowlisted set of Winetricks components and launch a user-selected file through Wine, Proton or DOSBox. Mora copies the command but does not invoke it. The full command contract and limitations are documented in [Windows compatibility](WINDOWS_COMPATIBILITY.md).
+
+This is a partial host integration, not a complete Windows subsystem. Wine applications run with the current user's permissions; this backend does not provide process isolation. Windows kernel-driver loading, arbitrary driver patching, anti-cheat bypass, universal DirectX support and Windows NT kernel emulation are not implemented.
 
 ## Provenance
 
