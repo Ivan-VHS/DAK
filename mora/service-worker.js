@@ -1,9 +1,10 @@
-const CACHE = "mora-shell-v8-soft-glass";
+const CACHE = "mora-shell-v9-blade-hub";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./xbox-hub.js",
   "./commons-catalog.js",
   "./core.js",
   "./apps.json",

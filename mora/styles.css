@@ -973,3 +973,525 @@ input[type="range"]{accent-color:var(--mora-brand)}
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 :root.reduce-motion *,:root.reduce-motion *::before,:root.reduce-motion *::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+
+
+
+/* DuckOS Blade Hub — original, console-inspired workspace navigation. */
+.xbox-hub-trigger {
+  min-width: 52px;
+  border-color: rgba(214,190,101,.38);
+  color: var(--mora-brand-hover);
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+.xbox-hub-trigger:hover,
+.xbox-hub-trigger[aria-expanded="true"] {
+  border-color: var(--mora-brand);
+  background: rgba(214,190,101,.16);
+  color: var(--mora-text);
+}
+body.xbox-hub-open { overflow: hidden; }
+.xbox-hub-root {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  color: var(--mora-text);
+}
+.xbox-hub-root[hidden] { display: none !important; }
+.xbox-hub-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(14,15,13,.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  animation: xbox-hub-fade-in .18s ease-out both;
+}
+.xbox-hub-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(1480px, 100%);
+  height: min(920px, calc(100dvh - 44px));
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(245,244,239,.18);
+  border-radius: 23px;
+  background: rgba(14,15,13,.96);
+  box-shadow: 0 28px 100px rgba(0,0,0,.5);
+  animation: xbox-hub-rise-in .24s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes xbox-hub-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes xbox-hub-rise-in {
+  from { opacity: 0; transform: translateY(12px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.xbox-hub-header {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 19px;
+  border-bottom: 1px solid rgba(245,244,239,.1);
+  background: rgba(245,244,239,.025);
+}
+.xbox-hub-brand { min-width: 180px; display: flex; align-items: center; gap: 12px; }
+.xbox-hub-mark {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(214,190,101,.34);
+  border-radius: 13px;
+  color: var(--mora-brand-hover);
+  background: rgba(214,190,101,.11);
+  font-size: 21px;
+}
+.xbox-hub-brand p,
+.xbox-hub-brand h2 { margin: 0; }
+.xbox-hub-brand p,
+.xbox-hub-kicker {
+  color: rgba(245,244,239,.48);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.xbox-hub-brand h2 { margin-top: 3px; font-size: 18px; font-weight: 650; letter-spacing: -.035em; }
+.xbox-hub-unofficial { display: block; margin-top: 4px; color: rgba(245,244,239,.42); font-size: 8px; letter-spacing: .08em; }
+.xbox-hub-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.xbox-hub-control-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(245,244,239,.12);
+  border-radius: 11px;
+  background: rgba(245,244,239,.045);
+}
+.xbox-hub-segment {
+  min-width: 35px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  color: rgba(245,244,239,.58);
+  background: transparent;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: color .16s ease, background .16s ease, transform .16s ease;
+}
+.xbox-hub-segment:hover { color: var(--mora-text); background: rgba(245,244,239,.08); }
+.xbox-hub-segment.is-active { color: var(--mora-on-brand); background: var(--mora-brand); }
+.xbox-hub-profile { display: flex; flex-direction: column; gap: 4px; color: rgba(245,244,239,.48); font-size: 8px; }
+.xbox-hub-profile select {
+  min-width: 112px;
+  height: 34px;
+  padding: 0 9px;
+  border: 1px solid rgba(245,244,239,.14);
+  border-radius: 9px;
+  color: var(--mora-text);
+  background: rgba(245,244,239,.07);
+  font: inherit;
+  font-size: 10px;
+}
+.xbox-hub-close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(245,244,239,.14);
+  border-radius: 11px;
+  color: rgba(245,244,239,.78);
+  background: rgba(245,244,239,.06);
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+}
+.xbox-hub-close:hover { border-color: rgba(214,190,101,.48); background: rgba(214,190,101,.12); }
+.xbox-hub-blades {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 7px;
+  padding: 10px 16px 0;
+}
+.xbox-hub-blade {
+  min-height: 57px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 13px;
+  border: 1px solid rgba(245,244,239,.1);
+  border-radius: 12px 12px 5px 5px;
+  color: rgba(245,244,239,.75);
+  background: linear-gradient(180deg,rgba(245,244,239,.065),rgba(245,244,239,.025));
+  text-align: left;
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.22,1,.36,1), border-color .18s ease, background .18s ease;
+}
+.xbox-hub-blade strong { font-size: 12px; font-weight: 750; letter-spacing: .025em; }
+.xbox-hub-blade span { color: rgba(245,244,239,.43); font-size: 8px; }
+.xbox-hub-blade:hover { transform: translateY(-1px); border-color: rgba(245,244,239,.25); }
+.xbox-hub-blade.is-active {
+  border-color: rgba(214,190,101,.72);
+  color: var(--mora-text);
+  background: linear-gradient(180deg,rgba(214,190,101,.16),rgba(214,190,101,.055));
+  box-shadow: inset 0 -2px 0 rgba(214,190,101,.65);
+}
+.xbox-hub-blade.is-active span { color: var(--mora-brand-hover); }
+.xbox-hub-stage {
+  min-height: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(190px,.7fr) minmax(380px,1.55fr) minmax(260px,.92fr);
+  gap: 10px;
+  padding: 10px 16px;
+}
+.xbox-hub-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(245,244,239,.11);
+  border-radius: 15px;
+  background: rgba(245,244,239,.035);
+}
+.xbox-hub-panel-head {
+  min-height: 39px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(245,244,239,.085);
+  color: rgba(245,244,239,.82);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.xbox-hub-micro {
+  max-width: 58%;
+  overflow: hidden;
+  color: rgba(245,244,239,.42);
+  font-family: ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.xbox-hub-vfs-list {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: auto;
+  padding: 9px;
+}
+.xbox-hub-vfs-item {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: rgba(245,244,239,.76);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.xbox-hub-vfs-item:hover { background: rgba(245,244,239,.06); }
+.xbox-hub-vfs-item.is-active {
+  border-color: rgba(214,190,101,.35);
+  color: var(--mora-brand-hover);
+  background: rgba(214,190,101,.1);
+}
+.xbox-hub-vfs-name { font-size: 10px; font-weight: 650; }
+.xbox-hub-footnote {
+  margin: 0;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(245,244,239,.08);
+  color: rgba(245,244,239,.4);
+  font-size: 8px;
+  line-height: 1.55;
+}
+.xbox-hub-main-panel { padding: 12px; overflow: auto; scrollbar-width: thin; scrollbar-color: rgba(245,244,239,.22) transparent; }
+.xbox-hub-main-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.xbox-hub-main-head h3 { margin: 4px 0 2px; font-size: 20px; font-weight: 550; letter-spacing: -.04em; }
+.xbox-hub-result-count { color: rgba(245,244,239,.42); font-family: ui-monospace,monospace; font-size: 8px; }
+.xbox-hub-search {
+  width: min(230px,45%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid rgba(245,244,239,.13);
+  border-radius: 10px;
+  color: rgba(245,244,239,.48);
+  background: rgba(14,15,13,.45);
+}
+.xbox-hub-search:focus-within { border-color: rgba(214,190,101,.55); }
+.xbox-hub-search input {
+  width: 100%;
+  min-width: 0;
+  height: 37px;
+  border: 0;
+  outline: 0;
+  color: var(--mora-text);
+  background: transparent;
+  font: inherit;
+  font-size: 9px;
+}
+.xbox-hub-app-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(205px,1fr)); gap: 8px; }
+.xbox-hub-app-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid rgba(245,244,239,.1);
+  border-radius: 12px;
+  background: rgba(14,15,13,.37);
+  transition: border-color .16s ease, background .16s ease, transform .18s cubic-bezier(.22,1,.36,1);
+}
+.xbox-hub-app-card:hover { transform: translateY(-1px); border-color: rgba(245,244,239,.23); }
+.xbox-hub-app-card.is-selected { border-color: rgba(214,190,101,.56); background: rgba(214,190,101,.07); }
+.xbox-hub-app-select {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr);
+  grid-template-rows: auto auto;
+  gap: 2px 9px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  color: var(--mora-text);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.xbox-hub-app-glyph {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  grid-row: 1 / span 2;
+  place-items: center;
+  border: 1px solid rgba(214,190,101,.18);
+  border-radius: 11px;
+  color: var(--mora-brand-hover);
+  background: rgba(214,190,101,.09);
+  font-size: 17px;
+}
+.xbox-hub-app-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.xbox-hub-app-copy strong { overflow: hidden; font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.xbox-hub-app-copy small { color: rgba(245,244,239,.5); font-size: 8px; line-height: 1.4; }
+.xbox-hub-app-state {
+  grid-column: 2;
+  color: rgba(214,190,101,.82);
+  font-size: 7px;
+  font-weight: 750;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.xbox-hub-launch,
+.xbox-hub-vector-open {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid rgba(245,244,239,.13);
+  border-radius: 8px;
+  color: rgba(245,244,239,.78);
+  background: rgba(245,244,239,.045);
+  font: inherit;
+  font-size: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.xbox-hub-launch:hover,
+.xbox-hub-vector-open:hover { border-color: rgba(214,190,101,.38); background: rgba(214,190,101,.1); }
+.xbox-hub-launch:disabled { cursor: not-allowed; opacity: .38; }
+.xbox-hub-empty {
+  grid-column: 1 / -1;
+  padding: 22px 12px;
+  border: 1px dashed rgba(245,244,239,.16);
+  border-radius: 12px;
+  color: rgba(245,244,239,.52);
+  font-size: 10px;
+  text-align: center;
+}
+.xbox-hub-vector-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(245,244,239,.09); }
+.xbox-hub-vector-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+.xbox-hub-vector-head h3 { margin: 0; font-size: 11px; font-weight: 750; }
+.xbox-hub-vector-head p { max-width: 520px; margin: 4px 0 0; color: rgba(245,244,239,.43); font-size: 8px; line-height: 1.5; }
+.xbox-hub-vector-count { color: var(--mora-brand-hover); font-family: ui-monospace,monospace; font-size: 12px; }
+.xbox-hub-vector-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; }
+.xbox-hub-vector {
+  min-width: 0;
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 5px 7px;
+  border: 1px solid rgba(245,244,239,.07);
+  border-radius: 7px;
+  color: rgba(245,244,239,.72);
+  background: rgba(245,244,239,.025);
+  text-align: left;
+  cursor: pointer;
+}
+.xbox-hub-vector:hover,
+.xbox-hub-vector.is-active { border-color: rgba(214,190,101,.35); background: rgba(214,190,101,.08); }
+.xbox-hub-vector-name { overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.xbox-hub-vector-tag { flex: 0 0 auto; color: rgba(214,190,101,.72); font-size: 6px; letter-spacing: .04em; }
+.xbox-hub-inspector-panel { overflow: auto; scrollbar-width: thin; scrollbar-color: rgba(245,244,239,.2) transparent; }
+.xbox-hub-inspector { padding: 11px 12px 5px; }
+.xbox-hub-inspector-title { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.xbox-hub-inspector-glyph { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(214,190,101,.25); border-radius: 12px; color: var(--mora-brand-hover); background: rgba(214,190,101,.1); font-size: 18px; }
+.xbox-hub-inspector-title div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.xbox-hub-inspector-title strong { overflow-wrap: anywhere; font-size: 11px; }
+.xbox-hub-inspector-title small { color: rgba(245,244,239,.4); font-family: ui-monospace,monospace; font-size: 8px; }
+.xbox-hub-inspector-row { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-top: 1px solid rgba(245,244,239,.075); }
+.xbox-hub-inspector-row span { color: rgba(245,244,239,.43); font-size: 8px; }
+.xbox-hub-inspector-row strong { color: rgba(245,244,239,.82); font-size: 9px; font-weight: 600; line-height: 1.45; }
+.xbox-hub-vector-detail { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 10px; padding: 10px; border: 1px solid rgba(214,190,101,.2); border-radius: 10px; background: rgba(214,190,101,.055); }
+.xbox-hub-vector-detail strong { font-size: 10px; }
+.xbox-hub-audit { padding: 0 12px 10px; }
+.xbox-hub-audit-button {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid rgba(214,190,101,.37);
+  border-radius: 9px;
+  color: var(--mora-on-brand);
+  background: var(--mora-brand);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.xbox-hub-audit-button:hover { background: var(--mora-brand-hover); }
+.xbox-hub-audit p { margin: 7px 0 0; color: rgba(245,244,239,.5); font-size: 8px; line-height: 1.5; }
+.xbox-hub-audit p[data-state="ok"] { color: var(--mora-brand-hover); }
+.xbox-hub-audit p[data-state="warn"] { color: rgba(245,244,239,.72); }
+.xbox-hub-log-area { border-top: 1px solid rgba(245,244,239,.09); }
+.xbox-hub-log { max-height: 108px; display: flex; flex-direction: column; gap: 4px; overflow: auto; margin: 0; padding: 8px 10px; list-style: none; }
+.xbox-hub-log-entry { display: grid; grid-template-columns: 54px minmax(0,1fr); gap: 6px; color: rgba(245,244,239,.64); font-family: ui-monospace,monospace; font-size: 7px; line-height: 1.45; }
+.xbox-hub-log-entry time { color: rgba(245,244,239,.34); }
+.xbox-hub-log-entry[data-level="warn"] span { color: rgba(245,244,239,.83); }
+.xbox-hub-log-entry[data-level="ok"] span { color: rgba(214,190,101,.86); }
+.xbox-hub-command { padding: 9px 10px 10px; border-top: 1px solid rgba(245,244,239,.09); }
+.xbox-hub-command label { display: block; margin-bottom: 6px; color: rgba(245,244,239,.42); font-size: 8px; }
+.xbox-hub-command > div { display: flex; gap: 5px; }
+.xbox-hub-command input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid rgba(245,244,239,.13);
+  border-radius: 8px;
+  outline: 0;
+  color: var(--mora-text);
+  background: rgba(14,15,13,.55);
+  font: inherit;
+  font-size: 8px;
+}
+.xbox-hub-command input:focus { border-color: rgba(214,190,101,.58); }
+.xbox-hub-command button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(214,190,101,.32);
+  border-radius: 8px;
+  color: var(--mora-on-brand);
+  background: var(--mora-brand);
+  font: inherit;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.xbox-hub-footer {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 18px;
+  border-top: 1px solid rgba(245,244,239,.08);
+  color: rgba(245,244,239,.38);
+  font-size: 8px;
+}
+.xbox-hub-root button:focus-visible,
+.xbox-hub-root input:focus-visible,
+.xbox-hub-root select:focus-visible {
+  outline: 2px solid var(--mora-brand-hover);
+  outline-offset: 2px;
+}
+@media (max-width: 1120px) {
+  .xbox-hub-dialog { width: min(960px,100%); }
+  .xbox-hub-stage { grid-template-columns: minmax(180px,.58fr) minmax(0,1.42fr); }
+  .xbox-hub-inspector-panel { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: start; }
+  .xbox-hub-inspector-panel > .xbox-hub-panel-head { grid-column: 1 / -1; }
+  .xbox-hub-inspector { grid-row: span 2; }
+  .xbox-hub-audit { padding-top: 10px; }
+  .xbox-hub-log-area { grid-column: 1 / -1; }
+  .xbox-hub-command { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  .xbox-hub-root { padding: 0; }
+  .xbox-hub-dialog { width: 100%; height: 100dvh; border: 0; border-radius: 0; }
+  .xbox-hub-header { align-items: flex-start; flex-direction: column; gap: 10px; padding: 12px; }
+  .xbox-hub-brand { min-width: 0; }
+  .xbox-hub-controls { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+  .xbox-hub-profile { flex: 1; }
+  .xbox-hub-profile select { width: 100%; }
+  .xbox-hub-blades { gap: 5px; padding: 8px 10px 0; }
+  .xbox-hub-blade { min-height: 50px; padding: 7px 8px; }
+  .xbox-hub-blade strong { font-size: 10px; }
+  .xbox-hub-blade span { font-size: 7px; }
+  .xbox-hub-stage { display: flex; flex-direction: column; gap: 8px; overflow: auto; padding: 8px 10px; }
+  .xbox-hub-panel { flex: 0 0 auto; overflow: visible; }
+  .xbox-hub-vfs-panel { min-height: 0; }
+  .xbox-hub-vfs-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); max-height: 150px; }
+  .xbox-hub-footnote { display: none; }
+  .xbox-hub-main-panel { overflow: visible; }
+  .xbox-hub-app-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .xbox-hub-vector-grid { grid-template-columns: 1fr; }
+  .xbox-hub-inspector-panel { display: flex; }
+  .xbox-hub-footer { min-height: 32px; padding: 0 11px; font-size: 7px; }
+}
+@media (max-width: 390px) {
+  .xbox-hub-segment { min-width: 29px; padding-inline: 6px; }
+  .xbox-hub-app-grid { grid-template-columns: 1fr; }
+  .xbox-hub-search { width: 42%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xbox-hub-root *,
+  .xbox-hub-root *::before,
+  .xbox-hub-root *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+:root.reduce-motion .xbox-hub-root *,
+:root.reduce-motion .xbox-hub-root *::before,
+:root.reduce-motion .xbox-hub-root *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}

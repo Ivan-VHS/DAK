@@ -45,11 +45,11 @@
     },
     "adaptive_workspace": {
       "maturity": "partial",
-      "scope": "responsive browser layout, single fixed Duck palette, reduced-motion and Eco Visuals preferences; native compositor and XR session transfer remain absent"
+      "scope": "responsive browser layout, four console-inspired blades, three persisted view contexts, RU/UA/dual semantic path labels, fixed Duck palette, reduced-motion and Eco Visuals preferences; no native compositor, virtual desktop service or XR session transfer"
     },
     "multimodal_input": {
       "maturity": "planned",
-      "scope": "keyboard, pointer and touch; no voice or spatial input service"
+      "scope": "keyboard, pointer, touch and optional standard Gamepad API D-pad/A navigation in the Blade Hub; no voice or spatial input service"
     },
     "material_interface": {
       "maturity": "implemented",
@@ -90,6 +90,10 @@
     "content_security_policy": {
       "maturity": "partial",
       "scope": "same-origin CSP for scripts, connections, workers, images and forms; inline styles remain allowed for current component layout; deployment response headers and native process isolation require the host platform"
+    },
+    "blade_navigation": {
+      "maturity": "implemented",
+      "scope": "browser-only four-blade navigation, three saved workspace contexts, RU/UA/dual labels, semantic path aliases, a 20-vector index and optional standard Gamepad API navigation; no Xbox account, console licence or DRM service, no package signature verification, no native VFS, no process sandbox, and no native console integration"
     }
   },
   "not_in_scope_as_implemented_features": [

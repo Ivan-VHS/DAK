@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { HUB_APPS, HUB_BLADES, HUB_VFS_NODES, MORA_VECTORS, localizePair, normalizeHubPreferences, resolveVfsNode, validateHubRegistry } from "../mora/xbox-hub.js";
 
 const html = await readFile(new URL("../mora/index.html", import.meta.url), "utf8");
 const css = await readFile(new URL("../mora/styles.css", import.meta.url), "utf8");
@@ -142,7 +143,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v8-soft-glass"));
+  assert.ok(serviceWorker.includes("mora-shell-v9-blade-hub"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
@@ -168,4 +169,68 @@ test("Mora blocks remote active content and limits browser-layer authority", () 
   assert.ok(html.includes('name="referrer" content="no-referrer"'));
   assert.equal(policy.capabilities.content_security_policy.maturity,"partial");
   assert.ok(policy.capabilities.content_security_policy.scope.includes("inline styles remain allowed"));
+});
+
+
+test("Blade Hub provides a complete, bilingual workspace over the existing Mora registry", () => {
+  assert.ok(html.includes('id="xbox-hub-toggle"'));
+  assert.ok(html.includes('id="xbox-hub-root"'));
+  assert.ok(html.includes('src="xbox-hub.js"'));
+  assert.ok(css.includes(".xbox-hub-dialog"));
+  assert.ok(css.includes(".xbox-hub-blades"));
+  assert.ok(css.includes(".xbox-hub-vector-grid"));
+  assert.ok(css.includes("@media (prefers-reduced-motion: reduce)"));
+
+  assert.equal(HUB_BLADES.length, 4);
+  assert.deepEqual(HUB_BLADES.map((blade) => blade.id), ["live", "games", "media", "system"]);
+  assert.equal(HUB_APPS.length, 29);
+  assert.equal(new Set(HUB_APPS.map((app) => app.id)).size, 29);
+  assert.deepEqual(HUB_APPS.map((app) => app.id).sort(), registry.built_in_apps.map((app) => app.id).sort());
+  assert.equal(MORA_VECTORS.length, 20);
+  assert.equal(new Set(MORA_VECTORS.map((vector) => vector.id)).size, 20);
+  assert.ok(MORA_VECTORS.every((vector) => HUB_APPS.some((app) => app.id === vector.appId)));
+  assert.equal(HUB_VFS_NODES.length, 8);
+
+  assert.equal(localizePair("Игры", "Ігри", "ru"), "Игры");
+  assert.equal(localizePair("Игры", "Ігри", "ua"), "Ігри");
+  assert.equal(localizePair("Игры", "Ігри", "dual"), "Игры / Ігри");
+  assert.equal(resolveVfsNode("/игры").id, "games");
+  assert.equal(resolveVfsNode("/ігри").id, "games");
+  assert.equal(resolveVfsNode("інтеграції").id, "integrations");
+
+  const normalized = normalizeHubPreferences({
+    language: "invalid",
+    workspace: "99",
+    profile: "root",
+    views: { "01": { blade: "foreign", cwd: "../../", selectedApp: "not-installed" } }
+  });
+  assert.equal(normalized.language, "ru");
+  assert.equal(normalized.workspace, "01");
+  assert.equal(normalized.profile, "owner");
+  assert.deepEqual(normalized.views["01"], { blade: "live", cwd: "root", selectedApp: "mora-ai" });
+
+  const complete = validateHubRegistry(HUB_APPS, HUB_APPS.map((app) => app.id));
+  assert.equal(complete.ok, true);
+  assert.equal(complete.available, 29);
+  const incomplete = validateHubRegistry(HUB_APPS, HUB_APPS.slice(1).map((app) => app.id));
+  assert.equal(incomplete.ok, false);
+  assert.equal(incomplete.missing.length, 1);
+});
+
+test("Blade Hub keeps console-inspired navigation separate from native rights enforcement", async () => {
+  const hubSource = await readFile(new URL("../mora/xbox-hub.js", import.meta.url), "utf8");
+  assert.ok(hubSource.includes("navigator.getGamepads"));
+  assert.ok(hubSource.includes("requestAnimationFrame"));
+  assert.ok(hubSource.includes("signatureUnknown"));
+  assert.ok(hubSource.includes("licenseUnknown"));
+  assert.ok(hubSource.includes("без запуска нативного процесса"));
+  assert.ok(!hubSource.includes("eval("));
+  assert.ok(!hubSource.includes("new Function"));
+
+  assert.ok(policy.capabilities.blade_navigation);
+  assert.equal(policy.capabilities.blade_navigation.maturity, "implemented");
+  assert.ok(policy.capabilities.blade_navigation.scope.includes("semantic VFS"));
+  assert.ok(policy.capabilities.blade_navigation.scope.includes("no native VFS"));
+  assert.ok(serviceWorker.includes("./xbox-hub.js"));
+  assert.ok(serviceWorker.includes("mora-shell-v9-blade-hub"));
 });

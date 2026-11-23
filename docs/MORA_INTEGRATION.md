@@ -105,3 +105,14 @@ Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPT
 The shell uses project-maintained SVG glyphs, CSS and wallpaper geometry. Its motion references general platform interaction principles only; it does not bundle or imitate Apple-owned icons, fonts, screenshots or wallpapers. All app identifiers and panel contracts remain DuckOS-owned.
 
 A same-origin CSP is present in `mora/index.html`. It blocks remote scripts, fonts, images, connections and embedded objects. Inline styles are currently allowed because app panels use style attributes for bounded display values. The browser shell still does not replace a native capability broker, OS process sandbox or HTTP response security headers.
+
+
+## Blade Hub and semantic workspace
+
+Mora offers an optional console-inspired Blade Hub above the existing 29-panel launcher. Four horizontal blades organise profile/access, games, media and system tools. Three workspace contexts retain their selected blade, semantic location and highlighted panel independently. RU, UA and paired RU/UA labels are available for navigation, vector names and supporting descriptions.
+
+The Hub includes the 20 shared architecture vectors as a navigation index with links to relevant built-in Mora panels. It does not mark those vectors as natively complete. Its semantic VFS maps stable in-shell nodes to equivalent Russian and Ukrainian names; it is not a mounted host filesystem or a native VFS implementation.
+
+The built-in catalogue inspector checks that the expected app IDs have visible Mora desktop tiles and confirms the expected same-origin CSP. Package signatures, content ownership, console accounts, licences and DRM are not validated. The profile selector changes only the Hub's local presentation state. The browser shell does not receive native process authority through this interface.
+
+Keyboard navigation includes Escape, arrow-key focus movement and Alt+Left/Right blade switching. The standard Gamepad API is used only while the Hub is open; D-pad changes blades/focus and A activates the focused control. Its polling loop is stopped when the overlay closes. No Xbox/Microsoft logos, screenshots, proprietary fonts, sounds or code are bundled; this is an independent design concept and is not affiliated with Microsoft.

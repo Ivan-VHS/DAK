@@ -74,3 +74,22 @@ The Mora glyphs, wallpaper treatment, layout, CSS and interaction details are ma
 The HTML shell carries a same-origin Content Security Policy: scripts, workers, connections, manifests and form targets are restricted to the local origin; object embedding is disabled. Inline styles remain enabled because the current app panels use bounded, project-authored style attributes. A deployed native host should also send response headers for frame policy, MIME sniffing, permissions and transport security. The CSP is a browser-layer defence, not process sandboxing.
 
 Sentinel remains a deny-by-default preference surface. Its toggles do not enforce microphone, camera, file, network or clipboard isolation in native processes until a DuckOS capability broker and sandbox are implemented.
+
+
+## Blade Hub and console-inspired navigation
+
+Mora includes an optional **Blade Hub** inspired by the broad horizontal category navigation of early console dashboards. It is an original DuckOS interface, not a reproduction of a console dashboard. The shell uses four content blades — Live, Games, Media and System — with three independently remembered workspace contexts. The Hub is opened from the status bar and does not replace the standard central launcher.
+
+The language selector has three modes: Russian (RU), Ukrainian (UA) and paired labels (RU/UA). Each semantic VFS navigation node has a stable internal ID and equivalent Russian/Ukrainian labels. Paths are a navigation model over the Mora catalogue; they are not mounted directories and do not grant access to the host filesystem.
+
+The Hub presents all 29 existing built-in Mora panels and indexes the 20 shared system vectors. A vector is an architectural area and points to a related built-in panel; its presence in the index is not a claim that the corresponding native subsystem is complete. Workspace choices, language and profile view are stored locally in the browser profile.
+
+Keyboard navigation supports Escape, arrow-key movement, and Alt+Left/Right blade switching. A connected standard Gamepad API controller can use the D-pad and A button while the Hub is open. Controller polling stops when the Hub closes. The interface remains usable with pointer and touch input and respects both operating-system and Mora reduced-motion settings.
+
+## Trademark, provenance and trust boundary
+
+The Blade Hub uses only project-maintained DuckOS markup, CSS and glyphs. It does not bundle Xbox or Microsoft logos, console screenshots, proprietary fonts, sounds, artwork or copied source code. The visual reference is limited to the general idea of horizontal category blades and controller-friendly focus movement. The feature is an independent DuckOS concept and is not affiliated with Microsoft.
+
+The inspector audits the correspondence between the built-in Mora catalogue and the visible desktop tiles, and checks for the shell's same-origin CSP. It does **not** validate package signatures, account ownership, console activation, DRM or third-party licences. Profile selection is a local presentation preference, not an Xbox account or an authorization grant. Sentinel and the Hub do not enforce native process permissions.
+
+The semantic VFS is a bilingual shell-level index. It does not expose host paths, mount volumes, read arbitrary files or replace the native DuckOS VFS. Native rights enforcement, package signing and trusted content installation belong to a future permissioned system service.

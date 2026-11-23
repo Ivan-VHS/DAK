@@ -13,6 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="app.js"></script>
+  <script type="module" src="xbox-hub.js"></script>
 </head>
 <body>
   <main class="desktop" id="desktop">
@@ -74,6 +75,7 @@
       <div class="system-status" aria-label="Состояние системы">
         <span class="status-item"><span class="status-dot wifi-dot"></span> Wi-Fi</span>
         <span class="status-item battery"><span class="battery-shape"><i></i></span> 86%</span>
+        <button type="button" class="status-control xbox-hub-trigger" id="xbox-hub-toggle" aria-label="Открыть Blade Hub">HUB</button>
         <button class="status-control" data-app="workspace" aria-label="Открыть параметры системы">Система</button>
         <span class="status-control theme-control" role="img" aria-label="Единая палитра DuckOS: чёрный, белый и жёлтый" title="Чёрный · белый · жёлтый">DUCK</span>
         <time id="status-time">--:--</time>
@@ -195,6 +197,7 @@
       </nav>
     </footer>
 
+    <div class="xbox-hub-root" id="xbox-hub-root" hidden></div>
     <div class="window-layer" id="window-layer" aria-live="polite"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </main>
