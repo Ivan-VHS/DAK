@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -10,197 +10,226 @@
       "id": "cockos",
       "name": "Cockos",
       "category": "audio",
-      "panel": "mora/app.js#cockos"
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "kavun",
       "name": "Kavun",
       "category": "photos",
-      "panel": "mora/app.js#kavun"
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "kabon",
       "name": "Ka-bon",
       "category": "finance",
-      "panel": "mora/app.js#kabon"
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "gloverty",
       "name": "Gloverty",
       "category": "automation",
-      "panel": "mora/app.js#gloverty"
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "po",
       "name": "Po",
       "category": "compass",
-      "panel": "mora/app.js#po"
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "illidia",
       "name": "Illidia",
       "category": "games",
-      "panel": "mora/app.js#illidia"
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "unify",
       "name": "Unify",
       "category": "devices",
-      "panel": "mora/app.js#unify"
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "sestem",
       "name": "Sestem",
       "category": "system",
-      "panel": "mora/app.js#sestem",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "setupup",
       "name": "SetupUP",
       "category": "system",
-      "panel": "mora/app.js#setupup",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "orriganize",
       "name": "Orriganize",
       "category": "productivity",
-      "panel": "mora/app.js#orriganize",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "abriganza",
       "name": "Abriganza",
       "category": "files",
-      "panel": "mora/app.js#abriganza",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "olaab",
       "name": "Olaab",
       "category": "multimedia",
-      "panel": "mora/app.js#olaab",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "concrete-thump",
       "name": "Concrete Thump",
       "category": "audio",
-      "panel": "mora/app.js#concrete-thump",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "seu-beu",
       "name": "Seu-Beu",
       "category": "privacy",
-      "panel": "mora/app.js#seu-beu",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "love-il",
       "name": "Love-IL",
       "category": "journal",
-      "panel": "mora/app.js#love-il",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "poi",
       "name": "Poi",
       "category": "notes",
-      "panel": "mora/app.js#poi",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "poi-2",
       "name": "Poi-2",
       "category": "knowledge",
-      "panel": "mora/app.js#poi-2",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "po-2",
       "name": "Po-2",
       "category": "navigation",
-      "panel": "mora/app.js#po-2",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "gamecharager",
       "name": "GameCharager",
       "category": "gaming",
-      "panel": "mora/app.js#gamecharager",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "exedotexe",
       "name": "EXEdotEXE",
       "category": "compatibility",
-      "panel": "mora/app.js#exedotexe",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "mora-ai",
       "name": "Mora AI",
       "category": "system",
-      "panel": "mora/app.js#mora-ai",
-      "maturity": "partial_local_rules"
+      "maturity": "partial_local_rules",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "security",
       "name": "Sentinel",
       "category": "security",
-      "panel": "mora/app.js#security",
-      "maturity": "shell_policy_only"
+      "maturity": "shell_policy_only",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "updates",
       "name": "Restore",
       "category": "recovery",
-      "panel": "mora/app.js#updates",
-      "maturity": "shell_snapshot_only"
+      "maturity": "shell_snapshot_only",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "runtime",
       "name": "Bridge",
       "category": "compatibility",
-      "panel": "mora/app.js#runtime",
-      "maturity": "partial_pe_cli_and_prefix_foundation"
+      "maturity": "partial_pe_cli_and_prefix_foundation",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "workspace",
       "name": "Control",
       "category": "workspace",
-      "panel": "mora/app.js#workspace",
-      "maturity": "shell_preferences"
+      "maturity": "shell_preferences",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "provenance",
       "name": "Proof",
       "category": "provenance",
-      "panel": "mora/app.js#provenance",
-      "maturity": "sha256_only"
+      "maturity": "sha256_only",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "mora-boost",
       "name": "Mora Boost",
       "category": "gaming",
-      "panel": "mora/app.js#mora-boost",
-      "maturity": "external_native_workbench"
+      "maturity": "external_native_workbench",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "desktop",
       "name": "Duck Desktop",
       "category": "workspace",
-      "panel": "mora/app.js#desktop",
-      "maturity": "partial_native_userland_tool"
+      "maturity": "partial_native_userland_tool",
+      "runtime": "native-tk",
+      "scope": "user-space"
     },
     {
       "id": "mora-commons",
       "name": "Mora Commons",
       "category": "application_catalogue",
-      "panel": "mora/app.js#mora-commons",
-      "maturity": "implemented_local_catalog"
+      "maturity": "implemented_local_catalog",
+      "runtime": "native-tk",
+      "scope": "user-space"
     }
   ],
   "widgets": [
