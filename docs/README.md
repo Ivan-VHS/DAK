@@ -33,3 +33,8 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Windows application compatibility
 
 [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics, the current non-executing boundary and implementation status against the 66-point specification.
+
+
+## Upstream compatibility engines
+
+[Upstream Windows compatibility engines](UPSTREAM_COMPATIBILITY_ENGINES.md) describes DuckOS's host-side adapters for Proton, Lutris, Bottles, CrossOver and Wine, including runtime selection, environment management, explicit CLI launches and native-runtime boundaries.

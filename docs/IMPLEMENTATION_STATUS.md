@@ -56,3 +56,17 @@ A Reaper script passing on the reference runtime proves only that the script and
 - [ ] DirectX/Vulkan, audio, input, network, device and launcher bridges.
 
 The implemented foundation never executes a Windows binary and does not install drivers or runtime DLLs. See [Windows compatibility](WINDOWS_COMPATIBILITY.md) for the full 66-point traceability table and exact CLI use.
+
+
+## Upstream Linux runtime adapters — 2026-11-23
+
+- [x] Read-only discovery of common Steam libraries, Proton tools, Wine, Lutris, Bottles, CrossOver and Flatpak registrations.
+- [x] Deterministic recommendation policy for Steam, multi-store, isolated and commercial application scenarios.
+- [x] Shell-free argv/environment launch plans for Proton, Lutris, Bottles, CrossOver and Wine.
+- [x] Explicit host CLI launch action with bounded identifiers and arguments.
+- [x] Bottles environment creation delegated to bottles-cli.
+- [x] Wine prefix initialization delegated to wineboot in a DuckOS-owned prefix store.
+- [ ] Mora browser-to-host process bridge and kernel-enforced capability broker.
+- [ ] Native DuckOS NT/Win32 loader, process model, graphics/audio bridges and per-title compatibility verification.
+
+Upstream adapters delegate execution to software installed on a Linux host. They do not implement the native DuckOS Windows subsystem and do not turn the current browser shell into a bootable OS.

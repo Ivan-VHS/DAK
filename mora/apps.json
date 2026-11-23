@@ -74,7 +74,7 @@
       "name": "Bridge",
       "category": "compatibility",
       "panel": "mora/app.js#runtime",
-      "maturity": "partial_pe_cli_and_prefix_foundation"
+      "maturity": "partial_native_inspection_plus_upstream_host_adapters"
     },
     {
       "id": "workspace",
@@ -134,7 +134,7 @@
     {
       "id": "compat-runtime",
       "maturity": "partial",
-      "scope": "PE32/PE32+ headers, sections and import DLL inspection; isolated prefix scaffold and CLI diagnostics; no native process execution"
+      "scope": "PE32/PE32+ inspection, isolated metadata prefixes and CLI diagnostics; Proton/Lutris/Bottles/CrossOver host adapters for read-only discovery, selection and explicit launch; no native DuckOS NT/Win32 process runtime"
     },
     {
       "id": "provenance-verifier",
@@ -155,6 +155,11 @@
       "id": "theme-adapter",
       "maturity": "implemented",
       "scope": "shared dark/light semantic tokens in Mora shell"
+    },
+    {
+      "id": "upstream-runtime-adapters",
+      "maturity": "implemented_host_cli",
+      "scope": "Linux runtime discovery, scenario recommendation, shell-free command planning, explicit host CLI launch and Wine/Bottles environment creation; no Mora browser process bridge"
     }
   ]
 }
