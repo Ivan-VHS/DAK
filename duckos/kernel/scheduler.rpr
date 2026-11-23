@@ -1,0 +1,25 @@
+# Deterministic scheduling policy.
+# Task shape: [id, priority, deadline, state].
+# This chooses work; it does not perform a hardware context switch.
+
+export craft pick_ready(tasks) {
+    vary found := false
+    vary selected_id := ""
+    vary selected_priority := -2147483648
+    vary selected_deadline := 9223372036854775807
+
+    each task in tasks {
+        when size(task) == 4 {
+            when task[3] == "ready" {
+                when not found or task[1] > selected_priority or (task[1] == selected_priority and task[2] < selected_deadline) {
+                    change found := true
+                    change selected_id := task[0]
+                    change selected_priority := task[1]
+                    change selected_deadline := task[2]
+                }
+            }
+        }
+    }
+
+    yield selected_id
+}

@@ -1,0 +1,15 @@
+# Finite service restart policy.
+# exit_code == 0 is a clean stop; retry limits are never expanded automatically.
+
+export craft decide(exit_code, retries, retry_limit) {
+    when retries < 0 or retry_limit < 0 {
+        yield ["invalid", retries]
+    }
+    when exit_code == 0 {
+        yield ["stopped", retries]
+    }
+    when retries >= retry_limit {
+        yield ["failed", retries]
+    }
+    yield ["restart", retries + 1]
+}

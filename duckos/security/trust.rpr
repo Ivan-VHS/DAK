@@ -1,0 +1,27 @@
+# Trust labels and effect boundary for external inputs.
+# Passing a validator never grants ambient privileges.
+
+import "capabilities.rpr" as capabilities
+
+export craft promote(label, validation_passed) {
+    when not validation_passed {
+        yield "quarantined"
+    }
+    when label == "untrusted" {
+        yield "validated"
+    }
+    when label == "validated" or label == "trusted" {
+        yield label
+    }
+    yield "quarantined"
+}
+
+export craft effect_allowed(label, grants, requested_effect) {
+    when label == "quarantined" {
+        yield false
+    }
+    when label == "untrusted" and requested_effect != "sanitize" {
+        yield false
+    }
+    yield capabilities["permits"](grants, requested_effect)
+}
