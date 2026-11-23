@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
+    QAbstractSpinBox,
     QHBoxLayout,
     QLabel,
     QSizePolicy,
@@ -109,7 +110,7 @@ class MoraSlider(QWidget):
         self.value_input.setSuffix(suffix)
         self.value_input.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.value_input.setKeyboardTracking(False)
-        self.value_input.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
+        self.value_input.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.value_input.setFixedWidth(88)
         self.value_input.setAccessibleName(f"{title}: точное значение")
         self.value_input.setValue(self.track.value())
