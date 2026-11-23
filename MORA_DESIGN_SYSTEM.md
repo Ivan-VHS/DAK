@@ -60,6 +60,18 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 - Preserve visible keyboard focus, labels, tab order, Escape handling, native DPI and text scaling.
 - Keep the centre stable as layouts reflow; at narrow widths, collapse columns instead of shrinking text or hit areas.
 
+## Typography
+
+Mora keeps **Inter / Segoe UI / system sans-serif** for the main interface. The calligraphic set is an accent layer, not a replacement for controls, dense text or system status.
+
+- Display / brand: **Lobster**, then **Pacifico** as an optional local fallback.
+- Cyrillic handwritten accents: **Caveat**, **Marck Script** and **Bad Script**.
+- Large expressive lettering: **Comforter** and **Comforter Brush**; use sparingly.
+- Latin-only ornament: **Great Vibes**, **Alex Brush**, **Allura**, **Pinyon Script**, **Italianno**, **Parisienne** and **Herr Von Muellerhoff**. Apply only to Latin text.
+- Code and numeric content keep their existing monospace/tabular treatment.
+
+The CSS stacks reference locally installed font families and do not fetch Google Fonts at runtime. This preserves Mora's offline behavior. Until licensed font files are bundled with their original notices, missing families fall back to the browser's local generic fonts. The complete approved set and redistribution rules are in [Calligraphic Typography](docs/CALLIGRAPHIC_TYPOGRAPHY.md).
+
 ## Integration contract
 
 `mora/theme.json` is the canonical token source. Native adapters may expose toolkit-specific names but must preserve semantic roles and contrast. The shell may read local theme assets; it must not fetch CSS or theme data from a remote server at runtime.
