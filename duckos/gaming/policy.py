@@ -189,6 +189,10 @@ def assess_capability_document(document: dict[str, Any] | None = None) -> dict[s
             raise GamingPolicyError("OPlague evidence must be read-only")
         return assess_capabilities(document.get("providers"))
     if document.get("schema") == "duckos.gaming-provider-evidence.v1":
+        if document.get("system_mutations_performed") is not False:
+            raise GamingPolicyError("Pytyliki evidence must be read-only")
+        if document.get("evidence_scope") != "whole_host":
+            raise GamingPolicyError("Pytyliki evidence scope must be explicitly whole_host")
         return assess_capabilities(document.get("capabilities"))
     if "capabilities" in document:
         return assess_capabilities(document["capabilities"])
