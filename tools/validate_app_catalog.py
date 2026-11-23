@@ -38,8 +38,8 @@ def main() -> int:
     native_shell = catalog["native_shell"]
     if native_shell["maturity_status"] != "implemented":
         raise SystemExit("Mora native user-space shell must be marked implemented")
-    if native_shell["runtime"] != "python-tk":
-        raise SystemExit("Mora must use the native Tk runtime")
+    if native_shell["runtime"] != "pyside6":
+        raise SystemExit("Mora must use the native PySide6 runtime")
 
     for app in catalog["applications"]:
         if app["maturity_status"] != "specified":
