@@ -14,3 +14,8 @@ The seven-app Mora shell can be opened from [`prototype/mora-home.html`](prototy
 Start with the [documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared terminology and evidence rules used across Ivan-VHS repositories.
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests. Architecture proposals and roadmap entries are not implementation evidence.
+
+
+## Visual language
+
+See [Mora Amber design system](docs/MORA_AMBER_DESIGN_SYSTEM.md) for the desktop shell palette, composition, motion and accessibility contract.
