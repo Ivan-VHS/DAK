@@ -68,3 +68,25 @@ The implemented foundation never executes a Windows binary and does not install 
 - [ ] Native target process creation, compatibility-prefix management for third-party runtimes, sandbox enforcement and graphics/audio translation.
 
 The runtime inventory and plan generator do not invoke a discovered runtime or target. Both execution_started and prefix_created are false in the versioned plan.
+
+
+## Release packaging and deployment planning — 2026-11-23
+
+- [x] Deterministic release component-bundle packaging from a validated system manifest.
+- [x] Component files are copied and re-hashed during packaging to detect changes in the source tree.
+- [x] SHA-256 inventory for release metadata and component payloads.
+- [x] Optional Ed25519 signing of release metadata with OpenSSL.
+- [x] Archive verifier for canonical paths, unsupported links, duplicate files, expanded-size limits, manifest digest, component hashes and checksum inventory.
+- [x] Optional Ed25519 signature verification against an externally supplied public key.
+- [x] Non-destructive GPT deployment layout planner with EFI, two system slots, recovery and user data.
+- [x] USB, PXE, UEFI HTTP Boot/iPXE and cloud deployment plan targets.
+- [x] CLI entry points: `build-release`, `verify-release` and `deployment-plan`.
+- [x] JSON schemas for release metadata and deployment plans.
+- [ ] Real ISO and hybrid USB image assembly, including an actual firmware-compatible EFI bootloader.
+- [ ] PXE/HTTP boot server provisioning, DHCP/TFTP configuration, native boot handoff and boot-chain signature enforcement.
+- [ ] Physical disk installer and safe destructive-write workflow.
+- [ ] Native A/B slot selection, boot-success confirmation and automatic rollback.
+- [ ] Cloud disk-image conversion and validation.
+- [ ] Firmware, VM and hardware boot qualification.
+
+The release bundle is a component archive, not a bootable image. Deployment plans are dry-run descriptions and do not write disks. HTTPS transport does not by itself establish UEFI Secure Boot. The Secure Boot plan therefore remains `ready: false`, and the cloud-format list records intended targets rather than completed conversions. See [DEPLOYMENT.md](DEPLOYMENT.md) for commands, boundaries and signing-key handling.
