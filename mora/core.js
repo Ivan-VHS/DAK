@@ -153,14 +153,14 @@ export function buildIntentPlan(rawInput) {
     });
   }
 
-  if (/(уменьш|сниз|отключ|без|зменш|вимкн).{0,24}анимац|без.{0,24}руху/u.test(text)) {
+  if (/(уменьш|сниз|отключ|без|зменш|вимкн).{0,24}(анимац|анімац)|без.{0,24}руху/u.test(text)) {
     actions.push({
       type: "set",
       setting: "reducedMotion",
       value: true,
       label: "Снизить движение интерфейса"
     });
-  } else if (/(обычн|включ|звичайн|увімк).{0,24}анимац/u.test(text)) {
+  } else if (/(обычн|включ|звичайн|увімк).{0,24}(анимац|анімац)/u.test(text)) {
     actions.push({
       type: "set",
       setting: "reducedMotion",
