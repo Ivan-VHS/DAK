@@ -36,7 +36,7 @@ The built-in production prompt is limited to **500 characters** and emphasizes O
 
 ## Local files, bounds and rights
 
-Audio import is initiated by the user and stays in the current browser session. Files are previewed through browser object URLs and decoded only when the sequencer plays or renders the selected choir source; closing the Concrete Thump window releases those URLs. The browser profile stores rhythm settings, the step sequence and sample metadata only. It does not persist audio bytes, upload files, search the Internet for recordings, or sync media across devices. Re-select a previously catalogued file to audition it again.
+Audio import is initiated by the user and stays in the current browser session. Files are previewed through browser object URLs and decoded by the browser preview or sequencer only when the user requests playback or rendering; closing the Concrete Thump window releases those URLs. The browser profile stores rhythm settings, the step sequence and sample metadata only. It does not persist audio bytes, upload files, search the Internet for recordings, or sync media across devices. Re-select a previously catalogued file to audition it again.
 
 The UI limits imports to eight samples, 25 MiB per file and 80 MiB total per open session. Playback and WAV rendering are bounded to a four-bar sequence. The drum sounds are simple browser-generated tonal/noise voices with a master compressor; they are not acoustic drum samples or a substitute for a dedicated production engine. These are application guardrails, not a general-purpose audio decoder or malware scanner.
 
