@@ -56,7 +56,7 @@ Example: Text Editor + Audio Editor + Translator = Jora.
 
 The first integrated feature packs are specification-only; they do not yet provide a working text editor, audio engine or translation service. Reaper is the only code-generation target currently implemented. Java, Kotlin, Python, TypeScript, Rust and C are labelled as pending adapters when selected. The generated scaffold is not installable, and Mora browser code never starts a host process.
 
-Jora's naming engine provides compact, balanced, descriptive and formula-style descriptors without creating separate brands. Its graph engine offers layered, pipeline, hub-and-spoke, plugin-mesh, event-driven and hybrid structures, with 1–6 reproducible variants. Hard dependencies stay acyclic; event feedback is asynchronous and bus-mediated. Each generated project contains `jora.graphs.json` with typed nodes, edges, signatures and compatibility metrics.
+Jora's naming engine provides compact, balanced, descriptive and formula-style descriptors without creating separate brands. Its graph engine offers layered, pipeline, hub-and-spoke, plugin-mesh, event-driven and hybrid structures, with 1–6 reproducible variants ranked for balance, low latency, modularity, extensibility or minimal complexity. Hard dependencies stay acyclic; event feedback is asynchronous and bus-mediated. Each generated project contains `jora.graphs.json` with typed nodes, edges, signatures and compatibility metrics.
 
 After exporting the request JSON, run the native command from the DuckOS environment:
 
