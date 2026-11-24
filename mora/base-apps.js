@@ -7,7 +7,7 @@ export const BASE_APP_DEFINITIONS = {
   wayline: { name: "Wayline", subtitle: "Закладки и чтение", glyph: "⌖", category: "internet" },
   sumora: { name: "Sumora", subtitle: "Личный учёт доходов и расходов", glyph: "₴", category: "finance" },
   pixora: { name: "Pixora", subtitle: "Галерея выбранных изображений", glyph: "▧", category: "multimedia" },
-  nexcode: { name: "Nexcode", subtitle: "Инструменты разработчика", glyph: "</>", category: "development" },
+  nexcode: { name: "Nexcode", subtitle: "Инструменты разработчика", glyph: "⌘", category: "development" },
   mnemo: { name: "Mnemo", subtitle: "Карточки для обучения", glyph: "◇", category: "education" },
   calcora: { name: "Calcora", subtitle: "Инженерный калькулятор", glyph: "∑", category: "utilities" },
   paceforge: { name: "Paceforge", subtitle: "Дневник активности", glyph: "↗", category: "health" },
@@ -98,10 +98,19 @@ function renderRecords(root, appId) {
       item.append(toggle, value);
     } else if (appId === "wayline") {
       const link = makeElement(documentRef, "a", "extension-entry-text", record.label || record.url);
-      link.href = record.url;
+      let safeUrl = null;
+      try {
+        const parsed = new URL(record.url);
+        if (["http:", "https:"].includes(parsed.protocol)) safeUrl = parsed.href;
+      } catch {}
+      if (!safeUrl) {
+        item.appendChild(makeElement(documentRef, "span", "extension-entry-text", "Недопустимая или повреждённая ссылка"));
+      } else {
+        link.href = safeUrl;
+        item.appendChild(link);
+      }
       link.target = "_blank";
       link.rel = "noopener noreferrer";
-      item.appendChild(link);
     } else if (appId === "mnemo") {
       const copy = makeElement(documentRef, "div", "base-card-copy");
       copy.appendChild(makeElement(documentRef, "strong", "", record.question));
@@ -296,7 +305,7 @@ export function calculateExpression(source) {
   const input = String(source).replace(/\s+/g, "");
   if (!input || input.length > 120) throw new Error("Введите выражение длиной до 120 символов.");
   const tokens = [];
-  const pattern = /(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/%]/y;
+  const pattern = /(?:\d+(?:\.\d*)?|\.\d+)|[()+*\/%-]/y;
   let offset = 0;
   while (offset < input.length) {
     pattern.lastIndex = offset;
@@ -366,7 +375,7 @@ function saveLexora(root, exportFile) {
     link.href = url;
     link.download = "lexora-document.txt";
     link.click();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 }
 
