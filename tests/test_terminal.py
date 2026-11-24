@@ -111,6 +111,33 @@ class ExtendedTerminalTests(unittest.TestCase):
         with self.assertRaisesRegex(TerminalInputError, "directory must not be a symlink"):
             service._read_json(linked_state / "config.json", 1024, {})
 
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "named pipes are POSIX-only")
+    def test_module_order_rejects_fifo_without_blocking(self):
+        source = self.state.parent / "module-order.json"
+        os.mkfifo(source)
+        with self.assertRaisesRegex(TerminalInputError, "regular file"):
+            self.terminal.execute("module order " + str(source), record_history=False)
+
+    def test_module_order_rejects_symlinked_input(self):
+        target = self.state.parent / "modules.json"
+        target.write_text('[]', encoding="utf-8")
+        linked = self.state.parent / "modules-link.json"
+        linked.symlink_to(target)
+        with self.assertRaisesRegex(TerminalInputError, "symlinks"):
+            self.terminal.execute("module order " + str(linked), record_history=False)
+
+    def test_module_order_rejects_oversized_file(self):
+        from duckos.terminal import service as terminal_module
+        source = self.state.parent / "large-modules.json"
+        source.write_text('[]', encoding="utf-8")
+        previous = terminal_module.MAX_INPUT_JSON_BYTES
+        terminal_module.MAX_INPUT_JSON_BYTES = 1
+        try:
+            with self.assertRaisesRegex(TerminalInputError, "size limit"):
+                self.terminal.execute("module order " + str(source), record_history=False)
+        finally:
+            terminal_module.MAX_INPUT_JSON_BYTES = previous
+
     def test_terminal_command_is_wired_to_the_existing_cli(self):
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
