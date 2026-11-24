@@ -140,6 +140,18 @@
       "maturity": "partial_local_workspace"
     },
     {
+      "id": "red-sparrow",
+      "name": "Red Sparrow / 赤雀",
+      "category": "creative",
+      "panel": "mora/app.js#red-sparrow",
+      "maturity": "partial_local_workspace",
+      "data_policy": "local_only_user_notes",
+      "locale_profiles": [
+        "ru-RU",
+        "zh-CN"
+      ]
+    },
+    {
       "id": "mora-ai",
       "name": "Mora AI",
       "category": "system",
@@ -201,18 +213,6 @@
       "category": "application_catalogue",
       "panel": "mora/app.js#mora-commons",
       "maturity": "implemented_local_catalog"
-    },
-    {
-      "id": "red-sparrow",
-      "name": "Red Sparrow / 赤雀",
-      "category": "creative",
-      "panel": "mora/app.js#red-sparrow",
-      "maturity": "partial_local_workspace",
-      "data_policy": "local_only_user_notes",
-      "locale_profiles": [
-        "ru-RU",
-        "zh-CN"
-      ]
     }
   ],
   "widgets": [
