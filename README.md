@@ -45,7 +45,7 @@ duckos reaper check ./examples/program.rpr
 duckos reaper typecheck ./examples/program.rpr
 ```
 
-The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. The pinned Reaper toolchain preserves UTF-8 source ranges through its reference IR and native C17 expression IR; DuckOS delegates diagnostics to Reaper rather than implementing its own parser. See [Native Reaper integration](docs/REAPER_INTEGRATION.md) and the [source-span contract](projects/reaper/docs/SOURCE_SPANS.md).
 
 ## Visual system and offline support
 
