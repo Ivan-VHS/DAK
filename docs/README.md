@@ -1,52 +1,54 @@
 # DuckOS documentation
 
+The root [README](../README.md) is the first-stop guide for the current project boundary, Mora browser preview, clone/test/build commands, application catalogue and maturity. This index links to the maintained architecture and integration contracts.
+
 ## Desktop and application interfaces
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
+- [Mora unified desktop](../mora/index.html) — current browser shell source and local preview entry point.
+- [Mora Commons](MORA_COMMONS.md) — neutral application discovery and catalogue experience.
+- [Mora shell and native integration](MORA_INTEGRATION.md) — browser-local behavior versus native host capabilities.
+- [Mora Design System](../MORA_DESIGN_SYSTEM.md) — canonical black/white/yellow palette and interaction tokens.
+- [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) — hardware evidence, reversible Windows sessions and future bridge scope.
+- [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) — product roles and declared capability boundaries.
+- [Earlier Mora prototype](../prototype/mora-home.html) — retained reference implementation; not a native desktop compositor.
 
-[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
+## Native platform and developer tools
 
-## Visual design
+- [Architecture](ARCHITECTURE.md) — implemented Reaper-first system contracts and pending native backends.
+- [Native Reaper integration](REAPER_INTEGRATION.md) — process-isolated Studio launch and delegated CLI checks.
+- [Repository federation](REPOSITORY_FEDERATION.md) — pinned Pytyliki, Reaper, OPlague and VentuSample submodules.
+- [DuckOS Extended Terminal](EXTENDED_TERMINAL.md) — allowlisted user-space command environment and trust boundaries.
+- [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) — native user-space maintenance and current compositor boundary.
+- [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) — PE inspection, profiles and diagnostic tools.
+- [DuckBridge](DUCKBRIDGE.md) — runtime discovery and structured dry-run launch plans; no target launch is claimed.
 
-[Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical interface standard; [mora/theme.json](../mora/theme.json) contains the versioned color, shape, spacing, typography and motion tokens.
+## Versioned contracts and utilities
 
-## Runnable prototypes
+- [Unify transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) — bounded JSON transfer contract for supported settings and content.
+- [Hardware inventory schema](../schemas/hardware-inventory.v1.schema.json) — bounded local device-inventory records.
+- [Preinstalled applications schema](../schemas/preinstalled-applications.v1.schema.json) — versioned application catalogue structure.
+- [Base application catalogue](../catalogs/dak-base-applications.v1.yaml) — proposed package catalogue, not a boot-image manifest.
+- [Engineering evolution framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — maturity states, architecture evolution and measurable completion criteria.
+- [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) — capability maturity, runtime states, evidence and documentation terminology.
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+## Build and verification
 
-[The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
+~~~sh
+npm test
+python -m pip install -e .
+python -m pip install jsonschema pyyaml
+python -m unittest discover -s tests -v
+python tools/validate_app_catalog.py
+python tools/validate_engineering_evolution.py
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+~~~
 
-## Command-line tools
-
-[DuckOS Extended Terminal](EXTENDED_TERMINAL.md) documents the separate allowlisted user-space command environment, command registry, local configuration, bounded history, extension contract and security boundaries.
-
-## Native workbench
-
-[Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
-
-## Desktop optimization
-
-[Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.
-
-## Product specification
-
-[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
-
-## Normative standard
-
-[Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
+CI currently runs Python 3.10/3.11/3.12, Mora Node tests on Node 22, and the native C build when a CMake target is present. The native build in this repository produces the C11 boot-contract library; it is not a complete OS image or kernel.
 
 ## Documentation rules
 
-Describe current behavior from the source, build configuration and tests. Mark designs and future work as specified or planned; do not present them as implemented. Keep kernel, boot, driver, runtime, graphics and desktop claims tied to concrete source paths and reproducible verification evidence.
+Describe implemented behavior separately from designs and roadmaps. A browser panel is not a native service; a catalogue item is not a packaged application; a process launch is not kernel integration; a device snapshot is not driver installation; and a boot contract is not a bootable image.
 
-This index is a documentation entry point. It does not itself assert that any particular subsystem is implemented or absent.
-
-## Windows application compatibility
-
-[Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
-
-
-## Capability completeness standard
-
-[Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
+This repository currently has no root LICENSE file or captured Mora desktop screenshot. Do not add license or screenshot badges until those artifacts exist.
