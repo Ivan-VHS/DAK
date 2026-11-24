@@ -160,6 +160,17 @@ test("glass materials use bounded progressive enhancement and accessible fallbac
   assert.equal(glass.strongBlurPx, 22);
   assert.equal(glass.mobileBlurPx, 10);
   assert.equal(glass.maxConcurrentBlurLayers, 5);
+  assert.deepEqual(glass.blurSurfaces, ["statusbar", "widget-card", "dock", "app-window", "toast"]);
+  assert.deepEqual(glass.performance, {
+    maxConcurrentBlurLayers: 5,
+    mobileBlurReductionPercent: 44,
+    opaqueFallbackRequired: true,
+    animateBackdropFilter: false
+  });
+  assert.equal(glass.blurSurfaces.length, glass.maxConcurrentBlurLayers);
+  for (const surface of glass.blurSurfaces) {
+    assert.ok(css.includes("." + surface), "missing glass surface selector: " + surface);
+  }
   assert.equal(glass.reducedTransparency, "opaque");
   assert.equal(glass.forcedColors, "system");
   assert.deepEqual(glass.nativeBackdrops.windows, {
