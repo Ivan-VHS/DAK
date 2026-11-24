@@ -7,6 +7,7 @@ const ASSETS = [
   "./commons-catalog.js",
   "./core.js",
   "./concrete-thump.js",
+  "./concrete-thump-audio.js",
   "./apps.json",
   "./system-policy.json",
   "./theme.json",
