@@ -84,6 +84,12 @@ class ReaperWorkbenchTests(unittest.TestCase):
         with self.assertRaises(ReaperIntegrationError):
             workbench.open_studio()
 
+    def test_invalid_environment_override_does_not_fall_back_to_checkout(self):
+        with patch.dict("os.environ", {"DUCKOS_REAPER_ROOT": str(self.root / "not-a-repository")}):
+            workbench = ReaperWorkbench()
+        self.assertFalse(workbench.inspect()["available"])
+        self.assertEqual(workbench.inspect()["status"], "not_found")
+
     def test_typecheck_requires_a_checkout_with_the_checker(self):
         (self.root / "reaper" / "typecheck.py").unlink()
         result = self.workbench.inspect()

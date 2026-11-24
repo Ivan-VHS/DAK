@@ -121,3 +121,16 @@ These are partial browser-shell features. The new DAK package catalog remains at
 - [ ] MacOS LaunchAgents integration and machine-wide/service startup management (intentionally outside this module's scope).
 
 The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
+
+
+## Unified capability completeness gate — 2026-11-23
+
+The shared [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) applies to every Mora and DuckOS capability. A feature is complete only for its explicitly declared scope and only when source, tests, CI and documentation agree.
+
+- Mora browser-shell behavior, local preferences and catalog entries are tracked separately from native DuckOS services.
+- User-space maintenance utilities are not kernel services, a compositor, a bootloader, a driver manager or proof of a bootable operating-system image.
+- Catalogued applications and proposed DAK services remain specifications until executable implementations and integration tests exist.
+- Kernel, boot, process, filesystem, compositor, driver and capability-enforcement work stays partial or planned until the relevant native code and target-platform tests are present.
+- Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
+
+The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.

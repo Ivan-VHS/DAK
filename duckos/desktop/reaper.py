@@ -42,20 +42,30 @@ class ReaperWorkbench:
         )
 
     @classmethod
+    def _validated_repository(cls, candidate: str | Path) -> Path | None:
+        try:
+            resolved = Path(candidate).expanduser().resolve(strict=True)
+        except OSError:
+            return None
+        return resolved if cls._is_repository(resolved) else None
+
+    @classmethod
     def _find_repository(cls, explicit: str | Path | None) -> Path | None:
-        candidates: list[Path] = []
+        # Explicit configuration is authoritative. Never silently switch to a
+        # different checkout when a caller supplied a missing or invalid path.
         if explicit is not None:
-            candidates.append(Path(explicit).expanduser())
+            return cls._validated_repository(explicit)
+
         configured = os.environ.get("DUCKOS_REAPER_ROOT")
         if configured:
-            candidates.append(Path(configured).expanduser())
+            return cls._validated_repository(configured)
 
         package_root = Path(__file__).resolve().parents[2]
-        candidates.extend((
+        candidates = (
             package_root / "projects" / "reaper",
             Path.cwd() / "projects" / "reaper",
             Path.cwd(),
-        ))
+        )
 
         seen: set[Path] = set()
         for candidate in candidates:
