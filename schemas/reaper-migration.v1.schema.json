@@ -14,7 +14,8 @@
     "execution_profiles",
     "source_inventory",
     "non_reaper_boundaries",
-    "gates"
+    "gates",
+    "reaper_target_profile"
   ],
   "properties": {
     "schema": {
