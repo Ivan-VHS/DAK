@@ -1,6 +1,10 @@
 # DuckOS predictive-security policy contracts.
 import "decision.rpr" as decision
+import "capabilities.rpr" as capabilities
 import "../services/security.rpr" as security_service
+import "../system/telemetry.rpr" as security_telemetry
+import "../kernel/ipc.rpr" as security_ipc
+import "../drivers/orchestrator.rpr" as security_drivers
 
 assert(decision["risk_score"](0, 0, false, false, false, false) == 0, "benign activity has no added risk")
 assert(decision["risk_score"](5, 0.8, true, true, true, false) == 100, "correlated destructive activity saturates risk")
@@ -50,3 +54,45 @@ assert(not capabilities["permits"](sensor_bundle, "security.process.terminate"),
 assert(capabilities["permits"](service_bundle, "security.events.read"), "analysis service may read events")
 assert(not capabilities["permits"](service_bundle, "security.file.restore"), "analysis service cannot restore user data")
 assert(capabilities["permits"](enforcement_bundle, "security.file.restore"), "separate enforcement bundle defines explicit restore authority")
+
+
+# Kernel IPC and telemetry enforce source trust and capability separation.
+make sensor_bundle := capabilities["security_sensor_grants"]()
+make service_bundle := capabilities["security_service_grants"]()
+make enforcement_bundle := capabilities["security_enforcement_grants"]()
+make security_event_a := [1, "event-0001", "sensor-0", "process.start", "pid-10", "", "", "trusted", 100]
+make security_event_b := [2, "event-0002", "sensor-0", "file.modify", "pid-10", "file-2", "event-0001", "trusted", 200]
+make untrusted_security_event := [3, "event-0003", "unknown-source", "file.modify", "pid-99", "file-9", "", "validated", 300]
+assert(security_telemetry["security_event_valid"](security_event_a), "security telemetry validates the versioned event tuple")
+assert(security_telemetry["security_event_allowed"](security_event_a, sensor_bundle), "trusted sensor with publish capability may emit")
+assert(not security_telemetry["security_event_allowed"](untrusted_security_event, sensor_bundle), "validated but untrusted source cannot publish privileged sensor events")
+make security_window_a := security_telemetry["append_security_window"]([], security_event_a, 2, sensor_bundle)
+make security_window_b := security_telemetry["append_security_window"](security_window_a[1], security_event_b, 2, sensor_bundle)
+assert(security_window_b[0] == "appended", "security event history accepts valid sequential events")
+assert(security_telemetry["security_sequence_valid"](security_window_b[1]), "security event sequence stays monotonic")
+assert(security_telemetry["append_security_window"](security_window_b[1], security_event_a, 2, sensor_bundle)[0] == "out-of-order", "security telemetry rejects replayed sequence numbers")
+assert(security_telemetry["append_security_window"]([], untrusted_security_event, 2, sensor_bundle)[0] == "denied", "security telemetry denies an untrusted source")
+make ipc_security_send := security_ipc["send_authorized"]([], 2, security_event_a, "trusted", sensor_bundle, "security.telemetry.publish")
+assert(ipc_security_send == ["sent", [security_event_a]], "IPC accepts a capability-authorized security producer")
+assert(security_ipc["send_authorized"]([], 2, security_event_a, "untrusted", sensor_bundle, "security.telemetry.publish")[0] == "denied", "IPC denies untrusted producers")
+assert(security_ipc["receive_authorized"]([security_event_a], "trusted", service_bundle, "security.events.read")[0] == "received", "analysis service may receive security evidence")
+assert(security_ipc["receive_authorized"]([security_event_a], "trusted", sensor_bundle, "security.events.read")[0] == "denied", "sensor grants do not include analysis read authority")
+
+# Driver admission requires trusted publisher, non-revoked signer, matching
+# image digest, secure-boot evidence and least-privilege sensor capabilities.
+make sensor_descriptor := [
+    "bav.sensor",
+    1,
+    "pci",
+    "x86_64",
+    ["security.telemetry.publish"],
+    "trusted.publisher",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+]
+assert(security_drivers["security_sensor_package_policy"](sensor_descriptor, 1, ["pci", "usb"], "x86_64", sensor_bundle, true, true, true, true, true) == "security-sensor-approved", "verified sensor driver satisfies every trust gate")
+assert(security_drivers["security_sensor_package_policy"](sensor_descriptor, 1, ["pci", "usb"], "x86_64", sensor_bundle, false, true, true, true, true) == "reject", "unsigned sensor driver is rejected")
+assert(security_drivers["security_sensor_package_policy"](sensor_descriptor, 1, ["pci", "usb"], "x86_64", sensor_bundle, true, true, false, true, true) == "reject", "revoked sensor signer is rejected")
+assert(security_drivers["security_sensor_package_policy"](sensor_descriptor, 1, ["pci", "usb"], "x86_64", sensor_bundle, true, true, true, false, true) == "reject", "changed sensor image digest is rejected")
+assert(security_drivers["security_sensor_package_policy"](sensor_descriptor, 1, ["pci", "usb"], "x86_64", sensor_bundle, true, true, true, true, false) == "reject", "unmeasured boot state cannot approve privileged sensors")
+assert(not capabilities["permits"](service_bundle, "security.process.terminate"), "analysis service cannot acquire kernel enforcement authority")
+assert(capabilities["permits"](enforcement_bundle, "security.process.terminate"), "separate policy bundle defines explicit termination capability")

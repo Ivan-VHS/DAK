@@ -33,11 +33,7 @@ export craft capability_for(action) {
 }
 
 export craft requires_approval(action) {
-    yield action == "file.restore"
-        or action == "process.isolate"
-        or action == "process.terminate"
-        or action == "network.isolate"
-        or action == "driver.quarantine"
+    yield action == "file.restore" or action == "process.isolate" or action == "process.terminate" or action == "network.isolate" or action == "driver.quarantine"
 }
 
 export craft authorize_action(

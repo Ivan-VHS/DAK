@@ -13,7 +13,7 @@ The security capability has four cooperating boundaries:
 4. **OS service lifecycle** — duckos/services/security.rpr registers the security service identity, dependencies, startup gates, health/backpressure states, bounded supervisor restart decisions and per-action capability checks. This is a lifecycle contract, not a running native daemon.
 5. **Mora presentation plane** — system policy advertises the capability as partial and cannot turn an advisory recommendation into a claim of active protection.
 
-Dependencies point inward to versioned contracts. The analyzer cannot call privileged OS operations. Sensor adapters must produce validated events; they must not pass kernel pointers, secrets, unbounded command lines or arbitrary nested payloads into the policy engine.
+Dependencies point inward to versioned contracts. The analyzer cannot call privileged OS operations. Sensor adapters must produce validated events; they must not pass kernel pointers, secrets, unbounded command lines or arbitrary nested payloads into the policy engine. The kernel security authorization contract consumes trust labels, explicit capability grants, evidence freshness, policy validity, approval state and authenticated snapshot metadata before allowing a privileged action. Telemetry publication and IPC reads have separate least-privilege grants; security-sensor driver descriptors additionally require a verified signer, non-revoked publisher, matching image digest and measured secure-boot state.
 
 ## Coverage of the 13 security directions
 
@@ -32,6 +32,14 @@ Dependencies point inward to versioned contracts. The analyzer cannot call privi
 | Mesh threat sharing | HMAC-SHA256 envelope, bounded lifetime and replay protection | Mutually authenticated transport, secure key provisioning, rotation, peer revocation and scope |
 | Flight recorder | Bounded in-memory event ring, secret-key redaction and causal report | Native low-overhead event source, durable protected retention and export controls |
 | Explainable verdict | Score, confidence, indicators, causal root, recommended action and advisory status | Evidence provenance, calibrated model validation and privileged decision broker |
+
+## Kernel and telemetry integration
+
+The kernel security contract is deny-by-default. It maps each security operation to a distinct capability and rejects unknown actions, untrusted callers, stale evidence and invalid policy state. File restore additionally requires an authenticated snapshot, verified payload and authorized target. Restore, process isolation/termination, network isolation and driver quarantine require explicit approval. The contract does not itself perform these actions; a native kernel broker must enforce it.
+
+Security telemetry has a fixed tuple contract with a monotonic sequence, event/source/actor identifiers, object/parent references, trusted-source label and monotonic timestamp. The telemetry queue validates event kinds and source authority. IPC provides separate authorized producer and consumer paths so a sensor's publish grant cannot silently become the analysis service's read grant.
+
+The driver ABI adds a stricter security-sensor admission policy requiring verified signature, trusted and non-revoked signer, matching image digest, target architecture, granted sensor capabilities and measured secure-boot state. These are verifier outputs accepted by the policy contract, not cryptographic checks performed by the Reaper interpreter.
 
 ## Event contract
 
