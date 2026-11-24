@@ -837,7 +837,7 @@ input[type="range"] { accent-color: #FFD400; }
 .app-window[data-window="news"] .window-body {
   padding: 0;
   overflow: auto;
-  background: #E5D7B7;
+  background: transparent;
 }
 .newspaper-app {
   --news-paper: #F2E8D4;
