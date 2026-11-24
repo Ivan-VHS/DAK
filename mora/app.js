@@ -88,6 +88,8 @@ function setLocale(locale) {
   currentLocale = locale;
   applyChromeLocale();
   updateClock();
+  const control = windowLayer.querySelector('[data-window="workspace"]');
+  if (control) control.querySelector(".window-body").innerHTML = panelMarkup("workspace");
   updateWorkspacePanel();
   const sparrow = windowLayer.querySelector('[data-window="red-sparrow"]');
   if (sparrow) {
@@ -725,9 +727,10 @@ async function initRedSparrowPanel(appWindow) {
   const input = appWindow.querySelector("[data-red-sparrow-note]");
   const status = appWindow.querySelector("[data-red-sparrow-status]");
   if (!input || !status) return;
+  input.addEventListener("input", () => { input.dataset.dirty = "true"; }, { once: true });
   try {
     const saved = await readLocalDocument("red-sparrow.notes");
-    if (saved && typeof saved.text === "string") input.value = saved.text.slice(0, 6000);
+    if (!input.dataset.dirty && saved && typeof saved.text === "string") input.value = saved.text.slice(0, 6000);
   } catch {
     status.textContent = currentLocale === "zh-CN"
       ? "本地存储不可用，请先复制重要内容。"
@@ -755,7 +758,7 @@ function showToast(message) {
 function updateActiveApp() {
   const windows = Array.from(windowLayer.querySelectorAll(".app-window"));
   if (windows.length === 0) {
-    activeAppLabel.textContent = "Рабочий стол";
+    activeAppLabel.textContent = LOCALE_TEXT[currentLocale].desktop;
   } else {
     windows.sort((a, b) => Number(b.style.zIndex) - Number(a.style.zIndex));
     const topWindow = windows[0];
