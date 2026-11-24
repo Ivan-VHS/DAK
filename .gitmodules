@@ -5,7 +5,7 @@
 [submodule "projects/reaper"]
 	path = projects/reaper
 	url = https://github.com/Ivan-VHS/Reaper.git
-	branch = feature/jora-app-factory
+	branch = main
 [submodule "projects/oplague"]
 	path = projects/oplague
 	url = https://github.com/Ivan-VHS/OPlague.git
