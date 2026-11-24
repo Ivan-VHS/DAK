@@ -24,7 +24,7 @@ Each service is described by `duckos.service-profile.v1`:
 Unknown fields are rejected so a misspelled option cannot silently fall back
 to a permissive default. Numeric limits reject booleans, NaN/infinity and
 out-of-range values. Aggregate startup plans enforce global concurrency,
-queue and memory budgets.
+queue and memory budgets. Serialized profiles are finite JSON and are capped at 256 KiB by default.
 
 ## CLI
 
@@ -32,7 +32,7 @@ Create a JSON document with a top-level `services` array, then run:
 
 ```sh
 duckos service-plan service-profiles.json
-duckos service-plan service-profiles.json --max-concurrency 2048 --max-memory-bytes 8589934592
+duckos service-plan service-profiles.json --max-concurrency 2048 --max-memory-bytes 8589934592 --max-profile-bytes 131072
 ```
 
 The output includes the stable startup order, normalized profiles, retry
