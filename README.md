@@ -45,7 +45,7 @@ duckos reaper check ./examples/program.rpr
 duckos reaper typecheck ./examples/program.rpr
 ```
 
-The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`), including the Jora request-to-project builder. The browser-based Mora shell only exports the request and does not launch host processes; native generation is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
 
 ## Jora application store and factory
