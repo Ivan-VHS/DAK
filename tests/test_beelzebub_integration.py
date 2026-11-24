@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from duckos.desktop.beelzebub import BeelzebubIntegrationError, BeelzebubWorkbench
@@ -39,6 +41,13 @@ class BeelzebubWorkbenchTests(unittest.TestCase):
             self.skipTest("Symbolic links are unavailable on this host.")
         with self.assertRaises(BeelzebubIntegrationError):
             self.workbench.scan(link)
+
+    def test_build_artifacts_use_the_configured_user_cache(self) -> None:
+        cache = self.root / "user-cache"
+        with patch.dict(os.environ, {"DUCKOS_BEELZEBUB_CACHE": str(cache)}):
+            workbench = BeelzebubWorkbench(self.root)
+        self.assertEqual(workbench.build_directory, cache / "build")
+        self.assertEqual(workbench.jar_path, cache / "build" / "beelzebub-av.jar")
 
     def test_scan_timeout_is_bounded(self) -> None:
         folder = self.root / "folder"

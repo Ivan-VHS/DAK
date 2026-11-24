@@ -13,3 +13,14 @@ duckos = "duckos.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["duckos*"]
+
+[tool.setuptools.data-files]
+"share/duckos/apps/beelzebub-av/src/main/java/ai/duckos/beelzebub" = [
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/BeelzebubAV.java",
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/Main.java",
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/ScannerEngine.java",
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/Support.java",
+]
+"share/duckos/apps/beelzebub-av/src/main/resources" = [
+  "apps/beelzebub-av/src/main/resources/signatures.sha256",
+]

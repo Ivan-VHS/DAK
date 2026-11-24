@@ -54,7 +54,7 @@ The --root option is available before the subcommand when developing from a non-
 duckos beelzebub --root /path/to/DuckOS status
 ~~~
 
-The native workbench builds the app on demand using a JDK 17+ (java, javac, jar). Java source targets release 17. The build has no third-party runtime dependencies.
+The Python wheel installs the Java source and resource files under the DuckOS data directory (`share/duckos/apps/beelzebub-av`); the workbench discovers both the system and per-user installation locations. The native workbench builds the app on demand using a JDK 17+ (`java`, `javac`, `jar`). Java source targets release 17. The build has no third-party runtime dependencies. Generated JAR/classes are written to the user's cache (`$XDG_CACHE_HOME/duckos/beelzebub-av`, default `~/.cache/duckos/beelzebub-av`; Windows uses `%LOCALAPPDATA%/DuckOS/Cache/BeelzebubAV`), not to the read-only application directory.
 
 ## Scan report contract
 

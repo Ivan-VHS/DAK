@@ -4,7 +4,9 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import site
 import subprocess
+import sysconfig
 from pathlib import Path
 from typing import Any
 
@@ -18,8 +20,26 @@ class BeelzebubWorkbench:
         repository = Path(__file__).resolve().parents[2]
         configured = root or (Path(os.environ["DUCKOS_BEELZEBUB_ROOT"]) if os.environ.get("DUCKOS_BEELZEBUB_ROOT") else None)
         self.repository_root = (configured or repository).expanduser().resolve()
-        self.application_root = self.repository_root / "apps" / "beelzebub-av"
-        self.build_directory = self.application_root / "build"
+        source_tree_app = self.repository_root / "apps" / "beelzebub-av"
+        packaged_apps = [
+            Path(sysconfig.get_path("data")) / "share" / "duckos" / "apps" / "beelzebub-av",
+            Path(site.getuserbase()) / "share" / "duckos" / "apps" / "beelzebub-av",
+        ]
+        if configured is not None:
+            self.application_root = source_tree_app
+        else:
+            self.application_root = next(
+                (candidate for candidate in [source_tree_app, *packaged_apps] if candidate.is_dir()),
+                source_tree_app,
+            )
+        cache_override = os.environ.get("DUCKOS_BEELZEBUB_CACHE")
+        if cache_override:
+            cache_root = Path(cache_override).expanduser()
+        elif os.name == "nt":
+            cache_root = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "DuckOS" / "Cache" / "BeelzebubAV"
+        else:
+            cache_root = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "duckos" / "beelzebub-av"
+        self.build_directory = cache_root / "build"
         self.classes_directory = self.build_directory / "classes"
         self.jar_path = self.build_directory / "beelzebub-av.jar"
 
@@ -40,6 +60,8 @@ class BeelzebubWorkbench:
             "built": self.jar_path.is_file() and not self.jar_path.is_symlink(),
             "jar_path": str(self.jar_path),
             "repository": str(self.repository_root),
+            "application_root": str(self.application_root),
+            "build_directory": str(self.build_directory),
             "missing": missing,
             "execution_boundary": "separate-user-space-process",
         }
@@ -58,6 +80,8 @@ class BeelzebubWorkbench:
         if resources.is_symlink():
             raise BeelzebubIntegrationError("The resource directory must not be a symbolic link.")
         newest = max((path.stat().st_mtime_ns for path in sources), default=0)
+        if (self.application_root / "build.sh").is_file():
+            newest = max(newest, (self.application_root / "build.sh").stat().st_mtime_ns)
         if resources.is_dir():
             newest = max(newest, max((path.stat().st_mtime_ns for path in resources.rglob("*") if path.is_file()), default=0))
         if self.jar_path.is_file() and self.jar_path.stat().st_mtime_ns >= newest:
