@@ -1,0 +1,207 @@
+{
+  "schema": "ivan-vhs.backend-engineering.v1",
+  "version": 1,
+  "project": "Duck",
+  "scope": "OS foundations, native user-space tools, module contracts, deployment planning, service interfaces and the Mora desktop boundary. Browser-shell preferences are not kernel enforcement.",
+  "standard": "docs/BACKEND_ENGINEERING_STANDARD.md",
+  "schema_file": ".architecture/backend-engineering.v1.schema.json",
+  "status_policy": {
+    "allowed_statuses": [
+      "implemented",
+      "partial",
+      "planned",
+      "not_applicable",
+      "not_assessed"
+    ],
+    "rule": "Use implemented or partial only when repository code and focused verification paths support the exact statement. Record limits explicitly. A design document, capability catalog or profile-validation job does not prove runtime behavior."
+  },
+  "controls": [
+    {
+      "id": "boundaries-contracts",
+      "title": "Module boundaries and versioned contracts",
+      "status": "partial",
+      "assessment": "A native module ABI and foundation architecture are present; the current kernel/service boundaries still include declarative Reaper-language components and are not a complete running kernel contract.",
+      "evidence": [
+        "docs/FOUNDATION_ARCHITECTURE.md",
+        "duckos/module_abi.py"
+      ],
+      "verification": [
+        "tests/test_module_abi.py"
+      ],
+      "limitations": [
+        "The ABI is a user-space integration contract; do not infer complete kernel isolation or service enforcement."
+      ]
+    },
+    {
+      "id": "input-validation-idempotency",
+      "title": "Input validation and idempotent state changes",
+      "status": "partial",
+      "assessment": "Deployment plans and versioned manifests use explicit validation and tests; system-wide idempotent servicing is not claimed.",
+      "evidence": [
+        "duckos/deployment.py",
+        "duckos/manifest.py",
+        "docs/DEPLOYMENT.md"
+      ],
+      "verification": [
+        "tests/test_deployment.py",
+        "tests/test_manifest.py"
+      ],
+      "limitations": [
+        "Planning and archive verification do not perform privileged installation or prove crash-safe OS updates."
+      ]
+    },
+    {
+      "id": "io-transport",
+      "title": "Low-level I/O and transport boundaries",
+      "status": "not_assessed",
+      "assessment": "IPC and zero-copy bus source files exist, but the repository has not established an executing native kernel transport or a production network stack.",
+      "evidence": [
+        "duckos/kernel/ipc.rpr",
+        "duckos/kernel/zero_copy_bus.rpr"
+      ],
+      "verification": [],
+      "limitations": [
+        "RPR source declarations are not evidence of an operational transport; do not claim network-server readiness."
+      ]
+    },
+    {
+      "id": "concurrency-backpressure",
+      "title": "Concurrency, scheduling and backpressure",
+      "status": "not_assessed",
+      "assessment": "A scheduler source module is present, but bounded runtime scheduling, queue backpressure and contention behavior have not been verified as a running kernel subsystem.",
+      "evidence": [
+        "duckos/kernel/scheduler.rpr"
+      ],
+      "verification": [],
+      "limitations": [
+        "No kernel load, saturation, race or recovery test currently establishes these behaviors."
+      ]
+    },
+    {
+      "id": "memory-resource-lifecycle",
+      "title": "Memory ownership and resource lifetime",
+      "status": "not_assessed",
+      "assessment": "Arena and memory subsystem source files exist; allocator ownership, reclamation, isolation and lifetime guarantees have not been independently verified.",
+      "evidence": [
+        "duckos/kernel/arena.rpr",
+        "duckos/kernel/memory.rpr"
+      ],
+      "verification": [],
+      "limitations": [
+        "Do not treat source presence as a working allocator or memory-protection boundary."
+      ]
+    },
+    {
+      "id": "data-integrity-transactions",
+      "title": "Data integrity and transactions",
+      "status": "partial",
+      "assessment": "Versioned manifests, deterministic bundles and deployment plans have validation coverage; persistent system-state transactions and boot rollback are not claimed.",
+      "evidence": [
+        "duckos/manifest.py",
+        "duckos/deployment.py",
+        "docs/DEPLOYMENT.md"
+      ],
+      "verification": [
+        "tests/test_manifest.py",
+        "tests/test_deployment.py"
+      ],
+      "limitations": [
+        "A deployment plan is not an atomic update engine or tested physical-disk recovery path."
+      ]
+    },
+    {
+      "id": "failure-recovery-lifecycle",
+      "title": "Failure handling, recovery and lifecycle",
+      "status": "partial",
+      "assessment": "Bundle verification and non-destructive deployment planning are covered by tests; graceful lifecycle and A/B boot recovery are still incomplete.",
+      "evidence": [
+        "duckos/deployment.py",
+        "docs/DEPLOYMENT.md"
+      ],
+      "verification": [
+        "tests/test_deployment.py"
+      ],
+      "limitations": [
+        "Do not present archive verification or an A/B plan as boot rollback or service-supervisor enforcement."
+      ]
+    },
+    {
+      "id": "security-privilege-secrets",
+      "title": "Security, privileges and secret handling",
+      "status": "partial",
+      "assessment": "Mora capability preferences and native trust/capability source contracts exist; kernel-enforced per-process authorization and a complete secret service are not established.",
+      "evidence": [
+        "duckos/security/capabilities.rpr",
+        "duckos/security/trust.rpr",
+        "docs/MORA_INTEGRATION.md"
+      ],
+      "verification": [
+        "tests/test_desktop.py"
+      ],
+      "limitations": [
+        "Browser preferences and policy files are not OS privilege enforcement."
+      ]
+    },
+    {
+      "id": "observability-diagnostics",
+      "title": "Observability and diagnostics",
+      "status": "partial",
+      "assessment": "Read-only hardware inventory and diagnostic reporting are implemented; end-to-end kernel tracing and service latency telemetry are not established.",
+      "evidence": [
+        "duckos/hardware_inventory.py",
+        "duckos/system/telemetry.rpr"
+      ],
+      "verification": [
+        "tests/test_hardware_inventory.py"
+      ],
+      "limitations": [
+        "Hardware snapshots are not continuous monitoring or distributed tracing."
+      ]
+    },
+    {
+      "id": "performance-capacity",
+      "title": "Performance budgets and capacity",
+      "status": "not_assessed",
+      "assessment": "No verified kernel throughput, latency distribution, queue-capacity or horizontal service-scaling baseline is currently recorded.",
+      "evidence": [],
+      "verification": [],
+      "limitations": [
+        "Do not infer performance or scalability from modular source layout or architecture plans."
+      ]
+    },
+    {
+      "id": "configuration-extensibility",
+      "title": "Configuration, extensibility and integration",
+      "status": "partial",
+      "assessment": "The module ABI and commit-pinned repository federation provide explicit extension and source-integration boundaries.",
+      "evidence": [
+        "duckos/module_abi.py",
+        "docs/REPOSITORY_FEDERATION.md"
+      ],
+      "verification": [
+        "tests/test_module_abi.py",
+        "tests/test_repository_federation.py"
+      ],
+      "limitations": [
+        "Federated source checkouts do not automatically load, execute or grant privileges to external modules."
+      ]
+    },
+    {
+      "id": "verification-delivery",
+      "title": "Verification and delivery gate",
+      "status": "implemented",
+      "assessment": "This PR adds a machine-readable backend engineering profile, safe-path/status validator, negative self-tests and a dedicated CI gate.",
+      "evidence": [
+        "docs/BACKEND_ENGINEERING_STANDARD.md",
+        "tools/validate_backend_engineering.py",
+        ".github/workflows/backend-engineering.yml"
+      ],
+      "verification": [
+        ".github/workflows/backend-engineering.yml"
+      ],
+      "limitations": [
+        "The gate validates profile integrity and evidence paths; it does not certify OS readiness or runtime behavior."
+      ]
+    }
+  ]
+}
