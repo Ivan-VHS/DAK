@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -63,6 +64,41 @@ class WindowsCompatibilityTests(unittest.TestCase):
         broken[0x3C:0x40] = (0x3FFFFFFF).to_bytes(4, "little")
         with self.assertRaises(PEFormatError):
             inspect_pe_bytes(bytes(broken))
+
+    def test_pe_file_reader_rejects_symlink_and_special_files(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source.exe"
+            source.write_bytes(minimal_pe64())
+            linked = root / "linked.exe"
+            try:
+                linked.symlink_to(source)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks are not available on this host")
+            with self.assertRaisesRegex(PEFormatError, "symbolic link"):
+                from duckos.compat.pe import inspect_pe_file
+                inspect_pe_file(linked)
+
+            if hasattr(os, "mkfifo"):
+                fifo = root / "named-pipe.exe"
+                os.mkfifo(fifo)
+                with self.assertRaisesRegex(PEFormatError, "regular file"):
+                    inspect_pe_file(fifo)
+
+    def test_pe_file_reader_enforces_limit_during_read(self):
+        from duckos.compat import pe as pe_module
+        from duckos.compat.pe import inspect_pe_file
+
+        with tempfile.TemporaryDirectory() as temporary:
+            candidate = Path(temporary) / "oversized.exe"
+            candidate.write_bytes(b"MZ" + bytes(128))
+            previous_limit = pe_module.MAX_FILE_BYTES
+            pe_module.MAX_FILE_BYTES = 64
+            try:
+                with self.assertRaisesRegex(PEFormatError, "64-byte inspection limit"):
+                    inspect_pe_file(candidate)
+            finally:
+                pe_module.MAX_FILE_BYTES = previous_limit
 
     def test_creates_isolated_prefix_and_validates_manifest(self):
         with tempfile.TemporaryDirectory() as temporary:
