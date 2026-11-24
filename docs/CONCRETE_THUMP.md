@@ -26,17 +26,19 @@ Open **Mora → Concrete Thump**.
 2. Select the chant and song families independently.
 3. Choose a sample treatment: chopped call-and-response, long choir beds, or granular vocal fragments.
 4. Set BPM and swing. Defaults are 160 BPM and 60%; the controls accept 40–240 BPM and 50–75% swing.
-5. Add audio files for local browser preview. Supported formats depend on the browser's native media support; common file types include WAV, MP3, FLAC, OGG, M4A, AAC, AIFF, OPUS and WebM.
+5. Add audio files for local browser preview and choose one as the choir source. Supported formats depend on the browser's native media support; common file types include WAV, MP3, FLAC, OGG, M4A, AAC, AIFF, OPUS and WebM.
 6. Enter a source/credit note and the declared rights basis for each sample.
-7. Save the profile or export the prompt, a JSON profile, or a Reaper timing helper.
+7. Edit the 16-step rows for kick, snare/clap, hi-hat, 808 and choir chops. The default pattern gives a starting point rather than a fixed genre template.
+8. Preview four bars. The browser synthesizes the drum and 808 lanes and chops the selected choir recording according to the chosen treatment.
+9. Render the same four-bar pattern to WAV, save the profile, or export the prompt, a JSON profile or a Reaper timing helper.
 
 The built-in production prompt is limited to **500 characters** and emphasizes Orthodox choir / East Slavic ritual sources, 808-driven Trap, rapid hi-hats, triplet bursts, swing, double-time bounce, stutter edits and negative-space drops.
 
 ## Local files, bounds and rights
 
-Audio import is initiated by the user and stays in the current browser session. Files are previewed through browser object URLs; closing the Concrete Thump window releases those URLs. The browser profile stores the rhythm settings and sample metadata only. It does not persist the audio bytes, upload files, search the Internet for recordings, or sync media across devices. Re-select a previously catalogued file to preview it again.
+Audio import is initiated by the user and stays in the current browser session. Files are previewed through browser object URLs and decoded only when the sequencer plays or renders the selected choir source; closing the Concrete Thump window releases those URLs. The browser profile stores rhythm settings, the step sequence and sample metadata only. It does not persist audio bytes, upload files, search the Internet for recordings, or sync media across devices. Re-select a previously catalogued file to audition it again.
 
-The UI limits imports to eight samples, 25 MiB per file and 80 MiB total per open session. These are application guardrails, not a general-purpose audio decoder or malware scanner.
+The UI limits imports to eight samples, 25 MiB per file and 80 MiB total per open session. Playback and WAV rendering are bounded to a four-bar sequence. The drum sounds are simple browser-generated tonal/noise voices with a master compressor; they are not acoustic drum samples or a substitute for a dedicated production engine. These are application guardrails, not a general-purpose audio decoder or malware scanner.
 
 Use recordings that you own, have permission to use, or can verify as public-domain or appropriately licensed. The credit and rights fields are declarations entered by the user; DuckOS does not verify copyright status, license terms, performer identity or public-domain status. Sacred and community recordings may have cultural protocols beyond copyright. Respect the source community and any restrictions on reuse.
 
@@ -54,7 +56,7 @@ The timing helper is not an audio renderer, MIDI generator, DAW project, sample 
 |---|---|---|
 | Mora UI | Source selections, rhythm controls, local sample preview, rights metadata and export actions | Browser application panel |
 | Profile module | Validated versioned profile, legacy BPM/swing migration and bounded sample metadata | Local browser storage |
-| Audio preview | Browser-native playback of user-selected files | No editing, resampling, synthesis or routing |
+| Browser sequencer | 16-step kick/snare/hat/808/choir lanes; Web Audio playback and four-bar WAV rendering | No native driver, device routing, MIDI, multitrack DAW or OS audio service |
 | Reaper companion | Reaper source calculates offbeat markers | Uses the existing Reaper CLI/runtime; no audio runtime is added |
 | Cockos | Existing, separate audio/recording product | No automatic sample handoff or cross-app audio bus is claimed |
 
@@ -69,7 +71,7 @@ npm test
 python -m json.tool catalogs/preinstalled-applications.v1.json > /dev/null
 ~~~
 
-The Node test suite covers profile defaults and normalization, v1-to-v2 profile migration, local persistence, sample count/size/type limits, the 500-character prompt, Reaper source generation and the Mora AI app-opening alias.
+The Node test suite covers profile defaults and normalization, 16-step sequence bounds, v1-to-v2 profile migration, local persistence, sample count/size/type limits, the 500-character prompt, Reaper source generation and the Mora AI app-opening alias. Browser playback and WAV export should also be checked in a current browser with Web Audio and OfflineAudioContext support.
 
 For the companion Reaper example, run from the Reaper repository root:
 
