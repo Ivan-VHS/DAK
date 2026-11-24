@@ -134,3 +134,17 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Jora application synthesis — 2026-11-24
+
+- [x] Formula parser with canonical IDs, Russian/English aliases, duplicate/conflict checks and bounded input.
+- [x] Layered component graph with a dense three-component base case and cluster gateways for larger formulas.
+- [x] Deterministic Reaper-first language selection with detected toolchain availability recorded instead of assumed.
+- [x] Source-package generation: versioned manifest, SHA-256 inventory, graph, Reaper entry point, demo project and README.
+- [x] Safe package validation for directories and ZIP archives, including canonical paths, duplicate entries, symlinks, size limits and digest checks.
+- [x] DuckOS CLI commands for catalogue inspection, package creation and validation; validation delegates to Reaper static checking when available.
+- [ ] Native DAK package service, native installation, privileged execution sandbox, remote store backend, signing and publication.
+- [ ] Import and verification of the full 666-variant taxonomy; the initial executable registry is smaller and explicitly versioned.
+
+The delivered slice generates and validates source packages. It does not compile arbitrary auxiliary-language modules, install packages into a running kernel, execute generated applications or claim a native DAK service. Reaper checks are static-only and are skipped with an explicit status when the Reaper checkout is unavailable.

@@ -41,6 +41,7 @@ services:
   - dak.route-planner.v1
   - dak.game-library.v1
   - dak.executable-inspection.v1
+  - dak.app-synthesis.v1
 
 applications:
   - id: dak.settings
@@ -231,6 +232,13 @@ applications:
     category: gaming
     permissions: [games.library.read, games.library.write, files.read.selected]
     services: [dak.game-library.v1, dak.executable-inspection.v1]
+
+  - id: dak.jora
+    name: Jora
+    entry: app://dak.jora/main
+    category: development
+    permissions: [packages.read, packages.create.request, files.write.selected, network.access.request]
+    services: [dak.app-synthesis.v1, dak.packages.v1, dak.policy.v1, dak.search.v1, dak.vfs.v1]
 
   - id: dak.exedotexe
     name: EXEdotEXE
