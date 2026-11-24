@@ -1,4 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { composeJoraRequest } from "./jora.js";
 
 import {
   RECOVERY_KEY,
@@ -43,7 +44,7 @@ const appDefinitions = {
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
+  "mora-commons": { name: "Jora", subtitle: "Магазин и фабрика приложений", color: DUCK_ACCENT, glyph: "✣" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -328,18 +329,42 @@ function commonsPanelMarkup() {
     '" aria-pressed="false">' + category.title + '</button>'
   ).join("");
 
-  return '<p class="window-kicker">MORA COMMONS · ЕДИНЫЙ КАТАЛОГ</p>' +
-    '<h2 class="window-heading">Пространство возможностей</h2>' +
-    '<p class="commons-intro">Пятнадцать направлений собраны по задачам, а не по полу. Каждый инструмент открыт каждому пользователю. Настраивайте каталог под свои интересы.</p>' +
-    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Mora Commons"></label>' +
+  return '<p class="window-kicker">JORA · ЕДИНЫЙ МАГАЗИН И ФАБРИКА ПРИЛОЖЕНИЙ</p>' +
+    '<h2 class="window-heading">Соберите приложение из возможностей</h2>' +
+    '<p class="commons-intro">Выбирайте готовые продуктовые концепции в каталоге или объединяйте функциональные модули в собственное приложение. Jora разрешает зависимости и готовит проект на Reaper.</p>' +
+    '<section class="jora-factory" aria-labelledby="jora-factory-title">' +
+      '<div class="jora-section-head"><span class="jora-kicker">JORA COMPOSER</span><span class="jora-status">Reaper · flow</span></div>' +
+      '<h3 id="jora-factory-title">Формула вашего приложения</h3>' +
+      '<p class="jora-copy">Параметр 1 + параметр 2 + параметр 3 ... + параметр N = новый продукт</p>' +
+      '<fieldset class="jora-fieldset"><legend>Функциональные модули</legend>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-component="text.editor" checked><span><strong>Текстовый редактор</strong><small>Документы, поиск, форматирование и история</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-component="audio.editor" checked><span><strong>Аудиоредактор</strong><small>Аудиоматериалы и монтажная шкала</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-component="translation.workspace" checked><span><strong>Переводчик</strong><small>Перевод, терминология и параллельные тексты</small></span></label>' +
+      '</fieldset>' +
+      '<div class="jora-settings">' +
+        '<label class="jora-label">Название продукта <input type="text" maxlength="80" data-jora-name placeholder="Автоматически: LexiTone 3D"></label>' +
+        '<label class="jora-label">Основной язык <select data-jora-preferred><option value="en">English</option><option value="ru" selected>Русский</option><option value="uk">Українська</option><option value="most">MOST</option></select></label>' +
+      '</div>' +
+      '<fieldset class="jora-fieldset jora-locale-fieldset"><legend>Языки интерфейса</legend>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="en" checked> EN</label>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="ru" checked> RU</label>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="uk" checked> UK</label>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="most" checked> MOST</label>' +
+      '</fieldset>' +
+      '<div class="jora-actions"><button class="action-button" type="button" data-action="jora-compose">Сформировать формулу</button><button class="subtle-button" type="button" data-action="jora-export" disabled>Экспортировать JSON</button></div>' +
+      '<div class="jora-preview" data-jora-preview aria-live="polite">Выберите модули и сформируйте комбинацию. Jora предложит имя и покажет итоговую формулу.</div>' +
+      '<p class="jora-footnote">Экспорт создаёт запрос для локальной сборки. Браузерная Mora не запускает процессы на компьютере и не устанавливает приложения самостоятельно.</p>' +
+      '<p class="jora-command">duckos jora build ./lexitone.request.json ./apps/LexiTone</p>' +
+    '</section>' +
+    '<div class="jora-catalog-heading"><div><span class="jora-kicker">CURATED CATALOGUE</span><h3>Каталог приложений</h3></div><span class="commons-count" data-commons-count aria-live="polite">Загрузка каталога</span></div>' +
+    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Jora"></label>' +
     '<div class="commons-filters" data-commons-filters aria-label="Категории приложений">' +
-    '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
-    filters +
+      '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
+      filters +
     '</div>' +
-    '<p class="commons-count" data-commons-count aria-live="polite">Показано 15 приложений</p>' +
     '<div class="commons-grid" data-commons-grid></div>' +
     '<section class="commons-detail" data-commons-detail aria-live="polite" hidden></section>' +
-    '<p class="window-copy">Каталог и избранное работают локально. Карточки описывают спецификации новых продуктов; отдельные исполняемые модули ещё не подключены.</p>';
+    '<p class="window-copy">Каталог сохраняет карточки и избранное локально. Публикация и установка требуют проверенных исполняемых модулей, подписанных пакетов и системного менеджера приложений.</p>';
 }
 
 function loadCommonsFavorites() {
@@ -353,6 +378,7 @@ function loadCommonsFavorites() {
 }
 
 let commonsFavorites = loadCommonsFavorites();
+const joraDrafts = new WeakMap();
 
 function saveCommonsFavorites() {
   try {
@@ -812,6 +838,69 @@ document.addEventListener("click", (event) => {
     const checked = owner.querySelectorAll("[data-share-check]:checked").length;
     owner.querySelector("[data-share-status]").textContent =
       checked + " из " + total + " пунктов отмечено. Проверьте получателя и содержимое передачи самостоятельно.";
+    return;
+  }
+
+  const joraComposeButton = event.target.closest('[data-action="jora-compose"]');
+  if (joraComposeButton) {
+    const owner = joraComposeButton.closest(".app-window");
+    if (!owner) return;
+    const preview = owner.querySelector("[data-jora-preview]");
+    const exportButton = owner.querySelector('[data-action="jora-export"]');
+    const components = Array.from(owner.querySelectorAll("[data-jora-component]:checked"))
+      .map((item) => item.dataset.joraComponent);
+    const locales = Array.from(owner.querySelectorAll("[data-jora-locale]:checked"))
+      .map((item) => item.dataset.joraLocale);
+    try {
+      const composed = composeJoraRequest({
+        components,
+        locales,
+        preferredLocale: owner.querySelector("[data-jora-preferred]").value,
+        name: owner.querySelector("[data-jora-name]").value
+      });
+      joraDrafts.set(owner, composed.request);
+      preview.replaceChildren();
+      const name = document.createElement("strong");
+      name.className = "jora-preview-name";
+      name.textContent = composed.name;
+      const formula = document.createElement("p");
+      formula.textContent = composed.formula + " = " + composed.name;
+      const detail = document.createElement("small");
+      detail.textContent = "Reaper flow · локали: " + composed.generatedLocales.join(", ").toUpperCase();
+      const maturity = document.createElement("small");
+      maturity.textContent = "Следующий шаг: экспортировать запрос и выполнить локальную сборку. Модули пока имеют статус спецификаций.";
+      preview.append(name, formula, detail, maturity);
+      exportButton.disabled = false;
+      showToast("Формула Jora подготовлена: " + composed.name);
+    } catch (error) {
+      joraDrafts.delete(owner);
+      exportButton.disabled = true;
+      preview.textContent = error.message || "Не удалось сформировать формулу.";
+    }
+    return;
+  }
+
+  const joraExportButton = event.target.closest('[data-action="jora-export"]');
+  if (joraExportButton) {
+    const owner = joraExportButton.closest(".app-window");
+    const request = owner && joraDrafts.get(owner);
+    if (!request) {
+      showToast("Сначала сформируйте формулу приложения");
+      return;
+    }
+    const payload = JSON.stringify(request, null, 2) + "\n";
+    const blob = new Blob([payload], { type: "application/json;charset=utf-8" });
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    const baseName = (request.name || "jora-application")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "jora-application";
+    anchor.href = objectUrl;
+    anchor.download = baseName + ".jora-request.json";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    showToast("Запрос Jora экспортирован");
     return;
   }
 
