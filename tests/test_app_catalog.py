@@ -26,26 +26,27 @@ class ApplicationCatalogTests(unittest.TestCase):
             self.schema, format_checker=FormatChecker()
         ).validate(self.catalog)
 
-    def test_all_twenty_first_party_applications_are_present(self) -> None:
+    def test_all_twenty_one_first_party_applications_are_present(self) -> None:
         expected = {
             "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
             "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "beelzebub-av",
         }
         actual = {item["id"] for item in self.catalog["applications"]}
         self.assertEqual(actual, expected)
-        self.assertEqual(len(self.catalog["applications"]), 20)
+        self.assertEqual(len(self.catalog["applications"]), 21)
 
     def test_native_and_browser_maturity_are_not_conflated(self) -> None:
         self.assertEqual(self.catalog["maturity_status"], "specified")
         self.assertEqual(self.catalog["prototype"]["maturity_status"], "partial")
         for app in self.catalog["applications"]:
-            self.assertEqual(app["maturity_status"], "specified")
+            expected_status = "partial" if app["id"] == "beelzebub-av" else "specified"
+            self.assertEqual(app["maturity_status"], expected_status)
             self.assertEqual(app["prototype_status"], "partial")
 
     def test_every_workflow_has_valid_endpoints_and_user_consent(self) -> None:
         app_ids = {item["id"] for item in self.catalog["applications"]}
-        self.assertEqual(len(self.catalog["workflows"]), 9)
+        self.assertEqual(len(self.catalog["workflows"]), 10)
         for workflow in self.catalog["workflows"]:
             self.assertIn(workflow["source"], app_ids)
             self.assertIn(workflow["target"], app_ids)
@@ -69,6 +70,8 @@ class ApplicationCatalogTests(unittest.TestCase):
             "docs/UNIFY_TRANSFER_FORMAT_V1.md",
             "schemas/unify.transfer.v1.schema.json",
             "catalogs/dak-base-applications.v1.yaml",
+            "docs/BEELZEBUB_AV.md",
+            "schemas/beelzebub.scan-report.v1.schema.json",
         ]
         for relative in expected_paths:
             with self.subTest(path=relative):
@@ -88,12 +91,21 @@ class ApplicationCatalogTests(unittest.TestCase):
         for name in (
             "Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
             "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2",
-            "Po-2", "GameCharager", "EXEdotEXE",
+            "Po-2", "GameCharager", "EXEdotEXE", "Beelzebub AV",
         ):
             with self.subTest(app=name):
                 self.assertIn(name, desktop + app_source)
         self.assertIn('id="extension-app-grid"', desktop)
         self.assertIn("EXTENSION_STORAGE_PREFIX", app_source)
+
+    def test_beelzebub_report_schema_and_native_security_boundaries(self) -> None:
+        report_schema = load_json("schemas/beelzebub.scan-report.v1.schema.json")
+        Draft202012Validator.check_schema(report_schema)
+        app = next(item for item in self.catalog["applications"] if item["id"] == "beelzebub-av")
+        self.assertEqual(app["maturity_status"], "partial")
+        self.assertIn("user_approved_file_quarantine", app["capabilities"])
+        self.assertTrue(any("kernel minifilter" in value for value in app["boundaries"]))
+        self.assertIn("security.executable-to-beelzebub-av.v1", {item["id"] for item in self.catalog["workflows"]})
 
     def test_dak_catalog_is_present_and_remains_design_only(self) -> None:
         catalog = (ROOT / "catalogs/dak-base-applications.v1.yaml").read_text(encoding="utf-8")
@@ -102,7 +114,7 @@ class ApplicationCatalogTests(unittest.TestCase):
         for app_id in (
             "sestem", "setupup", "orriganize", "abriganza", "olaab",
             "concrete-thump", "seu-beu", "love-il", "poi", "poi-2",
-            "po-2", "gamecharager", "exedotexe",
+            "po-2", "gamecharager", "exedotexe", "beelzebub-av",
         ):
             with self.subTest(app=app_id):
                 self.assertIn("id: dak." + app_id, catalog)

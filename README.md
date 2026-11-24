@@ -4,9 +4,9 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **21 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify), 13 Mora additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE), plus Beelzebub AV as a separate Java security application. The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
-The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
+The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus the 13 Mora additions and Beelzebub AV. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
 
 ## Federated source workspace
 
@@ -23,6 +23,7 @@ The system tools are:
 
 - **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
 - **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
+- **Beelzebub AV:** separate Java 17+ user-space file scanner with streaming SHA-256, EICAR test-string detection, local indicators, bounded script heuristics, selected-folder WatchService and explicit quarantine. It is not a kernel minifilter or system-wide prevention layer.
 - **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
 - **Bridge:** local PE/ELF inspection in Mora; the native DuckBridge CLI discovers compatibility runtimes and prepares reviewable launch plans. It still does not launch targets.
 - **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
@@ -30,6 +31,18 @@ The system tools are:
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
+
+## Beelzebub AV
+
+The native Beelzebub AV security application is implemented as a Java 17+ process with its own Mora-themed Swing interface. Duck Desktop builds and opens it in a separate process; Mora's browser panel does not access host files. The scanner provides selected-directory scans and JSON reports, local SHA-256 indicator import, EICAR test-string detection, conservative script heuristics, optional selected-folder monitoring and user-approved quarantine with safe restoration.
+
+~~~sh
+duckos beelzebub status
+duckos beelzebub gui
+duckos beelzebub scan "$HOME/Downloads"
+~~~
+
+The current implementation is a user-space scanner, not a complete kernel antivirus: no memory, network or boot scanning, process blocking, kernel filesystem filter, automatic disinfection, automatic deletion or bundled live malware feed is claimed. Build and verification details are in [Beelzebub AV](docs/BEELZEBUB_AV.md).
 
 ## Native Reaper workbench
 
@@ -143,6 +156,7 @@ Start with the [DuckOS documentation index](docs/README.md). The [unified docume
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
 - [Mora machine-readable system policy](mora/system-policy.json)
+- [Beelzebub AV implementation and report contract](docs/BEELZEBUB_AV.md)
 
 Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
 

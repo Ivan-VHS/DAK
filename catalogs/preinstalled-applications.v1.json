@@ -4,7 +4,7 @@
   "operating_system": "DuckOS",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
+  "note": "Product specification only. The 21 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion. Beelzebub AV is a partial native Java user-space security application; its scope and boundaries are documented separately.",
   "applications": [
     {
       "id": "cockos",
@@ -437,6 +437,37 @@
         "mora/index.html",
         "mora/app.js"
       ]
+    },
+    {
+      "id": "beelzebub-av",
+      "name": "Beelzebub AV",
+      "domain": "endpoint_file_protection",
+      "maturity_status": "partial",
+      "capabilities": [
+        "on_demand_recursive_directory_scan",
+        "streaming_sha256_hashing",
+        "eicar_test_string_detection",
+        "local_sha256_indicator_import",
+        "conservative_script_pattern_heuristics",
+        "user_approved_file_quarantine",
+        "selected_directory_change_monitoring"
+      ],
+      "boundaries": [
+        "Runs as a separate Java 17+ user-space process; it is not a kernel minifilter.",
+        "Detection is limited to the EICAR test string, imported SHA-256 indicators and conservative script heuristics; no maintained malware corpus is bundled.",
+        "WatchService observes only explicitly selected folders and cannot intercept every filesystem operation or guarantee real-time prevention.",
+        "No process blocking, memory, network or boot scanning, automatic disinfection, automatic deletion, cloud upload or automatic signature feed is implemented.",
+        "Quarantine is an explicit user-approved move; restoration verifies SHA-256 and refuses to overwrite an existing destination.",
+        "The Mora browser panel cannot access the host filesystem; native scanning is exposed through Duck Desktop and the DuckOS CLI."
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "apps/beelzebub-av/README.md",
+        "duckos/desktop/beelzebub.py",
+        "mora/index.html",
+        "mora/app.js"
+      ]
     }
   ],
   "workflows": [
@@ -518,6 +549,15 @@
       "target": "cockos",
       "trigger": "user_exports_rhythm_profile",
       "action": "hand_off_bpm_and_swing_metadata",
+      "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "security.executable-to-beelzebub-av.v1",
+      "source": "exedotexe",
+      "target": "beelzebub-av",
+      "trigger": "user_requests_a_scan_of_the_executable_parent_directory",
+      "action": "request_on_demand_directory_scan_in_native_beelzebub_av",
       "maturity_status": "specified",
       "user_consent_required": true
     }
@@ -607,6 +647,10 @@
       ],
       "exedotexe": [
         "Reuses local PE/ELF inspection and SHA-256; no executable launch or signature validation."
+      ],
+      "beelzebub-av": [
+        "A separate Java 17+ native user-space scanner provides on-demand directory scans, local SHA-256 indicators, EICAR detection, bounded script heuristics, selected-folder WatchService monitoring and explicit quarantine.",
+        "Mora provides a discovery panel only; the native Duck Desktop adapter and CLI bridge to the Java process. Kernel-level and all-system real-time protection remain unimplemented."
       ]
     }
   },

@@ -9,10 +9,12 @@ import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
+from pathlib import Path
 from typing import Any, Callable
 
 from .service import DesktopService, move_desktop_items_to_inbox
 from .reaper import ReaperIntegrationError, ReaperWorkbench
+from .beelzebub import BeelzebubIntegrationError, BeelzebubWorkbench
 
 COLORS = {
     "background": "#101010", "surface": "#1B1B1B", "raised": "#252525",
@@ -27,6 +29,8 @@ class DesktopWindow:
         self.service = DesktopService()
         self.report: dict[str, Any] = {}
         self.reaper = ReaperWorkbench()
+        self.beelzebub = BeelzebubWorkbench()
+        self._beelzebub_busy = False
         self.reaper_source: Path | None = None
         self._reaper_queue: queue.Queue[tuple[str, dict[str, Any] | None, str | None]] = queue.Queue()
         self._reaper_busy = False
@@ -66,12 +70,12 @@ class DesktopWindow:
 
         tabs = ttk.Notebook(self.root)
         tabs.pack(fill="both", expand=True, padx=20, pady=(4, 20))
-        overview, clean, startup, processes, rules, reaper_tab = [
-            ttk.Frame(tabs, padding=18) for _ in range(6)
+        overview, clean, startup, processes, rules, reaper_tab, beelzebub_tab = [
+            ttk.Frame(tabs, padding=18) for _ in range(7)
         ]
         for tab, title in zip(
-            (overview, clean, startup, processes, rules, reaper_tab),
-            ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила", "Reaper"),
+            (overview, clean, startup, processes, rules, reaper_tab, beelzebub_tab),
+            ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила", "Reaper", "Beelzebub AV"),
         ):
             tabs.add(tab, text=title)
 
@@ -140,6 +144,7 @@ class DesktopWindow:
             ttk.Label(row, text=statement, wraplength=820, justify="left").pack(side="left", fill="x", expand=True)
 
         self._build_reaper_tab(reaper_tab)
+        self._build_beelzebub_tab(beelzebub_tab)
         self.refresh()
 
     def _build_reaper_tab(self, tab: ttk.Frame) -> None:
@@ -193,6 +198,86 @@ class DesktopWindow:
         )
         self.reaper_output.pack(fill="both", expand=True)
         self._refresh_reaper_status()
+
+    def _build_beelzebub_tab(self, tab: ttk.Frame) -> None:
+        ttk.Label(tab, text="BEELZEBUB AV", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(
+            tab,
+            text="Отдельный Java 17+ сканер DuckOS: проверка выбранных папок, локальные SHA-256 индикаторы, Live Guard и карантин.",
+            style="Muted.TLabel", wraplength=850, justify="left",
+        ).pack(anchor="w", pady=(4, 12))
+        self.beelzebub_status = tk.StringVar(value="Проверка Java runtime…")
+        self.beelzebub_location = tk.StringVar(value="")
+        status_panel = ttk.Frame(tab, padding=12)
+        status_panel.pack(fill="x", pady=(0, 10))
+        ttk.Label(status_panel, textvariable=self.beelzebub_status, style="Title.TLabel").pack(anchor="w")
+        ttk.Label(status_panel, textvariable=self.beelzebub_location, style="Muted.TLabel", wraplength=850).pack(anchor="w", pady=(4, 0))
+        actions = ttk.Frame(tab)
+        actions.pack(fill="x", pady=(0, 10))
+        ttk.Button(actions, text="Обновить статус", command=self._refresh_beelzebub_status).pack(side="left")
+        ttk.Button(actions, text="Открыть Beelzebub AV", style="Accent.TButton", command=self._open_beelzebub).pack(side="left", padx=8)
+        ttk.Button(actions, text="Сканировать папку", command=self._scan_beelzebub).pack(side="left")
+        ttk.Label(tab, text="Результаты и границы работы", style="Muted.TLabel").pack(anchor="w", pady=(4, 5))
+        self.beelzebub_output = ScrolledText(
+            tab, height=18, wrap="word", bg=COLORS["surface"], fg=COLORS["text"],
+            insertbackground=COLORS["accent"], relief="flat", padx=12, pady=10,
+            font=("Cascadia Code", 9), state="disabled",
+        )
+        self.beelzebub_output.pack(fill="both", expand=True)
+        self._refresh_beelzebub_status()
+
+    def _append_beelzebub_output(self, value: str) -> None:
+        self.beelzebub_output.configure(state="normal")
+        self.beelzebub_output.insert("end", value.rstrip() + "\n")
+        self.beelzebub_output.see("end")
+        self.beelzebub_output.configure(state="disabled")
+
+    def _refresh_beelzebub_status(self) -> None:
+        state = self.beelzebub.inspect()
+        if not state["available"]:
+            self.beelzebub_status.set("BEELZEBUB · требуется JDK 17+")
+            self.beelzebub_location.set("Не найдены: " + ", ".join(state["missing"]))
+        else:
+            self.beelzebub_status.set("BEELZEBUB · готов к сборке")
+            self.beelzebub_location.set(f"Java: {state['java']} · исходников: {state['source_files']} · JAR: {'есть' if state['built'] else 'будет собран при запуске'}")
+        self._append_beelzebub_output(json.dumps(state, ensure_ascii=False, indent=2))
+
+    def _run_beelzebub_task(self, label: str, operation: Callable[[], Any]) -> None:
+        if self._beelzebub_busy:
+            messagebox.showinfo("Beelzebub AV", "Предыдущая операция ещё выполняется.", parent=self.root)
+            return
+        self._beelzebub_busy = True
+        self.beelzebub_status.set(f"BEELZEBUB · {label}…")
+
+        def worker() -> None:
+            try:
+                result = operation()
+                def success() -> None:
+                    self._beelzebub_busy = False
+                    self.beelzebub_status.set(f"BEELZEBUB · {label}: готово")
+                    self._append_beelzebub_output(json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, dict) else str(result))
+                self.root.after(0, success)
+            except (OSError, ValueError, RuntimeError, BeelzebubIntegrationError) as error:
+                message = str(error)
+                def failure(message: str = message) -> None:
+                    self._beelzebub_busy = False
+                    self.beelzebub_status.set(f"BEELZEBUB · {label}: ошибка")
+                    self._append_beelzebub_output(message)
+                self.root.after(0, failure)
+        threading.Thread(target=worker, name="duckos-beelzebub", daemon=True).start()
+
+    def _open_beelzebub(self) -> None:
+        self._run_beelzebub_task("запуск", lambda: {
+            "started": True,
+            "pid": self.beelzebub.open_gui().pid,
+            "shell": False,
+        })
+
+    def _scan_beelzebub(self) -> None:
+        directory = filedialog.askdirectory(parent=self.root, title="Выберите папку для проверки")
+        if not directory:
+            return
+        self._run_beelzebub_task("сканирование", lambda: self.beelzebub.scan(Path(directory)))
 
     def _append_reaper_output(self, value: str) -> None:
         self.reaper_output.configure(state="normal")

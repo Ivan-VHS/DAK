@@ -1,0 +1,3 @@
+# DuckOS Beelzebub AV built-in SHA-256 indicators v1
+# Intentionally no third-party malware corpus is bundled.
+# Import verified indicators from a trusted source before relying on hash matching.

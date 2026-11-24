@@ -133,6 +133,17 @@ def main(argv: list[str] | None = None) -> int:
     deployment.add_argument("--output", type=Path, help="write the JSON plan to this path")
 
 
+    beelzebub = commands.add_parser(
+        "beelzebub", help="run the native Java file scanner and quarantine manager"
+    )
+    beelzebub.add_argument("--root", type=Path, help="DuckOS source root (defaults to this checkout)")
+    beelzebub_commands = beelzebub.add_subparsers(dest="beelzebub_command", required=True)
+    beelzebub_commands.add_parser("status", help="inspect the Java runtime and scanner build state")
+    beelzebub_commands.add_parser("gui", help="build if needed and open the native Beelzebub AV window")
+    beelzebub_scan = beelzebub_commands.add_parser("scan", help="scan a user-selected directory without executing files")
+    beelzebub_scan.add_argument("path", type=Path)
+    beelzebub_scan.add_argument("--timeout", type=int, default=3600, help="scan timeout in seconds (1..86400)")
+
     reaper = commands.add_parser(
         "reaper", help="open and inspect the Reaper language workbench"
     )
@@ -273,6 +284,27 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
+        elif args.command == "beelzebub":
+            from .desktop.beelzebub import BeelzebubWorkbench
+
+            workbench = BeelzebubWorkbench(args.root)
+            if args.beelzebub_command == "status":
+                result = workbench.inspect()
+            elif args.beelzebub_command == "gui":
+                process = workbench.open_gui()
+                result = {
+                    "schema": "duckos.beelzebub-launch.v1",
+                    "started": True,
+                    "pid": process.pid,
+                    "jar": str(workbench.jar_path),
+                    "shell": False,
+                }
+            elif args.beelzebub_command == "scan":
+                result = workbench.scan(args.path, timeout=args.timeout)
+                _print_result(result)
+                return 1 if result.get("findings") else 0
+            else:
+                raise ValueError("unknown Beelzebub AV command")
         elif args.command == "reaper":
             from .desktop.reaper import ReaperWorkbench
 

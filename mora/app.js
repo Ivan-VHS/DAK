@@ -37,6 +37,7 @@ const appDefinitions = {
   exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: DUCK_ACCENT, glyph: "E" },
   "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: DUCK_ACCENT, glyph: "✦" },
   security: { name: "Sentinel", subtitle: "Права и доверие", color: DUCK_ACCENT, glyph: "◇" },
+  "beelzebub-av": { name: "Beelzebub AV", subtitle: "Защита файлов", color: DUCK_ACCENT, glyph: "B" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: DUCK_ACCENT, glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: DUCK_ACCENT, glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: DUCK_ACCENT, glyph: "⌘" },
@@ -636,6 +637,14 @@ function panelMarkup(appId) {
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
+    case "beelzebub-av":
+      return '<p class="window-kicker">BEELZEBUB AV · JAVA 17+</p>' +
+        '<h2 class="window-heading">Локальная защита файлов DuckOS</h2>' +
+        '<div class="setting-block"><strong>Потоковое сканирование</strong><span>SHA-256, EICAR, локальные индикаторы и ограниченные эвристики скриптов. Проверка выполняется отдельным Java-процессом.</span></div>' +
+        '<div class="setting-block"><strong>Live Guard и карантин</strong><span>Наблюдение включается только для выбранных папок. Карантин обратим, восстановление проверяет SHA-256 и не перезаписывает существующие файлы.</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>Для доступа к файловой системе откройте нативную программу Duck Desktop или используйте команды ниже. Браузерная Mora не запускает процессы и не читает файлы хоста.</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos beelzebub status · duckos beelzebub gui · duckos beelzebub scan ~/Downloads</span></div>' +
+        '<p class="window-copy">Требуется JDK 17+. Это пользовательский сканер, а не kernel minifilter: нет перехвата всех системных операций, проверки памяти/сети/загрузки или автоматического удаления угроз.</p>';
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }

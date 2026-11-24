@@ -78,3 +78,17 @@ jobs:
           else
             echo "::notice::No native C/C++ source tree or build target exists in this DuckOS repository revision; native compilation is not applicable yet."
           fi
+
+  beelzebub-java-17:
+    name: Beelzebub AV Java 17
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build and self-test Beelzebub AV
+        run: |
+          chmod +x apps/beelzebub-av/build.sh apps/beelzebub-av/test.sh
+          apps/beelzebub-av/test.sh

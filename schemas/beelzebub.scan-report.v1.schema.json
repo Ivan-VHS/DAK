@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/beelzebub.scan-report.v1.schema.json",
+  "title": "DuckOS Beelzebub AV scan report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "target",
+    "files_scanned",
+    "bytes_scanned",
+    "skipped",
+    "failures",
+    "cancelled",
+    "duration_ms",
+    "findings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "beelzebub.scan-report.v1"
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "files_scanned": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "bytes_scanned": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "skipped": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failures": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cancelled": {
+      "type": "boolean"
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "engine": {
+      "type": "string"
+    },
+    "process_exit_code": {
+      "type": "integer"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "name",
+          "severity",
+          "reason",
+          "size"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "enum": [
+              "HIGH",
+              "CRITICAL",
+              "SUSPICIOUS"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}
