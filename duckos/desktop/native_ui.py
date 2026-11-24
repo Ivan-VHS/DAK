@@ -6,6 +6,7 @@ import queue
 import subprocess
 import sys
 import threading
+from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
@@ -28,6 +29,9 @@ class DesktopWindow:
         self.report: dict[str, Any] = {}
         self.reaper = ReaperWorkbench()
         self.reaper_source: Path | None = None
+        self.jora_request: Path | None = None
+        self.jora_output: Path | None = None
+        self.jora_build_button: ttk.Button | None = None
         self._reaper_queue: queue.Queue[tuple[str, dict[str, Any] | None, str | None]] = queue.Queue()
         self._reaper_busy = False
         self._reaper_studio_process: subprocess.Popen[str] | None = None
@@ -173,6 +177,44 @@ class DesktopWindow:
         ttk.Button(actions, text="Проверить", command=self._check_reaper_source).pack(side="left")
         ttk.Button(actions, text="Проверить типы", command=self._typecheck_reaper_source).pack(side="left", padx=8)
 
+        jora_panel = ttk.LabelFrame(tab, text="JORA · ФАБРИКА ПРИЛОЖЕНИЙ", padding=12)
+        jora_panel.pack(fill="x", pady=(0, 10))
+        ttk.Label(
+            jora_panel,
+            text="Откройте JSON-запрос, экспортированный из Mora, задайте новый каталог проекта и соберите Reaper-каркас.",
+            style="Muted.TLabel",
+            wraplength=850,
+            justify="left",
+        ).pack(anchor="w", pady=(0, 8))
+
+        request_row = ttk.Frame(jora_panel)
+        request_row.pack(fill="x", pady=(0, 6))
+        ttk.Label(request_row, text="Запрос Jora", width=16).pack(side="left")
+        self.jora_request_text = tk.StringVar(value="JSON-запрос не выбран")
+        ttk.Label(request_row, textvariable=self.jora_request_text, style="Muted.TLabel").pack(side="left", fill="x", expand=True)
+        ttk.Button(request_row, text="Выбрать JSON", command=self._choose_jora_request).pack(side="right")
+
+        output_row = ttk.Frame(jora_panel)
+        output_row.pack(fill="x", pady=(0, 8))
+        ttk.Label(output_row, text="Новый проект", width=16).pack(side="left")
+        self.jora_output_text = tk.StringVar(value="")
+        ttk.Entry(output_row, textvariable=self.jora_output_text).pack(side="left", fill="x", expand=True)
+        ttk.Button(output_row, text="Папка…", command=self._choose_jora_output).pack(side="right", padx=(8, 0))
+
+        self.jora_build_button = ttk.Button(
+            jora_panel,
+            text="Собрать приложение",
+            style="Accent.TButton",
+            command=self._build_jora_app,
+        )
+        self.jora_build_button.pack(anchor="w")
+        ttk.Label(
+            jora_panel,
+            text="Результат — статически проверенный проектный каркас. Установка и запуск приложения не выполняются.",
+            style="Muted.TLabel",
+            wraplength=850,
+        ).pack(anchor="w", pady=(7, 0))
+
         ttk.Label(
             tab,
             text="Результаты проверки · JSON / диагностика",
@@ -215,12 +257,81 @@ class DesktopWindow:
             "native_studio": "native Studio",
             "static_typecheck": "static type analysis",
             "native_aot_subset": "experimental native AOT",
+            "jora_app_factory": "Jora application factory",
         }
         available = ", ".join(labels[item] for item in capabilities if item in labels)
         self.reaper_status.set("REAPER · доступен")
         self.reaper_location.set(f"{state['repository']} · {available}")
         self._append_reaper_output("Reaper integration ready")
         self._append_reaper_output(json.dumps(state, ensure_ascii=False, indent=2))
+        if self.jora_build_button is not None:
+            if "jora_app_factory" in state["capabilities"]:
+                self.jora_build_button.state(["!disabled"])
+            else:
+                self.jora_build_button.state(["disabled"])
+
+    def _choose_jora_request(self) -> None:
+        filename = filedialog.askopenfilename(
+            parent=self.root,
+            title="Выбрать запрос приложения Jora",
+            filetypes=[
+                ("Jora request", "*.json"),
+                ("JSON", "*.json"),
+                ("All files", "*.*"),
+            ],
+        )
+        if not filename:
+            return
+        self.jora_request = Path(filename)
+        self.jora_request_text.set(str(self.jora_request))
+
+    def _choose_jora_output(self) -> None:
+        folder = filedialog.askdirectory(
+            parent=self.root,
+            title="Выбрать родительскую папку нового приложения",
+            mustexist=True,
+        )
+        if not folder:
+            return
+        self.jora_output = Path(folder) / "Jora-Application"
+        self.jora_output_text.set(str(self.jora_output))
+
+    def _build_jora_app(self) -> None:
+        if self._reaper_busy:
+            messagebox.showinfo("Jora", "Предыдущая задача Reaper ещё выполняется.", parent=self.root)
+            return
+        request_value = self.jora_request_text.get().strip()
+        output_value = self.jora_output_text.get().strip()
+        if not request_value:
+            self._choose_jora_request()
+            request_value = self.jora_request_text.get().strip()
+        if not request_value:
+            return
+        if not output_value:
+            self._choose_jora_output()
+            output_value = self.jora_output_text.get().strip()
+        if not output_value:
+            return
+
+        request_path = Path(request_value)
+        output_path = Path(output_value)
+        self._reaper_busy = True
+        self.reaper_status.set("JORA · генерация приложения…")
+
+        def worker() -> None:
+            try:
+                result = self.reaper.jora_build(request_path, output_path)
+                self._reaper_queue.put(("Jora · сборка", result, None))
+            except (OSError, ValueError, RuntimeError, ReaperIntegrationError) as error:
+                self._reaper_queue.put(("Jora · сборка", None, str(error)))
+            except Exception as error:
+                self._reaper_queue.put(("Jora · сборка", None, f"{type(error).__name__}: {error}"))
+
+        threading.Thread(
+            target=worker,
+            name="duckos-jora-build",
+            daemon=True,
+        ).start()
 
     def _choose_reaper_source(self) -> None:
         filename = filedialog.askopenfilename(
