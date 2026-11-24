@@ -79,14 +79,14 @@ def validate_service_profile(profile: Any) -> dict[str, Any]:
     if not isinstance(item["version"], str) or not _VERSION.fullmatch(item["version"]):
         raise ServiceProfileError("version must use MAJOR.MINOR.PATCH semantic form")
     runtime = item["runtime"]
-    if runtime not in _RUNTIME_MODELS:
+    if not isinstance(runtime, str) or runtime not in _RUNTIME_MODELS:
         raise ServiceProfileError(f"runtime must be one of {sorted(_RUNTIME_MODELS)}")
 
     execution = _object(item["execution"], "execution", {
         "model", "max_concurrency", "queue_capacity", "timeout_ms",
         "max_input_bytes", "max_output_bytes", "max_memory_bytes",
     })
-    if execution["model"] not in _EXECUTION_MODELS:
+    if not isinstance(execution["model"], str) or execution["model"] not in _EXECUTION_MODELS:
         raise ServiceProfileError(f"execution.model must be one of {sorted(_EXECUTION_MODELS)}")
     concurrency = _integer(execution["max_concurrency"], "execution.max_concurrency", 1, 65536)
     queue_capacity = _integer(execution["queue_capacity"], "execution.queue_capacity", 0, 1_000_000)
@@ -203,7 +203,9 @@ def plan_service_startup(
     limits: ServicePlanLimits | None = None,
 ) -> dict[str, Any]:
     """Validate every profile and return a deterministic, non-executing plan."""
-    policy = limits or ServicePlanLimits()
+    policy = limits if limits is not None else ServicePlanLimits()
+    if not isinstance(policy, ServicePlanLimits):
+        raise ServiceProfileError("limits must be a ServicePlanLimits instance")
     if not isinstance(profiles, list) or len(profiles) > MAX_SERVICES:
         raise ServiceProfileError(f"profiles must be a list of at most {MAX_SERVICES} entries")
 
