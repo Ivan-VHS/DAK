@@ -389,7 +389,9 @@ export function initializeNewsPanel(appWindow, { showToast } = {}) {
     if (!bookmark) return;
     const url = safeArticleUrl(bookmark.dataset.newsBookmark);
     if (!url) return;
-    if (bookmarks.has(url)) bookmarks.delete(url);
+    const wasBookmarked = bookmarks.has(url);
+    const previousBookmark = bookmarks.get(url);
+    if (wasBookmarked) bookmarks.delete(url);
     else {
       if (bookmarks.size >= MAX_BOOKMARKS) {
         status.textContent = "Достигнут предел в " + MAX_BOOKMARKS + " закладок. Удалите старые, чтобы добавить новые.";
@@ -400,7 +402,10 @@ export function initializeNewsPanel(appWindow, { showToast } = {}) {
       bookmarks.set(url, article);
     }
     if (!writeBookmarks(bookmarks)) {
+      if (wasBookmarked) bookmarks.set(url, previousBookmark);
+      else bookmarks.delete(url);
       status.textContent = "Не удалось сохранить закладку в этом профиле браузера.";
+      render();
       return;
     }
     render();
