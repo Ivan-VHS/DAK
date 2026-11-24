@@ -18,6 +18,18 @@ test("Jora composes selected features into a deterministic product formula", () 
   assert.equal(result.request.language_targets, "auto");
 });
 
+test("Jora can mark additional compiler targets as pending adapters", () => {
+  const result = composeJoraRequest({
+    components: ["text.editor", "translation.workspace"],
+    locales: ["ru", "uk"],
+    preferredLocale: "ru",
+    languageTargets: ["java", "typescript"]
+  });
+  assert.deepEqual(result.languageTargets, ["reaper", "java", "typescript"]);
+  assert.deepEqual(result.pendingTargets, ["java", "typescript"]);
+  assert.deepEqual(result.request.language_targets, ["reaper", "java", "typescript"]);
+});
+
 test("Jora allows a custom product name and a subset of locales", () => {
   const result = composeJoraRequest({
     name: "My Workspace",
