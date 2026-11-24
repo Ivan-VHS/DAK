@@ -156,3 +156,7 @@ The existing implemented/partial boundary list above remains authoritative. This
 - [ ] End-to-end emulator/hardware validation and performance qualification.
 
 The checked boxes describe implemented user-space policy and evidence services only. They do not represent active kernel protection. Refer to SECURITY_ARCHITECTURE.md for exact boundaries and native bring-up gates.
+
+
+- [x] Reaper service-lifecycle contract registers DuckOS predictive security, dependency readiness, health/backpressure states, bounded supervisor restart and per-action capability/approval checks.
+- [ ] Native security daemon startup, IPC registration, kernel-backed service identity and capability-enforced action broker.

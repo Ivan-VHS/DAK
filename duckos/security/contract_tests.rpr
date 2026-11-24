@@ -1,5 +1,6 @@
 # DuckOS predictive-security policy contracts.
 import "decision.rpr" as decision
+import "../services/security.rpr" as security_service
 
 assert(decision["risk_score"](0, 0, false, false, false, false) == 0, "benign activity has no added risk")
 assert(decision["risk_score"](5, 0.8, true, true, true, false) == 100, "correlated destructive activity saturates risk")
@@ -19,3 +20,21 @@ assert(decision["recovery_allowed"](true, true, true), "recovery requires an aut
 assert(not decision["recovery_allowed"](true, false, true), "unverified recovery material is rejected")
 assert(decision["resource_profile"](true, false, false) == "quiet", "fullscreen mode may defer deep scans")
 assert(decision["resource_profile"](false, false, true) == "security_critical", "suspicious activity overrides comfort profiles")
+
+
+# OS service lifecycle, trust and dangerous-action authorization.
+make security_descriptor := security_service["descriptor"]()
+assert(security_descriptor[0] == "duckos.security", "security service is registered by stable system identity")
+assert(security_descriptor[2] == "services", "security service starts in the services boot phase")
+assert(security_service["start_allowed"]("services", true, true, true), "security service starts after all required dependencies")
+assert(not security_service["start_allowed"]("desktop", true, true, true), "security service rejects out-of-order startup")
+assert(security_service["health_state"](4, 16, 0, true, true) == "healthy", "healthy event queue")
+assert(security_service["health_state"](16, 16, 0, true, true) == "backpressured", "full event queue reports pressure")
+assert(security_service["health_state"](0, 16, 0, false, true) == "degraded", "missing policy keeps service degraded")
+assert(security_service["authorize_action"]("observe", "trusted", ["security.events.read"], true, true, false), "trusted observers may read security evidence")
+assert(not security_service["authorize_action"]("observe", "untrusted", ["security.events.read"], true, true, false), "untrusted callers are denied")
+assert(not security_service["authorize_action"]("process.terminate", "trusted", ["security.process.terminate"], true, true, false), "destructive actions require explicit approval")
+assert(security_service["authorize_action"]("process.terminate", "trusted", ["security.process.terminate"], true, true, true), "approved destructive action passes policy gate")
+assert(not security_service["authorize_action"]("process.terminate", "trusted", ["security.events.read"], true, true, true), "read capability cannot authorize process termination")
+assert(not security_service["authorize_action"]("file.restore", "trusted", ["security.file.restore"], false, true, true), "stale evidence cannot authorize recovery")
+assert(security_service["restart_decision"](1, 1, 3) == ["restart", 2], "service restart reuses the bounded system supervisor")

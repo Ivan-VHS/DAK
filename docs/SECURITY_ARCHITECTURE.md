@@ -10,7 +10,8 @@ The security capability has four cooperating boundaries:
 1. **Reaper policy plane** — deterministic risk scoring, action selection, snapshot requirements, mesh-signal acceptance, recovery authorization and workload-profile decisions.
 2. **DuckOS user-space evidence plane** — strict event ingestion, bounded causal correlation, indicator clustering, explainable risk evaluations, in-memory flight recorder, explicit file snapshots, integrity verification and authenticated mesh-alert envelopes.
 3. **Native sensor and enforcement plane** — future kernel/system services that collect events and enforce decisions through versioned capabilities. No native hook is claimed by the current user-space implementation.
-4. **Mora presentation plane** — system policy advertises the capability as partial and cannot turn an advisory recommendation into a claim of active protection.
+4. **OS service lifecycle** — duckos/services/security.rpr registers the security service identity, dependencies, startup gates, health/backpressure states, bounded supervisor restart decisions and per-action capability checks. This is a lifecycle contract, not a running native daemon.
+5. **Mora presentation plane** — system policy advertises the capability as partial and cannot turn an advisory recommendation into a claim of active protection.
 
 Dependencies point inward to versioned contracts. The analyzer cannot call privileged OS operations. Sensor adapters must produce validated events; they must not pass kernel pointers, secrets, unbounded command lines or arbitrary nested payloads into the policy engine.
 
@@ -39,6 +40,14 @@ An input batch uses duckos.security-events.v1. Each record uses duckos.security-
 Supported event kinds cover process start/stop/injection, file mutation, network connect/listen/DNS, memory reads/writes, identity access, registry/service changes, integrity changes, driver-load observations, mesh alerts and sandbox results. Exact shape is defined in security-events.v1.schema.json.
 
 Sensor adapters must explicitly classify source trust and collection scope. The analyzer treats sensor-provided reputation and signature fields as evidence, not as cryptographic proof.
+
+## Service lifecycle and authority
+
+The Reaper service contract declares the security service in the normal services boot phase. Startup requires dependencies, policy state and audit readiness. Queue saturation or event loss is surfaced as backpressure; missing policy or audit support yields a degraded state. Restart decisions reuse the existing finite service supervisor.
+
+The action gate denies untrusted callers and stale or invalid evidence. Observe, snapshot creation and integrity verification have distinct capabilities. File restore, process isolation, process termination and network isolation require both their own explicit capability and explicit approval. This is only policy logic: the future native service manager and kernel capability broker must enforce the same checks at the privileged boundary.
+
+The CLI's security status distinguishes this registered policy contract from a native service process or boot-time activation; those are not yet implemented.
 
 ## Decision semantics
 

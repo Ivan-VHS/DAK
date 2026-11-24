@@ -180,6 +180,8 @@ class GovernorAndServiceTests(unittest.TestCase):
         status = security_status()
         self.assertEqual(status["kernel_enforcement"], "not_implemented")
         self.assertEqual(status["live_sensor_collection"], "not_connected")
+        self.assertEqual(status["system_service_policy"], "registered_in_reaper_service_lifecycle_contract")
+        self.assertEqual(status["native_service_process"], "not_implemented")
 
 
 if __name__ == "__main__":
