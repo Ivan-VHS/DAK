@@ -4,6 +4,7 @@ import {
   CONCRETE_THUMP_LIMITS,
   CONCRETE_THUMP_STORAGE_KEY,
   LEGACY_CONCRETE_THUMP_STORAGE_KEY,
+  SEQUENCE_TRACKS,
   buildConcreteThumpPrompt,
   createDefaultConcreteThumpProfile,
   createReaperGridSource,
@@ -33,6 +34,32 @@ test("the default ritual profile targets heavyweight East Slavic trap at 160 BPM
   assert.ok(profile.chantSources.includes("znamenny"));
   assert.ok(profile.chantSources.includes("kolyadky"));
   assert.ok(profile.chantSources.includes("kupala"));
+});
+
+test("the default 16-step sequence has bounded kick, snare, hat, bass and choir lanes", () => {
+  const profile = createDefaultConcreteThumpProfile();
+  assert.deepEqual(SEQUENCE_TRACKS, ["kick", "snare", "hat", "bass", "choir"]);
+  for (const track of SEQUENCE_TRACKS) {
+    assert.equal(profile.sequence[track].length, 16);
+    assert.ok(profile.sequence[track].every((step) => typeof step === "boolean"));
+  }
+  assert.equal(profile.sequence.kick[0], true);
+  assert.equal(profile.sequence.snare[4], true);
+  assert.equal(profile.sequence.choir[0], true);
+});
+
+test("invalid sequence lanes are reset instead of accepting arbitrary data", () => {
+  const profile = normalizeConcreteThumpProfile({
+    sequence: {
+      kick: ["run", {}, 1],
+      snare: Array(16).fill(true)
+    }
+  });
+  assert.equal(profile.sequence.kick.length, 16);
+  assert.ok(profile.sequence.kick.every((step) => typeof step === "boolean"));
+  assert.equal(profile.sequence.snare.length, 16);
+  assert.ok(profile.sequence.snare.every(Boolean));
+  assert.equal(profile.sequence.choir.length, 16);
 });
 
 test("profile normalization rejects unknown tags and out-of-range rhythm values", () => {
