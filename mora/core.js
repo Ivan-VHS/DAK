@@ -5,7 +5,7 @@ export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
   "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
   "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "red-sparrow"
 ]);
 
 const CAPABILITIES = ["microphone", "camera", "location", "files", "network", "clipboard"];
@@ -99,7 +99,8 @@ const APP_ALIASES = [
   { id: "runtime", pattern: /bridge|совместим|runtime|\.exe/i },
   { id: "workspace", pattern: /control|настройк|системн/i },
   { id: "provenance", pattern: /proof|подлин|происхожд|провер.*файл/i },
-  { id: "mora-boost", pattern: /mora\s*boost|игров(ая|ую)\s+лаборатор|game\s*boost/i }
+  { id: "mora-boost", pattern: /mora\s*boost|игров(ая|ую)\s+лаборатор|game\s*boost/i },
+  { id: "red-sparrow", pattern: /red\s*sparrow|красн.*вороб|赤雀|chi\s*que/i }
 ];
 
 export function buildIntentPlan(rawInput) {
