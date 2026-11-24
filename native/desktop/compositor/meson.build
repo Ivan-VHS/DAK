@@ -18,7 +18,7 @@ xdg_shell_private_code = custom_target('xdg-shell-private-code',
   input: xdg_shell_xml,
   output: 'xdg-shell-protocol.c',
   command: [wayland_scanner, 'private-code', '@INPUT@', '@OUTPUT@'],
-  depend_files: [xdg_shell_server_header])
+  depends: [xdg_shell_server_header])
 
 executable('duckos-compositor',
   'main.c',
