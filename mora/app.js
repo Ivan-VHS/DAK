@@ -342,7 +342,8 @@ function commonsPanelMarkup() {
         '<label class="jora-option"><input type="checkbox" data-jora-component="translation.workspace" checked><span><strong>Переводчик</strong><small>Перевод, терминология и параллельные тексты</small></span></label>' +
       '</fieldset>' +
       '<div class="jora-settings">' +
-        '<div class="jora-label"><span>Имя единой системы</span><strong class="jora-fixed-name">Jora</strong></div>' +
+        '<div class="jora-label"><span>Единое имя системы</span><strong class="jora-fixed-name">Jora</strong></div>' +
+        '<label class="jora-label">Стиль описания <select data-jora-name-style><option value="compact">Краткий</option><option value="balanced" selected>Сбалансированный</option><option value="descriptive">Подробный</option><option value="formula">Формульный</option></select></label>' +
         '<label class="jora-label">Основной язык <select data-jora-preferred><option value="en">English</option><option value="ru" selected>Русский</option><option value="uk">Українська</option><option value="most">MOST</option></select></label>' +
       '</div>' +
       '<fieldset class="jora-fieldset jora-locale-fieldset"><legend>Языки интерфейса</legend>' +
@@ -358,6 +359,22 @@ function commonsPanelMarkup() {
         '<label class="jora-option"><input type="checkbox" data-jora-target="typescript"><span><strong>TypeScript</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
         '<label class="jora-option"><input type="checkbox" data-jora-target="rust"><span><strong>Rust</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
         '<label class="jora-option"><input type="checkbox" data-jora-target="c"><span><strong>C</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+      '</fieldset>' +
+      '<fieldset class="jora-fieldset jora-graph-fieldset"><legend>Архитектура графа приложения</legend>' +
+        '<div class="jora-graph-settings">' +
+          '<label class="jora-label">Топология <select data-jora-topology>' +
+            '<option value="auto" selected>Автоматический подбор</option>' +
+            '<option value="layered">Многослойная</option>' +
+            '<option value="pipeline">Последовательная</option>' +
+            '<option value="hub_spoke">Общий координатор</option>' +
+            '<option value="plugin_mesh">Сеть возможностей</option>' +
+            '<option value="event_driven">Событийная</option>' +
+            '<option value="hybrid">Гибридная</option>' +
+          '</select></label>' +
+          '<label class="jora-label">Количество вариантов <select data-jora-variants><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>' +
+        '</div>' +
+        '<label class="jora-label">Степень архитектурной вариативности <span data-jora-variation-value>50%</span><input type="range" min="0" max="100" step="5" value="50" data-jora-variation></label>' +
+        '<p class="jora-copy">Jora строит несколько графов с разными способами соединения модулей. Жёсткие зависимости остаются ацикличными; обратные события допускаются только через асинхронную шину.</p>' +
       '</fieldset>' +
       '<div class="jora-actions"><button class="action-button" type="button" data-action="jora-compose">Сформировать формулу</button><button class="subtle-button" type="button" data-action="jora-export" disabled>Экспортировать JSON</button></div>' +
       '<div class="jora-preview" data-jora-preview aria-live="polite">Выберите модули и сформируйте комбинацию. Jora предложит имя и покажет итоговую формулу.</div>' +
@@ -867,6 +884,10 @@ document.addEventListener("click", (event) => {
         locales,
         preferredLocale: owner.querySelector("[data-jora-preferred]").value,
         languageTargets,
+        nameStyle: owner.querySelector("[data-jora-name-style]").value,
+        graphTopology: owner.querySelector("[data-jora-topology]").value,
+        graphVariants: Number(owner.querySelector("[data-jora-variants]").value),
+        graphVariation: Number(owner.querySelector("[data-jora-variation]").value),
       });
       joraDrafts.set(owner, composed.request);
       preview.replaceChildren();
@@ -875,11 +896,17 @@ document.addEventListener("click", (event) => {
       name.textContent = composed.name;
       const formula = document.createElement("p");
       formula.textContent = composed.formula + " = " + composed.name;
+      const nameVariants = document.createElement("small");
+      nameVariants.textContent = "Варианты описания Jora: " + composed.nameSuggestions.join(" · ");
       const detail = document.createElement("small");
       detail.textContent = "Цели: " + composed.languageTargets.join(" + ").toUpperCase() + " · локали: " + composed.generatedLocales.join(", ").toUpperCase();
+      const graphSummary = document.createElement("small");
+      graphSummary.textContent = "Графы: " + composed.graphPlan.variants + " · топология: " + composed.graphPlan.topologyLabel + " · вариативность: " + composed.graphPlan.variation + "%";
+      const graphChoices = document.createElement("small");
+      graphChoices.textContent = "Доступные структуры: " + composed.graphPlan.availableTopologies.map((item) => item.label).join(" · ");
       const maturity = document.createElement("small");
-      maturity.textContent = composed.pendingTargets.length ? "Остальные языки отмечены как ожидающие адаптеры; реально генерируется Reaper. Модули пока спецификации." : "Следующий шаг: экспортировать запрос и выполнить локальную сборку. Модули пока имеют статус спецификаций."
-      preview.append(name, formula, detail, maturity);
+      maturity.textContent = composed.pendingTargets.length ? "Дополнительные языки ожидают адаптеров; сейчас генерируется Reaper. Функциональные модули остаются спецификациями." : "Следующий шаг: экспортировать запрос и выполнить локальную сборку. Функциональные модули пока спецификации.";
+      preview.append(name, formula, nameVariants, detail, graphSummary, graphChoices, maturity);
       exportButton.disabled = false;
       showToast("Формула Jora подготовлена: " + composed.name);
     } catch (error) {
@@ -985,7 +1012,7 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("input", (event) => {
   const joraInput = event.target.closest(
-    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred]"
+    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation]"
   );
   if (joraInput) {
     const owner = joraInput.closest(".app-window");
