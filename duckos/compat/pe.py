@@ -141,6 +141,21 @@ def inspect_pe_bytes(data: bytes, *, file_name: str = "") -> dict[str, Any]:
             "characteristics": section_flags,
         })
 
+    # Raw section ranges must be disjoint: overlapping file-backed bytes make
+    # RVA-to-file mapping ambiguous and can hide contradictory section content.
+    raw_ranges = sorted(
+        (int(section["raw_offset"]),
+         int(section["raw_offset"]) + int(section["raw_size"]),
+         str(section["name"]))
+        for section in sections
+        if int(section["raw_size"]) > 0
+    )
+    for previous, current in zip(raw_ranges, raw_ranges[1:]):
+        if current[0] < previous[1]:
+            raise PEFormatError(
+                f"sections {previous[2]!r} and {current[2]!r} have overlapping raw data"
+            )
+
     def rva_to_offset(rva: int, label: str) -> int:
         if rva < 0:
             raise PEFormatError(f"{label} has a negative RVA")

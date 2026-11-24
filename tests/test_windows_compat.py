@@ -14,6 +14,21 @@ from duckos.compat import (
 )
 
 
+def minimal_pe64_with_overlapping_sections() -> bytes:
+    data = bytearray(minimal_pe64())
+    coff = 0x84
+    data[coff + 2:coff + 4] = (2).to_bytes(2, "little")
+    optional_size = 0xF0
+    second = coff + 20 + optional_size + 40
+    data[second:second + 8] = b".data\\0\\0"
+    data[second + 8:second + 12] = (0x200).to_bytes(4, "little")
+    data[second + 12:second + 16] = (0x2000).to_bytes(4, "little")
+    data[second + 16:second + 20] = (0x200).to_bytes(4, "little")
+    data[second + 20:second + 24] = (0x200).to_bytes(4, "little")
+    data[second + 36:second + 40] = (0x40000040).to_bytes(4, "little")
+    return bytes(data)
+
+
 def minimal_pe64() -> bytes:
     data = bytearray(0x400)
     data[:2] = b"MZ"
@@ -56,6 +71,10 @@ class WindowsCompatibilityTests(unittest.TestCase):
         self.assertEqual(report["imports"], ["KERNEL32.dll"])
         self.assertTrue(report["inspection_only"])
         self.assertFalse(report["execution_performed"])
+
+    def test_rejects_overlapping_raw_section_ranges(self):
+        with self.assertRaisesRegex(PEFormatError, "overlapping raw data"):
+            inspect_pe_bytes(minimal_pe64_with_overlapping_sections())
 
     def test_rejects_truncated_and_invalid_images(self):
         with self.assertRaises(PEFormatError):
