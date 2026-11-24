@@ -60,7 +60,9 @@ static void test_file_burst_and_causal_chain(void) {
         assert(duckos_security_ingest(&engine, &f, &result) == DUCKOS_SECURITY_OK);
     }
     assert(result.risk_score >= 35);
+    assert(result.risk_level == DUCKOS_SECURITY_RISK_HIGH);
     assert(result.recommendation == DUCKOS_SECURITY_ACTION_RESTRICT);
+    assert(result.snapshot_recommended == 1);
     assert(result.file_mutations_in_window == 3);
     assert(result.causal_depth == 2);
     assert(strcmp(result.causal_root_event_id, "p") == 0);
@@ -85,6 +87,8 @@ static void test_credential_lolbin_and_mesh_cluster(void) {
     e.flags = DUCKOS_SECURITY_FLAG_ENCODED_COMMAND;
     assert(duckos_security_ingest(&engine, &e, &result) == DUCKOS_SECURITY_OK);
     assert(result.risk_score == 25);
+    assert(result.risk_level == DUCKOS_SECURITY_RISK_MEDIUM);
+    assert(result.sandbox_recommended == 1);
     assert((result.indicators & DUCKOS_SECURITY_IND_LOLBIN_CONTEXT) != 0);
 
     duckos_security_engine_init(&engine);

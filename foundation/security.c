@@ -229,11 +229,29 @@ duckos_security_status duckos_security_ingest(
     v.confidence_milli = indicators == 0u ? 250u :
         (550u + indicators * 70u > 980u ? 980u : 550u + indicators * 70u);
 
-    if (v.risk_score >= 80u) v.recommendation = DUCKOS_SECURITY_ACTION_BLOCK;
-    else if (v.risk_score >= 60u) v.recommendation = DUCKOS_SECURITY_ACTION_ISOLATE;
-    else if (v.risk_score >= 35u) v.recommendation = DUCKOS_SECURITY_ACTION_RESTRICT;
-    else if (v.risk_score >= 20u) v.recommendation = DUCKOS_SECURITY_ACTION_SANDBOX;
-    else v.recommendation = DUCKOS_SECURITY_ACTION_MONITOR;
+    if (v.risk_score >= 80u) {
+        v.risk_level = DUCKOS_SECURITY_RISK_CRITICAL;
+        v.recommendation = DUCKOS_SECURITY_ACTION_BLOCK;
+    } else if (v.risk_score >= 60u) {
+        v.risk_level = DUCKOS_SECURITY_RISK_HIGH;
+        v.recommendation = DUCKOS_SECURITY_ACTION_ISOLATE;
+    } else if (v.risk_score >= 35u) {
+        v.risk_level = DUCKOS_SECURITY_RISK_HIGH;
+        v.recommendation = DUCKOS_SECURITY_ACTION_RESTRICT;
+    } else if (v.risk_score >= 20u) {
+        v.risk_level = DUCKOS_SECURITY_RISK_MEDIUM;
+        v.recommendation = DUCKOS_SECURITY_ACTION_SANDBOX;
+    } else {
+        v.risk_level = DUCKOS_SECURITY_RISK_LOW;
+        v.recommendation = DUCKOS_SECURITY_ACTION_MONITOR;
+    }
+    v.sandbox_recommended =
+        (e->flags & DUCKOS_SECURITY_FLAG_ORIGIN_UNTRUSTED) != 0u ||
+        ((e->kind == DUCKOS_SECURITY_PROCESS_START ||
+          e->kind == DUCKOS_SECURITY_DRIVER_LOAD) && v.risk_score >= 20u);
+    v.snapshot_recommended =
+        (file_kind(e->kind) &&
+         (v.risk_score >= 20u || e->kind != DUCKOS_SECURITY_FILE_MODIFY));
 
     *out = v;
     return DUCKOS_SECURITY_OK;

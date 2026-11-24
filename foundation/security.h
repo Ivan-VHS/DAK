@@ -101,6 +101,13 @@ enum duckos_security_indicator {
     DUCKOS_SECURITY_IND_MULTI_HOST_CLUSTER = 1ull << 14
 };
 
+typedef enum duckos_security_risk_level {
+    DUCKOS_SECURITY_RISK_LOW = 0,
+    DUCKOS_SECURITY_RISK_MEDIUM = 1,
+    DUCKOS_SECURITY_RISK_HIGH = 2,
+    DUCKOS_SECURITY_RISK_CRITICAL = 3
+} duckos_security_risk_level;
+
 typedef enum duckos_security_recommendation {
     DUCKOS_SECURITY_ACTION_MONITOR = 0,
     DUCKOS_SECURITY_ACTION_SANDBOX = 1,
@@ -114,8 +121,11 @@ typedef struct duckos_security_evaluation_v1 {
     uint32_t version;
     uint32_t risk_score;
     uint32_t confidence_milli;
+    uint32_t risk_level;
     uint32_t recommendation;
     uint32_t advisory_only;
+    uint32_t sandbox_recommended;
+    uint32_t snapshot_recommended;
     uint32_t file_mutations_in_window;
     uint32_t distinct_hosts_in_cluster;
     uint32_t causal_depth;
@@ -171,6 +181,10 @@ typedef struct duckos_security_authorization_request_v1 {
     uint64_t granted_capabilities;
 } duckos_security_authorization_request_v1;
 
+/*
+ * The event ring is fixed-size and single-writer. Callers must serialize
+ * ingest and protect readers with the OS service's lock/critical section.
+ */
 void duckos_security_engine_init(duckos_security_engine *engine);
 duckos_security_status duckos_security_event_validate(const duckos_security_event_v1 *event);
 duckos_security_status duckos_security_ingest(
