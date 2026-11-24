@@ -78,6 +78,20 @@ duckos reaper --root /path/to/Reaper check ./program.rpr
 
 The `check` command delegates to Reaper's `--check --json` path. The focused `typecheck` command is enabled only when the located checkout contains both the type-checking module and its CLI dispatch. Older pinned checkouts are reported as lacking that capability rather than being treated as if it were present.
 
+
+## Read-only hardware inventory handoff
+
+DuckOS can export a bounded, versioned host inventory and ask Reaper to validate it as a separate diagnostic step:
+
+```sh
+python -m duckos hardware-inventory --output hardware-inventory.json
+PYTHONPATH="projects/reaper" python -m reaper.duckos_bridge hardware-inventory.json --output hardware-audit.json
+```
+
+The producer schema is `schemas/hardware-inventory.v1.schema.json`; the Reaper consumer mirrors it at `projects/reaper/schemas/duckos.hardware-inventory.v1.schema.json`. Reaper verifies the exact field set, canonical digest, device totals and bounded values. The audit is read-only and cannot install or modify drivers, firmware or devices. A passing digest proves content consistency, not publisher authenticity or device correctness.
+
+The `Reaper contract tests` workflow also runs `tests.test_reaper_hardware_contract` against the pinned Reaper submodule. It creates a temporary sysfs fixture, sends the actual DuckOS collector output into the Reaper validator and checks the resulting diagnostic report. This is a producer-to-consumer contract test; it does not inspect or mutate the CI host's physical hardware.
+
 ## Process and trust boundaries
 
 - Every process is started with a fixed argument list and `shell=False`.
