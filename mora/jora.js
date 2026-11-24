@@ -2,10 +2,14 @@ export const COMPONENTS = Object.freeze({
   "text.editor": {
     name: "Text Editor",
     label: "Текстовый редактор",
+    description: "Документы, структурированный текст, поиск и история правок.",
+    domain: "documents",
   },
   "audio.editor": {
     name: "Audio Editor",
     label: "Аудиоредактор",
+    description: "Аудиодорожки, таймкоды, маркеры и монтаж.",
+    domain: "media",
   },
   "translation.workspace": {
     name: "Translator",
