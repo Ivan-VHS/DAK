@@ -8,13 +8,13 @@ test("Jora composes selected features into a deterministic product formula", () 
     locales: ["en", "ru", "uk", "most"],
     preferredLocale: "ru"
   });
-  assert.equal(result.name, "LexiTone 3D");
+  assert.equal(result.name, "Jora");
   assert.equal(result.formula, "Text Editor + Audio Editor + Translator");
   assert.deepEqual(result.request.components,
     ["text.editor", "audio.editor", "translation.workspace"]);
   assert.deepEqual(result.generatedLocales, ["en", "ru", "uk", "most"]);
   assert.equal(result.request.schema, "reaper.jora.request.v1");
-  assert.equal(result.request.name, "LexiTone 3D");
+  assert.equal(result.request.name, "Jora");
   assert.equal(result.request.language_targets, "auto");
 });
 
@@ -32,14 +32,22 @@ test("Jora can mark additional compiler targets as pending adapters", () => {
 
 test("Jora allows a custom product name and a subset of locales", () => {
   const result = composeJoraRequest({
-    name: "My Workspace",
+    name: "Jora",
     components: ["text.editor"],
     locales: ["uk"],
     preferredLocale: "uk"
   });
-  assert.equal(result.name, "My Workspace");
+  assert.equal(result.name, "Jora");
   assert.equal(result.formula, "Text Editor");
   assert.deepEqual(result.request.locales, ["uk"]);
+});
+
+test("Jora refuses separately branded application names", () => {
+  assert.throws(() => composeJoraRequest({
+    name: "LexiTone",
+    components: ["text.editor"],
+    locales: ["en"]
+  }), /fixed application name/);
 });
 
 test("Jora rejects an empty feature selection and unknown components", () => {
