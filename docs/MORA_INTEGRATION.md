@@ -98,3 +98,18 @@ Never promote a feature to native/verified status because its UI panel exists.
 Mora exposes Duck Desktop as a system tool, but the browser panel is informational. It gives the user the `duckos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DuckOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
 
 Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.
+
+
+## Red Sparrow creative workspace
+
+The first-party **Red Sparrow / 赤雀** workspace is a creative production panel inside Mora, not a second desktop shell. It keeps the DuckOS black/white/yellow system identity; restrained crimson and emerald motifs are scoped to this application's own window. The panel covers screen Wuxia, stage-safe choreography, Emerald Nightmare visual language and UK Grime rhythm references. It is a fictional creative workspace, not a historical martial-arts school or a real combat manual.
+
+The workspace is registered in `mora/apps.json`, launched through the existing Mora window manager and included in the scoped service-worker cache. The internal app identifier is `red-sparrow`. Creative notes use the local document store: IndexedDB is preferred, with a bounded localStorage fallback. No network upload or cross-device synchronization is implemented.
+
+## Separate locale profile
+
+Control supports a persistent `ru-RU` / `zh-CN` locale selection under `duckos.mora.locale.v1`. The Simplified Chinese profile uses Mandarin-oriented UI wording and the `zh-CN` locale for date/time formatting. It is a presentation preference: it does not rename repositories, translate source code or change Reaper/compiler contracts. The desktop chrome, Control panel and Red Sparrow workspace are localized; legacy application panels are not yet fully translated and this capability remains partial.
+
+## Local-first document storage
+
+`mora/local-store.js` provides an IndexedDB-first document API with bounded identifiers and 256 KiB JSON payloads, plus a localStorage fallback for restricted browser contexts. It is a local document store, not a sync engine. CRDT replication, multi-device conflict resolution, native SQLite integration and background synchronization remain unimplemented until a concrete multi-writer requirement and versioned conflict contract exist.
