@@ -2,8 +2,19 @@
 # The compositor caps real frame deltas and applies reduced-motion preferences.
 
 export craft spring_step(position, velocity, target, stiffness, damping, mass, delta_seconds) {
-    when stiffness <= 0 or damping < 0 or mass <= 0
-        or delta_seconds <= 0 or delta_seconds > 0.032 {
+    when stiffness <= 0 {
+        yield ["invalid"]
+    }
+    when damping < 0 {
+        yield ["invalid"]
+    }
+    when mass <= 0 {
+        yield ["invalid"]
+    }
+    when delta_seconds <= 0 {
+        yield ["invalid"]
+    }
+    when delta_seconds > 0.032 {
         yield ["invalid"]
     }
     make acceleration := (-stiffness * (position - target) - damping * velocity) / mass
