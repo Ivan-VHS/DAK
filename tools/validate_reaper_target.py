@@ -136,7 +136,21 @@ def _validate_repository(root: Path, data: dict[str, Any], *, verify_git: bool) 
 def validate(root: str | Path, *, verify_git: bool = True) -> dict[str, Any]:
     repository = Path(root).expanduser().resolve()
     data = _read_json(repository / "duckos" / "reaper-migration.v1.json")
+    schema = _read_json(repository / "schemas" / "reaper-migration.v1.schema.json")
     _validate_shape(data)
+    try:
+        import jsonschema
+    except ImportError:
+        # The explicit invariant checks below remain dependency-free; CI and
+        # normal development environments also validate the published schema.
+        pass
+    else:
+        try:
+            jsonschema.validate(instance=data, schema=schema)
+        except jsonschema.ValidationError as error:
+            raise MigrationContractError(f"migration manifest does not satisfy its JSON Schema: {error.message}") from error
+        except jsonschema.SchemaError as error:
+            raise MigrationContractError(f"migration JSON Schema is invalid: {error.message}") from error
     _validate_repository(repository, data, verify_git=verify_git)
     return {
         "schema": "duckos.reaper-migration-validation.v1",
