@@ -305,6 +305,38 @@
         },
         "additionalProperties": false
       }
+    },
+    "reaper_target_profile": {
+      "type": "object",
+      "required": [
+        "repository",
+        "path",
+        "target_id",
+        "availability",
+        "upstream_pull_request"
+      ],
+      "properties": {
+        "repository": {
+          "const": "Ivan-VHS/Reaper"
+        },
+        "path": {
+          "const": "language/targets/duckos-kernel.v1.json"
+        },
+        "target_id": {
+          "const": "duckos-kernel"
+        },
+        "availability": {
+          "enum": [
+            "not-in-pinned-checkout",
+            "present-in-pinned-checkout"
+          ]
+        },
+        "upstream_pull_request": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
