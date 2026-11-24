@@ -2,20 +2,14 @@ const COMPONENTS = Object.freeze({
   "text.editor": {
     name: "Text Editor",
     label: "Текстовый редактор",
-    token: "Lexi",
-    singleName: "LexiDesk"
   },
   "audio.editor": {
     name: "Audio Editor",
     label: "Аудиоредактор",
-    token: "Tone",
-    singleName: "SonicLab"
   },
   "translation.workspace": {
     name: "Translator",
     label: "Переводчик",
-    token: "Lingua",
-    singleName: "LinguaDesk"
   }
 });
 
@@ -85,16 +79,13 @@ export function composeJoraRequest(options = {}) {
     uniqueTargets.add(target);
   }
 
-  const customName = safeText(options.name || "", 80, "application name");
+  const requestedName = safeText(options.name || "Jora", 80, "application name");
+  if (requestedName && requestedName !== "Jora") {
+    throw new TypeError("Jora is the fixed application name for every composition.");
+  }
   const description = safeText(options.description || "", 500, "application description");
   const formula = componentIds.map((id) => COMPONENTS[id].name).join(" + ");
-  const productName = customName || (
-    componentIds.length === 1
-      ? COMPONENTS[componentIds[0]].singleName
-      : COMPONENTS[componentIds[0]].token +
-        COMPONENTS[componentIds[1]].token +
-        (componentIds.length > 2 ? " " + componentIds.length + "D" : "")
-  );
+  const productName = "Jora";
 
   const request = {
     schema: "reaper.jora.request.v1",
