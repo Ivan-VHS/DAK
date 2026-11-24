@@ -41,9 +41,9 @@ Initialize the specialist checkout and inspect the integration:
 git submodule update --init projects/reaper
 duckos reaper status
 duckos reaper studio
-duckos reaper check ./examples/program.rpr
-duckos reaper typecheck ./examples/program.rpr
-duckos reaper modules ./examples/program.rpr
+duckos reaper check projects/reaper/examples/flow.rpr
+duckos reaper typecheck projects/reaper/examples/flow.rpr
+duckos reaper modules projects/reaper/examples/flow.rpr
 duckos reaper toolchain
 ```
 
