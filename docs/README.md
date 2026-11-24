@@ -1,52 +1,46 @@
 # DuckOS documentation
 
+This index is the entry point for the browser desktop shell, Reaper system contracts, source federation, release tooling and implementation-status evidence.
+
+## Start here
+
+- [Root README](../README.md) — product scope, quick start, visual diagrams and major implementation boundaries.
+- [Architecture](ARCHITECTURE.md) — product layers, system contracts and native bring-up gates.
+- [Implementation status](IMPLEMENTATION_STATUS.md) — implemented Reaper contracts and partial/external native boundaries.
+- [Build contracts](BUILD_CONTRACTS.md) — system manifest, image layout and driver ABI descriptions.
+- [Deployment tooling](DEPLOYMENT.md) — component bundles, checksums, optional signing and non-destructive deployment planning.
+- [Documentation control](DOCUMENTATION_CONTROL.md) — evidence, maturity and publication requirements.
+- [README visual standard](README_VISUAL_STANDARD.md) — theme-aware hero, diagrams, screenshot provenance and navigation.
+- [Unified documentation standard](UNIFIED_DOCUMENTATION_STANDARD.md) — shared project terminology and evidence policy.
+
 ## Desktop and application interfaces
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
+- [Mora unified desktop](../mora/index.html) — current browser-local desktop shell.
+- [Mora Commons](MORA_COMMONS.md) — application discovery hub.
+- [Mora integration](MORA_INTEGRATION.md) — browser shell, native services and capability boundaries.
+- [Mora gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) — measured telemetry and reversible Windows session contracts.
+- [Mora Design System](../MORA_DESIGN_SYSTEM.md) — canonical visual and interaction tokens.
 
-[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
+## Source federation and native workbench
 
-## Visual design
+- [Repository federation](REPOSITORY_FEDERATION.md) — commit-pinned specialist projects and synchronization behavior.
+- [Native Reaper integration](REAPER_INTEGRATION.md) — process-isolated Studio launcher and source-check bridge.
+- [Extended Terminal](EXTENDED_TERMINAL.md) — allowlisted user-space command environment.
 
-[Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical interface standard; [mora/theme.json](../mora/theme.json) contains the versioned color, shape, spacing, typography and motion tokens.
+## Compatibility, hardware and applications
 
-## Runnable prototypes
+- [Windows compatibility](WINDOWS_COMPATIBILITY.md) — PE inspection, prefix profiles and CLI diagnostics.
+- [DuckBridge](DUCKBRIDGE.md) — local runtime inventory and structured dry-run plans.
+- [Preinstalled applications](PREINSTALLED_APPLICATIONS.md) — application roles, scope and catalog boundary.
+- [Application catalog](../catalogs/preinstalled-applications.v1.json) — versioned machine-readable inventory.
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+## Transfer and system contracts
 
-[The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
-
-## Command-line tools
-
-[DuckOS Extended Terminal](EXTENDED_TERMINAL.md) documents the separate allowlisted user-space command environment, command registry, local configuration, bounded history, extension contract and security boundaries.
-
-## Native workbench
-
-[Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
-
-## Desktop optimization
-
-[Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.
-
-## Product specification
-
-[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
-
-## Normative standard
-
-[Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
+- [Unify transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) — bounded local transfer format.
+- [System capability profile](SYSTEM_CAPABILITY_PROFILE.md) — capability inventory and maturity rules.
+- [Engineering evolution framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — completeness, extension and verification criteria.
 
 ## Documentation rules
 
-Describe current behavior from the source, build configuration and tests. Mark designs and future work as specified or planned; do not present them as implemented. Keep kernel, boot, driver, runtime, graphics and desktop claims tied to concrete source paths and reproducible verification evidence.
+Describe behavior from source, build configuration, schemas and tests. Distinguish browser-local prototypes, executable reference contracts, partial integration, native implementation and future design. A catalog item, visual mock-up, schema or deployment plan is not proof of a shipped application, working driver or bootable OS.
 
-This index is a documentation entry point. It does not itself assert that any particular subsystem is implemented or absent.
-
-## Windows application compatibility
-
-[Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
-
-
-## Capability completeness standard
-
-[Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
