@@ -86,6 +86,10 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "bav_defender_doctrine": {
+      "maturity": "specified",
+      "scope": "Versioned Red Sparrow content-safety policy and sensitive-topic taxonomy; native Reaper evaluator, malware scanning, process isolation and kernel enforcement are not implemented."
     }
   },
   "not_in_scope_as_implemented_features": [
