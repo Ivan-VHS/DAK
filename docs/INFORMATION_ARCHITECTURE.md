@@ -21,6 +21,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 - [Mora theme tokens](../mora/theme.json) — versioned machine-readable palettes and interaction tokens.
 - [Mora system policy](../mora/system-policy.json) — maturity and implementation boundaries.
 - [Mora application registry](../mora/apps.json) — first-party panels and shell-level system tools.
+- [Газета application](../mora/news.js) and [news query/normalization core](../mora/news-core.js) — GDELT-backed feed and local bookmarks.
 - [Mora desktop entry point](../mora/index.html) — current unified browser shell.
 
 ### 2. Product applications
@@ -39,10 +40,10 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 
 ### 4. Runnable prototypes and evidence
 
-- [Current Mora shell](../mora/index.html) — unified 13-entry desktop, local settings and guarded system-tool panels.
+- [Current Mora shell](../mora/index.html) — unified desktop, local settings, nine system tools and the standalone newspaper feed.
 - [Earlier seven-app prototype](../prototype/mora-home.html) — historical/reference implementation.
 - [Application catalog validator](../tools/validate_app_catalog.py) and [catalog tests](../tests/test_app_catalog.py).
-- [Mora contract tests](../tests/mora-contract.test.mjs) and [core tests](../tests/mora-core.test.mjs).
+- [Mora contract tests](../tests/mora-contract.test.mjs), [news feed unit tests](../tests/mora-news-core.test.mjs) and [core tests](../tests/mora-core.test.mjs).
 
 ## Dependency and cross-repository boundaries
 
