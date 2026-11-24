@@ -120,9 +120,9 @@ export function composeJoraRequest(options = {}) {
     uniqueTargets.add(target);
   }
 
-  const requestedName = safeText(options.name || "Jora", 80, "application name");
-  if (requestedName && requestedName !== "Jora") {
-    throw new TypeError("Jora is the fixed application name for every composition.");
+  const requestedName = safeText(options.name || "", 80, "application name");
+  if (requestedName && /jora/i.test(requestedName)) {
+    throw new TypeError("Application names must be independent and must not contain the platform name Jora.");
   }
   const nameStyle = options.nameStyle || "balanced";
   if (!NAME_STYLES.has(nameStyle)) {
@@ -185,11 +185,17 @@ export function composeJoraRequest(options = {}) {
   const naturalDomains = joinNatural(descriptors);
   const naturalActions = joinNatural(actionTerms).toLowerCase();
   const nameSuggestions = [
-    "Jora · " + shortTerms.join(" / "),
-    "Jora — " + naturalDomains + " Workspace",
-    "Jora | Workspace for " + naturalActions,
-    "Jora — " + formulaTerms.join(" + ")
+    shortTerms.join(" / ") + " Workspace",
+    naturalDomains + " Workspace",
+    "Workspace for " + naturalActions,
+    formulaTerms.join(" + ") + " Workspace"
   ];
+  const name = requestedName || nameSuggestions[NAME_STYLES.has(nameStyle)
+    ? ["compact", "balanced", "descriptive", "formula"].indexOf(nameStyle)
+    : 1];
+  if (!name || /jora/i.test(name)) {
+    throw new TypeError("A valid independent application name is required.");
+  }
 
   const graph = {
     topology: graphTopology,
@@ -200,7 +206,7 @@ export function composeJoraRequest(options = {}) {
   };
   const request = {
     schema: "reaper.jora.request.v1",
-    name: "Jora",
+    name,
     description,
     name_style: nameStyle,
     components: [...componentIds],
@@ -212,7 +218,7 @@ export function composeJoraRequest(options = {}) {
   };
 
   return Object.freeze({
-    name: "Jora",
+    name,
     formula,
     request,
     nameStyle,
