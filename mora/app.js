@@ -1022,6 +1022,9 @@ document.addEventListener("input", (event) => {
       const preview = owner.querySelector("[data-jora-preview]");
       if (exportButton) exportButton.disabled = true;
       if (preview) preview.textContent = "Параметры изменены. Сформируйте формулу заново перед экспортом.";
+      const variationValue = owner.querySelector("[data-jora-variation-value]");
+      const variationInput = owner.querySelector("[data-jora-variation]");
+      if (variationValue && variationInput) variationValue.textContent = variationInput.value + "%";
     }
     return;
   }
