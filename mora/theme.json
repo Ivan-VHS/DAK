@@ -1,7 +1,7 @@
 {
   "schema": "mora.theme.v1",
   "name": "DuckOS Black White Yellow",
-  "version": 2,
+  "version": 3,
   "palettes": {
     "duck": {
       "page": "#080808",
@@ -50,5 +50,22 @@
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },
-  "defaultPalette": "duck"
+  "defaultPalette": "duck",
+  "materials": {
+    "glass": {
+      "progressiveEnhancement": true,
+      "fallback": "#151515",
+      "strongFallback": "#080808",
+      "fillOpacity": 0.78,
+      "strongFillOpacity": 0.84,
+      "blurPx": 18,
+      "strongBlurPx": 22,
+      "mobileBlurPx": 10,
+      "mobileStrongBlurPx": 14,
+      "edge": "rgba(255,212,0,0.26)",
+      "maxConcurrentBlurLayers": 5,
+      "reducedTransparency": "opaque",
+      "forcedColors": "system"
+    }
+  }
 }
