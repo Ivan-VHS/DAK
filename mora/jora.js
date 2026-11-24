@@ -126,7 +126,7 @@ export function composeJoraRequest(options = {}) {
 
   const formula = componentIds.map((id) => COMPONENTS[id].name).join(" + ");
   const namingTerms = {
-    "text.editor": { short: "Docs", domain: "Documents", action: "Writing & Editing", formula: "Text" },
+    "text.editor": { short: "Docs", domain: "Documents", action: "Writing", formula: "Text" },
     "audio.editor": { short: "Audio", domain: "Media", action: "Audio Editing", formula: "Audio" },
     "translation.workspace": { short: "Translate", domain: "Languages", action: "Translation", formula: "Translation" }
   };
