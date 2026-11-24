@@ -144,6 +144,15 @@ def main(argv: list[str] | None = None) -> int:
     reaper_check.add_argument("source", type=Path)
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
+    reaper_build = reaper_commands.add_parser(
+        "build", help="build a host executable from Reaper's supported native AOT subset"
+    )
+    reaper_build.add_argument("source", type=Path)
+    reaper_build.add_argument("--output", type=Path, required=True)
+    reaper_build.add_argument("--optimization", choices=("0", "1", "2", "3", "s"), default="2")
+    reaper_commands.add_parser(
+        "target-check", help="run the fixed DuckOS boot-info v1 reference/AOT conformance matrix"
+    )
 
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
@@ -296,6 +305,16 @@ def main(argv: list[str] | None = None) -> int:
                 result = workbench.typecheck(args.source)
                 _print_result(result)
                 return 0 if result["ok"] else 1
+            elif args.reaper_command == "build":
+                result = workbench.build_native(
+                    args.source,
+                    args.output,
+                    optimization=args.optimization,
+                )
+                _print_result(result)
+                return 0 if result["ok"] else 1
+            elif args.reaper_command == "target-check":
+                result = workbench.check_duckos_target()
             else:
                 raise ValueError("unknown Reaper workbench command")
         else:
