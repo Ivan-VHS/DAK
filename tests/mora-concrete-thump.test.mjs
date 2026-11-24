@@ -14,6 +14,12 @@ import {
   validateAudioSampleFile
 } from "../mora/concrete-thump.js";
 
+import {
+  playConcreteThump,
+  renderConcreteThumpWav,
+  stopConcreteThump
+} from "../mora/concrete-thump-audio.js";
+
 class MemoryStorage {
   constructor() {
     this.values = new Map();
@@ -25,6 +31,12 @@ class MemoryStorage {
     this.values.set(key, String(value));
   }
 }
+
+test("the browser audio module exposes playback, stop and four-bar WAV exports", () => {
+  assert.equal(typeof playConcreteThump, "function");
+  assert.equal(typeof stopConcreteThump, "function");
+  assert.equal(typeof renderConcreteThumpWav, "function");
+});
 
 test("the default ritual profile targets heavyweight East Slavic trap at 160 BPM", () => {
   const profile = createDefaultConcreteThumpProfile();
