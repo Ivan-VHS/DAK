@@ -1,0 +1,37 @@
+# Task-oriented workspace layout policy; the native host owns actual widgets.
+
+export craft layout_for(context) {
+    when context == "log.anomaly" {
+        yield "timeline-diff"
+    }
+    when context == "schema.design" {
+        yield "schema-canvas"
+    }
+    when context == "audio.mix" {
+        yield "waveform-mixer"
+    }
+    when context == "device.inspect" {
+        yield "device-graph"
+    }
+    yield "balanced-workspace"
+}
+
+export craft panels_for(context) {
+    when context == "log.anomaly" {
+        yield ["timeline", "diff", "filters", "lineage"]
+    }
+    when context == "schema.design" {
+        yield ["canvas", "schema-inspector", "validation"]
+    }
+    when context == "audio.mix" {
+        yield ["waveform", "meters", "routing", "presets"]
+    }
+    when context == "device.inspect" {
+        yield ["device-graph", "telemetry", "driver-evidence"]
+    }
+    yield ["navigation", "workspace", "inspector"]
+}
+
+export craft focus_valid(context, focused_item) {
+    yield context != "" and focused_item != ""
+}

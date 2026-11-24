@@ -19,6 +19,16 @@ import "duckos/system/three_media.rpr" as media
 import "duckos/system/telemetry.rpr" as telemetry
 import "duckos/ui/theme.rpr" as theme
 import "duckos/ui/motion.rpr" as motion
+import "duckos/storage/history.rpr" as history
+import "duckos/ui/workspace.rpr" as workspace
+import "duckos/system/prefetch.rpr" as prefetch
+import "duckos/ui/config.rpr" as config
+import "duckos/system/recovery.rpr" as recovery
+import "duckos/ui/physics.rpr" as physics
+import "duckos/ui/command_palette.rpr" as palette
+import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
+import "duckos/ui/canvas.rpr" as canvas
+import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
@@ -174,4 +184,81 @@ assert(desktop["background_state"](25, 4) == "review", "high CPU use is flagged"
 assert(desktop["background_state"](4, 11) == "review", "high memory use is flagged")
 assert(desktop["background_state"](101, 0) == "invalid", "out-of-range metrics are rejected")
 
+
+make history_root := [1, 0, "main", "create", "initial"]
+make history_row_a := history["append_revision"]([history_root], 2, 1, "main", "edit", "first")
+make history_row_b := history["append_revision"](history_row_a[1], 3, 1, "experiment", "branch", "alternate")
+assert(history["history_valid"](history_row_b[1]), "branched state history keeps parent links valid")
+assert(history_row_b[0] == "appended", "history branch can be appended from an older revision")
+assert(history["checkout"](history_row_b[1], 3)[1][2] == "experiment", "time travel checks out the selected branch")
+assert(history["append_revision"](history_row_b[1], 5, 4, "main", "edit", "bad")[0] == "missing-parent", "history refuses unknown parents")
+assert(history["branch_from"](history_row_b[1], 1, "sandbox") == "ready", "history can branch from a prior state")
+
+assert(workspace["layout_for"]("log.anomaly") == "timeline-diff", "anomaly analysis selects timeline and diff")
+assert(workspace["layout_for"]("schema.design") == "schema-canvas", "schema design gets a canvas-first layout")
+assert(workspace["focus_valid"]("schema.design", "node-17"), "spatial focus is bound to a real item")
+
+make navigation_history := ["schema.design", "log.anomaly", "schema.design"]
+assert(prefetch["prefetch_decision"](navigation_history, "schema.design", 100, 1000) == "warm-cache-only", "predictive prefetch warms cache after repeated intent")
+assert(prefetch["prefetch_decision"](navigation_history, "logs.export", 100, 1000) == "skip", "unproven speculation is skipped")
+assert(prefetch["prefetch_decision"](navigation_history, "schema.design", 1000, 1000) == "defer", "prefetch respects cache budget")
+assert(not prefetch["speculative_effect_allowed"]("write-file"), "speculative execution cannot mutate authoritative data")
+
+make bpm_schema := ["audio.bpm", "number", 40, 240]
+assert(config["numeric_schema_valid"](bpm_schema), "visual inspector accepts a valid numeric schema")
+assert(config["numeric_value_valid"](bpm_schema, 120), "visual inspector accepts an in-range value")
+assert(not config["numeric_value_valid"](bpm_schema, 999), "visual inspector rejects out-of-range values")
+assert(config["enum_value_valid"]("dark", ["dark", "light"]), "enum inspector accepts declared values")
+assert(not config["enum_value_valid"]("neon", ["dark", "light"]), "enum inspector rejects undeclared values")
+assert(config["inspector_feedback"](false) == ["invalid", "commit-denied"], "invalid configuration cannot be committed")
+
+assert(recovery["recovery_mode"](100, 1000, true, true) == "normal", "healthy system remains in normal mode")
+assert(recovery["recovery_mode"](950, 1000, true, true) == "reduce-quality-and-snapshot", "memory pressure requests a snapshot and degraded quality")
+assert(recovery["recovery_mode"](400, 1000, true, false) == "snapshot-cpu-renderer", "renderer failure falls back to a low-graphics path")
+assert(recovery["recovery_mode"](400, 1000, false, true) == "emergency-snapshot-lite", "device failure enters emergency mode")
+assert(recovery["restore_policy"](true, false, true) == "quarantine", "corrupt snapshots are quarantined")
+assert(recovery["restore_policy"](true, true, false) == "migration-required", "unknown snapshot schemas require migration")
+
+make spring_result := physics["spring_step"](0, 0, 1, 100, 20, 1, 0.01)
+assert(spring_result[0] == "stepped" and spring_result[1] > 0 and spring_result[2] > 0, "spring physics preserves motion velocity")
+assert(physics["spring_step"](0, 0, 1, 100, 20, 1, 0.5)[0] == "invalid", "spring physics clamps large frame deltas")
+assert(not physics["motion_allowed"](true, false), "reduced motion disables spring effects")
+
+assert(palette["intent_provider"]() == "deterministic-fallback", "palette has a local fallback until SLM host is installed")
+assert(palette["model_transport_policy"]() == "local-only", "command intent never requires cloud transport")
+assert(palette["resolve_intent"]("optimize this node", "graph.node.17") == "graph.optimize-focused-node", "natural language fallback binds intent to the focused node")
+assert(palette["resolve_intent"]("optimize this node", "") == "unresolved", "spatial command requires a focused object")
+
+make plugin_grants := ["telemetry.read", "workspace.read"]
+make valid_wasm_plugin := ["metrics.panel", "wasm-component", 500, 64, "verified", ["telemetry.read"]]
+make unsafe_wasm_plugin := ["metrics.panel", "wasm-component", 500, 64, "verified", ["driver.write"]]
+assert(plugin_sandbox["plugin_admission"](valid_wasm_plugin, plugin_grants) == "sandbox-eligible", "bounded Wasm package passes admission policy")
+assert(plugin_sandbox["plugin_admission"](unsafe_wasm_plugin, plugin_grants) == "reject", "plugin cannot amplify host capabilities")
+assert(plugin_sandbox["host_required"]() == "wasmtime-or-equivalent-component-host", "plugin isolation requires a real component host")
+
+make canvas_caps := ["canvas.dx12", "canvas.metal"]
+assert(canvas["choose_canvas_backend"](canvas_caps) == "directx12", "canvas selects the first supported platform backend")
+assert(canvas["choose_canvas_backend"]([]) == "cpu-fallback", "canvas has a safe CPU fallback")
+assert(canvas["frame_budget_microseconds"](120) > 0, "canvas frame budget is derived from target rate")
+assert(canvas["frame_budget_microseconds"](500) == -1, "canvas rejects unsupported frame-rate targets")
+
+
+make keyboard_event := ["keyboard", "shortcut", "node-17", 40, 80, 0, 0.99, 1000, "local", true]
+make voice_event := ["voice", "utterance", "node-17", 40, 80, 0, 0.91, 1030, "local", true]
+make remote_voice_event := ["voice", "utterance", "node-17", 40, 80, 0, 0.91, 1030, "remote", true]
+make stylus_event := ["stylus", "tap", "node-17", 41, 82, 0.6, 0.96, 1040, "local", true]
+assert(spatial_input["input_event_valid"](keyboard_event), "keyboard event passes local spatial admission")
+assert(spatial_input["input_event_valid"](voice_event), "opted-in voice event passes local admission")
+assert(not spatial_input["input_event_valid"](remote_voice_event), "voice event cannot leave the local privacy boundary")
+assert(spatial_input["multimodal_pair_valid"](voice_event, stylus_event, 80), "voice and stylus events can be fused within a bounded time window")
+assert(not spatial_input["multimodal_pair_valid"](voice_event, stylus_event, 5), "distant modalities are not combined")
+make mismatched_stylus := ["stylus", "tap", "node-22", 41, 82, 0.6, 0.96, 1040, "local", true]
+assert(not spatial_input["multimodal_pair_valid"](voice_event, mismatched_stylus, 80), "fusion refuses conflicting spatial targets")
+assert(spatial_input["resolve_spatial_intent"](voice_event, "optimize this node", "") == ["dispatch", "graph.optimize-focused-node", "node-17"], "voice command resolves against its screen anchor")
+make unanchored_voice := ["voice", "utterance", "", 0, 0, 0, 0.91, 1030, "local", true]
+assert(spatial_input["resolve_spatial_intent"](unanchored_voice, "optimize this node", "node-9") == ["dispatch", "graph.optimize-focused-node", "node-9"], "voice command can bind to the focused node")
+make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local", true]
+assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
+make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
+assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
 emit "DUCKOS_REAPER_CONTRACTS_OK"

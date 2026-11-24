@@ -1,0 +1,26 @@
+# Offline command-intent fallback. No network or hidden cloud inference.
+# An optional local SLM can be attached by a separately audited model host.
+
+export craft intent_provider() {
+    yield "deterministic-fallback"
+}
+
+export craft model_transport_policy() {
+    yield "local-only"
+}
+
+export craft resolve_intent(query, focused_item) {
+    when query == "open project" {
+        yield "project.open"
+    }
+    when query == "show timeline" {
+        yield "timeline.show"
+    }
+    when query == "inspect anomalies" {
+        yield "logs.inspect-anomalies"
+    }
+    when query == "optimize this node" and focused_item != "" {
+        yield "graph.optimize-focused-node"
+    }
+    yield "unresolved"
+}

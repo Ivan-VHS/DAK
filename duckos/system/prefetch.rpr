@@ -1,0 +1,29 @@
+# Predictive prefetch is cache-only and budget-gated.
+# It must never execute commands or mutate authoritative state speculatively.
+
+export craft occurrences(history, candidate) {
+    vary count := 0
+    each action in history {
+        when action == candidate {
+            change count := count + 1
+        }
+    }
+    yield count
+}
+
+export craft prefetch_decision(history, candidate, cache_used, cache_budget) {
+    when candidate == "" or cache_budget <= 0 or cache_used < 0 {
+        yield "invalid"
+    }
+    when cache_used >= cache_budget {
+        yield "defer"
+    }
+    when occurrences(history, candidate) >= 2 {
+        yield "warm-cache-only"
+    }
+    yield "skip"
+}
+
+export craft speculative_effect_allowed(effect) {
+    yield effect == "read-cache" or effect == "compile-cache"
+}

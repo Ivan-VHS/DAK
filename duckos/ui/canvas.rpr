@@ -1,0 +1,31 @@
+# Backend selection contract. Rendering is owned by native platform adapters.
+
+export craft backend_available(capabilities, backend) {
+    vary found := false
+    each capability in capabilities {
+        when capability == backend {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft choose_canvas_backend(capabilities) {
+    when backend_available(capabilities, "canvas.webgpu") {
+        yield "webgpu"
+    }
+    when backend_available(capabilities, "canvas.dx12") {
+        yield "directx12"
+    }
+    when backend_available(capabilities, "canvas.metal") {
+        yield "metal"
+    }
+    yield "cpu-fallback"
+}
+
+export craft frame_budget_microseconds(target_fps) {
+    when target_fps < 30 or target_fps > 240 {
+        yield -1
+    }
+    yield 1000000 / target_fps
+}

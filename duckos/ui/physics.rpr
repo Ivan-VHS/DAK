@@ -1,0 +1,28 @@
+# Bounded semi-implicit spring step with preserved velocity.
+# The compositor caps real frame deltas and applies reduced-motion preferences.
+
+export craft spring_step(position, velocity, target, stiffness, damping, mass, delta_seconds) {
+    when stiffness <= 0 {
+        yield ["invalid"]
+    }
+    when damping < 0 {
+        yield ["invalid"]
+    }
+    when mass <= 0 {
+        yield ["invalid"]
+    }
+    when delta_seconds <= 0 {
+        yield ["invalid"]
+    }
+    when delta_seconds > 0.032 {
+        yield ["invalid"]
+    }
+    make acceleration := (-stiffness * (position - target) - damping * velocity) / mass
+    make next_velocity := velocity + acceleration * delta_seconds
+    make next_position := position + next_velocity * delta_seconds
+    yield ["stepped", next_position, next_velocity]
+}
+
+export craft motion_allowed(reduced_motion, eco_visuals) {
+    yield not reduced_motion and not eco_visuals
+}

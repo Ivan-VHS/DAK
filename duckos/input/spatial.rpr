@@ -1,0 +1,115 @@
+# Spatial and multimodal input admission policy.
+# The native host supplies actual keyboard/trackpad/stylus/microphone events.
+# Voice intent stays local and requires explicit user opt-in.
+
+export craft input_source_allowed(source) {
+    when source == "keyboard" {
+        yield true
+    }
+    when source == "trackpad" {
+        yield true
+    }
+    when source == "stylus" {
+        yield true
+    }
+    when source == "voice" {
+        yield true
+    }
+    yield false
+}
+
+export craft input_event_valid(event) {
+    when size(event) != 10 {
+        yield false
+    }
+    when not input_source_allowed(event[0]) {
+        yield false
+    }
+    when event[1] == "" {
+        yield false
+    }
+    when event[3] < 0 {
+        yield false
+    }
+    when event[4] < 0 {
+        yield false
+    }
+    when event[5] < 0 {
+        yield false
+    }
+    when event[5] > 1 {
+        yield false
+    }
+    when event[6] < 0 {
+        yield false
+    }
+    when event[6] > 1 {
+        yield false
+    }
+    when event[7] < 0 {
+        yield false
+    }
+    when event[8] != "local" {
+        yield false
+    }
+    when event[0] == "voice" and event[9] != true {
+        yield false
+    }
+    yield true
+}
+
+export craft input_time_delta(first_ms, second_ms) {
+    when first_ms >= second_ms {
+        yield first_ms - second_ms
+    }
+    yield second_ms - first_ms
+}
+
+export craft multimodal_pair_valid(first, second, window_ms) {
+    when not input_event_valid(first) {
+        yield false
+    }
+    when not input_event_valid(second) {
+        yield false
+    }
+    when window_ms <= 0 {
+        yield false
+    }
+    when window_ms > 250 {
+        yield false
+    }
+    when input_time_delta(first[7], second[7]) > window_ms {
+        yield false
+    }
+    when first[2] != "" {
+        when second[2] != "" {
+            when first[2] != second[2] {
+                yield false
+            }
+        }
+    }
+    yield true
+}
+
+export craft resolve_spatial_intent(event, command, focused_target) {
+    when not input_event_valid(event) {
+        yield ["reject", "invalid-input"]
+    }
+    when command == "" {
+        yield ["reject", "empty-command"]
+    }
+    vary target := event[2]
+    when target == "" {
+        change target := focused_target
+    }
+    when command == "optimize this node" {
+        when target == "" {
+            yield ["reject", "missing-spatial-target"]
+        }
+        when event[6] < 0.75 {
+            yield ["reject", "low-intent-confidence"]
+        }
+        yield ["dispatch", "graph.optimize-focused-node", target]
+    }
+    yield ["dispatch", command, target]
+}
