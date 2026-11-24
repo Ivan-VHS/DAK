@@ -7,6 +7,7 @@
 
 #include "serial.h"
 #include "initramfs.h"
+#include "security_api.h"
 
 __attribute__((used, section(".limine_requests")))
 static volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
@@ -132,7 +133,9 @@ static void report_memory_map(void)
 _Noreturn void kmain(void)
 {
     serial_init();
+    duckos_kernel_security_init();
     serial_write("\nDuckOS kernel bring-up\n");
+    serial_write("[security] native BAV event/risk core initialised; sensor hooks pending\n");
     serial_write("----------------------\n");
 
     if (!LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision)) {
