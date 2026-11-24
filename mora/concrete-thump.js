@@ -214,7 +214,7 @@ export function buildConcreteThumpPrompt(value) {
   const identity = {
     "orthodox-liturgical": "Orthodox choir and sacred chant.",
     "east-slavic-folk": "East Slavic ritual folk choir and seasonal songs.",
-    layered: "Orthodox choir and chant; East Slavic ritual songs."
+    layered: "Orthodox male choir and chant; East Slavic ritual songs."
   }[profile.vocalTradition];
   const treatment = {
     "chopped-call-response": "Chopped choir call-response, hypnotic loops.",
