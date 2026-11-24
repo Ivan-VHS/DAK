@@ -20,6 +20,7 @@ from .desktop import DesktopService, audit_desktop
 from .image_layout import plan_image
 from .manifest import validate_manifest
 from .module_abi import resolve_load_order
+from .service_profiles import plan_service_startup
 from .deployment import build_release_bundle, create_deployment_plan, verify_release_bundle
 from .terminal import TerminalService, run_interactive
 
@@ -54,6 +55,15 @@ def main(argv: list[str] | None = None) -> int:
 
     modules = commands.add_parser("module-order", help="resolve static driver module dependencies")
     modules.add_argument("modules", type=Path)
+
+    services = commands.add_parser(
+        "service-plan",
+        help="validate service execution profiles and prepare a non-executing startup plan",
+    )
+    services.add_argument("profiles", type=Path, help="JSON file containing a services array")
+    services.add_argument("--max-concurrency", type=int, default=4096)
+    services.add_argument("--max-queued-jobs", type=int, default=65536)
+    services.add_argument("--max-memory-bytes", type=int, default=16 * 1024 * 1024 * 1024)
 
     inventory = commands.add_parser(
         "hardware-inventory", help="collect a read-only PCI/USB (Linux) or PnP (Windows) inventory"
@@ -227,6 +237,18 @@ def main(argv: list[str] | None = None) -> int:
                 "load_order": resolve_load_order(items),
                 "modules_loaded": False,
             }
+        elif args.command == "service-plan":
+            from .service_profiles import ServicePlanLimits
+            payload = _load(args.profiles)
+            items = payload.get("services") if isinstance(payload, dict) else payload
+            result = plan_service_startup(
+                items,
+                limits=ServicePlanLimits(
+                    max_total_concurrency=args.max_concurrency,
+                    max_total_queued_jobs=args.max_queued_jobs,
+                    max_total_memory_bytes=args.max_memory_bytes,
+                ),
+            )
         elif args.command == "hardware-inventory":
             result = collect_host_inventory(sysfs_root=args.sysfs_root)
             encoded = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
