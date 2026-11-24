@@ -11,7 +11,8 @@ class JoraFormulaTests(unittest.TestCase):
         ids=[item["id"] for item in PARAMETERS]
         self.assertEqual(len(ids),len(set(ids)))
         self.assertEqual(catalog_payload()["schema"],"jora.parameter-registry.v1")
-        self.assertGreaterEqual(sum(len(item["variants"]) for item in PARAMETERS),20)
+        self.assertGreaterEqual(len(PARAMETERS),20)
+        self.assertGreaterEqual(sum(len(item["variants"]) for item in PARAMETERS),50)
     def test_multilingual_formula_normalizes(self):
         components=normalize_formula("текстовый редактор + audio editor + переводчик")
         self.assertEqual([item["id"] for item in components],["text_editor","audio_editor","translator"])
@@ -25,12 +26,14 @@ class JoraFormulaTests(unittest.TestCase):
         app=build_application("text editor + audio editor + translator")
         self.assertEqual(app["manifest"]["app"]["display_name"],"Слововолна")
         self.assertIn("source/main.rpr",app["files"])
-    def test_large_graph_uses_cluster_gateways_and_bounded_local_edges(self):
-        seed=normalize_formula("text editor + audio editor + translator")
-        components=[dict(item,id=f"{item['id']}_{n}",name=f"{item['name']} {n}") for n in range(1,8) for item in seed]
-        graph=build_graph(components)
-        self.assertEqual(graph["topology"],"clustered-hub")
-        self.assertLessEqual(len(graph["edges"]),len(components)*3+len(graph["clusters"]))
+    def test_real_catalogue_supports_large_clustered_formulas(self):
+        formula = "text editor + audio editor + translator + subtitles + notes + task board + calendar + text to speech + speech to text + code editor + spreadsheet + image editor + video editor"
+        components = normalize_formula(formula)
+        self.assertEqual(len(components), 13)
+        graph = build_graph(components)
+        self.assertEqual(graph["topology"], "clustered-hub")
+        self.assertLessEqual(len(graph["edges"]), len(components) * 3 + len(graph["clusters"]))
+        self.assertGreaterEqual(len(graph["clusters"]), 5)
 
 class JoraPackageTests(unittest.TestCase):
     def test_directory_and_zip_packages_validate(self):
