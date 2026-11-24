@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 import subprocess
 import sys
@@ -11,6 +12,18 @@ from pathlib import Path
 from unittest.mock import patch
 
 from duckos.cli import main
+
+
+class FakePipeProcess:
+    def __init__(self, *, returncode=0, stdout="", stderr=""):
+        self.returncode = returncode
+        self.stdout = io.BytesIO(stdout.encode("utf-8"))
+        self.stderr = io.BytesIO(stderr.encode("utf-8"))
+        self.wait_timeout = None
+
+    def wait(self, timeout=None):
+        self.wait_timeout = timeout
+        return self.returncode
 
 
 class ReaperCliTests(unittest.TestCase):
@@ -51,7 +64,12 @@ class ReaperCliTests(unittest.TestCase):
             args=[], returncode=1,
             stdout=json.dumps(payload), stderr="",
         )
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed):
+        process = FakePipeProcess(
+            returncode=completed.returncode,
+            stdout=completed.stdout or "",
+            stderr=completed.stderr or "",
+        )
+        with patch("duckos.desktop.reaper.subprocess.Popen", return_value=process):
             code, output = self.invoke("reaper", "--root", str(self.root), "check", str(self.source))
         self.assertEqual(code, 1)
         self.assertEqual(json.loads(output)["result"], payload)
@@ -72,7 +90,12 @@ class ReaperCliTests(unittest.TestCase):
         completed = subprocess.CompletedProcess(
             args=[], returncode=4, stdout='{"ok": false, "exit_code": 4}', stderr=""
         )
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+        process = FakePipeProcess(
+            returncode=completed.returncode,
+            stdout=completed.stdout or "",
+            stderr=completed.stderr or "",
+        )
+        with patch("duckos.desktop.reaper.subprocess.Popen", return_value=process) as run:
             code, output = self.invoke(
                 "reaper", "--root", str(self.root), "run", str(self.source),
                 "--steps", "700", "--heap-bytes", "4096",
@@ -93,7 +116,12 @@ class ReaperCliTests(unittest.TestCase):
             stdout=json.dumps({"ok": True, "mode": "native", "executable": str(destination)}),
             stderr="",
         )
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+        process = FakePipeProcess(
+            returncode=completed.returncode,
+            stdout=completed.stdout or "",
+            stderr=completed.stderr or "",
+        )
+        with patch("duckos.desktop.reaper.subprocess.Popen", return_value=process) as run:
             code, output = self.invoke(
                 "reaper", "--root", str(self.root), "native",
                 str(self.source), "--output", str(destination),
@@ -112,7 +140,12 @@ class ReaperCliTests(unittest.TestCase):
             stdout='{"schema":"reaper.toolchain-inventory.v1","tools":[]}',
             stderr="",
         )
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+        process = FakePipeProcess(
+            returncode=completed.returncode,
+            stdout=completed.stdout or "",
+            stderr=completed.stderr or "",
+        )
+        with patch("duckos.desktop.reaper.subprocess.Popen", return_value=process) as run:
             code, output = self.invoke("reaper", "--root", str(self.root), "toolchain")
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(output)["result"]["schema"], "reaper.toolchain-inventory.v1")
@@ -121,7 +154,12 @@ class ReaperCliTests(unittest.TestCase):
     def test_reaper_lsp_protocol_uses_inherited_stdio(self):
         (self.root / "reaper" / "lsp.py").write_text("def serve():\\n    pass\\n", encoding="utf-8")
         completed = subprocess.CompletedProcess(args=[], returncode=0)
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+        process = FakePipeProcess(
+            returncode=completed.returncode,
+            stdout=completed.stdout or "",
+            stderr=completed.stderr or "",
+        )
+        with patch("duckos.desktop.reaper.subprocess.Popen", return_value=process) as run:
             code, output = self.invoke("reaper", "--root", str(self.root), "lsp")
         self.assertEqual(code, 0)
         self.assertEqual(output, "")
