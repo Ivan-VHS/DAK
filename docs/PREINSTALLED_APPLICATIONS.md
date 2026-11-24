@@ -5,7 +5,7 @@
 **Maturity:** `specified`  
 **Distribution intent:** seven default applications in the DuckOS product design
 
-This document defines the intended roles, first-scope capabilities and cross-application workflows for 20 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
+This document defines the intended roles, first-scope capabilities and cross-application workflows for 21 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
 
 The machine-readable inventory is maintained in [`preinstalled-applications.v1.json`](../catalogs/preinstalled-applications.v1.json). The separate DAK package-design catalog is [`dak-base-applications.v1.yaml`](../catalogs/dak-base-applications.v1.yaml). Shared terminology and maturity rules come from the [Ivan-VHS Unified Documentation and Semantics Standard](UNIFIED_DOCUMENTATION_STANDARD.md).
 
@@ -20,6 +20,7 @@ The machine-readable inventory is maintained in [`preinstalled-applications.v1.j
 | **Po** | Web browser | Browse with vertical tabs, reading mode, tracker protection and command-capable address bar |
 | **Illidia** | Games | Manage games, saves, clips, achievements and focused play sessions |
 | **Unify** | Device connectivity | Connect devices for clipboard, notifications, file transfer and state continuity |
+| **Jora** | Application synthesis and catalogue | Compose app formulas, generate Reaper-first source packages and manage a local verified-preview catalogue |
 | **Sestem** | System overview | Show documented shell status and subsystem maturity |
 | **SetupUP** | First-run setup | Choose Mora theme and record completion of local setup |
 | **Orriganize** | Projects and tasks | Keep lightweight local project and task lists |
@@ -297,3 +298,27 @@ These are local prototype workflows. They do not establish a system-wide event b
 The browser prototype uses the versioned [`unify.transfer.v1`](UNIFY_TRANSFER_FORMAT_V1.md) JSON-file contract for manual transfer of selected Po tabs, Illidia clips and selected local settings. The format is validated by [`schemas/unify.transfer.v1.schema.json`](../schemas/unify.transfer.v1.schema.json).
 
 The prototype enforces a 20 MiB package limit, a 12 MiB per-clip limit, and bounds on tab and clip counts. This is a user-mediated file hand-off, not authenticated pairing or live synchronization.
+
+
+## Jora — formula-driven application synthesis
+
+**Maturity:** partial user-space implementation.
+
+Jora is available from the Mora application grid and the native DuckOS CLI. Formula Studio resolves Russian and English aliases against the versioned component registry, detects duplicate/conflicting components, proposes an independent application identity, previews a bounded integration graph and explains the language plan. The browser panel stores local formula drafts; it does not launch processes.
+
+Native workflow:
+
+```sh
+duckos jora status
+duckos jora formula "текстовый редактор + аудиоредактор + переводчик"
+duckos jora create --formula "текстовый редактор + аудиоредактор + переводчик" --output ./slovovolna.jora
+duckos jora verify ./slovovolna.jora
+duckos jora publish ./slovovolna.jora --channel experimental
+duckos jora catalog
+```
+
+The generator writes a versioned source-first package with a Reaper .rpr entry point, formula and integration graph, selected language plan, synthetic demo content, a store-listing draft, README and SHA-256 inventory. Verification checks package paths and hashes, syntax-checks supported helper languages when their compiler exists, and requests a static Reaper CLI check when the pinned Reaper checkout is available.
+
+The current Jora catalogue is a local per-user registry. Supported channels are experimental and verified_preview; verified_preview requires a successful Reaper static check. There is no public server, stable-release pipeline, native installer, system package manager, kernel execution or boot-image integration. A Reaper reference-runtime static check is not native compilation or a full application runtime.
+
+The canonical registry currently contains 25 base components. The larger 666-variation catalogue is not yet imported as 666 independently implemented variation records; it remains future catalogue expansion. See [Jora integration](JORA_INTEGRATION.md).

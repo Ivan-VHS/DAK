@@ -4,7 +4,7 @@
   "operating_system": "DuckOS",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
+  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion. Jora is implemented as a partial user-space formula studio and source-package CLI; it is not a native OS package manager or public store.",
   "applications": [
     {
       "id": "cockos",
@@ -166,66 +166,38 @@
       ]
     },
     {
-      "id": "sestem",
-      "name": "Sestem",
-      "domain": "system_overview",
-      "maturity_status": "specified",
+      "id": "jora",
+      "name": "Jora",
+      "domain": "application_store_and_source_synthesis",
+      "maturity_status": "partial",
+      "concepts": [
+        "formula_composition",
+        "reaper_first_codegen",
+        "bounded_polyglot_selection",
+        "local_app_catalog"
+      ],
       "capabilities": [
-        "shell_health_summary",
-        "subsystem_maturity_view",
-        "shortcuts_to_system_tools"
+        "component_formula_parser",
+        "bounded_integration_graph",
+        "language_toolchain_selection",
+        "reaper_source_package_generation",
+        "package_sha256_validation",
+        "local_experimental_catalog"
       ],
       "boundaries": [
-        "Reports documented shell and project states only",
-        "Does not read native hardware sensors or claim kernel health"
+        "Mora browser interface previews formulas and stores drafts only in the current browser profile",
+        "Native duckos jora CLI creates source-first packages and performs bounded static checks",
+        "Reaper reference-runtime static checking does not prove native compilation or executable runtime behavior",
+        "Local catalog publication is limited to experimental and verified_preview channels",
+        "No public store backend, native application installer, kernel service or boot-image integration is provided"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
       "prototype_evidence": [
         "mora/index.html",
-        "mora/app.js"
-      ]
-    },
-    {
-      "id": "setupup",
-      "name": "SetupUP",
-      "domain": "first_run_setup",
-      "maturity_status": "specified",
-      "capabilities": [
-        "theme_selection",
-        "workspace_preferences",
-        "setup_completion_marker"
-      ],
-      "boundaries": [
-        "Changes Mora browser-profile preferences only",
-        "Not an OS installer, disk partitioner or bootloader configurator"
-      ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
-    },
-    {
-      "id": "orriganize",
-      "name": "Orriganize",
-      "domain": "projects_tasks",
-      "maturity_status": "specified",
-      "capabilities": [
-        "local_project_lists",
-        "task_capture",
-        "manual_item_removal"
-      ],
-      "boundaries": [
-        "Entries remain in the current browser profile",
-        "No OS scheduler, account sync or shared collaboration"
-      ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
+        "mora/jora.js",
+        "duckos/jora/engine.py",
+        "duckos/jora/packages.py"
       ]
     },
     {
@@ -241,27 +213,6 @@
       "boundaries": [
         "Reads selected file metadata only",
         "Does not extract archives, execute embedded files or scan for malware"
-      ],
-      "naming_review": "not_assessed",
-      "prototype_status": "partial",
-      "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
-      ]
-    },
-    {
-      "id": "olaab",
-      "name": "Olaab",
-      "domain": "media_collections",
-      "maturity_status": "specified",
-      "capabilities": [
-        "local_album_labels",
-        "media_tag_lists",
-        "collection_notes"
-      ],
-      "boundaries": [
-        "Stores text references and labels only",
-        "Does not duplicate source media or provide cloud media sync"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
@@ -292,18 +243,39 @@
       ]
     },
     {
-      "id": "seu-beu",
-      "name": "Seu-Beu",
-      "domain": "sharing_review",
+      "id": "exedotexe",
+      "name": "EXEdotEXE",
+      "domain": "executable_inspection",
       "maturity_status": "specified",
       "capabilities": [
-        "recipient_checklist",
-        "content_scope_checklist",
-        "retention_checklist"
+        "pe_elf_header_inspection",
+        "local_sha256_report",
+        "bounded_user_selected_file"
       ],
       "boundaries": [
-        "Provides a user-operated review checklist only",
-        "Does not encrypt, authenticate recipients or enforce OS permissions"
+        "Inspects a user-selected file in the browser",
+        "Not an antivirus, publisher-signature validator or EXE runtime"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "gamecharager",
+      "name": "GameCharager",
+      "domain": "game_library",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_game_profiles",
+        "executable_header_inspection",
+        "game_notes"
+      ],
+      "boundaries": [
+        "Game entries and diagnostics remain local",
+        "Does not launch executables, install drivers or manage anti-cheat"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
@@ -325,6 +297,69 @@
       "boundaries": [
         "Journal text stays in the current browser profile",
         "No cloud sync, medical advice or secure-vault claim"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "olaab",
+      "name": "Olaab",
+      "domain": "media_collections",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_album_labels",
+        "media_tag_lists",
+        "collection_notes"
+      ],
+      "boundaries": [
+        "Stores text references and labels only",
+        "Does not duplicate source media or provide cloud media sync"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "orriganize",
+      "name": "Orriganize",
+      "domain": "projects_tasks",
+      "maturity_status": "specified",
+      "capabilities": [
+        "local_project_lists",
+        "task_capture",
+        "manual_item_removal"
+      ],
+      "boundaries": [
+        "Entries remain in the current browser profile",
+        "No OS scheduler, account sync or shared collaboration"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js"
+      ]
+    },
+    {
+      "id": "po-2",
+      "name": "Po-2",
+      "domain": "manual_route_planning",
+      "maturity_status": "specified",
+      "capabilities": [
+        "manual_stop_list",
+        "ordered_waypoints",
+        "local_route_notes"
+      ],
+      "boundaries": [
+        "User enters stop names manually",
+        "No GPS, live maps, navigation or location tracking"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
@@ -376,18 +411,18 @@
       ]
     },
     {
-      "id": "po-2",
-      "name": "Po-2",
-      "domain": "manual_route_planning",
+      "id": "sestem",
+      "name": "Sestem",
+      "domain": "system_overview",
       "maturity_status": "specified",
       "capabilities": [
-        "manual_stop_list",
-        "ordered_waypoints",
-        "local_route_notes"
+        "shell_health_summary",
+        "subsystem_maturity_view",
+        "shortcuts_to_system_tools"
       ],
       "boundaries": [
-        "User enters stop names manually",
-        "No GPS, live maps, navigation or location tracking"
+        "Reports documented shell and project states only",
+        "Does not read native hardware sensors or claim kernel health"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
@@ -397,18 +432,18 @@
       ]
     },
     {
-      "id": "gamecharager",
-      "name": "GameCharager",
-      "domain": "game_library",
+      "id": "setupup",
+      "name": "SetupUP",
+      "domain": "first_run_setup",
       "maturity_status": "specified",
       "capabilities": [
-        "local_game_profiles",
-        "executable_header_inspection",
-        "game_notes"
+        "theme_selection",
+        "workspace_preferences",
+        "setup_completion_marker"
       ],
       "boundaries": [
-        "Game entries and diagnostics remain local",
-        "Does not launch executables, install drivers or manage anti-cheat"
+        "Changes Mora browser-profile preferences only",
+        "Not an OS installer, disk partitioner or bootloader configurator"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
@@ -418,18 +453,18 @@
       ]
     },
     {
-      "id": "exedotexe",
-      "name": "EXEdotEXE",
-      "domain": "executable_inspection",
+      "id": "seu-beu",
+      "name": "Seu-Beu",
+      "domain": "sharing_review",
       "maturity_status": "specified",
       "capabilities": [
-        "pe_elf_header_inspection",
-        "local_sha256_report",
-        "bounded_user_selected_file"
+        "recipient_checklist",
+        "content_scope_checklist",
+        "retention_checklist"
       ],
       "boundaries": [
-        "Inspects a user-selected file in the browser",
-        "Not an antivirus, publisher-signature validator or EXE runtime"
+        "Provides a user-operated review checklist only",
+        "Does not encrypt, authenticate recipients or enforce OS permissions"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",

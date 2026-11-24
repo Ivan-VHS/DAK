@@ -30,17 +30,24 @@ class ApplicationCatalogTests(unittest.TestCase):
         expected = {
             "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
             "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "jora",
         }
         actual = {item["id"] for item in self.catalog["applications"]}
         self.assertEqual(actual, expected)
-        self.assertEqual(len(self.catalog["applications"]), 20)
+        self.assertEqual(len(self.catalog["applications"]), 21)
+
+    def test_jora_is_a_user_space_factory_with_explicit_boundaries(self) -> None:
+        app = next(item for item in self.catalog["applications"] if item["id"] == "jora")
+        self.assertIn("component_formula_parser", app["capabilities"])
+        self.assertTrue(any("No public store backend" in item for item in app["boundaries"]))
+        self.assertEqual(app["prototype_status"], "partial")
 
     def test_native_and_browser_maturity_are_not_conflated(self) -> None:
         self.assertEqual(self.catalog["maturity_status"], "specified")
         self.assertEqual(self.catalog["prototype"]["maturity_status"], "partial")
         for app in self.catalog["applications"]:
-            self.assertEqual(app["maturity_status"], "specified")
+            expected_maturity = "partial" if app["id"] == "jora" else "specified"
+            self.assertEqual(app["maturity_status"], expected_maturity)
             self.assertEqual(app["prototype_status"], "partial")
 
     def test_every_workflow_has_valid_endpoints_and_user_consent(self) -> None:

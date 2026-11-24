@@ -145,6 +145,23 @@ def main(argv: list[str] | None = None) -> int:
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
 
+    jora = commands.add_parser("jora", help="compose, synthesize, verify and locally catalogue Jora applications")
+    jora_commands = jora.add_subparsers(dest="jora_command", required=True)
+    jora_commands.add_parser("status", help="show Jora capabilities and the local Reaper toolchain")
+    jora_formula = jora_commands.add_parser("formula", help="analyze a component formula and print its graph and language plan")
+    jora_formula.add_argument("formula", help="quoted formula, for example 'текстовый редактор + аудиоредактор + переводчик'")
+    jora_formula.add_argument("--profile", choices=("desktop", "web", "cli", "source_only"), default="desktop")
+    jora_create = jora_commands.add_parser("create", help="generate a source-first .jora package directory")
+    jora_create.add_argument("--formula", required=True)
+    jora_create.add_argument("--output", required=True, type=Path)
+    jora_create.add_argument("--profile", choices=("desktop", "web", "cli", "source_only"), default="desktop")
+    jora_verify = jora_commands.add_parser("verify", help="validate package paths, hashes, helper syntax and Reaper source")
+    jora_verify.add_argument("package", type=Path)
+    jora_publish = jora_commands.add_parser("publish", help="register a package in the current user's local catalog")
+    jora_publish.add_argument("package", type=Path)
+    jora_publish.add_argument("--channel", choices=("experimental", "verified_preview"), default="experimental")
+    jora_catalog = jora_commands.add_parser("catalog", help="list applications in the current user's local Jora catalog")
+
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
     )
@@ -273,6 +290,42 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
+        elif args.command == "jora":
+            from .jora.engine import analyze_formula, normalize_formula
+            from .jora.packages import generate_package, list_catalog, publish_package, verify_package
+            from .jora.registry import COMPONENTS
+            if args.jora_command == "status":
+                from .desktop.reaper import ReaperWorkbench
+                workbench = ReaperWorkbench()
+                result = {
+                    "schema": "duckos.jora.status.v1",
+                    "status": "partial_user_space_implementation",
+                    "component_registry": "duckos.jora.component-registry.v1",
+                    "canonical_component_count": len(COMPONENTS),
+                    "reaper": workbench.inspect(),
+                    "store": "current_user_local_catalog",
+                    "public_store": False,
+                    "native_installer": False,
+                    "stable_channel": False,
+                }
+            elif args.jora_command == "formula":
+                current_catalog = list_catalog()
+                requested_hash = normalize_formula(args.formula)["formula_hash"]
+                existing_slugs = {
+                    item.get("slug") for item in current_catalog["applications"]
+                    if item.get("slug") and item.get("formula_hash") != requested_hash
+                }
+                result = analyze_formula(args.formula, profile=args.profile, existing_slugs=existing_slugs)
+            elif args.jora_command == "create":
+                result = generate_package(args.formula, args.output, profile=args.profile)
+            elif args.jora_command == "verify":
+                result = verify_package(args.package)
+            elif args.jora_command == "publish":
+                result = publish_package(args.package, channel=args.channel)
+            elif args.jora_command == "catalog":
+                result = list_catalog()
+            else:
+                raise ValueError("unknown Jora command")
         elif args.command == "reaper":
             from .desktop.reaper import ReaperWorkbench
 
