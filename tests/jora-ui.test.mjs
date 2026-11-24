@@ -8,21 +8,21 @@ test("Jora composes selected features into a deterministic product formula", () 
     locales: ["en", "ru", "uk", "most"],
     preferredLocale: "ru"
   });
-  assert.equal(result.name, "Jora");
+  assert.equal(result.name, "Documents, Media & Languages Workspace");
   assert.equal(result.formula, "Text Editor + Audio Editor + Translator");
   assert.deepEqual(result.request.components,
     ["text.editor", "audio.editor", "translation.workspace"]);
   assert.deepEqual(result.generatedLocales, ["en", "ru", "uk", "most"]);
   assert.equal(result.request.schema, "reaper.jora.request.v1");
-  assert.equal(result.request.name, "Jora");
+  assert.equal(result.request.name, "Documents, Media & Languages Workspace");
   assert.equal(result.request.language_targets, "auto");
   assert.equal(result.request.name_style, "balanced");
   assert.deepEqual(result.request.graph, { topology: "auto", objective: "balanced", seed: "", variants: 4, variation: 50 });
   assert.equal(result.nameSuggestions.length, 4);
-  assert.equal(result.nameSuggestions[0], "Jora · Docs / Audio / Translate");
-  assert.equal(result.nameSuggestions[1], "Jora — Documents, Media & Languages Workspace");
-  assert.equal(result.nameSuggestions[2], "Jora | Workspace for writing, audio editing & translation");
-  assert.ok(result.nameSuggestions.every((label) => label.startsWith("Jora")));
+  assert.equal(result.nameSuggestions[0], "Docs / Audio / Translate Workspace");
+  assert.equal(result.nameSuggestions[1], "Documents, Media & Languages Workspace");
+  assert.equal(result.nameSuggestions[2], "Workspace for writing, audio editing & translation");
+  assert.ok(result.nameSuggestions.every((label) => !/jora/i.test(label)));
 });
 
 test("Jora can mark additional compiler targets as pending adapters", () => {
@@ -37,14 +37,13 @@ test("Jora can mark additional compiler targets as pending adapters", () => {
   assert.deepEqual(result.request.language_targets, ["reaper", "java", "typescript"]);
 });
 
-test("Jora keeps its canonical name while allowing a locale subset", () => {
+test("Jora generates independent application names while allowing a locale subset", () => {
   const result = composeJoraRequest({
-    name: "Jora",
     components: ["text.editor"],
     locales: ["uk"],
     preferredLocale: "uk"
   });
-  assert.equal(result.name, "Jora");
+  assert.equal(result.name, "Documents Workspace");
   assert.equal(result.formula, "Text Editor");
   assert.deepEqual(result.request.locales, ["uk"]);
 });
@@ -82,12 +81,19 @@ test("Jora rejects unsupported graph and naming options", () => {
   assert.throws(() => composeJoraRequest({ ...base, graphSeed: "x".repeat(65) }), /exceeds 64/);
 });
 
-test("Jora refuses separately branded application names", () => {
-  assert.throws(() => composeJoraRequest({
-    name: "OtherProduct",
-    components: ["text.editor"],
+test("Jora accepts independent product names and rejects the platform name as an app name", () => {
+  const named = composeJoraRequest({
+    name: "Sonaris",
+    components: ["audio.editor"],
     locales: ["en"]
-  }), /fixed application name/);
+  });
+  assert.equal(named.name, "Sonaris");
+  assert.equal(named.request.name, "Sonaris");
+  assert.throws(() => composeJoraRequest({
+    name: "Jora Audio",
+    components: ["audio.editor"],
+    locales: ["en"]
+  }), /must not contain the platform name Jora/);
 });
 
 test("Jora rejects an empty feature selection and unknown components", () => {
@@ -137,7 +143,7 @@ test("Jora composes a 13-component formula without duplicating components", () =
   assert.equal(result.request.components.length, 13);
   assert.equal(result.request.language_targets, "auto");
   assert.equal(result.request.graph.topology, "plugin_mesh");
-  assert.ok(result.nameSuggestions.every((label) => label.startsWith("Jora")));
+  assert.ok(result.nameSuggestions.every((label) => !/jora/i.test(label)));
 });
 
 test("Jora accepts all 21 registered packs within the bounded formula limit", () => {
