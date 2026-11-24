@@ -221,7 +221,9 @@ function updateWorkspacePanel() {
       ? preferences.focusMode
       : preferences.appearance.reducedMotion;
     button.setAttribute("aria-pressed", String(enabled));
-    button.textContent = enabled ? "Включено" : "Выключено";
+    button.textContent = enabled
+      ? (currentLocale === "zh-CN" ? "已开启" : "Включено")
+      : (currentLocale === "zh-CN" ? "已关闭" : "Выключено");
   });
 }
 
