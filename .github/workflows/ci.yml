@@ -78,3 +78,23 @@ jobs:
           else
             echo "::notice::No native C/C++ source tree or build target exists in this DuckOS repository revision; native compilation is not applicable yet."
           fi
+
+  reaper-boot-contract:
+    name: Reaper / DuckOS boot-contract parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize the pinned Reaper source checkout
+        run: git submodule update --init projects/reaper
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Configure native contract and Reaper cross-language tests
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DDUCKOS_REAPER_SOURCE_DIR="$GITHUB_WORKSPACE/projects/reaper"
+          -DDUCKOS_ENABLE_REAPER_CONTRACT_TESTS=ON
+      - name: Build the DuckOS C contract and conformance runner
+        run: cmake --build build --parallel
+      - name: Run C, Reaper reference and Reaper native parity tests
+        run: ctest --test-dir build --output-on-failure
