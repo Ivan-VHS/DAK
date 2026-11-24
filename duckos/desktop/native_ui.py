@@ -295,7 +295,7 @@ class DesktopWindow:
         )
         if not folder:
             return
-        self.jora_output = Path(folder) / "Jora-Application"
+        self.jora_output = Path(folder) / "Jora"
         self.jora_output_text.set(str(self.jora_output))
 
     def _build_jora_app(self) -> None:
