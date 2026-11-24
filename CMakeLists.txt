@@ -53,7 +53,11 @@ if(BUILD_TESTING)
 
     if(DUCKOS_ENABLE_REAPER_CONTRACT_TESTS)
         find_package(Python3 COMPONENTS Interpreter QUIET)
-        if(Python3_Interpreter_FOUND AND EXISTS "${DUCKOS_REAPER_SOURCE_DIR}/reaper/__main__.py")
+        if(
+            Python3_Interpreter_FOUND
+            AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang"
+            AND EXISTS "${DUCKOS_REAPER_SOURCE_DIR}/reaper/__main__.py"
+        )
             add_test(
                 NAME duckos-reaper-boot-contract-parity
                 COMMAND ${Python3_EXECUTABLE}
@@ -63,7 +67,7 @@ if(BUILD_TESTING)
             )
             set_tests_properties(duckos-reaper-boot-contract-parity PROPERTIES TIMEOUT 240)
         else()
-            message(STATUS "Reaper boot-contract parity disabled: initialize projects/reaper or set DUCKOS_REAPER_SOURCE_DIR")
+            message(STATUS "Reaper boot-contract parity disabled: requires Python 3, a GCC/Clang-compatible C toolchain and an initialized Reaper checkout")
         endif()
     endif()
 endif()
