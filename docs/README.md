@@ -50,3 +50,7 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Capability completeness standard
 
 [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
+
+## Reaper language migration
+
+[Full DuckOS-to-Reaper migration blueprint](REAPER_DUCKOS_FULL_MIGRATION.md) defines the target architecture, compiler/runtime gates, kernel ABI, migration phases and completion criteria. [Module-by-module migration matrix](REAPER_DUCKOS_MIGRATION_MATRIX.md) maps current DuckOS and Reaper components to their target owners, contracts and tests. These are plans, not evidence that native kernel execution or bootable images already exist.

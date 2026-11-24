@@ -100,3 +100,7 @@ python -m unittest tests.test_reaper_integration tests.test_reaper_cli -v
 ```
 
 The tests use temporary fake Reaper checkouts and mocked subprocess boundaries. They verify discovery, capability detection, argument-vector construction, JSON result handling, timeouts, source validation and the native Studio launch handoff. They do not run Reaper source or claim kernel-level process isolation.
+
+## Full language migration
+
+The current workbench remains a bounded user-space process integration. The longer-term transition is specified in [the full DuckOS–Reaper migration blueprint](REAPER_DUCKOS_FULL_MIGRATION.md), with per-component tasks in [the migration matrix](REAPER_DUCKOS_MIGRATION_MATRIX.md). Those documents define compiler, runtime, ABI, kernel and service milestones; they do not change the current launcher into a native kernel integration.
