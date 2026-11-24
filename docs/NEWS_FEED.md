@@ -13,12 +13,12 @@ Gazette is a separate editorial reader in Mora. It does not reuse the OS notific
 | World | BBC World | https://feeds.bbci.co.uk/news/world/rss.xml |
 | Technology | BBC Technology | https://feeds.bbci.co.uk/news/technology/rss.xml |
 
-The source list is explicit and version-controlled in mora/news-feed.js. Gazette keeps publisher attribution beside each item and sends readers to the publisher's page for the full story. It displays short feed excerpts rather than reproducing full articles.
+The source list is explicit and version-controlled in mora/news-feed.js. Gazette keeps publisher attribution beside each item and sends readers to the publisher's page for the full story. It displays only the publisher-provided description/summary, capped at 280 characters. It does not fall back to the RSS `content` field, which may contain a full article.
 
 ## Data flow
 
 1. Mora requests each configured public RSS URL through https://api.rss2json.com/v1/api.json.
-2. The converter response is treated as untrusted input. Titles and excerpts are reduced to bounded plain text, only HTTP(S) article links are accepted, and rendering uses DOM textContent; feed HTML is never inserted into the page.
+2. The converter response is treated as untrusted input. Titles and summaries are reduced to bounded plain text (180-character titles and 280-character descriptions), only HTTP(S) article links are accepted, and rendering uses DOM textContent; feed HTML is never inserted into the page.
 3. Results are deduplicated by article URL, sorted by publication time and capped at 60 headline records.
 4. Search and topic filters run locally. Bookmarks and the normalized headline cache are stored in the current browser profile.
 5. A 15-minute cache window avoids repeat requests on every app open. A manual refresh bypasses that window. When some feeds fail, Gazette retains cached items for those publishers; when all feeds fail, it shows the last saved data and the source links.

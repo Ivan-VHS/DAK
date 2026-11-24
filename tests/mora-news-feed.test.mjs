@@ -43,6 +43,14 @@ test("news item normalization rejects unsafe links and untrusted markup is only 
   assert.equal(valid.description, "Короткий опис матеріалу.");
   assert.equal(valid.category, "ukraine");
   assert.equal(valid.url, "https://example.com/news/1");
+  const contentOnly = normalizeNewsItem({
+    title: "Headline", link: "https://example.com/news/2", content: "Full article text must not be copied into the feed."
+  }, source);
+  assert.equal(contentOnly.description, "");
+  const longExcerpt = normalizeNewsItem({
+    title: "Long headline", link: "https://example.com/news/3", description: "x".repeat(400)
+  }, source);
+  assert.equal(longExcerpt.description.length, 280);
   assert.equal(normalizeNewsItem({ title: "Unsafe", link: "javascript:alert(1)" }, source), null);
   assert.equal(normalizeNewsItem({ title: "<b></b>", link: "https://example.com" }, source), null);
 });

@@ -70,7 +70,7 @@ export function normalizeNewsItem(item, source, now = Date.now()) {
   if (!url || !title) return null;
   const parsedDate = new Date(item.pubDate || item.published || item.isoDate || item.publishedAt || now);
   const publishedAt = Number.isFinite(parsedDate.getTime()) ? parsedDate.getTime() : now;
-  const description = plainText(item.description || item.content || item.summary || "", 560);
+  const description = plainText(item.description || item.summary || "", 280);
   return { id: url, url, title, description, sourceId: source.id, sourceName: source.name, category: source.category, publishedAt };
 }
 
