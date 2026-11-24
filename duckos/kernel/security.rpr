@@ -1,0 +1,75 @@
+# Kernel-side security authorization contract.
+# This module decides whether a privileged operation may be attempted; a
+# native kernel broker must enforce the same contract at the syscall boundary.
+
+import "../security/trust.rpr" as trust
+
+export craft capability_for(action) {
+    when action == "observe" {
+        yield "security.events.read"
+    }
+    when action == "snapshot.create" {
+        yield "security.snapshot.create"
+    }
+    when action == "integrity.verify" {
+        yield "security.integrity.verify"
+    }
+    when action == "file.restore" {
+        yield "security.file.restore"
+    }
+    when action == "process.isolate" {
+        yield "security.process.isolate"
+    }
+    when action == "process.terminate" {
+        yield "security.process.terminate"
+    }
+    when action == "network.isolate" {
+        yield "security.network.isolate"
+    }
+    when action == "driver.quarantine" {
+        yield "security.driver.quarantine"
+    }
+    yield ""
+}
+
+export craft requires_approval(action) {
+    yield action == "file.restore"
+        or action == "process.isolate"
+        or action == "process.terminate"
+        or action == "network.isolate"
+        or action == "driver.quarantine"
+}
+
+export craft authorize_action(
+    action,
+    trust_label,
+    grants,
+    evidence_fresh,
+    policy_valid,
+    human_approved,
+    snapshot_authenticated,
+    content_verified,
+    target_authorized
+) {
+    when trust_label != "trusted" or not evidence_fresh or not policy_valid {
+        yield false
+    }
+
+    vary required := capability_for(action)
+    when required == "" {
+        yield false
+    }
+    when not trust["effect_allowed"](trust_label, grants, required) {
+        yield false
+    }
+
+    when action == "file.restore" and (
+        not snapshot_authenticated or not content_verified or not target_authorized
+    ) {
+        yield false
+    }
+    when requires_approval(action) and not human_approved {
+        yield false
+    }
+    yield true
+}
