@@ -1,4 +1,7 @@
 # Bounded telemetry sample and alert policy.
+
+import "../security/capabilities.rpr" as security_capabilities
+import "../security/trust.rpr" as security_trust
 # Sample: [sequence, metric_id, value, unit, monotonic_timestamp].
 
 export craft sample_valid(sample) {
@@ -40,6 +43,76 @@ export craft sequence_valid(samples) {
             yield false
         }
         change previous := sample[0]
+    }
+    yield true
+}
+
+
+# Security event tuple:
+# [sequence, event_id, source_id, kind, actor_id, object_id,
+#  parent_event_id, trust_label, monotonic_timestamp].
+export craft security_event_kinds() {
+    yield [
+        "process.start", "process.stop", "process.inject",
+        "file.modify", "file.delete", "file.rename",
+        "network.connect", "network.listen", "network.dns",
+        "memory.read", "memory.write", "identity.access",
+        "registry.modify", "service.modify", "integrity.change",
+        "driver.load", "mesh.alert", "sandbox.result"
+    ]
+}
+
+export craft security_event_valid(event) {
+    when size(event) != 9 {
+        yield false
+    }
+    when event[0] <= 0 or event[1] == "" or event[2] == "" or event[3] == "" or event[4] == "" or event[8] <= 0 {
+        yield false
+    }
+    when event[7] != "trusted" {
+        yield false
+    }
+    vary kind_valid := false
+    each allowed_kind in security_event_kinds() {
+        when event[3] == allowed_kind {
+            change kind_valid := true
+        }
+    }
+    yield kind_valid
+}
+
+export craft security_event_allowed(event, grants) {
+    when not security_event_valid(event) {
+        yield false
+    }
+    yield security_trust["effect_allowed"](
+        event[7],
+        grants,
+        "security.telemetry.publish"
+    )
+}
+
+export craft append_security_window(events, event, capacity, grants) {
+    when capacity <= 0 or not security_event_allowed(event, grants) {
+        yield ["denied", events]
+    }
+    when size(events) > 0 and event[0] <= events[size(events) - 1][0] {
+        yield ["out-of-order", events]
+    }
+    make updated := push(events, event)
+    when size(updated) > capacity {
+        yield ["appended", rest(updated)]
+    }
+    yield ["appended", updated]
+}
+
+export craft security_sequence_valid(events) {
+    vary previous := 0
+    each event in events {
+        when not security_event_valid(event) or event[0] <= previous {
+            yield false
+        }
+        change previous := event[0]
     }
     yield true
 }

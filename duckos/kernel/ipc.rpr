@@ -1,6 +1,8 @@
 # Bounded FIFO channel contract.
 # A full queue never grows implicitly: it reports backpressure.
 
+import "../security/trust.rpr" as ipc_trust
+
 export craft send(queue, capacity, value) {
     when capacity <= 0 {
         yield ["invalid", queue]
@@ -21,4 +23,20 @@ export craft receive(queue) {
         change remaining := push(remaining, queue[index])
     }
     yield ["received", remaining, queue[0]]
+}
+
+
+# Security-event channels require a trusted source and an explicit capability.
+export craft send_authorized(queue, capacity, value, trust_label, grants, requested_effect) {
+    when not ipc_trust["effect_allowed"](trust_label, grants, requested_effect) {
+        yield ["denied", queue]
+    }
+    yield send(queue, capacity, value)
+}
+
+export craft receive_authorized(queue, trust_label, grants, requested_effect) {
+    when not ipc_trust["effect_allowed"](trust_label, grants, requested_effect) {
+        yield ["denied", queue, nothing]
+    }
+    yield receive(queue)
 }

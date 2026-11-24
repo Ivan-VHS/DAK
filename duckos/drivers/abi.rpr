@@ -41,3 +41,36 @@ export craft load_policy(descriptor, expected_abi, supported_buses, granted_capa
     }
     yield "descriptor-approved"
 }
+
+
+# Read-only security sensor driver approval.
+# sensor: [id, abi, bus, arch, required_capabilities, publisher_id, image_digest].
+# The verifier supplies these result flags after checking its trusted key store.
+# This function is policy only; it does not load or map driver code.
+export craft security_sensor_policy(
+    sensor,
+    expected_abi,
+    supported_buses,
+    target_arch,
+    grants,
+    signature_verified,
+    signer_trusted,
+    not_revoked,
+    digest_matches,
+    secure_boot_verified
+) {
+    when size(sensor) != 7 {
+        yield "reject"
+    }
+    when sensor[0] == "" or sensor[3] != target_arch or sensor[5] == "" or size(sensor[6]) != 64 {
+        yield "reject"
+    }
+    when signature_verified != true or signer_trusted != true or not_revoked != true or digest_matches != true or secure_boot_verified != true {
+        yield "reject"
+    }
+    make descriptor := [sensor[0], sensor[1], sensor[2], sensor[4]]
+    when load_policy(descriptor, expected_abi, supported_buses, grants) != "descriptor-approved" {
+        yield "reject"
+    }
+    yield "security-sensor-approved"
+}
