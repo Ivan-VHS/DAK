@@ -32,6 +32,19 @@ def _validate_shape(data: dict[str, Any]) -> None:
     if data.get("project") != "DuckOS":
         raise MigrationContractError("migration contract project must be DuckOS")
 
+    target_profile = data.get("reaper_target_profile")
+    if not isinstance(target_profile, dict):
+        raise MigrationContractError("reaper_target_profile must be an object")
+    if (
+        target_profile.get("repository") != "Ivan-VHS/Reaper"
+        or target_profile.get("path") != "language/targets/duckos-kernel.v1.json"
+        or target_profile.get("target_id") != "duckos-kernel"
+        or target_profile.get("availability") not in {"not-in-pinned-checkout", "present-in-pinned-checkout"}
+        or type(target_profile.get("upstream_pull_request")) is not int
+        or target_profile["upstream_pull_request"] < 1
+    ):
+        raise MigrationContractError("Reaper target profile dependency metadata is invalid")
+
     dependency = data.get("reaper_dependency")
     if not isinstance(dependency, dict):
         raise MigrationContractError("reaper_dependency must be an object")
