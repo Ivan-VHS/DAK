@@ -37,3 +37,7 @@ jobs:
 
       - name: Run contract suite with VM engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+
+      - name: Verify DuckOS hardware inventory against the pinned Reaper consumer
+        working-directory: DuckOS
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m unittest tests.test_reaper_hardware_contract -v
