@@ -69,6 +69,7 @@ class ApplicationCatalogTests(unittest.TestCase):
             "docs/UNIFY_TRANSFER_FORMAT_V1.md",
             "schemas/unify.transfer.v1.schema.json",
             "catalogs/dak-base-applications.v1.yaml",
+            "docs/NEWS_FEED.md",
         ]
         for relative in expected_paths:
             with self.subTest(path=relative):
