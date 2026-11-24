@@ -12,7 +12,8 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+[The current Mora shell](../mora/index.html) — unified home screen, eight core app identities plus 13 extensions, and nine system tools, including Газета and Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+- [Газета news feed](NEWS_FEED.md) — GDELT-backed browser reader, paper-print surface, query/cache contract and DAK native-service boundary.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
