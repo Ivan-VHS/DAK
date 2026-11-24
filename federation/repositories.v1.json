@@ -36,7 +36,7 @@
       "url": "https://github.com/Ivan-VHS/Reaper.git",
       "path": "projects/reaper",
       "default_branch": "main",
-      "pinned_commit": "b550514231ff4d2df108243bee05ed85829231de",
+      "pinned_commit": "5ca1d418b9e74f4c35a70dfdd8b394c1bc622260",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "language-and-toolchain",
