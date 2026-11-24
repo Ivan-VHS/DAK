@@ -4,9 +4,9 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **21 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify), 13 extensions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE), and **Газета**, the standalone newspaper-style news reader. The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
-The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
+The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus the 13 extensions and the new news application. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
 
 ## Federated source workspace
 
@@ -17,7 +17,7 @@ Clone the complete source workspace with `git clone --recurse-submodules https:/
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora uses the single DuckOS black/white/yellow visual profile: near-black surfaces, white content and a shared duck-yellow accent, with restrained vertical folds around a deep radial centre. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora uses the single DuckOS black/white/yellow visual profile: near-black surfaces, white content and a shared duck-yellow accent, with restrained vertical folds around a deep radial centre. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens and defines the scoped paper-print exception used by Газета; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty-one first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The Газета application fetches current headlines from GDELT DOC 2.0 only when opened or refreshed; saved results and bookmarks remain local to the browser profile. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
 
 The system tools are:
 
@@ -30,6 +30,8 @@ The system tools are:
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
+
+See the [Газета news feed implementation note](docs/NEWS_FEED.md) for source, caching, privacy and native-service boundaries.
 
 ## Native Reaper workbench
 

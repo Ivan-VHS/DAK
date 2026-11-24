@@ -6,7 +6,7 @@ schema_version: 1
 suite:
   id: dak.base-suite
   name: DAK OS Base Applications
-  version: 1.1.0
+  version: 1.2.0
   status: design
   minimum_platform_api: 1
 
@@ -41,6 +41,7 @@ services:
   - dak.route-planner.v1
   - dak.game-library.v1
   - dak.executable-inspection.v1
+  - dak.news-feed.v1
 
 applications:
   - id: dak.settings
@@ -98,6 +99,13 @@ applications:
     category: internet
     permissions: [network.access, sites.permissions.request, files.download.selected]
     services: [dak.network.v1, dak.secrets.v1, dak.vfs.v1]
+
+  - id: dak.news
+    name: Newspaper and News Feed
+    entry: app://dak.news/main
+    category: internet
+    permissions: [network.access, news.sources.read, news.bookmarks.write]
+    services: [dak.news-feed.v1, dak.network.v1, dak.vfs.v1]
 
   - id: dak.mail
     name: Mail

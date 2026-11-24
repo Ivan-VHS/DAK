@@ -8,7 +8,7 @@ const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
 
-const coreAppIds = ["cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"];
+const coreAppIds = ["cockos", "kavun", "kabon", "gloverty", "po", "news", "illidia", "unify"];
 const extensionAppIds = [
   "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
   "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"
@@ -18,7 +18,7 @@ const systemAppIds = [
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
-test("desktop exposes 20 first-party apps and nine system tools", () => {
+test("desktop exposes 21 first-party apps and nine system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
@@ -30,7 +30,7 @@ test("desktop exposes 20 first-party apps and nine system tools", () => {
     assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
-  assert.equal(registry.system_services.length, 13);
+  assert.equal(registry.system_services.length, 14);
   assert.ok(html.includes('id="extension-app-grid"'));
   for (const id of extensionAppIds) {
     assert.ok(html.includes('data-app="' + id + '"'), id + " is missing from the extension grid");
@@ -41,6 +41,17 @@ test("desktop exposes 20 first-party apps and nine system tools", () => {
     "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2", "Po-2", "GameCharager", "EXEdotEXE"]) {
     assert.ok(html.includes(name) || js.includes(name), name + " label is missing");
   }
+});
+
+test("newspaper is a first-party app with a scoped paper surface and GDELT data module", () => {
+  assert.ok(html.includes('data-app="news"'));
+  assert.ok(html.includes("Газета"));
+  assert.ok(js.includes('case "news":'));
+  assert.ok(js.includes("initializeNewsPanel"));
+  assert.ok(js.includes('from "./news.js"'));
+  assert.ok(css.includes('.app-window[data-window="news"]'));
+  assert.ok(css.includes(".newspaper-masthead"));
+  assert.ok(css.includes(".newspaper-story-lead"));
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {
@@ -67,6 +78,25 @@ test("system panels expose approvals, permissions, recovery and local file inspe
   }
   assert.ok(js.includes('event.key.toLowerCase() === "k"'));
   assert.ok(js.includes("Ctrl+K") === false);
+});
+
+test("newspaper print colors stay inside the news window", () => {
+  const newspaperColors = [
+    "#E5D7B7", "#F2E8D4", "#2C261D", "#6C5B43",
+    "#A8997C", "#7E3428", "#FAF7EF", "#584C3A"
+  ];
+  for (const color of newspaperColors) {
+    const matches = [...css.matchAll(new RegExp(color, "gi"))];
+    assert.ok(matches.length > 0, color + " is missing from the newspaper surface");
+    for (const match of matches) {
+      const preceding = css.slice(0, match.index);
+      const selector = preceding.slice(preceding.lastIndexOf("}") + 1, preceding.lastIndexOf("{")).trim();
+      assert.ok(
+        selector.includes("newspaper") || selector.includes('[data-window="news"]'),
+        color + " escaped the scoped newspaper surface in " + selector
+      );
+    }
+  }
 });
 
 test("shell policy keeps prototype and native-service maturity separate", () => {
@@ -132,7 +162,8 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(css.includes(".commons-grid"));
   const allowedColors = new Set([
     "#080808", "#151515", "#242424", "#3A3A3A", "#3A3100",
-    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C"
+    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C",
+    "#E5D7B7", "#F2E8D4", "#2C261D", "#6C5B43", "#A8997C", "#7E3428", "#FAF7EF", "#584C3A"
   ].map((color) => color.toLowerCase()));
   const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
@@ -142,7 +173,9 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v8-newspaper"));
+  assert.ok(serviceWorker.includes("./news.js"));
+  assert.ok(serviceWorker.includes("./news-core.js"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));

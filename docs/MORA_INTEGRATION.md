@@ -4,7 +4,7 @@
 
 DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
 
-The default Mora Amber profile uses warm vertical drapery with a repeating fold rhythm, a deep radial workspace centre, walnut/graphite panels, muted olive support surfaces and one restrained red critical marker. Material depth comes from soft light, edge highlights and tonal separation rather than neon fills. The compact dock and existing app IDs remain stable; Dark and Light remain selectable alternatives.
+Mora uses one fixed DuckOS profile: near-black structure, white content and duck-yellow action/selection, with a deep radial workspace centre and restrained vertical folds. No Amber, Dark or Light theme switching is exposed. The Газета app contains a deliberately scoped newsprint surface; it does not recolor the desktop or other applications.
 
 ## Shell components
 
@@ -19,14 +19,23 @@ The default Mora Amber profile uses warm vertical drapery with a repeating fold 
 | Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
 | Proof | Calculate local SHA-256 | No signer or C2PA verification |
 | Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
+| Газета | Search topic-based news, display source metadata and save article bookmarks | Browser fetch to GDELT DOC 2.0; no native service, editorial verification or synchronized account |
 
-The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
+The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Газета is an eighth core launcher app. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
 
 Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. The panels provide bounded local browser interactions, share the existing window manager and profile storage, and do not claim native service implementations.
 
+## Газета news feed
+
+Газета is a separate newspaper-style app in the Mora launcher and dock. It requests GDELT DOC 2.0 JSON ArtList results for six sections (Ukraine, Dnipro, World, Technology, Economy and Science), limits results to the last 24 hours, accepts a bounded free-text query, and opens only validated HTTPS publisher links. GDELT documents JSON output, browser CORS support and search across 65 translated source languages ([GDELT DOC 2.0 API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/)).
+
+The app fetches on open, section change, search or explicit refresh; it applies a 5.5-second client request interval and a 15-second timeout. It retains up to eight recent result sets and 100 article bookmarks in namespaced `localStorage`. It does not scrape full article bodies, assert source credibility, fact-check claims or synchronize user data. An external GDELT request reveals the selected query and ordinary connection metadata to that provider.
+
+The native DAK `dak.news-feed.v1` service is only proposed in the design catalog. The implemented feature is the Mora browser app and its local state; no native provider or operating-system feed daemon is claimed. Full provider, privacy and validation details are in [the Газета implementation note](NEWS_FEED.md).
+
 ## Run and validate
 
-Open **mora/index.html** directly in a modern browser. The desktop itself requires no network request. Some browser APIs such as Web Crypto may require a secure context.
+Open **mora/index.html** directly in a modern browser. The static shell assets are local, but opening or refreshing Газета requires network access to GDELT. Some browser APIs such as Web Crypto may require a secure context.
 
 Run **npm test** with Node.js 18 or newer. Contract tests check the static shell, registry and local policy helpers. They do not certify native OS operation or interaction with actual hardware.
 
@@ -62,7 +71,7 @@ Proof computes SHA-256 through Web Crypto when available. A digest can identify 
 
 ## Installable web shell
 
-The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript, catalogue, policy and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
+The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript (including `news.js` and `news-core.js`), catalogue, policy and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
 
 The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser shell provides a persisted light/dark preference; native toolkit adapters must implement the same semantic tokens independently.
 
@@ -72,7 +81,7 @@ Mora supports a responsive browser layout and a reduced-motion preference. Its f
 
 ## Data handling
 
-All legacy photo, budget, game, compass, device and audio content remains clearly identified as fictional demo content. New settings are stored in the browser's local storage. Selected executable and provenance files are read locally by the page; the shell does not transmit them.
+All legacy photo, budget, game, compass, device and audio content remains clearly identified as fictional demo content. New settings, news result caches and bookmarks are stored in the browser's local storage. The news provider receives user-triggered search requests; cached stories and bookmarks remain local and are not synchronized. Selected executable and provenance files are read locally by the page; the shell does not transmit them.
 
 The local browser profile can be removed by clearing site data. The snapshot is a copy of Mora preferences only and should not be called a system restore point.
 

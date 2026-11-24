@@ -29,10 +29,10 @@ def main() -> int:
     expected = {
         "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
         "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-        "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+        "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "news",
     }
     actual = {app["id"] for app in catalog["applications"]}
-    if actual != expected or len(actual) != 20:
+    if actual != expected or len(actual) != 21:
         raise SystemExit(f"Unexpected app catalog IDs: {sorted(actual)}")
 
     for app in catalog["applications"]:

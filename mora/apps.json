@@ -37,6 +37,13 @@
       "panel": "mora/app.js#po"
     },
     {
+      "id": "news",
+      "name": "Газета",
+      "category": "news",
+      "panel": "mora/app.js#news",
+      "maturity": "partial_live_gdelt_feed"
+    },
+    {
       "id": "illidia",
       "name": "Illidia",
       "category": "games",
@@ -285,6 +292,11 @@
       "id": "desktop-optimizer",
       "maturity": "partial_native_userland",
       "scope": "read-only local desktop/process audit, reversible current-user startup controls, confirmed move-to-Inbox operation and native Tk maintenance window; no compositor or kernel enforcement"
+    },
+    {
+      "id": "news-feed",
+      "maturity": "partial",
+      "scope": "Mora browser app fetches GDELT DOC 2.0 JSON article lists; validates HTTPS publisher links, caches recent results and stores up to 100 local bookmarks. No native provider, account or cross-device sync is connected."
     }
   ]
 }
