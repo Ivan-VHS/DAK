@@ -82,7 +82,7 @@ export function composeJoraRequest(options = {}) {
 
   const request = {
     schema: "reaper.jora.request.v1",
-    name: customName,
+    name: productName,
     description,
     components: [...componentIds],
     locales: [...localeIds],
