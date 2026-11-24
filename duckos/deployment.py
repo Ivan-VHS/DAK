@@ -8,6 +8,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import json
+import math
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -24,6 +25,8 @@ from .manifest import ManifestError, validate_manifest
 RELEASE_SCHEMA = "duckos.release.v1"
 DEPLOYMENT_SCHEMA = "duckos.deployment-plan.v1"
 MAX_METADATA_BYTES = 1024 * 1024
+MAX_JSON_INTEGER_DIGITS = 1024
+MAX_JSON_NESTING_DEPTH = 128
 MAX_ARCHIVE_MEMBERS = 256
 MAX_ARCHIVE_BYTES = 34 * 1024 * 1024 * 1024
 _MIB = 1024 * 1024
@@ -33,6 +36,83 @@ _ALIGNMENT = _MIB
 
 class DeploymentError(ValueError):
     """Raised when a release bundle or deployment plan is invalid."""
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise DeploymentError(f"JSON contains a duplicate object key: {key!r}")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> None:
+    raise DeploymentError(f"JSON contains a non-standard numeric constant: {value}")
+
+
+def _parse_json_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed):
+        raise DeploymentError("JSON contains a non-finite floating-point value")
+    return parsed
+
+
+def _parse_json_integer(value: str) -> int:
+    digits = value[1:] if value.startswith("-") else value
+    if len(digits) > MAX_JSON_INTEGER_DIGITS:
+        raise DeploymentError(
+            f"JSON integer exceeds the {MAX_JSON_INTEGER_DIGITS}-digit limit"
+        )
+    return int(value)
+
+
+def _validate_json_nesting(raw: str, label: str) -> None:
+    depth = 0
+    in_string = False
+    escaped = False
+    for character in raw:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif character == "\\\\":
+                escaped = True
+            elif character == '"':
+                in_string = False
+            continue
+        if character == '"':
+            in_string = True
+        elif character in "[{":
+            depth += 1
+            if depth > MAX_JSON_NESTING_DEPTH:
+                raise DeploymentError(
+                    f"{label} JSON nesting exceeds the {MAX_JSON_NESTING_DEPTH}-level limit"
+                )
+        elif character in "]}":
+            depth -= 1
+
+
+def _load_strict_json(raw: bytes | str, label: str) -> Any:
+    """Decode bounded release JSON with duplicate-key and finite-number checks."""
+    try:
+        text = raw.decode("utf-8") if isinstance(raw, bytes) else raw
+        encoded_size = len(text.encode("utf-8"))
+        if encoded_size > MAX_METADATA_BYTES:
+            raise DeploymentError(f"{label} exceeds the {MAX_METADATA_BYTES}-byte limit")
+        _validate_json_nesting(text, label)
+        return json.loads(
+            text,
+            object_pairs_hook=_unique_json_object,
+            parse_constant=_reject_json_constant,
+            parse_float=_parse_json_float,
+            parse_int=_parse_json_integer,
+        )
+    except UnicodeDecodeError as error:
+        raise DeploymentError(f"{label} is not valid UTF-8") from error
+    except json.JSONDecodeError as error:
+        raise DeploymentError(f"{label} is invalid JSON: {error}") from error
+    except RecursionError as error:
+        raise DeploymentError(f"{label} exceeds the supported JSON nesting depth") from error
 
 
 def _json_bytes(value: Any) -> bytes:
@@ -328,12 +408,16 @@ def verify_release_bundle(
                 with stream:
                     return stream.read(limit + 1)
 
+            manifest = _load_strict_json(
+                read_member("duckos-release/manifest.json"), "release manifest"
+            )
+            release = _load_strict_json(
+                read_member("duckos-release/release.json"), "release metadata"
+            )
             try:
-                manifest = json.loads(read_member("duckos-release/manifest.json"))
-                release = json.loads(read_member("duckos-release/release.json"))
                 checksum_text = read_member("duckos-release/SHA256SUMS").decode("utf-8")
-            except (UnicodeDecodeError, json.JSONDecodeError) as error:
-                raise DeploymentError(f"release metadata is invalid: {error}") from error
+            except UnicodeDecodeError as error:
+                raise DeploymentError("release checksums are not valid UTF-8") from error
             if not isinstance(release, dict) or release.get("schema") != RELEASE_SCHEMA:
                 raise DeploymentError(f"release metadata must use {RELEASE_SCHEMA}")
             manifest_data = _json_bytes(manifest)
