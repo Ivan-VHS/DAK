@@ -20,6 +20,12 @@ import {
   stopConcreteThump
 } from "../mora/concrete-thump-audio.js";
 
+import {
+  playConcreteThump,
+  renderConcreteThumpWav,
+  stopConcreteThump
+} from "../mora/concrete-thump-audio.js";
+
 class MemoryStorage {
   constructor() {
     this.values = new Map();
@@ -33,6 +39,12 @@ class MemoryStorage {
 }
 
 test("the browser audio module exposes playback, stop and four-bar WAV exports", () => {
+  assert.equal(typeof playConcreteThump, "function");
+  assert.equal(typeof stopConcreteThump, "function");
+  assert.equal(typeof renderConcreteThumpWav, "function");
+});
+
+test("the browser sequencer module loads and exposes playback/render controls", () => {
   assert.equal(typeof playConcreteThump, "function");
   assert.equal(typeof stopConcreteThump, "function");
   assert.equal(typeof renderConcreteThumpWav, "function");
