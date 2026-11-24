@@ -6,6 +6,8 @@ memory, resolve imports, or execute untrusted code.
 from __future__ import annotations
 
 import hashlib
+import os
+import stat
 import struct
 from pathlib import Path
 from typing import Any
@@ -222,17 +224,36 @@ def inspect_pe_bytes(data: bytes, *, file_name: str = "") -> dict[str, Any]:
 
 
 def inspect_pe_file(path: str | Path) -> dict[str, Any]:
-    """Read and inspect a local PE file with a strict size limit."""
+    """Read a regular file through a bounded descriptor without following symlinks."""
     candidate = Path(path)
+    descriptor: int | None = None
     try:
-        if candidate.is_symlink() or not candidate.is_file():
+        if candidate.is_symlink():
             raise PEFormatError("input must be a regular file, not a symbolic link")
-        size = candidate.stat().st_size
-        if size > MAX_FILE_BYTES:
+        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
+        flags |= getattr(os, "O_NONBLOCK", 0)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(candidate, flags)
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise PEFormatError("input must be a regular file, not a device, pipe or directory")
+        if metadata.st_size > MAX_FILE_BYTES:
             raise PEFormatError(f"file exceeds the {MAX_FILE_BYTES}-byte inspection limit")
-        payload = candidate.read_bytes()
+        # Bound the read itself as well as the preliminary stat: a file may grow
+        # between fstat() and read(), so never trust the original size alone.
+        with os.fdopen(descriptor, "rb") as stream:
+            descriptor = None
+            payload = stream.read(MAX_FILE_BYTES + 1)
+        if len(payload) > MAX_FILE_BYTES:
+            raise PEFormatError(f"file exceeds the {MAX_FILE_BYTES}-byte inspection limit")
+    except FileNotFoundError as error:
+        raise PEFormatError("input file does not exist") from error
     except OSError as error:
-        raise PEFormatError(f"cannot read {candidate}: {error}") from error
+        raise PEFormatError(f"cannot safely read input file: {error}") from error
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
     report = inspect_pe_bytes(payload, file_name=candidate.name)
     report["file_size_bytes"] = len(payload)
     report["sha256"] = hashlib.sha256(payload).hexdigest()
