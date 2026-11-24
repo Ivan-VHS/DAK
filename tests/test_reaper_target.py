@@ -23,6 +23,13 @@ class ReaperMigrationContractTests(unittest.TestCase):
             "project": "DuckOS",
             "migration_goal": "Migrate the DuckOS executable system logic to Reaper.",
             "maturity": "contract-first",
+            "reaper_target_profile": {
+                "repository": "Ivan-VHS/Reaper",
+                "path": "language/targets/duckos-kernel.v1.json",
+                "target_id": "duckos-kernel",
+                "availability": "not-in-pinned-checkout",
+                "upstream_pull_request": 273,
+            },
             "reaper_dependency": {
                 "repository": "Ivan-VHS/Reaper",
                 "url": "https://github.com/Ivan-VHS/Reaper.git",
