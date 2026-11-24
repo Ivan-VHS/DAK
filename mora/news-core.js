@@ -22,7 +22,10 @@ export function parseGdeltDate(value) {
   }
   const [, year, month, day, hour, minute, second] = match;
   const date = new Date(Date.UTC(+year, +month - 1, +day, +hour, +minute, +second));
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  if (Number.isNaN(date.getTime()) || date.getUTCFullYear() !== +year ||
+      date.getUTCMonth() !== +month - 1 || date.getUTCDate() !== +day ||
+      date.getUTCHours() !== +hour || date.getUTCMinutes() !== +minute || date.getUTCSeconds() !== +second) return null;
+  return date.toISOString();
 }
 
 export function normalizeNewsArticle(item) {
@@ -44,7 +47,7 @@ export function normalizeNewsArticle(item) {
   if (typeof imageValue === "string" && imageValue.trim()) {
     try {
       const candidate = new URL(imageValue.trim());
-      if (candidate.protocol === "https:") image = candidate.href;
+      if (candidate.protocol === "https:" && !candidate.username && !candidate.password) image = candidate.href;
     } catch {
       image = null;
     }
@@ -85,7 +88,7 @@ export function buildNewsRequestUrl(categoryId, searchText = "") {
   if (!category) throw new TypeError("Unknown news category");
   const cleanSearch = String(searchText)
     .replace(/[\u0000-\u001f\u007f]/g, " ")
-    .replace(/[()"]/g, " ")
+    .replace(/[()":]/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 100);
