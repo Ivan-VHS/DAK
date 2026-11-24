@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-23
+Updated: 2026-11-24
 
 ## Implemented in Reaper source
 
@@ -134,3 +134,14 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Reaper system migration baseline — 2026-11-24
+
+- [x] Versioned Reaper migration contract records the exact submodule pin, current .rpr source inventory, execution profiles, unresolved target decisions and phase gates.
+- [x] Validator rejects drift between the migration manifest, federation registry and Git submodule gitlink; it also rejects missing or unregistered Reaper source modules.
+- [x] CI runs the validator before source checks and the tree-walk/VM contract suite.
+- [ ] Reaper-native freestanding kernel, target object backend, linker integration, architecture boot protocol and bootable image.
+- [ ] Privileged memory, interrupt, scheduler, syscall, VFS, driver, process and userland implementations.
+
+The current state remains G0: the .rpr modules are reference-runtime/VM policy contracts; the native C11 boot-info validator is host-tested foundation code. No bootable DuckOS image or native Reaper kernel is claimed. See [Reaper migration roadmap](REAPER_MIGRATION.md) and [machine-readable migration contract](../duckos/reaper-migration.v1.json).

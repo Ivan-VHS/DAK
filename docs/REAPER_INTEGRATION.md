@@ -91,6 +91,14 @@ The `check` command delegates to Reaper's `--check --json` path. The focused `ty
 
 This is a native user-space integration surface, not a claim that the DuckOS kernel has already implemented process isolation, a privileged application broker or a hardware compositor.
 
+The exact Reaper submodule revision and all current DuckOS .rpr modules are tracked by the migration contract at duckos/reaper-migration.v1.json. Validate its Git pin, federation entry and source inventory with:
+
+~~~sh
+python tools/validate_reaper_target.py
+~~~
+
+This contract distinguishes reference-runtime/VM policy execution from native kernel compilation. The current Reaper scalar AOT backend does not yet compile the collection, import and iteration constructs used by DuckOS. See REAPER_MIGRATION.md for the system-wide migration gates and the evidence required before DuckOS may claim a Reaper-native or bootable kernel.
+
 ## Verification
 
 Run the focused tests:

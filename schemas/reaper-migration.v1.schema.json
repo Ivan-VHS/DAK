@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/reaper-migration.v1.schema.json",
+  "title": "DuckOS Reaper migration contract",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "project",
+    "migration_goal",
+    "maturity",
+    "reaper_dependency",
+    "boot_target",
+    "execution_profiles",
+    "source_inventory",
+    "non_reaper_boundaries",
+    "gates",
+    "reaper_target_profile"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.reaper-migration.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "project": {
+      "const": "DuckOS"
+    },
+    "migration_goal": {
+      "type": "string",
+      "minLength": 20
+    },
+    "maturity": {
+      "enum": [
+        "contract-first",
+        "hybrid",
+        "native-kernel",
+        "reaper-complete"
+      ]
+    },
+    "reaper_dependency": {
+      "type": "object",
+      "required": [
+        "repository",
+        "url",
+        "submodule_path",
+        "pinned_commit",
+        "source_of_pin",
+        "required_entrypoints",
+        "runtime_status",
+        "native_aot_status"
+      ],
+      "properties": {
+        "repository": {
+          "const": "Ivan-VHS/Reaper"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "submodule_path": {
+          "const": "projects/reaper"
+        },
+        "pinned_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "source_of_pin": {
+          "const": "federation/repositories.v1.json"
+        },
+        "required_entrypoints": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "runtime_status": {
+          "type": "string"
+        },
+        "native_aot_status": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "boot_target": {
+      "type": "object",
+      "required": [
+        "architecture",
+        "boot_protocol",
+        "kernel_abi",
+        "decision_status",
+        "boot_info_contract",
+        "bootable_image",
+        "reason"
+      ],
+      "properties": {
+        "architecture": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "boot_protocol": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kernel_abi": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decision_status": {
+          "enum": [
+            "undecided",
+            "proposed",
+            "approved"
+          ]
+        },
+        "boot_info_contract": {
+          "type": "string"
+        },
+        "bootable_image": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "execution_profiles": {
+      "type": "object",
+      "required": [
+        "reaper_reference_contract",
+        "reaper_native_kernel"
+      ],
+      "properties": {
+        "reaper_reference_contract": {
+          "type": "object",
+          "required": [
+            "status",
+            "execution",
+            "scope"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "implemented",
+                "partial",
+                "planned"
+              ]
+            },
+            "execution": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "scope": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "reaper_native_kernel": {
+          "type": "object",
+          "required": [
+            "status",
+            "freestanding",
+            "object_backend",
+            "linker_integration",
+            "startup_runtime",
+            "bootable",
+            "blockers"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "implemented",
+                "partial",
+                "planned"
+              ]
+            },
+            "freestanding": {
+              "type": "boolean"
+            },
+            "object_backend": {
+              "type": "boolean"
+            },
+            "linker_integration": {
+              "type": "boolean"
+            },
+            "startup_runtime": {
+              "type": "boolean"
+            },
+            "bootable": {
+              "type": "boolean"
+            },
+            "blockers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "source_inventory": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "subsystem",
+          "responsibility",
+          "maturity"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^duckos/.+\\.rpr$"
+          },
+          "subsystem": {
+            "type": "string"
+          },
+          "responsibility": {
+            "type": "string"
+          },
+          "maturity": {
+            "enum": [
+              "reference-contract",
+              "native-partial",
+              "native-complete"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "non_reaper_boundaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "language",
+          "reason"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "acceptance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "implemented",
+              "partial",
+              "planned"
+            ]
+          },
+          "acceptance": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reaper_target_profile": {
+      "type": "object",
+      "required": [
+        "repository",
+        "path",
+        "target_id",
+        "availability",
+        "upstream_pull_request"
+      ],
+      "properties": {
+        "repository": {
+          "const": "Ivan-VHS/Reaper"
+        },
+        "path": {
+          "const": "language/targets/duckos-kernel.v1.json"
+        },
+        "target_id": {
+          "const": "duckos-kernel"
+        },
+        "availability": {
+          "enum": [
+            "not-in-pinned-checkout",
+            "present-in-pinned-checkout"
+          ]
+        },
+        "upstream_pull_request": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
