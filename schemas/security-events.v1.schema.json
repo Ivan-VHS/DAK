@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/security-events.v1.schema.json",
+  "title": "DuckOS security event batch v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "events"],
+  "properties": {
+    "schema": {"const": "duckos.security-events.v1"},
+    "events": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id", "timestamp_ms", "host_id", "source", "kind", "actor_id"],
+        "properties": {
+          "schema": {"const": "duckos.security-event.v1"},
+          "event_id": {"type": "string", "minLength": 1, "maxLength": 128},
+          "timestamp_ms": {"type": "integer", "minimum": 1},
+          "host_id": {"type": "string", "minLength": 1, "maxLength": 128},
+          "source": {"type": "string", "minLength": 1, "maxLength": 128},
+          "kind": {"enum": ["process.start", "process.stop", "process.inject", "file.modify", "file.delete", "file.rename", "network.connect", "network.listen", "network.dns", "memory.read", "memory.write", "identity.access", "registry.modify", "service.modify", "integrity.change", "driver.load", "mesh.alert", "sandbox.result"]},
+          "actor_id": {"type": "string", "minLength": 1, "maxLength": 256},
+          "object_id": {"type": "string", "maxLength": 512},
+          "parent_event_id": {"type": "string", "maxLength": 128},
+          "correlation_id": {"type": "string", "maxLength": 128},
+          "action": {"type": "string", "maxLength": 128},
+          "attributes": {"type": "object", "maxProperties": 32, "additionalProperties": {"type": ["string", "integer", "number", "boolean"], "maxLength": 2048}}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# DuckOS predictive-security policy contracts.
+import "decision.rpr" as decision
+
+assert(decision["risk_score"](0, 0, false, false, false, false) == 0, "benign activity has no added risk")
+assert(decision["risk_score"](5, 0.8, true, true, true, false) == 100, "correlated destructive activity saturates risk")
+assert(decision["risk_score"](-1, 0, false, false, false, false) == -1, "invalid input is rejected")
+assert(decision["action_for"](15) == "monitor", "low risk remains observable")
+assert(decision["action_for"](25) == "sandbox", "medium risk requests containment review")
+assert(decision["action_for"](45) == "restrict", "high risk restricts through the policy boundary")
+assert(decision["action_for"](65) == "isolate", "very high risk recommends isolation")
+assert(decision["action_for"](90) == "block", "critical risk recommends blocking")
+assert(decision["snapshot_required"](true, 0), "destructive operations require a pre-action snapshot")
+assert(not decision["snapshot_required"](false, 10), "ordinary activity does not require a snapshot")
+assert(decision["mesh_signal_allowed"](true, true, false), "authenticated fresh unique mesh signals are accepted")
+assert(not decision["mesh_signal_allowed"](false, true, false), "unsigned mesh signals are rejected")
+assert(not decision["mesh_signal_allowed"](true, false, false), "expired mesh signals are rejected")
+assert(not decision["mesh_signal_allowed"](true, true, true), "replayed mesh signals are rejected")
+assert(decision["recovery_allowed"](true, true, true), "recovery requires an authenticated verified snapshot and authorized target")
+assert(not decision["recovery_allowed"](true, false, true), "unverified recovery material is rejected")
+assert(decision["resource_profile"](true, false, false) == "quiet", "fullscreen mode may defer deep scans")
+assert(decision["resource_profile"](false, false, true) == "security_critical", "suspicious activity overrides comfort profiles")

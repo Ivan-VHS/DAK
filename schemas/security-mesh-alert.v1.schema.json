@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/security-mesh-alert.v1.schema.json",
+  "title": "DuckOS authenticated mesh threat alert v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "alert_id", "origin_host", "issued_at_ms", "expires_at_ms", "severity", "indicators", "signature"],
+  "properties": {
+    "schema": {"const": "duckos.mesh-threat-alert.v1"},
+    "alert_id": {"type": "string", "minLength": 16, "maxLength": 96, "pattern": "^[A-Za-z0-9_-]+$"},
+    "origin_host": {"type": "string", "minLength": 1, "maxLength": 128},
+    "issued_at_ms": {"type": "integer", "minimum": 1},
+    "expires_at_ms": {"type": "integer", "minimum": 1},
+    "severity": {"enum": ["low", "medium", "high", "critical"]},
+    "indicators": {"type": "array", "maxItems": 32, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+    "signature": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
