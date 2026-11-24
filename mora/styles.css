@@ -1007,3 +1007,15 @@ input[type="range"] { accent-color: #FFD400; }
 @media (max-width:520px) {
   .jora-target-fieldset { grid-template-columns: 1fr; }
 }
+
+/* Jora v2 naming and architecture graph controls. */
+.jora-settings { grid-template-columns: minmax(110px,.7fr) minmax(150px,1fr) minmax(130px,.9fr); }
+.jora-graph-fieldset { gap: 12px; }
+.jora-graph-settings { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(100px,.7fr); gap: 9px; }
+.jora-graph-fieldset input[type="range"] { width: 100%; accent-color: var(--mora-brand, #FFD400); }
+.jora-fixed-name { color: var(--mora-brand, #FFD400); font-size: 17px; letter-spacing: .02em; }
+.jora-preview small { overflow-wrap: anywhere; }
+@media (max-width:760px) {
+  .jora-settings { grid-template-columns: 1fr; }
+  .jora-graph-settings { grid-template-columns: 1fr; }
+}
