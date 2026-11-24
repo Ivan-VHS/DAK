@@ -64,7 +64,7 @@ After exporting the request JSON, run the native command from the DuckOS environ
 
 Use an explicit specialist checkout when needed:
 
-    duckos jora --root ./projects/reaper build ./lexitone-3d.jora-request.json ./LexiTone-3D
+    duckos jora --root ./projects/reaper build ./jora-request.json ./Jora
 
 See [Jora store integration](docs/JORA_STORE_INTEGRATION.md) and [Reaper application factory](https://github.com/Ivan-VHS/Reaper/blob/main/docs/JORA_APPLICATION_FACTORY.md).
 
