@@ -162,6 +162,14 @@ test("glass materials use bounded progressive enhancement and accessible fallbac
   assert.equal(glass.maxConcurrentBlurLayers, 5);
   assert.equal(glass.reducedTransparency, "opaque");
   assert.equal(glass.forcedColors, "system");
+  assert.deepEqual(glass.nativeBackdrops.windows, {
+    api: "DwmSetWindowAttribute",
+    attribute: 38,
+    mainWindowType: 2,
+    requiresSystemBackdropSupport: true,
+    fallback: "opaque"
+  });
+  assert.equal(glass.nativeBackdrops.otherPlatforms, "opaque");
   assert.ok(css.includes("@supports ((backdrop-filter: blur(1px))"));
   assert.ok(css.includes("@media (prefers-reduced-transparency: reduce)"));
   assert.ok(css.includes(":root.reduce-transparency"));
