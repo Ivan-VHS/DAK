@@ -184,6 +184,8 @@ typedef struct duckos_security_authorization_request_v1 {
 /*
  * The event ring is fixed-size and single-writer. Callers must serialize
  * ingest and protect readers with the OS service's lock/critical section.
+ * source_trust must be assigned by a trusted kernel/source adapter after
+ * authenticating the producer; never copy a user-supplied trust label.
  */
 void duckos_security_engine_init(duckos_security_engine *engine);
 duckos_security_status duckos_security_event_validate(const duckos_security_event_v1 *event);

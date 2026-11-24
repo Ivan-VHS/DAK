@@ -101,6 +101,24 @@ static void test_credential_lolbin_and_mesh_cluster(void) {
     assert(result.distinct_hosts_in_cluster == 2);
     assert((result.indicators & DUCKOS_SECURITY_IND_CROSS_HOST_CLUSTER) != 0);
 }
+static void test_event_ring_is_bounded(void) {
+    duckos_security_engine engine;
+    duckos_security_evaluation_v1 result;
+    duckos_security_engine_init(&engine);
+    for (uint64_t i = 1; i <= DUCKOS_SECURITY_EVENT_CAPACITY + 9u; ++i) {
+        char id[32];
+        (void)snprintf(id, sizeof(id), "ring-%llu", (unsigned long long)i);
+        duckos_security_event_v1 e = event_make(
+            i, i * 100u, id, "host-ring", "sensor-ring", "process-ring",
+            DUCKOS_SECURITY_PROCESS_START
+        );
+        assert(duckos_security_ingest(&engine, &e, &result) == DUCKOS_SECURITY_OK);
+        assert(engine.count <= DUCKOS_SECURITY_EVENT_CAPACITY);
+    }
+    assert(engine.count == DUCKOS_SECURITY_EVENT_CAPACITY);
+    assert(engine.next_write == 9u);
+}
+
 static void test_sequence_and_authorization(void) {
     duckos_security_engine engine;
     duckos_security_evaluation_v1 result;
@@ -145,5 +163,6 @@ int main(void) {
     test_file_burst_and_causal_chain();
     test_credential_lolbin_and_mesh_cluster();
     test_sequence_and_authorization();
+    test_event_ring_is_bounded();
     return 0;
 }
