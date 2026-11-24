@@ -22,6 +22,12 @@ import {
   validateAudioSampleFile
 } from "./concrete-thump.js";
 
+import {
+  playConcreteThump,
+  renderConcreteThumpWav,
+  stopConcreteThump
+} from "./concrete-thump-audio.js";
+
 const DUCK_ACCENT = "#FFD400";
 
 const appDefinitions = {
@@ -323,11 +329,20 @@ function extensionPanelMarkup(appId) {
         '<input id="beat-bpm" type="range" min="40" max="240" value="' + profile.bpm + '" data-beat-range="bpm"></div>' +
         '<div class="extension-range-row"><div class="extension-range-heading"><label for="beat-swing">MPC swing</label><output data-beat-value="swing">' + profile.swing + '%</output></div>' +
         '<input id="beat-swing" type="range" min="50" max="75" value="' + profile.swing + '" data-beat-range="swing"></div>' +
-        '<p class="window-copy">Ориентир: тяжёлый 808, плотный kick, резкий snare/clap, быстрые hi-hat rolls, triplet bursts, синкопы, паузы и динамические drops.</p>' +
+        '<p class="window-copy">Тяжёлый низ, жёсткий kick/snare, дробные hi-hat rolls, triplet bursts, синкопы и динамические паузы.</p>' +
+        '<div class="concrete-sequencer"><h3>Секвенсор · 16 шагов</h3>' + concreteSequenceMarkup(profile) + '</div>' +
+        '<div class="concrete-playback-actions">' +
+        '<button class="action-button" data-action="play-beat">Прослушать 4 такта</button>' +
+        '<button class="subtle-button" data-action="stop-beat" disabled>Остановить</button>' +
+        '<button class="subtle-button" data-action="export-beat-wav">Рендер WAV</button>' +
+        '</div>' +
+        '<p class="window-copy">Секвенсор синтезирует kick, snare, hi-hat и 808 в браузере. Хоровая дорожка режет выбранную запись на фрагменты; для работы нужен хотя бы один импортированный файл.</p>' +
         '</section>' +
         '<section class="concrete-thump-section"><h3>Локальные хоровые сэмплы</h3>' +
         '<p class="window-copy">Импортируйте собственные, лицензированные или общественно-доступные записи. Предпрослушивание выполняется в браузере; файлы не отправляются в сеть.</p>' +
         '<label class="file-picker">Добавить аудиофайлы<input type="file" data-choir-samples multiple accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a,.aac,.aiff,.opus,.webm"></label>' +
+        '<label class="concrete-control-label" for="choir-playback-source">Хоровой источник для секвенсора</label>' +
+        '<select id="choir-playback-source" data-choir-playback-source><option value="">Нет сэмпла</option></select>' +
         '<ul class="concrete-sample-list" data-choir-sample-list aria-live="polite"></ul>' +
         '<div class="approval-actions"><button class="subtle-button" data-action="clear-choir-samples">Очистить список</button></div>' +
         '</section>' +
@@ -549,6 +564,26 @@ function initializeCommonsPanel(appWindow) {
   });
 
   renderGrid();
+}
+
+const CONCRETE_SEQUENCE_TRACKS = [
+  ["kick", "Kick"],
+  ["snare", "Snare / clap"],
+  ["hat", "Hi-hats"],
+  ["bass", "808"],
+  ["choir", "Choir chops"]
+];
+
+function concreteSequenceMarkup(profile) {
+  return CONCRETE_SEQUENCE_TRACKS.map(([track, label]) => {
+    const steps = profile.sequence[track].map((active, index) =>
+      '<button type="button" class="sequence-step' + (active ? ' active' : '') +
+      '" data-sequence-step="' + index + '" aria-label="' + label + ', шаг ' + (index + 1) +
+      '" aria-pressed="' + String(active) + '">' + (index + 1) + '</button>'
+    ).join("");
+    return '<div class="sequence-track" data-sequence-track="' + track + '">' +
+      '<strong>' + label + '</strong><div class="sequence-step-grid">' + steps + '</div></div>';
+  }).join("");
 }
 
 function panelMarkup(appId) {
@@ -784,6 +819,23 @@ function renderConcreteThumpSamples(owner) {
   if (!list) return;
   const samples = sampleSession(owner);
   list.replaceChildren();
+  const sourceSelect = owner.querySelector("[data-choir-playback-source]");
+  if (sourceSelect) {
+    const selected = sourceSelect.value;
+    sourceSelect.replaceChildren();
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "Нет сэмпла";
+    sourceSelect.append(empty);
+    samples.forEach((sample, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = sample.name;
+      sourceSelect.append(option);
+    });
+    if (samples.some((sample, index) => String(index) === selected)) sourceSelect.value = selected;
+    else if (samples.length) sourceSelect.value = "0";
+  }
 
   if (!samples.length) {
     const empty = document.createElement("li");
@@ -872,8 +924,21 @@ function collectConcreteThumpProfile(owner) {
     vocalTradition: owner.querySelector('[data-ritual-control="tradition"]').value,
     sampleTreatment: owner.querySelector('[data-ritual-control="treatment"]').value,
     chantSources: Array.from(owner.querySelectorAll("[data-chant-source]:checked"), (input) => input.value),
-    samples
+    samples,
+    sequence: Object.fromEntries(Array.from(owner.querySelectorAll("[data-sequence-track]"), (row) => [
+      row.dataset.sequenceTrack,
+      Array.from(row.querySelectorAll("[data-sequence-step]"), (button) =>
+        button.getAttribute("aria-pressed") === "true"
+      )
+    ]))
   });
+}
+
+function selectedConcreteThumpFile(owner) {
+  const picker = owner.querySelector("[data-choir-playback-source]");
+  if (!picker || picker.value === "") return null;
+  const sample = sampleSession(owner)[Number(picker.value)];
+  return sample && sample.file ? sample.file : null;
 }
 
 function refreshConcreteThumpPrompt(owner) {
@@ -906,7 +971,10 @@ function downloadConcreteThumpFile(fileName, source, mimeType) {
 
 function closeWindow(appWindow) {
   if (!appWindow) return;
-  if (appWindow.dataset.window === "concrete-thump") releaseConcreteThumpSamples(appWindow);
+  if (appWindow.dataset.window === "concrete-thump") {
+    stopConcreteThump(appWindow);
+    releaseConcreteThumpSamples(appWindow);
+  }
   appWindow.remove();
   updateActiveApp();
 }
@@ -985,6 +1053,14 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const sequenceStep = event.target.closest("[data-sequence-step]");
+  if (sequenceStep) {
+    const active = sequenceStep.getAttribute("aria-pressed") !== "true";
+    sequenceStep.setAttribute("aria-pressed", String(active));
+    sequenceStep.classList.toggle("active", active);
+    return;
+  }
+
   const beatSave = event.target.closest('[data-action="save-beat-profile"]');
   if (beatSave) {
     const owner = beatSave.closest(".app-window");
@@ -996,6 +1072,66 @@ document.addEventListener("click", (event) => {
     } else {
       status.textContent = "Не удалось сохранить профиль браузера.";
     }
+    return;
+  }
+
+  const playBeat = event.target.closest('[data-action="play-beat"]');
+  if (playBeat) {
+    const owner = playBeat.closest(".app-window");
+    const profile = collectConcreteThumpProfile(owner);
+    const stopButton = owner.querySelector('[data-action="stop-beat"]');
+    const status = owner.querySelector("[data-beat-status]");
+    playBeat.disabled = true;
+    stopButton.disabled = false;
+    status.textContent = "Готовлю четырёхтактовый рисунок…";
+    playConcreteThump({ owner, profile, sampleFile: selectedConcreteThumpFile(owner) })
+      .then(({ durationSeconds, choirLoaded }) => {
+        status.textContent = choirLoaded
+          ? "Играют drums, 808 и выбранные хоровые chops · " + durationSeconds.toFixed(1) + " с."
+          : "Играют drums и 808. Импортируйте и выберите аудиофайл для хоровой дорожки.";
+        globalThis.setTimeout(() => {
+          if (!owner.isConnected) return;
+          playBeat.disabled = false;
+          stopButton.disabled = true;
+        }, durationSeconds * 1000 + 350);
+      })
+      .catch((error) => {
+        playBeat.disabled = false;
+        stopButton.disabled = true;
+        status.textContent = error.message || "Не удалось запустить предпрослушивание.";
+      });
+    return;
+  }
+
+  const stopBeat = event.target.closest('[data-action="stop-beat"]');
+  if (stopBeat) {
+    const owner = stopBeat.closest(".app-window");
+    stopConcreteThump(owner);
+    const playButton = owner.querySelector('[data-action="play-beat"]');
+    playButton.disabled = false;
+    stopBeat.disabled = true;
+    owner.querySelector("[data-beat-status]").textContent = "Предпрослушивание остановлено.";
+    return;
+  }
+
+  const wavExport = event.target.closest('[data-action="export-beat-wav"]');
+  if (wavExport) {
+    const owner = wavExport.closest(".app-window");
+    const profile = collectConcreteThumpProfile(owner);
+    const status = owner.querySelector("[data-beat-status]");
+    wavExport.disabled = true;
+    status.textContent = "Рендерю четырёхтактовый WAV локально…";
+    renderConcreteThumpWav({ profile, sampleFile: selectedConcreteThumpFile(owner) })
+      .then((blob) => {
+        downloadConcreteThumpFile("concrete-thump-" + profile.bpm + "bpm.wav", blob, "audio/wav");
+        status.textContent = "WAV создан локально. Проверьте результат перед использованием в другом аудиоредакторе.";
+      })
+      .catch((error) => {
+        status.textContent = error.message || "Не удалось выполнить WAV-рендер.";
+      })
+      .finally(() => {
+        wavExport.disabled = false;
+      });
     return;
   }
 
