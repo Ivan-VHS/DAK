@@ -20,6 +20,7 @@ const COMPONENTS = Object.freeze({
 });
 
 const LOCALES = new Set(["en", "ru", "uk", "most"]);
+const EXTRA_TARGETS = new Set(["java", "kotlin", "python", "typescript", "rust", "c"]);
 
 function safeText(value, maximum, field) {
   if (typeof value !== "string") {
@@ -69,6 +70,21 @@ export function composeJoraRequest(options = {}) {
     throw new TypeError("The primary language must be among selected interface languages.");
   }
 
+  const requestedTargets = options.languageTargets || [];
+  if (!Array.isArray(requestedTargets)) {
+    throw new TypeError("Additional implementation targets must be a list.");
+  }
+  const uniqueTargets = new Set();
+  for (const target of requestedTargets) {
+    if (!EXTRA_TARGETS.has(target)) {
+      throw new TypeError("Unsupported additional language target: " + String(target));
+    }
+    if (uniqueTargets.has(target)) {
+      throw new TypeError("Duplicate additional language target: " + target);
+    }
+    uniqueTargets.add(target);
+  }
+
   const customName = safeText(options.name || "", 80, "application name");
   const description = safeText(options.description || "", 500, "application description");
   const formula = componentIds.map((id) => COMPONENTS[id].name).join(" + ");
@@ -88,7 +104,7 @@ export function composeJoraRequest(options = {}) {
     locales: [...localeIds],
     preferred_locale: preferredLocale,
     syntax_mode: "flow",
-    language_targets: "auto"
+    language_targets: uniqueTargets.size ? ["reaper", ...uniqueTargets] : "auto"
   };
 
   return Object.freeze({
@@ -96,6 +112,8 @@ export function composeJoraRequest(options = {}) {
     formula,
     request,
     target: "Reaper .rpr scaffold",
+    languageTargets: ["reaper", ...uniqueTargets],
+    pendingTargets: [...uniqueTargets],
     generatedLocales: [...localeIds]
   });
 }
