@@ -1,0 +1,276 @@
+{
+  "schema": "duckos.reaper-migration.v1",
+  "version": 1,
+  "project": "DuckOS",
+  "migration_goal": "Move executable OS, kernel, driver, service and user-space system logic to Reaper while retaining only reviewed architecture bootstrap and foreign-runtime boundaries.",
+  "maturity": "contract-first",
+  "reaper_dependency": {
+    "repository": "Ivan-VHS/Reaper",
+    "url": "https://github.com/Ivan-VHS/Reaper.git",
+    "submodule_path": "projects/reaper",
+    "pinned_commit": "cd84d347959f9b6cf60d87ab3d36bc94e05fd80f",
+    "source_of_pin": "federation/repositories.v1.json",
+    "required_entrypoints": [
+      "--check",
+      "--engine vm"
+    ],
+    "runtime_status": "reference-runtime-and-vm",
+    "native_aot_status": "experimental-scalar-subset"
+  },
+  "boot_target": {
+    "architecture": null,
+    "boot_protocol": null,
+    "kernel_abi": null,
+    "decision_status": "undecided",
+    "boot_info_contract": "C11 host-tested duckos.boot-info.v1",
+    "bootable_image": false,
+    "reason": "Architecture, boot protocol, memory map and kernel ABI require an approved ADR and native bring-up evidence."
+  },
+  "execution_profiles": {
+    "reaper_reference_contract": {
+      "status": "implemented",
+      "execution": [
+        "tree-walk",
+        "vm"
+      ],
+      "scope": "Policy and deterministic contract logic in duckos/**/*.rpr; this is not privileged hardware execution."
+    },
+    "reaper_native_kernel": {
+      "status": "planned",
+      "freestanding": false,
+      "object_backend": false,
+      "linker_integration": false,
+      "startup_runtime": false,
+      "bootable": false,
+      "blockers": [
+        "native lowering for lists, indexing, each, imports and collection pipelines",
+        "fixed-width integer and pointer types with target-aware layouts",
+        "aggregate ABI, alignment and packed-layout rules",
+        "freestanding runtime, panic, allocator and no-host-library profiles",
+        "ownership, lifetime, unsafe and effect/capability checking",
+        "volatile MMIO, atomics, barriers, DMA and interrupt contracts",
+        "architecture intrinsics, assembly entry points and context switching",
+        "object emission, relocations, linker scripts and debug information",
+        "cross-target differential tests and emulator boot qualification"
+      ]
+    }
+  },
+  "source_inventory": [
+    {
+      "path": "duckos/kernel/boot.rpr",
+      "subsystem": "boot",
+      "responsibility": "ordered startup and recovery policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/memory.rpr",
+      "subsystem": "memory",
+      "responsibility": "checked region arithmetic and arena reservation policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/arena.rpr",
+      "subsystem": "memory",
+      "responsibility": "bounded frame arena and SoA layout policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/scheduler.rpr",
+      "subsystem": "scheduler",
+      "responsibility": "deterministic ready-task selection policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/flock.rpr",
+      "subsystem": "scheduler",
+      "responsibility": "bounded least-loaded worker selection policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/ipc.rpr",
+      "subsystem": "ipc",
+      "responsibility": "bounded FIFO and backpressure policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/zero_copy_bus.rpr",
+      "subsystem": "ipc",
+      "responsibility": "byte accounting and watermarks for a future shared-memory bus",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/drivers/abi.rpr",
+      "subsystem": "drivers",
+      "responsibility": "driver descriptor and capability policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/drivers/orchestrator.rpr",
+      "subsystem": "drivers",
+      "responsibility": "device resource and IRQ conflict policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/security/capabilities.rpr",
+      "subsystem": "security",
+      "responsibility": "capability membership and attenuation",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/security/trust.rpr",
+      "subsystem": "security",
+      "responsibility": "input trust-state and effect-boundary policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/services/supervisor.rpr",
+      "subsystem": "services",
+      "responsibility": "bounded service restart policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/storage/hypergraph.rpr",
+      "subsystem": "storage",
+      "responsibility": "content-addressed graph reference validation",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/storage/crdt.rpr",
+      "subsystem": "storage",
+      "responsibility": "deterministic last-writer-wins register merge",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/system/three_media.rpr",
+      "subsystem": "system",
+      "responsibility": "CPU, accelerator and node-mesh selection policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/system/telemetry.rpr",
+      "subsystem": "system",
+      "responsibility": "bounded telemetry history and alert classification",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/ui/theme.rpr",
+      "subsystem": "ui",
+      "responsibility": "semantic desktop theme policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/ui/motion.rpr",
+      "subsystem": "ui",
+      "responsibility": "motion and frame-budget policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/ui/desktop.rpr",
+      "subsystem": "ui",
+      "responsibility": "desktop interaction policy",
+      "maturity": "reference-contract"
+    }
+  ],
+  "non_reaper_boundaries": [
+    {
+      "path": "foundation/boot_info.c",
+      "language": "C11",
+      "reason": "host-testable boot handoff validator; no bootloader or kernel entry exists yet"
+    },
+    {
+      "path": "duckos/**/*.py",
+      "language": "Python",
+      "reason": "host-side build tools, CLI, inspection, desktop launcher and integration tooling; not kernel code"
+    },
+    {
+      "path": "mora/**/*",
+      "language": "JavaScript/HTML/CSS",
+      "reason": "browser-hosted Mora desktop shell; migration requires a defined Reaper browser/UI runtime or an explicit retained web boundary"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G0",
+      "name": "reproducible baseline and source inventory",
+      "status": "implemented",
+      "acceptance": [
+        "exact Reaper submodule pin",
+        "all .rpr files statically checked",
+        "contract suite passes tree-walk and VM"
+      ]
+    },
+    {
+      "id": "G1",
+      "name": "architecture and ABI decision",
+      "status": "planned",
+      "acceptance": [
+        "approved CPU target and boot protocol ADR",
+        "versioned boot handoff and kernel ABI",
+        "QEMU machine profile and serial exit contract"
+      ]
+    },
+    {
+      "id": "G2",
+      "name": "Reaper freestanding systems subset",
+      "status": "planned",
+      "acceptance": [
+        "fixed-width types and aggregate layout",
+        "freestanding startup and panic profile",
+        "pointer, ownership and unsafe/effect checks",
+        "verified object and linker output"
+      ]
+    },
+    {
+      "id": "G3",
+      "name": "minimal Reaper kernel bring-up",
+      "status": "planned",
+      "acceptance": [
+        "bootable image",
+        "serial boot marker from Reaper kernel code",
+        "no Python or host runtime in target image"
+      ]
+    },
+    {
+      "id": "G4",
+      "name": "memory, exceptions, interrupts and scheduler",
+      "status": "planned",
+      "acceptance": [
+        "physical/page allocator invariants",
+        "exception and timer traces",
+        "preemptive context switching on SMP emulator"
+      ]
+    },
+    {
+      "id": "G5",
+      "name": "syscalls, drivers, storage and IPC",
+      "status": "planned",
+      "acceptance": [
+        "user-pointer validation",
+        "device and DMA adapter contracts",
+        "VFS and filesystem integration tests",
+        "bounded IPC with cancellation and wakeups"
+      ]
+    },
+    {
+      "id": "G6",
+      "name": "user space, services and desktop",
+      "status": "planned",
+      "acceptance": [
+        "Reaper-built user programs execute on DuckOS",
+        "service manager and package path work",
+        "Mora web/native boundary is explicit and tested"
+      ]
+    },
+    {
+      "id": "G7",
+      "name": "legacy removal and release qualification",
+      "status": "planned",
+      "acceptance": [
+        "no unapproved legacy executable system modules",
+        "reproducible cross-build",
+        "QEMU regression and recovery tests",
+        "security and performance sign-off"
+      ]
+    }
+  ]
+}
