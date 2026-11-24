@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -91,6 +92,24 @@ class ExtendedTerminalTests(unittest.TestCase):
         )
         result = extended.execute("sample check hello", record_history=False)
         self.assertEqual(result["result"], {"arguments": ["hello"], "available": True})
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "named pipes are POSIX-only")
+    def test_state_reader_rejects_fifo_without_blocking(self):
+        self.state.mkdir(parents=True)
+        fifo = self.state / "history.json"
+        os.mkfifo(fifo)
+        with self.assertRaisesRegex(TerminalInputError, "regular file"):
+            self.terminal._read_json(fifo, 1024, [])
+
+    def test_state_reader_rejects_symlinked_parent_directory(self):
+        target = self.state.parent / "external-state"
+        target.mkdir()
+        linked_state = self.state.parent / "linked-state"
+        linked_state.symlink_to(target, target_is_directory=True)
+        service = TerminalService.__new__(TerminalService)
+        service.state_dir = linked_state
+        with self.assertRaisesRegex(TerminalInputError, "directory must not be a symlink"):
+            service._read_json(linked_state / "config.json", 1024, {})
 
     def test_terminal_command_is_wired_to_the_existing_cli(self):
         output = io.StringIO()
