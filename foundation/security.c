@@ -7,6 +7,12 @@ static int string_ok(const char *text, size_t capacity, int required) {
     return end != NULL && (!required || end != text);
 }
 
+static void copy_text(char *destination, size_t capacity, const char *source) {
+    size_t length = strlen(source);
+    if (length >= capacity) length = capacity - 1u;
+    (void)memcpy(destination, source, length);
+    destination[length] = '\0';
+}
 static int same(const char *a, const char *b) { return strcmp(a, b) == 0; }
 static int file_kind(uint32_t k) {
     return k == DUCKOS_SECURITY_FILE_MODIFY ||
@@ -99,7 +105,7 @@ duckos_security_status duckos_security_ingest(
     v.struct_size = (uint32_t)sizeof(v);
     v.version = DUCKOS_SECURITY_ABI_VERSION;
     v.advisory_only = 1u;
-    (void)strncpy(v.event_id, e->event_id, sizeof(v.event_id) - 1u);
+    copy_text(v.event_id, sizeof(v.event_id), e->event_id);
 
     engine->events[engine->next_write] = *e;
     engine->next_write = (engine->next_write + 1u) % DUCKOS_SECURITY_EVENT_CAPACITY;
@@ -180,8 +186,7 @@ duckos_security_status duckos_security_ingest(
             for (size_t j = 0; j < host_count; ++j)
                 if (same(hosts[j], candidate->host_id)) found = 1;
             if (!found && host_count < DUCKOS_SECURITY_EVENT_CAPACITY) {
-                (void)strncpy(hosts[host_count], candidate->host_id, 63u);
-                hosts[host_count][63] = '\0';
+                copy_text(hosts[host_count], sizeof(hosts[host_count]), candidate->host_id);
                 ++host_count;
             }
         }
@@ -196,13 +201,11 @@ duckos_security_status duckos_security_ingest(
             signal(&v, DUCKOS_SECURITY_IND_CROSS_HOST_CLUSTER, 12u);
     }
 
-    (void)strncpy(v.causal_root_event_id, e->event_id,
-                  sizeof(v.causal_root_event_id) - 1u);
+    copy_text(v.causal_root_event_id, sizeof(v.causal_root_event_id), e->event_id);
     v.causal_depth = 1u;
     const duckos_security_event_v1 *cursor = e;
     char visited[DUCKOS_SECURITY_CAUSAL_DEPTH][64];
-    (void)strncpy(visited[0], e->event_id, 63u);
-    visited[0][63] = '\0';
+    copy_text(visited[0], sizeof(visited[0]), e->event_id);
     while (cursor->parent_event_id[0] != '\0' && v.causal_depth < DUCKOS_SECURITY_CAUSAL_DEPTH) {
         const duckos_security_event_v1 *parent = find_id(engine, cursor->parent_event_id);
         if (parent == NULL || !same(parent->host_id, e->host_id) ||
@@ -214,12 +217,9 @@ duckos_security_status duckos_security_ingest(
         for (size_t j = 0; j < v.causal_depth; ++j)
             if (same(visited[j], parent->event_id)) cycle = 1;
         if (cycle) break;
-        (void)strncpy(visited[v.causal_depth], parent->event_id, 63u);
-        visited[v.causal_depth][63] = '\0';
+        copy_text(visited[v.causal_depth], sizeof(visited[v.causal_depth]), parent->event_id);
         ++v.causal_depth;
-        (void)strncpy(v.causal_root_event_id, parent->event_id,
-                      sizeof(v.causal_root_event_id) - 1u);
-        v.causal_root_event_id[sizeof(v.causal_root_event_id) - 1u] = '\0';
+        copy_text(v.causal_root_event_id, sizeof(v.causal_root_event_id), parent->event_id);
         cursor = parent;
     }
 
