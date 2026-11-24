@@ -60,7 +60,7 @@ test("Jora allows graph topology, variant count and variation to be selected", (
     graphSeed: "user-seed-42",
     nameStyle: "descriptive"
   });
-  assert.equal(result.request.name, "Jora");
+  assert.equal(result.request.name, "Workspace for writing & translation");
   assert.equal(result.request.name_style, "descriptive");
   assert.deepEqual(result.request.graph, {
     topology: "event_driven", objective: "modularity", seed: "user-seed-42", variants: 2, variation: 80
