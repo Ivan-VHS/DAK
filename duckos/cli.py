@@ -64,6 +64,7 @@ def main(argv: list[str] | None = None) -> int:
     services.add_argument("--max-concurrency", type=int, default=4096)
     services.add_argument("--max-queued-jobs", type=int, default=65536)
     services.add_argument("--max-memory-bytes", type=int, default=16 * 1024 * 1024 * 1024)
+    services.add_argument("--max-profile-bytes", type=int, default=256 * 1024)
 
     inventory = commands.add_parser(
         "hardware-inventory", help="collect a read-only PCI/USB (Linux) or PnP (Windows) inventory"
@@ -247,6 +248,7 @@ def main(argv: list[str] | None = None) -> int:
                     max_total_concurrency=args.max_concurrency,
                     max_total_queued_jobs=args.max_queued_jobs,
                     max_total_memory_bytes=args.max_memory_bytes,
+                    max_profile_bytes=args.max_profile_bytes,
                 ),
             )
         elif args.command == "hardware-inventory":
