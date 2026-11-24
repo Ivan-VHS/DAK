@@ -58,6 +58,7 @@ let pendingIntentPlan = null;
 
 function applyPreferences() {
   document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
+  document.documentElement.classList.toggle("reduce-transparency", preferences.appearance.reduceTransparency);
   document.documentElement.dataset.theme = "duck";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
@@ -132,6 +133,8 @@ function executeApprovedPlan() {
       preferences.powerProfile = action.value;
     } else if (action.type === "set" && action.setting === "reducedMotion") {
       preferences.appearance.reducedMotion = action.value === true;
+    } else if (action.type === "set" && action.setting === "reduceTransparency") {
+      preferences.appearance.reduceTransparency = action.value === true;
     }
   }
 
@@ -172,7 +175,9 @@ function updateWorkspacePanel() {
   panel.querySelectorAll("[data-setting]").forEach((button) => {
     const enabled = button.dataset.setting === "focusMode"
       ? preferences.focusMode
-      : preferences.appearance.reducedMotion;
+      : button.dataset.setting === "reducedMotion"
+        ? preferences.appearance.reducedMotion
+        : preferences.appearance.reduceTransparency;
     button.setAttribute("aria-pressed", String(enabled));
     button.textContent = enabled ? "Включено" : "Выключено";
   });
@@ -628,6 +633,7 @@ function panelMarkup(appId) {
         '<div class="profile-options">' + profileButton("saver", "Экономия") + profileButton("balanced", "Баланс") + profileButton("performance", "Производительность") + '</div></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>Режим фокуса</strong><span>Приглушить второстепенные элементы оболочки</span></div><button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' + (preferences.focusMode ? "Включено" : "Выключено") + '</button></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>Снижение движения</strong><span>Убрать декоративные переходы и перемещения</span></div><button class="permission-toggle" data-setting="reducedMotion" aria-pressed="' + String(preferences.appearance.reducedMotion) + '">' + (preferences.appearance.reducedMotion ? "Включено" : "Выключено") + '</button></div>' +
+        '<div class="permission-row"><div class="permission-copy"><strong>Снижение прозрачности</strong><span>Заменить стекло непрозрачными поверхностями и отключить размытие</span></div><button class="permission-toggle" data-setting="reduceTransparency" aria-pressed="' + String(preferences.appearance.reduceTransparency) + '">' + (preferences.appearance.reduceTransparency ? "Включено" : "Выключено") + '</button></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>Адаптивная сетка и настройки доступности работают в оболочке. Аппаратные профили, VRR и NPU-планирование требуют native services.</span></div>' +
         '<p class="window-copy">Настройки хранятся локально в профиле браузера и могут быть сброшены очисткой данных сайта.</p>';
     case "provenance":
@@ -996,6 +1002,8 @@ document.addEventListener("click", (event) => {
       preferences.focusMode = !preferences.focusMode;
     } else if (setting.dataset.setting === "reducedMotion") {
       preferences.appearance.reducedMotion = !preferences.appearance.reducedMotion;
+    } else if (setting.dataset.setting === "reduceTransparency") {
+      preferences.appearance.reduceTransparency = !preferences.appearance.reduceTransparency;
     } else {
       return;
     }
