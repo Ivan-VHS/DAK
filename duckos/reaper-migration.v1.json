@@ -272,5 +272,12 @@
         "security and performance sign-off"
       ]
     }
-  ]
+  ],
+  "reaper_target_profile": {
+    "repository": "Ivan-VHS/Reaper",
+    "path": "language/targets/duckos-kernel.v1.json",
+    "target_id": "duckos-kernel",
+    "availability": "not-in-pinned-checkout",
+    "upstream_pull_request": 273
+  }
 }
