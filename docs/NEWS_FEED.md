@@ -20,7 +20,7 @@ The source list is explicit and version-controlled in mora/news-feed.js. Gazette
 1. Mora requests each configured public RSS URL through https://api.rss2json.com/v1/api.json.
 2. The converter response is treated as untrusted input. Titles and summaries are reduced to bounded plain text (180-character titles and 280-character descriptions), only HTTP(S) article links are accepted, and rendering uses DOM textContent; feed HTML is never inserted into the page.
 3. Results are deduplicated by article URL, sorted by publication time and capped at 60 headline records.
-4. Search and topic filters run locally. Bookmarks and the normalized headline cache are stored in the current browser profile.
+4. Search and topic filters run locally. Bookmarks store their own normalized headline card records (up to 200), so saved items remain visible even after they fall out of the 60-item latest-news cache. Both bookmarks and the normalized headline cache are stored in the current browser profile.
 5. A 15-minute cache window avoids repeat requests on every app open. A manual refresh bypasses that window. When some feeds fail, Gazette retains cached items for those publishers; when all feeds fail, it shows the last saved data and the source links.
 
 ## Privacy and boundaries

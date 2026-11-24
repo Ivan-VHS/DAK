@@ -82,6 +82,21 @@ function normalizeCachedItem(item) {
   }, source);
 }
 
+export function normalizeBookmarkRecords(value, fallbackItems = []) {
+  if (!Array.isArray(value)) return [];
+  const fallbackByUrl = new Map(
+    fallbackItems.filter((item) => safeArticleUrl(item?.url) === item.url).map((item) => [item.url, item])
+  );
+  const byUrl = new Map();
+  for (const entry of value.slice(-MAX_BOOKMARKS)) {
+    const item = typeof entry === "string"
+      ? fallbackByUrl.get(entry) || null
+      : normalizeCachedItem(entry);
+    if (item) byUrl.set(item.url, item);
+  }
+  return [...byUrl.values()].slice(-MAX_BOOKMARKS);
+}
+
 function readCache() {
   try {
     const stored = JSON.parse(globalThis.localStorage?.getItem(NEWS_CACHE_KEY) || "null");
@@ -109,19 +124,22 @@ function writeCache(items, fetchedAt, sources) {
   }
 }
 
-function readBookmarks() {
+function readBookmarks(fallbackItems = []) {
   try {
     const value = JSON.parse(globalThis.localStorage?.getItem(NEWS_BOOKMARKS_KEY) || "[]");
-    if (!Array.isArray(value)) return new Set();
-    return new Set(value.filter((url) => safeArticleUrl(url) === url).slice(0, MAX_BOOKMARKS));
+    return new Map(normalizeBookmarkRecords(value, fallbackItems).map((item) => [item.url, item]));
   } catch {
-    return new Set();
+    return new Map();
   }
 }
 
 function writeBookmarks(bookmarks) {
   try {
-    globalThis.localStorage?.setItem(NEWS_BOOKMARKS_KEY, JSON.stringify([...bookmarks].slice(0, MAX_BOOKMARKS)));
+    if (!globalThis.localStorage) return false;
+    globalThis.localStorage.setItem(
+      NEWS_BOOKMARKS_KEY,
+      JSON.stringify([...bookmarks.values()].slice(0, MAX_BOOKMARKS))
+    );
     return true;
   } catch {
     return false;
@@ -267,7 +285,7 @@ export function initializeNewsPanel(appWindow, { showToast } = {}) {
 
   let cache = readCache();
   let articles = cache?.items || [];
-  let bookmarks = readBookmarks();
+  let bookmarks = readBookmarks(articles);
   let activeCategory = "all";
   let isLoading = false;
   let lastUpdated = cache?.fetchedAt || 0;
@@ -278,9 +296,10 @@ export function initializeNewsPanel(appWindow, { showToast } = {}) {
 
   function render() {
     const query = search.value.trim().toLocaleLowerCase("ru-RU");
-    const matches = articles.filter((item) => {
+    const candidates = activeCategory === "saved" ? [...bookmarks.values()] : articles;
+    const matches = candidates.filter((item) => {
       const categoryMatch = activeCategory === "all" ||
-        (activeCategory === "saved" ? bookmarks.has(item.url) : item.category === activeCategory);
+        activeCategory === "saved" || item.category === activeCategory;
       const searchMatch = !query ||
         (item.title + " " + item.description + " " + item.sourceName).toLocaleLowerCase("ru-RU").includes(query);
       return categoryMatch && searchMatch;
@@ -376,7 +395,9 @@ export function initializeNewsPanel(appWindow, { showToast } = {}) {
         status.textContent = "Достигнут предел в " + MAX_BOOKMARKS + " закладок. Удалите старые, чтобы добавить новые.";
         return;
       }
-      bookmarks.add(url);
+      const article = articles.find((item) => item.url === url);
+      if (!article) return;
+      bookmarks.set(url, article);
     }
     if (!writeBookmarks(bookmarks)) {
       status.textContent = "Не удалось сохранить закладку в этом профиле браузера.";

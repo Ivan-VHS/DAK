@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  NEWS_SOURCES, normalizeNewsItem, plainText, safeArticleUrl,
+  NEWS_SOURCES, normalizeNewsItem, normalizeBookmarkRecords, plainText, safeArticleUrl,
   newsPanelMarkup, NEWS_CACHE_TTL_MS, MAX_NEWS_ITEMS
 } from "../mora/news-feed.js";
 
@@ -51,6 +51,19 @@ test("news item normalization rejects unsafe links and untrusted markup is only 
     title: "Long headline", link: "https://example.com/news/3", description: "x".repeat(400)
   }, source);
   assert.equal(longExcerpt.description.length, 280);
+  const normalized = normalizeNewsItem({
+    title: "Saved headline", link: "https://example.com/news/saved",
+    description: "A short saved excerpt", publishedAt: "2026-11-24T00:00:00Z"
+  }, source);
+  assert.deepEqual(
+    normalizeBookmarkRecords([normalized]).map((item) => item.url),
+    ["https://example.com/news/saved"]
+  );
+  assert.deepEqual(
+    normalizeBookmarkRecords(["https://example.com/news/saved"], [normalized]).map((item) => item.url),
+    ["https://example.com/news/saved"]
+  );
+  assert.deepEqual(normalizeBookmarkRecords(["https://example.com/not-in-cache"]), []);
   assert.equal(normalizeNewsItem({ title: "Unsafe", link: "javascript:alert(1)" }, source), null);
   assert.equal(normalizeNewsItem({ title: "<b></b>", link: "https://example.com" }, source), null);
 });
