@@ -16,6 +16,13 @@ const COMPONENTS = Object.freeze({
 const LOCALES = new Set(["en", "ru", "uk", "most"]);
 const EXTRA_TARGETS = new Set(["java", "kotlin", "python", "typescript", "rust", "c"]);
 const NAME_STYLES = new Set(["compact", "balanced", "descriptive", "formula"]);
+const GRAPH_OBJECTIVES = Object.freeze({
+  balanced: "Сбалансированность",
+  low_latency: "Минимальная задержка",
+  modularity: "Модульность",
+  extensibility: "Расширяемость",
+  minimal_complexity: "Минимальная сложность"
+});
 const GRAPH_TOPOLOGIES = Object.freeze({
   auto: "Автоматический подбор",
   layered: "Многослойная композиция",
@@ -102,6 +109,10 @@ export function composeJoraRequest(options = {}) {
   if (!Object.hasOwn(GRAPH_TOPOLOGIES, graphTopology)) {
     throw new TypeError("Unsupported Jora graph topology: " + String(graphTopology));
   }
+  const graphObjective = options.graphObjective || "balanced";
+  if (!Object.hasOwn(GRAPH_OBJECTIVES, graphObjective)) {
+    throw new TypeError("Unsupported Jora graph objective: " + String(graphObjective));
+  }
   const graphVariants = options.graphVariants === undefined ? 4 : options.graphVariants;
   const graphVariation = options.graphVariation === undefined ? 50 : options.graphVariation;
   if (!Number.isInteger(graphVariants) || graphVariants < 1 || graphVariants > 6) {
@@ -132,6 +143,7 @@ export function composeJoraRequest(options = {}) {
 
   const graph = {
     topology: graphTopology,
+    objective: graphObjective,
     seed: graphSeed,
     variants: graphVariants,
     variation: graphVariation
@@ -158,6 +170,8 @@ export function composeJoraRequest(options = {}) {
     graphPlan: {
       topology: graphTopology,
       topologyLabel: GRAPH_TOPOLOGIES[graphTopology],
+      objective: graphObjective,
+      objectiveLabel: GRAPH_OBJECTIVES[graphObjective],
       selectionPolicy: "max_compatibility_then_capability_reuse_then_minimal_planned_nodes",
       variants: graphVariants,
       variation: graphVariation,
