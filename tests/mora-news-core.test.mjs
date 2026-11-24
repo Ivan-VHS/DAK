@@ -37,6 +37,7 @@ test("user search text is bounded and cannot add raw GDELT query operators", () 
 test("GDELT timestamps are parsed as UTC and invalid dates are rejected", () => {
   assert.equal(parseGdeltDate("20261124T013045Z"), "2026-11-24T01:30:45.000Z");
   assert.equal(parseGdeltDate("not-a-date"), null);
+  assert.equal(parseGdeltDate("20261324T013045Z"), null);
   assert.equal(parseGdeltDate(null), null);
 });
 
@@ -57,6 +58,7 @@ test("article normalization accepts HTTPS publisher URLs and rejects unsafe sche
   assert.equal(article.seenAt, "2026-11-24T01:00:00.000Z");
   assert.equal(normalizeNewsArticle({ title: "bad", url: "javascript:alert(1)" }), null);
   assert.equal(normalizeNewsArticle({ title: "bad", url: "http://example.org/story" }), null);
+  assert.equal(normalizeNewsArticle({ title: "bad", url: "https://example.org/" + "x".repeat(2049) }), null);
   assert.equal(normalizeNewsArticle({ title: "", url: "https://example.org/story" }), null);
 });
 
