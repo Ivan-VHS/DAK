@@ -37,3 +37,8 @@ jobs:
 
       - name: Run contract suite with VM engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+
+      - name: Run DuckOS predictive-security contracts with tree-walk engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/security/contract_tests.rpr"
+      - name: Run DuckOS predictive-security contracts with VM engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/duckos/security/contract_tests.rpr"

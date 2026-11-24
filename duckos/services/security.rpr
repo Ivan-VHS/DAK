@@ -1,0 +1,69 @@
+# DuckOS predictive-security service lifecycle and authority contract.
+# This policy is ready for the future native service manager; it does not
+# start a daemon or enforce process/filesystem/network actions by itself.
+
+import "supervisor.rpr" as supervisor
+import "../kernel/security.rpr" as kernel_security
+
+export craft descriptor() {
+    yield [
+        "duckos.security",
+        1,
+        "services",
+        [
+            "security.events.read",
+            "security.policy.evaluate",
+            "security.audit.write",
+            "security.snapshot.create",
+            "security.integrity.verify"
+        ]
+    ]
+}
+
+export craft start_allowed(phase, dependencies_ready, policy_valid, audit_ready) {
+    when phase != "services" {
+        yield false
+    }
+    yield dependencies_ready and policy_valid and audit_ready
+}
+
+export craft health_state(queue_depth, queue_capacity, event_loss, policy_loaded, audit_ready) {
+    when queue_depth < 0 or queue_capacity <= 0 or queue_depth > queue_capacity or event_loss < 0 {
+        yield "invalid"
+    }
+    when not policy_loaded or not audit_ready {
+        yield "degraded"
+    }
+    when queue_depth == queue_capacity or event_loss > 0 {
+        yield "backpressured"
+    }
+    yield "healthy"
+}
+
+export craft authorize_action(
+    action,
+    trust_label,
+    grants,
+    evidence_fresh,
+    policy_valid,
+    human_approved,
+    snapshot_authenticated,
+    content_verified,
+    target_authorized
+) {
+    yield kernel_security["authorize_action"](
+        action,
+        trust_label,
+        grants,
+        evidence_fresh,
+        policy_valid,
+        human_approved,
+        snapshot_authenticated,
+        content_verified,
+        target_authorized
+    )
+}
+
+export craft restart_decision(exit_code, retries, retry_limit) {
+    yield supervisor["decide"](exit_code, retries, retry_limit)
+}

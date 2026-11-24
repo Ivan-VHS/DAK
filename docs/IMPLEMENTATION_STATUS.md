@@ -134,3 +134,47 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Predictive security foundation — 2026-11-24
+
+- [x] Versioned, bounded event model for process, file, network, memory, identity, registry, service, integrity, driver, mesh and sandbox observations.
+- [x] Deterministic risk correlation for supplied events: file mutation bursts, entropy deltas, LOLBin launch context, credential-material access, process injection, integrity tampering, unverified driver observations, periodic beacon hints and multi-host indicator clusters.
+- [x] Bounded parent-event causal chains, explainable indicator evidence and advisory risk recommendations.
+- [x] Bounded in-memory flight recorder with sensitive-key redaction and causal-edge export.
+- [x] Explicit managed-root regular-file snapshots with size/quota limits, path and symlink checks, SHA-256 verification and atomic replacement on restore.
+- [x] Read-only SHA-256 component-manifest verification.
+- [x] HMAC-authenticated mesh alert envelope creation, TTL validation and replay rejection; network transport and peer key provisioning remain absent.
+- [x] Workload-aware scan scheduling hints that never suppress event collection or lower security thresholds.
+- [x] Central Reaper security decision contracts and tests for risk levels, snapshot requirements, recovery authorization, mesh acceptance and quiet-mode overrides.
+- [x] Native CLI surfaces for status, offline event analysis, explicit snapshots and integrity reports.
+- [x] Reaper service-lifecycle contract registers the security service, dependencies, health/backpressure states and bounded supervisor restart.
+- [x] Kernel security policy contract provides deny-by-default action authorization with per-action capabilities, fresh evidence, snapshot integrity checks and explicit approval for destructive operations.
+- [x] System telemetry and IPC contracts enforce trusted sensor publishing and separate analysis-service read grants.
+- [x] Driver ABI policy adds security-sensor admission gates for signature, publisher trust, revocation, image digest, architecture, capabilities and measured boot.
+- [ ] Live native process, filesystem, network, identity, memory and kernel telemetry sensors.
+- [ ] Native kernel-enforced policy broker, process termination/isolation, firewall actions and system-wide capability checks.
+- [ ] Native implementation of the security telemetry ABI, trusted event source adapters and kernel IPC enforcement.
+- [ ] Filesystem pre-operation filter/journal and crash-safe system-wide ransomware recovery.
+- [ ] Hardware-backed memory protection, secure boot measurement and protected driver loading.
+- [ ] Real sandbox execution, browser token integration, autonomous repair and mesh transport.
+- [ ] End-to-end emulator/hardware validation and performance qualification.
+
+The checked boxes describe implemented user-space policy and evidence services only. They do not represent active kernel protection. Refer to SECURITY_ARCHITECTURE.md for exact boundaries and native bring-up gates.
+
+
+
+## Native C11 security foundation — 2026-11-24
+
+- [x] Versioned fixed-width C11 event/evaluation ABI with bounded identifiers and explicit trust labels.
+- [x] Fixed-capacity 128-entry event ring with no heap allocation in the ingestion path.
+- [x] Fail-closed event validation, trusted-source enforcement, event ID deduplication and per-host sequence/monotonic-time ordering.
+- [x] Native deterministic risk indicators for process injection, sensitive memory reads, credential material, protected-component tampering, unverified driver observations, file mutation bursts, entropy changes, malicious destinations, beacon hints, LOLBin context and cross-host IOC clusters.
+- [x] Bounded causal ancestry and explainable advisory recommendation.
+- [x] Separate deny-by-default C authorization API with least-privilege capability bits, fresh evidence/policy requirements, explicit destructive-action approval and verified snapshot/target conditions for restore.
+- [x] CMake library and CTest regression target.
+- [ ] Connect kernel/process/filesystem/network sensor callbacks to the native event ABI.
+- [ ] Link the security foundation into a booted kernel/service image and enforce authorization at privileged syscall/device boundaries.
+- [ ] Add a platform-native filesystem filter/journal, process sandbox and hardware-backed isolation.
+
+The native C foundation is compiled and tested as a static library. It is not yet a kernel driver or boot-time enforcement mechanism.

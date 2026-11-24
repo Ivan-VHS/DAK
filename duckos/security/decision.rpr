@@ -1,0 +1,78 @@
+# Central security decision policy.
+# These are deterministic policy contracts; native enforcement remains a separate gate.
+
+export craft risk_score(file_mutations, entropy_delta, periodic_beacon, suspicious_chain, credential_access, protected_tamper) {
+    when file_mutations < 0 or entropy_delta < 0 or entropy_delta > 1 {
+        yield -1
+    }
+    vary score := 0
+    when file_mutations >= 3 {
+        change score := score + 20
+    }
+    when file_mutations >= 8 {
+        change score := score + 15
+    }
+    when entropy_delta >= 0.25 {
+        change score := score + 15
+    }
+    when entropy_delta >= 0.5 {
+        change score := score + 15
+    }
+    when periodic_beacon {
+        change score := score + 20
+    }
+    when suspicious_chain {
+        change score := score + 25
+    }
+    when credential_access {
+        change score := score + 60
+    }
+    when protected_tamper {
+        change score := score + 60
+    }
+    when score > 100 {
+        change score := 100
+    }
+    yield score
+}
+
+export craft action_for(score) {
+    when score < 0 or score > 100 {
+        yield "invalid"
+    }
+    when score >= 80 {
+        yield "block"
+    }
+    when score >= 60 {
+        yield "isolate"
+    }
+    when score >= 35 {
+        yield "restrict"
+    }
+    when score >= 20 {
+        yield "sandbox"
+    }
+    yield "monitor"
+}
+
+export craft snapshot_required(destructive, score) {
+    yield destructive or score >= 20
+}
+
+export craft mesh_signal_allowed(signature_valid, fresh, replayed) {
+    yield signature_valid and fresh and not replayed
+}
+
+export craft recovery_allowed(snapshot_authenticated, content_verified, target_authorized) {
+    yield snapshot_authenticated and content_verified and target_authorized
+}
+
+export craft resource_profile(fullscreen, on_battery, suspicious_activity) {
+    when suspicious_activity {
+        yield "security_critical"
+    }
+    when fullscreen or on_battery {
+        yield "quiet"
+    }
+    yield "balanced"
+}

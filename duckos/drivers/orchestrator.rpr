@@ -50,3 +50,31 @@ export craft package_policy(package, device, target_arch, expected_abi, supporte
     }
     yield "approved"
 }
+
+
+# Security sensors use a stricter publisher, revocation, image and boot-trust gate.
+export craft security_sensor_package_policy(
+    sensor,
+    expected_abi,
+    supported_buses,
+    target_arch,
+    grants,
+    signature_verified,
+    signer_trusted,
+    not_revoked,
+    digest_matches,
+    secure_boot_verified
+) {
+    yield abi["security_sensor_policy"](
+        sensor,
+        expected_abi,
+        supported_buses,
+        target_arch,
+        grants,
+        signature_verified,
+        signer_trusted,
+        not_revoked,
+        digest_matches,
+        secure_boot_verified
+    )
+}

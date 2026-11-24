@@ -87,6 +87,20 @@ The native Python toolchain now provides deterministic, optionally Ed25519-signe
 
 See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce a verified component archive or deployment plan; they do not yet build a bootable ISO/USB image, install to a physical disk, convert cloud images, or implement firmware Secure Boot and boot rollback.
 
+## Predictive security stack
+
+DuckOS includes a compiled C11 security foundation, Reaper system-policy contracts and a bounded Python user-space analysis service for predictive security. The service accepts versioned telemetry batches, correlates process/file/network/identity/integrity events, builds causal chains, scores supplied indicators, produces explainable advisory recommendations and exports redacted forensic context. It also provides an explicit managed-root file snapshot API, read-only SHA-256 manifest verification, HMAC-authenticated mesh-alert envelopes and workload-aware scan hints.
+
+Native CLI entry points:
+
+- duckos security status — exact subsystem maturity and enforcement boundaries;
+- duckos security analyze EVENTS.json — offline analysis of caller-supplied events;
+- duckos security snapshot create ROOT RELATIVE_PATH — explicit pre-change snapshot;
+- duckos security snapshot restore ROOT SNAPSHOT_ID — verified restore;
+- duckos security integrity ROOT MANIFEST.json — read-only integrity verification.
+
+The analysis and snapshot APIs run in user space; Reaper contracts are wired into the OS service, trust, IPC, telemetry and driver-policy layers. This is not yet a live kernel antivirus. Process, memory, filesystem, browser-token and network sensors; native pre-operation interception; hardware memory isolation; actual sandbox execution; protected driver loading; autonomous repair and mesh networking remain native OS bring-up work. See [Predictive security architecture](docs/SECURITY_ARCHITECTURE.md) and [versioned event schema](schemas/security-events.v1.schema.json).
+
 ## System architecture and maturity
 
 The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).

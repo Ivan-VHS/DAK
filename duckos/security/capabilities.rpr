@@ -19,3 +19,38 @@ export craft child_is_subset(parent_grants, child_grants) {
     }
     yield allowed
 }
+
+
+# Narrow, composable security grants. Enforcement grants are never included
+# in the observer or analysis-service bundles.
+export craft security_sensor_grants() {
+    yield [
+        "security.telemetry.publish",
+        "security.process.observe",
+        "security.file.observe",
+        "security.network.observe",
+        "security.identity.observe",
+        "security.memory.observe",
+        "security.integrity.observe"
+    ]
+}
+
+export craft security_service_grants() {
+    yield [
+        "security.events.read",
+        "security.policy.evaluate",
+        "security.audit.write",
+        "security.snapshot.create",
+        "security.integrity.verify"
+    ]
+}
+
+export craft security_enforcement_grants() {
+    yield [
+        "security.file.restore",
+        "security.process.isolate",
+        "security.process.terminate",
+        "security.network.isolate",
+        "security.driver.quarantine"
+    ]
+}

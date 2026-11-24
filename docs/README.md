@@ -50,3 +50,8 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Capability completeness standard
 
 [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
+
+
+## Security
+
+- [Predictive security architecture](SECURITY_ARCHITECTURE.md) — event contracts, correlation, recovery boundaries, mesh authentication, forensic export and native enforcement gates.
