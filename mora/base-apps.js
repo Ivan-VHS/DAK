@@ -26,9 +26,28 @@ function storageKey(appId) {
 function readRecords(appId) {
   try {
     const parsed = JSON.parse(localStorage.getItem(storageKey(appId)) || "[]");
-    return Array.isArray(parsed)
-      ? parsed.filter((item) => item && typeof item === "object").slice(0, MAX_RECORDS)
-      : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+      if (appId === "sumora") {
+        return typeof item.label === "string" &&
+          ["income", "expense"].includes(item.kind) &&
+          Number.isFinite(item.amount) && item.amount > 0;
+      }
+      if (appId === "paceforge") {
+        return typeof item.activity === "string" &&
+          Number.isInteger(item.minutes) && item.minutes > 0 && item.minutes <= 1440;
+      }
+      if (appId === "mnemo") return typeof item.question === "string" && typeof item.answer === "string";
+      if (appId === "wayline") return typeof item.url === "string";
+      if (appId === "nuvault" || appId === "pixora") {
+        return typeof item.name === "string" && Number.isFinite(item.size) && item.size >= 0;
+      }
+      if (appId === "daymark") return typeof item.text === "string";
+      if (appId === "relay") return typeof item.name === "string";
+      if (appId === "trailmark") return typeof item.stop === "string";
+      return typeof item.text === "string";
+    }).slice(0, MAX_RECORDS);
   } catch {
     return [];
   }
