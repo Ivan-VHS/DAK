@@ -16,12 +16,12 @@ class JoraCliTests(unittest.TestCase):
             request.write_text("{}", encoding="utf-8")
             output = root / "new-app"
             expected = {"ok": True, "result": {"installable": False}}
-            with patch("duckos.desktop.reaper.ReaperWorkbench.jora_build", return_value=expected) as build:
+            with patch("duckos.desktop.reaper.ReaperWorkbench") as workbench:
+                workbench.return_value.jora_build.return_value = expected
                 exit_code = main(["jora", "build", str(request), str(output)])
             self.assertEqual(exit_code, 0)
-            self.assertEqual(build.call_count, 1)
-            args = build.call_args.args
-            self.assertEqual(args[1:], (request, output))
+            workbench.assert_called_once_with()
+            workbench.return_value.jora_build.assert_called_once_with(request, output)
 
 
 if __name__ == "__main__":
