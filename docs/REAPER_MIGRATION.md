@@ -40,6 +40,8 @@ The duckos/reaper-migration.v1.json file is the machine-readable inventory. Addi
 
 ## 3. Reaper capability gap: reference semantics versus native target
 
+The companion target contract is being proposed upstream in [Reaper PR #273](https://github.com/Ivan-VHS/Reaper/pull/273). It defines the required freestanding-kernel profile and its promotion rules. The DuckOS submodule is intentionally still pinned to its reviewed existing commit, so that profile is recorded as not yet present in the pinned checkout; it becomes an available integration input only after the Reaper change is accepted and DuckOS advances its submodule pin deliberately.
+
 Reaper's Python reference runtime and VM support materially more of the current DuckOS .rpr contract language than its experimental native AOT backend.
 
 | Required feature | Reference runtime / VM | Native AOT or freestanding kernel |
