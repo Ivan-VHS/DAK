@@ -437,6 +437,33 @@
         "mora/index.html",
         "mora/app.js"
       ]
+    },
+    {
+      "id": "news",
+      "name": "Газета",
+      "domain": "news_aggregation",
+      "maturity_status": "specified",
+      "capabilities": [
+        "live_news_search",
+        "topic_sections",
+        "saved_articles",
+        "newspaper_paper_interface",
+        "cached_recent_results"
+      ],
+      "boundaries": [
+        "The Mora browser app retrieves article metadata from the public GDELT DOC 2.0 API; the native DAK news provider remains a design contract.",
+        "The app links to original HTTPS publisher pages and does not scrape full article text, bypass subscriptions or certify editorial accuracy.",
+        "Search results and up to 100 bookmarks are stored only in the current browser profile; no cross-device sync or account is connected.",
+        "Network access is user-visible and can fail when the external provider is unavailable or rate limited."
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js",
+        "mora/news.js",
+        "mora/news-core.js"
+      ]
     }
   ],
   "workflows": [
@@ -607,6 +634,12 @@
       ],
       "exedotexe": [
         "Reuses local PE/ELF inspection and SHA-256; no executable launch or signature validation."
+      ],
+      "news": [
+        "Loads current article metadata from GDELT DOC 2.0 using topic sections and explicit search; refresh is user-triggered and requests are rate limited.",
+        "Caches up to eight recent query result sets and stores up to 100 bookmarks in namespaced localStorage for the current browser profile.",
+        "Validates external article and image URLs as HTTPS and opens publishers in a separate tab without sending a referrer.",
+        "Does not scrape full articles, synchronize bookmarks, rank sources by trust or verify claims; native DAK news services remain a design proposal."
       ]
     }
   },
