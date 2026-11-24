@@ -181,7 +181,13 @@ class GovernorAndServiceTests(unittest.TestCase):
         self.assertEqual(status["kernel_enforcement"], "not_implemented")
         self.assertEqual(status["live_sensor_collection"], "not_connected")
         self.assertEqual(status["system_service_policy"], "registered_in_reaper_service_lifecycle_contract")
+        self.assertEqual(status["kernel_authorization_policy"], "reaper_contract_only")
+        self.assertEqual(status["trusted_telemetry_contract"], "reaper_contract_only")
+        self.assertEqual(status["security_sensor_driver_admission"], "reaper_contract_only")
         self.assertEqual(status["native_service_process"], "not_implemented")
+        self.assertEqual(status["native_kernel_enforcement"], "not_implemented")
+        self.assertEqual(status["native_sensor_runtime"], "not_connected")
+        self.assertEqual(status["native_driver_loader"], "not_implemented")
 
 
 if __name__ == "__main__":
