@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v7-duck-palette";
+const CACHE = "mora-shell-v8-ritual-sample-workspace";
 const ASSETS = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS = [
   "./app.js",
   "./commons-catalog.js",
   "./core.js",
+  "./concrete-thump.js",
   "./apps.json",
   "./system-policy.json",
   "./theme.json",
