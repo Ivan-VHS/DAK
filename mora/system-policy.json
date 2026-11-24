@@ -8,7 +8,8 @@
     "Intent actions are limited to a reviewed local allowlist and require explicit approval.",
     "Unconfigured capabilities default to denied in the shell preference profile.",
     "File inspection and hashing run locally; uploads are not performed by the shell.",
-    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected."
+    "A UI control is not evidence that a kernel, driver, updater, model or runtime is connected.",
+    "BAV context tags describe subject matter only and never establish a malware verdict or authorize quarantine."
   ],
   "capabilities": {
     "desktop": {
@@ -86,6 +87,10 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "bav_context_classification": {
+      "maturity": "partial",
+      "scope": "Java 17 bounded local classifier for 60 descriptive terms in three categories; no malware engine, binary scanning, signature verification, sandboxing or quarantine"
     }
   },
   "not_in_scope_as_implemented_features": [
