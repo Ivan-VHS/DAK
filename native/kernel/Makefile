@@ -1,7 +1,7 @@
 CC = clang
 LD = ld.lld
 BUILD_DIR := build
-INCLUDES := -Iinclude
+INCLUDES := -Iinclude -I../../foundation
 CFLAGS := --target=x86_64-unknown-none-elf -std=c11 -O2 -Wall -Wextra -Werror \
 	-ffreestanding -fno-stack-protector -fno-pic -fno-pie \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables \
@@ -9,7 +9,7 @@ CFLAGS := --target=x86_64-unknown-none-elf -std=c11 -O2 -Wall -Wextra -Werror \
 LDFLAGS := -nostdlib -static -no-pie -z max-page-size=0x1000 -T linker.ld
 
 SOURCES := src/kernel.c src/serial.c src/initramfs.c
-OBJECTS := $(patsubst src/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
+OBJECTS := $(patsubst src/%.c,$(BUILD_DIR)/%.o,$(SOURCES)) $(BUILD_DIR)/security-foundation.o $(BUILD_DIR)/security-api.o
 
 .PHONY: all clean
 all: $(BUILD_DIR)/kernel.elf
@@ -19,6 +19,12 @@ $(BUILD_DIR):
 
 $(BUILD_DIR)/%.o: src/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/security-foundation.o: ../../foundation/security.c ../../foundation/security.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -fno-builtin -DDUCKOS_SECURITY_FREESTANDING $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/security-api.o: src/security.c include/security_api.h ../../foundation/security.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -fno-builtin $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/kernel.elf: $(OBJECTS) linker.ld
 	$(LD) $(LDFLAGS) $(OBJECTS) -o $@

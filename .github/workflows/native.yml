@@ -36,6 +36,8 @@ jobs:
         run: printf '#include "native/abi/include/duckos/driver.h"\nint main(void) { return 0; }\n' | clang -std=c11 -Wall -Wextra -Werror -x c -fsyntax-only -
       - name: Test CPIO validator
         run: clang -std=c11 -Wall -Wextra -Werror -Inative/kernel/src native/kernel/src/initramfs.c native/tests/test_initramfs_validator.c -o /tmp/duckos-initramfs-test && /tmp/duckos-initramfs-test
+      - name: Test native security policy engine
+        run: clang -std=c11 -Wall -Wextra -Werror -Ifoundation foundation/security.c native/tests/test_security_foundation.c -o /tmp/duckos-security-test && /tmp/duckos-security-test
 
   wayland-egl-shell:
     runs-on: ubuntu-latest

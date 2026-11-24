@@ -21,21 +21,21 @@ Build output is written to ../build/native, outside this source tree.
 
 | Subsystem | Current state | What exists now |
 |---|---|---|
-| Kernel | Early bring-up | Freestanding x86-64 ELF, Limine base revision 6 requests, COM1 logging, memory-map summary and framebuffer test pattern |
+| Kernel | Early bring-up with security foundation | Freestanding x86-64 ELF, Limine base revision 6 requests, COM1 logging, memory-map summary, framebuffer test pattern and linked C11 BAV event/risk/authorization core initialized at boot; no live event hooks or enforcement |
 | Bootloader | Integrated external project | Limine config and ISO staging; Limine itself is not forked or modified |
 | initramfs | Builder implemented | Deterministic newc CPIO generator and an early init script; kernel does not yet unpack it or launch PID 1 |
 | Wayland compositor | Preview bring-up | wlroots backend, renderer, output frame path, compositor and xdg-shell globals; input seat/focus and desktop policy remain unfinished |
 | Package manager | Local prototype | SHA-256 verified, traversal-safe, staged package store with list/verify/remove |
-| Driver ABI | Contract only | Versioned C header; no kernel module loader or device model exists yet |
+| Driver ABI | Contract only | Versioned C header; security admission policy exists in Reaper branch, but no kernel module loader or device model exists yet |
 | GPU acceleration | Host integration only | wlroots/Mesa EGL-GLES renderer path; no GPU driver or DRM subsystem in the DuckOS kernel |
 | AI sandbox | Linux host wrapper | Bubblewrap namespaces, network isolation, reduced filesystem view and resource limits; not a kernel security boundary |
 | Installer image | Builder integrated | Hybrid BIOS/UEFI ISO staging; it currently boots the bring-up kernel, not a complete desktop installation |
 
 ## Kernel handoff
 
-The current kernel is intentionally small. It validates the Limine base revision, initializes a serial console, reports bootloader information, the HHDM offset, usable RAM and boot modules, and paints the provided 32-bit RGB framebuffer. It then halts safely.
+The current kernel is intentionally small. It validates the Limine base revision, initializes a serial console and the fixed-capacity C11 security event/risk engine, reports bootloader information, the HHDM offset, usable RAM and boot modules, and paints the provided 32-bit RGB framebuffer. It then halts safely. The security API is linked into the freestanding kernel image and initialized, but there are no process/filesystem/network/driver callbacks to submit live events and no privileged enforcement broker yet.
 
-Not implemented: GDT/IDT ownership, APIC and interrupt routing, physical/virtual page allocators, SMP startup, scheduler, syscall boundary, process loader, VFS, filesystem drivers, PCI enumeration, USB, storage, networking, power management, module loader, IOMMU and firmware services. These are explicit future milestones, not hidden behind placeholder APIs.
+Not implemented: GDT/IDT ownership, APIC and interrupt routing, physical/virtual page allocators, SMP startup, scheduler, syscall boundary, process loader, VFS, filesystem drivers, PCI enumeration, USB, storage, networking, power management, module loader, IOMMU and firmware services. The BAV core does not yet have kernel event sources, filesystem pre-operation journaling, process termination/isolation, hardware memory isolation or driver quarantine. These are explicit future milestones, not hidden behind placeholder APIs.
 
 ## Security and release rules
 
