@@ -21,8 +21,16 @@ export craft snapshot_descriptor_valid(snapshot) {
     when size(snapshot) != 4 {
         yield false
     }
-    yield snapshot[0] > 0 and snapshot[1] > 0
-        and snapshot[2] >= 0 and snapshot[3] >= 0
+    when snapshot[0] <= 0 {
+        yield false
+    }
+    when snapshot[1] <= 0 {
+        yield false
+    }
+    when snapshot[2] < 0 {
+        yield false
+    }
+    yield snapshot[3] >= 0
 }
 
 export craft restore_policy(snapshot_valid, checksum_valid, schema_supported) {
