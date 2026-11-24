@@ -14,11 +14,13 @@ class DakBaseApplicationCatalogTests(unittest.TestCase):
         path = ROOT / "catalogs/dak-base-applications.v1.yaml"
         cls.catalog = yaml.safe_load(path.read_text(encoding="utf-8"))
 
-    def test_catalog_is_a_design_proposal_with_twenty_eight_apps(self) -> None:
+    def test_catalog_is_a_design_proposal_with_twenty_nine_apps(self) -> None:
         self.assertEqual(self.catalog["schema_version"], 1)
         self.assertEqual(self.catalog["suite"]["id"], "dak.base-suite")
         self.assertEqual(self.catalog["suite"]["status"], "design")
-        self.assertEqual(len(self.catalog["applications"]), 28)
+        self.assertEqual(len(self.catalog["applications"]), 29)
+        self.assertIn("dak.news", {item["id"] for item in self.catalog["applications"]})
+        self.assertIn("dak.news-feed.v1", self.catalog["services"])
 
     def test_application_ids_are_unique_and_service_references_resolve(self) -> None:
         applications = self.catalog["applications"]
