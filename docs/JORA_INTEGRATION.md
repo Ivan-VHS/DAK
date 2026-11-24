@@ -10,7 +10,7 @@ Jora is a distinct application in the Mora desktop and a proposed DAK applicatio
 
 ## Formula and seed registry
 
-A formula is a bounded composition such as: text editor + audio editor + translator. The seed registry assigns canonical parameter IDs, Russian/English aliases, domains, capabilities, conflicts and variants. It currently includes text editor, audio editor, translator, subtitles, notes, task board, calendar, offline mode and cloud translation. The full 666-variant source taxonomy is not represented as already implemented in this initial seed.
+A formula is a bounded composition such as: text editor + audio editor + translator. The seed registry assigns canonical parameter IDs, Russian/English aliases, domains, capabilities, conflicts and variants. The executable seed currently contains 21 canonical capabilities across text, media, language, productivity, runtime, development, data, visual, video, documents, system, network, automation and analytics. The extended 666-variant source taxonomy remains a separately versioned import.
 
 The parser rejects empty, unknown, duplicate and conflicting components. The limit is 64 components and 2,048 characters.
 
@@ -28,7 +28,7 @@ DuckOS uses the existing ReaperWorkbench process boundary. Package validation ma
 
 ## Package contract
 
-A generated directory or deterministic ZIP contains jora.manifest.json, formula.graph.json, source/main.rpr, polyglot/languages.json, content/demo-project.json and README.md. The manifest includes formula identity, selected languages, graph metadata, build maturity and a SHA-256 inventory.
+A generated directory or deterministic ZIP contains jora.manifest.json, formula.graph.json, source/main.rpr, polyglot/languages.json, content/demo-project.json and README.md. The manifest includes formula identity, a selected-language plan, graph metadata, build maturity and a SHA-256 inventory. The initial source generator emits a Reaper entry point and language-plan metadata; it does not yet synthesize complete Python/Rust adapter source modules.
 
 Audio is represented by placeholder metadata in the seed scenario; no audio binary is fabricated. Validation checks canonical relative paths, duplicate ZIP entries, symlinks, file-count and expanded-size limits, required files and SHA-256 integrity.
 
@@ -53,5 +53,5 @@ The output path must not already exist. Create writes a directory or ZIP; it doe
 
 ## Verification
 
-    python -m unittest tests.test_jora -v
+    python -m unittest discover -s tests -p "test_jora.py" -v
     npm test
