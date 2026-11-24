@@ -13,6 +13,7 @@ from duckos.deployment import (
     build_release_bundle,
     create_deployment_plan,
     verify_release_bundle,
+    _load_strict_json,
 )
 from duckos.manifest import SCHEMA
 
@@ -43,6 +44,32 @@ class DeploymentTests(unittest.TestCase):
             "components": components,
         }
         self.output = Path(self.temporary.name) / "duckos-test.tar.gz"
+
+    def test_release_metadata_rejects_duplicate_nested_json_keys(self):
+        with self.assertRaisesRegex(DeploymentError, "duplicate object key"):
+            _load_strict_json(
+                '{"metadata":{"name":"first","name":"second"}}',
+                "release metadata",
+            )
+
+    def test_release_metadata_rejects_non_finite_numbers(self):
+        for value in ("NaN", "Infinity", "-Infinity", "1e999"):
+            with self.subTest(value=value):
+                with self.assertRaises(DeploymentError):
+                    _load_strict_json('{"metric":' + value + "}", "release metadata")
+
+    def test_release_metadata_bounds_integer_digits_and_nesting(self):
+        oversized_integer = "9" * 1025
+        with self.assertRaisesRegex(DeploymentError, "1024-digit limit"):
+            _load_strict_json('{"count":' + oversized_integer + "}", "manifest")
+        depth = 129
+        with self.assertRaisesRegex(DeploymentError, "128-level limit"):
+            _load_strict_json("[" * depth + "0" + "]" * depth, "manifest")
+
+    def test_release_metadata_depth_scanner_ignores_brackets_in_strings(self):
+        payload = '{"text":"' + ("[{" * 1000) + '"}'
+        result = _load_strict_json(payload, "release metadata")
+        self.assertEqual(result["text"], "[{" * 1000)
 
     def test_builds_and_verifies_component_bundle(self):
         result = build_release_bundle(self.manifest, self.root, self.output)
