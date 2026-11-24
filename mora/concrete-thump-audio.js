@@ -87,9 +87,10 @@ function scheduleChoir(context, master, sampleBuffer, when, step, stepDuration, 
 
   source.buffer = sampleBuffer;
   source.playbackRate.setValueAtTime(treatment === "granular-fragments" ? 1.06 : 1, when);
+  const attack = Math.min(0.012, duration * 0.25);
   envelope.gain.setValueAtTime(0.0001, when);
-  envelope.gain.linearRampToValueAtTime(0.44, when + 0.012);
-  envelope.gain.setValueAtTime(0.44, Math.max(when + 0.013, when + duration * 0.72));
+  envelope.gain.linearRampToValueAtTime(0.44, when + attack);
+  envelope.gain.setValueAtTime(0.44, when + duration * 0.72);
   envelope.gain.linearRampToValueAtTime(0.0001, when + duration);
   source.connect(envelope);
   envelope.connect(destination);
@@ -117,7 +118,13 @@ function scheduleSequence(context, destination, profile, sampleBuffer, startAt) 
 
       if (sequence.kick[step]) scheduleKick(context, master, when);
       if (sequence.snare[step]) scheduleNoiseHit(context, master, noiseBuffer, when, "snare");
-      if (sequence.hat[step]) scheduleNoiseHit(context, master, noiseBuffer, when, "hat");
+      if (sequence.hat[step]) {
+        scheduleNoiseHit(context, master, noiseBuffer, when, "hat");
+        if (step % 4 === 3) {
+          scheduleNoiseHit(context, master, noiseBuffer, when + sixteenth / 3, "hat");
+          scheduleNoiseHit(context, master, noiseBuffer, when + (sixteenth * 2) / 3, "hat");
+        }
+      }
       if (sequence.bass[step]) scheduleBass(context, master, when);
       if (sequence.choir[step]) {
         scheduleChoir(context, master, sampleBuffer, when, step, sixteenth, profile.sampleTreatment);
