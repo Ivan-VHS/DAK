@@ -5,8 +5,25 @@
 #endif
 
 #include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
+static void test_v1_abi_layout(void) {
+    assert(sizeof(duckos_memory_region) == DUCKOS_MEMORY_REGION_V1_SIZE);
+    assert(offsetof(duckos_memory_region, base) == 0u);
+    assert(offsetof(duckos_memory_region, length) == 8u);
+    assert(offsetof(duckos_memory_region, type) == 16u);
+    assert(offsetof(duckos_memory_region, flags) == 20u);
+
+    assert(sizeof(duckos_boot_info_v1) == DUCKOS_BOOT_INFO_V1_SIZE);
+    assert(offsetof(duckos_boot_info_v1, struct_size) == 0u);
+    assert(offsetof(duckos_boot_info_v1, version) == 4u);
+    assert(offsetof(duckos_boot_info_v1, flags) == 8u);
+    assert(offsetof(duckos_boot_info_v1, kernel_phys_base) == 16u);
+    assert(offsetof(duckos_boot_info_v1, framebuffer_phys_base) == 48u);
+    assert(offsetof(duckos_boot_info_v1, memory_region_count) == 80u);
+}
 
 static duckos_boot_info_v1 valid_info(void) {
     duckos_boot_info_v1 info;
@@ -145,6 +162,7 @@ static void test_version_and_arguments_fail_closed(void) {
 }
 
 int main(void) {
+    test_v1_abi_layout();
     test_valid_handoff();
     test_initramfs_is_optional_but_must_be_consistent();
     test_kernel_and_initramfs_ranges_are_checked();
