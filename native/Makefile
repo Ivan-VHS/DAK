@@ -39,6 +39,7 @@ test: security-test
 	$(PYTHON) -m unittest discover -s tests -v
 
 security-test:
+	mkdir -p $(BUILD)
 	clang -std=c11 -Wall -Wextra -Werror -I../foundation ../foundation/security.c tests/test_security_foundation.c -o $(BUILD)/security-test
 	$(BUILD)/security-test
 
