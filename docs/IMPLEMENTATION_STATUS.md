@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-23
+Updated: 2026-11-24
 
 ## Implemented in Reaper source
 
