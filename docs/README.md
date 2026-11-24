@@ -23,6 +23,7 @@
 ## Native workbench
 
 [Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
+[Reaper migration roadmap](REAPER_MIGRATION.md) records the exact source inventory, compiler gaps, target decisions and bootable-kernel acceptance gates. The machine-readable status is [reaper-migration.v1.json](../duckos/reaper-migration.v1.json), validated by tools/validate_reaper_target.py.
 
 ## Desktop optimization
 
