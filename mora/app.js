@@ -60,8 +60,8 @@ let pendingIntentPlan = null;
 
 const LOCALE_KEY = "duckos.mora.locale.v1";
 const LOCALE_TEXT = {
-  "ru-RU": { desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы", dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.", yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"28 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ", dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы", routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства", expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН" },
-  "zh-CN": { desktop:"桌面", system:"系统", systemStatus:"系统状态", dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。", yourSpace:"您的空间", applications:"应用程序", appsCount:"28 个应用与工具", dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务", routines:"场景", compass:"指南针", games:"游戏", devices:"设备", expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线" }
+  "ru-RU": { desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы", dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.", yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"30 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ", dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы", routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства", expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН" },
+  "zh-CN": { desktop:"桌面", system:"系统", systemStatus:"系统状态", dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。", yourSpace:"您的空间", applications:"应用程序", appsCount:"30 个应用与工具", dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务", routines:"场景", compass:"指南针", games:"游戏", devices:"设备", expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线" }
 };
 function readLocale() {
   try { const value = localStorage.getItem(LOCALE_KEY); return value === "zh-CN" || value === "ru-RU" ? value : "ru-RU"; }
