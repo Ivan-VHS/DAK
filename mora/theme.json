@@ -75,6 +75,19 @@
           "fallback": "opaque"
         },
         "otherPlatforms": "opaque"
+      },
+      "blurSurfaces": [
+        "statusbar",
+        "widget-card",
+        "dock",
+        "app-window",
+        "toast"
+      ],
+      "performance": {
+        "maxConcurrentBlurLayers": 5,
+        "mobileBlurReductionPercent": 44,
+        "opaqueFallbackRequired": true,
+        "animateBackdropFilter": false
       }
     }
   }
