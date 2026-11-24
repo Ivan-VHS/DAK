@@ -145,6 +145,24 @@ def main(argv: list[str] | None = None) -> int:
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
 
+    security = commands.add_parser("security", help="inspect and evaluate DuckOS predictive-security evidence")
+    security_commands = security.add_subparsers(dest="security_action", required=True)
+    security_commands.add_parser("status", help="show security subsystem maturity and enforcement boundaries")
+    security_evaluate = security_commands.add_parser("analyze", help="analyze a versioned offline event batch")
+    security_evaluate.add_argument("events", type=Path)
+    security_evaluate.add_argument("--output", type=Path, help="write the forensic analysis JSON")
+    security_snapshot = security_commands.add_parser("snapshot", help="create or restore a managed-root file snapshot")
+    security_snapshot_actions = security_snapshot.add_subparsers(dest="snapshot_action", required=True)
+    snapshot_create = security_snapshot_actions.add_parser("create", help="capture one regular file before a change")
+    snapshot_create.add_argument("root", type=Path)
+    snapshot_create.add_argument("target", help="path relative to the managed root")
+    snapshot_restore = security_snapshot_actions.add_parser("restore", help="restore a previously captured file")
+    snapshot_restore.add_argument("root", type=Path)
+    snapshot_restore.add_argument("snapshot_id")
+    security_integrity = security_commands.add_parser("integrity", help="verify a SHA-256 component manifest without repairing files")
+    security_integrity.add_argument("root", type=Path)
+    security_integrity.add_argument("manifest", type=Path)
+
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
     )
@@ -206,6 +224,42 @@ def main(argv: list[str] | None = None) -> int:
                     "disk_written": False,
                 })
                 return 0
+        elif args.command == "security":
+            from .security.integrity import verify_integrity_manifest
+            from .security.service import analyze_event_document, security_status
+            from .security.snapshots import SnapshotStore
+
+            if args.security_action == "status":
+                result = security_status()
+            elif args.security_action == "analyze":
+                result = analyze_event_document(_load(args.events))
+                if args.output:
+                    if args.output.is_symlink():
+                        raise ValueError("security report output must not be a symlink")
+                    args.output.parent.mkdir(parents=True, exist_ok=True)
+                    args.output.write_text(
+                        json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\\n",
+                        encoding="utf-8",
+                        newline="\\n",
+                    )
+                    _print_result({
+                        "schema": result["schema"],
+                        "written": str(args.output.resolve()),
+                        "enforcement": "advisory_only",
+                    })
+                    return 0
+            elif args.security_action == "snapshot":
+                store = SnapshotStore(args.root)
+                if args.snapshot_action == "create":
+                    result = store.create(args.target)
+                elif args.snapshot_action == "restore":
+                    result = store.restore(args.snapshot_id)
+                else:
+                    raise ValueError("unknown snapshot action")
+            elif args.security_action == "integrity":
+                result = verify_integrity_manifest(args.root, _load(args.manifest))
+            else:
+                raise ValueError("unknown security action")
         elif args.command == "terminal":
             if args.terminal_action is None:
                 return run_interactive(TerminalService())
