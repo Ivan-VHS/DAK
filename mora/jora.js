@@ -160,6 +160,7 @@ export function composeJoraRequest(options = {}) {
       topologyLabel: GRAPH_TOPOLOGIES[graphTopology],
       variants: graphVariants,
       variation: graphVariation,
+      seed: graphSeed || "auto",
       availableTopologies: Object.entries(GRAPH_TOPOLOGIES).filter(([id]) => id !== "auto")
         .map(([id, label]) => ({ id, label }))
     },
