@@ -62,7 +62,7 @@ export craft security_sensor_policy(
     when size(sensor) != 7 {
         yield "reject"
     }
-    when sensor[0] == "" or sensor[3] != target_arch or sensor[5] == "" or size(sensor[6]) != 64 {
+    when sensor[0] == "" or sensor[3] != target_arch or sensor[5] == "" or sensor[6] == "" {
         yield "reject"
     }
     when signature_verified != true or signer_trusted != true or not_revoked != true or digest_matches != true or secure_boot_verified != true {

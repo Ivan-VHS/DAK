@@ -57,9 +57,6 @@ assert(capabilities["permits"](enforcement_bundle, "security.file.restore"), "se
 
 
 # Kernel IPC and telemetry enforce source trust and capability separation.
-make sensor_bundle := capabilities["security_sensor_grants"]()
-make service_bundle := capabilities["security_service_grants"]()
-make enforcement_bundle := capabilities["security_enforcement_grants"]()
 make security_event_a := [1, "event-0001", "sensor-0", "process.start", "pid-10", "", "", "trusted", 100]
 make security_event_b := [2, "event-0002", "sensor-0", "file.modify", "pid-10", "file-2", "event-0001", "trusted", 200]
 make untrusted_security_event := [3, "event-0003", "unknown-source", "file.modify", "pid-99", "file-9", "", "validated", 300]

@@ -59,9 +59,7 @@ export craft authorize_action(
         yield false
     }
 
-    when action == "file.restore" and (
-        not snapshot_authenticated or not content_verified or not target_authorized
-    ) {
+    when action == "file.restore" and (not snapshot_authenticated or not content_verified or not target_authorized) {
         yield false
     }
     when requires_approval(action) and not human_approved {
