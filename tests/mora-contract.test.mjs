@@ -142,8 +142,51 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v8-glass-materials"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
+});
+
+
+test("glass materials use bounded progressive enhancement and accessible fallbacks", () => {
+  const glass = theme.materials?.glass;
+  assert.equal(theme.version, 3);
+  assert.ok(glass, "glass material contract must be present");
+  assert.equal(glass.progressiveEnhancement, true);
+  assert.equal(glass.fallback, "#151515");
+  assert.equal(glass.strongFallback, "#080808");
+  assert.equal(glass.blurPx, 18);
+  assert.equal(glass.strongBlurPx, 22);
+  assert.equal(glass.mobileBlurPx, 10);
+  assert.equal(glass.maxConcurrentBlurLayers, 5);
+  assert.deepEqual(glass.blurSurfaces, ["statusbar", "widget-card", "dock", "app-window", "toast"]);
+  assert.deepEqual(glass.performance, {
+    maxConcurrentBlurLayers: 5,
+    mobileBlurReductionPercent: 44,
+    opaqueFallbackRequired: true,
+    animateBackdropFilter: false
+  });
+  assert.equal(glass.blurSurfaces.length, glass.maxConcurrentBlurLayers);
+  for (const surface of glass.blurSurfaces) {
+    assert.ok(css.includes("." + surface), "missing glass surface selector: " + surface);
+  }
+  assert.equal(glass.reducedTransparency, "opaque");
+  assert.equal(glass.forcedColors, "system");
+  assert.deepEqual(glass.nativeBackdrops.windows, {
+    api: "DwmSetWindowAttribute",
+    attribute: 38,
+    mainWindowType: 2,
+    requiresSystemBackdropSupport: true,
+    fallback: "opaque"
+  });
+  assert.equal(glass.nativeBackdrops.otherPlatforms, "opaque");
+  assert.ok(css.includes("@supports ((backdrop-filter: blur(1px))"));
+  assert.ok(css.includes("@media (prefers-reduced-transparency: reduce)"));
+  assert.ok(css.includes(":root.reduce-transparency"));
+  assert.ok(js.includes('classList.toggle("reduce-transparency", preferences.appearance.reduceTransparency)'));
+  assert.ok(js.includes('data-setting="reduceTransparency"'));
+  assert.ok(css.includes("@media (forced-colors: active)"));
+  assert.ok(css.includes("backdrop-filter: none"));
+  assert.ok(css.includes("--mora-glass-fallback"));
 });

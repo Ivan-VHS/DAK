@@ -261,4 +261,17 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
+assert(theme["material_profile"]("glass") == ["#151515", 78, 18, "#FFD400"], "glass uses bounded translucent Duck surface")
+assert(theme["material_profile"]("glass-strong") == ["#080808", 84, 22, "#FFD400"], "strong glass remains a single dark surface")
+assert(theme["material_mode"](true, false, false) == "frosted", "supported compositor may use frosted material")
+assert(theme["material_mode"](false, false, false) == "opaque", "unsupported compositor uses opaque fallback")
+assert(theme["material_mode"](true, true, false) == "opaque", "reduced transparency takes precedence")
+assert(theme["material_mode"](true, false, true) == "system-opaque", "forced colors use system surfaces")
+
+assert(theme["native_material_mode"]("win32", true, false, false) == "mica-window", "Windows host may request native Mica when available")
+assert(theme["native_material_mode"]("win32", false, false, false) == "opaque", "unsupported Windows host stays opaque")
+assert(theme["native_material_mode"]("linux", true, false, false) == "opaque", "non-Windows host uses a portable material")
+assert(theme["native_material_mode"]("win32", true, true, false) == "opaque", "reduced transparency overrides native Mica")
+assert(theme["native_material_mode"]("win32", true, false, true) == "system-opaque", "forced colors take priority over native backdrop")
+
 emit "DUCKOS_REAPER_CONTRACTS_OK"

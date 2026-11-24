@@ -46,3 +46,39 @@ export craft motion_profile(reduced_motion) {
     }
     yield "fluid"
 }
+
+
+# Surface materials are hints to the host compositor; unsupported hosts stay opaque.
+export craft material_profile(role) {
+    when role == "glass" {
+        yield ["#151515", 78, 18, "#FFD400"]
+    }
+    when role == "glass-strong" {
+        yield ["#080808", 84, 22, "#FFD400"]
+    }
+    yield ["#151515", 100, 0, "#3A3A3A"]
+}
+
+export craft material_mode(backdrop_supported, reduced_transparency, forced_colors) {
+    when forced_colors {
+        yield "system-opaque"
+    }
+    when reduced_transparency or not backdrop_supported {
+        yield "opaque"
+    }
+    yield "frosted"
+}
+
+
+export craft native_material_mode(platform, system_backdrop_supported, reduced_transparency, forced_colors) {
+    when forced_colors {
+        yield "system-opaque"
+    }
+    when reduced_transparency {
+        yield "opaque"
+    }
+    when platform == "win32" and system_backdrop_supported {
+        yield "mica-window"
+    }
+    yield "opaque"
+}
