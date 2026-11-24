@@ -9,7 +9,7 @@
 
 Mora Commons is the unified application discovery and launch surface inside the Mora desktop environment for DuckOS. It groups software by task and provides search, category filtering, product details and favourites. Thirteen first-party base applications have a working local browser-shell module and can be launched directly from their store details.
 
-Application brands are independent product identities. The platform name is not prepended to app names: **Deskline, Nuvault, Daymark, Lexora, Relay, Wayline, Sumora, Pixora, Nexcode, Mnemo, Calcora, Paceforge and Trailmark** are standalone names.
+Application brands are independent product identities. The platform name is not prepended to app names: **Deskline, Nuvault, Daymark, Lexora, Voxera, Wayline, Sumora, Pixora, Nexcode, Mnemo, Calcora, Paceforge and Trailmark** are standalone names.
 
 ## The 13 foundational categories
 
@@ -19,7 +19,7 @@ Application brands are independent product identities. The platform name is not 
 | Files | User-selected file cataloguing | Nuvault |
 | Productivity | Tasks and daily planning | Daymark |
 | Documents | Text creation and export | Lexora |
-| Communication | Personal contacts | Relay |
+| Communication | Personal contacts | Voxera |
 | Internet | Web bookmarks | Wayline |
 | Finance | Personal income and expense ledger | Sumora |
 | Multimedia | Selected image gallery | Pixora |
@@ -39,7 +39,7 @@ Each category has a stable ID in `MORA_COMMONS_CATEGORIES`. Each first applicati
 | **Nuvault** | Select files and save a local index of names, MIME types, sizes and modification times | Does not copy or upload file contents |
 | **Daymark** | Add tasks, mark them complete and remove entries | Browser-profile storage; no OS scheduler or cloud sync |
 | **Lexora** | Edit text, count words and characters, save a draft and export TXT | Local browser storage; no cloud document service |
-| **Relay** | Create and remove local contact cards with a contact detail or note | Does not send email, SMS or messenger messages |
+| **Voxera** | Create and remove local contact cards with a contact detail or note | Does not send email, SMS or messenger messages |
 | **Wayline** | Save named HTTP/HTTPS bookmarks and open links in a separate tab | No browser engine, tracker blocker or private-network proxy |
 | **Sumora** | Record income and expenses and calculate totals and balance | Manual ledger only; no bank connection, transfers or financial advice |
 | **Pixora** | Preview selected images and retain a local metadata list | Does not upload or permanently copy original media |
