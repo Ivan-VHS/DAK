@@ -3,7 +3,7 @@ export const BASE_APP_DEFINITIONS = {
   nuvault: { name: "Nuvault", subtitle: "Локальный каталог файлов", glyph: "▤", category: "files" },
   daymark: { name: "Daymark", subtitle: "Задачи и приоритеты", glyph: "✓", category: "productivity" },
   lexora: { name: "Lexora", subtitle: "Текстовый редактор", glyph: "¶", category: "documents" },
-  relay: { name: "Relay", subtitle: "Локальная адресная книга", glyph: "↗", category: "communication" },
+  voxera: { name: "Voxera", subtitle: "Локальная адресная книга", glyph: "↗", category: "communication" },
   wayline: { name: "Wayline", subtitle: "Закладки и чтение", glyph: "⌖", category: "internet" },
   sumora: { name: "Sumora", subtitle: "Личный учёт доходов и расходов", glyph: "₴", category: "finance" },
   pixora: { name: "Pixora", subtitle: "Галерея выбранных изображений", glyph: "▧", category: "multimedia" },
@@ -44,7 +44,7 @@ function readRecords(appId) {
         return typeof item.name === "string" && Number.isFinite(item.size) && item.size >= 0;
       }
       if (appId === "daymark") return typeof item.text === "string";
-      if (appId === "relay") return typeof item.name === "string";
+      if (appId === "voxera") return typeof item.name === "string";
       if (appId === "trailmark") return typeof item.stop === "string";
       return typeof item.text === "string";
     }).slice(0, MAX_RECORDS);
@@ -161,7 +161,7 @@ function renderRecords(root, appId) {
       }
     } else {
       let label = record.text || record.name || record.activity || record.label || "Запись";
-      if (appId === "relay") label = record.name + (record.detail ? " · " + record.detail : "");
+      if (appId === "voxera") label = record.name + (record.detail ? " · " + record.detail : "");
       if (appId === "sumora") label = record.label + " · " + (record.kind === "income" ? "+" : "−") + Number(record.amount).toFixed(2) + " ₴";
       if (appId === "paceforge") label = record.activity + " · " + record.minutes + " мин";
       if (appId === "nuvault" || appId === "pixora") {
@@ -208,10 +208,10 @@ export function renderBaseAppPanel(appId) {
       return panelShell(appId, "LEXORA · DOCUMENT STUDIO", "Текстовый документ",
         "Редактируйте текст, сохраняйте черновик локально или экспортируйте его в TXT. Автоматическая синхронизация и облачное хранилище не подключены.",
         '<textarea class="base-app-textarea" data-lexora-editor rows="10" maxlength="50000" placeholder="Начните писать…"></textarea><div class="approval-actions"><button class="action-button" data-base-action="save-document">Сохранить</button><button class="subtle-button" data-base-action="export-document">Экспорт TXT</button></div><p class="extension-status" data-lexora-count>0 слов · 0 символов</p>');
-    case "relay":
-      return panelShell(appId, "RELAY · CONTACT DESK", "Контакты и способы связи",
-        "Собирайте имена и заметки о способе связи. Relay хранит личную адресную книгу локально и ничего не отправляет адресатам.",
-        '<form class="extension-form" data-base-form="relay"><label>Новый контакт</label><div class="base-app-form-grid"><input data-base-field="name" required maxlength="80" placeholder="Имя"><input data-base-field="detail" maxlength="120" placeholder="Телефон, email или заметка"></div><button class="action-button" type="submit">Сохранить контакт</button></form>' + recordList(appId));
+    case "voxera":
+      return panelShell(appId, "VOXERA · CONTACT DESK", "Контакты и способы связи",
+        "Собирайте имена и заметки о способе связи. Voxera хранит личную адресную книгу локально и ничего не отправляет адресатам.",
+        '<form class="extension-form" data-base-form="voxera"><label>Новый контакт</label><div class="base-app-form-grid"><input data-base-field="name" required maxlength="80" placeholder="Имя"><input data-base-field="detail" maxlength="120" placeholder="Телефон, email или заметка"></div><button class="action-button" type="submit">Сохранить контакт</button></form>' + recordList(appId));
     case "wayline":
       return panelShell(appId, "WAYLINE · WEB LIBRARY", "Избранные страницы",
         "Сохраняйте HTTPS- и HTTP-адреса, добавляйте понятные подписи и открывайте сайты во внешней вкладке браузера.",
@@ -297,7 +297,7 @@ function submitBaseForm(root, form) {
   if (appId === "daymark") {
     const text = value("task");
     if (text) addRecord(root, appId, { text: text.slice(0, MAX_TEXT), done: false });
-  } else if (appId === "relay") {
+  } else if (appId === "voxera") {
     const name = value("name");
     if (name) addRecord(root, appId, { name: name.slice(0, 80), detail: value("detail").slice(0, 120) });
   } else if (appId === "wayline") {
