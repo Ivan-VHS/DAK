@@ -219,5 +219,15 @@ class ReaperWorkbenchTests(unittest.TestCase):
         with self.assertRaisesRegex(ReaperIntegrationError, "input limit"):
             self.workbench.check(large_source)
 
+
+    def test_capability_status_matches_the_versioned_duckos_contract(self):
+        schema_path = Path(__file__).resolve().parents[1] / "schemas" / "reaper-workbench.v1.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        report = self.workbench.inspect()
+        self.assertEqual(schema["properties"]["schema"]["const"], report["schema"])
+        self.assertEqual(schema["properties"]["runtime_boundary"]["const"], report["runtime_boundary"])
+        self.assertFalse(report["execution_is_os_sandboxed"])
+        self.assertEqual(report["capability_states"]["native_aot_subset"], "experimental")
+
 if __name__ == "__main__":
     unittest.main()
