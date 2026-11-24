@@ -30,7 +30,7 @@ function makeEnvelope(context, destination, when, peak, duration) {
   return gain;
 }
 
-function scheduleKick(context, destination, when) {
+function scheduleKick(context, master, when) {
   const oscillator = context.createOscillator();
   const gain = makeEnvelope(context, destination, when, 0.9, 0.2);
   oscillator.type = "sine";
@@ -41,7 +41,7 @@ function scheduleKick(context, destination, when) {
   oscillator.stop(when + 0.22);
 }
 
-function scheduleBass(context, destination, when) {
+function scheduleBass(context, master, when) {
   const oscillator = context.createOscillator();
   const gain = makeEnvelope(context, destination, when, 0.58, 0.32);
   oscillator.type = "sine";
@@ -52,7 +52,7 @@ function scheduleBass(context, destination, when) {
   oscillator.stop(when + 0.34);
 }
 
-function scheduleNoiseHit(context, destination, noiseBuffer, when, kind) {
+function scheduleNoiseHit(context, master, noiseBuffer, when, kind) {
   const source = context.createBufferSource();
   const filter = context.createBiquadFilter();
   const duration = kind === "hat" ? 0.055 : 0.18;
@@ -68,7 +68,7 @@ function scheduleNoiseHit(context, destination, noiseBuffer, when, kind) {
   source.stop(when + duration + 0.01);
 }
 
-function scheduleChoir(context, destination, sampleBuffer, when, step, stepDuration, treatment) {
+function scheduleChoir(context, master, sampleBuffer, when, step, stepDuration, treatment) {
   if (!sampleBuffer || sampleBuffer.duration <= 0) return;
 
   const source = context.createBufferSource();
@@ -101,6 +101,13 @@ function scheduleSequence(context, destination, profile, sampleBuffer, startAt) 
   const swingDelay = sixteenth * (profile.swing - 50) / 50;
   const loopDuration = sixteenth * 16 * RENDER_BARS + AUDIO_TAIL_SECONDS;
   const noiseBuffer = createNoiseBuffer(context);
+  const master = context.createDynamicsCompressor();
+  master.threshold.setValueAtTime(-9, startAt);
+  master.knee.setValueAtTime(8, startAt);
+  master.ratio.setValueAtTime(5, startAt);
+  master.attack.setValueAtTime(0.003, startAt);
+  master.release.setValueAtTime(0.18, startAt);
+  master.connect(destination);
 
   for (let bar = 0; bar < RENDER_BARS; bar += 1) {
     for (let step = 0; step < 16; step += 1) {
@@ -108,12 +115,12 @@ function scheduleSequence(context, destination, profile, sampleBuffer, startAt) 
         (step % 2 === 1 ? swingDelay : 0);
       const sequence = profile.sequence;
 
-      if (sequence.kick[step]) scheduleKick(context, destination, when);
-      if (sequence.snare[step]) scheduleNoiseHit(context, destination, noiseBuffer, when, "snare");
-      if (sequence.hat[step]) scheduleNoiseHit(context, destination, noiseBuffer, when, "hat");
-      if (sequence.bass[step]) scheduleBass(context, destination, when);
+      if (sequence.kick[step]) scheduleKick(context, master, when);
+      if (sequence.snare[step]) scheduleNoiseHit(context, master, noiseBuffer, when, "snare");
+      if (sequence.hat[step]) scheduleNoiseHit(context, master, noiseBuffer, when, "hat");
+      if (sequence.bass[step]) scheduleBass(context, master, when);
       if (sequence.choir[step]) {
-        scheduleChoir(context, destination, sampleBuffer, when, step, sixteenth, profile.sampleTreatment);
+        scheduleChoir(context, master, sampleBuffer, when, step, sixteenth, profile.sampleTreatment);
       }
     }
   }
