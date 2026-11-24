@@ -860,7 +860,7 @@ input[type="range"] { accent-color: #FFD400; }
 .jora-language strong { font-size:11px; }
 .jora-language span { color:rgba(255,255,255,.55); font-size:10px; line-height:1.5; }
 .jora-cli-card { display:grid; gap:10px; }
-.jora-command { display:block; overflow-wrap:anywhere; padding:12px; border-radius:10px; background:#050505; color:#ffd400; font-size:10px; line-height:1.6; white-space:normal; }
+.jora-command { display:block; overflow-wrap:anywhere; padding:12px; border-radius:10px; background:#080808; color:#ffd400; font-size:10px; line-height:1.6; white-space:normal; }
 .jora-drafts { display:grid; gap:9px; }
 .jora-draft-list { display:grid; gap:8px; }
 .jora-draft { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px; border:1px solid rgba(255,255,255,.1); border-radius:11px; background:rgba(255,255,255,.035); }
