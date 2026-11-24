@@ -114,5 +114,110 @@ class ReaperWorkbenchTests(unittest.TestCase):
                 self.workbench.check(self.source)
 
 
+
+    def test_run_uses_explicit_interpreter_limits_and_keeps_native_ffi_disabled(self):
+        response = {"ok": True, "result": 42}
+        completed = subprocess.CompletedProcess(args=[], returncode=0, stdout=json.dumps(response), stderr="")
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.run(self.source, limits={"steps": 500, "heap_bytes": 1024})
+        self.assertTrue(result["ok"])
+        command = run.call_args.args[0]
+        self.assertIn("--steps", command)
+        self.assertEqual(command[command.index("--steps") + 1], "500")
+        self.assertEqual(command[command.index("--heap-bytes") + 1], "1024")
+        self.assertIn("--json", command)
+        self.assertNotIn("--allow-native-ffi", command)
+        self.assertEqual(run.call_args.kwargs["timeout"], 60)
+        self.assertEqual(run.call_args.kwargs["stdin"], subprocess.DEVNULL)
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_run_rejects_resource_limits_above_the_bridge_policy(self):
+        with self.assertRaisesRegex(ReaperIntegrationError, "steps"):
+            self.workbench.run(self.source, limits={"steps": 10_000_001})
+
+    def test_module_graph_uses_reaper_read_only_inspection_mode(self):
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout='{"modules": []}', stderr=""
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.module_graph(self.source)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["result"], {"modules": []})
+        self.assertIn("--module-graph", run.call_args.args[0])
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_native_build_invokes_only_the_experimental_aot_subset(self):
+        destination = self.root / "program"
+        response = {"ok": True, "mode": "native", "executable": str(destination)}
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=json.dumps(response), stderr=""
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.native_build(self.source, destination, optimization="s")
+        self.assertTrue(result["ok"])
+        command = run.call_args.args[0]
+        self.assertEqual(command[2:4], ["reaper", "--native"])
+        self.assertIn(str(destination), command)
+        self.assertIn("--optimization", command)
+        self.assertEqual(command[command.index("--optimization") + 1], "s")
+        self.assertEqual(run.call_args.kwargs["timeout"], 120)
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_emit_c_uses_a_distinct_destination_and_never_overwrites_source(self):
+        destination = self.root / "program.c"
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout='{"ok": true, "mode": "emit-c"}', stderr=""
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.emit_c(self.source, destination)
+        self.assertTrue(result["ok"])
+        self.assertIn("--emit-c", run.call_args.args[0])
+        with self.assertRaisesRegex(ReaperIntegrationError, "overwrite"):
+            self.workbench.emit_c(self.source, self.source)
+
+    def test_toolchain_inventory_uses_the_read_only_inventory_module(self):
+        (self.root / "reaper" / "toolchain_inventory.py").write_text(
+            'def main():\\n    pass\\n', encoding="utf-8"
+        )
+        response = {"schema": "reaper.toolchain-inventory.v1", "tools": []}
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=json.dumps(response), stderr=""
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.toolchain_inventory(search_path="/usr/bin")
+        self.assertTrue(result["ok"])
+        command = run.call_args.args[0]
+        self.assertEqual(command[2:4], ["reaper.toolchain_inventory", "--path"])
+        self.assertEqual(command[4], "/usr/bin")
+        self.assertEqual(run.call_args.kwargs["stdin"], subprocess.DEVNULL)
+
+    def test_lsp_and_dap_are_passed_through_without_capturing_protocol_streams(self):
+        (self.root / "reaper" / "lsp.py").write_text("def serve():\\n    pass\\n", encoding="utf-8")
+        (self.root / "reaper" / "dap.py").write_text("def serve():\\n    pass\\n", encoding="utf-8")
+        with patch(
+            "duckos.desktop.reaper.subprocess.run",
+            return_value=subprocess.CompletedProcess(args=[], returncode=7),
+        ) as run:
+            code = self.workbench.serve_protocol("lsp")
+        self.assertEqual(code, 7)
+        self.assertEqual(run.call_args.args[0], ["python-test", "-m", "reaper", "lsp"])
+        self.assertEqual(run.call_args.kwargs["cwd"], self.root)
+        self.assertFalse(run.call_args.kwargs["shell"])
+        self.assertNotIn("capture_output", run.call_args.kwargs)
+        with self.assertRaisesRegex(ReaperIntegrationError, "protocol"):
+            self.workbench.serve_protocol("http")
+
+    def test_missing_lsp_module_is_not_advertised_or_started(self):
+        state = self.workbench.inspect()
+        self.assertNotIn("language_server", state["capabilities"])
+        with self.assertRaisesRegex(ReaperIntegrationError, "LSP"):
+            self.workbench.serve_protocol("lsp")
+
+    def test_source_size_is_bounded_before_subprocess_launch(self):
+        large_source = self.root / "large.rpr"
+        large_source.write_bytes(b"x" * (4 * 1024 * 1024 + 1))
+        with self.assertRaisesRegex(ReaperIntegrationError, "input limit"):
+            self.workbench.check(large_source)
+
 if __name__ == "__main__":
     unittest.main()
