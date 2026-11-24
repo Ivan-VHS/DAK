@@ -1,9 +1,11 @@
-const CACHE = "mora-shell-v7-duck-palette";
+const CACHE = "mora-shell-v8-newspaper";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./news.js",
+  "./news-core.js",
   "./commons-catalog.js",
   "./core.js",
   "./apps.json",
