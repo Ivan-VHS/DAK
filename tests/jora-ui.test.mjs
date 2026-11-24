@@ -108,6 +108,16 @@ test("Jora accepts independent product names and rejects the platform name as an
   }), /must not contain the platform name Jora/);
 });
 
+test("maximum component compositions keep all independent names within 80 characters", () => {
+  const result = composeJoraRequest({
+    components: Object.keys(COMPONENTS),
+    locales: ["en"]
+  });
+  assert.ok(result.name.length <= 80);
+  assert.ok(result.nameSuggestions.every((name) => name.length <= 80));
+  assert.ok(result.nameSuggestions.every((name) => !/jora/i.test(name)));
+});
+
 test("Jora rejects an empty feature selection and unknown components", () => {
   assert.throws(() => composeJoraRequest({ components: [], locales: ["en"] }));
   assert.throws(() => composeJoraRequest({
