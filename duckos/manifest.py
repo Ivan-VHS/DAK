@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path, PurePosixPath
 import re
+import stat
 from typing import Any
 
 SCHEMA = "duckos.system-manifest.v1"
@@ -35,17 +37,35 @@ def _relative_path(value: Any) -> str:
 
 
 def _hash_file(path: Path) -> tuple[int, str]:
+    """Hash a bounded regular file through an opened descriptor without following a final symlink."""
     digest = hashlib.sha256()
     size = 0
+    descriptor: int | None = None
     try:
-        with path.open("rb") as stream:
-            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                size += len(chunk)
-                if size > MAX_COMPONENT_BYTES:
-                    raise ManifestError(f"{path.name} exceeds the 8 GiB component limit")
-                digest.update(chunk)
+        if path.is_symlink():
+            raise ManifestError(f"component {path.name} must not be a symbolic link")
+        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
+        flags |= getattr(os, "O_CLOEXEC", 0)
+        flags |= getattr(os, "O_NONBLOCK", 0)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(path, flags)
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ManifestError(f"component {path.name} must be a regular file")
+        if metadata.st_size < 0 or metadata.st_size > MAX_COMPONENT_BYTES:
+            raise ManifestError(f"{path.name} exceeds the {MAX_COMPONENT_BYTES}-byte component limit")
+        while chunk := os.read(descriptor, 1024 * 1024):
+            size += len(chunk)
+            if size > MAX_COMPONENT_BYTES:
+                raise ManifestError(f"{path.name} exceeds the {MAX_COMPONENT_BYTES}-byte component limit")
+            digest.update(chunk)
+    except ManifestError:
+        raise
     except OSError as error:
-        raise ManifestError(f"cannot read component {path.name}: {error}") from error
+        raise ManifestError(f"cannot safely read component {path.name}: {error}") from error
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
     return size, digest.hexdigest()
 
 
