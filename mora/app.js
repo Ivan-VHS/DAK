@@ -692,6 +692,47 @@ function panelMarkup(appId) {
   }
 }
 
+function redSparrowPanelMarkup() {
+  if (currentLocale === "zh-CN") {
+    return '<div class="red-sparrow-panel"><p class="window-kicker">赤雀 · CHÌQUÈ · WUXIA WORKSHOP</p>' +
+      '<h2 class="window-heading">赤雀 · 红色雀鸟</h2>' +
+      '<p class="window-copy">原创银幕武侠与安全动作编排工作室：融合手工艺的精准、雀鸟般的轻盈、翡翠梦魇的视觉隐喻与 UK Grime 节奏。</p>' +
+      '<div class="red-sparrow-hero"><span>赤雀</span><strong>手艺的精确 · 翅膀的轻盈 · 梦魇的低语</strong><small>原创创作设定，不是历史武术流派，也不是现实格斗教程。</small></div>' +
+      '<div class="red-sparrow-grid"><article><small>01 · 工艺</small><h3>静而准确</h3><p>观察、整理、修复与专注。角色的气质来自耐心和克制。</p></article>' +
+      '<article><small>02 · 武侠</small><h3>轻而有形</h3><p>清晰轮廓、斜线构图、节奏停顿、转身与非接触式银幕动作。</p></article>' +
+      '<article><small>03 · 梦魇</small><h3>翡翠与绯红</h3><p>腐化树根、深红雾、裂纹反射与不可靠的影子作为视觉隐喻。</p></article>' +
+      '<article><small>04 · 声音</small><h3>UK Grime</h3><p>重低音、切分鼓组、短暂停顿、快速段落与中国传统打击乐音色。</p></article></div>' +
+      '<div class="red-sparrow-note-wrap"><label for="red-sparrow-note">本地创作笔记</label><textarea id="red-sparrow-note" data-red-sparrow-note maxlength="6000" placeholder="记录角色、场景、镜头、音乐与世界观……"></textarea>' +
+      '<div class="red-sparrow-actions"><button class="action-button" data-action="save-red-sparrow" type="button">保存到本机</button><span data-red-sparrow-status role="status" aria-live="polite">笔记仅保存在本机。</span></div></div>' +
+      '<p class="window-copy">不提供真实伤害技巧、危险武器操作或攻击要害的指导。跌倒、接触与道具动作须由合格特技指导设计和排练。</p></div>';
+  }
+  return '<div class="red-sparrow-panel"><p class="window-kicker">赤雀 · CHÌQUÈ · WUXIA WORKSHOP</p>' +
+    '<h2 class="window-heading">Красный воробей</h2>' +
+    '<p class="window-copy">Оригинальная лаборатория экранного Wuxia и безопасной постановочной хореографии: ремесленная точность, лёгкость воробья, метафизика Изумрудного Кошмара и ритмика UK Grime.</p>' +
+    '<div class="red-sparrow-hero"><span>赤雀</span><strong>Точность ремесла · Лёгкость крыла · Багровый шёпот Кошмара</strong><small>Авторская концепция, не историческая школа ушу и не руководство по реальной драке.</small></div>' +
+    '<div class="red-sparrow-grid"><article><small>01 · РЕМЕСЛО</small><h3>Спокойная точность</h3><p>Наблюдение, порядок, починка, внимание к материалу и ясность жеста.</p></article>' +
+    '<article><small>02 · WUXIA</small><h3>Лёгкая выразительность</h3><p>Чистый силуэт, диагонали, паузы, повороты и бесконтактная экранная пластика.</p></article>' +
+    '<article><small>03 · КОШМАР</small><h3>Изумруд и багрянец</h3><p>Искажённые корни, тёмный туман, трещины отражений и ненадёжные тени как метафоры.</p></article>' +
+    '<article><small>04 · ЗВУК</small><h3>UK Grime</h3><p>Тяжёлый саб, синкопированные барабаны, стопы, быстрые фрагменты и китайская перкуссия.</p></article></div>' +
+    '<div class="red-sparrow-note-wrap"><label for="red-sparrow-note">Локальные творческие заметки</label><textarea id="red-sparrow-note" data-red-sparrow-note maxlength="6000" placeholder="Персонажи, сцены, камера, музыка и мир…"></textarea>' +
+    '<div class="red-sparrow-actions"><button class="action-button" data-action="save-red-sparrow" type="button">Сохранить локально</button><span data-red-sparrow-status role="status" aria-live="polite">Заметки остаются в локальном профиле браузера.</span></div></div>' +
+    '<p class="window-copy">Без инструкций по причинению травм, применению реального оружия или поражению уязвимых зон. Контакт, падения и реквизит проектируются квалифицированным постановщиком трюков.</p></div>';
+}
+
+async function initRedSparrowPanel(appWindow) {
+  const input = appWindow.querySelector("[data-red-sparrow-note]");
+  const status = appWindow.querySelector("[data-red-sparrow-status]");
+  if (!input || !status) return;
+  try {
+    const saved = await readLocalDocument("red-sparrow.notes");
+    if (saved && typeof saved.text === "string") input.value = saved.text.slice(0, 6000);
+  } catch {
+    status.textContent = currentLocale === "zh-CN"
+      ? "本地存储不可用，请先复制重要内容。"
+      : "Локальное хранилище недоступно; скопируйте важный текст перед закрытием.";
+  }
+}
+
 function updateClock() {
   const now = new Date();
   const locale = currentLocale || "ru-RU";
@@ -809,6 +850,22 @@ function startWindowDrag(appWindow, header, pointerEvent) {
 }
 
 document.addEventListener("click", (event) => {
+  const saveRedSparrow = event.target.closest('[data-action="save-red-sparrow"]');
+  if (saveRedSparrow) {
+    const owner = saveRedSparrow.closest(".app-window");
+    const input = owner && owner.querySelector("[data-red-sparrow-note]");
+    const status = owner && owner.querySelector("[data-red-sparrow-status]");
+    const note = input ? input.value.slice(0, 6000) : "";
+    writeLocalDocument("red-sparrow.notes", { text: note }).then((result) => {
+      if (status) status.textContent = currentLocale === "zh-CN"
+        ? (result.backend === "indexeddb" ? "已保存到本机 IndexedDB。" : "已保存到本机浏览器备用存储。")
+        : (result.backend === "indexeddb" ? "Сохранено в локальную IndexedDB." : "Сохранено в локальном резервном хранилище браузера.");
+      showToast(currentLocale === "zh-CN" ? "创作笔记已保存" : "Творческие заметки сохранены");
+    }).catch(() => {
+      if (status) status.textContent = currentLocale === "zh-CN" ? "保存失败；请复制文本。" : "Не удалось сохранить; скопируйте текст.";
+    });
+    return;
+  }
   const setupComplete = event.target.closest('[data-action="setup-complete"]');
   if (setupComplete) {
     const status = setupComplete.closest(".app-window").querySelector("[data-setup-status]");
