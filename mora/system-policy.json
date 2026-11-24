@@ -89,7 +89,7 @@
     },
     "predictive_security": {
       "maturity": "partial",
-      "scope": "Reaper decision-policy contract, offline event analysis, bounded causal correlation, explicit managed-root snapshots, read-only SHA-256 verification, HMAC alert envelopes and forensic export; no live kernel sensors or enforcement"
+      "scope": "Reaper kernel/service authorization and least-privilege telemetry/driver-admission contracts, offline event analysis, bounded causal correlation, explicit managed-root snapshots, read-only SHA-256 verification, HMAC alert envelopes and forensic export; no live kernel sensors or enforcement"
     }
   },
   "not_in_scope_as_implemented_features": [

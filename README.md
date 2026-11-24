@@ -99,7 +99,7 @@ Native CLI entry points:
 - duckos security snapshot restore ROOT SNAPSHOT_ID — verified restore;
 - duckos security integrity ROOT MANIFEST.json — read-only integrity verification.
 
-These are user-space foundations, not a live kernel antivirus. Process, memory, filesystem, browser-token and network sensors; native pre-operation interception; hardware memory isolation; actual sandbox execution; protected driver loading; autonomous repair and mesh networking remain native OS bring-up work. See [Predictive security architecture](docs/SECURITY_ARCHITECTURE.md) and [versioned event schema](schemas/security-events.v1.schema.json).
+The analysis and snapshot APIs run in user space; Reaper contracts are wired into the OS service, trust, IPC, telemetry and driver-policy layers. This is not yet a live kernel antivirus. Process, memory, filesystem, browser-token and network sensors; native pre-operation interception; hardware memory isolation; actual sandbox execution; protected driver loading; autonomous repair and mesh networking remain native OS bring-up work. See [Predictive security architecture](docs/SECURITY_ARCHITECTURE.md) and [versioned event schema](schemas/security-events.v1.schema.json).
 
 ## System architecture and maturity
 

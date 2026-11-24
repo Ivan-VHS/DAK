@@ -3,6 +3,8 @@
 **Status:** implemented user-space foundations plus Reaper policy contracts; native enforcement remains gated.  
 **Scope:** DuckOS operating-system security services, not a detached antivirus application.
 
+**Runtime alignment:** this repository currently exposes a Python user-space CLI/service and Reaper policy contracts; it contains no Java/JVM runtime or Java build module. No unsupported Java sidecar was introduced. A Java implementation can only be integrated after the OS defines a supported JVM lifecycle and cross-language contract; the present implementation keeps Reaper as the shared policy plane and uses the existing DuckOS runtime.
+
 ## Architecture
 
 The security capability has four cooperating boundaries:

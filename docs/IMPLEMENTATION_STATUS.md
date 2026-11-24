@@ -148,8 +148,13 @@ The existing implemented/partial boundary list above remains authoritative. This
 - [x] Workload-aware scan scheduling hints that never suppress event collection or lower security thresholds.
 - [x] Central Reaper security decision contracts and tests for risk levels, snapshot requirements, recovery authorization, mesh acceptance and quiet-mode overrides.
 - [x] Native CLI surfaces for status, offline event analysis, explicit snapshots and integrity reports.
+- [x] Reaper service-lifecycle contract registers the security service, dependencies, health/backpressure states and bounded supervisor restart.
+- [x] Kernel security policy contract provides deny-by-default action authorization with per-action capabilities, fresh evidence, snapshot integrity checks and explicit approval for destructive operations.
+- [x] System telemetry and IPC contracts enforce trusted sensor publishing and separate analysis-service read grants.
+- [x] Driver ABI policy adds security-sensor admission gates for signature, publisher trust, revocation, image digest, architecture, capabilities and measured boot.
 - [ ] Live native process, filesystem, network, identity, memory and kernel telemetry sensors.
-- [ ] Kernel-enforced policy broker, process termination/isolation, firewall actions and system-wide capability checks.
+- [ ] Native kernel-enforced policy broker, process termination/isolation, firewall actions and system-wide capability checks.
+- [ ] Native implementation of the security telemetry ABI, trusted event source adapters and kernel IPC enforcement.
 - [ ] Filesystem pre-operation filter/journal and crash-safe system-wide ransomware recovery.
 - [ ] Hardware-backed memory protection, secure boot measurement and protected driver loading.
 - [ ] Real sandbox execution, browser token integration, autonomous repair and mesh transport.
@@ -157,6 +162,3 @@ The existing implemented/partial boundary list above remains authoritative. This
 
 The checked boxes describe implemented user-space policy and evidence services only. They do not represent active kernel protection. Refer to SECURITY_ARCHITECTURE.md for exact boundaries and native bring-up gates.
 
-
-- [x] Reaper service-lifecycle contract registers DuckOS predictive security, dependency readiness, health/backpressure states, bounded supervisor restart and per-action capability/approval checks.
-- [ ] Native security daemon startup, IPC registration, kernel-backed service identity and capability-enforced action broker.
