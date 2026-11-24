@@ -31,7 +31,7 @@ Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriga
 
 The app fetches on open, section change, search or explicit refresh; it applies a 5.5-second client request interval and a 15-second timeout. It retains up to eight recent result sets and 100 article bookmarks in namespaced `localStorage`. It does not scrape full article bodies, assert source credibility, fact-check claims or synchronize user data. An external GDELT request reveals the selected query and ordinary connection metadata to that provider.
 
-The native DAK `dak.news-feed.v1` service is only proposed in the design catalog. The implemented feature is the Mora browser app and its local state; no native provider or operating-system feed daemon is claimed.
+The native DAK `dak.news-feed.v1` service is only proposed in the design catalog. The implemented feature is the Mora browser app and its local state; no native provider or operating-system feed daemon is claimed. Full provider, privacy and validation details are in [the Газета implementation note](NEWS_FEED.md).
 
 ## Run and validate
 
