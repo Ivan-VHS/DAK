@@ -22,7 +22,7 @@
 
 ## Native workbench
 
-[Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
+[Native Reaper integration](REAPER_INTEGRATION.md) documents the pinned Reaper toolchain, DuckOS CLI and native desktop workbench, bounded execution/AOT operations, and stdio LSP/DAP hand-off.
 
 ## Desktop optimization
 

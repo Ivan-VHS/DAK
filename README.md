@@ -33,7 +33,7 @@ The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is re
 
 ## Native Reaper workbench
 
-Reaper is integrated into the native **Duck Desktop** maintenance workspace as a first-class developer tool. It discovers the pinned `projects/reaper` checkout, opens Reaper Studio in its own process and delegates static checks to Reaper's own CLI. It does not embed a second language runtime into DuckOS.
+Reaper is integrated into the native **Duck Desktop** maintenance workspace as DuckOS's systems-language workbench. The independently versioned, commit-pinned `projects/reaper` checkout supplies its Python reference runtime, CLI/REPL, Studio, static type checker, LSP/DAP and experimental scalar C17 AOT path. DuckOS owns the host adapter and explicit user-space process boundary; it does not embed Reaper's interpreter into the OS process.
 
 Initialize the specialist checkout and inspect the integration:
 
@@ -41,11 +41,15 @@ Initialize the specialist checkout and inspect the integration:
 git submodule update --init projects/reaper
 duckos reaper status
 duckos reaper studio
-duckos reaper check ./examples/program.rpr
-duckos reaper typecheck ./examples/program.rpr
+duckos reaper check projects/reaper/examples/flow.rpr
+duckos reaper typecheck projects/reaper/examples/flow.rpr
+duckos reaper modules projects/reaper/examples/flow.rpr
+duckos reaper toolchain
 ```
 
-The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+Additional explicit operations are available for quota-bounded user-space execution (`duckos reaper run`), experimental C17/native AOT output (`duckos reaper emit-c` and `duckos reaper native`), and stdio IDE services (`duckos reaper lsp` and `duckos reaper dap`). Run and native build require deliberate user action; a native executable is not launched automatically. Interpreter quotas are not an OS sandbox, and the DuckOS bridge does not expose native FFI or kernel/device privileges.
+
+The same checks, module graph, Run, native-build and toolchain controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
 ## Visual system and offline support
 
