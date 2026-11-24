@@ -43,7 +43,7 @@ const appDefinitions = {
   orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: DUCK_ACCENT, glyph: "▦" },
   abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: DUCK_ACCENT, glyph: "▤" },
   olaab: { name: "Olaab", subtitle: "Медиатека", color: DUCK_ACCENT, glyph: "◈" },
-  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: DUCK_ACCENT, glyph: "♫" },
+  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритуальный Trap-секвенсор", color: DUCK_ACCENT, glyph: "♫" },
   "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: DUCK_ACCENT, glyph: "◇" },
   "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: DUCK_ACCENT, glyph: "♡" },
   poi: { name: "Poi", subtitle: "Быстрые заметки", color: DUCK_ACCENT, glyph: "⌖" },
