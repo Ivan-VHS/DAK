@@ -20,7 +20,7 @@ class JoraCliTests(unittest.TestCase):
                 workbench.return_value.jora_build.return_value = expected
                 exit_code = main(["jora", "build", str(request), str(output)])
             self.assertEqual(exit_code, 0)
-            workbench.assert_called_once_with()
+            workbench.assert_called_once_with(None)
             workbench.return_value.jora_build.assert_called_once_with(request, output)
 
 
