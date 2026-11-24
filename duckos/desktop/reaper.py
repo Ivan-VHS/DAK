@@ -14,7 +14,7 @@ import threading
 from pathlib import Path
 from typing import Any
 
-MAX_OUTPUT_CHARS = 1_000_000
+MAX_OUTPUT_BYTES = 1_000_000
 MAX_SOURCE_BYTES = 4 * 1024 * 1024
 COMMAND_TIMEOUT_SECONDS = 30
 EXECUTION_TIMEOUT_SECONDS = 60
@@ -231,7 +231,7 @@ class ReaperWorkbench:
                     chunk = stream.read(64 * 1024)
                     if not chunk:
                         return
-                    remaining = max(0, MAX_OUTPUT_CHARS - len(captured[name]))
+                    remaining = max(0, MAX_OUTPUT_BYTES - len(captured[name]))
                     if remaining:
                         captured[name].extend(chunk[:remaining])
                     if len(chunk) > remaining:
@@ -250,7 +250,10 @@ class ReaperWorkbench:
         try:
             exit_code = process.wait(timeout=timeout)
         except subprocess.TimeoutExpired as error:
-            process.kill()
+            try:
+                process.kill()
+            except ProcessLookupError:
+                pass
             process.wait()
             for reader in readers:
                 reader.join(timeout=1)
