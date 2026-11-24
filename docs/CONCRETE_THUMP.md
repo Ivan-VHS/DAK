@@ -3,7 +3,7 @@
 **Project:** DuckOS  
 **Application:** Mora / Concrete Thump  
 **Maintainer:** Ivan-VHS  
-**Browser prototype status:** partial local workflow  
+**Browser prototype status:** partial local sequencer and WAV workflow  
 **Native DuckOS audio service:** not implemented
 
 ## Purpose
@@ -16,7 +16,7 @@ The source families are deliberately distinct:
 - **East Slavic folk and seasonal material:** Kolyadky, Vesnyanky, Kupala songs and harvest songs.
 - **Ceremonial folk material:** wedding songs and funeral laments.
 
-The application can combine these references in one arrangement profile without claiming that liturgical chant and folk ritual songs have the same history, function or religious context. The production direction favors deep male choir timbres, archaic polyphony, modal minor-key melodies, solemn refrains and deliberate call-and-response.
+The application can combine these references in one arrangement profile without claiming that liturgical chant and folk ritual songs have the same history, function or religious context. The production direction favors deep male choir timbres, archaic polyphony, modal minor-key melodies, solemn refrains and deliberate call-and-response. Selected user recordings supply the choral source; no bundled commercial or community recording is distributed with the app.
 
 ## Current browser workflow
 
@@ -28,7 +28,7 @@ Open **Mora → Concrete Thump**.
 4. Set BPM and swing. Defaults are 160 BPM and 60%; the controls accept 40–240 BPM and 50–75% swing.
 5. Add audio files for local browser preview and choose one as the choir source. Supported formats depend on the browser's native media support; common file types include WAV, MP3, FLAC, OGG, M4A, AAC, AIFF, OPUS and WebM.
 6. Enter a source/credit note and the declared rights basis for each sample.
-7. Edit the 16-step rows for kick, snare/clap, hi-hat, 808 and choir chops. The default pattern gives a starting point rather than a fixed genre template.
+7. Edit the 16-step rows for kick, snare/clap, hi-hat, 808 and choir chops. The default pattern is a starting point, not a fixed genre template.
 8. Preview four bars. The browser synthesizes the drum and 808 lanes and chops the selected choir recording according to the chosen treatment.
 9. Render the same four-bar pattern to WAV, save the profile, or export the prompt, a JSON profile or a Reaper timing helper.
 
@@ -56,7 +56,7 @@ The timing helper is not an audio renderer, MIDI generator, DAW project, sample 
 |---|---|---|
 | Mora UI | Source selections, rhythm controls, local sample preview, rights metadata and export actions | Browser application panel |
 | Profile module | Validated versioned profile, legacy BPM/swing migration and bounded sample metadata | Local browser storage |
-| Browser sequencer | 16-step kick/snare/hat/808/choir lanes; Web Audio playback and four-bar WAV rendering | No native driver, device routing, MIDI, multitrack DAW or OS audio service |
+| Browser sequencer | 16-step kick/snare/hat/808/choir lanes; Web Audio synthesis, sample chopping, playback and four-bar WAV rendering | No native driver, device routing, MIDI, multitrack DAW or OS audio service |
 | Reaper companion | Reaper source calculates offbeat markers | Uses the existing Reaper CLI/runtime; no audio runtime is added |
 | Cockos | Existing, separate audio/recording product | No automatic sample handoff or cross-app audio bus is claimed |
 
