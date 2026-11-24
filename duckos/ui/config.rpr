@@ -5,8 +5,13 @@ export craft numeric_schema_valid(schema) {
     when size(schema) != 4 {
         yield false
     }
-    yield schema[0] != "" and schema[1] == "number"
-        and schema[2] <= schema[3]
+    when schema[0] == "" {
+        yield false
+    }
+    when schema[1] != "number" {
+        yield false
+    }
+    yield schema[2] <= schema[3]
 }
 
 export craft numeric_value_valid(schema, value) {
