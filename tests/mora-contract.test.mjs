@@ -142,7 +142,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v9-jora-graphs"));
+  assert.ok(serviceWorker.includes("mora-shell-v10-independent-app-names"));
   assert.ok(serviceWorker.includes("./jora.js"));
   assert.ok(js.includes("composeJoraRequest"));
   assert.ok(js.includes("Формула вашего приложения"));
