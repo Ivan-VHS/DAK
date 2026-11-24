@@ -32,7 +32,7 @@ export function normalizeNewsArticle(item) {
   if (!item || typeof item !== "object") return null;
   const title = typeof item.title === "string" ? item.title.trim().slice(0, 500) : "";
   const rawUrl = typeof item.url === "string" ? item.url.trim() : "";
-  if (!title || !rawUrl) return null;
+  if (!title || !rawUrl || rawUrl.length > 2048) return null;
 
   let articleUrl;
   try {
@@ -44,7 +44,7 @@ export function normalizeNewsArticle(item) {
 
   let image = null;
   const imageValue = typeof item.socialimage === "string" ? item.socialimage : item.image;
-  if (typeof imageValue === "string" && imageValue.trim()) {
+  if (typeof imageValue === "string" && imageValue.trim() && imageValue.length <= 2048) {
     try {
       const candidate = new URL(imageValue.trim());
       if (candidate.protocol === "https:" && !candidate.username && !candidate.password) image = candidate.href;
