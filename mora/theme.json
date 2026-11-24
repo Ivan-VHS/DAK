@@ -65,7 +65,17 @@
       "edge": "rgba(255,212,0,0.26)",
       "maxConcurrentBlurLayers": 5,
       "reducedTransparency": "opaque",
-      "forcedColors": "system"
+      "forcedColors": "system",
+      "nativeBackdrops": {
+        "windows": {
+          "api": "DwmSetWindowAttribute",
+          "attribute": 38,
+          "mainWindowType": 2,
+          "requiresSystemBackdropSupport": true,
+          "fallback": "opaque"
+        },
+        "otherPlatforms": "opaque"
+      }
     }
   }
 }
