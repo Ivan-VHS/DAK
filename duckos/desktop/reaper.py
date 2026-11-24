@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -206,30 +207,62 @@ class ReaperWorkbench:
         timeout: int = COMMAND_TIMEOUT_SECONDS,
     ) -> dict[str, Any]:
         root = self._require_repository()
+        captured = {"stdout": bytearray(), "stderr": bytearray()}
+        truncated = {"stdout": False, "stderr": False}
+
         try:
-            completed = subprocess.run(
+            process = subprocess.Popen(
                 command,
                 cwd=root,
                 stdin=subprocess.DEVNULL,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=timeout,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                bufsize=0,
                 shell=False,
-                check=False,
             )
-        except subprocess.TimeoutExpired as error:
-            raise ReaperIntegrationError(
-                f"Reaper command exceeded the {timeout}-second time limit"
-            ) from error
         except OSError as error:
             raise ReaperIntegrationError(f"cannot start Reaper: {error}") from error
 
-        raw_stdout = completed.stdout or ""
-        raw_stderr = completed.stderr or ""
-        stdout = raw_stdout[:MAX_OUTPUT_CHARS]
-        stderr = raw_stderr[:MAX_OUTPUT_CHARS]
+        def drain(stream: Any, name: str) -> None:
+            if stream is None:
+                return
+            try:
+                while True:
+                    chunk = stream.read(64 * 1024)
+                    if not chunk:
+                        return
+                    remaining = max(0, MAX_OUTPUT_CHARS - len(captured[name]))
+                    if remaining:
+                        captured[name].extend(chunk[:remaining])
+                    if len(chunk) > remaining:
+                        truncated[name] = True
+            except OSError:
+                # The parent closes a pipe after a timed-out child is killed.
+                return
+
+        readers = [
+            threading.Thread(target=drain, args=(process.stdout, "stdout"), daemon=True),
+            threading.Thread(target=drain, args=(process.stderr, "stderr"), daemon=True),
+        ]
+        for reader in readers:
+            reader.start()
+
+        try:
+            exit_code = process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired as error:
+            process.kill()
+            process.wait()
+            for reader in readers:
+                reader.join(timeout=1)
+            raise ReaperIntegrationError(
+                f"Reaper command exceeded the {timeout}-second time limit"
+            ) from error
+        finally:
+            for reader in readers:
+                reader.join(timeout=2)
+
+        stdout = bytes(captured["stdout"]).decode("utf-8", errors="replace")
+        stderr = bytes(captured["stderr"]).decode("utf-8", errors="replace")
         payload: Any = None
         if stdout.strip():
             try:
@@ -237,13 +270,13 @@ class ReaperWorkbench:
             except json.JSONDecodeError:
                 payload = None
         return {
-            "ok": completed.returncode == 0,
-            "exit_code": completed.returncode,
+            "ok": exit_code == 0,
+            "exit_code": exit_code,
             "command": command,
             "stdout": stdout,
             "stderr": stderr,
             "result": payload,
-            "truncated": len(raw_stdout) > MAX_OUTPUT_CHARS or len(raw_stderr) > MAX_OUTPUT_CHARS,
+            "truncated": truncated["stdout"] or truncated["stderr"],
         }
 
     def _run(self, arguments: list[str], *, timeout: int = COMMAND_TIMEOUT_SECONDS) -> dict[str, Any]:
