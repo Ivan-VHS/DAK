@@ -1,4 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { initializeNewsPanel, newsPanelMarkup } from "./news.js";
 
 import {
   RECOVERY_KEY,
@@ -20,6 +21,7 @@ const appDefinitions = {
   kabon: { name: "Ka-bon", subtitle: "Финансы", color: DUCK_ACCENT, glyph: "₴" },
   gloverty: { name: "Gloverty", subtitle: "Сценарии", color: DUCK_ACCENT, glyph: "ϟ" },
   po: { name: "Po", subtitle: "Компас", color: DUCK_ACCENT, glyph: "⌖" },
+  news: { name: "Газета", subtitle: "Новости и пресса", color: DUCK_ACCENT, glyph: "▤" },
   illidia: { name: "Illidia", subtitle: "Игры", color: DUCK_ACCENT, glyph: "⌘" },
   unify: { name: "Unify", subtitle: "Устройства", color: DUCK_ACCENT, glyph: "∞" },
   sestem: { name: "Sestem", subtitle: "Статус системы", color: DUCK_ACCENT, glyph: "♟" },
@@ -574,6 +576,8 @@ function panelMarkup(appId) {
         '<div class="setting-block"><strong>Безопасная организация</strong><span>Перенос выбранных файлов в Inbox без удаления и перезаписи; операции выполняются после подтверждения.</span></div>' +
         '<div class="setting-block"><strong>Автозагрузка</strong><span>Только текущий пользователь; отключение можно восстановить.</span></div>' +
         '<p class="window-copy">Браузерная Mora показывает только точку входа. Она не изображает системный монитор, оконный менеджер или привилегированный доступ.</p>';
+    case "news":
+      return newsPanelMarkup();
     case "mora-commons":
       return commonsPanelMarkup();
     case "mora-ai":
@@ -699,6 +703,7 @@ function openApp(appId) {
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
   if (appId === "mora-commons") initializeCommonsPanel(appWindow);
+  if (appId === "news") initializeNewsPanel(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
