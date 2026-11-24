@@ -100,3 +100,9 @@ python -m unittest tests.test_reaper_integration tests.test_reaper_cli -v
 ```
 
 The tests use temporary fake Reaper checkouts and mocked subprocess boundaries. They verify discovery, capability detection, argument-vector construction, JSON result handling, timeouts, source validation and the native Studio launch handoff. They do not run Reaper source or claim kernel-level process isolation.
+
+## Source provenance and toolchain pin
+
+The DuckOS submodule is pinned to the Reaper revision that introduces the shared source-span contract. Reaper's lexer tokens carry half-open UTF-8 byte offsets and 1-based line/column coordinates; the reference frontend preserves token provenance through AST and canonical IR, and the native C17 expression slice preserves byte ranges through AST and IR. DuckOS delegates parsing and diagnostics to the pinned Reaper CLI and does not implement a second parser or reinterpret source coordinates.
+
+The native C17 frontend remains a deliberately limited expression parser/lowering slice. DuckOS policy programs and static checks use the Python reference CLI; the native test step verifies the C17 lexer, parser, IR, optimizer and lowering contracts but does not imply complete native language parity or kernel execution support.

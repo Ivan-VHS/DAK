@@ -30,7 +30,24 @@ jobs:
           set -euo pipefail
           while IFS= read -r -d '' source; do
             PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$source"
-          done < <(find "$GITHUB_WORKSPACE/DuckOS/duckos" -type f -name '*.rpr' -print0)
+          done < <(find "$GITHUB_WORKSPACE/DuckOS/duckos" -type f \( -name '*.rpr' -o -name '*.most' \) -print0)
+
+      - name: Verify Python source-span preservation
+        env:
+          PYTHONPATH: ${{ github.workspace }}/DuckOS/projects/reaper
+        run: python -m unittest discover -s "$GITHUB_WORKSPACE/DuckOS/projects/reaper/tests" -p "test_source_spans.py" -v
+
+      - name: Build native Reaper C17 conformance targets
+        run: |
+          cmake -S "$GITHUB_WORKSPACE/DuckOS/projects/reaper" -B "$GITHUB_WORKSPACE/DuckOS/projects/reaper/build" -DREAPER_BUILD_TESTS=ON
+          cmake --build "$GITHUB_WORKSPACE/DuckOS/projects/reaper/build" --parallel
+          ctest --test-dir "$GITHUB_WORKSPACE/DuckOS/projects/reaper/build" --output-on-failure -R '^native-(lexer|parser|ir|optimizer|lowering)
+      - name: Run contract suite with tree-walk engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+
+      - name: Run contract suite with VM engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+
 
       - name: Run contract suite with tree-walk engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
