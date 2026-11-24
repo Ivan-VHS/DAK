@@ -85,7 +85,7 @@
       "url": "https://github.com/Ivan-VHS/VentuSample.git",
       "path": "projects/ventusample",
       "default_branch": "main",
-      "pinned_commit": "f98aa06fd407823cb289acaf4590c864ff29cb0e",
+      "pinned_commit": "fb24ececc0e53fc0d6d7d06b1f183cb2039277b7",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "audio-and-dsp",
