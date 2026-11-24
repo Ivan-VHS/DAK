@@ -49,9 +49,9 @@ static void copy_text(char *destination, size_t capacity, const char *source) {
 }
 static int same(const char *a, const char *b) { return security_strcmp(a, b) == 0; }
 static int file_kind(uint32_t k) {
-    return k == DUCKOS_SECURITY_FILE_MODIFY ||
-           k == DUCKOS_SECURITY_FILE_DELETE ||
-           k == DUCKOS_SECURITY_FILE_RENAME;
+    return k == (uint32_t)DUCKOS_SECURITY_FILE_MODIFY ||
+           k == (uint32_t)DUCKOS_SECURITY_FILE_DELETE ||
+           k == (uint32_t)DUCKOS_SECURITY_FILE_RENAME;
 }
 static int time_in_window(uint64_t newer, uint64_t older, uint64_t window) {
     return newer >= older && newer - older <= window;
@@ -120,7 +120,7 @@ duckos_security_status duckos_security_ingest(
         return DUCKOS_SECURITY_INVALID_ARGUMENT;
     duckos_security_status status = duckos_security_event_validate(e);
     if (status != DUCKOS_SECURITY_OK) return status;
-    if (e->source_trust != DUCKOS_SECURITY_TRUST_TRUSTED)
+    if (e->source_trust != (uint32_t)DUCKOS_SECURITY_TRUST_TRUSTED)
         return DUCKOS_SECURITY_UNTRUSTED_SOURCE;
 
     for (size_t i = 0; i < engine->count; ++i) {
@@ -308,7 +308,7 @@ duckos_security_status duckos_security_ingest(
 
 static uint64_t capability_for(uint32_t action) {
     switch (action) {
-        case DUCKOS_SECURITY_OP_OBSERVE: return DUCKOS_SECURITY_CAP_OBSERVE;
+        case (uint32_t)DUCKOS_SECURITY_OP_OBSERVE: return DUCKOS_SECURITY_CAP_OBSERVE;
         case DUCKOS_SECURITY_OP_SNAPSHOT_CREATE: return DUCKOS_SECURITY_CAP_SNAPSHOT_CREATE;
         case DUCKOS_SECURITY_OP_INTEGRITY_VERIFY: return DUCKOS_SECURITY_CAP_INTEGRITY_VERIFY;
         case DUCKOS_SECURITY_OP_FILE_RESTORE: return DUCKOS_SECURITY_CAP_FILE_RESTORE;

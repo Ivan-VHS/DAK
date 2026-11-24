@@ -4,7 +4,7 @@ PYTHON ?= python3
 CC = clang
 LD = ld.lld
 
-.PHONY: all kernel initramfs compositor shell iso test clean
+.PHONY: all kernel initramfs compositor shell iso test security-test clean
 all: kernel initramfs
 
 kernel:
@@ -35,8 +35,12 @@ shell:
 iso:
 	bash scripts/build-iso.sh
 
-test:
+test: security-test
 	$(PYTHON) -m unittest discover -s tests -v
+
+security-test:
+	clang -std=c11 -Wall -Wextra -Werror -I../foundation ../foundation/security.c tests/test_security_foundation.c -o $(BUILD)/security-test
+	$(BUILD)/security-test
 
 clean:
 	$(MAKE) -C kernel clean
