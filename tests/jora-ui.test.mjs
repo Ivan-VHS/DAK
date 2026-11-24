@@ -14,6 +14,7 @@ test("Jora composes selected features into a deterministic product formula", () 
     ["text.editor", "audio.editor", "translation.workspace"]);
   assert.deepEqual(result.generatedLocales, ["en", "ru", "uk", "most"]);
   assert.equal(result.request.schema, "reaper.jora.request.v1");
+  assert.equal(result.request.name, "LexiTone 3D");
   assert.equal(result.request.language_targets, "auto");
 });
 
