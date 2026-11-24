@@ -25,7 +25,7 @@ test("Mora Commons keeps its original products and adds thirteen distinct core a
   assert.equal(new Set(MORA_COMMONS_APPS.map((app) => app.id)).size, 28);
   assert.deepEqual(
     MORA_COMMONS_APPS.slice(0, 13).map((app) => app.name),
-    ["Deskline", "Nuvault", "Daymark", "Lexora", "Relay", "Wayline", "Sumora",
+    ["Deskline", "Nuvault", "Daymark", "Lexora", "Voxera", "Wayline", "Sumora",
       "Pixora", "Nexcode", "Mnemo", "Calcora", "Paceforge", "Trailmark"]
   );
   assert.deepEqual(
