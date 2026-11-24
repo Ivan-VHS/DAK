@@ -4,7 +4,7 @@
   "operating_system": "DuckOS",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
+  "note": "Product specification only. The 21 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
   "applications": [
     {
       "id": "cockos",
@@ -437,6 +437,32 @@
         "mora/index.html",
         "mora/app.js"
       ]
+    },
+    {
+      "id": "gazette",
+      "name": "Gazette",
+      "domain": "news_rss_reader",
+      "maturity_status": "specified",
+      "capabilities": [
+        "public_rss_source_aggregation",
+        "category_and_text_filtering",
+        "local_article_bookmarks",
+        "bounded_offline_feed_cache"
+      ],
+      "boundaries": [
+        "Loads public publisher RSS feeds through a third-party RSS-to-JSON service; network and provider availability apply",
+        "Displays source-owned headlines and short excerpts and opens the publisher page instead of republishing full articles",
+        "Bookmarks and feed cache remain in the current browser profile; native synchronization is not connected",
+        "Does not verify editorial accuracy or publisher identity beyond the configured feed URL"
+      ],
+      "naming_review": "not_assessed",
+      "prototype_status": "partial",
+      "prototype_evidence": [
+        "mora/index.html",
+        "mora/app.js",
+        "mora/news-feed.js",
+        "mora/news-feed.css"
+      ]
     }
   ],
   "workflows": [
@@ -607,6 +633,11 @@
       ],
       "exedotexe": [
         "Reuses local PE/ELF inspection and SHA-256; no executable launch or signature validation."
+      ],
+      "gazette": [
+        "Reads six configured public RSS feeds through rss2json.com, normalizes untrusted item text and validates publisher URLs before rendering.",
+        "Stores at most 60 normalized headlines and local bookmarks in the current browser profile; it does not cache full publisher articles.",
+        "Uses the source publisher's page for the full article; native account sync and editorial verification are not connected."
       ]
     }
   },

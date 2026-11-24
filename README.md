@@ -4,9 +4,9 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **21 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 14 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager, EXEdotEXE and Gazette). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
-The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
+The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 14 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
 
 ## Federated source workspace
 
@@ -17,7 +17,9 @@ Clone the complete source workspace with `git clone --recurse-submodules https:/
 
 **Start here:** [Mora desktop shell](mora/index.html).
 
-Mora uses the single DuckOS black/white/yellow visual profile: near-black surfaces, white content and a shared duck-yellow accent, with restrained vertical folds around a deep radial centre. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+Mora uses the single DuckOS black/white/yellow visual profile: near-black surfaces, white content and a shared duck-yellow accent, with restrained vertical folds around a deep radial centre. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty-one first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+
+The dedicated **Gazette** browser app provides a skeuomorphic paper-style news reader with Ukrainian, world and technology RSS sources, local bookmarks and a bounded offline headline cache. It is separate from system notifications; full stories remain on publisher sites. See [News feed](docs/NEWS_FEED.md) for source, privacy and cache boundaries.
 
 The system tools are:
 

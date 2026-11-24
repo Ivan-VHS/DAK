@@ -12,6 +12,10 @@ The target composition is approximately 65% black, 25% white/graphite and 10% ye
 
 The standard workspace remains visually stable at the centre. Secondary content and controls are arranged symmetrically around it; decorative treatment never obscures task content.
 
+### Scoped editorial material
+
+Gazette is an application-scoped exception for long-form reading: its content surface uses tactile parchment, printed-ink typography, ruled columns, paper-edge shading and restrained physical depth. Those material tokens belong only to the editorial application; they do not create a second Mora desktop palette or recolor other applications. Text remains selectable, links remain explicit, and motion obeys the shared reduced-motion preference.
+
 ## Semantic palette
 
 | Token | Value | Role |

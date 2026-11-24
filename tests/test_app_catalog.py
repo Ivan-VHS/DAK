@@ -26,15 +26,15 @@ class ApplicationCatalogTests(unittest.TestCase):
             self.schema, format_checker=FormatChecker()
         ).validate(self.catalog)
 
-    def test_all_twenty_first_party_applications_are_present(self) -> None:
+    def test_all_twenty_one_first_party_applications_are_present(self) -> None:
         expected = {
             "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
             "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "gazette",
         }
         actual = {item["id"] for item in self.catalog["applications"]}
         self.assertEqual(actual, expected)
-        self.assertEqual(len(self.catalog["applications"]), 20)
+        self.assertEqual(len(self.catalog["applications"]), 21)
 
     def test_native_and_browser_maturity_are_not_conflated(self) -> None:
         self.assertEqual(self.catalog["maturity_status"], "specified")
@@ -88,7 +88,7 @@ class ApplicationCatalogTests(unittest.TestCase):
         for name in (
             "Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
             "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2",
-            "Po-2", "GameCharager", "EXEdotEXE",
+            "Po-2", "GameCharager", "EXEdotEXE", "Gazette",
         ):
             with self.subTest(app=name):
                 self.assertIn(name, desktop + app_source)

@@ -1,12 +1,12 @@
 # Draft package catalog for the DAK OS foundational application suite.
-# Based on the supplied apps.yaml draft and extended with 13 Mora applications.
+# Based on the supplied apps.yaml draft and extended with 14 Mora applications.
 # API and capability identifiers are proposals; register them in platform policy/API
 # registries and implement service providers before production packaging.
 schema_version: 1
 suite:
   id: dak.base-suite
   name: DAK OS Base Applications
-  version: 1.1.0
+  version: 1.2.0
   status: design
   minimum_platform_api: 1
 
@@ -19,6 +19,7 @@ services:
   - dak.notifications.v1
   - dak.clock.v1
   - dak.network.v1
+  - dak.news-feed.v1
   - dak.power.v1
   - dak.display.v1
   - dak.audio.v1
@@ -238,3 +239,10 @@ applications:
     category: development
     permissions: [files.read.selected, executable.inspect]
     services: [dak.executable-inspection.v1]
+
+  - id: dak.gazette
+    name: Gazette
+    entry: app://dak.gazette/main
+    category: news
+    permissions: [network.access, news.feed.read, news.bookmarks.read, news.bookmarks.write]
+    services: [dak.news-feed.v1, dak.network.v1]
