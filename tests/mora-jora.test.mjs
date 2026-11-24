@@ -23,15 +23,16 @@ test("the three-component graph includes all pairwise synergy edges", () => {
 });
 
 test("large formulas switch to bounded cluster graph growth", () => {
-  const seed = parseJoraFormula("text editor + audio editor + translator");
-  const components = Array.from({ length: 21 }, (_, index) => ({ ...seed[index % 3], id: seed[index % 3].id + "_" + index }));
+  const components = parseJoraFormula("text editor + audio editor + translator + subtitles + notes + task board + calendar + text to speech + speech to text + code editor + spreadsheet + image editor + video editor");
   const graph = buildJoraGraph(components);
   assert.equal(graph.topology, "clustered-hub");
+  assert.equal(graph.componentCount, 13);
   assert.ok(graph.edges.length <= components.length * 3 + Object.keys(graph.clusters).length);
+  assert.ok(Object.keys(graph.clusters).length >= 5);
 });
 
 test("Jora creates a Reaper-first source draft and connected demo segments", () => {
-  assert.ok(JORA_PARAMETER_REGISTRY.length >= 9);
+  assert.ok(JORA_PARAMETER_REGISTRY.length >= 20);
   const result = buildJoraPackage("текстовый редактор + аудиоредактор + переводчик");
   assert.equal(result.displayName, "Слововолна");
   assert.equal(result.languages[0].id, "reaper");
