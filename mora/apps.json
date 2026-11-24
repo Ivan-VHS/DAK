@@ -140,6 +140,13 @@
       "maturity": "partial_local_workspace"
     },
     {
+      "id": "gazette",
+      "name": "Gazette",
+      "category": "news",
+      "panel": "mora/app.js#gazette",
+      "maturity": "partial_browser_rss_feed"
+    },
+    {
       "id": "mora-ai",
       "name": "Mora AI",
       "category": "system",

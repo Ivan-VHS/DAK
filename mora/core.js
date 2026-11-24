@@ -5,7 +5,7 @@ export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
   "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
   "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
+  "gazette", "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost"
 ]);
 
 const CAPABILITIES = ["microphone", "camera", "location", "files", "network", "clipboard"];
@@ -93,6 +93,7 @@ const APP_ALIASES = [
   { id: "po", pattern: /(?:^|\s)po(?:$|\s)/i },
   { id: "illidia", pattern: /illidia/i },
   { id: "unify", pattern: /unify/i },
+  { id: "gazette", pattern: /gazette|газет|новост/i },
   { id: "mora-ai", pattern: /mora\s*ai|помощник|агент/i },
   { id: "security", pattern: /sentinel|безопасност/i },
   { id: "updates", pattern: /restore|обновлен|восстановлен/i },

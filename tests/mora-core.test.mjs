@@ -24,11 +24,12 @@ class MemoryStorage {
   }
 }
 
-test("the shell registry exposes 20 user apps and seven system tools", () => {
-  assert.equal(APP_IDS.length, 27);
+test("the shell registry exposes 21 user apps and seven system tools", () => {
+  assert.equal(APP_IDS.length, 28);
   for (const id of ["sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump", "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"]) {
     assert.ok(APP_IDS.includes(id), id + " must be registered");
   }
+  assert.ok(APP_IDS.includes("gazette"));
   assert.ok(APP_IDS.includes("mora-ai"));
   assert.ok(APP_IDS.includes("security"));
   assert.ok(APP_IDS.includes("runtime"));
@@ -48,6 +49,12 @@ test("opening an app is restricted to the built-in application list", () => {
   assert.equal(plan.actions[0].type, "open-app");
   assert.equal(plan.actions[0].appId, "security");
   assert.equal(buildIntentPlan("запусти powershell").ok, false);
+});
+
+test("Gazette can be opened with a Russian news intent", () => {
+  const plan = buildIntentPlan("открой новости");
+  assert.equal(plan.ok, true);
+  assert.deepEqual(plan.actions.map((action) => action.appId), ["gazette"]);
 });
 
 test("Mora Boost can be opened through the bounded intent allowlist", () => {

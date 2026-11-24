@@ -11,14 +11,14 @@ const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", i
 const coreAppIds = ["cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify"];
 const extensionAppIds = [
   "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-  "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"
+  "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "gazette"
 ];
 const systemAppIds = [
   "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "desktop", "mora-commons"
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
-test("desktop exposes 20 first-party apps and nine system tools", () => {
+test("desktop exposes 21 first-party apps and nine system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
@@ -38,7 +38,7 @@ test("desktop exposes 20 first-party apps and nine system tools", () => {
     assert.ok(registry.built_in_apps.some((app) => app.id === id), id + " is missing from the registry");
   }
   for (const name of ["Sestem", "SetupUP", "Orriganize", "Abriganza", "Olaab",
-    "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2", "Po-2", "GameCharager", "EXEdotEXE"]) {
+    "Concrete Thump", "Seu-Beu", "Love-IL", "Poi", "Poi-2", "Po-2", "GameCharager", "EXEdotEXE", "Gazette"]) {
     assert.ok(html.includes(name) || js.includes(name), name + " label is missing");
   }
 });
@@ -142,7 +142,9 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v7-duck-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v8-gazette"));
+  assert.ok(serviceWorker.includes("./news-feed.js"));
+  assert.ok(serviceWorker.includes("./news-feed.css"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));

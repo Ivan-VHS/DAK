@@ -5,7 +5,7 @@
 **Maturity:** `specified`  
 **Distribution intent:** seven default applications in the DuckOS product design
 
-This document defines the intended roles, first-scope capabilities and cross-application workflows for 20 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
+This document defines the intended roles, first-scope capabilities and cross-application workflows for 21 DuckOS first-party application concepts. The original seven remain the core suite; 14 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
 
 The machine-readable inventory is maintained in [`preinstalled-applications.v1.json`](../catalogs/preinstalled-applications.v1.json). The separate DAK package-design catalog is [`dak-base-applications.v1.yaml`](../catalogs/dak-base-applications.v1.yaml). Shared terminology and maturity rules come from the [Ivan-VHS Unified Documentation and Semantics Standard](UNIFIED_DOCUMENTATION_STANDARD.md).
 
@@ -169,7 +169,7 @@ Boundaries and design rules:
 
 ### 2.8 Extended Mora application concepts
 
-The following scope is intentionally modest because these 13 names arrived without product briefs. Each Mora panel reuses the existing window manager, theme tokens, toast feedback and profile storage. No new native process, filesystem, networking or audio privileges are implied.
+The following scope is intentionally modest because most of these additional names arrived without product briefs. Each Mora panel reuses the existing window manager, theme tokens, toast feedback and profile storage. No new native process, filesystem, networking or audio privileges are implied.
 
 | App | Implemented in the Mora panel | Boundary |
 |---|---|---|
@@ -186,8 +186,11 @@ The following scope is intentionally modest because these 13 names arrived witho
 | Po-2 | Manually ordered route-stop list | No GPS, live map or navigation service |
 | GameCharager | Local game list and read-only executable inspection | Does not launch games or install drivers |
 | EXEdotEXE | PE/ELF inspection and SHA-256 report for a selected file | Not an antivirus, signature verifier or executable runtime |
+| Gazette | Aggregated public RSS headlines, topic filters, search, local bookmarks and cached headline fallback | Uses the external rss2json.com converter; full articles stay on publisher sites, and no native news service or account sync is implied |
 
 Entries are namespaced by app in the Mora browser profile. Each text collection is limited to 100 entries and 160 characters per entry. File inspection is user initiated and remains local to the browser. The mora/apps.json registry and core.js app ID list are updated together so the launcher and panel router share one inventory.
+
+Gazette is the explicit network-enabled exception in this group: it reads six configured public feeds via the RSS-to-JSON converter, stores a bounded set of normalized headline records and bookmarks in the current browser profile, and links back to each publisher for the full story. The converter sees feed requests; Mora Sentinel currently stores preferences only and does not enforce per-app network permissions. See [News feed implementation and data boundaries](NEWS_FEED.md).
 
 ## 3. Cross-application workflows
 
