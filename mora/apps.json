@@ -274,7 +274,7 @@
     {
       "id": "rhythm-profile-store",
       "maturity": "partial",
-      "scope": "Local BPM/swing profiles, bounded in-browser audio sample audition and sample provenance metadata, 500-character production prompt export, and Reaper timing-helper export; no audio synthesis, MIDI, device routing or native audio service."
+      "scope": "Validated local BPM/swing profiles and 16-step sequence, bounded in-browser audio sample preview/chopping, synthesized kick/snare/hi-hat/808 playback, four-bar WAV rendering, sample provenance metadata, 500-character production prompt export, and Reaper timing-helper export; no native audio driver, system mixer, MIDI routing or multitrack DAW."
     },
     {
       "id": "setup-preferences",
