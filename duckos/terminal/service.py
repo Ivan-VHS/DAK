@@ -518,18 +518,10 @@ class TerminalService:
 
     def _module_order(self, arguments: list[str]) -> Any:
         file_path = self._require_path("module order FILE", arguments)
-        if file_path.is_symlink():
-            raise TerminalInputError("module input must not be a symlink")
-        try:
-            if file_path.stat().st_size > MAX_INPUT_JSON_BYTES:
-                raise TerminalInputError("module input exceeds the 4 MiB limit")
-            payload = json.loads(file_path.read_text(encoding="utf-8"))
-        except FileNotFoundError as error:
-            raise TerminalInputError("module input does not exist: " + str(file_path)) from error
-        except json.JSONDecodeError as error:
-            raise TerminalInputError("invalid module JSON: " + str(error)) from error
-        except OSError as error:
-            raise TerminalInputError("cannot read module input: " + str(error)) from error
+        missing = object()
+        payload = self._read_json(file_path, MAX_INPUT_JSON_BYTES, missing)
+        if payload is missing:
+            raise TerminalInputError("module input does not exist: " + str(file_path))
         items = payload.get("modules") if isinstance(payload, dict) else payload
         if not isinstance(items, list):
             raise TerminalInputError("module input must be a list or an object with a modules list")
