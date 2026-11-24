@@ -1,4 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { BASE_APP_DEFINITIONS, renderBaseAppPanel, initializeBaseAppPanel } from "./base-apps.js";
 
 import {
   RECOVERY_KEY,
@@ -43,7 +44,8 @@ const appDefinitions = {
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
+  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
+  ...Object.fromEntries(Object.entries(BASE_APP_DEFINITIONS).map(([id, definition]) => [id, { ...definition, color: DUCK_ACCENT }]))
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -318,7 +320,7 @@ function extensionPanelMarkup(appId) {
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Это не антивирус, не проверка подписи издателя и не Windows runtime.</span></div>';
     default:
-      return extensionPanelMarkup(appId);
+      return renderBaseAppPanel(appId) || extensionPanelMarkup(appId);
   }
 }
 
@@ -330,16 +332,16 @@ function commonsPanelMarkup() {
 
   return '<p class="window-kicker">MORA COMMONS · ЕДИНЫЙ КАТАЛОГ</p>' +
     '<h2 class="window-heading">Пространство возможностей</h2>' +
-    '<p class="commons-intro">Пятнадцать направлений собраны по задачам, а не по полу. Каждый инструмент открыт каждому пользователю. Настраивайте каталог под свои интересы.</p>' +
+    '<p class="commons-intro">Каталог объединяет 13 базовых категорий и 28 продуктов. Первые 13 приложений уже запускаются в оболочке Mora; остальные продукты представлены спецификациями. Все приложения доступны каждому пользователю.</p>' +
     '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Mora Commons"></label>' +
     '<div class="commons-filters" data-commons-filters aria-label="Категории приложений">' +
     '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
     filters +
     '</div>' +
-    '<p class="commons-count" data-commons-count aria-live="polite">Показано 15 приложений</p>' +
+    '<p class="commons-count" data-commons-count aria-live="polite">Показано 28 приложений</p>' +
     '<div class="commons-grid" data-commons-grid></div>' +
     '<section class="commons-detail" data-commons-detail aria-live="polite" hidden></section>' +
-    '<p class="window-copy">Каталог и избранное работают локально. Карточки описывают спецификации новых продуктов; отдельные исполняемые модули ещё не подключены.</p>';
+    '<p class="window-copy">Поиск, избранное и базовые приложения работают локально. Часть каталога пока представлена продуктовыми спецификациями; зрелость каждого продукта указана отдельно.</p>';
 }
 
 function loadCommonsFavorites() {
@@ -395,10 +397,18 @@ function renderCommonsDetails(detailPanel, app) {
   }
   detailPanel.appendChild(list);
 
+  if (BASE_APP_DEFINITIONS[app.id]) {
+    const launch = makeCommonsText("button", "action-button commons-launch", "Открыть приложение");
+    launch.type = "button";
+    launch.dataset.commonsLaunch = app.id;
+    detailPanel.appendChild(launch);
+  }
   detailPanel.appendChild(makeCommonsText(
     "p",
     "commons-detail-status",
-    "Статус: спецификация. Каталог Mora Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
+    BASE_APP_DEFINITIONS[app.id]
+      ? "Статус: модуль доступен в браузерной оболочке Mora; данные хранятся локально. Это не отдельный нативный процесс DuckOS."
+      : "Статус: спецификация продукта. Исполняемый модуль пока не подключён."
   ));
   detailPanel.hidden = false;
 }
@@ -496,6 +506,11 @@ function initializeCommonsPanel(appWindow) {
   details.addEventListener("click", (event) => {
     if (event.target.closest("[data-commons-close-detail]")) {
       details.hidden = true;
+      return;
+    }
+    const launch = event.target.closest("[data-commons-launch]");
+    if (launch && BASE_APP_DEFINITIONS[launch.dataset.commonsLaunch]) {
+      openApp(launch.dataset.commonsLaunch);
     }
   });
 
@@ -698,6 +713,7 @@ function openApp(appId) {
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
+  if (BASE_APP_DEFINITIONS[appId]) initializeBaseAppPanel(appWindow);
   if (appId === "mora-commons") initializeCommonsPanel(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
