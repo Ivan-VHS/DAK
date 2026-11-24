@@ -1,0 +1,173 @@
+# DuckOS native implementation roadmap
+
+**Reviewed:** 2026-11-24  
+**Product:** DuckOS operating-system foundation; Mora is the desktop/browser shell.  
+**Source of truth:** native source, Reaper contracts, tests, CMake targets, CI and the versioned system-capability profile.
+
+## Product maturity contract
+
+DuckOS currently combines three distinct surfaces. They must never be conflated:
+
+1. **Mora browser shell:** application discovery, local preferences, local tools and UI workflows. Browser code cannot enforce kernel privileges or control host devices.
+2. **Reaper reference contracts:** executable policy models for boot sequencing, memory arithmetic, scheduling decisions, IPC admission, capabilities, service restart and telemetry classification. Passing these tests proves policy behavior on the Reaper reference runtime only.
+3. **Native foundation:** a host-buildable C11 boot-handoff validation library with CMake and CTest. It is not yet a freestanding kernel, bootloader, process runtime or bootable image.
+
+| Maturity | Required evidence |
+|---|---|
+| Delivered | Native/source implementation, focused tests and required CI on the supported target |
+| Partial | A bounded subset exists; every missing primitive and platform limitation is explicit |
+| Planned | No implementation on the target runtime; dependency and measurable acceptance test are recorded |
+| Not applicable | A capability is outside the approved product scope, with rationale |
+
+A policy model, browser preference, catalogue entry, manifest, generated archive or host-side unit test cannot be relabelled as a native kernel, driver, boot service or physical-device capability.
+
+## Current delivered foundation
+
+| Area | Delivered scope | Explicit boundary |
+|---|---|---|
+| C11 build | CMake foundation target and CTest test executable | Host build only; no freestanding target |
+| Boot handoff | Versioned fixed-width record, typed memory-map entries and validation | No firmware loader or kernel entry point |
+| Validation | Range overflow, overlap, framebuffer extent, map ordering/type and version/size checks | Validates metadata; does not allocate or map physical memory |
+| Reaper contracts | Boot phases, resource budgets, scheduling/IPC policies, capabilities and service restart decisions | Reference-runtime policy, not kernel enforcement |
+| Mora | Browser desktop shell, app catalogue, local preferences and local UI tools | Not a native compositor or privileged shell |
+| Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature and non-destructive deployment planning | Not an ISO/USB image, disk installer or verified boot chain |
+
+## Native implementation sequence
+
+### D0 — Boot information and host conformance
+
+**Status: Delivered for the host-side contract.**
+
+- Preserve the v1 boot handoff ABI, fixed widths, record version and structure size.
+- Reject malformed kernel/initramfs ranges, overlapping regions, invalid framebuffer extents and unsorted/overlapping memory-map records.
+- Keep status codes deterministic and test malformed input boundaries.
+
+**Exit evidence:** CMake build and CTest pass on supported host CI; invalid structures are rejected without out-of-bounds access. This stage does not claim UEFI or physical boot.
+
+### D1 — Freestanding target and firmware handoff
+
+**Status: Planned.**
+
+- Select and document the first architecture/firmware target (initially x86_64 UEFI, unless a reviewed architecture decision changes it).
+- Define the freestanding compiler/linker profile, target ABI, entry symbol, stack alignment, image format and serial-console contract.
+- Implement an independently testable UEFI loader that validates firmware memory-map descriptors and constructs the versioned boot handoff.
+- Reserve memory and pass framebuffer, ACPI/SMBIOS and boot-volume references only through validated versioned structures.
+- Keep secure-boot claims separate: an unsigned image or HTTPS transport is not Secure Boot.
+
+**Exit evidence:** reproducible freestanding build; loader runs in a pinned UEFI emulator; serial log records handoff version and memory map; malformed handoff cases fail closed; build artifact hash and emulator configuration are retained.
+
+### D2 — Physical memory and virtual address spaces
+
+**Status: Planned.**
+
+- Implement a physical page-frame allocator from the validated firmware memory map.
+- Reserve firmware, kernel, initramfs, framebuffer, ACPI and boot-service regions before allocating.
+- Add page-table construction, mapping permissions, guard regions, canonical-address checks and safe unmap/free behavior.
+- Specify ownership, alignment, overflow, fragmentation and allocation-failure semantics.
+- Keep DMA/IOMMU memory separate from ordinary pageable allocations.
+
+**Exit evidence:** allocator invariants under randomized allocation/free sequences; page-table tests in emulator; permission-fault tests; sanitizer/UB checks for host-testable helpers; memory-map fuzzing; no reservation overlap.
+
+### D3 — Interrupts, clocks and execution scheduler
+
+**Status: Planned; policy selector only exists in Reaper contracts.**
+
+- Install exception and interrupt descriptor tables with explicit error-code handling.
+- Add a calibrated monotonic timer source and an interrupt-safe event path.
+- Implement context save/restore and preemptive scheduling only after stack, address-space and interrupt invariants are validated.
+- Define task lifecycle, priority/deadline semantics, bounded run queues, idle behavior and CPU affinity.
+- Add work stealing only after single-core scheduling is correct and multicore memory ordering is specified.
+
+**Exit evidence:** emulator tests for timer ticks, task preemption, fault isolation and deterministic scheduler cases; stress tests across multiple runnable tasks; latency measurements with hardware/emulator details.
+
+### D4 — Processes, syscalls and capability enforcement
+
+**Status: Planned; capability policy exists only as a Reaper reference model.**
+
+- Define a versioned syscall ABI and stable userspace calling convention.
+- Create process address spaces, isolated stacks, handle tables and bounded resource accounting.
+- Enforce capabilities at the kernel boundary, including inheritance attenuation, revocation and audit.
+- Validate user pointers and lengths before kernel access; never trust a userspace “validated” flag.
+- Implement process lifecycle, exit status, wait/reap and safe cancellation.
+
+**Exit evidence:** negative tests proving denied syscalls cannot cross capability boundaries; user-pointer fuzzing; process isolation tests; resource-exhaustion tests; ABI compatibility fixtures.
+
+### D5 — IPC and service supervision
+
+**Status: Planned; bounded queue/UDB policy is a Reaper contract only.**
+
+- Implement a kernel-owned IPC endpoint and bounded message queues.
+- Add sender identity, capability checks, backpressure, cancellation and bounded wait semantics.
+- Add shared-memory transport only with explicit mapping ownership, page pinning, lifetime and revocation.
+- Implement service supervision with restart budgets, crash-loop backoff and observable terminal failure state.
+- Define journal durability requirements before persisting events.
+
+**Exit evidence:** cross-process tests, queue saturation/backpressure tests, malformed message fuzzing, cancellation/race tests and crash/restart integration scenarios.
+
+### D6 — Hardware discovery, drivers and device isolation
+
+**Status: Planned; descriptor and conflict policy only.**
+
+- Implement bounded PCI/PCIe and ACPI enumeration for the first declared target.
+- Define driver package format, architecture/ABI compatibility and a cryptographic trust chain.
+- Verify package signatures from a pinned trust root; a caller-provided boolean is not verification evidence.
+- Load drivers in an isolated address space with explicit device/resource capabilities.
+- Add interrupt routing, DMA/IOMMU enforcement and safe device teardown only after the memory and process stages pass.
+
+**Exit evidence:** emulator/device fixtures, signed and invalid package tests, resource-conflict tests, isolation tests, driver crash recovery and hardware qualification for each supported device. No blanket “driver support” claim from inventory alone.
+
+### D7 — Persistent storage, filesystems and package lifecycle
+
+**Status: Planned.**
+
+- Select a first filesystem and define crash-consistency and recovery expectations.
+- Implement block-device abstraction, bounded reads/writes, cache flush semantics and error propagation.
+- Add a package format with hashes, dependency graph, trust metadata and atomic installation/rollback.
+- Use content-addressed storage only after hash algorithm, versioning, integrity and migration contracts are fixed.
+
+**Exit evidence:** filesystem image tests, power-loss/fault injection, corruption detection, package-signature verification, atomic install/rollback tests and recovery from interrupted transactions.
+
+### D8 — Native desktop, input, graphics and audio
+
+**Status: Planned; Mora browser UI is not the native desktop.**
+
+- Choose a native display and windowing architecture for the initial hardware target.
+- Implement graphics buffer ownership, input event routing, focus, accessibility and display-mode failure recovery.
+- Add font shaping and text input only with a defined Unicode and fallback policy.
+- Treat audio engine/device scheduling as a separate bounded subsystem.
+- Keep the Mora visual system as a design reference, not as proof of compositor or GPU implementation.
+
+**Exit evidence:** emulator screenshot capture, input/accessibility conformance tests, display-loss recovery, frame-time measurements and supported hardware matrix.
+
+### D9 — Installer, image assembly and release qualification
+
+**Status: Planned; component bundles and dry-run deployment plans are delivered separately.**
+
+- Assemble a reproducible bootable image from verified components and a versioned system manifest.
+- Include a firmware-compatible bootloader and documented boot configuration.
+- Add verified boot only after signing identity, key custody, revocation and recovery policy are implemented.
+- Keep disk writes behind explicit operator approval and a destructive-operation preview.
+- Implement A/B slot update, boot-success confirmation and recovery only after filesystem and boot stages are qualified.
+- Keep cloud targets out of the release matrix until a real format conversion and target boot test exist.
+
+**Exit evidence:** reproducible ISO/USB image, image verification, emulator boot test, supported hardware boot matrix, installation rollback, signed provenance and recovery drill.
+
+## Cross-cutting engineering gates
+
+Every native stage must have:
+
+- versioned interfaces and migration policy;
+- bounded input, memory, CPU and retry budgets;
+- unit, property, fuzz and negative-case tests appropriate to the primitive;
+- CI build/test and sanitizer coverage where applicable;
+- fault-injection and rollback/recovery behavior for state-changing operations;
+- security review for privilege, device, package and trust-boundary changes;
+- documentation updates tied to the exact implementation commit and CI run.
+
+## Current non-goals
+
+A hosted web service, remote orchestration control plane, automatic driver installation, arbitrary shell execution, unattended destructive disk writes and unsupported cloud deployment are not implied by the current DuckOS product. Add them only through an explicit product decision, threat model, owner and acceptance plan.
+
+## Release rule
+
+Do not claim DuckOS is bootable until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. Until then, describe the project as a host-tested OS foundation and a Reaper-backed contract model with a browser desktop shell.

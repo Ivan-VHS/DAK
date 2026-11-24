@@ -50,3 +50,8 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Capability completeness standard
 
 [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
+
+## Native implementation planning
+
+- [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
+- [Implementation status](IMPLEMENTATION_STATUS.md) — current delivered/partial boundaries with source and test evidence.

@@ -149,3 +149,8 @@ Implementation maturity, supported platforms and subsystem behavior must be stat
 ## Attribution
 
 Project author/developer: **Ivan-VHS**. Preserve the authorship, contributions and license notices of existing contributors and dependencies.
+
+
+## Native implementation roadmap
+
+The [DuckOS native implementation roadmap](docs/IMPLEMENTATION_ROADMAP.md) records staged acceptance gates from the current host-tested boot handoff to a future bootable image. It distinguishes Reaper reference policies, Mora browser-shell behavior and native implementation. A bootable OS claim remains gated by target-specific firmware, kernel, hardware, recovery and release evidence.
