@@ -40,13 +40,13 @@ export craft framebuffer_valid(base, bytes, width, height, pitch, bpp) {
 }
 
 export craft validate(info, regions) {
-    when size(info) != 15 or size(regions) == 0 or size(regions) > 256 {
+    when size(info) != 15 {
         yield "invalid-argument"
     }
     when info[0] < boot_info_v1_size or info[1] != 1 {
         yield "unsupported-version"
     }
-    when info[13] != size(regions) {
+    when size(regions) == 0 or size(regions) > 256 or info[13] != size(regions) {
         yield "invalid-memory-map"
     }
     when not range_valid(info[3], info[4]) {
