@@ -80,10 +80,7 @@ export craft authorize_action(action, trust_label, grants, evidence_fresh, polic
         yield false
     }
 
-    when action == "file.restore"
-        or action == "process.isolate"
-        or action == "process.terminate"
-        or action == "network.isolate" {
+    when action == "file.restore" or action == "process.isolate" or action == "process.terminate" or action == "network.isolate" {
         yield human_approved
     }
     yield true
