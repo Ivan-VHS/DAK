@@ -81,8 +81,12 @@ export craft multimodal_pair_valid(first, second, window_ms) {
     when input_time_delta(first[7], second[7]) > window_ms {
         yield false
     }
-    when first[2] != "" and second[2] != "" and first[2] != second[2] {
-        yield false
+    when first[2] != "" {
+        when second[2] != "" {
+            when first[2] != second[2] {
+                yield false
+            }
+        }
     }
     yield true
 }
