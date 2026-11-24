@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -49,6 +50,19 @@ class RepositoryFederationTests(unittest.TestCase):
         altered["repositories"][0]["depends_on"] = ["reaper"]
         altered["repositories"][1]["depends_on"] = ["pytyliki"]
         self.assertTrue(any("dependency cycle" in error for error in validate_manifest(altered)))
+
+    def test_gitlink_commit_pins_match_the_federation_registry(self):
+        for item in self.manifest["repositories"]:
+            result = subprocess.run(
+                ["git", "ls-tree", "HEAD", item["path"]],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            fields = result.stdout.split()
+            self.assertEqual(fields[:2], ["160000", "commit"], item["id"])
+            self.assertEqual(fields[2], item["pinned_commit"], item["id"])
 
     def test_gitmodules_is_one_to_one_with_the_registry(self):
         config = parse_gitmodules((ROOT / ".gitmodules").read_text(encoding="utf-8"))
