@@ -15,7 +15,7 @@ export const NEWS_MAX_BOOKMARKS = 100;
 
 export function parseGdeltDate(value) {
   if (typeof value !== "string") return null;
-  const match = value.match(/^(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})(\\d{2})Z?$/);
+  const match = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?$/);
   if (!match) {
     const parsed = Date.parse(value);
     return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
@@ -40,9 +40,10 @@ export function normalizeNewsArticle(item) {
   if (articleUrl.protocol !== "https:" || !articleUrl.hostname || articleUrl.username || articleUrl.password) return null;
 
   let image = null;
-  if (typeof item.socialimage === "string" && item.socialimage.trim()) {
+  const imageValue = typeof item.socialimage === "string" ? item.socialimage : item.image;
+  if (typeof imageValue === "string" && imageValue.trim()) {
     try {
-      const candidate = new URL(item.socialimage.trim());
+      const candidate = new URL(imageValue.trim());
       if (candidate.protocol === "https:") image = candidate.href;
     } catch {
       image = null;
@@ -58,8 +59,8 @@ export function normalizeNewsArticle(item) {
     title,
     domain,
     language: typeof item.language === "string" ? item.language.slice(0, 48) : "",
-    sourceCountry: typeof item.sourcecountry === "string" ? item.sourcecountry.slice(0, 64) : "",
-    seenAt: parseGdeltDate(item.seendate),
+    sourceCountry: typeof (item.sourcecountry || item.sourceCountry) === "string" ? (item.sourcecountry || item.sourceCountry).slice(0, 64) : "",
+    seenAt: parseGdeltDate(item.seendate || item.seenAt),
     image
   };
 }
@@ -83,9 +84,9 @@ export function buildNewsRequestUrl(categoryId, searchText = "") {
   const category = NEWS_CATEGORIES.find((item) => item.id === categoryId);
   if (!category) throw new TypeError("Unknown news category");
   const cleanSearch = String(searchText)
-    .replace(/[\\u0000-\\u001f\\u007f]/g, " ")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
     .replace(/[()"]/g, " ")
-    .replace(/\\s+/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
     .slice(0, 100);
   const query = category.query + (cleanSearch ? ' "' + cleanSearch + '"' : "");
