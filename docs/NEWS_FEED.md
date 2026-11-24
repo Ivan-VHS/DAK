@@ -48,6 +48,6 @@ npm test
 Run the catalogue tests with the repository's Python test dependencies:
 
 ```sh
-python -m unittest tests.test_app_catalog tests.test_dak_base_catalog -v
+python -m unittest discover -s tests -v
 ```
 
