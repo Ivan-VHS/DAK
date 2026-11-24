@@ -26,15 +26,15 @@ class ApplicationCatalogTests(unittest.TestCase):
             self.schema, format_checker=FormatChecker()
         ).validate(self.catalog)
 
-    def test_all_twenty_first_party_applications_are_present(self) -> None:
+    def test_all_twenty_one_first_party_applications_are_present(self) -> None:
         expected = {
             "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
             "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "news",
         }
         actual = {item["id"] for item in self.catalog["applications"]}
         self.assertEqual(actual, expected)
-        self.assertEqual(len(self.catalog["applications"]), 20)
+        self.assertEqual(len(self.catalog["applications"]), 21)
 
     def test_native_and_browser_maturity_are_not_conflated(self) -> None:
         self.assertEqual(self.catalog["maturity_status"], "specified")
@@ -94,6 +94,9 @@ class ApplicationCatalogTests(unittest.TestCase):
                 self.assertIn(name, desktop + app_source)
         self.assertIn('id="extension-app-grid"', desktop)
         self.assertIn("EXTENSION_STORAGE_PREFIX", app_source)
+        self.assertIn('case "news":', app_source)
+        self.assertIn("initializeNewsPanel", app_source)
+        self.assertIn("GDELT DOC 2.0", (ROOT / "mora/news.js").read_text(encoding="utf-8"))
 
     def test_dak_catalog_is_present_and_remains_design_only(self) -> None:
         catalog = (ROOT / "catalogs/dak-base-applications.v1.yaml").read_text(encoding="utf-8")
@@ -102,7 +105,7 @@ class ApplicationCatalogTests(unittest.TestCase):
         for app_id in (
             "sestem", "setupup", "orriganize", "abriganza", "olaab",
             "concrete-thump", "seu-beu", "love-il", "poi", "poi-2",
-            "po-2", "gamecharager", "exedotexe",
+            "po-2", "gamecharager", "exedotexe", "news",
         ):
             with self.subTest(app=app_id):
                 self.assertIn("id: dak." + app_id, catalog)
