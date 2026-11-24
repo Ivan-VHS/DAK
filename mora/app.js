@@ -903,7 +903,7 @@ document.addEventListener("click", (event) => {
       const detail = document.createElement("small");
       detail.textContent = "Цели: " + composed.languageTargets.join(" + ").toUpperCase() + " · локали: " + composed.generatedLocales.join(", ").toUpperCase();
       const graphSummary = document.createElement("small");
-      graphSummary.textContent = "Графы: " + composed.graphPlan.variants + " · топология: " + composed.graphPlan.topologyLabel + " · вариативность: " + composed.graphPlan.variation + "% · seed: " + composed.graphPlan.seed;
+      graphSummary.textContent = "Графы: " + composed.graphPlan.variants + " · топология: " + composed.graphPlan.topologyLabel + " · вариативность: " + composed.graphPlan.variation + "% · seed: " + composed.graphPlan.seed + " · выберется граф с лучшей оценкой совместимости";
       const graphChoices = document.createElement("small");
       graphChoices.textContent = "Доступные структуры: " + composed.graphPlan.availableTopologies.map((item) => item.label).join(" · ");
       const maturity = document.createElement("small");
