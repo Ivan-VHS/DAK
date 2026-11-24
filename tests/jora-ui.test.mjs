@@ -19,6 +19,9 @@ test("Jora composes selected features into a deterministic product formula", () 
   assert.equal(result.request.name_style, "balanced");
   assert.deepEqual(result.request.graph, { topology: "auto", objective: "balanced", seed: "", variants: 4, variation: 50 });
   assert.equal(result.nameSuggestions.length, 4);
+  assert.equal(result.nameSuggestions[0], "Jora · Docs / Audio / Translate");
+  assert.equal(result.nameSuggestions[1], "Jora — Documents, Media & Languages Workspace");
+  assert.equal(result.nameSuggestions[2], "Jora | Workspace for writing, audio editing & translation");
   assert.ok(result.nameSuggestions.every((label) => label.startsWith("Jora")));
 });
 
