@@ -6,6 +6,10 @@
 
 [Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
+## Security doctrine
+
+[BAV Defender Doctrine — Red Sparrow](BAV_DEFENDER_DOCTRINE.md) defines the versioned content-safety policy and review boundaries. It is specified; no running antivirus engine or native enforcement is claimed.
+
 ## Visual design
 
 [Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical interface standard; [mora/theme.json](../mora/theme.json) contains the versioned color, shape, spacing, typography and motion tokens.
