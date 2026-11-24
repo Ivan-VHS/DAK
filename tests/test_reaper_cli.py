@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -124,7 +125,7 @@ class ReaperCliTests(unittest.TestCase):
             code, output = self.invoke("reaper", "--root", str(self.root), "lsp")
         self.assertEqual(code, 0)
         self.assertEqual(output, "")
-        self.assertEqual(run.call_args.args[0], [str(Path(__import__("sys").executable)), "-m", "reaper", "lsp"])
+        self.assertEqual(run.call_args.args[0], [sys.executable, "-m", "reaper", "lsp"])
         self.assertNotIn("capture_output", run.call_args.kwargs)
         self.assertFalse(run.call_args.kwargs["shell"])
 
