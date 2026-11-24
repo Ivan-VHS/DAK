@@ -201,6 +201,13 @@
       "category": "application_catalogue",
       "panel": "mora/app.js#mora-commons",
       "maturity": "implemented_local_catalog"
+    },
+    {
+      "id": "jora",
+      "name": "Jora",
+      "category": "application_store",
+      "panel": "mora/app.js#jora",
+      "maturity": "partial_local_formula_studio_and_source_generator"
     }
   ],
   "widgets": [

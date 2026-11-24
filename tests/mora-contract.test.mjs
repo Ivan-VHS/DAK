@@ -147,3 +147,15 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
+
+
+test("Jora is a first-class Mora application with local synthesis controls", () => {
+  assert.ok(html.includes('data-app="jora"'));
+  assert.ok(js.includes('jora: { name: "Jora"'));
+  assert.ok(js.includes('case "jora":'));
+  assert.ok(js.includes("initializeJoraPanel"));
+  assert.ok(js.includes("buildJoraPackage"));
+  assert.ok(registry.built_in_apps.some((app) => app.id === "jora"));
+  assert.equal(policy.capabilities.jora_formula_synthesis.maturity, "partial");
+  assert.ok(serviceWorker.includes("./jora-core.js"));
+});

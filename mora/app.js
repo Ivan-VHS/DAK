@@ -1,4 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { joraPanelMarkup, initializeJoraPanel } from "./jora-ui.js";
 
 import {
   RECOVERY_KEY,
@@ -43,7 +44,8 @@ const appDefinitions = {
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
+  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
+  jora: { name: "Jora", subtitle: "Формулы и генерация приложений", color: DUCK_ACCENT, glyph: "J" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -576,6 +578,8 @@ function panelMarkup(appId) {
         '<p class="window-copy">Браузерная Mora показывает только точку входа. Она не изображает системный монитор, оконный менеджер или привилегированный доступ.</p>';
     case "mora-commons":
       return commonsPanelMarkup();
+    case "jora":
+      return joraPanelMarkup();
     case "mora-ai":
       return '<p class="window-kicker">MORA INTENT ENGINE · ЛОКАЛЬНЫЙ РЕЖИМ</p>' +
         '<h2 class="window-heading">Сформулируйте задачу</h2>' +
@@ -699,6 +703,7 @@ function openApp(appId) {
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
   if (appId === "mora-commons") initializeCommonsPanel(appWindow);
+  if (appId === "jora") initializeJoraPanel(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
