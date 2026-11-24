@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/reaper-workbench.v1.schema.json",
+  "title": "DuckOS Reaper workbench capability status",
+  "type": "object",
+  "required": [
+    "schema",
+    "available",
+    "status",
+    "repository",
+    "python",
+    "capabilities",
+    "capability_states",
+    "runtime_boundary",
+    "execution_is_os_sandboxed",
+    "message"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.reaper-workbench.v1"
+    },
+    "available": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "not_found",
+        "ready"
+      ]
+    },
+    "repository": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "python": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "reference_runtime",
+          "cli",
+          "native_studio",
+          "static_typecheck",
+          "native_aot_subset",
+          "language_server",
+          "debug_adapter",
+          "toolchain_inventory",
+          "embedded_tooling",
+          "polyglot_tooling",
+          "qcs_frontend"
+        ]
+      }
+    },
+    "capability_states": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          "available",
+          "experimental",
+          "partial"
+        ]
+      }
+    },
+    "runtime_boundary": {
+      "const": "user-space"
+    },
+    "execution_is_os_sandboxed": {
+      "const": false
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}
