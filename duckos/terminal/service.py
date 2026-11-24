@@ -10,6 +10,7 @@ from pathlib import Path
 import platform
 import re
 import shlex
+import stat
 import tempfile
 from typing import Any, Callable, Iterable
 
@@ -168,19 +169,44 @@ class TerminalService:
                 pass
 
     def _read_json(self, path: Path, max_bytes: int, default: Any) -> Any:
+        if self.state_dir.is_symlink():
+            raise TerminalInputError("terminal state directory must not be a symlink")
         if path.is_symlink():
             raise TerminalInputError("terminal state files must not be symlinks: " + path.name)
+
+        descriptor: int | None = None
         try:
-            size = path.stat().st_size
-            if size > max_bytes:
+            flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
+            # Avoid blocking on FIFOs/devices and refuse symlink swaps where supported.
+            flags |= getattr(os, "O_NONBLOCK", 0)
+            flags |= getattr(os, "O_NOFOLLOW", 0)
+            descriptor = os.open(path, flags)
+            metadata = os.fstat(descriptor)
+            if not stat.S_ISREG(metadata.st_mode):
+                raise TerminalInputError(path.name + " must be a regular file")
+            if metadata.st_size > max_bytes:
                 raise TerminalInputError(path.name + " exceeds its size limit")
-            return json.loads(path.read_text(encoding="utf-8"))
+
+            with os.fdopen(descriptor, "rb") as stream:
+                descriptor = None
+                raw = stream.read(max_bytes + 1)
+            if len(raw) > max_bytes:
+                raise TerminalInputError(path.name + " exceeds its size limit")
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise TerminalInputError("invalid UTF-8 in " + path.name) from error
+            try:
+                return json.loads(text)
+            except json.JSONDecodeError as error:
+                raise TerminalInputError("invalid JSON in " + path.name + ": " + str(error)) from error
         except FileNotFoundError:
             return default
-        except json.JSONDecodeError as error:
-            raise TerminalInputError("invalid JSON in " + path.name + ": " + str(error)) from error
         except OSError as error:
             raise TerminalInputError("cannot read " + path.name + ": " + str(error)) from error
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
 
     def _atomic_write(self, path: Path, payload: str) -> None:
         self._ensure_state_dir()
