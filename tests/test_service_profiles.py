@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from duckos.service_profiles import (
     PLAN_SCHEMA,
@@ -10,6 +15,7 @@ from duckos.service_profiles import (
     plan_service_startup,
     validate_service_profile,
 )
+from duckos.cli import main as duckos_main
 
 
 def profile(service_id: str, dependencies: list[str] | None = None) -> dict:
@@ -142,6 +148,22 @@ class ServiceProfileTests(unittest.TestCase):
         item["runtime"] = object()
         with self.assertRaisesRegex(ServiceProfileError, "finite JSON"):
             validate_service_profile(item)
+
+    def test_cli_emits_plan_without_starting_services(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "services.json"
+            path.write_text(
+                json.dumps({"services": [profile("telemetry")]}),
+                encoding="utf-8",
+            )
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                status = duckos_main(["service-plan", str(path)])
+        self.assertEqual(status, 0)
+        result = json.loads(output.getvalue())
+        self.assertEqual(result["schema"], PLAN_SCHEMA)
+        self.assertFalse(result["services_started"])
+        self.assertFalse(result["processes_spawned"])
 
 
 if __name__ == "__main__":
