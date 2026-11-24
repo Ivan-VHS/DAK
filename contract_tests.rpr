@@ -28,6 +28,7 @@ import "duckos/ui/physics.rpr" as physics
 import "duckos/ui/command_palette.rpr" as palette
 import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
 import "duckos/ui/canvas.rpr" as canvas
+import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
@@ -241,4 +242,23 @@ assert(canvas["choose_canvas_backend"]([]) == "cpu-fallback", "canvas has a safe
 assert(canvas["frame_budget_microseconds"](120) > 0, "canvas frame budget is derived from target rate")
 assert(canvas["frame_budget_microseconds"](500) == -1, "canvas rejects unsupported frame-rate targets")
 
+
+make keyboard_event := ["keyboard", "shortcut", "node-17", 40, 80, 0, 0.99, 1000, "local", true]
+make voice_event := ["voice", "utterance", "node-17", 40, 80, 0, 0.91, 1030, "local", true]
+make remote_voice_event := ["voice", "utterance", "node-17", 40, 80, 0, 0.91, 1030, "remote", true]
+make stylus_event := ["stylus", "tap", "node-17", 41, 82, 0.6, 0.96, 1040, "local", true]
+assert(spatial_input["input_event_valid"](keyboard_event), "keyboard event passes local spatial admission")
+assert(spatial_input["input_event_valid"](voice_event), "opted-in voice event passes local admission")
+assert(not spatial_input["input_event_valid"](remote_voice_event), "voice event cannot leave the local privacy boundary")
+assert(spatial_input["multimodal_pair_valid"](voice_event, stylus_event, 80), "voice and stylus events can be fused within a bounded time window")
+assert(not spatial_input["multimodal_pair_valid"](voice_event, stylus_event, 5), "distant modalities are not combined")
+make mismatched_stylus := ["stylus", "tap", "node-22", 41, 82, 0.6, 0.96, 1040, "local", true]
+assert(not spatial_input["multimodal_pair_valid"](voice_event, mismatched_stylus, 80), "fusion refuses conflicting spatial targets")
+assert(spatial_input["resolve_spatial_intent"](voice_event, "optimize this node", "") == ["dispatch", "graph.optimize-focused-node", "node-17"], "voice command resolves against its screen anchor")
+make unanchored_voice := ["voice", "utterance", "", 0, 0, 0, 0.91, 1030, "local", true]
+assert(spatial_input["resolve_spatial_intent"](unanchored_voice, "optimize this node", "node-9") == ["dispatch", "graph.optimize-focused-node", "node-9"], "voice command can bind to the focused node")
+make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local", true]
+assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
+make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
+assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
 emit "DUCKOS_REAPER_CONTRACTS_OK"
