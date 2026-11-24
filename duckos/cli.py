@@ -149,6 +149,7 @@ def main(argv: list[str] | None = None) -> int:
         "jora", help="compose and generate Reaper-first applications"
     )
     jora_commands = jora.add_subparsers(dest="jora_command", required=True)
+    jora.add_argument("--root", type=Path, help="explicit Reaper source checkout")
     jora_build = jora_commands.add_parser(
         "build", help="generate a non-installable Reaper application scaffold"
     )
@@ -258,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "jora" and args.jora_command == "build":
             from .desktop.reaper import ReaperWorkbench
 
-            result = ReaperWorkbench().jora_build(args.request, args.output)
+            result = ReaperWorkbench(args.root).jora_build(args.request, args.output)
         elif args.command == "bridge" and args.bridge_command == "runtimes":
             result = detect_bridge_runtimes()
         elif args.command == "bridge" and args.bridge_command == "inspect":
