@@ -10,9 +10,9 @@ Jora is the platform and application store. Every generated application has its 
 
 Example:
 
-Text Editor + Audio Editor + Translator = Jora
+Text Editor + Audio Editor + Translator = Sonaris
 
-Mora's browser surface performs local composition preview and exports a versioned JSON request. It does not launch host processes. This preserves the existing security boundary: browser JavaScript is not a local command runner.
+Mora's browser surface performs local composition preview and exports a versioned JSON request carrying `application_name_policy=no_platform_brand_in_application_name`. It does not launch host processes. This preserves the existing security boundary: browser JavaScript is not a local command runner.
 
 ## End-to-end flow
 
@@ -29,7 +29,7 @@ The native Duck Desktop Reaper tab can select the exported JSON request, choose 
 
 ## Naming and graph variability
 
-The naming engine never assigns the platform name to an application. It derives independent product-name candidates from selected component domains, such as `Sonaris`, `Documents Workspace` or `Workspace for writing & translation`. An explicit application name is accepted; names containing Jora are rejected.
+The naming engine never assigns the platform name to an application. It derives independent product-name candidates from selected component domains, such as `Sonaris`, `Documents Workspace` or `Workspace for writing & translation`. An explicit application name is accepted only when it obeys the immutable `application_name_policy=no_platform_brand_in_application_name`. Every generated suggestion and the selected name are checked; any case-insensitive or Unicode-compatibility-normalized occurrence of `Jora` is rejected. DuckOS puts this policy in the versioned JSON request, and Reaper independently enforces it before writing the manifest.
 
 The graph engine can generate 1–6 alternatives for one feature formula. Its topologies include layered composition, sequential pipeline, shared orchestrator, capability mesh, event-driven and hybrid. Each topology can itself use distinct direct, domain-grouped, capability-routed, stateful, validated or extensible rewrites. Each node and edge has a type; compatible provider/consumer pairs can be connected directly or brokered. A variation budget controls optional extension and validation layers, and the seed makes the output reproducible. Users can also optimize graph selection for balanced quality, low latency, modularity, extensibility or minimal complexity. Jora scores every candidate against the chosen objective and selects the highest-ranked graph with deterministic tie-breaks.
 
