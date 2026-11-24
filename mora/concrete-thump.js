@@ -179,32 +179,37 @@ export function validateAudioSampleFile(file, { sampleCount = 0, totalBytes = 0 
 
 export function buildConcreteThumpPrompt(value) {
   const profile = normalizeConcreteThumpProfile(value);
-  const sourceNames = profile.chantSources
-    .map((id) => CHANT_SOURCE_LABELS[id])
-    .filter(Boolean)
-    .join(", ");
-
+  const promptNames = {
+    "znamenny": "znamenny",
+    "byzantine-slavic": "Byzantine-Slavic",
+    "kolyadky": "Kolyadky",
+    "vesnyanky": "Vesnyanky",
+    "kupala": "Kupala",
+    "harvest": "harvest",
+    "wedding": "wedding",
+    "funeral": "funeral"
+  };
+  const sourceNames = profile.chantSources.map((id) => promptNames[id]).filter(Boolean).join(", ");
   const identity = {
-    "orthodox-liturgical": "Orthodox male choir and liturgical chant.",
-    "east-slavic-folk": "East Slavic folk and seasonal ritual songs.",
-    layered: "Orthodox liturgical choir and East Slavic ritual songs, kept as distinct traditions."
+    "orthodox-liturgical": "Orthodox choir and sacred chant.",
+    "east-slavic-folk": "East Slavic ritual folk choir and seasonal songs.",
+    layered: "Orthodox choir and chant; East Slavic ritual songs."
   }[profile.vocalTradition];
-
   const treatment = {
-    "chopped-call-response": "Chopped choir phrases, pitched call-and-response and hypnotic loops.",
-    "long-choir-beds": "Long choral beds, solemn refrains and selective vocal chops.",
-    "granular-fragments": "Granular chant fragments, short melodic cells and evolving vocal layers."
+    "chopped-call-response": "Chopped choir call-response, hypnotic loops.",
+    "long-choir-beds": "Long choir beds, solemn refrains, selective chops.",
+    "granular-fragments": "Granular chant fragments, evolving vocal loops."
   }[profile.sampleTreatment];
-
-  const sources = sourceNames ? "Sources: " + sourceNames + "." : "";
+  const sourceLine = sourceNames ? "Sources: " + sourceNames + "." : "";
   const prompt = [
     "Heavyweight Modern Trap, " + profile.bpm + " BPM.",
     identity,
-    sources,
+    sourceLine,
+    "Sacred liturgy and folk ritual stay distinct; archaic polyphony, minor modes, solemn refrains.",
     treatment,
-    "Dark minor-key melodies, thunderous 808s, hard kicks, sharp snares, rapid hi-hats, triplet bursts, " +
-      profile.swing + "% MPC swing, aggressive bounce, stutter edits, negative-space drops and monumental hooks."
-  ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+    "Thunderous 808s, hard kicks, sharp snares, rapid hi-hats, triplet bursts, " +
+      profile.swing + "% MPC swing, aggressive double-time bounce, stutter edits, negative-space drops."
+  ].filter(Boolean).join(" ").replace(/\\s+/g, " ").trim();
 
   return prompt.length <= 500 ? prompt : prompt.slice(0, 497).trimEnd() + "...";
 }
