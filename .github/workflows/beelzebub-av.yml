@@ -8,6 +8,7 @@ on:
       - "security/BEELZEBUB-AV-SOURCE.md"
       - "scripts/unpack-beelzebub-av-source.sh"
       - "duckos/cli.py"
+      - "duckos/desktop/**"
       - "tests/test_beelzebub_*.py"
       - ".github/workflows/beelzebub-av.yml"
   push:
@@ -17,6 +18,7 @@ on:
       - "security/BEELZEBUB-AV-SOURCE.md"
       - "scripts/unpack-beelzebub-av-source.sh"
       - "duckos/cli.py"
+      - "duckos/desktop/**"
       - "tests/test_beelzebub_*.py"
       - ".github/workflows/beelzebub-av.yml"
   workflow_dispatch:
@@ -64,6 +66,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: Validate bridge syntax
-        run: python -m compileall -q duckos/security tests
+        run: python -m compileall -q duckos/security duckos/desktop tests
       - name: Run DuckOS bridge and CLI regression tests
         run: python -W error::ResourceWarning -m unittest discover -s tests -p 'test_beelzebub_*.py' -v
