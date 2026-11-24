@@ -77,13 +77,12 @@ class SecurityEngine:
         if len(self._events) == self.capacity:
             oldest = self._events[0]
             self._by_id.pop(oldest.event_id, None)
+            if oldest.host_id != event.host_id and not any(
+                item.host_id == oldest.host_id for item in list(self._events)[1:]
+            ):
+                self._last_timestamp.pop(oldest.host_id, None)
         self._events.append(event)
         self._by_id[event.event_id] = event
-
-        cutoff = event.timestamp_ms - self.window_ms
-        while self._events and self._events[0].timestamp_ms < cutoff:
-            expired = self._events.popleft()
-            self._by_id.pop(expired.event_id, None)
 
     def _causal_chain(self, event: SecurityEvent) -> tuple[str, ...]:
         chain = [event.event_id]
@@ -91,7 +90,7 @@ class SecurityEngine:
         visited = {event.event_id}
         while parent_id and parent_id not in visited and len(chain) < 32:
             parent = self._by_id.get(parent_id)
-            if parent is None:
+            if parent is None or parent.host_id != event.host_id:
                 break
             chain.append(parent.event_id)
             visited.add(parent.event_id)
@@ -104,12 +103,17 @@ class SecurityEngine:
         indicator = attributes.get("indicator_hash") or attributes.get("indicator")
         if not isinstance(indicator, str) or not indicator or len(indicator) > 256:
             return 0
-        if indicator not in self._indicators and len(self._indicators) >= self.capacity:
-            self._indicators.pop(next(iter(self._indicators)))
+        if indicator not in self._indicators:
+            if len(self._indicators) >= self.capacity:
+                self._indicators.pop(next(iter(self._indicators)))
+            self._indicators[indicator] = deque(maxlen=self.capacity)
         bucket = self._indicators[indicator]
-        cutoff = event.timestamp_ms - 5 * 60 * 1000
-        while bucket and bucket[0][0] < cutoff:
-            bucket.popleft()
+        recent = [
+            (timestamp, host) for timestamp, host in bucket
+            if 0 <= event.timestamp_ms - timestamp <= 5 * 60 * 1000
+        ]
+        bucket.clear()
+        bucket.extend(recent)
         if not any(host == event.host_id for _, host in bucket):
             bucket.append((event.timestamp_ms, event.host_id))
         return len({host for _, host in bucket})
@@ -147,7 +151,8 @@ class SecurityEngine:
         if event.kind in {"file.modify", "file.delete", "file.rename"}:
             mutations = [
                 item for item in self._events
-                if item.actor_id == event.actor_id
+                if item.host_id == event.host_id
+                and item.actor_id == event.actor_id
                 and item.kind in {"file.modify", "file.delete", "file.rename"}
                 and 0 <= event.timestamp_ms - item.timestamp_ms <= self.window_ms
             ]

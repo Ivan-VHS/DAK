@@ -77,6 +77,14 @@ class SecurityEvent:
     def from_mapping(cls, record: Mapping[str, Any]) -> "SecurityEvent":
         if not isinstance(record, Mapping):
             raise SecurityEventError("each event must be an object")
+        allowed_fields = {
+            "schema", "event_id", "timestamp_ms", "host_id", "source",
+            "kind", "actor_id", "object_id", "parent_event_id",
+            "correlation_id", "action", "attributes",
+        }
+        unknown_fields = set(record) - allowed_fields
+        if unknown_fields:
+            raise SecurityEventError(f"unsupported event fields: {sorted(unknown_fields)!r}")
         schema = record.get("schema", EVENT_SCHEMA)
         if schema != EVENT_SCHEMA:
             raise SecurityEventError(f"unsupported event schema: {schema!r}")

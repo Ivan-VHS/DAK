@@ -147,23 +147,46 @@ class SnapshotStore:
         self._ensure_store()
         metadata_path = self.store / f"{snapshot_id}.json"
         data_path = self.store / f"{snapshot_id}.bin"
-        if metadata_path.is_symlink() or data_path.is_symlink():
-            raise SnapshotError("snapshot records must not be symbolic links")
         try:
-            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-            content = data_path.read_bytes()
+            metadata_stat = metadata_path.lstat()
+            data_stat = data_path.lstat()
+            if not stat.S_ISREG(metadata_stat.st_mode) or not stat.S_ISREG(data_stat.st_mode):
+                raise SnapshotError("snapshot records must be regular files, not links or special files")
+            if metadata_stat.st_size > 16 * 1024 or data_stat.st_size > self.max_file_bytes:
+                raise SnapshotError("snapshot record exceeds its configured size limit")
+            flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+            with os.fdopen(os.open(metadata_path, flags), "rb") as stream:
+                metadata_bytes = stream.read(16 * 1024 + 1)
+            if len(metadata_bytes) > 16 * 1024:
+                raise SnapshotError("snapshot metadata exceeds its size limit")
+            with os.fdopen(os.open(data_path, flags), "rb") as stream:
+                content = stream.read(self.max_file_bytes + 1)
+        except SnapshotError:
+            raise
         except (OSError, UnicodeError, json.JSONDecodeError) as error:
             raise SnapshotError(f"cannot read snapshot: {error}") from error
+        try:
+            metadata = json.loads(metadata_bytes.decode("utf-8"))
+        except (UnicodeError, json.JSONDecodeError) as error:
+            raise SnapshotError(f"invalid snapshot metadata: {error}") from error
+        if not isinstance(metadata, dict):
+            raise SnapshotError("snapshot metadata must be a JSON object")
         if metadata.get("schema") != "duckos.file-snapshot.v1" or metadata.get("snapshot_id") != snapshot_id:
             raise SnapshotError("snapshot metadata identity mismatch")
-        if len(content) != metadata.get("size_bytes") or len(content) > self.max_file_bytes:
+        expected_size = metadata.get("size_bytes")
+        if isinstance(expected_size, bool) or not isinstance(expected_size, int):
+            raise SnapshotError("snapshot metadata has an invalid size")
+        if len(content) != expected_size or len(content) > self.max_file_bytes:
             raise SnapshotError("snapshot payload size mismatch")
+        mode = metadata.get("mode", 0o600)
+        if isinstance(mode, bool) or not isinstance(mode, int) or mode < 0 or mode > 0o777:
+            raise SnapshotError("snapshot metadata has an invalid file mode")
         digest = hashlib.sha256(content).hexdigest()
         if digest != metadata.get("sha256"):
             raise SnapshotError("snapshot payload digest mismatch")
         relative = self._safe_relative(metadata.get("target"))
         path = self._target(relative, allow_missing=True)
-        self._atomic_write(path, content, int(metadata.get("mode", 0o600)))
+        self._atomic_write(path, content, mode)
         return {
             "schema": "duckos.file-restore.v1",
             "snapshot_id": snapshot_id,
