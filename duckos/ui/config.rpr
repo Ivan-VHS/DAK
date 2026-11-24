@@ -1,0 +1,37 @@
+# Strict schema-first configuration inspector policy.
+# UI editors consume these validators and write through a versioned store.
+
+export craft numeric_schema_valid(schema) {
+    when size(schema) != 4 {
+        yield false
+    }
+    yield schema[0] != "" and schema[1] == "number"
+        and schema[2] <= schema[3]
+}
+
+export craft numeric_value_valid(schema, value) {
+    when not numeric_schema_valid(schema) {
+        yield false
+    }
+    yield value >= schema[2] and value <= schema[3]
+}
+
+export craft enum_value_valid(value, choices) {
+    vary found := false
+    when value == "" or size(choices) == 0 {
+        yield false
+    }
+    each choice in choices {
+        when value == choice {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft inspector_feedback(valid) {
+    when valid {
+        yield ["valid", "preview-allowed"]
+    }
+    yield ["invalid", "commit-denied"]
+}
