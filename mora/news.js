@@ -128,10 +128,11 @@ function renderNewsArticles(feed, articles, bookmarks, savedView, status) {
     if (article.image) {
       const image = document.createElement("img");
       image.className = "newspaper-story-image";
-      image.src = article.image;
       image.alt = "";
       image.loading = "lazy";
+      image.crossOrigin = "anonymous";
       image.referrerPolicy = "no-referrer";
+      image.src = article.image;
       image.addEventListener("error", () => image.remove(), { once: true });
       card.appendChild(image);
     }
