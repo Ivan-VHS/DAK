@@ -385,6 +385,10 @@ class DesktopWindow:
                     self._append_reaper_output(rendered)
                 if result.get("stderr"):
                     self._append_reaper_output("STDERR:\n" + result["stderr"])
+                if result.get("truncated"):
+                    self._append_reaper_output(
+                        "OUTPUT TRUNCATED · each process stream is limited to 1,000,000 bytes"
+                    )
         except queue.Empty:
             pass
         try:
