@@ -9,7 +9,7 @@ The first foundation component defines the data boundary between a future bootlo
 
 Implemented files:
 
-- `foundation/boot_info.h` — v1 structures, memory-region types and validation status codes.
+- `foundation/boot_info.h` — v1 structures, fixed ABI layout assertions, memory-region types and validation status codes.
 - `foundation/boot_info.c` — range, memory-map, image-overlap and framebuffer validation.
 - `tests/test_boot_info.c` — host-side positive and negative fixtures.
 
@@ -25,6 +25,36 @@ The v1 record contains:
 - memory-map entry count.
 
 Each memory-map entry contains a 64-bit base, 64-bit length, typed region kind and flags.
+
+## v1 binary layout
+
+The public C ABI is fixed to these sizes and offsets. The header enforces them with C11 `_Static_assert` or C++ `static_assert` for every consumer.
+
+| Type / field | Offset | Size |
+|---|---:|---:|
+| `duckos_memory_region` | — | 24 |
+| `base` | 0 | 8 |
+| `length` | 8 | 8 |
+| `type` | 16 | 4 |
+| `flags` | 20 | 4 |
+| `duckos_boot_info_v1` | — | 88 |
+| `struct_size` | 0 | 4 |
+| `version` | 4 | 4 |
+| `flags` | 8 | 8 |
+| `kernel_phys_base` | 16 | 8 |
+| `kernel_size` | 24 | 8 |
+| `initramfs_phys_base` | 32 | 8 |
+| `initramfs_size` | 40 | 8 |
+| `framebuffer_phys_base` | 48 | 8 |
+| `framebuffer_size` | 56 | 8 |
+| `framebuffer_width` | 64 | 4 |
+| `framebuffer_height` | 68 | 4 |
+| `framebuffer_pitch` | 72 | 4 |
+| `framebuffer_bpp` | 76 | 4 |
+| `memory_region_count` | 80 | 4 |
+| `reserved` | 84 | 4 |
+
+All offsets and sizes are in bytes. These assertions deliberately make unsupported packing/alignment configurations fail at compile time instead of silently changing the handoff ABI. Do not apply custom packing pragmas to these public types.
 
 ## Validation rules
 
@@ -45,6 +75,8 @@ Memory-map entries must be sorted by ascending base and must not overlap. Gaps a
 ## Compatibility policy
 
 The version identifies the semantics of the record. `struct_size` allows a future compatible extension to append fields while retaining the v1 prefix. An incompatible change requires a new version and explicit negotiation in the boot protocol. The public record must not contain compiler-private pointers, C++ objects or kernel-private handles.
+
+The fixed v1 layout is independent of Reaper's IR and DABI64 layout. Reaper may describe and validate the boot contract, but the C handoff remains a separately versioned boundary; neither ABI may infer the other's structure layout.
 
 ## Deliberate non-goals
 
