@@ -143,14 +143,29 @@ function renderRecords(root, appId) {
       reveal.dataset.baseIndex = String(index);
       reveal.dataset.baseApp = appId;
       item.append(copy, reveal);
+    } else if (appId === "trailmark") {
+      const label = record.stop + (record.note ? " · " + record.note : "");
+      item.appendChild(makeElement(documentRef, "span", "extension-entry-text", label));
+      for (const [actionName, glyph, labelText] of [
+        ["move-up", "↑", "Переместить выше"],
+        ["move-down", "↓", "Переместить ниже"]
+      ]) {
+        const move = makeElement(documentRef, "button", "base-task-toggle", glyph);
+        move.type = "button";
+        move.dataset.baseAction = actionName;
+        move.dataset.baseApp = appId;
+        move.dataset.baseIndex = String(index);
+        move.setAttribute("aria-label", labelText);
+        move.disabled = actionName === "move-up" ? index === 0 : index === records.length - 1;
+        item.appendChild(move);
+      }
     } else {
-      let label = record.text || record.name || record.stop || record.activity || record.label || record.name || "Запись";
+      let label = record.text || record.name || record.activity || record.label || "Запись";
       if (appId === "relay") label = record.name + (record.detail ? " · " + record.detail : "");
-      if (appId === "sumora") label = record.label + " · " + (record.kind === "income" ? "+" : "−") + record.amount.toFixed(2) + " ₴";
+      if (appId === "sumora") label = record.label + " · " + (record.kind === "income" ? "+" : "−") + Number(record.amount).toFixed(2) + " ₴";
       if (appId === "paceforge") label = record.activity + " · " + record.minutes + " мин";
-      if (appId === "trailmark") label = record.stop + (record.note ? " · " + record.note : "");
       if (appId === "nuvault" || appId === "pixora") {
-        label = record.name + " · " + record.size.toLocaleString("ru-RU") + " байт";
+        label = record.name + " · " + Number(record.size).toLocaleString("ru-RU") + " байт";
       }
       item.appendChild(makeElement(documentRef, "span", "extension-entry-text", label));
     }
@@ -262,7 +277,9 @@ function addRecord(root, appId, record) {
     setStatus(root, "Достигнут лимит в 200 записей.");
     return;
   }
-  records.unshift({ id: makeRecordId(), ...record, createdAt: new Date().toISOString() });
+  const entry = { id: makeRecordId(), ...record, createdAt: new Date().toISOString() };
+  if (appId === "trailmark") records.push(entry);
+  else records.unshift(entry);
   if (!writeRecords(appId, records)) {
     setStatus(root, "Не удалось сохранить данные: локальное хранилище недоступно или заполнено.");
     return;
@@ -451,13 +468,19 @@ export function initializeBaseAppPanel(appWindow) {
     const action = event.target.closest("[data-base-action]");
     if (!action) return;
     const actionName = action.dataset.baseAction;
-    if (actionName === "remove" || actionName === "toggle" || actionName === "flip") {
+    if (["remove", "toggle", "flip", "move-up", "move-down"].includes(actionName)) {
       const targetApp = action.dataset.baseApp || appId;
       const index = Number(action.dataset.baseIndex);
       const records = readRecords(targetApp);
       if (!Number.isInteger(index) || index < 0 || index >= records.length) return;
       if (actionName === "remove") records.splice(index, 1);
       if (actionName === "toggle" && targetApp === "daymark") records[index].done = !records[index].done;
+      if (actionName === "move-up" && targetApp === "trailmark" && index > 0) {
+        [records[index - 1], records[index]] = [records[index], records[index - 1]];
+      }
+      if (actionName === "move-down" && targetApp === "trailmark" && index < records.length - 1) {
+        [records[index + 1], records[index]] = [records[index], records[index + 1]];
+      }
       if (actionName === "flip" && targetApp === "mnemo") {
         const answer = action.closest(".extension-entry")?.querySelector("[data-base-answer]");
         if (answer) answer.hidden = !answer.hidden;
