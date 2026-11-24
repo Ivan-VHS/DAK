@@ -35,7 +35,7 @@ The graph engine can generate 1–6 alternatives for one feature formula. Its to
 
 Hard dependency edges must be acyclic. Event feedback is only allowed asynchronously through the explicit event bus. Planned extension registries and compatibility gates are labelled as planned, not implemented services.
 
-The graph set is embedded in the application manifest and also saved to `jora.graphs.json`. Readable Mermaid diagrams are generated under `graphs/variant-*.mmd`. The lock file records the selected naming label, graph IDs and signatures.
+The graph set is embedded in the application manifest and also saved to `jora.graphs.json`. Readable Mermaid diagrams are generated under `graphs/variant-*.mmd`. The lock file records the selected naming label, graph IDs and signatures. The selected graph is the highest-scoring candidate, ranked by compatibility, reusable capability links, fewer planned nodes and then a stable signature tie-break.
 
 ## Generated artifact contract
 
