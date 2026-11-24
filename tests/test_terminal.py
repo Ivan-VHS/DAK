@@ -93,6 +93,45 @@ class ExtendedTerminalTests(unittest.TestCase):
         result = extended.execute("sample check hello", record_history=False)
         self.assertEqual(result["result"], {"arguments": ["hello"], "available": True})
 
+
+    def test_state_reader_rejects_nested_duplicate_json_keys(self):
+        source = self.state / "duplicate.json"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_text('{"outer":{"value":1,"value":2}}', encoding="utf-8")
+        with self.assertRaisesRegex(TerminalInputError, "duplicate object key"):
+            self.terminal._read_json(source, 1024, {})
+
+    def test_state_reader_rejects_non_finite_json_numbers(self):
+        source = self.state / "nonfinite.json"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        for number in ("NaN", "Infinity", "-Infinity", "1e999"):
+            with self.subTest(number=number):
+                source.write_text('{"value":' + number + "}", encoding="utf-8")
+                with self.assertRaises(TerminalInputError):
+                    self.terminal._read_json(source, 1024, {})
+
+    def test_state_reader_enforces_json_nesting_depth(self):
+        source = self.state / "nested.json"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        depth = 129
+        source.write_text("[" * depth + "0" + "]" * depth, encoding="utf-8")
+        with self.assertRaisesRegex(TerminalInputError, "nesting exceeds"):
+            self.terminal._read_json(source, 4096, {})
+
+    def test_state_reader_ignores_brackets_inside_json_strings(self):
+        source = self.state / "strings.json"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        content = '{"text":"' + ("[{" * 1000) + '"}'
+        source.write_text(content, encoding="utf-8")
+        self.assertEqual(self.terminal._read_json(source, 8192, {})["text"], "[{" * 1000)
+
+    def test_state_reader_handles_escaped_quotes_inside_json_strings(self):
+        source = self.state / "escaped-strings.json"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        value = 'quoted " text with braces { [ ] } and backslash \\ marker'
+        source.write_text(json.dumps({"text": value}), encoding="utf-8")
+        self.assertEqual(self.terminal._read_json(source, 1024, {})["text"], value)
+
     @unittest.skipUnless(hasattr(os, "mkfifo"), "named pipes are POSIX-only")
     def test_state_reader_rejects_fifo_without_blocking(self):
         self.state.mkdir(parents=True)

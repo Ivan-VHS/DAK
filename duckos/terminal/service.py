@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version as package_version
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -33,6 +34,8 @@ MAX_CONFIG_BYTES = 64 * 1024
 MAX_HISTORY_BYTES = 2 * 1024 * 1024
 MAX_HISTORY_ENTRIES = 10_000
 MAX_INPUT_JSON_BYTES = 4 * 1024 * 1024
+MAX_JSON_INTEGER_DIGITS = 1024
+MAX_JSON_NESTING_DEPTH = 128
 _ALIAS_NAME = re.compile(r"^[a-z][a-z0-9_-]{0,31}$")
 _SECRET_OPTIONS = {"--token", "--password", "--secret", "--api-key", "--authorization"}
 
@@ -40,6 +43,61 @@ _SECRET_OPTIONS = {"--token", "--password", "--secret", "--api-key", "--authoriz
 class TerminalInputError(ValueError):
     """Raised when terminal input or its local configuration is invalid."""
 
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise TerminalInputError("JSON contains a duplicate object key: " + key)
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> None:
+    raise TerminalInputError("JSON contains a non-standard numeric constant: " + value)
+
+
+def _parse_json_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed):
+        raise TerminalInputError("JSON contains a non-finite floating-point value")
+    return parsed
+
+
+def _parse_json_integer(value: str) -> int:
+    digits = value[1:] if value.startswith("-") else value
+    if len(digits) > MAX_JSON_INTEGER_DIGITS:
+        raise TerminalInputError(
+            "JSON integer exceeds the " + str(MAX_JSON_INTEGER_DIGITS) + "-digit limit"
+        )
+    return int(value)
+
+
+def _validate_json_depth(raw: str, source_name: str) -> None:
+    depth = 0
+    in_string = False
+    escaped = False
+    for character in raw:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == '"':
+                in_string = False
+            continue
+        if character == '"':
+            in_string = True
+        elif character in "[{":
+            depth += 1
+            if depth > MAX_JSON_NESTING_DEPTH:
+                raise TerminalInputError(
+                    source_name + " JSON nesting exceeds the "
+                    + str(MAX_JSON_NESTING_DEPTH) + "-level limit"
+                )
+        elif character in "]}":
+            depth -= 1
 
 @dataclass(frozen=True)
 class CommandSpec:
@@ -196,10 +254,19 @@ class TerminalService:
                 text = raw.decode("utf-8")
             except UnicodeDecodeError as error:
                 raise TerminalInputError("invalid UTF-8 in " + path.name) from error
+            _validate_json_depth(text, path.name)
             try:
-                return json.loads(text)
+                return json.loads(
+                    text,
+                    object_pairs_hook=_unique_json_object,
+                    parse_constant=_reject_json_constant,
+                    parse_float=_parse_json_float,
+                    parse_int=_parse_json_integer,
+                )
             except json.JSONDecodeError as error:
                 raise TerminalInputError("invalid JSON in " + path.name + ": " + str(error)) from error
+            except RecursionError as error:
+                raise TerminalInputError("excessive JSON nesting in " + path.name) from error
         except FileNotFoundError:
             return default
         except OSError as error:
