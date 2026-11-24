@@ -171,8 +171,10 @@ def write_package(application:dict[str,Any],output:str|Path)->dict[str,Any]:
     target.parent.mkdir(parents=True,exist_ok=True)
     if target.suffix.casefold()==".zip":
         temporary=target.with_name(target.name+".tmp")
+        if temporary.exists() or temporary.is_symlink():
+            raise ValueError(f"temporary output already exists: {temporary}")
         try:
-            with zipfile.ZipFile(temporary,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
+            with zipfile.ZipFile(temporary,"x",compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
                 for name,data in sorted(files.items()):
                     info=zipfile.ZipInfo(name,date_time=(1980,1,1,0,0,0))
                     info.compress_type=zipfile.ZIP_DEFLATED
@@ -196,12 +198,15 @@ def _read_package(path:Path)->dict[str,bytes]:
     if path.is_dir():
         root=path.resolve()
         result={}
+        total=0
         for item in root.rglob("*"):
             if item.is_symlink(): raise ValueError("symbolic links are not allowed in packages")
             if item.is_file():
                 name=_safe_path(item.relative_to(root).as_posix())
                 data=item.read_bytes()
                 if len(data)>MAX_FILE_BYTES: raise ValueError(f"file exceeds size limit: {name}")
+                total += len(data)
+                if total>MAX_PACKAGE_BYTES: raise ValueError("package expanded size exceeds limit")
                 result[name]=data
                 if len(result)>MAX_FILES: raise ValueError("package exceeds file-count limit")
         return result
@@ -229,7 +234,18 @@ def validate_package(path:str|Path,*,check_reaper:bool=True)->dict[str,Any]:
     try: manifest=json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError,json.JSONDecodeError) as error: raise ValueError(f"invalid Jora manifest: {error}") from error
     if not isinstance(manifest,dict) or manifest.get("schema")!=PACKAGE_SCHEMA: raise ValueError(f"manifest schema must be {PACKAGE_SCHEMA}")
-    inventory=manifest.get("integrity",{}).get("files")
+    app=manifest.get("app")
+    formula=manifest.get("formula")
+    integrity=manifest.get("integrity")
+    if not isinstance(app,dict) or not isinstance(app.get("id"),str) or not app["id"] or not isinstance(app.get("display_name"),str) or not app["display_name"]:
+        raise ValueError("manifest app identity is invalid")
+    if not isinstance(formula,dict) or not isinstance(formula.get("components"),list) or not formula["components"]:
+        raise ValueError("manifest formula is invalid")
+    if len(formula["components"])>MAX_COMPONENTS:
+        raise ValueError("manifest formula exceeds component limit")
+    if not isinstance(integrity,dict) or integrity.get("algorithm")!="sha256":
+        raise ValueError("manifest integrity algorithm must be sha256")
+    inventory=integrity.get("files")
     if not isinstance(inventory,dict) or not inventory: raise ValueError("manifest integrity inventory is missing")
     verified=[]
     for name,record in inventory.items():
@@ -237,8 +253,14 @@ def validate_package(path:str|Path,*,check_reaper:bool=True)->dict[str,Any]:
         data=files.get(safe)
         if data is None: raise ValueError(f"manifest file is missing: {safe}")
         if not isinstance(record,dict) or record.get("size_bytes")!=len(data): raise ValueError(f"size mismatch: {safe}")
-        if record.get("sha256")!=hashlib.sha256(data).hexdigest(): raise ValueError(f"SHA-256 mismatch: {safe}")
+        digest=record.get("sha256")
+        if not isinstance(digest,str) or digest!=hashlib.sha256(data).hexdigest(): raise ValueError(f"SHA-256 mismatch: {safe}")
         verified.append(safe)
+    extras=set(files)-set(verified)-{"jora.manifest.json"}
+    if extras: raise ValueError("unlisted package files: "+", ".join(sorted(extras)))
+    for pointer in (manifest.get("graph",{}).get("path"),manifest.get("content",{}).get("path")):
+        if not isinstance(pointer,str) or _safe_path(pointer) not in files:
+            raise ValueError("manifest graph/content artifact pointer is invalid")
     source=files.get("source/main.rpr")
     if source is None: raise ValueError("source/main.rpr is missing")
     reaper={"status":"not_checked"}
