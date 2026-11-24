@@ -2,6 +2,7 @@
 # Run with Reaper's tree-walk engine and VM.
 
 import "duckos/kernel/boot.rpr" as boot
+import "duckos/kernel/boot_info.rpr" as boot_info
 import "duckos/kernel/memory.rpr" as memory
 import "duckos/kernel/arena.rpr" as arena
 import "duckos/kernel/scheduler.rpr" as scheduler
@@ -27,6 +28,27 @@ assert(boot["transition_valid"]("memory", "interrupts"), "memory must precede in
 assert(not boot["transition_valid"]("drivers", "scheduler"), "boot must reject skipped phases")
 assert(boot["failure_action"](0) == "continue", "successful phase must continue")
 assert(boot["failure_action"](1) == "recovery", "failed phase must enter recovery")
+
+# Boot handoff policy mirrors foundation/boot_info.c without dereferencing addresses.
+make boot_regions := [[0, 4096, 2, 0], [4096, 8388608, 1, 0]]
+make valid_boot_info := [88, 1, 0, 1048576, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0]
+assert(boot_info["validate"](valid_boot_info, boot_regions) == "ok", "valid boot handoff")
+make boot_with_initramfs := [88, 1, 0, 1048576, 1048576, 4194304, 4096, 0, 0, 0, 0, 0, 0, 2, 0]
+assert(boot_info["validate"](boot_with_initramfs, boot_regions) == "ok", "valid initramfs handoff")
+make boot_with_framebuffer := [88, 1, 0, 1048576, 1048576, 0, 0, 3758096384, 1228800, 640, 480, 2560, 32, 2, 0]
+assert(boot_info["validate"](boot_with_framebuffer, boot_regions) == "ok", "valid framebuffer descriptor")
+make bad_boot_range := [88, 1, 0, 18446744073709551600, 32, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0]
+assert(boot_info["validate"](bad_boot_range, boot_regions) == "invalid-kernel-range", "overflowing kernel range is rejected")
+make partial_initramfs := [88, 1, 0, 1048576, 1048576, 4096, 0, 0, 0, 0, 0, 0, 0, 2, 0]
+assert(boot_info["validate"](partial_initramfs, boot_regions) == "invalid-initramfs-range", "half-specified initramfs is rejected")
+make overlapping_images := [88, 1, 0, 1048576, 1048576, 1572864, 4096, 0, 0, 0, 0, 0, 0, 2, 0]
+assert(boot_info["validate"](overlapping_images, boot_regions) == "overlapping-images", "overlapping kernel and initramfs are rejected")
+make bad_framebuffer := [88, 1, 0, 1048576, 1048576, 0, 0, 3758096384, 1228800, 640, 480, 100, 32, 2, 0]
+assert(boot_info["validate"](bad_framebuffer, boot_regions) == "invalid-framebuffer", "undersized framebuffer pitch is rejected")
+make unsorted_regions := [[4096, 8192, 1, 0], [0, 4096, 2, 0]]
+assert(boot_info["validate"](valid_boot_info, unsorted_regions) == "invalid-memory-map", "unsorted memory map is rejected")
+make invalid_region_type := [[0, 4096, 7, 0], [4096, 8388608, 1, 0]]
+assert(boot_info["validate"](valid_boot_info, invalid_region_type) == "invalid-memory-map", "unknown memory type is rejected")
 
 assert(memory["align_up"](17, 16) == 32, "arena alignment")
 assert(memory["align_up"](32, 16) == 32, "aligned address must remain unchanged")
