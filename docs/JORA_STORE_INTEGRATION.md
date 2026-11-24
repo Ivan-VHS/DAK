@@ -31,11 +31,11 @@ The native Duck Desktop Reaper tab can select the exported JSON request, choose 
 
 The naming engine keeps the canonical application name fixed as **Jora**. It derives semantic descriptors from the selected component domains and offers compact, balanced, descriptive and formula-style labels such as `Jora — Documents & Languages Workspace`. No combination is published under a separate invented brand.
 
-The graph engine can generate 1–6 alternatives for one feature formula. Its topologies include layered composition, sequential pipeline, shared orchestrator, capability mesh, event-driven and hybrid. Each node and edge has a type; compatible provider/consumer pairs can be connected directly. A variation budget controls optional extension and validation layers, and the seed makes the output reproducible.
+The graph engine can generate 1–6 alternatives for one feature formula. Its topologies include layered composition, sequential pipeline, shared orchestrator, capability mesh, event-driven and hybrid. Each topology can itself use distinct direct, domain-grouped, capability-routed, stateful, validated or extensible rewrites. Each node and edge has a type; compatible provider/consumer pairs can be connected directly or brokered. A variation budget controls optional extension and validation layers, and the seed makes the output reproducible.
 
 Hard dependency edges must be acyclic. Event feedback is only allowed asynchronously through the explicit event bus. Planned extension registries and compatibility gates are labelled as planned, not implemented services.
 
-The graph set is embedded in the application manifest and also saved to `jora.graphs.json`. The lock file records selected graph IDs and signatures.
+The graph set is embedded in the application manifest and also saved to `jora.graphs.json`. Readable Mermaid diagrams are generated under `graphs/variant-*.mmd`. The lock file records the selected naming label, graph IDs and signatures.
 
 ## Generated artifact contract
 
