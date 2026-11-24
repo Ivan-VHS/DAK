@@ -125,20 +125,28 @@ export function composeJoraRequest(options = {}) {
   const description = safeText(options.description || "", 500, "application description");
 
   const formula = componentIds.map((id) => COMPONENTS[id].name).join(" + ");
-  const domainOrder = ["Documents", "Audio", "Languages"];
-  const domains = [...new Set(componentIds.map((id) => ({
-    "text.editor": "Documents",
-    "audio.editor": "Audio",
-    "translation.workspace": "Languages"
-  })[id]))].sort((left, right) => domainOrder.indexOf(left) - domainOrder.indexOf(right));
-  const descriptors = domains;
-  const joined = descriptors.join(" · ");
-  const natural = descriptors.join(" & ");
+  const namingTerms = {
+    "text.editor": { short: "Docs", domain: "Documents", action: "Writing & Editing", formula: "Text" },
+    "audio.editor": { short: "Audio", domain: "Media", action: "Audio Editing", formula: "Audio" },
+    "translation.workspace": { short: "Translate", domain: "Languages", action: "Translation", formula: "Translation" }
+  };
+  const unique = (values) => [...new Set(values)];
+  const joinNatural = (values) => values.length <= 1
+    ? (values[0] || "Workspace")
+    : values.length === 2
+      ? values[0] + " & " + values[1]
+      : values.slice(0, -1).join(", ") + " & " + values[values.length - 1];
+  const shortTerms = unique(componentIds.map((id) => namingTerms[id].short));
+  const descriptors = unique(componentIds.map((id) => namingTerms[id].domain));
+  const actionTerms = unique(componentIds.map((id) => namingTerms[id].action));
+  const formulaTerms = unique(componentIds.map((id) => namingTerms[id].formula));
+  const naturalDomains = joinNatural(descriptors);
+  const naturalActions = joinNatural(actionTerms).toLowerCase();
   const nameSuggestions = [
-    "Jora · " + joined,
-    "Jora — " + natural + " Workspace",
-    "Jora | Workspace for " + natural,
-    "Jora — " + descriptors.join(" + ")
+    "Jora · " + shortTerms.join(" / "),
+    "Jora — " + naturalDomains + " Workspace",
+    "Jora | Workspace for " + naturalActions,
+    "Jora — " + formulaTerms.join(" + ")
   ];
 
   const graph = {
