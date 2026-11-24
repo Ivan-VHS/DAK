@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/bav-defender-doctrine.v1.schema.json",
+  "title": "BAV Red Sparrow Defender Doctrine v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "policy_id",
+    "version",
+    "name",
+    "purpose",
+    "principles",
+    "categories",
+    "operational_intent_patterns",
+    "defensive_context_patterns",
+    "negation_patterns",
+    "decision",
+    "hard_boundaries",
+    "limits"
+  ],
+  "properties": {
+    "schema": {
+      "const": "bav.red-sparrow-defender.v1"
+    },
+    "policy_id": {
+      "const": "bav.red-sparrow-defender"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principles": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "terms"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "terms": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "operational_intent_patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "defensive_context_patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "negation_patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topic_reference_only",
+        "topic_plus_non_negated_operational_intent",
+        "defensive_context_alone",
+        "defensive_context_with_operational_intent",
+        "country_or_nationality_alone",
+        "automatic_block",
+        "automatic_quarantine"
+      ],
+      "properties": {
+        "topic_reference_only": {
+          "const": "no_finding"
+        },
+        "topic_plus_non_negated_operational_intent": {
+          "const": "human_review"
+        },
+        "defensive_context_alone": {
+          "const": "no_finding"
+        },
+        "defensive_context_with_operational_intent": {
+          "const": "human_review"
+        },
+        "country_or_nationality_alone": {
+          "const": "no_finding"
+        },
+        "automatic_block": {
+          "const": false
+        },
+        "automatic_quarantine": {
+          "const": false
+        }
+      }
+    },
+    "hard_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "weapon_design_or_build_guidance",
+        "targeting_or_fire_control",
+        "military_system_control_or_interception",
+        "scanning_or_accessing_military_networks",
+        "remote_collection",
+        "autonomous_use_of_force",
+        "destructive_remediation"
+      ],
+      "properties": {
+        "weapon_design_or_build_guidance": {
+          "const": false
+        },
+        "targeting_or_fire_control": {
+          "const": false
+        },
+        "military_system_control_or_interception": {
+          "const": false
+        },
+        "scanning_or_accessing_military_networks": {
+          "const": false
+        },
+        "remote_collection": {
+          "const": false
+        },
+        "autonomous_use_of_force": {
+          "const": false
+        },
+        "destructive_remediation": {
+          "const": false
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_files",
+        "max_file_bytes",
+        "max_total_bytes",
+        "text_extensions",
+        "excluded_directories"
+      ],
+      "properties": {
+        "max_files": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_file_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_total_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "text_extensions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^\\.[a-z0-9]+$"
+          }
+        },
+        "excluded_directories": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
