@@ -48,6 +48,8 @@ def validate_module(manifest: Any, *, architecture: str, kernel_abi: str) -> dic
     if any(not isinstance(item, str) or not re.fullmatch(r"[a-z][a-z0-9_.-]{0,63}", item)
            for item in capabilities):
         raise ModuleABIError("capabilities must be lowercase identifiers")
+    if len(set(capabilities)) != len(capabilities):
+        raise ModuleABIError("capabilities must be unique identifiers")
     return {
         "schema": "duckos.driver-module-validation.v1",
         "valid": True,
