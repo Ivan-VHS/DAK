@@ -19,10 +19,15 @@ class ReaperCliTests(unittest.TestCase):
         self.root = Path(temporary.name)
         package = self.root / "reaper"
         package.mkdir()
+        apps = package / "apps"
+        apps.mkdir()
+        (apps / "__init__.py").write_text("", encoding="utf-8")
+        (apps / "manifest.json").write_text('{"schema":"reaper.application-suite.v1","applications":[]}', encoding="utf-8")
+        (package / "apps_cli.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (self.root / "pyproject.toml").write_text("[project]\nname='reaper'\n", encoding="utf-8")
         (package / "__main__.py").write_text("from .cli import main\n", encoding="utf-8")
         (package / "cli.py").write_text(
-            'if arguments and arguments[0] == "typecheck":\n    pass\n',
+            'if arguments and arguments[0] == "typecheck":\n    pass\nif arguments and arguments[0] == "apps":\n    pass\n',
             encoding="utf-8",
         )
         (package / "desktop.py").write_text("def main():\n    pass\n", encoding="utf-8")
@@ -54,6 +59,38 @@ class ReaperCliTests(unittest.TestCase):
             code, output = self.invoke("reaper", "--root", str(self.root), "check", str(self.source))
         self.assertEqual(code, 1)
         self.assertEqual(json.loads(output)["result"], payload)
+
+
+    def test_reaper_apps_list_delegates_to_reaper_cli(self):
+        payload = {"schema": "reaper.application-suite.v1", "count": 15, "applications": []}
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=json.dumps(payload), stderr="",
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            code, output = self.invoke("reaper", "--root", str(self.root), "apps", "list")
+        self.assertEqual(code, 0)
+        self.assertTrue(json.loads(output)["ok"])
+        self.assertEqual(run.call_args.args[0], ["python", "-m", "reaper", "apps", "list"])
+
+    def test_reaper_apps_run_passes_validated_json_path(self):
+        source = self.root / "payload.json"
+        source.write_text("{}", encoding="utf-8")
+        payload = {"ok": True, "app_id": "telemetry_guard"}
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=json.dumps(payload), stderr="",
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            code, output = self.invoke(
+                "reaper", "--root", str(self.root), "apps", "run",
+                "telemetry_guard", "--input", str(source),
+            )
+        self.assertEqual(code, 0)
+        self.assertTrue(json.loads(output)["ok"])
+        self.assertIn(str(source.resolve()), run.call_args.args[0])
+
+    def test_reaper_apps_run_requires_a_json_input_option(self):
+        with self.assertRaises(SystemExit):
+            self.invoke("reaper", "--root", str(self.root), "apps", "run", "telemetry_guard")
 
     def test_reaper_studio_command_starts_the_native_app(self):
         process = type("Process", (), {"pid": 4812})()

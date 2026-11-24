@@ -8,14 +8,17 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 MAX_OUTPUT_CHARS = 1_000_000
+MAX_APP_INPUT_BYTES = 4 * 1024 * 1024
 COMMAND_TIMEOUT_SECONDS = 30
 SOURCE_SUFFIXES = {".rpr", ".most"}
+APP_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_]{1,63}$")
 
 
 class ReaperIntegrationError(ValueError):
@@ -114,6 +117,13 @@ class ReaperWorkbench:
             capabilities.append("static_typecheck")
         if (root / "reaper" / "native_compiler.py").is_file():
             capabilities.append("native_aot_subset")
+        if (
+            (root / "reaper" / "apps" / "__init__.py").is_file()
+            and (root / "reaper" / "apps" / "manifest.json").is_file()
+            and (root / "reaper" / "apps_cli.py").is_file()
+            and 'arguments[0] == "apps"' in cli_source
+        ):
+            capabilities.append("application_suite")
 
         return {
             "schema": "duckos.reaper-workbench.v1",
@@ -198,6 +208,69 @@ class ReaperWorkbench:
                 "this Reaper checkout predates the integrated static type checker; update the projects/reaper submodule"
             )
         return self._run(["typecheck", str(path), "--json"])
+
+    def _require_application_suite(self) -> None:
+        if "application_suite" not in self.inspect()["capabilities"]:
+            raise ReaperIntegrationError(
+                "this Reaper checkout does not contain the first-party application suite; update projects/reaper"
+            )
+
+    @staticmethod
+    def _json_input_path(source: str | Path) -> Path:
+        path = Path(source).expanduser()
+        if path.is_symlink():
+            raise ReaperIntegrationError("application JSON input must not be a symbolic link")
+        try:
+            resolved = path.resolve(strict=True)
+        except OSError as error:
+            raise ReaperIntegrationError(f"cannot open application JSON input: {error}") from error
+        if not resolved.is_file() or resolved.suffix.lower() != ".json":
+            raise ReaperIntegrationError("application input must be an existing regular .json file")
+        if resolved.stat().st_size > MAX_APP_INPUT_BYTES:
+            raise ReaperIntegrationError(f"application JSON input exceeds {MAX_APP_INPUT_BYTES} bytes")
+        return resolved
+
+    @staticmethod
+    def _json_output_path(destination: str | Path, source: Path) -> Path:
+        path = Path(destination).expanduser()
+        if path.is_symlink():
+            raise ReaperIntegrationError("application JSON output must not be a symbolic link")
+        if path.suffix.lower() != ".json":
+            raise ReaperIntegrationError("application output must use the .json extension")
+        if not path.parent.is_dir():
+            raise ReaperIntegrationError("application output directory must already exist")
+        if path.exists() and path.is_dir():
+            raise ReaperIntegrationError("application output path must not be a directory")
+        resolved = path.resolve()
+        if resolved == source:
+            raise ReaperIntegrationError("application output must not overwrite its input")
+        return resolved
+
+    def list_apps(self) -> dict[str, Any]:
+        self._require_application_suite()
+        return self._run(["apps", "list"])
+
+    def describe_app(self, app_id: str) -> dict[str, Any]:
+        self._require_application_suite()
+        if not isinstance(app_id, str) or not APP_ID_PATTERN.fullmatch(app_id):
+            raise ReaperIntegrationError("application ID must contain lowercase ASCII letters, digits and underscores")
+        return self._run(["apps", "describe", app_id])
+
+    def run_app(
+        self,
+        app_id: str,
+        input_file: str | Path,
+        output_file: str | Path | None = None,
+    ) -> dict[str, Any]:
+        self._require_application_suite()
+        if not isinstance(app_id, str) or not APP_ID_PATTERN.fullmatch(app_id):
+            raise ReaperIntegrationError("application ID must contain lowercase ASCII letters, digits and underscores")
+        source = self._json_input_path(input_file)
+        arguments = ["apps", "run", app_id, "--input", str(source)]
+        if output_file is not None:
+            destination = self._json_output_path(output_file, source)
+            arguments.extend(["--output", str(destination)])
+        return self._run(arguments)
 
     def open_studio(self) -> subprocess.Popen[str]:
         root = self._require_repository()

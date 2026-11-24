@@ -2,6 +2,18 @@
 
 DuckOS is the operating-system project. **Mora** is its unified desktop environment: the home screen, application launcher, dock, window workspace and system control surface use one visual language and interaction model.
 
+## Reaper application suite
+
+DuckOS integrates the Reaper language workbench as a user-space tool and exposes its 15 first-party JSON applications through the native workbench and CLI. The OS does not embed a second interpreter or grant device/kernel privileges to these services.
+
+```sh
+duckos reaper status
+duckos reaper apps list
+duckos reaper apps describe telemetry_guard
+duckos reaper apps run telemetry_guard --input ./telemetry.json
+```
+
+See [Reaper integration](docs/REAPER_INTEGRATION.md) for capability detection, input/output limits and trust boundaries.
 ## Product direction
 
 The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
