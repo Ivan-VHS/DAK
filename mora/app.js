@@ -371,6 +371,13 @@ function commonsPanelMarkup() {
             '<option value="event_driven">Событийная</option>' +
             '<option value="hybrid">Гибридная</option>' +
           '</select></label>' +
+          '<label class="jora-label">Цель архитектуры <select data-jora-objective>' +
+            '<option value="balanced" selected>Сбалансированная</option>' +
+            '<option value="low_latency">Минимальная задержка</option>' +
+            '<option value="modularity">Модульность</option>' +
+            '<option value="extensibility">Расширяемость</option>' +
+            '<option value="minimal_complexity">Минимальная сложность</option>' +
+          '</select></label>' +
           '<label class="jora-label">Количество вариантов <select data-jora-variants><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>' +
         '</div>' +
         '<label class="jora-label">Степень архитектурной вариативности <span data-jora-variation-value>50%</span><input type="range" min="0" max="100" step="5" value="50" data-jora-variation></label>' +
@@ -887,6 +894,7 @@ document.addEventListener("click", (event) => {
         languageTargets,
         nameStyle: owner.querySelector("[data-jora-name-style]").value,
         graphTopology: owner.querySelector("[data-jora-topology]").value,
+        graphObjective: owner.querySelector("[data-jora-objective]").value,
         graphVariants: Number(owner.querySelector("[data-jora-variants]").value),
         graphVariation: Number(owner.querySelector("[data-jora-variation]").value),
         graphSeed: owner.querySelector("[data-jora-graph-seed]").value,
@@ -903,7 +911,7 @@ document.addEventListener("click", (event) => {
       const detail = document.createElement("small");
       detail.textContent = "Цели: " + composed.languageTargets.join(" + ").toUpperCase() + " · локали: " + composed.generatedLocales.join(", ").toUpperCase();
       const graphSummary = document.createElement("small");
-      graphSummary.textContent = "Графы: " + composed.graphPlan.variants + " · топология: " + composed.graphPlan.topologyLabel + " · вариативность: " + composed.graphPlan.variation + "% · seed: " + composed.graphPlan.seed + " · выберется граф с лучшей оценкой совместимости";
+      graphSummary.textContent = "Графы: " + composed.graphPlan.variants + " · топология: " + composed.graphPlan.topologyLabel + " · цель: " + composed.graphPlan.objectiveLabel + " · вариативность: " + composed.graphPlan.variation + "% · seed: " + composed.graphPlan.seed + " · Jora выберет лучший граф по целевой метрике";
       const graphChoices = document.createElement("small");
       graphChoices.textContent = "Доступные структуры: " + composed.graphPlan.availableTopologies.map((item) => item.label).join(" · ");
       const maturity = document.createElement("small");
@@ -1014,7 +1022,7 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("input", (event) => {
   const joraInput = event.target.closest(
-    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation], [data-jora-graph-seed]"
+    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation], [data-jora-graph-seed], [data-jora-objective]"
   );
   if (joraInput) {
     const owner = joraInput.closest(".app-window");
