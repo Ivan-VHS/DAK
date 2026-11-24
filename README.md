@@ -87,6 +87,10 @@ The native Python toolchain now provides deterministic, optionally Ed25519-signe
 
 See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce a verified component archive or deployment plan; they do not yet build a bootable ISO/USB image, install to a physical disk, convert cloud images, or implement firmware Secure Boot and boot rollback.
 
+## Service execution contracts
+
+DuckOS has a bounded, non-executing service profile planner for runtime models, resource quotas, health checks, retry/backoff and dependency order. See [Service execution profiles](docs/SERVICE_PROFILES.md). It validates plans; it does not launch services or enforce kernel capabilities.
+
 ## System architecture and maturity
 
 The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
