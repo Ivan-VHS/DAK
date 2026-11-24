@@ -99,7 +99,7 @@ Running a `.rpr` or `.most` file is always an explicit command or user action in
 | Managed heap | 64 MiB | 512 MiB |
 | Open managed resources | 64 | 256 |
 
-These are Reaper interpreter guardrails, **not an operating-system sandbox**. They do not enforce OS-level CPU scheduling, filesystem isolation, process isolation or kernel capabilities. The non-interactive DuckOS run bridge does not provide a stdin prompt channel; use `duckos reaper repl` or Reaper directly for interactive work. Unknown source files must not be run.
+These are Reaper interpreter guardrails, **not an operating-system sandbox**. They do not enforce OS-level CPU scheduling, filesystem isolation, process isolation or kernel capabilities. The bridge drains stdout and stderr concurrently and retains at most 1,000,000 bytes per stream; excess output is discarded and the UI reports truncation. The non-interactive DuckOS run bridge does not provide a stdin prompt channel; use `duckos reaper repl` or Reaper directly for interactive work. Unknown source files must not be run.
 
 The native AOT path is experimental and only accepts the subset implemented by Reaper's current compiler. The bridge can emit C17 or invoke a selected/available GCC- or Clang-compatible host compiler to create a host executable. It does not run the resulting executable, install it, load it as a driver, or place it in the DuckOS boot chain. Native compilation does not establish full language parity or a general machine-code backend.
 
