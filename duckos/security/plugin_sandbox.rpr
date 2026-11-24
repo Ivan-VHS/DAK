@@ -24,8 +24,16 @@ export craft plugin_admission(plugin, granted) {
     when plugin[0] == "" or plugin[1] != "wasm-component" {
         yield "reject"
     }
-    when plugin[2] <= 0 or plugin[2] > 2500
-        or plugin[3] <= 0 or plugin[3] > 256 {
+    when plugin[2] <= 0 {
+        yield "reject"
+    }
+    when plugin[2] > 2500 {
+        yield "reject"
+    }
+    when plugin[3] <= 0 {
+        yield "reject"
+    }
+    when plugin[3] > 256 {
         yield "reject"
     }
     when plugin[4] != "verified" or not capabilities_subset(plugin[5], granted) {
