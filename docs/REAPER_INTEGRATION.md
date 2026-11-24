@@ -74,12 +74,13 @@ Examples:
 
 ```sh
 duckos reaper status
-duckos reaper check ./examples/flow.rpr
-duckos reaper typecheck ./examples/flow.rpr
-duckos reaper modules ./examples/flow.rpr
-duckos reaper run ./examples/flow.rpr --steps 1000000 --heap-bytes 67108864
-duckos reaper emit-c ./examples/flow.rpr --output ./build/flow.c
-duckos reaper native ./examples/flow.rpr --output ./build/flow
+duckos reaper check projects/reaper/examples/flow.rpr
+duckos reaper typecheck projects/reaper/examples/flow.rpr
+duckos reaper modules projects/reaper/examples/flow.rpr
+mkdir -p build
+duckos reaper run projects/reaper/examples/flow.rpr --steps 1000000 --heap-bytes 67108864
+duckos reaper emit-c projects/reaper/examples/flow.rpr --output ./build/flow.c
+duckos reaper native projects/reaper/examples/flow.rpr --output ./build/flow
 duckos reaper toolchain
 duckos reaper studio
 ```
