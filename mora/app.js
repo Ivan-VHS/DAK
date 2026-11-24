@@ -354,7 +354,7 @@ function commonsPanelMarkup() {
       '<div class="jora-actions"><button class="action-button" type="button" data-action="jora-compose">Сформировать формулу</button><button class="subtle-button" type="button" data-action="jora-export" disabled>Экспортировать JSON</button></div>' +
       '<div class="jora-preview" data-jora-preview aria-live="polite">Выберите модули и сформируйте комбинацию. Jora предложит имя и покажет итоговую формулу.</div>' +
       '<p class="jora-footnote">Экспорт создаёт запрос для локальной сборки. Браузерная Mora не запускает процессы на компьютере и не устанавливает приложения самостоятельно.</p>' +
-      '<p class="jora-command">duckos jora build ./lexitone.request.json ./apps/LexiTone</p>' +
+      '<p class="jora-command">duckos jora build ./lexitone-3d.jora-request.json ./LexiTone-3D</p>' +
     '</section>' +
     '<div class="jora-catalog-heading"><div><span class="jora-kicker">CURATED CATALOGUE</span><h3>Каталог приложений</h3></div><span class="commons-count" data-commons-count aria-live="polite">Загрузка каталога</span></div>' +
     '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Jora"></label>' +
@@ -424,7 +424,7 @@ function renderCommonsDetails(detailPanel, app) {
   detailPanel.appendChild(makeCommonsText(
     "p",
     "commons-detail-status",
-    "Статус: спецификация. Каталог Mora Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
+    "Статус: спецификация. Каталог Jora показывает продуктовые концепции; отдельный исполняемый модуль этого приложения ещё не подключён."
   ));
   detailPanel.hidden = false;
 }
