@@ -16,6 +16,10 @@ test("Jora composes selected features into a deterministic product formula", () 
   assert.equal(result.request.schema, "reaper.jora.request.v1");
   assert.equal(result.request.name, "Jora");
   assert.equal(result.request.language_targets, "auto");
+  assert.equal(result.request.name_style, "balanced");
+  assert.deepEqual(result.request.graph, { topology: "auto", seed: "", variants: 4, variation: 50 });
+  assert.equal(result.nameSuggestions.length, 4);
+  assert.ok(result.nameSuggestions.every((label) => label.startsWith("Jora")));
 });
 
 test("Jora can mark additional compiler targets as pending adapters", () => {
@@ -30,7 +34,7 @@ test("Jora can mark additional compiler targets as pending adapters", () => {
   assert.deepEqual(result.request.language_targets, ["reaper", "java", "typescript"]);
 });
 
-test("Jora allows a custom product name and a subset of locales", () => {
+test("Jora keeps its canonical name while allowing a locale subset", () => {
   const result = composeJoraRequest({
     name: "Jora",
     components: ["text.editor"],
@@ -40,6 +44,33 @@ test("Jora allows a custom product name and a subset of locales", () => {
   assert.equal(result.name, "Jora");
   assert.equal(result.formula, "Text Editor");
   assert.deepEqual(result.request.locales, ["uk"]);
+});
+
+test("Jora allows graph topology, variant count and variation to be selected", () => {
+  const result = composeJoraRequest({
+    components: ["text.editor", "translation.workspace"],
+    locales: ["ru"],
+    preferredLocale: "ru",
+    graphTopology: "event_driven",
+    graphVariants: 2,
+    graphVariation: 80,
+    nameStyle: "descriptive"
+  });
+  assert.equal(result.request.name, "Jora");
+  assert.equal(result.request.name_style, "descriptive");
+  assert.deepEqual(result.request.graph, {
+    topology: "event_driven", seed: "", variants: 2, variation: 80
+  });
+  assert.equal(result.graphPlan.topologyLabel, "Событийная архитектура");
+  assert.equal(result.graphPlan.variants, 2);
+});
+
+test("Jora rejects unsupported graph and naming options", () => {
+  const base = { components: ["text.editor"], locales: ["en"] };
+  assert.throws(() => composeJoraRequest({ ...base, graphTopology: "random" }), /Unsupported Jora graph topology/);
+  assert.throws(() => composeJoraRequest({ ...base, graphVariants: 7 }), /from 1 to 6/);
+  assert.throws(() => composeJoraRequest({ ...base, graphVariation: 101 }), /from 0 to 100/);
+  assert.throws(() => composeJoraRequest({ ...base, nameStyle: "invented" }), /Unsupported Jora naming style/);
 });
 
 test("Jora refuses separately branded application names", () => {
