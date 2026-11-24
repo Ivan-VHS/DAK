@@ -71,6 +71,11 @@ class DeploymentTests(unittest.TestCase):
         result = _load_strict_json(payload, "release metadata")
         self.assertEqual(result["text"], "[{" * 1000)
 
+    def test_release_metadata_depth_scanner_handles_escaped_quotes(self):
+        value = 'quoted " text with brackets [ { ] } and slash \\ marker'
+        payload = __import__("json").dumps({"text": value})
+        self.assertEqual(_load_strict_json(payload, "release metadata")["text"], value)
+
     def test_builds_and_verifies_component_bundle(self):
         result = build_release_bundle(self.manifest, self.root, self.output)
         self.assertTrue(result["valid"])
