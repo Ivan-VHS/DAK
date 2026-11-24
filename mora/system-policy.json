@@ -86,6 +86,18 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "language_profile": {
+      "maturity": "partial",
+      "scope": "Persistent ru-RU and Simplified Chinese (zh-CN) selection in Mora Control, with localized desktop metadata, app launcher labels, date/time and Red Sparrow; legacy application panels are not yet all translated."
+    },
+    "red_sparrow_workspace": {
+      "maturity": "partial",
+      "scope": "Creative Wuxia production workspace inside Mora with Russian and Simplified Chinese content, local note editor and stage-safe visual design; not a native combat system or executable third-party extension."
+    },
+    "local_first_documents": {
+      "maturity": "partial",
+      "scope": "IndexedDB-first bounded browser document store with a localStorage fallback for Red Sparrow notes; no CRDT replication, cross-device sync or native SQLite service is connected."
     }
   },
   "not_in_scope_as_implemented_features": [
