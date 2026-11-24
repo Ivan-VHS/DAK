@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -201,6 +201,97 @@
       "category": "application_catalogue",
       "panel": "mora/app.js#mora-commons",
       "maturity": "implemented_local_catalog"
+    },
+    {
+      "id": "deskline",
+      "name": "Deskline",
+      "category": "system",
+      "panel": "mora/app.js#deskline",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "nuvault",
+      "name": "Nuvault",
+      "category": "files",
+      "panel": "mora/app.js#nuvault",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "daymark",
+      "name": "Daymark",
+      "category": "productivity",
+      "panel": "mora/app.js#daymark",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "lexora",
+      "name": "Lexora",
+      "category": "documents",
+      "panel": "mora/app.js#lexora",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "voxera",
+      "name": "Voxera",
+      "category": "communication",
+      "panel": "mora/app.js#voxera",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "wayline",
+      "name": "Wayline",
+      "category": "internet",
+      "panel": "mora/app.js#wayline",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "sumora",
+      "name": "Sumora",
+      "category": "finance",
+      "panel": "mora/app.js#sumora",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "pixora",
+      "name": "Pixora",
+      "category": "multimedia",
+      "panel": "mora/app.js#pixora",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "nexcode",
+      "name": "Nexcode",
+      "category": "development",
+      "panel": "mora/app.js#nexcode",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "mnemo",
+      "name": "Mnemo",
+      "category": "education",
+      "panel": "mora/app.js#mnemo",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "calcora",
+      "name": "Calcora",
+      "category": "utilities",
+      "panel": "mora/app.js#calcora",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "paceforge",
+      "name": "Paceforge",
+      "category": "health",
+      "panel": "mora/app.js#paceforge",
+      "maturity": "partial_browser_app_local_data"
+    },
+    {
+      "id": "trailmark",
+      "name": "Trailmark",
+      "category": "travel",
+      "panel": "mora/app.js#trailmark",
+      "maturity": "partial_browser_app_local_data"
     }
   ],
   "widgets": [

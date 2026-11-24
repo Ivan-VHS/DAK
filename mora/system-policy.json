@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "implemented",
-      "scope": "browser shell, responsive layout, draggable windows, dock, seven original app panels and seven system tools"
+      "scope": "browser shell, responsive layout, draggable windows, dock, 33 first-party product panels including 13 local-first Commons apps, nine system tools"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -77,7 +77,7 @@
     },
     "installable_workspace": {
       "maturity": "partial",
-      "scope": "web manifest and scoped offline cache; not an OS installer"
+      "scope": "web manifest and scoped offline cache including the Mora Commons catalogue and 13 local-first base app modules; not an OS installer"
     },
     "gaming_performance": {
       "maturity": "partial",
@@ -86,6 +86,10 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "mora_commons_base_apps": {
+      "maturity": "partial",
+      "scope": "13 independent-brand browser-local application modules launched from Mora Commons; profile-scoped data; no separate native process, privileged OS API or boot-image package is implied"
     }
   },
   "not_in_scope_as_implemented_features": [

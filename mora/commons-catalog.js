@@ -1,31 +1,115 @@
 export const MORA_COMMONS_CATEGORIES = [
-  {
-    id: "workshop",
-    title: "Мастерская и инструменты",
-    description: "Техническое обслуживание, измерения и контроль снаряжения."
-  },
-  {
-    id: "training",
-    title: "Сила и восстановление",
-    description: "Тренировочные планы, интервалы, нагрузка и восстановление."
-  },
-  {
-    id: "outdoors",
-    title: "Поле и автономность",
-    description: "Маршруты, комплектация, ориентирование и дежурства."
-  },
-  {
-    id: "business",
-    title: "Работа и личная дисциплина",
-    description: "Себестоимость, рабочее время, приоритеты и повседневные задачи."
-  }
+  { id: "system", title: "Система", description: "Рабочая среда, настройки и состояние DuckOS." },
+  { id: "files", title: "Файлы", description: "Выбор, организация и локальный учёт файлов." },
+  { id: "productivity", title: "Продуктивность", description: "Задачи, планы, приоритеты и рабочие процессы." },
+  { id: "documents", title: "Документы", description: "Текст, заметки, редактирование и экспорт." },
+  { id: "communication", title: "Коммуникации", description: "Контакты и личная информация для связи." },
+  { id: "internet", title: "Интернет", description: "Закладки, веб-адреса и материалы для чтения." },
+  { id: "finance", title: "Финансы", description: "Личный учёт денег, доходов и расходов." },
+  { id: "multimedia", title: "Мультимедиа", description: "Изображения, визуальные коллекции и медиафайлы." },
+  { id: "development", title: "Разработка", description: "Инструменты для кода, данных и форматов." },
+  { id: "education", title: "Обучение", description: "Карточки, повторение и личные учебные материалы." },
+  { id: "utilities", title: "Утилиты", description: "Калькуляторы, справочники и прикладные инструменты." },
+  { id: "health", title: "Активность и здоровье", description: "Личные записи движения, тренировок и восстановления." },
+  { id: "travel", title: "Путешествия", description: "Маршруты, остановки, поездки и автономные планы." }
 ];
 
 export const MORA_COMMONS_APPS = [
   {
+    id: "deskline", name: "Deskline", category: "system", glyph: "⌘",
+    subtitle: "Пульт рабочего пространства",
+    description: "Стартовая панель DuckOS с быстрыми переходами к приложениям и понятным обзором возможностей текущей оболочки.",
+    capabilities: ["Быстрые переходы к системным инструментам", "Обзор доступных модулей Mora", "Понятные границы браузерных и нативных функций", "Работа без учётной записи"],
+    keywords: ["система", "рабочий стол", "настройки", "оболочка", "панель"], runtime: "local_browser"
+  },
+  {
+    id: "nuvault", name: "Nuvault", category: "files", glyph: "▤",
+    subtitle: "Локальный каталог файлов",
+    description: "Личный индекс выбранных файлов с именами, форматами, размерами и датами изменения без копирования их содержимого.",
+    capabilities: ["Выбор нескольких файлов", "Каталог метаданных", "Локальный список и удаление записей", "Ограничение размера выбора"],
+    keywords: ["файлы", "каталог", "папки", "размер", "формат"], runtime: "local_browser"
+  },
+  {
+    id: "daymark", name: "Daymark", category: "productivity", glyph: "✓",
+    subtitle: "Задачи и приоритеты",
+    description: "Минималистичный планировщик на день: быстрый ввод задач, отметка выполнения и локальное сохранение списка.",
+    capabilities: ["Быстрое добавление задач", "Отметка выполнения", "Удаление устаревших пунктов", "Локальное хранение до 200 записей"],
+    keywords: ["задачи", "план", "сегодня", "приоритеты", "список"], runtime: "local_browser"
+  },
+  {
+    id: "lexora", name: "Lexora", category: "documents", glyph: "¶",
+    subtitle: "Текстовый редактор",
+    description: "Локальный редактор документов с подсчётом слов и символов, сохранением черновика и экспортом в TXT.",
+    capabilities: ["Редактирование текста", "Подсчёт слов и символов", "Автономный черновик в профиле", "Экспорт в TXT"],
+    keywords: ["текст", "документ", "редактор", "писать", "экспорт"], runtime: "local_browser"
+  },
+  {
+    id: "voxera", name: "Voxera", category: "communication", glyph: "↗",
+    subtitle: "Локальная адресная книга",
+    description: "Персональный список контактов и заметок о способах связи. Приложение не отправляет сообщения и не подключается к мессенджерам.",
+    capabilities: ["Карточки контактов", "Заметки о каналах связи", "Локальное редактирование и удаление", "Без передачи данных в сеть"],
+    keywords: ["контакты", "связь", "адресная книга", "телефон", "email"], runtime: "local_browser"
+  },
+  {
+    id: "wayline", name: "Wayline", category: "internet", glyph: "⌖",
+    subtitle: "Закладки и веб-адреса",
+    description: "Личная библиотека веб-страниц с подписями и открытием сохранённых HTTP/HTTPS-адресов в новой вкладке.",
+    capabilities: ["Добавление веб-адресов", "Подписи к закладкам", "Проверка протокола ссылки", "Открытие во внешней вкладке"],
+    keywords: ["интернет", "браузер", "ссылки", "закладки", "страницы"], runtime: "local_browser"
+  },
+  {
+    id: "sumora", name: "Sumora", category: "finance", glyph: "₴",
+    subtitle: "Личный учёт доходов и расходов",
+    description: "Простой журнал денежных поступлений и затрат с автоматическим подсчётом итогов и остатка.",
+    capabilities: ["Запись доходов и расходов", "Суммирование по типу операции", "Расчёт текущего остатка", "Локальное хранение без банковского доступа"],
+    keywords: ["деньги", "бюджет", "расходы", "доходы", "учёт"], runtime: "local_browser"
+  },
+  {
+    id: "pixora", name: "Pixora", category: "multimedia", glyph: "▧",
+    subtitle: "Галерея выбранных изображений",
+    description: "Просмотр изображений, выбранных пользователем, и локальный каталог их метаданных без загрузки оригиналов на сервер.",
+    capabilities: ["Выбор изображений", "Локальный предпросмотр", "Список имён и форматов", "Ограничение размера и количества файлов"],
+    keywords: ["изображения", "фото", "галерея", "медиа", "визуальное"], runtime: "local_browser"
+  },
+  {
+    id: "nexcode", name: "Nexcode", category: "development", glyph: "⌘",
+    subtitle: "Инструменты разработчика",
+    description: "Небольшая рабочая среда для проверки синтаксиса JSON, форматирования структуры и локального сохранения исходного текста.",
+    capabilities: ["Проверка JSON", "Форматирование с отступами", "Локальное сохранение", "Без исполнения кода и сетевой передачи"],
+    keywords: ["разработка", "код", "json", "форматирование", "программист"], runtime: "local_browser"
+  },
+  {
+    id: "mnemo", name: "Mnemo", category: "education", glyph: "◇",
+    subtitle: "Карточки для обучения",
+    description: "Локальные учебные карточки с вопросом и ответом для самостоятельного повторения и запоминания материала.",
+    capabilities: ["Создание вопроса и ответа", "Просмотр ответа по нажатию", "Локальный набор карточек", "Удаление и обновление записей"],
+    keywords: ["обучение", "карточки", "память", "повторение", "учёба"], runtime: "local_browser"
+  },
+  {
+    id: "calcora", name: "Calcora", category: "utilities", glyph: "∑",
+    subtitle: "Калькулятор выражений",
+    description: "Безопасный калькулятор арифметических выражений со скобками, дробями, приоритетом операций и обработкой ошибок.",
+    capabilities: ["Сложение и вычитание", "Умножение и деление", "Скобки и десятичные числа", "Модульное деление и защита от деления на ноль"],
+    keywords: ["калькулятор", "математика", "вычисления", "проценты", "арифметика"], runtime: "local_browser"
+  },
+  {
+    id: "paceforge", name: "Paceforge", category: "health", glyph: "↗",
+    subtitle: "Дневник физической активности",
+    description: "Личный журнал движения и тренировок с длительностью занятий и суммарным временем активности.",
+    capabilities: ["Запись вида активности", "Учёт длительности", "Подсчёт суммарного времени", "Локальный журнал без медицинских выводов"],
+    keywords: ["активность", "тренировка", "движение", "спорт", "время"], runtime: "local_browser"
+  },
+  {
+    id: "trailmark", name: "Trailmark", category: "travel", glyph: "➤",
+    subtitle: "Планировщик поездок и маршрутов",
+    description: "Последовательный список остановок с заметками и порядком следования для личного плана поездки.",
+    capabilities: ["Добавление точек маршрута", "Заметки к остановкам", "Удаление и перестройка списка", "Офлайн-план без GPS и онлайн-карт"],
+    keywords: ["путешествия", "маршрут", "остановки", "поездка", "путь"], runtime: "local_browser"
+  },
+  {
     id: "torquespec",
     name: "TorqueSpec",
-    category: "workshop",
+    category: "utilities",
     glyph: "N·m",
     subtitle: "Моменты затяжки и допуски",
     description: "Справочник моментов затяжки, типоразмеров резьбы, допусков и схем обтяжки для обслуживания автомобилей, мотоциклов и бытовой техники.",
@@ -35,7 +119,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "bore-thread",
     name: "Bore & Thread",
-    category: "workshop",
+    category: "utilities",
     glyph: "Ø",
     subtitle: "Резьбы, сверловка и посадки",
     description: "Инженерный справочник по метрическим и дюймовым резьбам, отверстиям под метчик, посадкам, допускам и распространённым маркам материалов.",
@@ -45,7 +129,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "garagebay-log",
     name: "GarageBay Log",
-    category: "workshop",
+    category: "productivity",
     glyph: "⌁",
     subtitle: "Журнал обслуживания техники",
     description: "История обслуживания техники и мастерской с пробегом, моточасами, расходниками, партномерами и плановыми работами.",
@@ -55,7 +139,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "blade-edge",
     name: "Blade & Edge",
-    category: "workshop",
+    category: "utilities",
     glyph: "◢",
     subtitle: "Заточка и уход за инструментом",
     description: "Журнал заточки и ухода за режущим и ручным инструментом с параметрами абразивов, геометрии и состояния кромки.",
@@ -65,7 +149,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "rigcheck",
     name: "RigCheck",
-    category: "workshop",
+    category: "system",
     glyph: "✓",
     subtitle: "Проверка техники и снаряжения",
     description: "Предрейсовые и полевые контрольные списки для прицепов, багажников, лебёдок, генераторов и экспедиционного оснащения.",
@@ -75,7 +159,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "iron-cadence",
     name: "IronCadence",
-    category: "training",
+    category: "health",
     glyph: "↗",
     subtitle: "Силовой тренировочный дневник",
     description: "Планирование силовых занятий с расчётом рабочих весов, объёма, времени отдыха и динамики прогрессии.",
@@ -85,7 +169,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "roundtimer-pro",
     name: "RoundTimer Pro",
-    category: "training",
+    category: "health",
     glyph: "◷",
     subtitle: "Интервалы и раунды",
     description: "Гибкий интервальный таймер для бокса, единоборств, круговых комплексов и кондиционной подготовки.",
@@ -95,7 +179,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "ruckledger",
     name: "RuckLedger",
-    category: "training",
+    category: "health",
     glyph: "▣",
     subtitle: "Ходьба с нагрузкой",
     description: "Дневник ходовых тренировок с грузом: дистанция, масса рюкзака, рельеф, темп и субъективная нагрузка.",
@@ -105,7 +189,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "grip-hang",
     name: "Grip & Hang",
-    category: "training",
+    category: "health",
     glyph: "Ⅱ",
     subtitle: "Хват, висы и изометрия",
     description: "Учёт изометрических упражнений, висов, силы хвата и предплечий с постепенным изменением времени и нагрузки.",
@@ -115,7 +199,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "recoveryledger",
     name: "RecoveryLedger",
-    category: "training",
+    category: "health",
     glyph: "≈",
     subtitle: "Восстановление и самочувствие",
     description: "Личный дневник сна, субъективной усталости, мышечной болезненности, гидратации и готовности к очередной нагрузке.",
@@ -125,7 +209,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "deadreckon",
     name: "DeadReckon",
-    category: "outdoors",
+    category: "travel",
     glyph: "⌖",
     subtitle: "Офлайн-навигация и маршрут",
     description: "Планирование и запись маршрутов на местности с заранее сохранёнными картами, контрольными точками и профилем высот.",
@@ -135,7 +219,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "campload",
     name: "CampLoad",
-    category: "outdoors",
+    category: "travel",
     glyph: "▤",
     subtitle: "Вес и баланс снаряжения",
     description: "Калькулятор массы и распределения походного или экспедиционного груза с учётом воды, еды и расходников на каждый день.",
@@ -145,7 +229,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "watchdesk",
     name: "WatchDesk",
-    category: "outdoors",
+    category: "productivity",
     glyph: "◴",
     subtitle: "Смены, дежурства и журнал",
     description: "Локальный планировщик смен и дежурств с ротацией, напоминаниями и временными отметками событий.",
@@ -155,7 +239,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "marginline",
     name: "MarginLine",
-    category: "business",
+    category: "finance",
     glyph: "₴",
     subtitle: "Себестоимость и реальная ставка",
     description: "Калькулятор маржи и стоимости работ для услуг, ремонта и небольшого бизнеса с учётом времени, простоев, налогов и расходников.",
@@ -165,7 +249,7 @@ export const MORA_COMMONS_APPS = [
   {
     id: "coldstart",
     name: "ColdStart",
-    category: "business",
+    category: "productivity",
     glyph: "03",
     subtitle: "Приоритеты и дисциплина дня",
     description: "Минималистичный планировщик ключевых задач без навязчивой геймификации, рейтингов и перегруженных уведомлений.",
@@ -177,7 +261,7 @@ export const MORA_COMMONS_APPS = [
 export const MORA_COMMONS_POLICY = {
   audience: "everyone",
   genderSegmentation: false,
-  maturity: "catalog_implemented_products_specified",
+  maturity: "13_local_first_apps_15_specialist_specs",
   principles: [
     "Equal access to every application regardless of gender.",
     "No male-only or female-only application categories.",
@@ -186,19 +270,28 @@ export const MORA_COMMONS_POLICY = {
   ]
 };
 
+const LEGACY_CATEGORY_FILTERS = {
+  workshop: ["torquespec", "bore-thread", "garagebay-log", "blade-edge", "rigcheck"],
+  training: ["iron-cadence", "roundtimer-pro", "ruckledger", "grip-hang", "recoveryledger"],
+  outdoors: ["deadreckon", "campload", "watchdesk"],
+  business: ["marginline", "coldstart"]
+};
+
 export function filterCommonsApps(query = "", category = "all") {
   const normalizedQuery = String(query).trim().toLocaleLowerCase("ru-RU");
+  const legacyMembers = LEGACY_CATEGORY_FILTERS[category];
 
   return MORA_COMMONS_APPS.filter((app) => {
-    if (category !== "all" && app.category !== category) return false;
+    if (category !== "all") {
+      if (legacyMembers && !legacyMembers.includes(app.id)) return false;
+      if (!legacyMembers && app.category !== category) return false;
+    }
     if (!normalizedQuery) return true;
 
+    const categoryTitle = MORA_COMMONS_CATEGORIES.find((item) => item.id === app.category)?.title || "";
     const searchableText = [
-      app.name,
-      app.subtitle,
-      app.description,
-      ...app.capabilities,
-      ...app.keywords
+      app.name, app.subtitle, app.description, categoryTitle,
+      ...app.capabilities, ...app.keywords
     ].join(" ").toLocaleLowerCase("ru-RU");
 
     return searchableText.includes(normalizedQuery);

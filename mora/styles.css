@@ -821,3 +821,85 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
 input[type="range"] { accent-color: #FFD400; }
 .theme-control { color: #FFD400; }
 .extension-theme-options { display: none; }
+
+
+/* First 13 Mora Commons base applications — shared, accessible local-first controls. */
+.base-app-textarea {
+  display:block;
+  width:100%;
+  min-height:190px;
+  resize:vertical;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  outline:none;
+  color:var(--mora-text);
+  background:rgba(0,0,0,.28);
+  font:inherit;
+  font-size:12px;
+  line-height:1.6;
+}
+.base-app-textarea:focus { border-color:var(--mora-brand); }
+.base-code-textarea { font-family:var(--font-mono, "Cascadia Mono", monospace); tab-size:2; }
+.base-app-form-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin:8px 0;
+}
+.base-app-form-grid input,
+.base-app-form-grid select {
+  min-width:0;
+  min-height:40px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  color:var(--mora-text);
+  background:rgba(255,255,255,.06);
+  font:inherit;
+  font-size:11px;
+}
+.base-app-form-grid select { grid-column:1 / -1; }
+.base-task-toggle {
+  width:30px;
+  min-width:30px;
+  min-height:30px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--mora-brand);
+  background:rgba(255,212,0,.08);
+  cursor:pointer;
+}
+.base-entry-done { opacity:.5; text-decoration:line-through; }
+.base-card-copy { min-width:0; flex:1; display:grid; gap:6px; }
+.base-card-copy strong { color:var(--mora-text); font-size:11px; }
+.base-card-copy p { margin:0; color:var(--mora-secondary); font-size:10px; line-height:1.5; }
+.base-image-preview {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin:12px 0;
+}
+.base-image-figure {
+  min-width:0;
+  margin:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:rgba(255,255,255,.04);
+}
+.base-image-figure img { display:block; width:100%; aspect-ratio:1; object-fit:cover; }
+.base-image-figure figcaption {
+  padding:6px;
+  overflow:hidden;
+  color:var(--mora-muted);
+  font-size:9px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.commons-launch { width:100%; margin-top:10px; }
+@media (max-width:480px) {
+  .base-app-form-grid { grid-template-columns:1fr; }
+  .base-app-form-grid select { grid-column:auto; }
+  .base-image-preview { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
