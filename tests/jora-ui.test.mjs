@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { COMPONENTS, composeJoraRequest } from "../mora/jora.js";
+import { APPLICATION_NAME_POLICY, COMPONENTS, composeJoraRequest } from "../mora/jora.js";
 
 test("Jora composes selected features into a deterministic product formula", () => {
   const result = composeJoraRequest({
@@ -89,8 +89,20 @@ test("Jora accepts independent product names and rejects the platform name as an
   });
   assert.equal(named.name, "Sonaris");
   assert.equal(named.request.name, "Sonaris");
+  assert.equal(named.request.application_name_policy, APPLICATION_NAME_POLICY);
+  assert.equal(named.applicationNamePolicy, APPLICATION_NAME_POLICY);
   assert.throws(() => composeJoraRequest({
     name: "Jora Audio",
+    components: ["audio.editor"],
+    locales: ["en"]
+  }), /must not contain the platform name Jora/);
+  assert.throws(() => composeJoraRequest({
+    name: "myjOrAapp",
+    components: ["audio.editor"],
+    locales: ["en"]
+  }), /must not contain the platform name Jora/);
+  assert.throws(() => composeJoraRequest({
+    name: "ＪＯＲＡ Suite",
     components: ["audio.editor"],
     locales: ["en"]
   }), /must not contain the platform name Jora/);
