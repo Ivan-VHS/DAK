@@ -144,6 +144,15 @@ def main(argv: list[str] | None = None) -> int:
     reaper_check.add_argument("source", type=Path)
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
+    reaper_apps = reaper_commands.add_parser("apps", help="list, inspect and run first-party Reaper applications")
+    reaper_app_commands = reaper_apps.add_subparsers(dest="reaper_apps_command", required=True)
+    reaper_app_commands.add_parser("list", help="list the applications in the located Reaper checkout")
+    reaper_app_describe = reaper_app_commands.add_parser("describe", help="show one application contract")
+    reaper_app_describe.add_argument("app_id")
+    reaper_app_run = reaper_app_commands.add_parser("run", help="run an application with a JSON input file")
+    reaper_app_run.add_argument("app_id")
+    reaper_app_run.add_argument("--input", type=Path, required=True, help="existing .json input file")
+    reaper_app_run.add_argument("--output", type=Path, help="optional atomic .json output file")
 
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
@@ -294,6 +303,17 @@ def main(argv: list[str] | None = None) -> int:
                 return 0 if result["ok"] else 1
             elif args.reaper_command == "typecheck":
                 result = workbench.typecheck(args.source)
+                _print_result(result)
+                return 0 if result["ok"] else 1
+            elif args.reaper_command == "apps":
+                if args.reaper_apps_command == "list":
+                    result = workbench.list_apps()
+                elif args.reaper_apps_command == "describe":
+                    result = workbench.describe_app(args.app_id)
+                elif args.reaper_apps_command == "run":
+                    result = workbench.run_app(args.app_id, args.input, args.output)
+                else:
+                    raise ValueError("unknown Reaper application command")
                 _print_result(result)
                 return 0 if result["ok"] else 1
             else:

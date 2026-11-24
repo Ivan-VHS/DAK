@@ -20,6 +20,12 @@ COLORS = {
     "accent_text": "#111111", "border": "#454545",
 }
 
+REAPER_APPLICATION_IDS = (
+    "telemetry_guard", "log_sieve", "game_tuner", "table_cleaner", "api_gateway",
+    "secret_patrol", "latency_probe", "dag_runner", "span_indexer", "ledger_reconcile",
+    "driver_manifest", "most_build", "text_shield", "physics_bench", "bf_vm",
+)
+
 
 class DesktopWindow:
     def __init__(self, root: tk.Tk) -> None:
@@ -158,6 +164,11 @@ class DesktopWindow:
         self.reaper_status = tk.StringVar(value="Проверка исходного checkout…")
         self.reaper_location = tk.StringVar(value="Репозиторий ещё не обнаружен")
         self.reaper_selected = tk.StringVar(value="Исходный файл не выбран")
+        self.reaper_app_id = tk.StringVar(value="telemetry_guard")
+        self.reaper_app_input: Path | None = None
+        self.reaper_app_output: Path | None = None
+        self.reaper_app_input_label = tk.StringVar(value="JSON-вход не выбран")
+        self.reaper_app_output_label = tk.StringVar(value="JSON-выход: показать результат в окне")
 
         status_panel = ttk.Frame(tab, padding=12)
         status_panel.pack(fill="x", pady=(0, 10))
@@ -172,6 +183,32 @@ class DesktopWindow:
         ttk.Button(actions, text="Выбрать .rpr", command=self._choose_reaper_source).pack(side="left", padx=8)
         ttk.Button(actions, text="Проверить", command=self._check_reaper_source).pack(side="left")
         ttk.Button(actions, text="Проверить типы", command=self._typecheck_reaper_source).pack(side="left", padx=8)
+
+        apps_panel = ttk.LabelFrame(tab, text="Первичные приложения Reaper", padding=10)
+        apps_panel.pack(fill="x", pady=(0, 10))
+        app_controls = ttk.Frame(apps_panel)
+        app_controls.pack(fill="x")
+        ttk.Label(app_controls, text="Приложение").pack(side="left")
+        self.reaper_app_combo = ttk.Combobox(
+            app_controls, textvariable=self.reaper_app_id,
+            values=REAPER_APPLICATION_IDS, state="disabled", width=24,
+        )
+        self.reaper_app_combo.pack(side="left", padx=(8, 12))
+        self.reaper_app_input_button = ttk.Button(
+            app_controls, text="Выбрать JSON-вход", command=self._choose_reaper_app_input,
+        )
+        self.reaper_app_input_button.pack(side="left")
+        self.reaper_app_output_button = ttk.Button(
+            app_controls, text="Сохранить результат…", command=self._choose_reaper_app_output,
+        )
+        self.reaper_app_output_button.pack(side="left", padx=8)
+        self.reaper_app_run_button = ttk.Button(
+            app_controls, text="Запустить", style="Accent.TButton",
+            command=self._run_reaper_application,
+        )
+        self.reaper_app_run_button.pack(side="left")
+        ttk.Label(apps_panel, textvariable=self.reaper_app_input_label, style="Muted.TLabel").pack(anchor="w", pady=(7, 0))
+        ttk.Label(apps_panel, textvariable=self.reaper_app_output_label, style="Muted.TLabel").pack(anchor="w", pady=(2, 0))
 
         ttk.Label(
             tab,
@@ -215,10 +252,16 @@ class DesktopWindow:
             "native_studio": "native Studio",
             "static_typecheck": "static type analysis",
             "native_aot_subset": "experimental native AOT",
+            "application_suite": "15 first-party applications",
         }
         available = ", ".join(labels[item] for item in capabilities if item in labels)
         self.reaper_status.set("REAPER · доступен")
         self.reaper_location.set(f"{state['repository']} · {available}")
+        suite_available = "application_suite" in capabilities
+        self.reaper_app_combo.configure(state="readonly" if suite_available else "disabled")
+        self.reaper_app_input_button.configure(state="normal" if suite_available else "disabled")
+        self.reaper_app_output_button.configure(state="normal" if suite_available else "disabled")
+        self.reaper_app_run_button.configure(state="normal" if suite_available else "disabled")
         self._append_reaper_output("Reaper integration ready")
         self._append_reaper_output(json.dumps(state, ensure_ascii=False, indent=2))
 
@@ -235,6 +278,56 @@ class DesktopWindow:
             return
         self.reaper_source = Path(filename)
         self.reaper_selected.set(str(self.reaper_source))
+
+    def _choose_reaper_app_input(self) -> None:
+        filename = filedialog.askopenfilename(
+            parent=self.root,
+            title="Выбрать JSON-вход приложения",
+            filetypes=[("JSON", "*.json"), ("All files", "*.*")],
+        )
+        if filename:
+            self.reaper_app_input = Path(filename)
+            self.reaper_app_input_label.set(str(self.reaper_app_input))
+
+    def _choose_reaper_app_output(self) -> None:
+        filename = filedialog.asksaveasfilename(
+            parent=self.root,
+            title="Сохранить JSON-результат",
+            defaultextension=".json",
+            filetypes=[("JSON", "*.json")],
+        )
+        if filename:
+            self.reaper_app_output = Path(filename)
+            self.reaper_app_output_label.set("JSON-выход: " + str(self.reaper_app_output))
+
+    def _run_reaper_application(self) -> None:
+        if self._reaper_busy:
+            messagebox.showinfo("Reaper", "Предыдущая операция ещё выполняется.", parent=self.root)
+            return
+        if self.reaper_app_input is None:
+            self._choose_reaper_app_input()
+            if self.reaper_app_input is None:
+                return
+        app_id = self.reaper_app_id.get()
+        source = self.reaper_app_input
+        destination = self.reaper_app_output
+        self._reaper_busy = True
+        self.reaper_status.set(f"REAPER · {app_id}…")
+
+        def worker() -> None:
+            try:
+                result = self.reaper.run_app(app_id, source, destination)
+                self._reaper_queue.put((f"Приложение {app_id}", result, None))
+            except (OSError, ValueError, RuntimeError, ReaperIntegrationError) as error:
+                self._reaper_queue.put((f"Приложение {app_id}", None, str(error)))
+            except Exception as error:
+                self._reaper_queue.put((f"Приложение {app_id}", None, f"{type(error).__name__}: {error}"))
+
+        threading.Thread(
+            target=worker,
+            name="duckos-reaper-application",
+            daemon=True,
+        ).start()
 
     def _start_reaper_task(
         self,

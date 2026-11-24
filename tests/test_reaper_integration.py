@@ -17,10 +17,15 @@ class ReaperWorkbenchTests(unittest.TestCase):
         self.root = Path(temporary.name)
         package = self.root / "reaper"
         package.mkdir()
+        apps = package / "apps"
+        apps.mkdir()
+        (apps / "__init__.py").write_text("", encoding="utf-8")
+        (apps / "manifest.json").write_text('{"schema":"reaper.application-suite.v1","applications":[]}', encoding="utf-8")
+        (package / "apps_cli.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (self.root / "pyproject.toml").write_text("[project]\nname='reaper'\n", encoding="utf-8")
         (package / "__main__.py").write_text("from .cli import main\n", encoding="utf-8")
         (package / "cli.py").write_text(
-            'if arguments and arguments[0] == "typecheck":\n    pass\n',
+            'if arguments and arguments[0] == "typecheck":\n    pass\nif arguments and arguments[0] == "apps":\n    pass\n',
             encoding="utf-8",
         )
         (package / "desktop.py").write_text("def main():\n    pass\n", encoding="utf-8")
@@ -37,7 +42,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
         self.assertEqual(result["repository"], str(self.root))
         self.assertEqual(
             result["capabilities"],
-            ["reference_runtime", "cli", "native_studio", "static_typecheck", "native_aot_subset"],
+            ["reference_runtime", "cli", "native_studio", "static_typecheck", "native_aot_subset", "application_suite"],
         )
 
     def test_check_invokes_reaper_cli_without_a_shell(self):
@@ -67,6 +72,62 @@ class ReaperWorkbenchTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(run.call_args.args[0][2:4], ["reaper", "typecheck"])
         self.assertIn(str(self.source.resolve()), run.call_args.args[0])
+
+
+    def test_list_apps_uses_the_reaper_cli_without_a_shell(self):
+        response = {"schema": "reaper.application-suite.v1", "count": 15, "applications": []}
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0,
+            stdout=json.dumps(response, ensure_ascii=False), stderr="",
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.list_apps()
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["result"], response)
+        self.assertEqual(run.call_args.args[0], ["python-test", "-m", "reaper", "apps", "list"])
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_run_app_validates_json_and_uses_bounded_subprocess(self):
+        source = self.root / "input.json"
+        source.write_text('{"readings":[]}', encoding="utf-8")
+        output = self.root / "result.json"
+        response = {"ok": True, "app_id": "telemetry_guard"}
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0,
+            stdout=json.dumps(response), stderr="",
+        )
+        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+            result = self.workbench.run_app("telemetry_guard", source, output)
+        self.assertTrue(result["ok"])
+        arguments = run.call_args.args[0]
+        self.assertEqual(arguments[:6], [
+            "python-test", "-m", "reaper", "apps", "run", "telemetry_guard",
+        ])
+        self.assertIn(str(source.resolve()), arguments)
+        self.assertIn(str(output.resolve()), arguments)
+        self.assertEqual(run.call_args.kwargs["timeout"], 30)
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_run_app_rejects_invalid_ids_and_non_json_inputs(self):
+        source = self.root / "input.txt"
+        source.write_text("{}", encoding="utf-8")
+        with self.assertRaisesRegex(ReaperIntegrationError, "application ID"):
+            self.workbench.run_app("../telemetry_guard", source)
+        with self.assertRaisesRegex(ReaperIntegrationError, r"\.json"):
+            self.workbench.run_app("telemetry_guard", source)
+
+    def test_run_app_refuses_to_overwrite_input(self):
+        source = self.root / "payload.json"
+        source.write_text("{}", encoding="utf-8")
+        with self.assertRaisesRegex(ReaperIntegrationError, "must not overwrite"):
+            self.workbench.run_app("telemetry_guard", source, source)
+
+    def test_older_checkout_does_not_advertise_application_suite(self):
+        (self.root / "reaper" / "apps" / "__init__.py").unlink()
+        state = self.workbench.inspect()
+        self.assertNotIn("application_suite", state["capabilities"])
+        with self.assertRaisesRegex(ReaperIntegrationError, "application suite"):
+            self.workbench.list_apps()
 
     def test_studio_launch_uses_a_separate_process(self):
         fake_process = object()

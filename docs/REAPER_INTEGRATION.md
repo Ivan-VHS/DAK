@@ -56,7 +56,8 @@ The **Reaper** tab offers:
 - opening the Reaper Studio desktop application as a separate process;
 - selecting a local `.rpr` or `.most` file;
 - running the normal parser and static-check command;
-- running focused type diagnostics when the selected Reaper checkout contains that capability.
+- running focused type diagnostics when the selected Reaper checkout contains that capability;
+- selecting one of the 15 first-party Reaper applications, choosing a JSON input, optionally choosing a JSON result file, and running it through the Reaper CLI when the application-suite capability is available.
 
 The panel's source-check operations run on a worker thread, so a large local source file does not block the native window. The result is returned to the UI as bounded text/JSON diagnostics.
 
@@ -78,15 +79,32 @@ duckos reaper --root /path/to/Reaper check ./program.rpr
 
 The `check` command delegates to Reaper's `--check --json` path. The focused `typecheck` command is enabled only when the located checkout contains both the type-checking module and its CLI dispatch. Older pinned checkouts are reported as lacking that capability rather than being treated as if it were present.
 
+The Reaper application suite is exposed only when the located checkout contains its package, manifest, CLI entry point and top-level CLI dispatch. The DuckOS bridge provides:
+- `apps list` and `apps describe <id>` for discovery;
+- `apps run <id> --input <file.json>` for bounded execution;
+- optional `--output <file.json>` for atomic JSON result persistence.
+
+Application input must be a regular non-symlink JSON file no larger than 4 MiB. An output file must use the .json extension, its parent directory must already exist, and it cannot overwrite the input. The bridge starts a fixed argv with `shell=False`, caps the child process at 30 seconds and bounds captured output. The service response is JSON; an application error is returned with a non-zero exit status.
+
+Examples:
+```sh
+duckos reaper apps list
+duckos reaper apps describe telemetry_guard
+duckos reaper apps run telemetry_guard --input ./telemetry.json
+duckos reaper apps run latency_probe --input ./samples.json --output ./reports/latency.json
+```
+
 ## Process and trust boundaries
 
 - Every process is started with a fixed argument list and `shell=False`.
 - The Reaper checkout is discovered from the DuckOS submodule path, `DUCKOS_REAPER_ROOT`, an explicit `--root`, or the current working directory.
 - A selected source must be an existing regular `.rpr` or `.most` file. Symbolic-link sources are rejected by the bridge.
 - Check and typecheck are static operations; they do not execute the selected source program.
+- Application commands invoke only the exact first-party handler registered by Reaper. The DuckOS bridge does not import arbitrary modules or execute caller-selected task callbacks.
 - Check commands have a 30-second timeout and captured output is limited to one million characters per stream.
 - Opening Reaper Studio starts a separate user-space process. Studio's own Run/Debug actions remain explicit user actions.
 - DuckOS does not silently grant Reaper FFI, device access, administrator rights, driver installation, kernel access or filesystem-wide permissions.
+- The application suite is not a privileged OS API: Game Tuner recommends but does not apply scheduler/frame-rate settings; Driver Manifest is read-only; API Gateway plans routing but does not open a listener; DAG Runner plans dependencies but does not run commands; Secret Patrol scans only text supplied in its JSON request.
 - The browser-based Mora shell is not used as a host-process launcher. The actual launch path is the native Duck Desktop panel or the `duckos reaper` command.
 
 This is a native user-space integration surface, not a claim that the DuckOS kernel has already implemented process isolation, a privileged application broker or a hardware compositor.
