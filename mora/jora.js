@@ -158,6 +158,7 @@ export function composeJoraRequest(options = {}) {
     graphPlan: {
       topology: graphTopology,
       topologyLabel: GRAPH_TOPOLOGIES[graphTopology],
+      selectionPolicy: "max_compatibility_then_capability_reuse_then_minimal_planned_nodes",
       variants: graphVariants,
       variation: graphVariation,
       seed: graphSeed || "auto",
