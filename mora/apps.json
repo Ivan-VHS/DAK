@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -64,7 +64,7 @@
     },
     {
       "id": "orriganize",
-      "name": "Orriganize",
+      "name": "ORGze",
       "category": "productivity",
       "panel": "mora/app.js#orriganize",
       "maturity": "partial_local_workspace"
@@ -201,6 +201,18 @@
       "category": "application_catalogue",
       "panel": "mora/app.js#mora-commons",
       "maturity": "implemented_local_catalog"
+    },
+    {
+      "id": "red-sparrow",
+      "name": "Red Sparrow / 赤雀",
+      "category": "creative",
+      "panel": "mora/app.js#red-sparrow",
+      "maturity": "partial_local_workspace",
+      "data_policy": "local_only_user_notes",
+      "locale_profiles": [
+        "ru-RU",
+        "zh-CN"
+      ]
     }
   ],
   "widgets": [
