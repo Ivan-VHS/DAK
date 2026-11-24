@@ -125,6 +125,13 @@ class ExtendedTerminalTests(unittest.TestCase):
         source.write_text(content, encoding="utf-8")
         self.assertEqual(self.terminal._read_json(source, 8192, {})["text"], "[{" * 1000)
 
+    def test_state_reader_handles_escaped_quotes_inside_json_strings(self):
+        source = self.state / "escaped-strings.json"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        value = 'quoted " text with braces { [ ] } and backslash \\ marker'
+        source.write_text(json.dumps({"text": value}), encoding="utf-8")
+        self.assertEqual(self.terminal._read_json(source, 1024, {})["text"], value)
+
     @unittest.skipUnless(hasattr(os, "mkfifo"), "named pipes are POSIX-only")
     def test_state_reader_rejects_fifo_without_blocking(self):
         self.state.mkdir(parents=True)
