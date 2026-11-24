@@ -82,7 +82,7 @@ def _validate_json_depth(raw: str, source_name: str) -> None:
         if in_string:
             if escaped:
                 escaped = False
-            elif character == "\\\\":
+            elif character == "\\":
                 escaped = True
             elif character == '"':
                 in_string = False
