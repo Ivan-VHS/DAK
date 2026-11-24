@@ -50,6 +50,16 @@ class ModuleABITests(unittest.TestCase):
         self.assertEqual(result[0], "m0000")
         self.assertEqual(result[-1], "m1023")
 
+    def test_duplicate_capabilities_are_rejected(self):
+        manifest = {
+            "schema": SCHEMA, "name": "usb", "version": "1.0.0",
+            "architecture": "x86_64", "kernel_abi": "abi-1",
+            "entry_symbol": "usb_init", "dependencies": [],
+            "capabilities": ["bus.usb", "bus.usb"],
+        }
+        with self.assertRaisesRegex(ModuleABIError, "capabilities must be unique"):
+            validate_module(manifest, architecture="x86_64", kernel_abi="abi-1")
+
     def test_unhashable_dependency_values_are_rejected_cleanly(self):
         manifest = {
             "schema": SCHEMA, "name": "usb", "version": "0.1",
