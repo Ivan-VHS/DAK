@@ -350,7 +350,7 @@ function commonsPanelMarkup() {
         componentOptions +
       '</fieldset>' +
       '<div class="jora-settings">' +
-        '<label class="jora-label">Название приложения <input type="text" maxlength="80" data-jora-app-name placeholder="Например, Sonaris" autocomplete="off"></label>' +
+        '<label class="jora-label">Название приложения <input type="text" maxlength="80" pattern="^(?!.*[Jj][Oo][Rr][Aa]).+$" title="Название приложения не должно содержать Jora — это имя платформы" data-jora-app-name placeholder="Например, Sonaris" autocomplete="off"></label>' +
         '<label class="jora-label">Стиль описания <select data-jora-name-style><option value="compact">Краткий</option><option value="balanced" selected>Сбалансированный</option><option value="descriptive">Подробный</option><option value="formula">Формульный</option></select></label>' +
         '<label class="jora-label">Основной язык <select data-jora-preferred><option value="en">English</option><option value="ru" selected>Русский</option><option value="uk">Українська</option><option value="most">MOST</option></select></label>' +
       '</div>' +
