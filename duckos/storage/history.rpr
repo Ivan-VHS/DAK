@@ -5,8 +5,22 @@ export craft record_valid(record) {
     when size(record) != 5 {
         yield false
     }
-    yield record[0] > 0 and record[1] >= 0 and record[1] < record[0]
-        and record[2] != "" and record[3] != ""
+    when record[0] <= 0 {
+        yield false
+    }
+    when record[1] < 0 {
+        yield false
+    }
+    when record[1] >= record[0] {
+        yield false
+    }
+    when record[2] == "" {
+        yield false
+    }
+    when record[3] == "" {
+        yield false
+    }
+    yield true
 }
 
 export craft has_revision(revisions, sought) {
@@ -19,11 +33,22 @@ export craft has_revision(revisions, sought) {
     yield found
 }
 
+export craft revisions(records) {
+    vary result := []
+    each record in records {
+        change result := push(result, record[0])
+    }
+    yield result
+}
+
 export craft history_valid(records) {
     vary seen := []
     vary previous := 0
     each record in records {
-        when not record_valid(record) or record[0] <= previous {
+        when not record_valid(record) {
+            yield false
+        }
+        when record[0] <= previous {
             yield false
         }
         when record[1] != 0 and not has_revision(seen, record[1]) {
@@ -37,13 +62,16 @@ export craft history_valid(records) {
 
 export craft append_revision(records, revision, parent, branch, action, payload) {
     make candidate := [revision, parent, branch, action, payload]
-    when not history_valid(records) or not record_valid(candidate) {
+    when not history_valid(records) {
+        yield ["invalid", records]
+    }
+    when not record_valid(candidate) {
         yield ["invalid", records]
     }
     when has_revision(records, revision) {
         yield ["duplicate", records]
     }
-    when parent != 0 and not has_revision(records, parent) {
+    when parent != 0 and not has_revision(revisions(records), parent) {
         yield ["missing-parent", records]
     }
     yield ["appended", push(records, candidate)]
@@ -62,16 +90,14 @@ export craft checkout(records, revision) {
 }
 
 export craft branch_from(records, parent_revision, new_branch) {
-    when new_branch == "" or not has_revision(revisions(records), parent_revision) {
+    when new_branch == "" {
+        yield "invalid"
+    }
+    when not history_valid(records) {
+        yield "invalid"
+    }
+    when not has_revision(revisions(records), parent_revision) {
         yield "invalid"
     }
     yield "ready"
-}
-
-export craft revisions(records) {
-    vary result := []
-    each record in records {
-        change result := push(result, record[0])
-    }
-    yield result
 }
