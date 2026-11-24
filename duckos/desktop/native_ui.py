@@ -7,6 +7,7 @@ import subprocess
 import sys
 import threading
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 from typing import Any, Callable
@@ -173,6 +174,13 @@ class DesktopWindow:
         ttk.Button(actions, text="Проверить", command=self._check_reaper_source).pack(side="left")
         ttk.Button(actions, text="Проверить типы", command=self._typecheck_reaper_source).pack(side="left", padx=8)
 
+        extended_actions = ttk.Frame(tab)
+        extended_actions.pack(fill="x", pady=(0, 10))
+        ttk.Button(extended_actions, text="Граф модулей", command=self._inspect_reaper_modules).pack(side="left")
+        ttk.Button(extended_actions, text="Запустить программу", command=self._run_reaper_source).pack(side="left", padx=8)
+        ttk.Button(extended_actions, text="Собрать native AOT", command=self._build_reaper_native).pack(side="left")
+        ttk.Button(extended_actions, text="Инвентаризация toolchain", command=self._inspect_reaper_toolchain).pack(side="left", padx=8)
+
         ttk.Label(
             tab,
             text="Результаты проверки · JSON / диагностика",
@@ -215,6 +223,12 @@ class DesktopWindow:
             "native_studio": "native Studio",
             "static_typecheck": "static type analysis",
             "native_aot_subset": "experimental native AOT",
+            "language_server": "LSP",
+            "debug_adapter": "DAP",
+            "toolchain_inventory": "toolchain inventory",
+            "embedded_tooling": "embedded tools",
+            "polyglot_tooling": "polyglot tools",
+            "qcs_frontend": "QCS frontend",
         }
         available = ", ".join(labels[item] for item in capabilities if item in labels)
         self.reaper_status.set("REAPER · доступен")
@@ -239,12 +253,14 @@ class DesktopWindow:
     def _start_reaper_task(
         self,
         label: str,
-        operation: Callable[[], dict[str, Any]],
+        operation: Callable[[Path | None], dict[str, Any]],
+        *,
+        needs_source: bool = True,
     ) -> None:
         if self._reaper_busy:
             messagebox.showinfo("Reaper", "Предыдущая проверка ещё выполняется.", parent=self.root)
             return
-        if self.reaper_source is None:
+        if needs_source and self.reaper_source is None:
             self._choose_reaper_source()
             if self.reaper_source is None:
                 return
@@ -255,7 +271,7 @@ class DesktopWindow:
 
         def worker() -> None:
             try:
-                result = operation()
+                result = operation(source)
                 self._reaper_queue.put((label, result, None))
             except (OSError, ValueError, RuntimeError, ReaperIntegrationError) as error:
                 self._reaper_queue.put((label, None, str(error)))
@@ -271,13 +287,80 @@ class DesktopWindow:
     def _check_reaper_source(self) -> None:
         self._start_reaper_task(
             "Проверка",
-            lambda: self.reaper.check(self.reaper_source),
+            lambda source: self.reaper.check(source),
         )
 
     def _typecheck_reaper_source(self) -> None:
         self._start_reaper_task(
             "Анализ типов",
-            lambda: self.reaper.typecheck(self.reaper_source),
+            lambda source: self.reaper.typecheck(source),
+        )
+
+    def _inspect_reaper_modules(self) -> None:
+        self._start_reaper_task(
+            "Граф модулей",
+            lambda source: self.reaper.module_graph(source),
+        )
+
+    def _run_reaper_source(self) -> None:
+        if self.reaper_source is None:
+            self._choose_reaper_source()
+            if self.reaper_source is None:
+                return
+        approved = messagebox.askyesno(
+            "Запуск программы Reaper",
+            "Будет выполнен выбранный локальный исходный файл. Интерпретатор применяет "
+            "лимиты шагов, коллекций, текста и управляемой памяти, но это не системная "
+            "песочница DuckOS. Native FFI не включается. Продолжить?",
+            parent=self.root,
+        )
+        if not approved:
+            return
+        self._start_reaper_task(
+            "Запуск",
+            lambda source: self.reaper.run(source),
+        )
+
+    def _build_reaper_native(self) -> None:
+        if self.reaper_source is None:
+            self._choose_reaper_source()
+            if self.reaper_source is None:
+                return
+        default_name = "reaper-program.exe" if sys.platform == "win32" else "reaper-program"
+        filename = filedialog.asksaveasfilename(
+            parent=self.root,
+            title="Сохранить native executable",
+            initialfile=default_name,
+            defaultextension=".exe" if sys.platform == "win32" else "",
+            filetypes=[("Native executable", "*.exe" if sys.platform == "win32" else "*")],
+        )
+        if not filename:
+            return
+        destination = Path(filename)
+        if destination.exists() and not messagebox.askyesno(
+            "Перезапись файла",
+            f"Файл уже существует. Перезаписать {destination.name}?",
+            parent=self.root,
+        ):
+            return
+        approved = messagebox.askyesno(
+            "Экспериментальная native AOT-сборка",
+            "Reaper проверит поддерживаемое подмножество и запустит выбранный C17-компилятор "
+            "для создания host executable. Полученный файл автоматически запускаться не будет. Продолжить?",
+            parent=self.root,
+        )
+        if not approved:
+            return
+        self._start_reaper_task(
+            "Native AOT",
+            lambda source: self.reaper.native_build(source, destination),
+        )
+
+    def _inspect_reaper_toolchain(self) -> None:
+        self._start_reaper_task(
+            "Инвентаризация toolchain",
+            lambda _source: self.reaper.toolchain_inventory(),
+            needs_source=False,
         )
 
     def _poll_reaper_queue(self) -> None:
