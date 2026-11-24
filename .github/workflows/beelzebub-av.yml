@@ -39,6 +39,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Reconstruct and verify the source bundle
         run: ./scripts/unpack-beelzebub-av-source.sh
+      - name: Publish reconstructed Java scanner source for integration review
+        uses: actions/upload-artifact@v4
+        with:
+          name: beelzebub-java-core-source
+          path: security/beelzebub-av/
+          if-no-files-found: error
+          retention-days: 3
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -53,13 +60,6 @@ jobs:
       - name: Verify CLI entry point
         working-directory: security/beelzebub-av
         run: java -jar target/beelzebub-av-0.1.0-SNAPSHOT.jar version
-      - name: Publish reconstructed Java scanner source for integration review
-        uses: actions/upload-artifact@v4
-        with:
-          name: beelzebub-java-core-source
-          path: security/beelzebub-av/
-          if-no-files-found: error
-          retention-days: 3
 
   duckos-bridge:
     name: DuckOS process bridge tests
