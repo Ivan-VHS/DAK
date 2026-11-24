@@ -30,7 +30,7 @@ class ApplicationCatalogTests(unittest.TestCase):
         expected = {
             "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
             "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "gazette", "gazette",
+            "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "gazette",
         }
         actual = {item["id"] for item in self.catalog["applications"]}
         self.assertEqual(actual, expected)
