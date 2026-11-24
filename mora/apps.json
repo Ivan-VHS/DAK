@@ -231,10 +231,10 @@
       "maturity": "partial_browser_app_local_data"
     },
     {
-      "id": "relay",
-      "name": "Relay",
+      "id": "voxera",
+      "name": "Voxera",
       "category": "communication",
-      "panel": "mora/app.js#relay",
+      "panel": "mora/app.js#voxera",
       "maturity": "partial_browser_app_local_data"
     },
     {
