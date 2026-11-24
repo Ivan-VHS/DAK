@@ -68,7 +68,8 @@ export function createDefaultConcreteThumpProfile() {
       "funeral"
     ],
     sampleTreatment: "chopped-call-response",
-    samples: []
+    samples: [],
+    sequence: Object.fromEntries(SEQUENCE_TRACKS.map((track) => [track, [...DEFAULT_SEQUENCE[track]]]))
   };
 }
 
