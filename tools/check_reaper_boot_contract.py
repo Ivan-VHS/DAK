@@ -48,8 +48,8 @@ def verify(reaper_root: Path, c_harness: Path) -> dict[str, object]:
     harness = c_harness.expanduser().resolve(strict=True)
     if not root.is_dir() or not (root / "reaper" / "__main__.py").is_file():
         raise ContractCheckError("Reaper root is not a valid source checkout")
-    if not harness.is_file() or not os.access(harness, os.X_OK):
-        raise ContractCheckError("C conformance harness is not an executable file")
+    if not harness.is_file():
+        raise ContractCheckError("C conformance harness does not exist")
 
     relative_source = Path("targets") / "duckos" / "boot_contract_v1.rpr"
     source = root / relative_source
