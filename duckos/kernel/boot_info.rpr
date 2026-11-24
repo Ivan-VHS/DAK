@@ -1,0 +1,94 @@
+# Reaper value-level mirror of DuckOS boot-info v1 validation.
+# This validates decoded records; it does not map or dereference physical addresses.
+# The C11 adapter remains the native handoff validator until a freestanding Reaper
+# backend and the bootloader/kernel boundary have been qualified.
+
+make max_u64 := 18446744073709551615
+make boot_info_v1_size := 88
+
+export craft range_valid(base, length) {
+    when base < 0 or base > max_u64 or length <= 0 or length > max_u64 {
+        yield false
+    }
+    yield base <= max_u64 - length
+}
+
+export craft framebuffer_valid(base, bytes, width, height, pitch, bpp) {
+    make any_field := base != 0 or bytes != 0 or width != 0 or height != 0 or pitch != 0 or bpp != 0
+    when not any_field {
+        yield true
+    }
+
+    when base == 0 or bytes == 0 or width == 0 or height == 0 or pitch == 0 {
+        yield false
+    }
+    when bpp != 16 and bpp != 24 and bpp != 32 {
+        yield false
+    }
+
+    make bytes_per_pixel := bpp // 8
+    make minimum_pitch := width * bytes_per_pixel
+    when pitch < minimum_pitch {
+        yield false
+    }
+
+    make required_size := pitch * height
+    when required_size > bytes {
+        yield false
+    }
+    yield range_valid(base, bytes)
+}
+
+export craft validate(info, regions) {
+    when size(info) != 15 or size(regions) == 0 or size(regions) > 256 {
+        yield "invalid-argument"
+    }
+    when info[0] < boot_info_v1_size or info[1] != 1 {
+        yield "unsupported-version"
+    }
+    when info[13] != size(regions) {
+        yield "invalid-memory-map"
+    }
+    when not range_valid(info[3], info[4]) {
+        yield "invalid-kernel-range"
+    }
+
+    when (info[5] == 0) != (info[6] == 0) {
+        yield "invalid-initramfs-range"
+    }
+    when info[6] != 0 and not range_valid(info[5], info[6]) {
+        yield "invalid-initramfs-range"
+    }
+
+    when not framebuffer_valid(info[7], info[8], info[9], info[10], info[11], info[12]) {
+        yield "invalid-framebuffer"
+    }
+
+    vary previous_end := 0
+    vary first_region := true
+    each region in regions {
+        when size(region) != 4 {
+            yield "invalid-memory-map"
+        }
+        when region[2] < 1 or region[2] > 6 {
+            yield "invalid-memory-map"
+        }
+        when not range_valid(region[0], region[1]) {
+            yield "invalid-memory-map"
+        }
+        when not first_region and region[0] < previous_end {
+            yield "invalid-memory-map"
+        }
+        change previous_end := region[0] + region[1]
+        change first_region := false
+    }
+
+    when info[6] != 0 {
+        make kernel_end := info[3] + info[4]
+        make initramfs_end := info[5] + info[6]
+        when info[3] < initramfs_end and info[5] < kernel_end {
+            yield "overlapping-images"
+        }
+    }
+    yield "ok"
+}
