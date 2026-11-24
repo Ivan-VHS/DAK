@@ -247,6 +247,8 @@ class DesktopWindow:
         if not state["available"]:
             self.reaper_status.set("REAPER · checkout не найден")
             self.reaper_location.set(state["message"])
+            if self.jora_build_button is not None:
+                self.jora_build_button.state(["disabled"])
             self._append_reaper_output(state["message"])
             return
 
