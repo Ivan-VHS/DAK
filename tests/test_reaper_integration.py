@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from duckos.desktop.reaper import MAX_OUTPUT_CHARS, ReaperIntegrationError, ReaperWorkbench
+from duckos.desktop.reaper import MAX_OUTPUT_BYTES, ReaperIntegrationError, ReaperWorkbench
 
 
 class FakeProcess:
@@ -275,12 +275,12 @@ class ReaperWorkbenchTests(unittest.TestCase):
 
 
     def test_output_capture_is_bounded_before_text_decoding(self):
-        large_output = "x" * (MAX_OUTPUT_CHARS + 4096)
+        large_output = "x" * (MAX_OUTPUT_BYTES + 4096)
         process = FakeProcess(stdout=large_output)
         with patch("duckos.desktop.reaper.subprocess.Popen", return_value=process):
             result = self.workbench.check(self.source)
         self.assertTrue(result["truncated"])
-        self.assertEqual(len(result["stdout"].encode("utf-8")), MAX_OUTPUT_CHARS)
+        self.assertEqual(len(result["stdout"].encode("utf-8")), MAX_OUTPUT_BYTES)
 
     def test_capability_status_matches_the_versioned_duckos_contract(self):
         schema_path = Path(__file__).resolve().parents[1] / "schemas" / "reaper-workbench.v1.schema.json"
