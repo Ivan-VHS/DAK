@@ -56,6 +56,12 @@ test("Mora Boost can be opened through the bounded intent allowlist", () => {
   assert.deepEqual(plan.actions.map((action) => action.appId), ["mora-boost"]);
 });
 
+test("Concrete Thump can be opened through the bounded intent allowlist", () => {
+  const plan = buildIntentPlan("открой Concrete Thump");
+  assert.equal(plan.ok, true);
+  assert.deepEqual(plan.actions.map((action) => action.appId), ["concrete-thump"]);
+});
+
 test("preferences are validated and saved without trusting arbitrary values", () => {
   const storage = new MemoryStorage();
   const settings = createDefaultPreferences();

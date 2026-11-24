@@ -821,3 +821,233 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
 input[type="range"] { accent-color: #FFD400; }
 .theme-control { color: #FFD400; }
 .extension-theme-options { display: none; }
+
+
+/* Concrete Thump: local East Slavic ritual sample workspace. */
+.concrete-thump-panel {
+  display: grid;
+  gap: 18px;
+  max-width: 980px;
+}
+.concrete-thump-panel .window-heading {
+  margin-bottom: 0;
+}
+.concrete-thump-section {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,.025);
+}
+.concrete-thump-section h3 {
+  margin: 0;
+  color: var(--mora-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+.concrete-control-label,
+.concrete-sample-card label {
+  display: grid;
+  gap: 6px;
+  color: var(--mora-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+.concrete-thump-section select,
+.concrete-sample-card input,
+.concrete-sample-card select {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--mora-border);
+  border-radius: 9px;
+  background: var(--mora-surface);
+  color: var(--mora-text);
+  font: inherit;
+}
+.ritual-source-groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.ritual-source-groups > div {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--mora-border);
+  border-radius: 12px;
+}
+.ritual-source-groups strong {
+  margin-bottom: 3px;
+  color: var(--mora-text);
+  font-size: 11px;
+}
+.ritual-source {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mora-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+.ritual-source input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--mora-brand);
+}
+.concrete-thump-panel .extension-range-row {
+  margin: 0;
+}
+.concrete-sample-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.concrete-sample-card {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--mora-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+}
+.concrete-sample-card > strong {
+  overflow-wrap: anywhere;
+  color: var(--mora-text);
+  font-size: 12px;
+}
+.concrete-sample-meta,
+.concrete-sample-empty {
+  color: var(--mora-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.concrete-sample-card audio {
+  width: 100%;
+  min-height: 36px;
+}
+.concrete-sample-card label {
+  max-width: 100%;
+}
+.concrete-sample-card input,
+.concrete-sample-card select {
+  min-width: 0;
+  font-size: 11px;
+}
+.concrete-prompt {
+  width: 100%;
+  min-height: 118px;
+  padding: 12px;
+  resize: vertical;
+  border: 1px solid var(--mora-border);
+  border-radius: 11px;
+  background: #080808;
+  color: var(--mora-text);
+  font: 11px/1.6 ui-monospace, "Cascadia Code", "Consolas", monospace;
+}
+.concrete-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.concrete-export-actions button {
+  min-height: 38px;
+}
+@media (max-width: 720px) {
+  .ritual-source-groups {
+    grid-template-columns: 1fr;
+  }
+  .concrete-thump-section {
+    padding: 12px;
+  }
+  .concrete-export-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .concrete-thump-panel *,
+  .concrete-thump-panel *::before,
+  .concrete-thump-panel *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+
+.concrete-sequencer {
+  display: grid;
+  gap: 12px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.concrete-sequencer h3 {
+  margin: 0;
+  color: var(--mora-text);
+  font-size: 13px;
+}
+.sequence-track {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 620px;
+}
+.sequence-track > strong {
+  color: var(--mora-secondary);
+  font-size: 10px;
+  font-weight: 650;
+}
+.sequence-step-grid {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 4px;
+}
+.sequence-step {
+  min-width: 0;
+  min-height: 29px;
+  padding: 3px 0;
+  border: 1px solid var(--mora-border);
+  border-radius: 6px;
+  background: #111111;
+  color: var(--mora-muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.sequence-step:nth-child(4n + 1) {
+  border-left-color: var(--mora-brand);
+}
+.sequence-step.active {
+  border-color: var(--mora-brand);
+  background: var(--mora-brand);
+  color: #080808;
+  font-weight: 800;
+}
+.sequence-step:focus-visible {
+  outline: 2px solid var(--mora-focus);
+  outline-offset: 2px;
+}
+.sequence-step[aria-pressed="true"]::after {
+  content: "";
+}
+.concrete-playback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.concrete-playback-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+@media (max-width: 560px) {
+  .sequence-track {
+    grid-template-columns: 78px minmax(540px, 1fr);
+  }
+}

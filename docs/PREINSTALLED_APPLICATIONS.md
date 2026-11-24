@@ -25,7 +25,7 @@ The machine-readable inventory is maintained in [`preinstalled-applications.v1.j
 | **Orriganize** | Projects and tasks | Keep lightweight local project and task lists |
 | **Abriganza** | Archive inspection | Read selected archive name, format and size without extraction |
 | **Olaab** | Media collections | Organize local album labels and text references to media |
-| **Concrete Thump** | Rhythm planning | Create BPM and swing profiles for later manual use |
+| **Concrete Thump** | Rhythm planning and ritual sample preparation | Build tempo/swing profiles, classify Orthodox chant and East Slavic ritual sources, audition selected local audio, export a production prompt and a Reaper timing worksheet |
 | **Seu-Beu** | Sharing review | Check recipient, selected content and retention before a hand-off |
 | **Love-IL** | Private journal | Keep personal text notes in the local browser profile |
 | **Poi** | Quick capture | Save short notes for later sorting |
@@ -178,7 +178,7 @@ The following scope is intentionally modest because these 13 names arrived witho
 | Orriganize | Add and remove project/task text entries | Browser-profile storage only; no system scheduler or sync |
 | Abriganza | Inspect selected archive filename, extension and size | No extraction, malware scanning or execution |
 | Olaab | Local album and media-collection labels | Stores text references, not media files |
-| Concrete Thump | BPM and swing controls with saved local profiles | No audio synthesis, recording or device routing |
+| Concrete Thump | BPM/swing profiles, separate Orthodox and East Slavic source selections, bounded local audio import and preview, a 16-step kick/snare/hat/808/choir sequencer, synthesized drum playback, local choir chops, four-bar WAV render, sample-credit/rights metadata, 500-character prompt, JSON and Reaper timing exports | Browser-local Web Audio workflow only; audio bytes remain in the current session; no native audio driver, system mixer, device routing, MIDI or full multitrack DAW |
 | Seu-Beu | Manual checklist before sharing selected material | Not encryption, recipient authentication or OS security |
 | Love-IL | Local personal text entries | No cloud sync or secure-vault claim |
 | Poi | Quick text capture | No system-wide search or global shortcut |

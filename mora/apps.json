@@ -88,7 +88,7 @@
       "name": "Concrete Thump",
       "category": "audio",
       "panel": "mora/app.js#concrete-thump",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_audio_sample_workflow"
     },
     {
       "id": "seu-beu",
@@ -274,7 +274,7 @@
     {
       "id": "rhythm-profile-store",
       "maturity": "partial",
-      "scope": "Local BPM and swing profiles only; no audio engine or device routing."
+      "scope": "Validated local BPM/swing profiles and 16-step sequence, bounded in-browser audio sample preview/chopping, synthesized kick/snare/hi-hat/808 playback, four-bar WAV rendering, sample provenance metadata, 500-character production prompt export, and Reaper timing-helper export; no native audio driver, system mixer, MIDI routing or multitrack DAW."
     },
     {
       "id": "setup-preferences",

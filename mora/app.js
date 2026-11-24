@@ -12,6 +12,22 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
+import {
+  CHANT_SOURCE_LABELS,
+  buildConcreteThumpPrompt,
+  createReaperGridSource,
+  loadConcreteThumpProfile,
+  normalizeConcreteThumpProfile,
+  saveConcreteThumpProfile,
+  validateAudioSampleFile
+} from "./concrete-thump.js";
+
+import {
+  playConcreteThump,
+  renderConcreteThumpWav,
+  stopConcreteThump
+} from "./concrete-thump-audio.js";
+
 const DUCK_ACCENT = "#FFD400";
 
 const appDefinitions = {
@@ -27,7 +43,7 @@ const appDefinitions = {
   orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: DUCK_ACCENT, glyph: "▦" },
   abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: DUCK_ACCENT, glyph: "▤" },
   olaab: { name: "Olaab", subtitle: "Медиатека", color: DUCK_ACCENT, glyph: "◈" },
-  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: DUCK_ACCENT, glyph: "♫" },
+  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритуальный Trap-секвенсор", color: DUCK_ACCENT, glyph: "♫" },
   "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: DUCK_ACCENT, glyph: "◇" },
   "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: DUCK_ACCENT, glyph: "♡" },
   poi: { name: "Poi", subtitle: "Быстрые заметки", color: DUCK_ACCENT, glyph: "⌖" },
@@ -45,6 +61,8 @@ const appDefinitions = {
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
   "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
 };
+
+const concreteThumpSessions = new WeakMap();
 
 const windowLayer = document.getElementById("window-layer");
 const activeAppLabel = document.getElementById("active-app");
@@ -279,19 +297,65 @@ function extensionPanelMarkup(appId) {
     case "olaab":
       return localCollectionPanel("olaab","OLAAB · МЕДИАТЕКА","Подборки и медиатеги","Создавайте названия альбомов и подборок. Здесь сохраняются текстовые ссылки и метки, а не сами медиафайлы.","Название альбома или подборки","Новая подборка");
     case "concrete-thump": {
-      let bpm = 150, swing = 57;
-      try {
-        const saved = JSON.parse(localStorage.getItem("duckos.mora.concrete-thump.v1") || "null");
-        if (saved && Number.isInteger(saved.bpm) && saved.bpm >= 40 && saved.bpm <= 240 &&
-            Number.isInteger(saved.swing) && saved.swing >= 50 && saved.swing <= 75) ({bpm,swing} = saved);
-      } catch {}
-      return '<p class="window-kicker">CONCRETE THUMP · RHYTHM LAB</p><h2 class="window-heading">Ритмический профиль</h2>' +
-        '<div class="extension-range-row"><div class="extension-range-heading"><label for="beat-bpm">Темп</label><output data-beat-value="bpm">' + bpm + ' BPM</output></div>' +
-        '<input id="beat-bpm" type="range" min="40" max="240" value="' + bpm + '" data-beat-range="bpm"></div>' +
-        '<div class="extension-range-row"><div class="extension-range-heading"><label for="beat-swing">Swing</label><output data-beat-value="swing">' + swing + '%</output></div>' +
-        '<input id="beat-swing" type="range" min="50" max="75" value="' + swing + '" data-beat-range="swing"></div>' +
+      const profile = loadConcreteThumpProfile();
+      const sourceOption = (id) =>
+        '<label class="ritual-source"><input type="checkbox" data-chant-source value="' + id + '"' +
+        (profile.chantSources.includes(id) ? ' checked' : '') + '>' + CHANT_SOURCE_LABELS[id] + '</label>';
+      return '<div class="concrete-thump-panel">' +
+        '<p class="window-kicker">CONCRETE THUMP · RITUAL TRAP LAB</p>' +
+        '<h2 class="window-heading">Восточнославянский ритуальный Trap</h2>' +
+        '<p class="window-copy">Тяжёлый современный Trap · 160 BPM · православные хоровые распевы и восточнославянские обрядовые песни. Источники остаются отдельными культурными слоями.</p>' +
+        '<section class="concrete-thump-section"><h3>Вокальная традиция</h3>' +
+        '<label class="concrete-control-label" for="ritual-tradition">Основа аранжировки</label>' +
+        '<select id="ritual-tradition" data-ritual-control="tradition">' +
+        '<option value="layered"' + (profile.vocalTradition === "layered" ? ' selected' : '') + '>Смешанная аранжировка · традиции раздельны</option>' +
+        '<option value="orthodox-liturgical"' + (profile.vocalTradition === "orthodox-liturgical" ? ' selected' : '') + '>Православный литургический хор</option>' +
+        '<option value="east-slavic-folk"' + (profile.vocalTradition === "east-slavic-folk" ? ' selected' : '') + '>Восточнославянские народные и сезонные песни</option>' +
+        '</select>' +
+        '<div class="ritual-source-groups"><div><strong>Церковные распевы</strong>' +
+        sourceOption("znamenny") + sourceOption("byzantine-slavic") + '</div>' +
+        '<div><strong>Календарные и сезонные песни</strong>' +
+        sourceOption("kolyadky") + sourceOption("vesnyanky") + sourceOption("kupala") + sourceOption("harvest") + '</div>' +
+        '<div><strong>Обрядовый фольклор</strong>' +
+        sourceOption("wedding") + sourceOption("funeral") + '</div></div>' +
+        '<label class="concrete-control-label" for="sample-treatment">Обработка хора</label>' +
+        '<select id="sample-treatment" data-ritual-control="treatment">' +
+        '<option value="chopped-call-response"' + (profile.sampleTreatment === "chopped-call-response" ? ' selected' : '') + '>Ритмическая нарезка и call-and-response</option>' +
+        '<option value="long-choir-beds"' + (profile.sampleTreatment === "long-choir-beds" ? ' selected' : '') + '>Длинные хоровые подложки и отдельные chops</option>' +
+        '<option value="granular-fragments"' + (profile.sampleTreatment === "granular-fragments" ? ' selected' : '') + '>Короткие гранулярные вокальные фрагменты</option>' +
+        '</select></section>' +
+        '<section class="concrete-thump-section"><h3>Ритмика</h3>' +
+        '<div class="extension-range-row"><div class="extension-range-heading"><label for="beat-bpm">Темп</label><output data-beat-value="bpm">' + profile.bpm + ' BPM</output></div>' +
+        '<input id="beat-bpm" type="range" min="40" max="240" value="' + profile.bpm + '" data-beat-range="bpm"></div>' +
+        '<div class="extension-range-row"><div class="extension-range-heading"><label for="beat-swing">MPC swing</label><output data-beat-value="swing">' + profile.swing + '%</output></div>' +
+        '<input id="beat-swing" type="range" min="50" max="75" value="' + profile.swing + '" data-beat-range="swing"></div>' +
+        '<p class="window-copy">Тяжёлый низ, жёсткий kick/snare, дробные hi-hat rolls, triplet bursts, синкопы и динамические паузы.</p>' +
+        '<div class="concrete-sequencer"><h3>Секвенсор · 16 шагов</h3>' + concreteSequenceMarkup(profile) + '</div>' +
+        '<div class="concrete-playback-actions">' +
+        '<button class="action-button" data-action="play-beat">Прослушать 4 такта</button>' +
+        '<button class="subtle-button" data-action="stop-beat" disabled>Остановить</button>' +
+        '<button class="subtle-button" data-action="export-beat-wav">Рендер WAV</button>' +
+        '</div>' +
+        '<p class="window-copy">Секвенсор синтезирует kick, snare, hi-hat и 808 в браузере. Хоровая дорожка режет выбранную запись на фрагменты; для работы нужен хотя бы один импортированный файл.</p>' +
+        '</section>' +
+        '<section class="concrete-thump-section"><h3>Локальные хоровые сэмплы</h3>' +
+        '<p class="window-copy">Импортируйте собственные, лицензированные или общественно-доступные записи. Предпрослушивание выполняется в браузере; файлы не отправляются в сеть.</p>' +
+        '<label class="file-picker">Добавить аудиофайлы<input type="file" data-choir-samples multiple accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a,.aac,.aiff,.opus,.webm"></label>' +
+        '<label class="concrete-control-label" for="choir-playback-source">Хоровой источник для секвенсора</label>' +
+        '<select id="choir-playback-source" data-choir-playback-source><option value="">Нет сэмпла</option></select>' +
+        '<ul class="concrete-sample-list" data-choir-sample-list aria-live="polite"></ul>' +
+        '<div class="approval-actions"><button class="subtle-button" data-action="clear-choir-samples">Очистить список</button></div>' +
+        '</section>' +
+        '<section class="concrete-thump-section"><h3>Промпт производства</h3>' +
+        '<textarea class="concrete-prompt" data-concrete-prompt rows="5" readonly aria-label="Сформированный промпт до 500 символов"></textarea>' +
+        '<div class="concrete-export-actions">' +
         '<button class="action-button" data-action="save-beat-profile">Сохранить профиль</button>' +
-        '<p class="extension-status" data-beat-status>Локальные параметры. Генерация и воспроизведение аудио не подключены.</p>';
+        '<button class="subtle-button" data-action="export-beat-profile">Экспорт JSON</button>' +
+        '<button class="subtle-button" data-action="export-prompt">Экспорт промпта</button>' +
+        '<button class="subtle-button" data-action="export-reaper-grid">Экспорт сетки Reaper</button>' +
+        '</div>' +
+        '<p class="extension-status" data-beat-status>Профиль хранится локально. В JSON сохраняются параметры и метаданные, но не сами аудиофайлы.</p>' +
+        '</section></div>';
     }
     case "seu-beu":
       return '<p class="window-kicker">SEU-BEU · SHARE REVIEW</p><h2 class="window-heading">Проверка перед обменом</h2>' +
@@ -502,6 +566,26 @@ function initializeCommonsPanel(appWindow) {
   renderGrid();
 }
 
+const CONCRETE_SEQUENCE_TRACKS = [
+  ["kick", "Kick"],
+  ["snare", "Snare / clap"],
+  ["hat", "Hi-hats"],
+  ["bass", "808"],
+  ["choir", "Choir chops"]
+];
+
+function concreteSequenceMarkup(profile) {
+  return CONCRETE_SEQUENCE_TRACKS.map(([track, label]) => {
+    const steps = profile.sequence[track].map((active, index) =>
+      '<button type="button" class="sequence-step' + (active ? ' active' : '') +
+      '" data-sequence-step="' + index + '" aria-label="' + label + ', шаг ' + (index + 1) +
+      '" aria-pressed="' + String(active) + '">' + (index + 1) + '</button>'
+    ).join("");
+    return '<div class="sequence-track" data-sequence-track="' + track + '">' +
+      '<strong>' + label + '</strong><div class="sequence-step-grid">' + steps + '</div></div>';
+  }).join("");
+}
+
 function panelMarkup(appId) {
   switch (appId) {
     case "cockos":
@@ -698,6 +782,7 @@ function openApp(appId) {
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
+  if (appId === "concrete-thump") initializeConcreteThumpPanel(appWindow);
   if (appId === "mora-commons") initializeCommonsPanel(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
@@ -710,8 +795,186 @@ function openApp(appId) {
   showToast(definition.name + " открыто");
 }
 
+function initializeConcreteThumpPanel(owner) {
+  sampleSession(owner);
+  renderConcreteThumpSamples(owner);
+  refreshConcreteThumpPrompt(owner);
+}
+
+function sampleSession(owner) {
+  let samples = concreteThumpSessions.get(owner);
+  if (!samples) {
+    samples = loadConcreteThumpProfile().samples.map((sample) => ({
+      ...sample,
+      file: null,
+      url: null
+    }));
+    concreteThumpSessions.set(owner, samples);
+  }
+  return samples;
+}
+
+function renderConcreteThumpSamples(owner) {
+  const list = owner.querySelector("[data-choir-sample-list]");
+  if (!list) return;
+  const samples = sampleSession(owner);
+  list.replaceChildren();
+  const sourceSelect = owner.querySelector("[data-choir-playback-source]");
+  if (sourceSelect) {
+    const selected = sourceSelect.value;
+    sourceSelect.replaceChildren();
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "Нет сэмпла";
+    sourceSelect.append(empty);
+    samples.forEach((sample, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = sample.name;
+      sourceSelect.append(option);
+    });
+    if (samples.some((sample, index) => String(index) === selected)) sourceSelect.value = selected;
+    else if (samples.length) sourceSelect.value = "0";
+  }
+
+  if (!samples.length) {
+    const empty = document.createElement("li");
+    empty.className = "concrete-sample-empty";
+    empty.textContent = "Сэмплы ещё не добавлены.";
+    list.append(empty);
+    return;
+  }
+
+  samples.forEach((sample, index) => {
+    const item = document.createElement("li");
+    item.className = "concrete-sample-card";
+    item.dataset.sampleIndex = String(index);
+
+    const heading = document.createElement("strong");
+    heading.textContent = sample.name;
+    const details = document.createElement("span");
+    details.className = "concrete-sample-meta";
+    details.textContent = (sample.type || "audio") + " · " +
+      Number(sample.size || 0).toLocaleString("ru-RU") + " байт";
+    item.append(heading, details);
+
+    if (sample.url) {
+      const player = document.createElement("audio");
+      player.controls = true;
+      player.preload = "metadata";
+      player.src = sample.url;
+      player.setAttribute("aria-label", "Предпрослушать " + sample.name);
+      item.append(player);
+    } else {
+      const note = document.createElement("span");
+      note.className = "concrete-sample-meta";
+      note.textContent = "Метаданные сохранены. Для предпрослушивания выберите файл повторно.";
+      item.append(note);
+    }
+
+    const creditLabel = document.createElement("label");
+    creditLabel.textContent = "Источник / автор";
+    const credit = document.createElement("input");
+    credit.type = "text";
+    credit.maxLength = 200;
+    credit.placeholder = "Источник, автор или ссылка на лицензию";
+    credit.value = sample.credit || "";
+    credit.dataset.sampleCredit = "";
+    creditLabel.append(credit);
+
+    const rightsLabel = document.createElement("label");
+    rightsLabel.textContent = "Основание использования";
+    const rights = document.createElement("select");
+    rights.dataset.sampleRights = "";
+    [
+      ["unspecified", "Не указано"],
+      ["user-owned", "Моя запись"],
+      ["public-domain", "Общественное достояние"],
+      ["licensed", "Лицензия"],
+      ["permission-granted", "Есть разрешение"]
+    ].forEach(([value, label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      rights.append(option);
+    });
+    rights.value = sample.rights || "unspecified";
+    rightsLabel.append(rights);
+    item.append(creditLabel, rightsLabel);
+    list.append(item);
+  });
+}
+
+function collectConcreteThumpProfile(owner) {
+  const base = loadConcreteThumpProfile();
+  const samples = sampleSession(owner).map((sample, index) => {
+    const item = owner.querySelector('[data-sample-index="' + index + '"]');
+    return {
+      name: sample.name,
+      type: sample.type || "",
+      size: Number(sample.size || 0),
+      credit: item ? item.querySelector("[data-sample-credit]").value : (sample.credit || ""),
+      rights: item ? item.querySelector("[data-sample-rights]").value : (sample.rights || "unspecified")
+    };
+  });
+  return normalizeConcreteThumpProfile({
+    ...base,
+    bpm: Number(owner.querySelector('[data-beat-range="bpm"]').value),
+    swing: Number(owner.querySelector('[data-beat-range="swing"]').value),
+    vocalTradition: owner.querySelector('[data-ritual-control="tradition"]').value,
+    sampleTreatment: owner.querySelector('[data-ritual-control="treatment"]').value,
+    chantSources: Array.from(owner.querySelectorAll("[data-chant-source]:checked"), (input) => input.value),
+    samples,
+    sequence: Object.fromEntries(Array.from(owner.querySelectorAll("[data-sequence-track]"), (row) => [
+      row.dataset.sequenceTrack,
+      Array.from(row.querySelectorAll("[data-sequence-step]"), (button) =>
+        button.getAttribute("aria-pressed") === "true"
+      )
+    ]))
+  });
+}
+
+function selectedConcreteThumpFile(owner) {
+  const picker = owner.querySelector("[data-choir-playback-source]");
+  if (!picker || picker.value === "") return null;
+  const sample = sampleSession(owner)[Number(picker.value)];
+  return sample && sample.file ? sample.file : null;
+}
+
+function refreshConcreteThumpPrompt(owner) {
+  if (!owner) return;
+  const output = owner.querySelector("[data-concrete-prompt]");
+  if (!output) return;
+  output.value = buildConcreteThumpPrompt(collectConcreteThumpProfile(owner));
+}
+
+function releaseConcreteThumpSamples(owner) {
+  const samples = concreteThumpSessions.get(owner) || [];
+  samples.forEach((sample) => {
+    if (sample.url) URL.revokeObjectURL(sample.url);
+  });
+  concreteThumpSessions.delete(owner);
+}
+
+function downloadConcreteThumpFile(fileName, source, mimeType) {
+  const blob = new Blob([source], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.hidden = true;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function closeWindow(appWindow) {
   if (!appWindow) return;
+  if (appWindow.dataset.window === "concrete-thump") {
+    stopConcreteThump(appWindow);
+    releaseConcreteThumpSamples(appWindow);
+  }
   appWindow.remove();
   updateActiveApp();
 }
@@ -790,18 +1053,133 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const sequenceStep = event.target.closest("[data-sequence-step]");
+  if (sequenceStep) {
+    const active = sequenceStep.getAttribute("aria-pressed") !== "true";
+    sequenceStep.setAttribute("aria-pressed", String(active));
+    sequenceStep.classList.toggle("active", active);
+    return;
+  }
+
   const beatSave = event.target.closest('[data-action="save-beat-profile"]');
   if (beatSave) {
     const owner = beatSave.closest(".app-window");
-    const bpm = Number(owner.querySelector('[data-beat-range="bpm"]').value);
-    const swing = Number(owner.querySelector('[data-beat-range="swing"]').value);
-    try {
-      localStorage.setItem("duckos.mora.concrete-thump.v1", JSON.stringify({ bpm, swing, savedAt: new Date().toISOString() }));
-      owner.querySelector("[data-beat-status]").textContent = "Профиль " + bpm + " BPM / " + swing + "% сохранён локально.";
-      showToast("Ритмический профиль сохранён");
-    } catch {
-      owner.querySelector("[data-beat-status]").textContent = "Не удалось сохранить профиль браузера.";
+    const profile = collectConcreteThumpProfile(owner);
+    const status = owner.querySelector("[data-beat-status]");
+    if (saveConcreteThumpProfile(profile)) {
+      status.textContent = "Профиль " + profile.bpm + " BPM / " + profile.swing + "% и метаданные сэмплов сохранены локально.";
+      showToast("Профиль Concrete Thump сохранён");
+    } else {
+      status.textContent = "Не удалось сохранить профиль браузера.";
     }
+    return;
+  }
+
+  const playBeat = event.target.closest('[data-action="play-beat"]');
+  if (playBeat) {
+    const owner = playBeat.closest(".app-window");
+    const profile = collectConcreteThumpProfile(owner);
+    const stopButton = owner.querySelector('[data-action="stop-beat"]');
+    const status = owner.querySelector("[data-beat-status]");
+    playBeat.disabled = true;
+    stopButton.disabled = false;
+    status.textContent = "Готовлю четырёхтактовый рисунок…";
+    playConcreteThump({ owner, profile, sampleFile: selectedConcreteThumpFile(owner) })
+      .then(({ durationSeconds, choirLoaded }) => {
+        status.textContent = choirLoaded
+          ? "Играют drums, 808 и выбранные хоровые chops · " + durationSeconds.toFixed(1) + " с."
+          : "Играют drums и 808. Импортируйте и выберите аудиофайл для хоровой дорожки.";
+        globalThis.setTimeout(() => {
+          if (!owner.isConnected) return;
+          playBeat.disabled = false;
+          stopButton.disabled = true;
+        }, durationSeconds * 1000 + 350);
+      })
+      .catch((error) => {
+        playBeat.disabled = false;
+        stopButton.disabled = true;
+        status.textContent = error.message || "Не удалось запустить предпрослушивание.";
+      });
+    return;
+  }
+
+  const stopBeat = event.target.closest('[data-action="stop-beat"]');
+  if (stopBeat) {
+    const owner = stopBeat.closest(".app-window");
+    stopConcreteThump(owner);
+    const playButton = owner.querySelector('[data-action="play-beat"]');
+    playButton.disabled = false;
+    stopBeat.disabled = true;
+    owner.querySelector("[data-beat-status]").textContent = "Предпрослушивание остановлено.";
+    return;
+  }
+
+  const wavExport = event.target.closest('[data-action="export-beat-wav"]');
+  if (wavExport) {
+    const owner = wavExport.closest(".app-window");
+    const profile = collectConcreteThumpProfile(owner);
+    const status = owner.querySelector("[data-beat-status]");
+    wavExport.disabled = true;
+    status.textContent = "Рендерю четырёхтактовый WAV локально…";
+    renderConcreteThumpWav({ profile, sampleFile: selectedConcreteThumpFile(owner) })
+      .then((blob) => {
+        downloadConcreteThumpFile("concrete-thump-" + profile.bpm + "bpm.wav", blob, "audio/wav");
+        status.textContent = "WAV создан локально. Проверьте результат перед использованием в другом аудиоредакторе.";
+      })
+      .catch((error) => {
+        status.textContent = error.message || "Не удалось выполнить WAV-рендер.";
+      })
+      .finally(() => {
+        wavExport.disabled = false;
+      });
+    return;
+  }
+
+  const beatExport = event.target.closest('[data-action="export-beat-profile"]');
+  if (beatExport) {
+    const owner = beatExport.closest(".app-window");
+    const profile = collectConcreteThumpProfile(owner);
+    const bundle = {
+      schema: "duckos.concrete-thump-export.v1",
+      exportedAt: new Date().toISOString(),
+      profile,
+      audioFilesIncluded: false,
+      notice: "Export contains settings and sample metadata only; audio bytes are not embedded."
+    };
+    downloadConcreteThumpFile("duckos-concrete-thump-profile.json", JSON.stringify(bundle, null, 2), "application/json");
+    owner.querySelector("[data-beat-status]").textContent = "JSON-профиль экспортирован. Аудиофайлы в пакет не включены.";
+    return;
+  }
+
+  const promptExport = event.target.closest('[data-action="export-prompt"]');
+  if (promptExport) {
+    const owner = promptExport.closest(".app-window");
+    const prompt = buildConcreteThumpPrompt(collectConcreteThumpProfile(owner));
+    downloadConcreteThumpFile("east-slavic-ritual-trap-prompt.txt", prompt + "\n", "text/plain;charset=utf-8");
+    owner.querySelector("[data-beat-status]").textContent = "Промпт экспортирован (" + prompt.length + " символов).";
+    return;
+  }
+
+  const reaperExport = event.target.closest('[data-action="export-reaper-grid"]');
+  if (reaperExport) {
+    const owner = reaperExport.closest(".app-window");
+    const profile = collectConcreteThumpProfile(owner);
+    const source = createReaperGridSource(profile);
+    downloadConcreteThumpFile("duckos-ritual-trap-grid.rpr", source, "text/plain;charset=utf-8");
+    owner.querySelector("[data-beat-status]").textContent = "Сетка таймингов Reaper экспортирована как .rpr. Это расчётная программа, не аудиодвижок.";
+    return;
+  }
+
+  const clearSamples = event.target.closest('[data-action="clear-choir-samples"]');
+  if (clearSamples) {
+    const owner = clearSamples.closest(".app-window");
+    sampleSession(owner).forEach((sample) => {
+      if (sample.url) URL.revokeObjectURL(sample.url);
+    });
+    concreteThumpSessions.set(owner, []);
+    saveConcreteThumpProfile(collectConcreteThumpProfile(owner));
+    renderConcreteThumpSamples(owner);
+    owner.querySelector("[data-beat-status]").textContent = "Список сэмплов очищен.";
     return;
   }
 
@@ -887,10 +1265,16 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const concreteControl = event.target.closest("[data-ritual-control], [data-chant-source]");
   const beatRange = event.target.closest("[data-beat-range]");
   if (beatRange) {
     const output = beatRange.closest(".extension-range-row").querySelector('[data-beat-value="' + beatRange.dataset.beatRange + '"]');
     if (output) output.textContent = beatRange.dataset.beatRange === "bpm" ? beatRange.value + " BPM" : beatRange.value + "%";
+    refreshConcreteThumpPrompt(beatRange.closest(".app-window"));
+    return;
+  }
+  if (concreteControl) {
+    refreshConcreteThumpPrompt(concreteControl.closest(".app-window"));
     return;
   }
   const range = event.target.closest("[data-range]");
@@ -1047,6 +1431,67 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const ritualControl = event.target.closest("[data-ritual-control], [data-chant-source]");
+  if (ritualControl) {
+    refreshConcreteThumpPrompt(ritualControl.closest(".app-window"));
+    return;
+  }
+
+  const choirInput = event.target.closest("[data-choir-samples]");
+  if (choirInput) {
+    const owner = choirInput.closest(".app-window");
+    const samples = sampleSession(owner);
+    let totalBytes = samples.reduce((sum, sample) => sum + Number(sample.size || 0), 0);
+    const messages = [];
+
+    for (const file of Array.from(choirInput.files || [])) {
+      const existingIndex = samples.findIndex((sample) =>
+        !sample.file && sample.name === file.name &&
+        Number(sample.size) === Number(file.size) &&
+        (sample.type || "audio") === (file.type || "audio")
+      );
+      const previousSize = existingIndex >= 0 ? Number(samples[existingIndex].size || 0) : 0;
+      const validation = validateAudioSampleFile(file, {
+        sampleCount: samples.length - (existingIndex >= 0 ? 1 : 0),
+        totalBytes: totalBytes - previousSize
+      });
+      if (!validation.ok) {
+        messages.push(file.name + ": " + validation.reason);
+        continue;
+      }
+
+      try {
+        const url = URL.createObjectURL(file);
+        if (existingIndex >= 0) {
+          const previous = samples[existingIndex];
+          if (previous.url) URL.revokeObjectURL(previous.url);
+          samples[existingIndex] = { ...previous, file, url };
+        } else {
+          samples.push({
+            name: file.name,
+            type: file.type || "audio",
+            size: file.size,
+            credit: "",
+            rights: "unspecified",
+            file,
+            url
+          });
+        }
+        totalBytes = totalBytes - previousSize + file.size;
+      } catch {
+        messages.push(file.name + ": браузер не смог создать локальный предпросмотр.");
+      }
+    }
+
+    choirInput.value = "";
+    renderConcreteThumpSamples(owner);
+    const status = owner.querySelector("[data-beat-status]");
+    status.textContent = messages.length
+      ? messages.join(" ")
+      : "Сэмплы доступны локально для предпрослушивания. Перед использованием проверьте права.";
+    return;
+  }
+
   const archiveInput = event.target.closest("[data-archive-file]");
   if (archiveInput) {
     const report = archiveInput.closest(".app-window").querySelector("[data-archive-report]");
