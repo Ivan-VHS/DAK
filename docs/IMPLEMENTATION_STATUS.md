@@ -134,3 +134,22 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Jora application synthesis — 2026-11-24
+
+- [x] Versioned 25-entry base component registry with Russian/English aliases, capability contracts and suggestions.
+- [x] Formula normalization with primary/background/optional roles, bounded weights, duplicate detection and offline/cloud conflict diagnostics.
+- [x] Deterministic application identity and a bounded hub/cluster integration graph with O(N*M) edge growth.
+- [x] Reaper-first language selection based on discoverable optional toolchains; native Reaper compilation is not assumed.
+- [x] Source-first Jora package generation with Reaper .rpr entry point, integration graph, language plan, coherent synthetic demo data, store-listing draft, README and SHA-256 inventory.
+- [x] Package path and checksum verification; helper syntax checks; static Reaper CLI check through the existing bounded process bridge when available.
+- [x] Per-user local catalogue with experimental and verified_preview channels.
+- [x] Mora Formula Studio with formula preview, graph and language plan, local draft storage and native CLI command handoff.
+- [ ] Full 666 independently registered component variations and additional domain packs.
+- [ ] Native compilation and runtime packaging for generated apps.
+- [ ] Public hosted catalogue, remote ingestion workers, account/reputation system and public distribution.
+- [ ] Production screenshot capture from running generated applications and visual-regression gates.
+- [ ] Native package installer, app process sandbox, capability enforcement and OS service integration.
+
+Jora is a partial user-space source synthesis workbench. Browser drafts are local to Mora; the native CLI produces source-first packages. Experimental publication registers a local package path only. verified_preview requires a successful Reaper reference-runtime static check and does not mean the application was executed, natively compiled or installed.

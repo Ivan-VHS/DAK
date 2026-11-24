@@ -29,16 +29,17 @@ def main() -> int:
     expected = {
         "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
         "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
-        "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+        "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe", "jora",
     }
     actual = {app["id"] for app in catalog["applications"]}
-    if actual != expected or len(actual) != 20:
+    if actual != expected or len(actual) != 21:
         raise SystemExit(f"Unexpected app catalog IDs: {sorted(actual)}")
 
     for app in catalog["applications"]:
-        if app["maturity_status"] != "specified":
+        expected_maturity = "partial" if app["id"] == "jora" else "specified"
+        if app["maturity_status"] != expected_maturity:
             raise SystemExit(
-                f"{app['id']}: native app maturity must remain specified"
+                f"{app['id']}: expected maturity status {expected_maturity}"
             )
         if app["prototype_status"] != "partial":
             raise SystemExit(

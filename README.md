@@ -4,7 +4,7 @@ DuckOS is the operating-system project. **Mora** is its unified desktop environm
 
 ## Product direction
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+The product catalog now defines **21 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE), plus Jora as a formula-driven application synthesis and local catalogue workbench. The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
 
 The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
 
@@ -30,6 +30,21 @@ The system tools are:
 - **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
 
 The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
+
+## Jora application synthesis
+
+Jora is available as a separate Mora application and through the native DuckOS CLI. Formula Studio previews component composition and graph integration; the native CLI generates a source-first package and verifies its manifest, checksums, helper syntax and Reaper source through the existing bounded Reaper workbench.
+
+```sh
+duckos jora status
+duckos jora formula "текстовый редактор + аудиоредактор + переводчик"
+duckos jora create --formula "текстовый редактор + аудиоредактор + переводчик" --output ./slovovolna.jora
+duckos jora verify ./slovovolna.jora
+duckos jora publish ./slovovolna.jora --channel experimental
+duckos jora catalog
+```
+
+The catalogue is local to the current user. Jora does not provide a public marketplace, stable release channel, native installer or kernel service. Reaper source checking does not imply native compilation or execution. See [Jora integration](docs/JORA_INTEGRATION.md).
 
 ## Native Reaper workbench
 
@@ -133,12 +148,26 @@ It does not claim to be the native compositor or manage machine-wide services. S
 
 DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.
 
+## Jora application synthesis
+
+Jora is a separate Mora application and native DuckOS source-synthesis tool. Formula Studio previews component composition and integration graphs; the native CLI creates source-first Reaper packages, checks their hashes and validates Reaper source through the bounded Reaper workbench.
+
+    duckos jora status
+    duckos jora formula "текстовый редактор + аудиоредактор + переводчик"
+    duckos jora create --formula "текстовый редактор + аудиоредактор + переводчик" --output ./slovovolna.jora
+    duckos jora verify ./slovovolna.jora
+    duckos jora publish ./slovovolna.jora --channel experimental
+    duckos jora catalog
+
+The catalogue is local to the current user. There is no public marketplace, stable release channel, native installer or kernel service. Reaper source checking does not imply native compilation or program execution. See [Jora integration](docs/JORA_INTEGRATION.md).
+
 ## Documentation
 
 Start with the [DuckOS documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines terminology, maturity states, runtime claims and evidence requirements.
 
 - [Mora Commons unified application catalogue](docs/MORA_COMMONS.md)
 - [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
+- [Jora formula-driven application synthesis](docs/JORA_INTEGRATION.md)
 - [Mora shell and native integration](docs/MORA_INTEGRATION.md)
 - [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
 - [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
