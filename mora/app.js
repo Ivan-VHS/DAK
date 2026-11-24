@@ -987,6 +987,21 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const joraInput = event.target.closest(
+    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name]"
+  );
+  if (joraInput) {
+    const owner = joraInput.closest(".app-window");
+    if (owner) {
+      joraDrafts.delete(owner);
+      const exportButton = owner.querySelector('[data-action="jora-export"]');
+      const preview = owner.querySelector("[data-jora-preview]");
+      if (exportButton) exportButton.disabled = true;
+      if (preview) preview.textContent = "Параметры изменены. Сформируйте формулу заново перед экспортом.";
+    }
+    return;
+  }
+
   const beatRange = event.target.closest("[data-beat-range]");
   if (beatRange) {
     const output = beatRange.closest(".extension-range-row").querySelector('[data-beat-value="' + beatRange.dataset.beatRange + '"]');
