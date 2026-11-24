@@ -36,17 +36,18 @@
       "url": "https://github.com/Ivan-VHS/Reaper.git",
       "path": "projects/reaper",
       "default_branch": "main",
-      "pinned_commit": "cd84d347959f9b6cf60d87ab3d36bc94e05fd80f",
+      "pinned_commit": "2267b2a087311a5ac4e72a0888a11bca2888e6b6",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "language-and-toolchain",
-      "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser, static type diagnostics and native toolchain contracts.",
+      "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser, static type diagnostics, scalar native AOT and the checked DuckOS boot-info v1 conformance target.",
       "integration_mode": [
         "native Duck Desktop workbench",
         "bounded user-space subprocess bridge",
         "user-space CLI",
         "versioned JSON protocol",
-        "sandboxed extension ABI"
+        "sandboxed extension ABI",
+        "DuckOS boot-contract reference/AOT/C parity gate"
       ],
       "runtime_boundary": "user-space-only",
       "build_system": "CMake / C17 plus Python reference runtime",
@@ -116,6 +117,7 @@
     "Pytyliki and OPlague hardware inspection remains read-only; no clock, voltage, firmware, device or driver writes.",
     "VentuSample processing is offline by default; real-time audio and device access need a separate reviewed OS service contract.",
     "Validate licenses, provenance, schema versions and dependency boundaries before creating a native cross-project link.",
-    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image."
+    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image.",
+    "The Reaper boot-info v1 target is a conformance specification only; DuckOS C remains the kernel-facing ABI until Reaper has typed records, bounded collections, full unsigned address semantics and a freestanding object/linker/startup toolchain."
   ]
 }

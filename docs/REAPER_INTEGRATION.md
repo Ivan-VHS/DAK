@@ -3,100 +3,94 @@
 **Project:** DuckOS  
 **Specialist runtime:** Reaper  
 **Maintainer:** Ivan-VHS  
-**Status:** implemented user-space launcher, source-check bridge and native Duck Desktop panel
+**Status:** implemented user-space launcher, static-check bridge, native AOT build command and boot-contract parity gate
 
 ## Architecture
 
-DuckOS treats Reaper as its canonical systems-language and policy implementation while keeping the two repositories independently versioned. The Reaper source remains the pinned Git submodule at `projects/reaper`; the federation registry records the reviewed integration commit and the native-workbench status.
-
-The integration is intentionally a process boundary:
+DuckOS keeps Reaper as an independently versioned language and toolchain source at `projects/reaper`. The native Duck Desktop and CLI integrations invoke Reaper through an explicit process boundary:
 
 ```text
-Duck Desktop native window / duckos CLI
-                 |
-                 v
-       duckos.desktop.reaper
-       ReaperWorkbench
-                 |
-       explicit argument vector
-       shell=False, bounded timeout
-                 |
-                 v
-      projects/reaper Python package
-       ├── Reaper CLI / static checker
-       └── Reaper Studio (separate process)
+Duck Desktop / duckos CLI
+          |
+          v
+  ReaperWorkbench
+          |
+  fixed argument vector
+  shell=False, bounded timeout
+          |
+          v
+  projects/reaper
+  ├── reference runtime and static checker
+  ├── experimental scalar C17 AOT backend
+  └── DuckOS boot-info v1 source target
 ```
 
-DuckOS does not import the Reaper interpreter, AST or Python modules into its own process. Reaper owns its language grammar, runtime, compiler and diagnostics. DuckOS provides discovery, native UI entry points and a bounded host process bridge.
+DuckOS does not import Reaper's interpreter, AST or Python modules into the OS process. Reaper owns its grammar, reference semantics and compiler diagnostics. DuckOS owns the native launch surface, the bounded process bridge and the boot ABI implementation.
 
 ## Initialize the source checkout
-
-From an existing DuckOS clone:
 
 ```sh
 git submodule update --init projects/reaper
 python -m pip install -e .
 ```
 
-The DuckOS package installs the `duckos` command. The Reaper submodule is an independent Python project and keeps its own editable install and dependency contract.
-
-When the source checkout is outside the standard `projects/reaper` location, set `DUCKOS_REAPER_ROOT` to its absolute path or pass `--root` to the CLI.
+The Reaper submodule is pinned to an exact reviewed commit in `federation/repositories.v1.json`. A source checkout is not automatically built, trusted as a kernel module, or launched.
 
 ## Native shell entry points
-
-Open the native Duck Desktop window:
-
-```sh
-duckos desktop gui
-```
-
-The **Reaper** tab offers:
-
-- checkout discovery and an evidence-based capability summary;
-- opening the Reaper Studio desktop application as a separate process;
-- selecting a local `.rpr` or `.most` file;
-- running the normal parser and static-check command;
-- running focused type diagnostics when the selected Reaper checkout contains that capability.
-
-The panel's source-check operations run on a worker thread, so a large local source file does not block the native window. The result is returned to the UI as bounded text/JSON diagnostics.
-
-## Command shell
 
 ```sh
 duckos reaper status
 duckos reaper studio
 duckos reaper check ./examples/program.rpr
 duckos reaper typecheck ./examples/program.rpr
+duckos reaper build ./examples/native_program.rpr --output ./build/native_program
+duckos reaper target-check
 ```
 
-Use an alternate checkout explicitly:
+- `check` invokes the static parser/type-check path; it does not execute the selected program.
+- `typecheck` invokes the focused type diagnostics when the pinned checkout supports them.
+- `build` asks Reaper's experimental AOT subset to produce a host executable. It does not run that executable, and it does not claim to generate a DuckOS kernel image.
+- `target-check` runs the fixed, repository-owned boot-contract conformance program in the Reaper reference runtime and AOT backend, then checks both outputs against the expected fixture stream. It never accepts an arbitrary source path.
+
+The native Duck Desktop Reaper panel continues to use the same process boundary. The browser Mora shell does not launch host processes.
+
+## Reaper boot-info v1 target
+
+The Reaper repository contains `targets/duckos/boot_contract_v1.rpr`. It models split-u64 range arithmetic, individual memory-region validation, ordering, framebuffer extent calculation and the current C handoff status codes for a two-region conformance matrix.
+
+The DuckOS native CMake test adds a small C fixture runner linked to `duckos_boot_contract`. CTest compares the exact status stream from:
+
+1. the Reaper reference runtime;
+2. Reaper's experimental native AOT executable;
+3. the current DuckOS C implementation.
+
+Run the complete native contract check after initializing the Reaper submodule:
 
 ```sh
-duckos reaper --root /path/to/Reaper status
-duckos reaper --root /path/to/Reaper check ./program.rpr
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
 ```
 
-The `check` command delegates to Reaper's `--check --json` path. The focused `typecheck` command is enabled only when the located checkout contains both the type-checking module and its CLI dispatch. Older pinned checkouts are reported as lacking that capability rather than being treated as if it were present.
+Or run the bridge directly after building the conformance harness:
+
+```sh
+python tools/check_reaper_boot_contract.py \
+  --reaper-root projects/reaper \
+  --c-harness build/duckos_boot_info_conformance
+```
 
 ## Process and trust boundaries
 
-- Every process is started with a fixed argument list and `shell=False`.
-- The Reaper checkout is discovered from the DuckOS submodule path, `DUCKOS_REAPER_ROOT`, an explicit `--root`, or the current working directory.
-- A selected source must be an existing regular `.rpr` or `.most` file. Symbolic-link sources are rejected by the bridge.
-- Check and typecheck are static operations; they do not execute the selected source program.
-- Check commands have a 30-second timeout and captured output is limited to one million characters per stream.
-- Opening Reaper Studio starts a separate user-space process. Studio's own Run/Debug actions remain explicit user actions.
-- DuckOS does not silently grant Reaper FFI, device access, administrator rights, driver installation, kernel access or filesystem-wide permissions.
-- The browser-based Mora shell is not used as a host-process launcher. The actual launch path is the native Duck Desktop panel or the `duckos reaper` command.
+- Every Reaper process is started with a fixed argument vector and `shell=False`.
+- Commands have bounded execution time and captured output; source paths must be existing regular `.rpr` or `.most` files.
+- Native AOT builds write only to the explicit output path and do not execute the result.
+- The fixed boot-contract conformance program uses only scalar arithmetic and standard output; it has no file, network, FFI, process or hardware effects.
+- DuckOS does not grant Reaper kernel access, device access, administrator rights, driver installation or ambient FFI.
+- The C boot-info contract remains the kernel-facing implementation.
 
-This is a native user-space integration surface, not a claim that the DuckOS kernel has already implemented process isolation, a privileged application broker or a hardware compositor.
+## Current migration boundary
 
-## Verification
+The current Reaper AOT backend emits hosted C17 for a limited scalar language subset. It does not yet emit freestanding object files, define a bootloader calling convention, link a kernel image, provide records or general collections, implement complete unsigned integer types, or cover arbitrary memory-map arrays in the source-level fixture validator. The Reaper model currently covers two memory regions; DuckOS C remains authoritative for maps of up to 256 entries.
 
-Run the focused tests:
-
-```sh
-python -m unittest tests.test_reaper_integration tests.test_reaper_cli -v
-```
-
-The tests use temporary fake Reaper checkouts and mocked subprocess boundaries. They verify discovery, capability detection, argument-vector construction, JSON result handling, timeouts, source validation and the native Studio launch handoff. They do not run Reaper source or claim kernel-level process isolation.
+A genuine kernel migration must not begin until typed records and bounded collections, complete u64/u32 semantics, a versioned target ABI, a freestanding backend, object/ELF generation, linker and entry-point contracts, startup/runtime support, target emulator tests and hardware validation are implemented. The current parity gate is the first measurable migration slice, not a claim that a bootable Reaper kernel exists.

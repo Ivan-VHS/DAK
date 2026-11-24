@@ -27,6 +27,9 @@ class ReaperCliTests(unittest.TestCase):
         )
         (package / "desktop.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "typecheck.py").write_text("def main():\n    pass\n", encoding="utf-8")
+        target = self.root / "targets" / "duckos"
+        target.mkdir(parents=True)
+        (target / "boot_contract_v1.rpr").write_text("emit 0\n", encoding="utf-8")
         self.source = self.root / "app.rpr"
         self.source.write_text("emit 1\n", encoding="utf-8")
 
@@ -54,6 +57,48 @@ class ReaperCliTests(unittest.TestCase):
             code, output = self.invoke("reaper", "--root", str(self.root), "check", str(self.source))
         self.assertEqual(code, 1)
         self.assertEqual(json.loads(output)["result"], payload)
+
+
+    def test_reaper_build_dispatches_a_bounded_native_build(self):
+        completed = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+        with tempfile.TemporaryDirectory() as folder:
+            output_path = str(Path(folder) / "app")
+            with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+                code, output = self.invoke(
+                    "reaper", "--root", str(self.root), "build",
+                    str(self.source), "--output", output_path, "--optimization", "1",
+                )
+        payload = json.loads(output)
+        self.assertEqual(code, 0)
+        self.assertTrue(payload["ok"])
+        command = run.call_args.args[0]
+        self.assertIn("--native", command)
+        self.assertIn("--optimization", command)
+        self.assertEqual(command[command.index("--optimization") + 1], "1")
+        self.assertFalse(run.call_args.kwargs["shell"])
+
+    def test_reaper_target_check_runs_the_fixed_reference_and_native_fixture(self):
+        expected = "0\\n0\\n-2\\n-3\\n-4\\n-5\\n-6\\n-6\\n-7\\n"
+
+        def fake_run(command, **kwargs):
+            if command[0] == sys.executable:
+                if "--native" in command:
+                    Path(command[command.index("--native") + 1]).write_text("test executable", encoding="utf-8")
+                    return subprocess.CompletedProcess(command, 0, "", "")
+                if "--check" in command:
+                    return subprocess.CompletedProcess(command, 0, "", "")
+                return subprocess.CompletedProcess(command, 0, expected, "")
+            return subprocess.CompletedProcess(command, 0, expected, "")
+
+        import sys
+        with patch("duckos.desktop.reaper.subprocess.run", side_effect=fake_run):
+            code, output = self.invoke("reaper", "--root", str(self.root), "target-check")
+        payload = json.loads(output)
+        self.assertEqual(code, 0)
+        self.assertTrue(payload["valid"])
+        self.assertEqual(payload["fixtures"], 9)
+        self.assertTrue(payload["native_program_executed"])
+        self.assertFalse(payload["hardware_accessed"])
 
     def test_reaper_studio_command_starts_the_native_app(self):
         process = type("Process", (), {"pid": 4812})()

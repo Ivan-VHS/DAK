@@ -26,6 +26,9 @@ class ReaperWorkbenchTests(unittest.TestCase):
         (package / "desktop.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "typecheck.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "native_compiler.py").write_text("COMPILER = True\n", encoding="utf-8")
+        target = self.root / "targets" / "duckos"
+        target.mkdir(parents=True)
+        (target / "boot_contract_v1.rpr").write_text("emit 0\n", encoding="utf-8")
         self.source = self.root / "example.rpr"
         self.source.write_text("emit 42\n", encoding="utf-8")
         self.workbench = ReaperWorkbench(self.root, python_executable="python-test")
@@ -67,6 +70,58 @@ class ReaperWorkbenchTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(run.call_args.args[0][2:4], ["reaper", "typecheck"])
         self.assertIn(str(self.source.resolve()), run.call_args.args[0])
+
+
+    def test_native_build_uses_the_explicit_output_path_and_no_shell(self):
+        completed = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "program"
+            with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+                result = self.workbench.build_native(self.source, output, optimization="s")
+        self.assertTrue(result["ok"])
+        command = run.call_args.args[0]
+        self.assertEqual(command[:4], ["python-test", "-m", "reaper", str(self.source.resolve())])
+        self.assertEqual(command[command.index("--native") + 1], str(output.resolve()))
+        self.assertEqual(command[command.index("--optimization") + 1], "s")
+        self.assertFalse(run.call_args.kwargs["shell"])
+        self.assertEqual(run.call_args.kwargs["timeout"], 150)
+
+    def test_native_build_rejects_source_overwrite_and_invalid_optimization(self):
+        with self.assertRaisesRegex(ReaperIntegrationError, "overwrite"):
+            self.workbench.build_native(self.source, self.source)
+        with self.assertRaisesRegex(ReaperIntegrationError, "optimization"):
+            self.workbench.build_native(self.source, self.root / "program", optimization="fast")
+
+    def test_duckos_target_check_compares_reference_and_native_output(self):
+        expected = "0\\n0\\n-2\\n-3\\n-4\\n-5\\n-6\\n-6\\n-7\\n"
+
+        def fake_run(command, **kwargs):
+            if command[0] == "python-test":
+                if "--native" in command:
+                    native_output = Path(command[command.index("--native") + 1])
+                    native_output.write_text("native test executable", encoding="utf-8")
+                    return subprocess.CompletedProcess(command, 0, "", "")
+                if "--check" in command:
+                    return subprocess.CompletedProcess(command, 0, "", "")
+                return subprocess.CompletedProcess(command, 0, expected, "")
+            return subprocess.CompletedProcess(command, 0, expected, "")
+
+        with patch("duckos.desktop.reaper.subprocess.run", side_effect=fake_run) as run:
+            result = self.workbench.check_duckos_target()
+        self.assertTrue(result["valid"])
+        self.assertEqual(result["fixtures"], 9)
+        self.assertEqual(result["reference_runtime"], "pass")
+        self.assertEqual(result["native_aot"], "pass")
+        self.assertTrue(result["native_program_executed"])
+        self.assertFalse(result["hardware_accessed"])
+        self.assertEqual(run.call_count, 4)
+        self.assertTrue(all(call.kwargs["shell"] is False for call in run.call_args_list))
+        self.assertTrue(any("--syntax-only" in call.args[0] for call in run.call_args_list))
+
+    def test_duckos_target_check_rejects_a_missing_target(self):
+        (self.root / "targets" / "duckos" / "boot_contract_v1.rpr").unlink()
+        with self.assertRaisesRegex(ReaperIntegrationError, "does not contain"):
+            self.workbench.check_duckos_target()
 
     def test_studio_launch_uses_a_separate_process(self):
         fake_process = object()
