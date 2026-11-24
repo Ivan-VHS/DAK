@@ -268,4 +268,10 @@ assert(theme["material_mode"](false, false, false) == "opaque", "unsupported com
 assert(theme["material_mode"](true, true, false) == "opaque", "reduced transparency takes precedence")
 assert(theme["material_mode"](true, false, true) == "system-opaque", "forced colors use system surfaces")
 
+assert(theme["native_material_mode"]("win32", true, false, false) == "mica-window", "Windows host may request native Mica when available")
+assert(theme["native_material_mode"]("win32", false, false, false) == "opaque", "unsupported Windows host stays opaque")
+assert(theme["native_material_mode"]("linux", true, false, false) == "opaque", "non-Windows host uses a portable material")
+assert(theme["native_material_mode"]("win32", true, true, false) == "opaque", "reduced transparency overrides native Mica")
+assert(theme["native_material_mode"]("win32", true, false, true) == "system-opaque", "forced colors take priority over native backdrop")
+
 emit "DUCKOS_REAPER_CONTRACTS_OK"
