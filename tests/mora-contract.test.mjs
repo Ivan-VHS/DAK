@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 const html = await readFile(new URL("../mora/index.html", import.meta.url), "utf8");
 const css = await readFile(new URL("../mora/styles.css", import.meta.url), "utf8");
 const js = await readFile(new URL("../mora/app.js", import.meta.url), "utf8");
+const jora = await readFile(new URL("../mora/jora.js", import.meta.url), "utf8");
 const registry = JSON.parse(await readFile(new URL("../mora/apps.json", import.meta.url), "utf8"));
 const policy = JSON.parse(await readFile(new URL("../mora/system-policy.json", import.meta.url), "utf8"));
 
@@ -150,8 +151,8 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(js.includes('data-action="jora-export"'));
   assert.ok(js.includes("data-jora-name-style"));
   assert.ok(js.includes("data-jora-app-name"));
-  assert.ok(js.includes("no_platform_brand_in_application_name"));
-  assert.ok(js.includes("application_name_policy"));
+  assert.ok(jora.includes("no_platform_brand_in_application_name"));
+  assert.ok(jora.includes("application_name_policy"));
   assert.ok(js.includes('pattern="^(?!.*[Jj][Oo][Rr][Aa]).+$"'));
   assert.ok(js.includes("Другие варианты названия"));
   assert.ok(js.includes("data-jora-objective"));
