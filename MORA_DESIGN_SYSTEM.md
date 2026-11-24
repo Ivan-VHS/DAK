@@ -44,6 +44,12 @@ Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targ
 - Foreground controls stay crisp; background structure may soften with distance.
 - Keep top controls compact and grouped. Put progress, discrete ticks and critical markers at the lower boundary instead of floating over work content.
 
+## Newspaper material surface
+
+Газета is a scoped skeuomorphic exception, not a second Mora desktop theme. The application may use an isolated newsprint palette (paper `#F2E8D4`, deeper paper `#E5D7B7`, ink `#2C261D`, muted print `#6C5B43`, rule `#A8997C`, editorial accent `#7E3428`) only beneath `.newspaper-app`. The desktop, status bar, launcher, dock and other windows retain the canonical black/white/yellow DuckOS palette.
+
+The paper surface uses restrained grain, a printed masthead, double rules, serif display type, compact newspaper metadata and shallow paper-card shadows. Material effects must not reduce text contrast, obscure controls or create a global theme override. Reflow article columns at narrow widths; preserve keyboard focus, 44 px targets where practical, reduced-motion behavior and readable publisher metadata. External article images are lazy-loaded with no referrer; original publisher links are explicit and open separately.
+
 ## Motion
 
 Use predictable low-amplitude transitions with `ease-in-out`: 80–140 ms for focus and direct feedback, 160–240 ms for panel changes and 260–380 ms for context changes. Avoid random movement, strobing, flashing gradients and perpetual ambient motion.
