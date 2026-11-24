@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430" role="img" aria-labelledby="t d">
+<title id="t">DuckOS repository and validation workflow — schematic</title><desc id="d">Pinned source federation, contract validation, package verification and deployment planning. No bootable OS image is implied.</desc>
+<rect width="760" height="430" rx="22" fill="#141719"/>
+<text x="34" y="42" fill="#e5bd32" font-family="system-ui,sans-serif" font-size="13" font-weight="700" letter-spacing="2">SOURCE → CONTRACT → PACKAGE PLAN</text>
+<g font-family="system-ui,sans-serif">
+<rect x="34" y="72" width="205" height="72" rx="12" fill="#252b2e" stroke="#e5bd32"/>
+<text x="136" y="103" text-anchor="middle" fill="#f6f6f0" font-size="17" font-weight="700">Pinned submodules</text><text x="136" y="125" text-anchor="middle" fill="#b9c0bd" font-size="12">4 source projects</text>
+<rect x="278" y="72" width="205" height="72" rx="12" fill="#252b2e" stroke="#94a3a3"/>
+<text x="380" y="103" text-anchor="middle" fill="#f6f6f0" font-size="17" font-weight="700">Reaper contracts</text><text x="380" y="125" text-anchor="middle" fill="#b9c0bd" font-size="12">policy and validation</text>
+<rect x="517" y="72" width="209" height="72" rx="12" fill="#252b2e" stroke="#94a3a3"/>
+<text x="621" y="103" text-anchor="middle" fill="#f6f6f0" font-size="17" font-weight="700">Schema + tests</text><text x="621" y="125" text-anchor="middle" fill="#b9c0bd" font-size="12">catalog and contract checks</text>
+<g stroke="#e5bd32" stroke-width="2" fill="none"><path d="M239 108h36m-9-7 9 7-9 7"/><path d="M483 108h29m-9-7 9 7-9 7"/></g>
+<path d="M621 144v46H380v26" stroke="#e5bd32" stroke-width="2" fill="none"/><path d="M373 208l7 9 7-9" stroke="#e5bd32" stroke-width="2" fill="none"/>
+<rect x="183" y="219" width="394" height="78" rx="12" fill="#252b2e" stroke="#e5bd32"/>
+<text x="380" y="251" text-anchor="middle" fill="#f6f6f0" font-size="18" font-weight="700">Verified component bundle</text><text x="380" y="276" text-anchor="middle" fill="#b9c0bd" font-size="13">hash inventory · optional signature</text>
+<path d="M380 297v28" stroke="#e5bd32" stroke-width="2"/><path d="M373 316l7 9 7-9" stroke="#e5bd32" stroke-width="2" fill="none"/>
+<rect x="183" y="334" width="394" height="54" rx="12" fill="#211d16" stroke="#e5bd32" stroke-dasharray="6 5"/>
+<text x="380" y="357" text-anchor="middle" fill="#f6f6f0" font-size="16" font-weight="700">Non-destructive deployment plan</text><text x="380" y="376" text-anchor="middle" fill="#c9c0aa" font-size="11">not a bootable image or disk writer</text>
+</g>
+<text x="380" y="414" fill="#9ca7a4" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" letter-spacing="1.5">AUTHORED PIPELINE DIAGRAM · NOT A SCREENSHOT</text>
+</svg>

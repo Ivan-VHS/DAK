@@ -1,151 +1,193 @@
-# DuckOS
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/hero-banner-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/hero-banner-light.svg">
+    <img src="assets/readme/hero-banner-light.svg" alt="DuckOS operating-system project and Mora desktop shell" width="880">
+  </picture>
+</p>
 
-DuckOS is the operating-system project. **Mora** is its unified desktop environment: the home screen, application launcher, dock, window workspace and system control surface use one visual language and interaction model.
+<h1 align="center">DuckOS</h1>
+<p align="center"><strong>A Reaper-first operating-system project with a browser-local Mora desktop shell, versioned system contracts and a federated source workspace.</strong></p>
+<p align="center">
+  <a href="https://github.com/Ivan-VHS/DuckOS/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DuckOS/ci.yml?branch=main&style=flat-square&label=CI"></a>
+  <a href="https://github.com/Ivan-VHS/DuckOS/actions/workflows/completeness-check.yml"><img alt="Completeness checks" src="https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DuckOS/completeness-check.yml?branch=main&style=flat-square&label=Completeness"></a>
+</p>
 
-## Product direction
+[Quick start](#quick-start) · [Revival update](#documentation-revival) · [Visual overview](#visual-overview) · [Architecture](#architecture-and-implementation-boundaries) · [Documentation](docs/README.md)
 
-The product catalog now defines **20 first-party application concepts**: the original seven (Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify) plus 13 additions (Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE). The new names were supplied without role descriptions, so their first-scope meanings are documented as working product interpretations. Their Mora panels are partial browser-local tools, not native system services. Product boundaries and proposed integrations remain in the [preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md) and [versioned application catalog](catalogs/preinstalled-applications.v1.json). A product specification is not evidence that an app ships in a bootable image.
+> **Implementation boundary:** Mora is currently a browser desktop shell. Reaper provides executable system-policy and boot/resource contracts on its reference runtime. These are not the same as a native kernel, driver stack, compositor, bootable image or production OS installation. The repository's implementation status is tracked in [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md).
 
-The separate DAK foundational package proposal contains the existing 15 system and everyday apps plus these 13 additions. It remains a design catalog: proposed API and capability identifiers must be registered before production packaging ([DAK base application catalog](catalogs/dak-base-applications.v1.yaml)).
+## Quick start
+
+**Requirements:** Git, Node.js 18+ for JavaScript contract tests, and Python 3 for validation tools.
+
+Clone the repository with its pinned source projects:
+
+~~~sh
+git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git
+cd DuckOS
+~~~
+
+Run the repository checks:
+
+~~~sh
+npm test
+python -m pip install jsonschema
+python -m unittest discover -s tests -v
+python tools/validate_app_catalog.py
+~~~
+
+Open the current Mora shell by opening <code>mora/index.html</code> in a modern browser. The shell has no external runtime dependencies; a secure browser context may be needed for Web Crypto file hashing.
+
+To synchronize the already pinned submodule revisions in an existing checkout:
+
+~~~sh
+python tools/federate_repositories.py sync
+~~~
+
+This initializes the commits recorded by DuckOS. It does not update the submodules to their latest upstream revisions or overwrite local submodule changes.
+
+## Documentation revival
+
+| Before | Revival documentation |
+|---|---|
+| Static README entry point | Adaptive light/dark SVG hero with accessible fallback text |
+| Product direction and implementation status were easy to conflate | Clear distinction between Mora browser shell, Reaper contracts and native OS work |
+| No verified application screenshot in this repository | Two-column architecture visuals explicitly labelled as schematics, not screenshots |
+| Build, test and deployment planning details were spread across pages | Quick start with separate validation and non-destructive packaging paths |
+| Long documentation navigation | Updated document index, visual standard and contributor checklist |
+
+This is a documentation refresh, **not a new DuckOS release or bootable image announcement**. No kernel, driver, compositor or installer capability is implied by the new visuals.
+
+## Product and implementation overview
+
+| Area | Current state | Boundary |
+|---|---|---|
+| Mora desktop | Browser-local unified shell, application discovery, preferences and offline cache | Not a native compositor or kernel service |
+| First-party app catalog | Versioned catalog of application concepts and initial scopes | Catalog entries do not prove that apps ship in a bootable image |
+| Reaper system contracts | Executable policy/reference contracts for startup ordering, resource limits, scheduling, trust and data flow | Does not itself supply native privileged execution |
+| Source federation | Four independent, commit-pinned specialist repositories | Imported sources are not automatically built, launched or loaded as drivers |
+| Release packaging | Deterministic component bundle, SHA-256 inventory and optional Ed25519 signing/verification | Does not create a bootable ISO/USB image |
+| Deployment planning | Non-destructive GPT layout and USB/PXE/UEFI HTTP Boot/iPXE/cloud plan descriptions | Does not write physical disks or deploy a running OS |
+| Native OS implementation | Architecture and contracts under active development | Native kernel, full driver runtime, boot path, compositor and recovery still require implementation |
+
+## Visual overview
+
+<p><em>No verified live desktop screenshot is committed in this repository. The following are authored architecture illustrations, not application captures.</em></p>
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="assets/readme/overview.svg" alt="DuckOS architecture layers: Mora browser shell, Reaper contracts and native OS work still to complete" width="100%">
+      <p><sub><strong>Product layers — schematic.</strong> The native OS layer is shown as incomplete work, not as a running system.</sub></p>
+    </td>
+    <td width="50%">
+      <img src="assets/readme/pipeline.svg" alt="DuckOS pinned source federation, contract validation, verified component bundle and non-destructive deployment plan" width="100%">
+      <p><sub><strong>Repository and release pipeline — schematic.</strong> A deployment plan is not a bootable image.</sub></p>
+    </td>
+  </tr>
+</table>
+
+## Architecture and implementation boundaries
+
+~~~mermaid
+flowchart LR
+  A[DuckOS repository] --> B[Commit-pinned source federation]
+  B --> C[Reaper reference contracts]
+  C --> D[Policy and contract validation]
+  D --> E[Versioned manifests and schemas]
+  E --> F[Verified component bundle]
+  F --> G[Non-destructive deployment plan]
+  A --> H[Mora browser desktop shell]
+  C -. future native backend .-> I[Kernel / drivers / native compositor]
+~~~
+
+The dashed native branch is a future implementation boundary, not a claim of present kernel or driver execution. For the authoritative layer description, see [Architecture](docs/ARCHITECTURE.md), [Build contracts](docs/BUILD_CONTRACTS.md) and [Implementation status](docs/IMPLEMENTATION_STATUS.md).
 
 ## Federated source workspace
 
-DuckOS keeps the four specialist Ivan-VHS projects as independent, commit-pinned Git submodules under `projects/`: [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [Reaper](https://github.com/Ivan-VHS/Reaper), [OPlague](https://github.com/Ivan-VHS/OPlague) and [VentuSample](https://github.com/Ivan-VHS/VentuSample). The checked-in registry records their source pins, licenses, roles and integration boundaries.
+DuckOS keeps four specialist projects as independent commit-pinned Git submodules under <code>projects/</code>:
 
-Clone the complete source workspace with `git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git`. For an existing checkout, run `python tools/federate_repositories.py sync`; it initializes only the commits pinned by DuckOS and refuses to overwrite local submodule changes. Imported projects are source checkouts, not automatically built, launched, loaded as drivers or claimed as boot-ready OS services. Reaper is the explicit exception for user-approved source checking and Studio launch through the [native Reaper workbench](docs/REAPER_INTEGRATION.md); this does not grant kernel or device privileges. See [Repository federation](docs/REPOSITORY_FEDERATION.md).
-## Mora desktop
+- [Reaper](https://github.com/Ivan-VHS/Reaper) — source-language semantics and system-policy contracts.
+- [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) — processor systems and bounded hardware diagnostics.
+- [OPlague](https://github.com/Ivan-VHS/OPlague) — read-only device and driver evidence workbench.
+- [VentuSample](https://github.com/Ivan-VHS/VentuSample) — offline procedural audio and DSP workstation.
 
-**Start here:** [Mora desktop shell](mora/index.html).
+The pinned checkouts are source dependencies, not automatically built OS services. The explicit Reaper workbench integration can run approved checks and launch Studio; it does not grant kernel or device privileges. See [Repository federation](docs/REPOSITORY_FEDERATION.md) and [Reaper integration](docs/REAPER_INTEGRATION.md).
 
-Mora uses the single DuckOS black/white/yellow visual profile: near-black surfaces, white content and a shared duck-yellow accent, with restrained vertical folds around a deep radial centre. Amber, Dark and Light are not separate modes. The [Mora Design System](MORA_DESIGN_SYSTEM.md) supplies the canonical semantic tokens; the shell adds an installable web manifest, persistent single-palette preferences and a scoped offline cache. It includes twenty first-party applications, the Mora Commons catalogue, nine system tools and the native Duck Desktop optimizer integration. The browser shell includes draggable windows, live clock, dashboard widgets, responsive layout, local preferences and keyboard navigation.
+## Reaper workbench
 
-The system tools are:
+After initializing the pinned Reaper submodule, the DuckOS CLI exposes these integration commands:
 
-- **Mora AI:** allowlisted local intent planning, readable action preview and explicit approval. No free-form shell execution or connected LLM is claimed.
-- **Sentinel:** deny-by-default capability preferences for microphone, camera, location, files, network and clipboard. A native capability broker is still needed for process enforcement.
-- **Restore:** versioned backup and restore of Mora preferences, with an A/B update workflow preview. This is not an OS-image updater or boot rollback.
-- **Bridge:** local PE/ELF inspection in Mora; the native DuckBridge CLI discovers compatibility runtimes and prepares reviewable launch plans. It still does not launch targets.
-- **Control:** persistent shell preferences for focus, reduced motion and a selectable resource profile. These do not change kernel scheduling or hardware power.
-- **Proof:** local SHA-256 calculation. It does not verify C2PA manifests or signer identity.
-- **Mora Boost:** a single entry point to OPlague's Windows gaming lab for hardware snapshots, NVIDIA telemetry, Windows reliability events, reversible power sessions, frametime benchmarking and validated per-device profiles. It does not claim browser-side driver or kernel control.
-
-The previous one-file [Mora seven-app prototype](prototype/mora-home.html) is retained as a reference implementation while the unified shell evolves.
-
-## Native Reaper workbench
-
-Reaper is integrated into the native **Duck Desktop** maintenance workspace as a first-class developer tool. It discovers the pinned `projects/reaper` checkout, opens Reaper Studio in its own process and delegates static checks to Reaper's own CLI. It does not embed a second language runtime into DuckOS.
-
-Initialize the specialist checkout and inspect the integration:
-
-```sh
-git submodule update --init projects/reaper
+~~~sh
 duckos reaper status
 duckos reaper studio
 duckos reaper check ./examples/program.rpr
 duckos reaper typecheck ./examples/program.rpr
-```
+~~~
 
-The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
-
-## Visual system and offline support
-
-The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The service worker is scoped to the Mora directory, caches only Mora shell assets and removes only older caches named with the `mora-shell-` prefix.
-
-## Hardware inventory and driver audit
-
-Collect a bounded, read-only snapshot of PCI/USB devices on Linux or present Plug-and-Play devices on Windows:
-
-```sh
-duckos hardware-inventory --output hardware-inventory.json
-```
-
-The versioned [hardware inventory contract](schemas/hardware-inventory.v1.schema.json) records detected bus IDs, driver binding state and privacy-preserving per-snapshot identity hashes. It does not install, update, enable or unload drivers. Use Reaper's read-only audit command to validate the snapshot and produce a diagnostic report; actual device support, signed driver packages and kernel enforcement remain native DuckOS work.
-
-## Run and validate
-
-Open **mora/index.html** in a modern browser. The shell has no external runtime dependencies. A secure browser context may be needed for Web Crypto file hashing.
-
-Run the JavaScript contract tests with Node.js 18 or newer:
-
-```sh
-npm test
-```
-
-The existing Python validation remains available:
-
-```sh
-python -m pip install jsonschema
-python -m unittest discover -s tests -v
-python tools/validate_app_catalog.py
-```
-
-The tests cover the browser-shell contracts and local helper logic; they do not prove kernel, driver, compositor or boot-image behavior.
+These commands operate the documented developer-workbench integration; they do not boot DuckOS or execute kernel code.
 
 ## Release packaging and deployment planning
 
-The native Python toolchain now provides deterministic, optionally Ed25519-signed component bundles, SHA-256 inventory and verification, plus non-destructive GPT A/B/recovery/data layout planning for USB, PXE, UEFI HTTP Boot/iPXE and cloud deployment targets.
-
-See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce a verified component archive or deployment plan; they do not yet build a bootable ISO/USB image, install to a physical disk, convert cloud images, or implement firmware Secure Boot and boot rollback.
-
-## System architecture and maturity
-
-The 2026 OS design directions are tracked as service contracts in [Mora system policy](mora/system-policy.json) and in the [Mora integration guide](docs/MORA_INTEGRATION.md).
-
-| Area | Current Mora shell | Native DuckOS work still required |
-|---|---|---|
-| Intent UI and approvals | Limited allowlisted local actions with review | privileged action broker, audit and rollback |
-| Local models and AI-native scheduling | Not connected | local inference runtime, NPU discovery and kernel scheduler |
-| Immutable atomic updates | Local settings snapshot only | signed images, A/B slots, boot verification and recovery |
-| Sandboxing and zero trust | Preferences only | per-process isolation, capability checks and device broker |
-| Provenance | SHA-256 only | C2PA parsing, signer trust and signature validation |
-| Adaptive workspace | Responsive browser layout, reduced motion | native compositor, display migration and XR runtime |
-| Multimodal input | Keyboard, pointer and touch | speech, gesture and accessibility services |
-| Windows/Linux compatibility | PE32/PE32+ header, section and import inspection; prefix scaffolding and CLI diagnostics | native executable loader, Win32/NT APIs, graphics/audio translation and launcher integration |
-| Declarative configuration | Versioned shell preference object | system-wide desired-state and package manager |
-| Energy awareness | UI profile preference | CPU/GPU/NPU scheduler, thermal policy and VRR |
-| Hardware inventory | Read-only PCI/USB (Linux) and PnP (Windows) snapshot | PCI/USB/ACPI enumeration in kernel, signed driver installation and device recovery |
-
-No browser control is described as a native kernel, driver, sandbox, updater or hardware implementation. In particular, PE inspection is not Windows program execution, settings snapshots are not atomic OS rollback, and SHA-256 does not authenticate a file's author.
-
-## DuckOS Extended Terminal
-
-The separate user-space extended terminal is available through `duckos terminal`. It provides an allowlisted command registry for existing hardware, desktop, DuckBridge, compatibility and module diagnostics, plus local aliases, bounded history, prompt settings and an explicit extension API. It does not launch a host shell, execute arbitrary commands or load third-party extensions automatically. See [Extended Terminal](docs/EXTENDED_TERMINAL.md) for commands, state handling, security boundaries and tests.
+Validate a local system manifest and staged root filesystem:
 
 ~~~sh
-duckos terminal
-duckos terminal run "hardware inventory"
-duckos terminal run "bridge runtimes"
+python -m duckos validate-manifest system-manifest.json build/rootfs
 ~~~
 
-## Native Duck Desktop optimizer
-
-The native user-space maintenance utility complements the Mora browser shell. It provides a read-only desktop and resource audit, confirmed move-to-Inbox file organization, reversible current-user startup management and a Tk maintenance window.
+Build a component archive:
 
 ~~~sh
-duckos desktop audit
-duckos desktop gui
-duckos desktop startup list
+python -m duckos build-release system-manifest.json build/rootfs DuckOS-release.tar.gz
 ~~~
 
-It does not claim to be the native compositor or manage machine-wide services. See [Duck Desktop optimization](docs/DESKTOP_OPTIMIZATION.md) for commands, safety boundaries and implementation status.
+Create a non-destructive USB layout plan:
 
-## Windows application compatibility
+~~~sh
+python -m duckos deployment-plan system-manifest.json build/rootfs --target usb --output usb-layout.json
+~~~
 
-DuckOS now includes a read-only PE32/PE32+ inspection engine, isolated prefix scaffolding and dry-run launch diagnostics. This is the first compatibility layer, not yet a Wine replacement; native Windows process execution remains blocked until the NT/Win32 runtime and graphics/audio backends exist. See [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the PE foundation and [DuckBridge](docs/DUCKBRIDGE.md) for Wine/Proton/CrossOver/Bottles discovery and non-executing command plans.
+The toolchain can create and verify component archives, checksums and optional signatures, and describe deployment layouts. It does **not** yet produce a bootable ISO/USB image, write a physical disk, install firmware Secure Boot keys, or implement native boot rollback. Read [Deployment tooling](docs/DEPLOYMENT.md) before treating a plan as an installation procedure.
 
-## Documentation
+## Configuration
 
-Start with the [DuckOS documentation index](docs/README.md). The [unified documentation and semantics standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md) defines terminology, maturity states, runtime claims and evidence requirements.
+The browser shell does not require a root <code>.env</code>, hosted account, API token or remote backend for its local workflow. System and application policy contracts are versioned in repository files such as <code>mora/system-policy.json</code> and the files linked from the [documentation index](docs/README.md). Do not add placeholder credentials or undocumented environment variables to this README.
 
-- [Mora Commons unified application catalogue](docs/MORA_COMMONS.md)
-- [Preinstalled application suite](docs/PREINSTALLED_APPLICATIONS.md)
-- [Mora shell and native integration](docs/MORA_INTEGRATION.md)
-- [DuckBridge runtime discovery and launch planning](docs/DUCKBRIDGE.md)
-- [Mora Boost and OPlague gaming integration](docs/GAMING_PERFORMANCE_INTEGRATION.md)
-- [Mora machine-readable system policy](mora/system-policy.json)
+## Repository map
 
-Implementation maturity, supported platforms and subsystem behavior must be stated from the current source, build configuration and tests.
+| Path | Responsibility |
+|---|---|
+| <code>mora/</code> | Current Mora browser desktop shell, theme and local system-policy files |
+| <code>prototype/</code> | Earlier Mora prototype retained for reference |
+| <code>projects/</code> | Commit-pinned specialist source repositories |
+| <code>duckos/</code> | DuckOS language-level contracts and security policy |
+| <code>catalogs/</code> and <code>schemas/</code> | Versioned application, system and transfer contracts |
+| <code>tools/</code> | Federation, validation, release packaging and deployment planning |
+| <code>tests/</code> | Python and JavaScript contract/regression tests |
+| <code>docs/</code> | Architecture, implementation status, deployment and integration documentation |
+| <code>.github/workflows/</code> | CI, completeness, compatibility and federation checks |
 
-## Attribution
+## Verification and roadmap
 
-Project author/developer: **Ivan-VHS**. Preserve the authorship, contributions and license notices of existing contributors and dependencies.
+~~~sh
+npm test
+python -m unittest discover -s tests -v
+python tools/validate_app_catalog.py
+git diff --check
+~~~
+
+Use [Implementation status](docs/IMPLEMENTATION_STATUS.md) for the current maturity ledger, [Deployment](docs/DEPLOYMENT.md) for archive and plan capabilities, and [Windows compatibility](docs/WINDOWS_COMPATIBILITY.md) for the executable-inspection boundary. A passing contract test is not proof of native kernel, device-driver or boot-image behavior.
+
+## Contributing and security
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing system contracts, manifests, federation or native boundaries. The documentation publication rules are in [README Visual Standard](docs/README_VISUAL_STANDARD.md); use the repository's existing security and capability contracts when reviewing changes.
+
+## Further reading
+
+- [Mora desktop integration](docs/MORA_INTEGRATION.md)
+- [Preinstalled application specification](docs/PREINSTALLED_APPLICATIONS.md)
+- [DuckOS Extended Terminal](docs/EXTENDED_TERMINAL.md)
+- [DuckOS architecture](docs/ARCHITECTURE.md)
+- [Build contracts](docs/BUILD_CONTRACTS.md)
+- [Deployment tooling](docs/DEPLOYMENT.md)
