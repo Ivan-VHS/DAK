@@ -86,6 +86,10 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "jora_application_store": {
+      "maturity": "partial",
+      "scope": "Mora local catalogue and capability-pack composer; exports a versioned request and delegates scaffold generation to Reaper CLI; no signed package store, native installation or runtime isolation yet"
     }
   },
   "not_in_scope_as_implemented_features": [
