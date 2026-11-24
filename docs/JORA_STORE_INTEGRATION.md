@@ -55,7 +55,7 @@ A successful generation means only that a new project scaffold was created. The 
 
 | Dimension | Current behavior |
 |---|---|
-| Feature packs | Text editor, audio editor, translator |
+| Feature packs | 21 canonical capability contracts across text, media, language, productivity, development, data, visual, video, documents, system, network, automation and analytics |
 | Generated implementation | Reaper .rpr, flow syntax |
 | UI locales | EN, RU, UK, MOST |
 | Java/Kotlin/Python/TypeScript/Rust/C | Request metadata only; code-generation adapter pending |
@@ -76,3 +76,14 @@ Initialize the independent Reaper checkout using the existing submodule workflow
 ## Release gates
 
 Jora's catalogue and scaffold builder are not a package manager. Before an application can be offered as installable, DuckOS still needs a native package lifecycle with cryptographic manifest/signature verification, dependency/license review, permission prompts and enforcement, process isolation, resource quotas, transaction-safe updates and rollback. Every selected module must have implementation, tests and reproducible provenance. A catalogue card or generated stub cannot pass those gates.
+
+
+## Expanded capability catalogue and Reaper binding
+
+Mora renders the capability list from the same canonical component IDs consumed by Reaper, rather than maintaining a three-item UI list. The selected formula supports up to 24 unique components. For formulas above 12 packs, Reaper builds domain-cluster gateways and bounds direct provider/consumer neighbours; graph node and edge counts have finite generation budgets.
+
+DuckOS pins the Reaper submodule to the matching `feature/jora-app-factory` commit while the cross-repository Reaper pull request is under review. The native bridge continues to use argument arrays and `shell=False`; the browser composer only exports a request and never starts processes.
+
+The DAK catalogue registers `dak.jora` and reserves `dak.app-synthesis.v1`. This DAK service is a contract reservation, not a completed native kernel/service provider. Generated projects remain statically validated source scaffolds, not installable or executable applications. Extra-language selections are generated as explicit `adapter_pending` plans until their language-specific backends are implemented.
+
+The seed registry covers 21 canonical packs today. The 666 detailed variations are not silently represented as complete: they must be imported and verified as a separately versioned catalogue expansion.

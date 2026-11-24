@@ -1,4 +1,4 @@
-const COMPONENTS = Object.freeze({
+export const COMPONENTS = Object.freeze({
   "text.editor": {
     name: "Text Editor",
     label: "Текстовый редактор",
@@ -10,7 +10,27 @@ const COMPONENTS = Object.freeze({
   "translation.workspace": {
     name: "Translator",
     label: "Переводчик",
-  }
+    description: "Перевод, терминология и параллельные тексты.",
+    domain: "language",
+  },
+  "subtitle.editor": { name: "Subtitle Editor", label: "Редактор субтитров", description: "Тайминг, проверка и экспорт SRT/WebVTT/ASS.", domain: "language" },
+  "notes.workspace": { name: "Notes Workspace", label: "Заметки и связи", description: "Связанные заметки, теги, ссылки и аннотации.", domain: "productivity" },
+  "task.board": { name: "Task Board", label: "Доска задач", description: "Задачи, статусы, приоритеты и очереди проекта.", domain: "productivity" },
+  "calendar.scheduler": { name: "Calendar Scheduler", label: "Календарь и расписание", description: "События, дедлайны, расписания и напоминания.", domain: "productivity" },
+  "speech.synthesis": { name: "Speech Synthesis", label: "Синтез речи", description: "Озвучка текста, голосовые профили и речевые ресурсы.", domain: "audio" },
+  "speech.recognition": { name: "Speech Recognition", label: "Распознавание речи", description: "Транскрибация, распознавание и разделение спикеров.", domain: "audio" },
+  "code.editor": { name: "Code Editor", label: "Редактор кода", description: "Исходники, диагностика, структура и поиск по проекту.", domain: "development" },
+  "spreadsheet.editor": { name: "Spreadsheet Editor", label: "Таблицы", description: "Табличные данные, формулы, сортировка и преобразования.", domain: "data" },
+  "image.editor": { name: "Image Editor", label: "Редактор изображений", description: "Изображения, слои, маски и экспорт графики.", domain: "visual" },
+  "video.editor": { name: "Video Editor", label: "Видеоредактор", description: "Видеоклипы, монтажные последовательности и рендер.", domain: "video" },
+  "presentation.editor": { name: "Presentation Editor", label: "Презентации", description: "Слайды, заметки докладчика, макеты и экспорт.", domain: "documents" },
+  "file.manager": { name: "File Manager", label: "Файловый менеджер", description: "Файлы, метаданные, избранные каталоги и навигация.", domain: "system" },
+  "api.client": { name: "API Client", label: "API-клиент", description: "HTTP API, запросы, схемы ответов и коллекции.", domain: "network" },
+  "automation.engine": { name: "Automation Engine", label: "Автоматизация", description: "Триггеры, правила, события и автоматические действия.", domain: "automation" },
+  "data.visualizer": { name: "Data Visualizer", label: "Визуализация данных", description: "Графики, агрегаты, панели и интерактивные данные.", domain: "analytics" },
+  "database.manager": { name: "Database Manager", label: "Менеджер баз данных", description: "Схемы, запросы, миграции и просмотр записей.", domain: "data" },
+  "archive.manager": { name: "Archive Manager", label: "Архиватор", description: "Просмотр, распаковка, упаковка и проверка архивов.", domain: "system" },
+  "knowledge.graph": { name: "Knowledge Graph", label: "Граф знаний", description: "Сущности, отношения, обратные ссылки и семантический поиск.", domain: "knowledge" },
 });
 
 const LOCALES = new Set(["en", "ru", "uk", "most"]);
@@ -128,7 +148,25 @@ export function composeJoraRequest(options = {}) {
   const namingTerms = {
     "text.editor": { short: "Docs", domain: "Documents", action: "Writing", formula: "Text" },
     "audio.editor": { short: "Audio", domain: "Media", action: "Audio Editing", formula: "Audio" },
-    "translation.workspace": { short: "Translate", domain: "Languages", action: "Translation", formula: "Translation" }
+    "translation.workspace": { short: "Translate", domain: "Languages", action: "Translation", formula: "Translation" },
+    "subtitle.editor": { short: "Captions", domain: "Languages", action: "Subtitle Editing", formula: "Subtitles" },
+    "notes.workspace": { short: "Notes", domain: "Productivity", action: "Note Taking", formula: "Notes" },
+    "task.board": { short: "Tasks", domain: "Productivity", action: "Task Management", formula: "Tasks" },
+    "calendar.scheduler": { short: "Calendar", domain: "Productivity", action: "Scheduling", formula: "Calendar" },
+    "speech.synthesis": { short: "Voice", domain: "Audio", action: "Speech Synthesis", formula: "Voice" },
+    "speech.recognition": { short: "Speech", domain: "Audio", action: "Speech Recognition", formula: "Transcription" },
+    "code.editor": { short: "Code", domain: "Development", action: "Code Editing", formula: "Code" },
+    "spreadsheet.editor": { short: "Sheets", domain: "Data", action: "Spreadsheet Editing", formula: "Sheets" },
+    "image.editor": { short: "Images", domain: "Visual", action: "Image Editing", formula: "Images" },
+    "video.editor": { short: "Video", domain: "Media", action: "Video Editing", formula: "Video" },
+    "presentation.editor": { short: "Slides", domain: "Documents", action: "Presentation Design", formula: "Slides" },
+    "file.manager": { short: "Files", domain: "System", action: "File Management", formula: "Files" },
+    "api.client": { short: "API", domain: "Development", action: "API Integration", formula: "API" },
+    "automation.engine": { short: "Flow", domain: "Automation", action: "Workflow Automation", formula: "Automation" },
+    "data.visualizer": { short: "Charts", domain: "Analytics", action: "Data Visualization", formula: "Charts" },
+    "database.manager": { short: "Database", domain: "Data", action: "Database Management", formula: "Database" },
+    "archive.manager": { short: "Archive", domain: "System", action: "Archive Management", formula: "Archive" },
+    "knowledge.graph": { short: "Knowledge", domain: "Knowledge", action: "Knowledge Mapping", formula: "Knowledge" }
   };
   const unique = (values) => [...new Set(values)];
   const joinNatural = (values) => values.length <= 1

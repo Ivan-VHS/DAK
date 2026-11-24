@@ -89,7 +89,7 @@
     },
     "jora_application_store": {
       "maturity": "partial",
-      "scope": "Mora single-name Jora catalogue and formula composer; derives Jora-branded semantic name descriptors, selects and ranks 1–6 deterministic Reaper composition graph variants for balance, latency, modularity, extensibility or minimal complexity, exports typed graph JSON and Mermaid diagrams plus a versioned request, and delegates statically checked scaffold generation to Reaper CLI; no signed package store, native installation or runtime isolation yet"
+      "scope": "Mora Jora catalogue and formula composer backed by 21 canonical Reaper capability packs; exports versioned requests, selects and ranks deterministic graph variants, routes >12 component graphs through domain gateways with bounded provider edges, chooses auxiliary language targets from component preferences and delegates static scaffold validation/generation to the pinned Reaper CLI; DAK service ID reserved but native provider, signed package store, installation and execution isolation are not yet implemented"
     }
   },
   "not_in_scope_as_implemented_features": [

@@ -3,6 +3,7 @@
 	url = https://github.com/Ivan-VHS/Pytyliki.git
 	branch = main
 [submodule "projects/reaper"]
+	branch = feature/jora-app-factory
 	path = projects/reaper
 	url = https://github.com/Ivan-VHS/Reaper.git
 	branch = main

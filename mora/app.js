@@ -1,5 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
-import { composeJoraRequest } from "./jora.js";
+import { COMPONENTS as JORA_COMPONENTS, composeJoraRequest } from "./jora.js";
 
 import {
   RECOVERY_KEY,
@@ -328,6 +328,16 @@ function commonsPanelMarkup() {
     '<button class="commons-filter" type="button" data-commons-filter="' + category.id +
     '" aria-pressed="false">' + category.title + '</button>'
   ).join("");
+  const escapeMarkup = (value) => String(value).replace(/[&<>"']/gu, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[character]);
+  const defaultComponents = new Set(["text.editor", "audio.editor", "translation.workspace"]);
+  const componentOptions = Object.entries(JORA_COMPONENTS).map(([id, component]) =>
+    '<label class="jora-option"><input type="checkbox" data-jora-component="' +
+    escapeMarkup(id) + '"' + (defaultComponents.has(id) ? " checked" : "") +
+    '><span><strong>' + escapeMarkup(component.label) + '</strong><small>' +
+    escapeMarkup(component.description) + '</small></span></label>'
+  ).join("");
 
   return '<p class="window-kicker">JORA · ЕДИНЫЙ МАГАЗИН И ФАБРИКА ПРИЛОЖЕНИЙ</p>' +
     '<h2 class="window-heading">Соберите приложение из возможностей</h2>' +
@@ -335,11 +345,9 @@ function commonsPanelMarkup() {
     '<section class="jora-factory" aria-labelledby="jora-factory-title">' +
       '<div class="jora-section-head"><span class="jora-kicker">JORA</span><span class="jora-status">Reaper · flow</span></div>' +
       '<h3 id="jora-factory-title">Формула вашего приложения</h3>' +
-      '<p class="jora-copy">Параметр 1 + параметр 2 + параметр 3 ... + параметр N = новый продукт</p>' +
+      '<p class="jora-copy">21 базовый пакет возможностей. Компонуйте формулу от одной до 24 позиций; большие графы автоматически группируются по доменам.</p>' +
       '<fieldset class="jora-fieldset"><legend>Функциональные модули</legend>' +
-        '<label class="jora-option"><input type="checkbox" data-jora-component="text.editor" checked><span><strong>Текстовый редактор</strong><small>Документы, поиск, форматирование и история</small></span></label>' +
-        '<label class="jora-option"><input type="checkbox" data-jora-component="audio.editor" checked><span><strong>Аудиоредактор</strong><small>Аудиоматериалы и монтажная шкала</small></span></label>' +
-        '<label class="jora-option"><input type="checkbox" data-jora-component="translation.workspace" checked><span><strong>Переводчик</strong><small>Перевод, терминология и параллельные тексты</small></span></label>' +
+        componentOptions +
       '</fieldset>' +
       '<div class="jora-settings">' +
         '<div class="jora-label"><span>Единое имя системы</span><strong class="jora-fixed-name">Jora</strong></div>' +

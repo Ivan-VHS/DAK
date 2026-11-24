@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { composeJoraRequest } from "../mora/jora.js";
+import { COMPONENTS, composeJoraRequest } from "../mora/jora.js";
 
 test("Jora composes selected features into a deterministic product formula", () => {
   const result = composeJoraRequest({
@@ -113,4 +113,37 @@ test("Jora bounds metadata before exporting a request", () => {
   assert.throws(() => composeJoraRequest({
     name: "x".repeat(81), components: ["text.editor"], locales: ["en"]
   }), /exceeds 80/);
+});
+
+
+test("Jora exposes the 21 canonical capability packs used by Reaper", () => {
+  assert.equal(Object.keys(COMPONENTS).length, 21);
+  assert.ok(COMPONENTS["subtitle.editor"]);
+  assert.ok(COMPONENTS["knowledge.graph"]);
+  assert.ok(Object.values(COMPONENTS).every((component) => component.description && component.domain));
+});
+
+test("Jora composes a 13-component formula without duplicating components", () => {
+  const components = [
+    "text.editor", "audio.editor", "translation.workspace", "subtitle.editor",
+    "notes.workspace", "task.board", "calendar.scheduler", "speech.synthesis",
+    "speech.recognition", "code.editor", "spreadsheet.editor", "image.editor",
+    "video.editor"
+  ];
+  const result = composeJoraRequest({
+    components, locales: ["en", "ru"], preferredLocale: "ru",
+    graphTopology: "plugin_mesh", graphVariants: 3, graphObjective: "extensibility"
+  });
+  assert.equal(result.request.components.length, 13);
+  assert.equal(result.request.language_targets, "auto");
+  assert.equal(result.request.graph.topology, "plugin_mesh");
+  assert.ok(result.nameSuggestions.every((label) => label.startsWith("Jora")));
+});
+
+test("Jora accepts all 21 registered packs within the bounded formula limit", () => {
+  const result = composeJoraRequest({
+    components: Object.keys(COMPONENTS), locales: ["ru"], preferredLocale: "ru",
+    graphVariants: 1, graphTopology: "hybrid"
+  });
+  assert.equal(result.request.components.length, 21);
 });
