@@ -442,7 +442,7 @@
       "id": "gazette",
       "name": "Gazette",
       "domain": "news_rss_reader",
-      "maturity_status": "partial",
+      "maturity_status": "specified",
       "capabilities": [
         "public_rss_source_aggregation",
         "category_and_text_filtering",
