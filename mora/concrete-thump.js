@@ -7,6 +7,16 @@ export const CONCRETE_THUMP_LIMITS = Object.freeze({
   maxTotalSampleBytes: 80 * 1024 * 1024
 });
 
+export const SEQUENCE_TRACKS = Object.freeze(["kick", "snare", "hat", "bass", "choir"]);
+
+const DEFAULT_SEQUENCE = Object.freeze({
+  kick:  [true, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false],
+  snare: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+  hat:   [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
+  bass:  [true, false, false, false, false, false, false, true, true, false, false, false, false, false, true, false],
+  choir: [true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false]
+});
+
 export const CHANT_SOURCE_LABELS = Object.freeze({
   "znamenny": "Знаменный распев",
   "byzantine-slavic": "Византийско-славянский церковный распев",
@@ -91,6 +101,15 @@ export function normalizeConcreteThumpProfile(value) {
   const samples = Array.isArray(source.samples)
     ? source.samples.map(normalizeSampleMetadata).filter(Boolean).slice(0, CONCRETE_THUMP_LIMITS.maxSamples)
     : [];
+  const sequenceSource = source.sequence && typeof source.sequence === "object" ? source.sequence : {};
+  const sequence = Object.fromEntries(SEQUENCE_TRACKS.map((track) => {
+    const savedSteps = sequenceSource[track];
+    const fallback = DEFAULT_SEQUENCE[track];
+    const steps = Array.isArray(savedSteps) && savedSteps.length === 16
+      ? savedSteps.map((step) => step === true)
+      : [...fallback];
+    return [track, steps];
+  }));
 
   return {
     schema: defaults.schema,
@@ -103,7 +122,8 @@ export function normalizeConcreteThumpProfile(value) {
     sampleTreatment: ALLOWED_TREATMENTS.has(source.sampleTreatment)
       ? source.sampleTreatment
       : defaults.sampleTreatment,
-    samples
+    samples,
+    sequence
   };
 }
 
