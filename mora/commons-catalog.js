@@ -44,7 +44,7 @@ export const MORA_COMMONS_APPS = [
     keywords: ["текст", "документ", "редактор", "писать", "экспорт"], runtime: "local_browser"
   },
   {
-    id: "relay", name: "Relay", category: "communication", glyph: "↗",
+    id: "voxera", name: "Voxera", category: "communication", glyph: "↗",
     subtitle: "Локальная адресная книга",
     description: "Персональный список контактов и заметок о способах связи. Приложение не отправляет сообщения и не подключается к мессенджерам.",
     capabilities: ["Карточки контактов", "Заметки о каналах связи", "Локальное редактирование и удаление", "Без передачи данных в сеть"],
