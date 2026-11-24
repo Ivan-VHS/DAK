@@ -374,6 +374,7 @@ function commonsPanelMarkup() {
           '<label class="jora-label">Количество вариантов <select data-jora-variants><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>' +
         '</div>' +
         '<label class="jora-label">Степень архитектурной вариативности <span data-jora-variation-value>50%</span><input type="range" min="0" max="100" step="5" value="50" data-jora-variation></label>' +
+        '<label class="jora-label">Seed графов (необязательно) <input type="text" maxlength="64" data-jora-graph-seed placeholder="Автоматически из формулы и параметров"></label>' +
         '<p class="jora-copy">Jora строит несколько графов с разными способами соединения модулей. Жёсткие зависимости остаются ацикличными; обратные события допускаются только через асинхронную шину.</p>' +
       '</fieldset>' +
       '<div class="jora-actions"><button class="action-button" type="button" data-action="jora-compose">Сформировать формулу</button><button class="subtle-button" type="button" data-action="jora-export" disabled>Экспортировать JSON</button></div>' +
@@ -888,6 +889,7 @@ document.addEventListener("click", (event) => {
         graphTopology: owner.querySelector("[data-jora-topology]").value,
         graphVariants: Number(owner.querySelector("[data-jora-variants]").value),
         graphVariation: Number(owner.querySelector("[data-jora-variation]").value),
+        graphSeed: owner.querySelector("[data-jora-graph-seed]").value,
       });
       joraDrafts.set(owner, composed.request);
       preview.replaceChildren();
@@ -1012,7 +1014,7 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("input", (event) => {
   const joraInput = event.target.closest(
-    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation]"
+    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation], [data-jora-graph-seed]"
   );
   if (joraInput) {
     const owner = joraInput.closest(".app-window");
