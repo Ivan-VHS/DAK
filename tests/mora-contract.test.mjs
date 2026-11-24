@@ -147,3 +147,25 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
 });
+
+
+test("glass materials use bounded progressive enhancement and accessible fallbacks", () => {
+  const glass = theme.materials?.glass;
+  assert.equal(theme.version, 3);
+  assert.ok(glass, "glass material contract must be present");
+  assert.equal(glass.progressiveEnhancement, true);
+  assert.equal(glass.fallback, "#151515");
+  assert.equal(glass.strongFallback, "#080808");
+  assert.equal(glass.blurPx, 18);
+  assert.equal(glass.strongBlurPx, 22);
+  assert.equal(glass.mobileBlurPx, 10);
+  assert.equal(glass.maxConcurrentBlurLayers, 5);
+  assert.equal(glass.reducedTransparency, "opaque");
+  assert.equal(glass.forcedColors, "system");
+  assert.ok(css.includes("@supports ((backdrop-filter: blur(1px))"));
+  assert.ok(css.includes("@media (prefers-reduced-transparency: reduce)"));
+  assert.ok(css.includes(":root.reduce-transparency"));
+  assert.ok(css.includes("@media (forced-colors: active)"));
+  assert.ok(css.includes("backdrop-filter: none"));
+  assert.ok(css.includes("--mora-glass-fallback"));
+});
