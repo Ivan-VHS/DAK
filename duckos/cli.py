@@ -144,6 +144,30 @@ def main(argv: list[str] | None = None) -> int:
     reaper_check.add_argument("source", type=Path)
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
+    reaper_modules = reaper_commands.add_parser("modules", help="inspect the transitive source module graph without execution")
+    reaper_modules.add_argument("source", type=Path)
+    reaper_run = reaper_commands.add_parser("run", help="run a local Reaper program with explicit interpreter quotas")
+    reaper_run.add_argument("source", type=Path)
+    reaper_run.add_argument("--steps", type=int, default=1_000_000)
+    reaper_run.add_argument("--items", type=int, default=100_000)
+    reaper_run.add_argument("--text-length", type=int, default=1_000_000)
+    reaper_run.add_argument("--heap-bytes", type=int, default=64 * 1024 * 1024)
+    reaper_run.add_argument("--open-resources", type=int, default=64)
+    reaper_run.add_argument("--engine", choices=("treewalk", "vm"), default="treewalk")
+    reaper_run.add_argument("--profile", action="store_true")
+    reaper_native = reaper_commands.add_parser("native", help="build the experimental Reaper scalar AOT subset to a host executable")
+    reaper_native.add_argument("source", type=Path)
+    reaper_native.add_argument("--output", type=Path, required=True)
+    reaper_native.add_argument("--compiler", help="explicit GCC/Clang-compatible compiler path")
+    reaper_native.add_argument("--optimization", choices=("0", "1", "2", "3", "s"), default="2")
+    reaper_emit_c = reaper_commands.add_parser("emit-c", help="emit C17 for the checked Reaper native subset")
+    reaper_emit_c.add_argument("source", type=Path)
+    reaper_emit_c.add_argument("--output", type=Path, required=True)
+    reaper_toolchain = reaper_commands.add_parser("toolchain", help="inventory available local build and development tools without executing them")
+    reaper_toolchain.add_argument("--path", help="optional PATH value for a reproducible inventory")
+    reaper_commands.add_parser("lsp", help="serve the Reaper Language Server Protocol over stdio")
+    reaper_commands.add_parser("dap", help="serve the Reaper Debug Adapter Protocol over stdio")
+    reaper_commands.add_parser("repl", help="start the interactive Reaper prompt")
 
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
@@ -296,6 +320,48 @@ def main(argv: list[str] | None = None) -> int:
                 result = workbench.typecheck(args.source)
                 _print_result(result)
                 return 0 if result["ok"] else 1
+            elif args.reaper_command == "modules":
+                result = workbench.module_graph(args.source)
+                _print_result(result)
+                return result["exit_code"]
+            elif args.reaper_command == "run":
+                result = workbench.run(
+                    args.source,
+                    limits={
+                        "steps": args.steps,
+                        "items": args.items,
+                        "text_length": args.text_length,
+                        "heap_bytes": args.heap_bytes,
+                        "open_resources": args.open_resources,
+                    },
+                    engine=args.engine,
+                    profile=args.profile,
+                )
+                _print_result(result)
+                return result["exit_code"]
+            elif args.reaper_command == "native":
+                result = workbench.native_build(
+                    args.source,
+                    args.output,
+                    compiler=args.compiler,
+                    optimization=args.optimization,
+                )
+                _print_result(result)
+                return result["exit_code"]
+            elif args.reaper_command == "emit-c":
+                result = workbench.emit_c(args.source, args.output)
+                _print_result(result)
+                return result["exit_code"]
+            elif args.reaper_command == "toolchain":
+                result = workbench.toolchain_inventory(search_path=args.path)
+                _print_result(result)
+                return result["exit_code"]
+            elif args.reaper_command == "lsp":
+                return workbench.serve_protocol("lsp")
+            elif args.reaper_command == "dap":
+                return workbench.serve_protocol("dap")
+            elif args.reaper_command == "repl":
+                return workbench.repl()
             else:
                 raise ValueError("unknown Reaper workbench command")
         else:
