@@ -2,9 +2,9 @@
 
 ## Executive state
 
-DuckOS is already **Reaper-first at the policy-contract layer**. Nineteen .rpr modules describe boot ordering, memory arithmetic, scheduler decisions, bounded IPC, driver metadata, trust, services, storage, telemetry and desktop policy. The Reaper contract-tests workflow checks every .rpr file and executes the integration suite with both the tree-walk reference runtime and the VM.
+DuckOS is already **Reaper-first at the policy-contract layer**. Twenty .rpr modules describe boot ordering, memory arithmetic, scheduler decisions, bounded IPC, driver metadata, trust, services, storage, telemetry and desktop policy. The Reaper contract-tests workflow checks every .rpr file and executes the integration suite with both the tree-walk reference runtime and the VM.
 
-That is a meaningful language/system co-design baseline, but it is not yet a Reaper-native operating system. The current CMake project builds a host-testable C11 boot-information validator. No bootloader, privileged kernel entry, page tables, physical allocator, interrupt controller, preemptive scheduler, syscall boundary, VFS, process model or bootable image is present. The Python package supplies host-side tools and user-space integrations; Mora is a browser-hosted JavaScript/HTML/CSS desktop shell.
+That is a meaningful language/system co-design baseline, but it is not yet a Reaper-native operating system. The current CMake project builds a host-testable C11 boot-information validator; a new Reaper value-level mirror now exercises the same handoff policy in the contract suite. No bootloader, privileged kernel entry, page tables, physical allocator, interrupt controller, preemptive scheduler, syscall boundary, VFS, process model or bootable image is present. The Python package supplies host-side tools and user-space integrations; Mora is a browser-hosted JavaScript/HTML/CSS desktop shell.
 
 This plan treats source, tests, CI and emulator/hardware evidence as the capability boundary. A policy function that returns a scheduling decision is not a context switch. A queue model is not a shared-page IPC transport. A driver descriptor is not a loaded device driver. A valid boot-info structure is not a bootloader.
 
@@ -32,7 +32,7 @@ The pin is a language-toolchain dependency, not proof that native Reaper object 
 | duckos/storage/*.rpr | graph references, journal ordering and LWW register | Reaper policy; no persistent VFS or full database |
 | duckos/system/*.rpr | execution-medium selection and telemetry classification | Reaper policy; no accelerator dispatch or sensor driver |
 | duckos/ui/*.rpr | theme, motion and desktop policy | Reaper policy; no compositor or renderer |
-| foundation/boot_info.c/.h | versioned fixed-width boot handoff validation | C11 host-tested foundation; no boot protocol implementation |
+| foundation/boot_info.c/.h and duckos/kernel/boot_info.rpr | C11 and Reaper validation of the versioned fixed-width boot handoff | C11 host-tested boundary plus Reaper value-level mirror; no boot protocol implementation |
 | duckos/**/*.py | packaging, deployment planning, read-only host inventory, CLI, compatibility inspection, native workbench and desktop maintenance | host tools/user-space; not kernel implementation |
 | mora/**/* | browser-local Mora shell and app surfaces | web runtime; requires an explicit decision before calling it part of the Reaper-native userland |
 
