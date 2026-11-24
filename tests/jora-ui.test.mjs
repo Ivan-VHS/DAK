@@ -75,7 +75,7 @@ test("Jora rejects unsupported graph and naming options", () => {
 
 test("Jora refuses separately branded application names", () => {
   assert.throws(() => composeJoraRequest({
-    name: "LexiTone",
+    name: "OtherProduct",
     components: ["text.editor"],
     locales: ["en"]
   }), /fixed application name/);
