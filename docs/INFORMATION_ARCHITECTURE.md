@@ -21,6 +21,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 - [Mora theme tokens](../mora/theme.json) — versioned machine-readable palettes and interaction tokens.
 - [Mora system policy](../mora/system-policy.json) — maturity and implementation boundaries.
 - [Mora application registry](../mora/apps.json) — first-party panels and shell-level system tools.
+- [Газета news feed implementation note](NEWS_FEED.md) — provider usage, local cache, privacy model and native DAK boundary.
 - [Газета application](../mora/news.js) and [news query/normalization core](../mora/news-core.js) — GDELT-backed feed and local bookmarks.
 - [Mora desktop entry point](../mora/index.html) — current unified browser shell.
 
