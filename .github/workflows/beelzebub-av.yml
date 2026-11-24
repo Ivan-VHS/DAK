@@ -1,0 +1,69 @@
+name: Beelzebub AV Java security core
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "security/beelzebub-av-source.parts/**"
+      - "security/BEELZEBUB-AV-SOURCE.md"
+      - "scripts/unpack-beelzebub-av-source.sh"
+      - "duckos/cli.py"
+      - "tests/test_beelzebub_*.py"
+      - ".github/workflows/beelzebub-av.yml"
+  push:
+    branches: [main, "feat/**", "integration/**", "feature/**"]
+    paths:
+      - "security/beelzebub-av-source.parts/**"
+      - "security/BEELZEBUB-AV-SOURCE.md"
+      - "scripts/unpack-beelzebub-av-source.sh"
+      - "duckos/cli.py"
+      - "tests/test_beelzebub_*.py"
+      - ".github/workflows/beelzebub-av.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beelzebub-av-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  java-core:
+    name: Java 21 core and security regression tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct and verify the source bundle
+        run: ./scripts/unpack-beelzebub-av-source.sh
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build executable scanner JAR
+        working-directory: security/beelzebub-av
+        run: mvn --batch-mode --no-transfer-progress clean package
+      - name: Run dependency-free adversarial regression harness
+        working-directory: security/beelzebub-av
+        run: ./scripts/self-test.sh
+      - name: Verify CLI entry point
+        working-directory: security/beelzebub-av
+        run: java -jar target/beelzebub-av-0.1.0-SNAPSHOT.jar version
+
+  duckos-bridge:
+    name: DuckOS process bridge tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct and verify the source bundle
+        run: ./scripts/unpack-beelzebub-av-source.sh
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate bridge syntax
+        run: python -m compileall -q duckos/security tests
+      - name: Run DuckOS bridge and CLI regression tests
+        run: python -W error::ResourceWarning -m unittest discover -s tests -p 'test_beelzebub_*.py' -v

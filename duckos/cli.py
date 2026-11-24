@@ -171,6 +171,29 @@ def main(argv: list[str] | None = None) -> int:
         help="append one target argument; repeat to add more than one",
     )
 
+    beelzebub = commands.add_parser(
+        "beelzebub", help="scan user-selected files with the Beelzebub AV user-space scanner"
+    )
+    beelzebub.add_argument("--root", type=Path, help="DuckOS repository root containing the built AV JAR")
+    beelzebub_commands = beelzebub.add_subparsers(dest="beelzebub_command", required=True)
+    beelzebub_commands.add_parser("status", help="show actual scanner availability and protection boundaries")
+    av_scan = beelzebub_commands.add_parser("scan", help="scan a file or directory without executing or deleting it")
+    av_scan.add_argument("target", type=Path)
+    av_scan.add_argument("--hashdb", type=Path)
+    av_scan.add_argument("--signature", type=Path)
+    av_scan.add_argument("--public-key", type=Path)
+    av_scan.add_argument("--min-db-version", type=int)
+    av_scan.add_argument("--clam-port", type=int)
+    av_scan.add_argument("--yara-bin", type=Path)
+    av_scan.add_argument("--yara-rules", type=Path)
+    av_scan.add_argument("--yara-timeout", type=int)
+    av_scan.add_argument("--quarantine", action="store_true")
+    av_scan.add_argument("--quarantine-dir", type=Path)
+    av_scan.add_argument("--quarantine-key", type=Path)
+    av_scan.add_argument("--state-dir", type=Path)
+    av_scan.add_argument("--work-dir", type=Path)
+    av_scan.add_argument("--audit", type=Path)
+
     try:
         args = parser.parse_args(argv)
         if args.command == "build-release":
@@ -298,6 +321,35 @@ def main(argv: list[str] | None = None) -> int:
                 return 0 if result["ok"] else 1
             else:
                 raise ValueError("unknown Reaper workbench command")
+        elif args.command == "beelzebub":
+            from .security import BeelzebubWorkbench
+
+            workbench = BeelzebubWorkbench(args.root)
+            if args.beelzebub_command == "status":
+                result = workbench.inspect()
+                _print_result(result)
+                return 0 if result["available"] else 3
+            if args.beelzebub_command == "scan":
+                exit_code, result = workbench.scan(
+                    args.target,
+                    hashdb=args.hashdb,
+                    signature=args.signature,
+                    public_key=args.public_key,
+                    min_db_version=args.min_db_version,
+                    clam_port=args.clam_port,
+                    yara_bin=args.yara_bin,
+                    yara_rules=args.yara_rules,
+                    yara_timeout=args.yara_timeout,
+                    quarantine=args.quarantine,
+                    quarantine_dir=args.quarantine_dir,
+                    quarantine_key=args.quarantine_key,
+                    state_dir=args.state_dir,
+                    work_dir=args.work_dir,
+                    audit=args.audit,
+                )
+                _print_result(result)
+                return exit_code
+            raise ValueError("unknown Beelzebub command")
         else:
             result = compatibility_status()
         _print_result(result)
