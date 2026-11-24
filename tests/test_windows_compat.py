@@ -100,6 +100,13 @@ class WindowsCompatibilityTests(unittest.TestCase):
             finally:
                 pe_module.MAX_FILE_BYTES = previous_limit
 
+    def test_pe_file_reader_rejects_directory(self):
+        from duckos.compat.pe import inspect_pe_file
+
+        with tempfile.TemporaryDirectory() as temporary:
+            with self.assertRaisesRegex(PEFormatError, "regular file"):
+                inspect_pe_file(Path(temporary))
+
     def test_creates_isolated_prefix_and_validates_manifest(self):
         with tempfile.TemporaryDirectory() as temporary:
             manifest = create_prefix(temporary, "sample-game", architecture="x86_64")
