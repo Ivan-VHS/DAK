@@ -351,6 +351,14 @@ function commonsPanelMarkup() {
         '<label class="jora-locale"><input type="checkbox" data-jora-locale="uk" checked> UK</label>' +
         '<label class="jora-locale"><input type="checkbox" data-jora-locale="most" checked> MOST</label>' +
       '</fieldset>' +
+      '<fieldset class="jora-fieldset jora-target-fieldset"><legend>Дополнительные языки исходников</legend>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="java"><span><strong>Java</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="kotlin"><span><strong>Kotlin</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="python"><span><strong>Python</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="typescript"><span><strong>TypeScript</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="rust"><span><strong>Rust</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="c"><span><strong>C</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+      '</fieldset>' +
       '<div class="jora-actions"><button class="action-button" type="button" data-action="jora-compose">Сформировать формулу</button><button class="subtle-button" type="button" data-action="jora-export" disabled>Экспортировать JSON</button></div>' +
       '<div class="jora-preview" data-jora-preview aria-live="polite">Выберите модули и сформируйте комбинацию. Jora предложит имя и покажет итоговую формулу.</div>' +
       '<p class="jora-footnote">Экспорт создаёт запрос для локальной сборки. Браузерная Mora не запускает процессы на компьютере и не устанавливает приложения самостоятельно.</p>' +
@@ -851,11 +859,14 @@ document.addEventListener("click", (event) => {
       .map((item) => item.dataset.joraComponent);
     const locales = Array.from(owner.querySelectorAll("[data-jora-locale]:checked"))
       .map((item) => item.dataset.joraLocale);
+    const languageTargets = Array.from(owner.querySelectorAll("[data-jora-target]:checked"))
+      .map((item) => item.dataset.joraTarget);
     try {
       const composed = composeJoraRequest({
         components,
         locales,
         preferredLocale: owner.querySelector("[data-jora-preferred]").value,
+        languageTargets,
         name: owner.querySelector("[data-jora-name]").value
       });
       joraDrafts.set(owner, composed.request);
@@ -866,9 +877,9 @@ document.addEventListener("click", (event) => {
       const formula = document.createElement("p");
       formula.textContent = composed.formula + " = " + composed.name;
       const detail = document.createElement("small");
-      detail.textContent = "Reaper flow · локали: " + composed.generatedLocales.join(", ").toUpperCase();
+      detail.textContent = "Цели: " + composed.languageTargets.join(" + ").toUpperCase() + " · локали: " + composed.generatedLocales.join(", ").toUpperCase();
       const maturity = document.createElement("small");
-      maturity.textContent = "Следующий шаг: экспортировать запрос и выполнить локальную сборку. Модули пока имеют статус спецификаций.";
+      maturity.textContent = composed.pendingTargets.length ? "Остальные языки отмечены как ожидающие адаптеры; реально генерируется Reaper. Модули пока спецификации." : "Следующий шаг: экспортировать запрос и выполнить локальную сборку. Модули пока имеют статус спецификаций."
       preview.append(name, formula, detail, maturity);
       exportButton.disabled = false;
       showToast("Формула Jora подготовлена: " + composed.name);
