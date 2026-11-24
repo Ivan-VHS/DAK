@@ -57,15 +57,15 @@
   },
   "source_inventory": [
     {
-      "path": "duckos/kernel/boot.rpr",
-      "subsystem": "boot",
-      "responsibility": "ordered startup and recovery policy",
+      "path": "duckos/drivers/abi.rpr",
+      "subsystem": "drivers",
+      "responsibility": "driver descriptor and capability policy",
       "maturity": "reference-contract"
     },
     {
-      "path": "duckos/kernel/memory.rpr",
-      "subsystem": "memory",
-      "responsibility": "checked region arithmetic and arena reservation policy",
+      "path": "duckos/drivers/orchestrator.rpr",
+      "subsystem": "drivers",
+      "responsibility": "device resource and IRQ conflict policy",
       "maturity": "reference-contract"
     },
     {
@@ -75,9 +75,15 @@
       "maturity": "reference-contract"
     },
     {
-      "path": "duckos/kernel/scheduler.rpr",
-      "subsystem": "scheduler",
-      "responsibility": "deterministic ready-task selection policy",
+      "path": "duckos/kernel/boot_info.rpr",
+      "subsystem": "boot",
+      "responsibility": "Reaper value-level validation mirror for the versioned boot handoff contract",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/boot.rpr",
+      "subsystem": "boot",
+      "responsibility": "ordered startup and recovery policy",
       "maturity": "reference-contract"
     },
     {
@@ -93,21 +99,21 @@
       "maturity": "reference-contract"
     },
     {
+      "path": "duckos/kernel/memory.rpr",
+      "subsystem": "memory",
+      "responsibility": "checked region arithmetic and arena reservation policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/kernel/scheduler.rpr",
+      "subsystem": "scheduler",
+      "responsibility": "deterministic ready-task selection policy",
+      "maturity": "reference-contract"
+    },
+    {
       "path": "duckos/kernel/zero_copy_bus.rpr",
       "subsystem": "ipc",
       "responsibility": "byte accounting and watermarks for a future shared-memory bus",
-      "maturity": "reference-contract"
-    },
-    {
-      "path": "duckos/drivers/abi.rpr",
-      "subsystem": "drivers",
-      "responsibility": "driver descriptor and capability policy",
-      "maturity": "reference-contract"
-    },
-    {
-      "path": "duckos/drivers/orchestrator.rpr",
-      "subsystem": "drivers",
-      "responsibility": "device resource and IRQ conflict policy",
       "maturity": "reference-contract"
     },
     {
@@ -129,21 +135,15 @@
       "maturity": "reference-contract"
     },
     {
-      "path": "duckos/storage/hypergraph.rpr",
-      "subsystem": "storage",
-      "responsibility": "content-addressed graph reference validation",
-      "maturity": "reference-contract"
-    },
-    {
       "path": "duckos/storage/crdt.rpr",
       "subsystem": "storage",
       "responsibility": "deterministic last-writer-wins register merge",
       "maturity": "reference-contract"
     },
     {
-      "path": "duckos/system/three_media.rpr",
-      "subsystem": "system",
-      "responsibility": "CPU, accelerator and node-mesh selection policy",
+      "path": "duckos/storage/hypergraph.rpr",
+      "subsystem": "storage",
+      "responsibility": "content-addressed graph reference validation",
       "maturity": "reference-contract"
     },
     {
@@ -153,9 +153,15 @@
       "maturity": "reference-contract"
     },
     {
-      "path": "duckos/ui/theme.rpr",
+      "path": "duckos/system/three_media.rpr",
+      "subsystem": "system",
+      "responsibility": "CPU, accelerator and node-mesh selection policy",
+      "maturity": "reference-contract"
+    },
+    {
+      "path": "duckos/ui/desktop.rpr",
       "subsystem": "ui",
-      "responsibility": "semantic desktop theme policy",
+      "responsibility": "desktop interaction policy",
       "maturity": "reference-contract"
     },
     {
@@ -165,9 +171,9 @@
       "maturity": "reference-contract"
     },
     {
-      "path": "duckos/ui/desktop.rpr",
+      "path": "duckos/ui/theme.rpr",
       "subsystem": "ui",
-      "responsibility": "desktop interaction policy",
+      "responsibility": "semantic desktop theme policy",
       "maturity": "reference-contract"
     }
   ],
