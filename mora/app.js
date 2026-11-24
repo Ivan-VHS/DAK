@@ -350,7 +350,7 @@ function commonsPanelMarkup() {
         componentOptions +
       '</fieldset>' +
       '<div class="jora-settings">' +
-        '<div class="jora-label"><span>Единое имя системы</span><strong class="jora-fixed-name">Jora</strong></div>' +
+        '<label class="jora-label">Название приложения <input type="text" maxlength="80" data-jora-app-name placeholder="Например, Sonaris" autocomplete="off"></label>' +
         '<label class="jora-label">Стиль описания <select data-jora-name-style><option value="compact">Краткий</option><option value="balanced" selected>Сбалансированный</option><option value="descriptive">Подробный</option><option value="formula">Формульный</option></select></label>' +
         '<label class="jora-label">Основной язык <select data-jora-preferred><option value="en">English</option><option value="ru" selected>Русский</option><option value="uk">Українська</option><option value="most">MOST</option></select></label>' +
       '</div>' +
@@ -897,6 +897,7 @@ document.addEventListener("click", (event) => {
     try {
       const composed = composeJoraRequest({
         components,
+        name: owner.querySelector("[data-jora-app-name]").value,
         locales,
         preferredLocale: owner.querySelector("[data-jora-preferred]").value,
         languageTargets,
@@ -915,7 +916,7 @@ document.addEventListener("click", (event) => {
       const formula = document.createElement("p");
       formula.textContent = composed.formula + " = " + composed.name;
       const nameVariants = document.createElement("small");
-      nameVariants.textContent = "Варианты описания Jora: " + composed.nameSuggestions.join(" · ");
+      nameVariants.textContent = "Другие варианты названия: " + composed.nameSuggestions.join(" · ");
       const detail = document.createElement("small");
       detail.textContent = "Цели: " + composed.languageTargets.join(" + ").toUpperCase() + " · локали: " + composed.generatedLocales.join(", ").toUpperCase();
       const graphSummary = document.createElement("small");
@@ -926,7 +927,7 @@ document.addEventListener("click", (event) => {
       maturity.textContent = composed.pendingTargets.length ? "Дополнительные языки ожидают адаптеров; сейчас генерируется Reaper. Функциональные модули остаются спецификациями." : "Следующий шаг: экспортировать запрос и выполнить локальную сборку. Функциональные модули пока спецификации.";
       preview.append(name, formula, nameVariants, detail, graphSummary, graphChoices, maturity);
       exportButton.disabled = false;
-      showToast("Формула Jora подготовлена: " + composed.name);
+      showToast("Приложение подготовлено: " + composed.name);
     } catch (error) {
       joraDrafts.delete(owner);
       exportButton.disabled = true;
@@ -1030,7 +1031,7 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("input", (event) => {
   const joraInput = event.target.closest(
-    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation], [data-jora-graph-seed], [data-jora-objective]"
+    "[data-jora-app-name], [data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation], [data-jora-graph-seed], [data-jora-objective]"
   );
   if (joraInput) {
     const owner = joraInput.closest(".app-window");
