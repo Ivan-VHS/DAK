@@ -98,3 +98,10 @@ Never promote a feature to native/verified status because its UI panel exists.
 Mora exposes Duck Desktop as a system tool, but the browser panel is informational. It gives the user the `duckos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DuckOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
 
 Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.
+
+
+## BAV defensive context service
+
+DuckOS now contains a limited Java 17 BAV context-classification library at `bav/java/duckos/bav/context`. It reads the local, versioned `security/defense-context.v1.tsv` catalog and emits descriptive context tags only. The module is bounded, read-only and has no network, process-execution or quarantine path.
+
+This component is not a malware scanner and is not represented as full antivirus protection. Malware verdicts must come from separate evidence providers; context matches cannot change a malware verdict, block a build, delete a file or trigger quarantine. See [the defensive security doctrine](DEFENSIVE_SECURITY_DOCTRINE.md) and [BAV module scope](../bav/README.md).
