@@ -45,7 +45,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
     def test_inspect_does_not_advertise_jora_without_generator_and_dispatch(self):
         (self.root / "reaper" / "jora.py").unlink()
         (self.root / "reaper" / "cli.py").write_text(
-            'if arguments and arguments[0] == "typecheck":\\n    pass\\n',
+            'if arguments and arguments[0] == "typecheck":\n    pass\n',
             encoding="utf-8",
         )
         self.assertNotIn("jora_app_factory", self.workbench.inspect()["capabilities"])
