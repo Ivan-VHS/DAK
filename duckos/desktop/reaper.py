@@ -114,6 +114,8 @@ class ReaperWorkbench:
             capabilities.append("static_typecheck")
         if (root / "reaper" / "native_compiler.py").is_file():
             capabilities.append("native_aot_subset")
+        if (jora_file := root / "reaper" / "jora.py").is_file() and 'arguments[0] == "jora"' in cli_source:
+            capabilities.append("jora_app_factory")
 
         return {
             "schema": "duckos.reaper-workbench.v1",
