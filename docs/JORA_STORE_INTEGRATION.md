@@ -6,7 +6,7 @@
 
 ## User-facing model
 
-Jora is the single product identity for the store, composer, generator and every generated application. Users pick capability modules, interface locales, a naming presentation style and graph architecture preferences. Jora itself is always named Jora; generated name options are descriptive Jora labels, not separate brands.
+Jora is the platform and application store. Every generated application has its own independent product name, which must not contain Jora. Users pick an application name, capability modules, interface locales, a naming style and graph architecture preferences.
 
 Example:
 
@@ -29,7 +29,7 @@ The native Duck Desktop Reaper tab can select the exported JSON request, choose 
 
 ## Naming and graph variability
 
-The naming engine keeps the canonical application name fixed as **Jora**. It derives semantic descriptors from the selected component domains and offers compact, balanced, descriptive and formula-style labels such as `Jora — Documents & Languages Workspace`. No combination is published under a separate invented brand.
+The naming engine never assigns the platform name to an application. It derives independent product-name candidates from selected component domains, such as `Sonaris`, `Documents Workspace` or `Workspace for writing & translation`. An explicit application name is accepted; names containing Jora are rejected.
 
 The graph engine can generate 1–6 alternatives for one feature formula. Its topologies include layered composition, sequential pipeline, shared orchestrator, capability mesh, event-driven and hybrid. Each topology can itself use distinct direct, domain-grouped, capability-routed, stateful, validated or extensible rewrites. Each node and edge has a type; compatible provider/consumer pairs can be connected directly or brokered. A variation budget controls optional extension and validation layers, and the seed makes the output reproducible. Users can also optimize graph selection for balanced quality, low latency, modularity, extensibility or minimal complexity. Jora scores every candidate against the chosen objective and selects the highest-ranked graph with deterministic tie-breaks.
 
