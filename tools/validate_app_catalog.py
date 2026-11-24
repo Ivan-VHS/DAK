@@ -30,15 +30,17 @@ def main() -> int:
         "cockos", "kavun", "ka-bon", "gloverty", "po", "illidia", "unify",
         "sestem", "setupup", "orriganize", "abriganza", "olaab", "concrete-thump",
         "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe",
+        "beelzebub-av",
     }
     actual = {app["id"] for app in catalog["applications"]}
-    if actual != expected or len(actual) != 20:
+    if actual != expected or len(actual) != 21:
         raise SystemExit(f"Unexpected app catalog IDs: {sorted(actual)}")
 
     for app in catalog["applications"]:
-        if app["maturity_status"] != "specified":
+        expected_maturity = "partial" if app["id"] == "beelzebub-av" else "specified"
+        if app["maturity_status"] != expected_maturity:
             raise SystemExit(
-                f"{app['id']}: native app maturity must remain specified"
+                f"{app['id']}: native app maturity must be {expected_maturity}"
             )
         if app["prototype_status"] != "partial":
             raise SystemExit(
@@ -54,8 +56,8 @@ def main() -> int:
                 f"{app['id']}: missing browser-prototype evidence path {expected_evidence}"
             )
 
-    if len(catalog["workflows"]) != 9:
-        raise SystemExit("Expected four core and five extended app workflows")
+    if len(catalog["workflows"]) != 10:
+        raise SystemExit("Expected four core, five extended and one security workflow")
 
     for workflow in catalog["workflows"]:
         if workflow["source"] not in actual or workflow["target"] not in actual:
