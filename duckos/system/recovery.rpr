@@ -1,0 +1,36 @@
+# Graceful-degradation decision contract.
+# The native host performs snapshots and renderer/device handoff.
+
+export craft recovery_mode(memory_used, memory_budget, device_healthy, renderer_healthy) {
+    when memory_used < 0 or memory_budget <= 0 {
+        yield "invalid"
+    }
+    when not device_healthy or memory_used >= memory_budget {
+        yield "emergency-snapshot-lite"
+    }
+    when not renderer_healthy {
+        yield "snapshot-cpu-renderer"
+    }
+    when memory_used * 10 >= memory_budget * 9 {
+        yield "reduce-quality-and-snapshot"
+    }
+    yield "normal"
+}
+
+export craft snapshot_descriptor_valid(snapshot) {
+    when size(snapshot) != 4 {
+        yield false
+    }
+    yield snapshot[0] > 0 and snapshot[1] > 0
+        and snapshot[2] >= 0 and snapshot[3] >= 0
+}
+
+export craft restore_policy(snapshot_valid, checksum_valid, schema_supported) {
+    when not snapshot_valid or not checksum_valid {
+        yield "quarantine"
+    }
+    when not schema_supported {
+        yield "migration-required"
+    }
+    yield "restore"
+}
