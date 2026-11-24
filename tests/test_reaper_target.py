@@ -16,6 +16,12 @@ class ReaperMigrationContractTests(unittest.TestCase):
         self.root = Path(temporary.name)
         (self.root / "duckos").mkdir()
         (self.root / "federation").mkdir()
+        schema_dir = self.root / "schemas"
+        schema_dir.mkdir()
+        checked_schema = Path(__file__).resolve().parents[1] / "schemas" / "reaper-migration.v1.schema.json"
+        (schema_dir / "reaper-migration.v1.schema.json").write_text(
+            checked_schema.read_text(encoding="utf-8"), encoding="utf-8"
+        )
         self.pin = "cd84d347959f9b6cf60d87ab3d36bc94e05fd80f"
         self.manifest = {
             "schema": "duckos.reaper-migration.v1",
