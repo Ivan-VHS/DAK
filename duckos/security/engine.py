@@ -90,7 +90,12 @@ class SecurityEngine:
         visited = {event.event_id}
         while parent_id and parent_id not in visited and len(chain) < 32:
             parent = self._by_id.get(parent_id)
-            if parent is None or parent.host_id != event.host_id:
+            if (
+                parent is None
+                or parent.host_id != event.host_id
+                or parent.timestamp_ms > event.timestamp_ms
+                or event.timestamp_ms - parent.timestamp_ms > self.window_ms
+            ):
                 break
             chain.append(parent.event_id)
             visited.add(parent.event_id)

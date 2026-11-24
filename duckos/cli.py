@@ -238,9 +238,9 @@ def main(argv: list[str] | None = None) -> int:
                         raise ValueError("security report output must not be a symlink")
                     args.output.parent.mkdir(parents=True, exist_ok=True)
                     args.output.write_text(
-                        json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\\n",
+                        json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
                         encoding="utf-8",
-                        newline="\\n",
+                        newline="\n",
                     )
                     _print_result({
                         "schema": result["schema"],
