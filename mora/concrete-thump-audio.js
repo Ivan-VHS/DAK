@@ -3,7 +3,7 @@ import { normalizeConcreteThumpProfile } from "./concrete-thump.js";
 const activeSessions = new WeakMap();
 const RENDER_BARS = 4;
 const SAMPLE_RATE = 44100;
-const AUDIO_TAIL_SECONDS = 0.65;
+const AUDIO_TAIL_SECONDS = 1.6;
 
 function createNoiseBuffer(context) {
   const length = context.sampleRate;
@@ -199,10 +199,13 @@ function encodeWav(audioBuffer) {
   writeString(36, "data");
   view.setUint32(40, dataBytes, true);
 
+  const channelData = Array.from({ length: channels }, (_, channel) =>
+    audioBuffer.getChannelData(channel)
+  );
   let offset = 44;
   for (let frame = 0; frame < frames; frame += 1) {
     for (let channel = 0; channel < channels; channel += 1) {
-      const sample = Math.max(-1, Math.min(1, audioBuffer.getChannelData(channel)[frame]));
+      const sample = Math.max(-1, Math.min(1, channelData[channel][frame]));
       view.setInt16(offset, sample < 0 ? sample * 32768 : sample * 32767, true);
       offset += 2;
     }
