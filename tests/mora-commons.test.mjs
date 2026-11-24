@@ -55,6 +55,10 @@ test("all thirteen base products have a runnable Mora panel and registry definit
   const baseProducts = MORA_COMMONS_APPS.filter((app) => app.runtime === "local_browser");
   assert.equal(baseProducts.length, 13);
   assert.deepEqual(baseProducts.map((app) => app.id), BASE_APP_IDS);
+  assert.deepEqual(
+    baseProducts.map((app) => app.category),
+    MORA_COMMONS_CATEGORIES.map((category) => category.id)
+  );
   for (const app of baseProducts) {
     assert.ok(BASE_APP_DEFINITIONS[app.id], app.id + " needs a launcher definition");
     assert.ok(renderBaseAppPanel(app.id), app.id + " needs a working panel");
