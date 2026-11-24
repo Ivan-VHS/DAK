@@ -114,11 +114,12 @@ export function composeJoraRequest(options = {}) {
   const description = safeText(options.description || "", 500, "application description");
 
   const formula = componentIds.map((id) => COMPONENTS[id].name).join(" + ");
+  const domainOrder = ["Documents", "Audio", "Languages"];
   const domains = [...new Set(componentIds.map((id) => ({
     "text.editor": "Documents",
-    "audio.editor": "Audio & Media",
+    "audio.editor": "Audio",
     "translation.workspace": "Languages"
-  })[id]))];
+  })[id]))].sort((left, right) => domainOrder.indexOf(left) - domainOrder.indexOf(right));
   const descriptors = domains;
   const joined = descriptors.join(" · ");
   const natural = descriptors.join(" & ");
