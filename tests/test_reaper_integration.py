@@ -20,9 +20,11 @@ class ReaperWorkbenchTests(unittest.TestCase):
         (self.root / "pyproject.toml").write_text("[project]\nname='reaper'\n", encoding="utf-8")
         (package / "__main__.py").write_text("from .cli import main\n", encoding="utf-8")
         (package / "cli.py").write_text(
-            'if arguments and arguments[0] == "typecheck":\n    pass\n',
+            'if arguments and arguments[0] == "typecheck":\n    pass\n'
+            'if arguments and arguments[0] == "jora":\n    pass\n',
             encoding="utf-8",
         )
+        (package / "jora.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "desktop.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "typecheck.py").write_text("def main():\n    pass\n", encoding="utf-8")
         (package / "native_compiler.py").write_text("COMPILER = True\n", encoding="utf-8")
@@ -37,8 +39,16 @@ class ReaperWorkbenchTests(unittest.TestCase):
         self.assertEqual(result["repository"], str(self.root))
         self.assertEqual(
             result["capabilities"],
-            ["reference_runtime", "cli", "native_studio", "static_typecheck", "native_aot_subset"],
+            ["reference_runtime", "cli", "native_studio", "static_typecheck", "native_aot_subset", "jora_app_factory"],
         )
+
+    def test_inspect_does_not_advertise_jora_without_generator_and_dispatch(self):
+        (self.root / "reaper" / "jora.py").unlink()
+        (self.root / "reaper" / "cli.py").write_text(
+            'if arguments and arguments[0] == "typecheck":\n    pass\n',
+            encoding="utf-8",
+        )
+        self.assertNotIn("jora_app_factory", self.workbench.inspect()["capabilities"])
 
     def test_check_invokes_reaper_cli_without_a_shell(self):
         response = {"ok": True, "mode": "static-check", "diagnostics": []}

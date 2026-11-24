@@ -45,7 +45,28 @@ duckos reaper check ./examples/program.rpr
 duckos reaper typecheck ./examples/program.rpr
 ```
 
-The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`), including the Jora request-to-project builder. The browser-based Mora shell only exports the request and does not launch host processes; native generation is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
+
+
+## Jora application store and factory
+
+Jora is the platform and application store, not the name of generated applications. Each application receives its own independent product name, without the word Jora. Select an app name, capability packs, locales, naming style and graph topology; the composer generates reproducible graph alternatives before exporting a versioned request. The Reaper generator resolves dependencies and creates a statically checked user-space project scaffold.
+
+Example: Text Editor + Audio Editor + Translator = Jora.
+
+The first integrated feature packs are specification-only; they do not yet provide a working text editor, audio engine or translation service. Reaper is the only code-generation target currently implemented. Java, Kotlin, Python, TypeScript, Rust and C are labelled as pending adapters when selected. The generated scaffold is not installable, and Mora browser code never starts a host process.
+
+The naming engine provides compact, balanced, descriptive and formula-style candidates for independent application identities. Its graph engine offers layered, pipeline, hub-and-spoke, plugin-mesh, event-driven and hybrid structures, with 1–6 reproducible variants ranked for balance, low latency, modularity, extensibility or minimal complexity. Hard dependencies stay acyclic; event feedback is asynchronous and bus-mediated. Each generated project contains `jora.graphs.json` with typed nodes, edges, signatures and compatibility metrics.
+
+After exporting the request JSON, run the native command from the DuckOS environment:
+
+    duckos jora build ./jora-request.json ./Jora
+
+Use an explicit specialist checkout when needed:
+
+    duckos jora --root ./projects/reaper build ./jora-request.json ./Jora
+
+See [Jora store integration](docs/JORA_STORE_INTEGRATION.md) and [Reaper application factory](https://github.com/Ivan-VHS/Reaper/blob/main/docs/JORA_APPLICATION_FACTORY.md).
 
 ## Visual system and offline support
 

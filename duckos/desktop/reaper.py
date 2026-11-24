@@ -114,6 +114,8 @@ class ReaperWorkbench:
             capabilities.append("static_typecheck")
         if (root / "reaper" / "native_compiler.py").is_file():
             capabilities.append("native_aot_subset")
+        if (jora_file := root / "reaper" / "jora.py").is_file() and 'arguments[0] == "jora"' in cli_source:
+            capabilities.append("jora_app_factory")
 
         return {
             "schema": "duckos.reaper-workbench.v1",
@@ -198,6 +200,48 @@ class ReaperWorkbench:
                 "this Reaper checkout predates the integrated static type checker; update the projects/reaper submodule"
             )
         return self._run(["typecheck", str(path), "--json"])
+
+    @staticmethod
+    def _request_path(request: str | Path) -> Path:
+        path = Path(request).expanduser()
+        if path.is_symlink():
+            raise ReaperIntegrationError("Jora request files must not be symbolic links")
+        try:
+            resolved = path.resolve(strict=True)
+        except OSError as error:
+            raise ReaperIntegrationError(f"cannot open Jora request: {error}") from error
+        if not resolved.is_file() or resolved.suffix.lower() != ".json":
+            raise ReaperIntegrationError("select an existing regular .json Jora request")
+        if resolved.stat().st_size > 1_048_576:
+            raise ReaperIntegrationError("Jora request exceeds the 1 MiB host limit")
+        return resolved
+
+    @staticmethod
+    def _output_path(output: str | Path) -> Path:
+        path = Path(output).expanduser()
+        if path.name in {"", ".", ".."} or path.is_symlink():
+            raise ReaperIntegrationError("Jora output must be a new, non-symlink directory path")
+        parent = path.parent.resolve()
+        if not parent.is_dir():
+            raise ReaperIntegrationError("Jora output parent directory must already exist")
+        destination = parent / path.name
+        if destination.exists() or destination.is_symlink():
+            raise ReaperIntegrationError("Jora output already exists; existing projects are never overwritten")
+        return destination
+
+    def jora_build(self, request: str | Path, output: str | Path) -> dict[str, Any]:
+        """Generate a Reaper project scaffold; do not execute or install it."""
+        request_path = self._request_path(request)
+        output_path = self._output_path(output)
+        result = self._run(
+            ["jora", "build", "--request", str(request_path), "--output", str(output_path), "--json"],
+            timeout=120,
+        )
+        if not result["ok"]:
+            raise ReaperIntegrationError(
+                result["stderr"] or result["stdout"] or "Jora project generation failed"
+            )
+        return result
 
     def open_studio(self) -> subprocess.Popen[str]:
         root = self._require_repository()

@@ -145,6 +145,17 @@ def main(argv: list[str] | None = None) -> int:
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
 
+    jora = commands.add_parser(
+        "jora", help="compose and generate Reaper-first applications"
+    )
+    jora_commands = jora.add_subparsers(dest="jora_command", required=True)
+    jora.add_argument("--root", type=Path, help="explicit Reaper source checkout")
+    jora_build = jora_commands.add_parser(
+        "build", help="generate a non-installable Reaper application scaffold"
+    )
+    jora_build.add_argument("request", type=Path, help="versioned Jora request JSON")
+    jora_build.add_argument("output", type=Path, help="new output directory")
+
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
     )
@@ -245,6 +256,10 @@ def main(argv: list[str] | None = None) -> int:
             result = diagnose_binary(args.file, args.prefix)
         elif args.command == "compat-plan":
             result = plan_launch(args.file, args.prefix)
+        elif args.command == "jora" and args.jora_command == "build":
+            from .desktop.reaper import ReaperWorkbench
+
+            result = ReaperWorkbench(args.root).jora_build(args.request, args.output)
         elif args.command == "bridge" and args.bridge_command == "runtimes":
             result = detect_bridge_runtimes()
         elif args.command == "bridge" and args.bridge_command == "inspect":

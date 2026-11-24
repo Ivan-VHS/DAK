@@ -197,10 +197,10 @@
     },
     {
       "id": "mora-commons",
-      "name": "Mora Commons",
-      "category": "application_catalogue",
+      "name": "Jora",
+      "category": "application_store",
       "panel": "mora/app.js#mora-commons",
-      "maturity": "implemented_local_catalog"
+      "maturity": "local_catalog_and_request_composer"
     }
   ],
   "widgets": [

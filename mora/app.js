@@ -1,4 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { COMPONENTS as JORA_COMPONENTS, composeJoraRequest } from "./jora.js";
 
 import {
   RECOVERY_KEY,
@@ -43,7 +44,7 @@ const appDefinitions = {
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
+  "mora-commons": { name: "Jora", subtitle: "Магазин и фабрика приложений", color: DUCK_ACCENT, glyph: "✣" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -327,19 +328,84 @@ function commonsPanelMarkup() {
     '<button class="commons-filter" type="button" data-commons-filter="' + category.id +
     '" aria-pressed="false">' + category.title + '</button>'
   ).join("");
+  const escapeMarkup = (value) => String(value).replace(/[&<>"']/gu, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[character]);
+  const defaultComponents = new Set(["text.editor", "audio.editor", "translation.workspace"]);
+  const componentOptions = Object.entries(JORA_COMPONENTS).map(([id, component]) =>
+    '<label class="jora-option"><input type="checkbox" data-jora-component="' +
+    escapeMarkup(id) + '"' + (defaultComponents.has(id) ? " checked" : "") +
+    '><span><strong>' + escapeMarkup(component.label) + '</strong><small>' +
+    escapeMarkup(component.description) + '</small></span></label>'
+  ).join("");
 
-  return '<p class="window-kicker">MORA COMMONS · ЕДИНЫЙ КАТАЛОГ</p>' +
-    '<h2 class="window-heading">Пространство возможностей</h2>' +
-    '<p class="commons-intro">Пятнадцать направлений собраны по задачам, а не по полу. Каждый инструмент открыт каждому пользователю. Настраивайте каталог под свои интересы.</p>' +
-    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Mora Commons"></label>' +
+  return '<p class="window-kicker">JORA · ЕДИНЫЙ МАГАЗИН И ФАБРИКА ПРИЛОЖЕНИЙ</p>' +
+    '<h2 class="window-heading">Соберите приложение из возможностей</h2>' +
+    '<p class="commons-intro">Выбирайте готовые продуктовые концепции в каталоге или объединяйте функциональные модули в собственное приложение. Jora разрешает зависимости и готовит проект на Reaper.</p>' +
+    '<section class="jora-factory" aria-labelledby="jora-factory-title">' +
+      '<div class="jora-section-head"><span class="jora-kicker">JORA</span><span class="jora-status">Reaper · flow</span></div>' +
+      '<h3 id="jora-factory-title">Формула вашего приложения</h3>' +
+      '<p class="jora-copy">21 базовый пакет возможностей. Компонуйте формулу от одной до 24 позиций; большие графы автоматически группируются по доменам.</p>' +
+      '<fieldset class="jora-fieldset"><legend>Функциональные модули</legend>' +
+        componentOptions +
+      '</fieldset>' +
+      '<div class="jora-settings">' +
+        '<label class="jora-label">Название приложения <input type="text" maxlength="80" pattern="^(?!.*[Jj][Oo][Rr][Aa]).+$" title="Название приложения не должно содержать Jora — это имя платформы" data-jora-app-name placeholder="Например, Sonaris" autocomplete="off"></label>' +
+        '<label class="jora-label">Стиль описания <select data-jora-name-style><option value="compact">Краткий</option><option value="balanced" selected>Сбалансированный</option><option value="descriptive">Подробный</option><option value="formula">Формульный</option></select></label>' +
+        '<label class="jora-label">Основной язык <select data-jora-preferred><option value="en">English</option><option value="ru" selected>Русский</option><option value="uk">Українська</option><option value="most">MOST</option></select></label>' +
+      '</div>' +
+      '<fieldset class="jora-fieldset jora-locale-fieldset"><legend>Языки интерфейса</legend>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="en" checked> EN</label>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="ru" checked> RU</label>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="uk" checked> UK</label>' +
+        '<label class="jora-locale"><input type="checkbox" data-jora-locale="most" checked> MOST</label>' +
+      '</fieldset>' +
+      '<fieldset class="jora-fieldset jora-target-fieldset"><legend>Дополнительные языки исходников</legend>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="java"><span><strong>Java</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="kotlin"><span><strong>Kotlin</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="python"><span><strong>Python</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="typescript"><span><strong>TypeScript</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="rust"><span><strong>Rust</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+        '<label class="jora-option"><input type="checkbox" data-jora-target="c"><span><strong>C</strong><small>Адаптер генерации ожидает реализации</small></span></label>' +
+      '</fieldset>' +
+      '<fieldset class="jora-fieldset jora-graph-fieldset"><legend>Архитектура графа приложения</legend>' +
+        '<div class="jora-graph-settings">' +
+          '<label class="jora-label">Топология <select data-jora-topology>' +
+            '<option value="auto" selected>Автоматический подбор</option>' +
+            '<option value="layered">Многослойная</option>' +
+            '<option value="pipeline">Последовательная</option>' +
+            '<option value="hub_spoke">Общий координатор</option>' +
+            '<option value="plugin_mesh">Сеть возможностей</option>' +
+            '<option value="event_driven">Событийная</option>' +
+            '<option value="hybrid">Гибридная</option>' +
+          '</select></label>' +
+          '<label class="jora-label">Цель архитектуры <select data-jora-objective>' +
+            '<option value="balanced" selected>Сбалансированная</option>' +
+            '<option value="low_latency">Минимальная задержка</option>' +
+            '<option value="modularity">Модульность</option>' +
+            '<option value="extensibility">Расширяемость</option>' +
+            '<option value="minimal_complexity">Минимальная сложность</option>' +
+          '</select></label>' +
+          '<label class="jora-label">Количество вариантов <select data-jora-variants><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>' +
+        '</div>' +
+        '<label class="jora-label">Степень архитектурной вариативности <span data-jora-variation-value>50%</span><input type="range" min="0" max="100" step="5" value="50" data-jora-variation></label>' +
+        '<label class="jora-label">Seed графов (необязательно) <input type="text" maxlength="64" data-jora-graph-seed placeholder="Автоматически из формулы и параметров"></label>' +
+        '<p class="jora-copy">Jora строит несколько графов с разными способами соединения модулей. Жёсткие зависимости остаются ацикличными; обратные события допускаются только через асинхронную шину.</p>' +
+      '</fieldset>' +
+      '<div class="jora-actions"><button class="action-button" type="button" data-action="jora-compose">Сформировать формулу</button><button class="subtle-button" type="button" data-action="jora-export" disabled>Экспортировать JSON</button></div>' +
+      '<div class="jora-preview" data-jora-preview aria-live="polite">Выберите модули и сформируйте комбинацию. Jora предложит имя и покажет итоговую формулу.</div>' +
+      '<p class="jora-footnote">Экспорт создаёт запрос для локальной сборки. Браузерная Mora не запускает процессы на компьютере и не устанавливает приложения самостоятельно.</p>' +
+      '<p class="jora-command">duckos jora build ./jora-request.json ./Jora</p>' +
+    '</section>' +
+    '<div class="jora-catalog-heading"><div><span class="jora-kicker">CURATED CATALOGUE</span><h3>Каталог приложений</h3></div><span class="commons-count" data-commons-count aria-live="polite">Загрузка каталога</span></div>' +
+    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Jora"></label>' +
     '<div class="commons-filters" data-commons-filters aria-label="Категории приложений">' +
-    '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
-    filters +
+      '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
+      filters +
     '</div>' +
-    '<p class="commons-count" data-commons-count aria-live="polite">Показано 15 приложений</p>' +
     '<div class="commons-grid" data-commons-grid></div>' +
     '<section class="commons-detail" data-commons-detail aria-live="polite" hidden></section>' +
-    '<p class="window-copy">Каталог и избранное работают локально. Карточки описывают спецификации новых продуктов; отдельные исполняемые модули ещё не подключены.</p>';
+    '<p class="window-copy">Каталог сохраняет карточки и избранное локально. Публикация и установка требуют проверенных исполняемых модулей, подписанных пакетов и системного менеджера приложений.</p>';
 }
 
 function loadCommonsFavorites() {
@@ -353,6 +419,7 @@ function loadCommonsFavorites() {
 }
 
 let commonsFavorites = loadCommonsFavorites();
+const joraDrafts = new WeakMap();
 
 function saveCommonsFavorites() {
   try {
@@ -398,7 +465,7 @@ function renderCommonsDetails(detailPanel, app) {
   detailPanel.appendChild(makeCommonsText(
     "p",
     "commons-detail-status",
-    "Статус: спецификация. Каталог Mora Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
+    "Статус: спецификация. Каталог Jora показывает продуктовые концепции; отдельный исполняемый модуль этого приложения ещё не подключён."
   ));
   detailPanel.hidden = false;
 }
@@ -815,6 +882,82 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const joraComposeButton = event.target.closest('[data-action="jora-compose"]');
+  if (joraComposeButton) {
+    const owner = joraComposeButton.closest(".app-window");
+    if (!owner) return;
+    const preview = owner.querySelector("[data-jora-preview]");
+    const exportButton = owner.querySelector('[data-action="jora-export"]');
+    const components = Array.from(owner.querySelectorAll("[data-jora-component]:checked"))
+      .map((item) => item.dataset.joraComponent);
+    const locales = Array.from(owner.querySelectorAll("[data-jora-locale]:checked"))
+      .map((item) => item.dataset.joraLocale);
+    const languageTargets = Array.from(owner.querySelectorAll("[data-jora-target]:checked"))
+      .map((item) => item.dataset.joraTarget);
+    try {
+      const composed = composeJoraRequest({
+        components,
+        name: owner.querySelector("[data-jora-app-name]").value,
+        locales,
+        preferredLocale: owner.querySelector("[data-jora-preferred]").value,
+        languageTargets,
+        nameStyle: owner.querySelector("[data-jora-name-style]").value,
+        graphTopology: owner.querySelector("[data-jora-topology]").value,
+        graphObjective: owner.querySelector("[data-jora-objective]").value,
+        graphVariants: Number(owner.querySelector("[data-jora-variants]").value),
+        graphVariation: Number(owner.querySelector("[data-jora-variation]").value),
+        graphSeed: owner.querySelector("[data-jora-graph-seed]").value,
+      });
+      joraDrafts.set(owner, composed.request);
+      preview.replaceChildren();
+      const name = document.createElement("strong");
+      name.className = "jora-preview-name";
+      name.textContent = composed.name;
+      const formula = document.createElement("p");
+      formula.textContent = composed.formula + " = " + composed.name;
+      const nameVariants = document.createElement("small");
+      nameVariants.textContent = "Другие варианты названия: " + composed.nameSuggestions.join(" · ");
+      const detail = document.createElement("small");
+      detail.textContent = "Цели: " + composed.languageTargets.join(" + ").toUpperCase() + " · локали: " + composed.generatedLocales.join(", ").toUpperCase();
+      const graphSummary = document.createElement("small");
+      graphSummary.textContent = "Графы: " + composed.graphPlan.variants + " · топология: " + composed.graphPlan.topologyLabel + " · цель: " + composed.graphPlan.objectiveLabel + " · вариативность: " + composed.graphPlan.variation + "% · seed: " + composed.graphPlan.seed + " · Jora выберет лучший граф по целевой метрике";
+      const graphChoices = document.createElement("small");
+      graphChoices.textContent = "Доступные структуры: " + composed.graphPlan.availableTopologies.map((item) => item.label).join(" · ");
+      const maturity = document.createElement("small");
+      maturity.textContent = composed.pendingTargets.length ? "Дополнительные языки ожидают адаптеров; сейчас генерируется Reaper. Функциональные модули остаются спецификациями." : "Следующий шаг: экспортировать запрос и выполнить локальную сборку. Функциональные модули пока спецификации.";
+      preview.append(name, formula, nameVariants, detail, graphSummary, graphChoices, maturity);
+      exportButton.disabled = false;
+      showToast("Приложение подготовлено: " + composed.name);
+    } catch (error) {
+      joraDrafts.delete(owner);
+      exportButton.disabled = true;
+      preview.textContent = error.message || "Не удалось сформировать формулу.";
+    }
+    return;
+  }
+
+  const joraExportButton = event.target.closest('[data-action="jora-export"]');
+  if (joraExportButton) {
+    const owner = joraExportButton.closest(".app-window");
+    const request = owner && joraDrafts.get(owner);
+    if (!request) {
+      showToast("Сначала сформируйте формулу приложения");
+      return;
+    }
+    const payload = JSON.stringify(request, null, 2) + "\n";
+    const blob = new Blob([payload], { type: "application/json;charset=utf-8" });
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = "jora-request.json";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    showToast("Запрос Jora экспортирован");
+    return;
+  }
+
   const opener = event.target.closest("[data-app]");
   if (opener) {
     openApp(opener.dataset.app);
@@ -887,6 +1030,24 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const joraInput = event.target.closest(
+    "[data-jora-app-name], [data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name-style], [data-jora-topology], [data-jora-variants], [data-jora-variation], [data-jora-graph-seed], [data-jora-objective]"
+  );
+  if (joraInput) {
+    const owner = joraInput.closest(".app-window");
+    if (owner) {
+      joraDrafts.delete(owner);
+      const exportButton = owner.querySelector('[data-action="jora-export"]');
+      const preview = owner.querySelector("[data-jora-preview]");
+      if (exportButton) exportButton.disabled = true;
+      if (preview) preview.textContent = "Параметры изменены. Сформируйте формулу заново перед экспортом.";
+      const variationValue = owner.querySelector("[data-jora-variation-value]");
+      const variationInput = owner.querySelector("[data-jora-variation]");
+      if (variationValue && variationInput) variationValue.textContent = variationInput.value + "%";
+    }
+    return;
+  }
+
   const beatRange = event.target.closest("[data-beat-range]");
   if (beatRange) {
     const output = beatRange.closest(".extension-range-row").querySelector('[data-beat-value="' + beatRange.dataset.beatRange + '"]');
