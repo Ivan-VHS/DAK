@@ -6,18 +6,18 @@
 
 ## User-facing model
 
-Jora is the one application-store entry point in Mora. It combines a curated catalogue with a formula builder. Users can pick capability modules, choose interface locales and a primary locale, and receive a product-name suggestion and a formula.
+Jora is the single product identity for the store, composer, generator and every generated application. Users pick capability modules, interface locales, a naming presentation style and graph architecture preferences. Jora itself is always named Jora; generated name options are descriptive Jora labels, not separate brands.
 
 Example:
 
-Text Editor + Audio Editor + Translator = LexiTone 3D
+Text Editor + Audio Editor + Translator = Jora
 
 Mora's browser surface performs local composition preview and exports a versioned JSON request. It does not launch host processes. This preserves the existing security boundary: browser JavaScript is not a local command runner.
 
 ## End-to-end flow
 
 Mora / Jora composer
-  -> select components and locales
+  -> select components, naming style, locales and graph architecture
   -> reaper.jora.request.v1 JSON file
   -> user invokes local DuckOS CLI
   -> duckos jora build request.json output-directory
@@ -27,12 +27,23 @@ Mora / Jora composer
 
 The native Duck Desktop Reaper tab can select the exported JSON request, choose a destination path and start generation on a worker thread. The CLI is also available. Both use the same native bridge, which requires an existing regular .json request file, rejects symlinks and requests larger than 1 MiB, requires a new output path and delegates through Reaper's existing bounded subprocess adapter. It does not import Reaper into the DuckOS process.
 
+## Naming and graph variability
+
+The naming engine keeps the canonical application name fixed as **Jora**. It derives semantic descriptors from the selected component domains and offers compact, balanced, descriptive and formula-style labels such as `Jora — Documents & Languages Workspace`. No combination is published under a separate invented brand.
+
+The graph engine can generate 1–6 alternatives for one feature formula. Its topologies include layered composition, sequential pipeline, shared orchestrator, capability mesh, event-driven and hybrid. Each node and edge has a type; compatible provider/consumer pairs can be connected directly. A variation budget controls optional extension and validation layers, and the seed makes the output reproducible.
+
+Hard dependency edges must be acyclic. Event feedback is only allowed asynchronously through the explicit event bus. Planned extension registries and compatibility gates are labelled as planned, not implemented services.
+
+The graph set is embedded in the application manifest and also saved to `jora.graphs.json`. The lock file records selected graph IDs and signatures.
+
 ## Generated artifact contract
 
 The generator writes:
 
 - jora.app.json — versioned application manifest and composition formula;
-- jora.lock.json — component and dependency versions and resolution order;
+- jora.lock.json — component/dependency versions, naming version and graph signatures;
+- jora.graphs.json — generated graph alternatives, typed nodes/edges, topology labels and compatibility metrics;
 - src/main.rpr — Reaper flow entry-point scaffold;
 - src/components/*.rpr — selected component contract stubs;
 - locales/*.json — selected EN/RU/UK/MOST interface dictionaries;
@@ -57,8 +68,8 @@ MOST is a Russian-language profile. It is emitted as a separate locale package s
 
 reaper jora catalog --json
 reaper jora compose --request ./request.json --json
-reaper jora build --request ./request.json --output ./LexiTone --json
-duckos jora build ./request.json ./LexiTone
+reaper jora build --request ./jora-request.json --output ./Jora --json
+duckos jora build ./jora-request.json ./Jora
 
 Initialize the independent Reaper checkout using the existing submodule workflow and install its Python package before invoking the bridge.
 
