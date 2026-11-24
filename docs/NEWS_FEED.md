@@ -29,7 +29,7 @@ GDELT DOC 2.0 documents JSON/JSONP output, wildcard CORS support and search acro
 
 ## Privacy and editorial boundaries
 
-The browser sends the selected topic/search query to GDELT. Requests omit credentials and referrers, but the provider necessarily receives the network request and ordinary connection metadata. Queries and article bookmarks are stored locally in the current browser profile; they are not synchronized. Clearing that profile's site data removes the cache and saved bookmarks.
+The browser sends the selected topic/search query to GDELT. Requests omit credentials and referrers, but the provider necessarily receives the network request and ordinary connection metadata. Optional publisher/CDN images are lazy-loaded in anonymous CORS mode with no referrer; an image host can still observe its request. Queries and article bookmarks are stored locally in the current browser profile; they are not synchronized. Clearing that profile's site data removes the cache and saved bookmarks.
 
 The feed does not claim that a source is trustworthy, does not fact-check headlines, does not generate summaries, does not scrape paywalled article text and does not bypass publisher access controls. Users should open the original publisher page and assess the reporting themselves. GDELT coverage may be incomplete and results can include duplicate, stale or irrelevant matches.
 
