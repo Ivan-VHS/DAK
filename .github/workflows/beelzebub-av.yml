@@ -53,6 +53,13 @@ jobs:
       - name: Verify CLI entry point
         working-directory: security/beelzebub-av
         run: java -jar target/beelzebub-av-0.1.0-SNAPSHOT.jar version
+      - name: Publish reconstructed Java scanner source for integration review
+        uses: actions/upload-artifact@v4
+        with:
+          name: beelzebub-java-core-source
+          path: security/beelzebub-av/
+          if-no-files-found: error
+          retention-days: 3
 
   duckos-bridge:
     name: DuckOS process bridge tests
@@ -69,3 +76,10 @@ jobs:
         run: python -m compileall -q duckos/security duckos/desktop tests
       - name: Run DuckOS bridge and CLI regression tests
         run: python -W error::ResourceWarning -m unittest discover -s tests -p 'test_beelzebub_*.py' -v
+      - name: Publish DuckOS Java adapter source for integration review
+        uses: actions/upload-artifact@v4
+        with:
+          name: beelzebub-duckos-adapter-source
+          path: duckos/security/beelzebub.py
+          if-no-files-found: error
+          retention-days: 3
