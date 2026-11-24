@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -198,6 +199,115 @@ class ReaperWorkbench:
                 "this Reaper checkout predates the integrated static type checker; update the projects/reaper submodule"
             )
         return self._run(["typecheck", str(path), "--json"])
+
+
+    def build_native(
+        self,
+        source: str | Path,
+        output: str | Path,
+        *,
+        optimization: str = "2",
+    ) -> dict[str, Any]:
+        """Build a host executable from Reaper's explicitly supported AOT subset."""
+        path = self._source_path(source)
+        if optimization not in {"0", "1", "2", "3", "s"}:
+            raise ReaperIntegrationError("optimization must be one of 0, 1, 2, 3, or s")
+
+        destination = Path(output).expanduser()
+        if destination.is_symlink():
+            raise ReaperIntegrationError("native output path must not be a symbolic link")
+        try:
+            resolved_output = destination.resolve(strict=False)
+        except OSError as error:
+            raise ReaperIntegrationError(f"cannot resolve native output path: {error}") from error
+        if resolved_output == path:
+            raise ReaperIntegrationError("native output must not overwrite its Reaper source file")
+        if resolved_output.suffix.lower() in {".c", ".h", ".rpr", ".most"}:
+            raise ReaperIntegrationError("native output must be an executable path, not a source file")
+        return self._run(
+            [str(path), "--native", str(resolved_output), "--optimization", optimization],
+            timeout=150,
+        )
+
+    def check_duckos_target(self) -> dict[str, Any]:
+        """Run the fixed DuckOS boot-contract conformance program in both Reaper engines."""
+        root = self._require_repository()
+        relative = Path("targets") / "duckos" / "boot_contract_v1.rpr"
+        source = root / relative
+        if source.is_symlink():
+            raise ReaperIntegrationError("DuckOS target source must not be a symbolic link")
+        try:
+            resolved_source = source.resolve(strict=True)
+        except OSError as error:
+            raise ReaperIntegrationError(
+                "this Reaper checkout does not contain the DuckOS boot-info v1 target"
+            ) from error
+        if root not in resolved_source.parents or not resolved_source.is_file():
+            raise ReaperIntegrationError("DuckOS target source is outside the Reaper checkout")
+
+        expected = "0\\n0\\n-2\\n-3\\n-4\\n-5\\n-6\\n-6\\n-7\\n"
+        syntax = self._run(
+            ["--check", "--syntax-only", str(resolved_source)],
+            timeout=COMMAND_TIMEOUT_SECONDS,
+        )
+        if not syntax["ok"]:
+            raise ReaperIntegrationError(
+                f"DuckOS Reaper target failed syntax validation: {syntax['stderr'][:2000]}"
+            )
+
+        reference = self._run([str(resolved_source)], timeout=COMMAND_TIMEOUT_SECONDS)
+        if not reference["ok"] or reference["stdout"] != expected:
+            raise ReaperIntegrationError(
+                "DuckOS boot target reference output differs from its expected conformance matrix"
+            )
+
+        with tempfile.TemporaryDirectory(prefix="duckos-reaper-target-") as folder:
+            output = Path(folder) / ("boot-contract.exe" if os.name == "nt" else "boot-contract")
+            build = self._run(
+                [str(resolved_source), "--native", str(output)],
+                timeout=150,
+            )
+            if not build["ok"] or not output.is_file():
+                raise ReaperIntegrationError(
+                    f"DuckOS Reaper target native build failed: {build['stderr'][:2000]}"
+                )
+            try:
+                completed = subprocess.run(
+                    [str(output)],
+                    cwd=root,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=COMMAND_TIMEOUT_SECONDS,
+                    shell=False,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired as error:
+                raise ReaperIntegrationError("DuckOS native conformance program exceeded its time limit") from error
+            except OSError as error:
+                raise ReaperIntegrationError(f"cannot run DuckOS conformance executable: {error}") from error
+
+        stdout = completed.stdout or ""
+        stderr = completed.stderr or ""
+        if len(stdout) > MAX_OUTPUT_CHARS or len(stderr) > MAX_OUTPUT_CHARS:
+            raise ReaperIntegrationError("DuckOS conformance output exceeded the configured limit")
+        if completed.returncode != 0 or stdout != expected:
+            raise ReaperIntegrationError(
+                "DuckOS Reaper native output differs from its expected conformance matrix"
+            )
+        return {
+            "schema": "duckos.reaper-boot-target-check.v1",
+            "valid": True,
+            "target": relative.as_posix(),
+            "fixtures": len(expected.splitlines()),
+            "reference_runtime": "pass",
+            "native_aot": "pass",
+            "status_stream": expected.splitlines(),
+            "native_program_executed": True,
+            "hardware_accessed": False,
+            "kernel_or_driver_state_changed": False,
+        }
 
     def open_studio(self) -> subprocess.Popen[str]:
         root = self._require_repository()
