@@ -80,6 +80,25 @@ test("system panels expose approvals, permissions, recovery and local file inspe
   assert.ok(js.includes("Ctrl+K") === false);
 });
 
+test("newspaper print colors stay inside the news window", () => {
+  const newspaperColors = [
+    "#E5D7B7", "#F2E8D4", "#2C261D", "#6C5B43",
+    "#A8997C", "#7E3428", "#FAF7EF", "#584C3A"
+  ];
+  for (const color of newspaperColors) {
+    const matches = [...css.matchAll(new RegExp(color, "gi"))];
+    assert.ok(matches.length > 0, color + " is missing from the newspaper surface");
+    for (const match of matches) {
+      const preceding = css.slice(0, match.index);
+      const selector = preceding.slice(preceding.lastIndexOf("}") + 1, preceding.lastIndexOf("{")).trim();
+      assert.ok(
+        selector.includes("newspaper") || selector.includes('[data-window="news"]'),
+        color + " escaped the scoped newspaper surface in " + selector
+      );
+    }
+  }
+});
+
 test("shell policy keeps prototype and native-service maturity separate", () => {
   assert.equal(policy.desktop, "Mora");
   assert.equal(policy.product, "DuckOS");
