@@ -50,13 +50,13 @@ The same controls are available in the **Reaper** tab of the native Duck Desktop
 
 ## Jora application store and factory
 
-Jora is the single product name for the store, composer, generator and every generated application. Select capability packs, locales, a naming-description style and graph topology; Jora produces semantic labels that all retain the Jora identity and generates reproducible graph alternatives before exporting a versioned request. The Reaper generator resolves dependencies and creates a statically checked user-space project scaffold.
+Jora is the platform and application store, not the name of generated applications. Each application receives its own independent product name, without the word Jora. Select an app name, capability packs, locales, naming style and graph topology; the composer generates reproducible graph alternatives before exporting a versioned request. The Reaper generator resolves dependencies and creates a statically checked user-space project scaffold.
 
 Example: Text Editor + Audio Editor + Translator = Jora.
 
 The first integrated feature packs are specification-only; they do not yet provide a working text editor, audio engine or translation service. Reaper is the only code-generation target currently implemented. Java, Kotlin, Python, TypeScript, Rust and C are labelled as pending adapters when selected. The generated scaffold is not installable, and Mora browser code never starts a host process.
 
-Jora's naming engine provides compact, balanced, descriptive and formula-style descriptors without creating separate brands. Its graph engine offers layered, pipeline, hub-and-spoke, plugin-mesh, event-driven and hybrid structures, with 1–6 reproducible variants ranked for balance, low latency, modularity, extensibility or minimal complexity. Hard dependencies stay acyclic; event feedback is asynchronous and bus-mediated. Each generated project contains `jora.graphs.json` with typed nodes, edges, signatures and compatibility metrics.
+The naming engine provides compact, balanced, descriptive and formula-style candidates for independent application identities. Its graph engine offers layered, pipeline, hub-and-spoke, plugin-mesh, event-driven and hybrid structures, with 1–6 reproducible variants ranked for balance, low latency, modularity, extensibility or minimal complexity. Hard dependencies stay acyclic; event feedback is asynchronous and bus-mediated. Each generated project contains `jora.graphs.json` with typed nodes, edges, signatures and compatibility metrics.
 
 After exporting the request JSON, run the native command from the DuckOS environment:
 
