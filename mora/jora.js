@@ -15,6 +15,16 @@ const COMPONENTS = Object.freeze({
 
 const LOCALES = new Set(["en", "ru", "uk", "most"]);
 const EXTRA_TARGETS = new Set(["java", "kotlin", "python", "typescript", "rust", "c"]);
+const NAME_STYLES = new Set(["compact", "balanced", "descriptive", "formula"]);
+const GRAPH_TOPOLOGIES = Object.freeze({
+  auto: "Автоматический подбор",
+  layered: "Многослойная композиция",
+  pipeline: "Последовательный процесс",
+  hub_spoke: "Общий координатор",
+  plugin_mesh: "Сеть возможностей",
+  event_driven: "Событийная архитектура",
+  hybrid: "Гибридная архитектура"
+});
 
 function safeText(value, maximum, field) {
   if (typeof value !== "string") {
@@ -83,25 +93,75 @@ export function composeJoraRequest(options = {}) {
   if (requestedName && requestedName !== "Jora") {
     throw new TypeError("Jora is the fixed application name for every composition.");
   }
-  const description = safeText(options.description || "", 500, "application description");
-  const formula = componentIds.map((id) => COMPONENTS[id].name).join(" + ");
-  const productName = "Jora";
+  const nameStyle = options.nameStyle || "balanced";
+  if (!NAME_STYLES.has(nameStyle)) {
+    throw new TypeError("Unsupported Jora naming style: " + String(nameStyle));
+  }
 
+  const graphTopology = options.graphTopology || "auto";
+  if (!Object.hasOwn(GRAPH_TOPOLOGIES, graphTopology)) {
+    throw new TypeError("Unsupported Jora graph topology: " + String(graphTopology));
+  }
+  const graphVariants = options.graphVariants === undefined ? 4 : options.graphVariants;
+  const graphVariation = options.graphVariation === undefined ? 50 : options.graphVariation;
+  if (!Number.isInteger(graphVariants) || graphVariants < 1 || graphVariants > 6) {
+    throw new RangeError("Jora graph variants must be from 1 to 6.");
+  }
+  if (!Number.isInteger(graphVariation) || graphVariation < 0 || graphVariation > 100) {
+    throw new RangeError("Jora graph variation must be from 0 to 100.");
+  }
+  const graphSeed = safeText(options.graphSeed || "", 64, "graph seed");
+  const description = safeText(options.description || "", 500, "application description");
+
+  const formula = componentIds.map((id) => COMPONENTS[id].name).join(" + ");
+  const domains = [...new Set(componentIds.map((id) => ({
+    "text.editor": "Documents",
+    "audio.editor": "Audio & Media",
+    "translation.workspace": "Languages"
+  })[id]))];
+  const descriptors = domains;
+  const joined = descriptors.join(" · ");
+  const natural = descriptors.join(" & ");
+  const nameSuggestions = [
+    "Jora · " + joined,
+    "Jora — " + natural + " Workspace",
+    "Jora | Workspace for " + natural,
+    "Jora — " + descriptors.join(" + ")
+  ];
+
+  const graph = {
+    topology: graphTopology,
+    seed: graphSeed,
+    variants: graphVariants,
+    variation: graphVariation
+  };
   const request = {
     schema: "reaper.jora.request.v1",
-    name: productName,
+    name: "Jora",
     description,
+    name_style: nameStyle,
     components: [...componentIds],
     locales: [...localeIds],
     preferred_locale: preferredLocale,
     syntax_mode: "flow",
-    language_targets: uniqueTargets.size ? ["reaper", ...uniqueTargets] : "auto"
+    language_targets: uniqueTargets.size ? ["reaper", ...uniqueTargets] : "auto",
+    graph
   };
 
   return Object.freeze({
-    name: productName,
+    name: "Jora",
     formula,
     request,
+    nameStyle,
+    nameSuggestions,
+    graphPlan: {
+      topology: graphTopology,
+      topologyLabel: GRAPH_TOPOLOGIES[graphTopology],
+      variants: graphVariants,
+      variation: graphVariation,
+      availableTopologies: Object.entries(GRAPH_TOPOLOGIES).filter(([id]) => id !== "auto")
+        .map(([id, label]) => ({ id, label }))
+    },
     target: "Reaper .rpr scaffold",
     languageTargets: ["reaper", ...uniqueTargets],
     pendingTargets: [...uniqueTargets],
