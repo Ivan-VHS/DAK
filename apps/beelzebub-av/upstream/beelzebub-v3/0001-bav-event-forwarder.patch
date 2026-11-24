@@ -185,7 +185,7 @@ diff --git a/internal/builder/bav_event_forwarder.go b/internal/builder/bav_even
 new file mode 100644
 --- /dev/null
 +++ b/internal/builder/bav_event_forwarder.go
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,172 @@
 +package builder
 +
 +import (
@@ -246,6 +246,7 @@ new file mode 100644
 +		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
 +			return nil, errors.New("BAV token path must be a regular non-symlink file")
 +		}
++		if info.Size() > 4096 { return nil, errors.New("BAV token file exceeds 4096 bytes") }
 +		if info.Mode().Perm()&0o077 != 0 && runtime.GOOS != "windows" {
 +			return nil, errors.New("BAV token file permissions must be 0600 or stricter")
 +		}
@@ -253,7 +254,9 @@ new file mode 100644
 +		if readErr != nil { return nil, fmt.Errorf("read BAV token file: %w", readErr) }
 +		token = strings.TrimSpace(string(data))
 +	}
-+	if len(token) < 32 { return nil, errors.New("BAV auth token must contain at least 32 bytes") }
++	if len(token) < 32 || len(token) > 4096 || strings.ContainsAny(token, "\r\n\x00") {
++		return nil, errors.New("BAV auth token must contain 32–4096 bytes without control characters")
++	}
 +	timeout := time.Duration(config.TimeoutMilliseconds) * time.Millisecond
 +	if config.TimeoutMilliseconds == 0 { timeout = 750 * time.Millisecond }
 +	if timeout < 100*time.Millisecond || timeout > 5*time.Second {

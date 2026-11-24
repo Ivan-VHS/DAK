@@ -91,10 +91,15 @@ func dataDirectory() (string, error) {
 
 func loadOrCreateToken(filename string) (string, string, error) {
 	if supplied := os.Getenv("BAV_EVENT_TOKEN"); supplied != "" {
-		if len(supplied) < 32 { return "", "", errors.New("BAV_EVENT_TOKEN must contain at least 32 characters") }
+		if len(supplied) < 32 || len(supplied) > 4096 { return "", "", errors.New("BAV_EVENT_TOKEN must contain between 32 and 4096 characters") }
 		return supplied, "environment variable BAV_EVENT_TOKEN", nil
 	}
 	if err := rejectExistingSymlink(filename); err != nil { return "", "", err }
+	if info, err := os.Lstat(filename); err == nil && info.Size() > 4096 {
+		return "", "", errors.New("existing ingest.token exceeds 4096 bytes")
+	} else if err != nil && !os.IsNotExist(err) {
+		return "", "", err
+	}
 	if data, err := os.ReadFile(filename); err == nil {
 		token := strings.TrimSpace(string(data))
 		if len(token) < 32 { return "", "", errors.New("existing ingest.token is invalid; remove it and restart to rotate") }

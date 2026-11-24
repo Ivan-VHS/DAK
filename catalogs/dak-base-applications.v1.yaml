@@ -6,7 +6,7 @@ schema_version: 1
 suite:
   id: dak.base-suite
   name: DAK OS Base Applications
-  version: 1.1.0
+  version: 1.2.0
   status: design
   minimum_platform_api: 1
 
