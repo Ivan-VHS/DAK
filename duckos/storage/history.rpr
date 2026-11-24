@@ -1,0 +1,77 @@
+# Branchable local state history.
+# This is a deterministic history model; persistence is supplied by storage.
+
+export craft record_valid(record) {
+    when size(record) != 5 {
+        yield false
+    }
+    yield record[0] > 0 and record[1] >= 0 and record[1] < record[0]
+        and record[2] != "" and record[3] != ""
+}
+
+export craft has_revision(revisions, sought) {
+    vary found := false
+    each revision in revisions {
+        when revision == sought {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft history_valid(records) {
+    vary seen := []
+    vary previous := 0
+    each record in records {
+        when not record_valid(record) or record[0] <= previous {
+            yield false
+        }
+        when record[1] != 0 and not has_revision(seen, record[1]) {
+            yield false
+        }
+        change seen := push(seen, record[0])
+        change previous := record[0]
+    }
+    yield true
+}
+
+export craft append_revision(records, revision, parent, branch, action, payload) {
+    make candidate := [revision, parent, branch, action, payload]
+    when not history_valid(records) or not record_valid(candidate) {
+        yield ["invalid", records]
+    }
+    when has_revision(records, revision) {
+        yield ["duplicate", records]
+    }
+    when parent != 0 and not has_revision(records, parent) {
+        yield ["missing-parent", records]
+    }
+    yield ["appended", push(records, candidate)]
+}
+
+export craft checkout(records, revision) {
+    when not history_valid(records) {
+        yield ["invalid-history"]
+    }
+    each record in records {
+        when record[0] == revision {
+            yield ["found", record]
+        }
+    }
+    yield ["not-found"]
+}
+
+export craft branch_from(records, parent_revision, new_branch) {
+    when new_branch == "" or not has_revision(revisions(records), parent_revision) {
+        yield "invalid"
+    }
+    yield "ready"
+}
+
+export craft revisions(records) {
+    vary result := []
+    each record in records {
+        change result := push(result, record[0])
+    }
+    yield result
+}
