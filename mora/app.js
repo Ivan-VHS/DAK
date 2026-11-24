@@ -1448,7 +1448,7 @@ document.addEventListener("change", async (event) => {
       const existingIndex = samples.findIndex((sample) =>
         !sample.file && sample.name === file.name &&
         Number(sample.size) === Number(file.size) &&
-        (sample.type || "") === (file.type || "")
+        (sample.type || "audio") === (file.type || "audio")
       );
       const previousSize = existingIndex >= 0 ? Number(samples[existingIndex].size || 0) : 0;
       const validation = validateAudioSampleFile(file, {
