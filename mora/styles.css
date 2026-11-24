@@ -821,3 +821,89 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
 input[type="range"] { accent-color: #FFD400; }
 .theme-control { color: #FFD400; }
 .extension-theme-options { display: none; }
+
+
+/* Progressive glass materials: five high-value blur layers, solid fallbacks elsewhere. */
+:root {
+  --mora-glass-fallback: #151515;
+  --mora-glass-strong-fallback: #080808;
+  --mora-glass-fill: rgba(21,21,21,.78);
+  --mora-glass-strong-fill: rgba(8,8,8,.84);
+  --mora-glass-edge: rgba(255,212,0,.26);
+  --mora-glass-blur: 18px;
+  --mora-glass-blur-strong: 22px;
+}
+
+.statusbar {
+  background: var(--mora-glass-strong-fallback);
+  border-bottom-color: var(--mora-glass-edge);
+}
+.app-tile {
+  background: var(--mora-glass-fallback);
+  border-color: var(--mora-glass-edge);
+}
+.widget-card, .dock, .app-window, .toast {
+  background: var(--mora-glass-fallback);
+  border-color: var(--mora-glass-edge);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .statusbar {
+    background: var(--mora-glass-strong-fill);
+    -webkit-backdrop-filter: blur(var(--mora-glass-blur));
+    backdrop-filter: blur(var(--mora-glass-blur));
+  }
+  .app-tile {
+    background: linear-gradient(145deg, rgba(255,212,0,.12), rgba(21,21,21,.76));
+  }
+  .widget-card, .dock, .app-window, .toast {
+    background: var(--mora-glass-fill);
+    -webkit-backdrop-filter: blur(var(--mora-glass-blur-strong));
+    backdrop-filter: blur(var(--mora-glass-blur-strong));
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --mora-glass-blur: 10px;
+    --mora-glass-blur-strong: 14px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .statusbar { background: var(--mora-glass-strong-fallback); }
+  .app-tile, .widget-card, .dock, .app-window, .toast {
+    background: var(--mora-glass-fallback);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+}
+
+:root.reduce-transparency .statusbar {
+  background: var(--mora-glass-strong-fallback);
+}
+:root.reduce-transparency .app-tile,
+:root.reduce-transparency .widget-card,
+:root.reduce-transparency .dock,
+:root.reduce-transparency .app-window,
+:root.reduce-transparency .toast {
+  background: var(--mora-glass-fallback);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+@media (forced-colors: active) {
+  .statusbar, .app-tile, .widget-card, .dock, .app-window, .toast {
+    color: CanvasText;
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
