@@ -50,6 +50,14 @@ assert(boot_info["validate"](valid_boot_info, unsorted_regions) == "invalid-memo
 make invalid_region_type := [[0, 4096, 7, 0], [4096, 8388608, 1, 0]]
 assert(boot_info["validate"](valid_boot_info, invalid_region_type) == "invalid-memory-map", "unknown memory type is rejected")
 
+assert(boot_info["validate"](valid_boot_info, []) == "invalid-memory-map", "empty memory map is rejected")
+make short_boot_info := [80, 1, 0, 1048576, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0]
+assert(boot_info["validate"](short_boot_info, boot_regions) == "unsupported-version", "short boot record is rejected")
+make wrong_boot_version := [88, 2, 0, 1048576, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0]
+assert(boot_info["validate"](wrong_boot_version, boot_regions) == "unsupported-version", "unsupported boot record version is rejected")
+make overlapping_regions := [[0, 8192, 2, 0], [4096, 4096, 1, 0]]
+assert(boot_info["validate"](valid_boot_info, overlapping_regions) == "invalid-memory-map", "overlapping memory regions are rejected")
+
 assert(memory["align_up"](17, 16) == 32, "arena alignment")
 assert(memory["align_up"](32, 16) == 32, "aligned address must remain unchanged")
 assert(memory["align_up"](9223372036854775800, 16) == -1, "alignment must reject signed address overflow")
