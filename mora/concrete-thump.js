@@ -12,7 +12,7 @@ export const SEQUENCE_TRACKS = Object.freeze(["kick", "snare", "hat", "bass", "c
 const DEFAULT_SEQUENCE = Object.freeze({
   kick:  [true, false, false, false, false, false, true, false, true, false, false, false, false, true, false, false],
   snare: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
-  hat:   [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
+  hat:   [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
   bass:  [true, false, false, false, false, false, false, true, true, false, false, false, false, false, true, false],
   choir: [true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false]
 });
