@@ -178,7 +178,7 @@ The following scope is intentionally modest because these 13 names arrived witho
 | Orriganize | Add and remove project/task text entries | Browser-profile storage only; no system scheduler or sync |
 | Abriganza | Inspect selected archive filename, extension and size | No extraction, malware scanning or execution |
 | Olaab | Local album and media-collection labels | Stores text references, not media files |
-| Concrete Thump | BPM/swing profiles, separate Orthodox and East Slavic source selections, bounded local audio import and preview, sample-credit/rights metadata, a production prompt capped at 500 characters, JSON export and a Reaper timing-helper export | Browser profile stores metadata only; audio bytes remain selected in the current session; no synthesis, chopping, recording, MIDI, multitrack editing or device routing |
+| Concrete Thump | BPM/swing profiles, separate Orthodox and East Slavic source selections, bounded local audio import and preview, a 16-step kick/snare/hat/808/choir sequencer, synthesized drum playback, local choir chops, four-bar WAV render, sample-credit/rights metadata, 500-character prompt, JSON and Reaper timing exports | Browser-local Web Audio workflow only; audio bytes remain in the current session; no native audio driver, system mixer, device routing, MIDI or full multitrack DAW |
 | Seu-Beu | Manual checklist before sharing selected material | Not encryption, recipient authentication or OS security |
 | Love-IL | Local personal text entries | No cloud sync or secure-vault claim |
 | Poi | Quick text capture | No system-wide search or global shortcut |
