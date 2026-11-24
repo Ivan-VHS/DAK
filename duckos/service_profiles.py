@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import heapq
+import json
 import math
 import re
 from typing import Any
@@ -65,7 +66,29 @@ def _object(value: Any, name: str, fields: set[str]) -> dict[str, Any]:
     return value
 
 
-def validate_service_profile(profile: Any) -> dict[str, Any]:
+def validate_service_profile(
+    profile: Any, *, max_profile_bytes: int = 256 * 1024
+) -> dict[str, Any]:
+    if (
+        isinstance(max_profile_bytes, bool)
+        or not isinstance(max_profile_bytes, int)
+        or not 1 <= max_profile_bytes <= 4 * 1024 * 1024
+    ):
+        raise ServiceProfileError("max_profile_bytes must be an integer in [1, 4194304]")
+    try:
+        encoded_profile = json.dumps(
+            profile,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+    except (TypeError, ValueError, RecursionError) as error:
+        raise ServiceProfileError(f"profile must be finite JSON data: {error}") from error
+    if len(encoded_profile) > max_profile_bytes:
+        raise ServiceProfileError(
+            f"profile exceeds the configured {max_profile_bytes}-byte limit"
+        )
     required = {
         "schema", "id", "version", "runtime", "execution", "health",
         "restart", "resilience", "dependencies", "capabilities",
@@ -209,7 +232,10 @@ def plan_service_startup(
     if not isinstance(profiles, list) or len(profiles) > MAX_SERVICES:
         raise ServiceProfileError(f"profiles must be a list of at most {MAX_SERVICES} entries")
 
-    validated = [validate_service_profile(item) for item in profiles]
+    validated = [
+        validate_service_profile(item, max_profile_bytes=policy.max_profile_bytes)
+        for item in profiles
+    ]
     by_id: dict[str, dict[str, Any]] = {}
     for profile in validated:
         if profile["id"] in by_id:
