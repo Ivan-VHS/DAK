@@ -333,7 +333,7 @@ function commonsPanelMarkup() {
     '<h2 class="window-heading">Соберите приложение из возможностей</h2>' +
     '<p class="commons-intro">Выбирайте готовые продуктовые концепции в каталоге или объединяйте функциональные модули в собственное приложение. Jora разрешает зависимости и готовит проект на Reaper.</p>' +
     '<section class="jora-factory" aria-labelledby="jora-factory-title">' +
-      '<div class="jora-section-head"><span class="jora-kicker">JORA COMPOSER</span><span class="jora-status">Reaper · flow</span></div>' +
+      '<div class="jora-section-head"><span class="jora-kicker">JORA</span><span class="jora-status">Reaper · flow</span></div>' +
       '<h3 id="jora-factory-title">Формула вашего приложения</h3>' +
       '<p class="jora-copy">Параметр 1 + параметр 2 + параметр 3 ... + параметр N = новый продукт</p>' +
       '<fieldset class="jora-fieldset"><legend>Функциональные модули</legend>' +
@@ -342,7 +342,7 @@ function commonsPanelMarkup() {
         '<label class="jora-option"><input type="checkbox" data-jora-component="translation.workspace" checked><span><strong>Переводчик</strong><small>Перевод, терминология и параллельные тексты</small></span></label>' +
       '</fieldset>' +
       '<div class="jora-settings">' +
-        '<label class="jora-label">Название продукта <input type="text" maxlength="80" data-jora-name placeholder="Автоматически: LexiTone 3D"></label>' +
+        '<div class="jora-label"><span>Имя единой системы</span><strong class="jora-fixed-name">Jora</strong></div>' +
         '<label class="jora-label">Основной язык <select data-jora-preferred><option value="en">English</option><option value="ru" selected>Русский</option><option value="uk">Українська</option><option value="most">MOST</option></select></label>' +
       '</div>' +
       '<fieldset class="jora-fieldset jora-locale-fieldset"><legend>Языки интерфейса</legend>' +
@@ -362,7 +362,7 @@ function commonsPanelMarkup() {
       '<div class="jora-actions"><button class="action-button" type="button" data-action="jora-compose">Сформировать формулу</button><button class="subtle-button" type="button" data-action="jora-export" disabled>Экспортировать JSON</button></div>' +
       '<div class="jora-preview" data-jora-preview aria-live="polite">Выберите модули и сформируйте комбинацию. Jora предложит имя и покажет итоговую формулу.</div>' +
       '<p class="jora-footnote">Экспорт создаёт запрос для локальной сборки. Браузерная Mora не запускает процессы на компьютере и не устанавливает приложения самостоятельно.</p>' +
-      '<p class="jora-command">duckos jora build ./lexitone-3d.jora-request.json ./LexiTone-3D</p>' +
+      '<p class="jora-command">duckos jora build ./jora-request.json ./Jora</p>' +
     '</section>' +
     '<div class="jora-catalog-heading"><div><span class="jora-kicker">CURATED CATALOGUE</span><h3>Каталог приложений</h3></div><span class="commons-count" data-commons-count aria-live="polite">Загрузка каталога</span></div>' +
     '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Jora"></label>' +
@@ -867,7 +867,6 @@ document.addEventListener("click", (event) => {
         locales,
         preferredLocale: owner.querySelector("[data-jora-preferred]").value,
         languageTargets,
-        name: owner.querySelector("[data-jora-name]").value
       });
       joraDrafts.set(owner, composed.request);
       preview.replaceChildren();
@@ -903,10 +902,8 @@ document.addEventListener("click", (event) => {
     const blob = new Blob([payload], { type: "application/json;charset=utf-8" });
     const objectUrl = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
-    const baseName = (request.name || "jora-application")
-      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "jora-application";
     anchor.href = objectUrl;
-    anchor.download = baseName + ".jora-request.json";
+    anchor.download = "jora-request.json";
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
@@ -988,7 +985,7 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("input", (event) => {
   const joraInput = event.target.closest(
-    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred], [data-jora-name]"
+    "[data-jora-component], [data-jora-locale], [data-jora-target], [data-jora-preferred]"
   );
   if (joraInput) {
     const owner = joraInput.closest(".app-window");
