@@ -47,6 +47,25 @@ duckos reaper typecheck ./examples/program.rpr
 
 The same controls are available in the **Reaper** tab of the native Duck Desktop window (`duckos desktop gui`). The browser-based Mora shell does not launch host processes; native launch is handled by Duck Desktop and the DuckOS CLI. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
+
+## Jora application store and factory
+
+Jora is Mora's single application-store entry point. It combines the curated catalogue with a formula composer: select feature packs, choose interface locales and optional programming-language targets, preview a generated product name, then export a versioned request. The Reaper generator resolves dependencies and creates a statically checked user-space project scaffold.
+
+Example: Text Editor + Audio Editor + Translator = LexiTone 3D.
+
+The first integrated feature packs are specification-only; they do not yet provide a working text editor, audio engine or translation service. Reaper is the only code-generation target currently implemented. Java, Kotlin, Python, TypeScript, Rust and C are labelled as pending adapters when selected. The generated scaffold is not installable, and Mora browser code never starts a host process.
+
+After exporting the request JSON, run the native command from the DuckOS environment:
+
+    duckos jora build ./lexitone-3d.jora-request.json ./LexiTone-3D
+
+Use an explicit specialist checkout when needed:
+
+    duckos jora --root ./projects/reaper build ./lexitone-3d.jora-request.json ./LexiTone-3D
+
+See [Jora store integration](docs/JORA_STORE_INTEGRATION.md) and [Reaper application factory](https://github.com/Ivan-VHS/Reaper/blob/main/docs/JORA_APPLICATION_FACTORY.md).
+
 ## Visual system and offline support
 
 The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The service worker is scoped to the Mora directory, caches only Mora shell assets and removes only older caches named with the `mora-shell-` prefix.
