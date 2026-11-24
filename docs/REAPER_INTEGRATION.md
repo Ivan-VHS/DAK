@@ -100,3 +100,11 @@ python -m unittest tests.test_reaper_integration tests.test_reaper_cli -v
 ```
 
 The tests use temporary fake Reaper checkouts and mocked subprocess boundaries. They verify discovery, capability detection, argument-vector construction, JSON result handling, timeouts, source validation and the native Studio launch handoff. They do not run Reaper source or claim kernel-level process isolation.
+
+## Jora application generation
+
+Mora exposes Jora as the unified catalogue and application composer. The browser panel creates a versioned request file; it does not execute local commands. The native bridge supports the explicit CLI path:
+
+    duckos jora build ./request.json ./NewApplication
+
+The bridge accepts only a regular JSON request below the 1 MiB limit, rejects symlinks and existing output paths, and delegates to Reaper through the existing argv-based, shell-free process adapter. Reaper resolves the request and writes a non-installable project scaffold with a manifest, lock file, Reaper entry point, component contract stubs and selected locale dictionaries. Current text/audio/translation packs are specifications only, not functioning editors or translation engines. No generated source is run and no system permissions are granted.
