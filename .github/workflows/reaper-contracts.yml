@@ -25,6 +25,7 @@ jobs:
           python-version: "3.12"
 
       - name: Validate migration manifest, exact pin and source inventory
+        working-directory: DuckOS
         run: python tools/validate_reaper_target.py
 
       - name: Check every Reaper source file
