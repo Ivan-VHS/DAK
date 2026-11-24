@@ -190,7 +190,7 @@ make history_row_b := history["append_revision"](history_row_a[1], 3, 1, "experi
 assert(history["history_valid"](history_row_b[1]), "branched state history keeps parent links valid")
 assert(history_row_b[0] == "appended", "history branch can be appended from an older revision")
 assert(history["checkout"](history_row_b[1], 3)[1][2] == "experiment", "time travel checks out the selected branch")
-assert(history["append_revision"](history_row_b[1], 4, 99, "main", "edit", "bad")[0] == "missing-parent", "history refuses unknown parents")
+assert(history["append_revision"](history_row_b[1], 5, 4, "main", "edit", "bad")[0] == "missing-parent", "history refuses unknown parents")
 assert(history["branch_from"](history_row_b[1], 1, "sandbox") == "ready", "history can branch from a prior state")
 
 assert(workspace["layout_for"]("log.anomaly") == "timeline-diff", "anomaly analysis selects timeline and diff")
