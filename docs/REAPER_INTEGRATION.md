@@ -153,7 +153,7 @@ LSP and DAP are intended for an external editor or terminal client. The Mora bro
 
 ## Capabilities that remain partial or experimental
 
-The workbench exposes only the capabilities actually present in the selected Reaper checkout. Experimental scalar AOT is not a general native compiler. The C17 parser/IR/lowering, QCS hardware-description frontend, embedded linker tooling and hardware Studio are limited or staged features. The Python runtime remains the broad compatibility reference.
+The machine-readable status payload follows [reaper-workbench.v1.schema.json](../schemas/reaper-workbench.v1.schema.json); it reports capability maturity and explicitly records that the integration is user-space, not an OS sandbox. The workbench exposes only the capabilities actually present in the selected Reaper checkout. Experimental scalar AOT is not a general native compiler. The C17 parser/IR/lowering, QCS hardware-description frontend, embedded linker tooling and hardware Studio are limited or staged features. The Python runtime remains the broad compatibility reference.
 
 Reaper's MMIO descriptor API validates descriptors and dispatches through a supplied host adapter; it does not map physical memory or provide a real device driver. Full native type/ownership/effect checking, general object generation, OS-backed MMIO/IRQ/DMA services, hardware execution and a complete hardware-focused Studio workspace remain upstream development work. DuckOS does not promote those plans to implemented OS capabilities.
 
