@@ -50,3 +50,8 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Capability completeness standard
 
 [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
+
+
+## Cross-repository capability adaptation
+
+See [Java ecosystem capability adaptation](JAVA_ECOSYSTEM_ADAPTATION.md) for the shared framework crosswalk, implementation scope and repository boundaries.
