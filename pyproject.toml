@@ -13,3 +13,32 @@ duckos = "duckos.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["duckos*"]
+
+[tool.setuptools.data-files]
+"share/duckos/apps/beelzebub-av/src/main/java/ai/duckos/beelzebub" = [
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/BeelzebubAV.java",
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/Main.java",
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/ScannerEngine.java",
+  "apps/beelzebub-av/src/main/java/ai/duckos/beelzebub/Support.java",
+]
+"share/duckos/apps/beelzebub-av/src/main/resources" = [
+  "apps/beelzebub-av/src/main/resources/signatures.sha256",
+]
+
+"share/duckos/apps/beelzebub-av/bridge" = [
+  "apps/beelzebub-av/bridge/go.mod",
+]
+"share/duckos/apps/beelzebub-av/bridge/cmd/bav-bridge" = [
+  "apps/beelzebub-av/bridge/cmd/bav-bridge/main.go",
+]
+"share/duckos/apps/beelzebub-av/bridge/internal/eventintel" = [
+  "apps/beelzebub-av/bridge/internal/eventintel/event.go",
+  "apps/beelzebub-av/bridge/internal/eventintel/json.go",
+]
+"share/duckos/apps/beelzebub-av/bridge/internal/store" = [
+  "apps/beelzebub-av/bridge/internal/store/store.go",
+]
+"share/duckos/apps/beelzebub-av/bridge/internal/server" = [
+  "apps/beelzebub-av/bridge/internal/server/server.go",
+  "apps/beelzebub-av/bridge/internal/server/context.go",
+]

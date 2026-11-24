@@ -6,7 +6,7 @@ schema_version: 1
 suite:
   id: dak.base-suite
   name: DAK OS Base Applications
-  version: 1.1.0
+  version: 1.2.0
   status: design
   minimum_platform_api: 1
 
@@ -41,6 +41,8 @@ services:
   - dak.route-planner.v1
   - dak.game-library.v1
   - dak.executable-inspection.v1
+  - dak.endpoint-protection.v1
+  - dak.beelzebub-events.v1
 
 applications:
   - id: dak.settings
@@ -238,3 +240,10 @@ applications:
     category: development
     permissions: [files.read.selected, executable.inspect]
     services: [dak.executable-inspection.v1]
+
+  - id: dak.beelzebub-av
+    name: Beelzebub AV
+    entry: app://dak.beelzebub-av/main
+    category: security
+    permissions: [files.read.selected, files.watch.selected, security.scan.user, security.quarantine.manage, telemetry.honeypot.read.local, network.loopback.bind]
+    services: [dak.endpoint-protection.v1, dak.beelzebub-events.v1, dak.vfs.v1]

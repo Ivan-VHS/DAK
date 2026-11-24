@@ -5,7 +5,7 @@
 **Maturity:** `specified`  
 **Distribution intent:** seven default applications in the DuckOS product design
 
-This document defines the intended roles, first-scope capabilities and cross-application workflows for 20 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
+This document defines the intended roles, first-scope capabilities and cross-application workflows for 21 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
 
 The machine-readable inventory is maintained in [`preinstalled-applications.v1.json`](../catalogs/preinstalled-applications.v1.json). The separate DAK package-design catalog is [`dak-base-applications.v1.yaml`](../catalogs/dak-base-applications.v1.yaml). Shared terminology and maturity rules come from the [Ivan-VHS Unified Documentation and Semantics Standard](UNIFIED_DOCUMENTATION_STANDARD.md).
 
@@ -33,6 +33,7 @@ The machine-readable inventory is maintained in [`preinstalled-applications.v1.j
 | **Po-2** | Route planning | Arrange manually entered stops without GPS |
 | **GameCharager** | Game library | Track local game profiles and inspect selected executables |
 | **EXEdotEXE** | Executable inspection | Inspect PE/ELF metadata and calculate a local SHA-256 digest |
+| **Beelzebub AV** | Endpoint file scanning | Inspect selected directories with a Java user-space scanner, local hash indicators and explicit quarantine |
 
 The names are product working names. **Cockos** is flagged for a naming and trademark review before public distribution. No trademark clearance is asserted for Cockos or the other names by this specification.
 
@@ -297,3 +298,17 @@ These are local prototype workflows. They do not establish a system-wide event b
 The browser prototype uses the versioned [`unify.transfer.v1`](UNIFY_TRANSFER_FORMAT_V1.md) JSON-file contract for manual transfer of selected Po tabs, Illidia clips and selected local settings. The format is validated by [`schemas/unify.transfer.v1.schema.json`](../schemas/unify.transfer.v1.schema.json).
 
 The prototype enforces a 20 MiB package limit, a 12 MiB per-clip limit, and bounds on tab and clip counts. This is a user-mediated file hand-off, not authenticated pairing or live synchronization.
+
+
+## Beelzebub AV
+
+**Beelzebub AV** is a partial native Java 17+ endpoint file-scanning application. It provides on-demand selected-directory scans, streaming SHA-256 indicators, EICAR test-string matching, conservative script heuristics, optional monitoring of explicitly selected directories and user-approved reversible quarantine. The browser shell is only a discovery surface; actual filesystem access belongs to the Java process launched through Duck Desktop or the CLI.
+
+It is not a kernel antivirus or a system-wide protection guarantee. No memory/network/boot scanning, process blocking, automatic disinfection, automatic deletion or maintained vendor malware corpus is included. See [Beelzebub AV implementation and security boundaries](BEELZEBUB_AV.md).
+
+
+
+## Beelzebub AV · Honeypot intelligence
+
+The native Java Beelzebub AV scanner can optionally receive events from the separate Go Beelzebub v3 deception runtime through a local loopback-only Go bridge. This adds a Honeypot Intel view for normalized behavioural telemetry; it does not treat an attack against a decoy as proof of malware on the user's host and does not trigger quarantine. The upstream Go runtime requires an explicit event-forwarder patch. The integration uses a separate bounded sink and does not consume or replace the existing RabbitMQ event queue.
+
