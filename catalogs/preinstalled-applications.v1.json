@@ -282,21 +282,27 @@
         "bounded_local_audio_sample_import",
         "local_audio_sample_preview",
         "sample_provenance_metadata",
+        "sixteen_step_browser_sequencer",
+        "browser_synthesized_trap_drums_and_808",
+        "local_choir_sample_chopping",
+        "four_bar_wav_render",
         "production_prompt_export_500_characters",
         "reaper_timing_helper_export"
       ],
       "boundaries": [
-        "Saves BPM, swing and sample metadata in Mora browser storage; audio file bytes are not stored in the profile",
-        "The browser prototype imports user-selected audio only for local preview; files are not uploaded or transmitted",
-        "Imported audio is not synthesized, transformed, mixed, recorded or routed",
+        "Saves BPM, swing, sequence and sample metadata in Mora browser storage; audio file bytes are not stored in the profile",
+        "The browser prototype imports user-selected audio only for local preview and sequencing; files are not uploaded or transmitted",
+        "The browser sequencer synthesizes a bounded kick, snare, hi-hat and 808 pattern and can render a four-bar WAV",
+        "Choir chops are sourced from user-selected audio; no third-party recordings are bundled or fetched",
         "The Reaper helper calculates reference swing timing markers; it does not play audio, create MIDI or control a DAW",
-        "The catalogued native DuckOS application remains specified; the browser prototype is partial"
+        "No native DuckOS audio driver, system mixer, low-latency service, device routing or multitrack DAW is claimed"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
       "prototype_evidence": [
         "mora/app.js",
         "mora/concrete-thump.js",
+        "mora/concrete-thump-audio.js",
         "tests/mora-concrete-thump.test.mjs"
       ]
     },
@@ -528,6 +534,15 @@
       "trigger": "user_exports_rhythm_profile",
       "action": "hand_off_bpm_and_swing_metadata",
       "maturity_status": "specified",
+      "user_consent_required": true
+    },
+    {
+      "id": "language.concrete-thump-to-reaper.v1",
+      "source": "concrete-thump",
+      "target": "reaper",
+      "trigger": "user_exports_reaper_timing_helper",
+      "action": "download_validated_reaper_source_for_manual_timing_analysis",
+      "maturity_status": "partial",
       "user_consent_required": true
     }
   ],
