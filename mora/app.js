@@ -906,6 +906,7 @@ function downloadConcreteThumpFile(fileName, source, mimeType) {
 
 function closeWindow(appWindow) {
   if (!appWindow) return;
+  if (appWindow.dataset.window === "concrete-thump") releaseConcreteThumpSamples(appWindow);
   appWindow.remove();
   updateActiveApp();
 }
@@ -1294,43 +1295,64 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const ritualControl = event.target.closest("[data-ritual-control], [data-chant-source]");
+  if (ritualControl) {
+    refreshConcreteThumpPrompt(ritualControl.closest(".app-window"));
+    return;
+  }
+
   const choirInput = event.target.closest("[data-choir-samples]");
   if (choirInput) {
     const owner = choirInput.closest(".app-window");
     const samples = sampleSession(owner);
-    let totalBytes = samples.reduce((sum, sample) => sum + (sample.file ? Number(sample.size || 0) : 0), 0);
+    let totalBytes = samples.reduce((sum, sample) => sum + Number(sample.size || 0), 0);
     const messages = [];
+
     for (const file of Array.from(choirInput.files || [])) {
+      const existingIndex = samples.findIndex((sample) =>
+        !sample.file && sample.name === file.name &&
+        Number(sample.size) === Number(file.size) &&
+        (sample.type || "") === (file.type || "")
+      );
+      const previousSize = existingIndex >= 0 ? Number(samples[existingIndex].size || 0) : 0;
       const validation = validateAudioSampleFile(file, {
-        sampleCount: samples.length,
-        totalBytes
+        sampleCount: samples.length - (existingIndex >= 0 ? 1 : 0),
+        totalBytes: totalBytes - previousSize
       });
       if (!validation.ok) {
         messages.push(file.name + ": " + validation.reason);
         continue;
       }
+
       try {
         const url = URL.createObjectURL(file);
-        samples.push({
-          name: file.name,
-          type: file.type || "audio",
-          size: file.size,
-          credit: "",
-          rights: "unspecified",
-          file,
-          url
-        });
-        totalBytes += file.size;
+        if (existingIndex >= 0) {
+          const previous = samples[existingIndex];
+          if (previous.url) URL.revokeObjectURL(previous.url);
+          samples[existingIndex] = { ...previous, file, url };
+        } else {
+          samples.push({
+            name: file.name,
+            type: file.type || "audio",
+            size: file.size,
+            credit: "",
+            rights: "unspecified",
+            file,
+            url
+          });
+        }
+        totalBytes = totalBytes - previousSize + file.size;
       } catch {
         messages.push(file.name + ": браузер не смог создать локальный предпросмотр.");
       }
     }
+
     choirInput.value = "";
     renderConcreteThumpSamples(owner);
     const status = owner.querySelector("[data-beat-status]");
     status.textContent = messages.length
       ? messages.join(" ")
-      : "Добавлено сэмплов: " + samples.length + ". Предпрослушивание локальное; перед использованием проверьте права.";
+      : "Сэмплы доступны локально для предпрослушивания. Перед использованием проверьте права.";
     return;
   }
 
