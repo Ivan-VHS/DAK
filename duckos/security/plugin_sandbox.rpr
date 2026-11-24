@@ -1,0 +1,39 @@
+# Admission contract for a future Wasm Component Model host.
+# "sandbox-eligible" is not a claim that arbitrary code is already isolated.
+
+export craft capabilities_subset(requested, granted) {
+    vary valid := true
+    each capability in requested {
+        vary found := false
+        each grant in granted {
+            when capability == grant {
+                change found := true
+            }
+        }
+        when not found {
+            change valid := false
+        }
+    }
+    yield valid
+}
+
+export craft plugin_admission(plugin, granted) {
+    when size(plugin) != 6 {
+        yield "reject"
+    }
+    when plugin[0] == "" or plugin[1] != "wasm-component" {
+        yield "reject"
+    }
+    when plugin[2] <= 0 or plugin[2] > 2500
+        or plugin[3] <= 0 or plugin[3] > 256 {
+        yield "reject"
+    }
+    when plugin[4] != "verified" or not capabilities_subset(plugin[5], granted) {
+        yield "reject"
+    }
+    yield "sandbox-eligible"
+}
+
+export craft host_required() {
+    yield "wasmtime-or-equivalent-component-host"
+}
