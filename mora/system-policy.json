@@ -86,6 +86,10 @@
     "desktop_optimizer": {
       "maturity": "partial",
       "scope": "native Python user-space utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; no native compositor, virtual desktop manager, kernel scheduler or machine-wide service control"
+    },
+    "jora_formula_synthesis": {
+      "maturity": "partial",
+      "scope": "local formula parser, bounded integration graph, Reaper-first plan and source export; no native DAK installer, remote catalogue backend, build sandbox or application execution"
     }
   },
   "not_in_scope_as_implemented_features": [

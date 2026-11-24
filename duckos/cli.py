@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from .jora.cli import add_commands as add_jora_commands, run_command as run_jora_command
 from typing import Any
 
 from .compat import (
@@ -145,6 +146,8 @@ def main(argv: list[str] | None = None) -> int:
     reaper_typecheck = reaper_commands.add_parser("typecheck", help="run the focused Reaper type diagnostics")
     reaper_typecheck.add_argument("source", type=Path)
 
+    add_jora_commands(commands)
+
     bridge = commands.add_parser(
         "bridge", help="discover compatibility runtimes and prepare non-executing launch plans"
     )
@@ -245,6 +248,8 @@ def main(argv: list[str] | None = None) -> int:
             result = diagnose_binary(args.file, args.prefix)
         elif args.command == "compat-plan":
             result = plan_launch(args.file, args.prefix)
+        elif args.command == "jora":
+            result = run_jora_command(args)
         elif args.command == "bridge" and args.bridge_command == "runtimes":
             result = detect_bridge_runtimes()
         elif args.command == "bridge" and args.bridge_command == "inspect":

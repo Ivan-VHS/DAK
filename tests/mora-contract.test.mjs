@@ -14,11 +14,11 @@ const extensionAppIds = [
   "seu-beu", "love-il", "poi", "poi-2", "po-2", "gamecharager", "exedotexe"
 ];
 const systemAppIds = [
-  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "desktop", "mora-commons"
+  "mora-ai", "security", "updates", "runtime", "workspace", "provenance", "mora-boost", "desktop", "mora-commons", "jora"
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
-test("desktop exposes 20 first-party apps and nine system tools", () => {
+test("desktop exposes 20 first-party apps and ten system tools", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
     assert.ok(matches.length >= 1, id + " is missing from the desktop");
@@ -146,4 +146,16 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
+});
+
+
+test("Jora is a first-class Mora application with local synthesis controls", () => {
+  assert.ok(html.includes('data-app="jora"'));
+  assert.ok(js.includes('jora: { name: "Jora"'));
+  assert.ok(js.includes('case "jora":'));
+  assert.ok(js.includes("initializeJoraPanel"));
+  assert.ok(js.includes("buildJoraPackage"));
+  assert.ok(registry.built_in_apps.some((app) => app.id === "jora"));
+  assert.equal(policy.capabilities.jora_formula_synthesis.maturity, "partial");
+  assert.ok(serviceWorker.includes("./jora-core.js"));
 });
