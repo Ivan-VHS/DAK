@@ -78,3 +78,11 @@ BAV — защитное программное обеспечение коне�
 9. Schema, unit/property tests, CI и документация версионируются вместе с изменением контракта.
 
 См. также [JSON Schema](../schemas/bav-defender-doctrine.v1.schema.json) и [Reaper native runtime contract](https://github.com/Ivan-VHS/Reaper/blob/main/docs/BAV_POLICY_RUNTIME_CONTRACT.md).
+
+## 8. Текущие репозиторные артефакты
+
+- Каноническая политика и схема находятся в этом репозитории: `security/bav/defender-doctrine.v1.json` и `schemas/bav-defender-doctrine.v1.schema.json`.
+- [OPlague Red Sparrow Guard](https://github.com/Ivan-VHS/OPlague/blob/main/docs/RED_SPARROW_GUARD.md) — read-only локальный сканер контента с ручной проверкой; не является BAV-антивирусом.
+- [Reaper BAV policy runtime contract](https://github.com/Ivan-VHS/Reaper/blob/main/docs/BAV_POLICY_RUNTIME_CONTRACT.md) — целевой контракт будущего детерминированного/native evaluator; пока только спецификация.
+
+При переходе этих PR в main потребуется отдельное согласованное обновление commit pin OPlague и Reaper в DuckOS federation registry. Пока PR открыты, DuckOS не должен ссылаться на их ветки как на закреплённые production-зависимости.
