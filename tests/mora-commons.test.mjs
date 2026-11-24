@@ -24,17 +24,17 @@ test("Mora Commons keeps its original products and adds thirteen distinct core a
   assert.equal(MORA_COMMONS_APPS.length, 28);
   assert.equal(new Set(MORA_COMMONS_APPS.map((app) => app.id)).size, 28);
   assert.deepEqual(
-    MORA_COMMONS_APPS.slice(0, 15).map((app) => app.name),
+    MORA_COMMONS_APPS.slice(0, 13).map((app) => app.name),
+    ["Deskline", "Nuvault", "Daymark", "Lexora", "Relay", "Wayline", "Sumora",
+      "Pixora", "Nexcode", "Mnemo", "Calcora", "Paceforge", "Trailmark"]
+  );
+  assert.deepEqual(
+    MORA_COMMONS_APPS.slice(13).map((app) => app.name),
     [
       "TorqueSpec", "Bore & Thread", "GarageBay Log", "Blade & Edge", "RigCheck",
       "IronCadence", "RoundTimer Pro", "RuckLedger", "Grip & Hang", "RecoveryLedger",
       "DeadReckon", "CampLoad", "WatchDesk", "MarginLine", "ColdStart"
     ]
-  );
-  assert.deepEqual(
-    MORA_COMMONS_APPS.slice(15).map((app) => app.name),
-    ["Deskline", "Nuvault", "Daymark", "Lexora", "Relay", "Wayline", "Sumora",
-      "Pixora", "Nexcode", "Mnemo", "Calcora", "Paceforge", "Trailmark"]
   );
   assert.equal(MORA_COMMONS_CATEGORIES.length, 13);
 });
@@ -83,7 +83,7 @@ test("search and category filters return the expected catalogue entries", () => 
 test("equal access is a product rule rather than a user segment", () => {
   assert.equal(MORA_COMMONS_POLICY.audience, "everyone");
   assert.equal(MORA_COMMONS_POLICY.genderSegmentation, false);
-  assert.equal(MORA_COMMONS_POLICY.maturity, "catalog_implemented_products_specified");
+  assert.equal(MORA_COMMONS_POLICY.maturity, "13_local_first_apps_15_specialist_specs");
   assert.ok(MORA_COMMONS_POLICY.principles.some((rule) => rule.includes("Equal access")));
   assert.ok(MORA_COMMONS_POLICY.principles.some((rule) => rule.includes("No gender-based")));
   assert.ok(MORA_COMMONS_CATEGORIES.every((category) => !/men|women|мужчин|женщин/i.test(category.title)));
