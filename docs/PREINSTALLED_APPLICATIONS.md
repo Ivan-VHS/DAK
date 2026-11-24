@@ -3,9 +3,9 @@
 **Catalog ID:** `duckos.preinstalled-applications.v1`  
 **Catalog version:** 1.0  
 **Maturity:** `specified`  
-**Distribution intent:** seven default applications in the DuckOS product design
+**Distribution intent:** first-party applications in the DuckOS product design; release packaging is not verified
 
-This document defines the intended roles, first-scope capabilities and cross-application workflows for 20 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
+This document defines the intended roles, first-scope capabilities and cross-application workflows for 21 DuckOS first-party application concepts: the original seven, 13 extended tools and the Газета news reader. The names of the 13 extensions were provided without functional descriptions, so their initial roles are explicit working interpretations. Газета is a browser-backed news aggregation surface with its own newspaper material style; its native DAK service remains a design contract. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
 
 The machine-readable inventory is maintained in [`preinstalled-applications.v1.json`](../catalogs/preinstalled-applications.v1.json). The separate DAK package-design catalog is [`dak-base-applications.v1.yaml`](../catalogs/dak-base-applications.v1.yaml). Shared terminology and maturity rules come from the [Ivan-VHS Unified Documentation and Semantics Standard](UNIFIED_DOCUMENTATION_STANDARD.md).
 
@@ -33,6 +33,7 @@ The machine-readable inventory is maintained in [`preinstalled-applications.v1.j
 | **Po-2** | Route planning | Arrange manually entered stops without GPS |
 | **GameCharager** | Game library | Track local game profiles and inspect selected executables |
 | **EXEdotEXE** | Executable inspection | Inspect PE/ELF metadata and calculate a local SHA-256 digest |
+| **Газета** | News aggregation | Browse six current-news topics, search headlines and keep local article bookmarks |
 
 The names are product working names. **Cockos** is flagged for a naming and trademark review before public distribution. No trademark clearance is asserted for Cockos or the other names by this specification.
 
@@ -189,6 +190,26 @@ The following scope is intentionally modest because these 13 names arrived witho
 
 Entries are namespaced by app in the Mora browser profile. Each text collection is limited to 100 entries and 160 characters per entry. File inspection is user initiated and remains local to the browser. The mora/apps.json registry and core.js app ID list are updated together so the launcher and panel router share one inventory.
 
+### 2.9 Газета — news aggregation
+
+**Purpose:** a separate newspaper-like news desk inside Mora, with a paper-print surface distinct from the global DuckOS desktop palette.
+
+Initial browser capability scope:
+
+- Six topic sections: Ukraine, Dnipro, World, Technology, Economy and Science.
+- Search within the selected section and manually refresh the latest 24-hour article list.
+- Display title, publisher domain, source language/country and publication timestamp; open the original HTTPS publisher page.
+- Save up to 100 article links as local bookmarks.
+- Retain up to eight recent query result sets in the current browser profile for offline fallback.
+
+Provider and trust boundaries:
+
+- The current Mora panel requests the public GDELT DOC 2.0 JSON ArtList endpoint. GDELT documents JSON output, cross-origin access and search across machine-translated coverage in 65 languages.
+- The feed displays article metadata rather than copying full article bodies. Publisher links open separately; no subscription or access-control bypass is attempted.
+- GDELT is an aggregator, not an editorial verification service. The interface does not rank publisher trust, fact-check claims or imply that a headline is independently verified.
+- Requests are user-triggered, rate-limited in the browser and sent without cookies or a referrer. The provider still receives the network request and can observe its query and connection metadata.
+- Local cache and bookmarks are not synchronized between devices. The native `dak.news-feed.v1` provider, capability registration and package integration remain specified, not implemented.
+
 ## 3. Cross-application workflows
 
 These workflows define intended product behavior and future integration contracts. They are not claims that the connectors or event bus are implemented.
@@ -297,3 +318,11 @@ These are local prototype workflows. They do not establish a system-wide event b
 The browser prototype uses the versioned [`unify.transfer.v1`](UNIFY_TRANSFER_FORMAT_V1.md) JSON-file contract for manual transfer of selected Po tabs, Illidia clips and selected local settings. The format is validated by [`schemas/unify.transfer.v1.schema.json`](../schemas/unify.transfer.v1.schema.json).
 
 The prototype enforces a 20 MiB package limit, a 12 MiB per-clip limit, and bounds on tab and clip counts. This is a user-mediated file hand-off, not authenticated pairing or live synchronization.
+
+## 10. Current Mora newspaper feed
+
+The current shell entry point is [`mora/index.html`](../mora/index.html), routed through the first-party app ID `news`. Its panel implementation is split into [`mora/news.js`](../mora/news.js) and the pure request/normalization helpers in [`mora/news-core.js`](../mora/news-core.js). The service worker precaches both modules.
+
+The UI is a deliberately isolated skeuomorphic newspaper surface: printed masthead, paper grain, double rules, editorial columns, raised article cards and serif headlines. Its paper/ink colors are scoped to `.newspaper-app`; the desktop continues to use only DuckOS black, white and yellow semantic tokens. See the [news feed implementation note](NEWS_FEED.md).
+
+The browser implementation is partial and network-dependent. The DAK YAML registers `dak.news` and `dak.news-feed.v1` as a proposal; it does not establish that a native news service or a bootable package exists.
