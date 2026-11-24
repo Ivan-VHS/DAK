@@ -165,6 +165,8 @@ test("glass materials use bounded progressive enhancement and accessible fallbac
   assert.ok(css.includes("@supports ((backdrop-filter: blur(1px))"));
   assert.ok(css.includes("@media (prefers-reduced-transparency: reduce)"));
   assert.ok(css.includes(":root.reduce-transparency"));
+  assert.ok(js.includes('classList.toggle("reduce-transparency", preferences.appearance.reduceTransparency)'));
+  assert.ok(js.includes('data-setting="reduceTransparency"'));
   assert.ok(css.includes("@media (forced-colors: active)"));
   assert.ok(css.includes("backdrop-filter: none"));
   assert.ok(css.includes("--mora-glass-fallback"));
