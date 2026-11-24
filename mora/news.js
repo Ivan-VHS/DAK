@@ -197,7 +197,10 @@ export function initializeNewsPanel(appWindow) {
   let currentView = "latest";
   let currentSearch = "";
   let requestSequence = 0;
-  let cached = readStoredJson(NEWS_CACHE_KEY, {});
+  const rawCache = readStoredJson(NEWS_CACHE_KEY, {});
+  let cached = Object.fromEntries(Object.entries(rawCache)
+    .filter(([key, value]) => /^(ukraine|dnipro|world|technology|business|science):/.test(key) && Array.isArray(value))
+    .map(([key, value]) => [key, parseNewsArticles({ articles: value })]));
   let bookmarks = new Map();
   const storedBookmarks = readStoredJson(NEWS_BOOKMARKS_KEY, []);
   const bookmarkItems = Array.isArray(storedBookmarks)
@@ -245,7 +248,7 @@ export function initializeNewsPanel(appWindow) {
     status.classList.toggle("is-error", isError);
   }
 
-  async function loadNews(force = false) {
+  async function loadNews() {
     if (currentView === "saved") return;
     const sequence = ++requestSequence;
     const key = activeCacheKey();
@@ -259,11 +262,6 @@ export function initializeNewsPanel(appWindow) {
     }
 
     const elapsed = Date.now() - lastRequestAt;
-    if (!force && elapsed < MIN_REQUEST_INTERVAL_MS && lastRequestAt > 0) {
-      const wait = Math.ceil((MIN_REQUEST_INTERVAL_MS - elapsed) / 1000);
-      setStatus("Чтобы не перегружать источник, следующий запрос доступен через " + wait + " сек.", true);
-      return;
-    }
     if (lastRequestAt > 0 && elapsed < MIN_REQUEST_INTERVAL_MS) {
       const wait = Math.ceil((MIN_REQUEST_INTERVAL_MS - elapsed) / 1000);
       setStatus("Источник ограничивает частоту запросов. Повторите обновление через " + wait + " сек.", true);
@@ -329,6 +327,7 @@ export function initializeNewsPanel(appWindow) {
 
     const view = event.target.closest("[data-news-view]");
     if (view) {
+      requestSequence += 1;
       currentView = view.dataset.newsView === "saved" ? "saved" : "latest";
       render();
       if (currentView === "latest" && !(cached[activeCacheKey()] || []).length) loadNews();
@@ -359,10 +358,10 @@ export function initializeNewsPanel(appWindow) {
     currentSearch = searchInput.value.trim().slice(0, 100);
     currentView = "latest";
     render();
-    loadNews(true);
+    loadNews();
   });
 
-  refreshButton.addEventListener("click", () => loadNews(true));
+  refreshButton.addEventListener("click", () => loadNews());
   root.querySelector("[data-news-issue-date]").textContent = formatIssueDate();
   render();
   loadNews();
