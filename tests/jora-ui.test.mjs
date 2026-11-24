@@ -17,7 +17,7 @@ test("Jora composes selected features into a deterministic product formula", () 
   assert.equal(result.request.name, "Jora");
   assert.equal(result.request.language_targets, "auto");
   assert.equal(result.request.name_style, "balanced");
-  assert.deepEqual(result.request.graph, { topology: "auto", seed: "", variants: 4, variation: 50 });
+  assert.deepEqual(result.request.graph, { topology: "auto", objective: "balanced", seed: "", variants: 4, variation: 50 });
   assert.equal(result.nameSuggestions.length, 4);
   assert.ok(result.nameSuggestions.every((label) => label.startsWith("Jora")));
 });
@@ -54,15 +54,17 @@ test("Jora allows graph topology, variant count and variation to be selected", (
     graphTopology: "event_driven",
     graphVariants: 2,
     graphVariation: 80,
+    graphObjective: "modularity",
     graphSeed: "user-seed-42",
     nameStyle: "descriptive"
   });
   assert.equal(result.request.name, "Jora");
   assert.equal(result.request.name_style, "descriptive");
   assert.deepEqual(result.request.graph, {
-    topology: "event_driven", seed: "user-seed-42", variants: 2, variation: 80
+    topology: "event_driven", objective: "modularity", seed: "user-seed-42", variants: 2, variation: 80
   });
   assert.equal(result.graphPlan.topologyLabel, "Событийная архитектура");
+  assert.equal(result.graphPlan.objectiveLabel, "Модульность");
   assert.equal(result.graphPlan.variants, 2);
   assert.equal(result.graphPlan.seed, "user-seed-42");
 });
@@ -70,6 +72,7 @@ test("Jora allows graph topology, variant count and variation to be selected", (
 test("Jora rejects unsupported graph and naming options", () => {
   const base = { components: ["text.editor"], locales: ["en"] };
   assert.throws(() => composeJoraRequest({ ...base, graphTopology: "random" }), /Unsupported Jora graph topology/);
+  assert.throws(() => composeJoraRequest({ ...base, graphObjective: "random" }), /Unsupported Jora graph objective/);
   assert.throws(() => composeJoraRequest({ ...base, graphVariants: 7 }), /from 1 to 6/);
   assert.throws(() => composeJoraRequest({ ...base, graphVariation: 101 }), /from 0 to 100/);
   assert.throws(() => composeJoraRequest({ ...base, nameStyle: "invented" }), /Unsupported Jora naming style/);
