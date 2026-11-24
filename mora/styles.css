@@ -979,3 +979,75 @@ input[type="range"] { accent-color: #FFD400; }
     animation-duration: 0.01ms !important;
   }
 }
+
+
+.concrete-sequencer {
+  display: grid;
+  gap: 12px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.concrete-sequencer h3 {
+  margin: 0;
+  color: var(--mora-text);
+  font-size: 13px;
+}
+.sequence-track {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 620px;
+}
+.sequence-track > strong {
+  color: var(--mora-secondary);
+  font-size: 10px;
+  font-weight: 650;
+}
+.sequence-step-grid {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 4px;
+}
+.sequence-step {
+  min-width: 0;
+  min-height: 29px;
+  padding: 3px 0;
+  border: 1px solid var(--mora-border);
+  border-radius: 6px;
+  background: #111111;
+  color: var(--mora-muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.sequence-step:nth-child(4n + 1) {
+  border-left-color: var(--mora-brand);
+}
+.sequence-step.active {
+  border-color: var(--mora-brand);
+  background: var(--mora-brand);
+  color: #080808;
+  font-weight: 800;
+}
+.sequence-step:focus-visible {
+  outline: 2px solid var(--mora-focus);
+  outline-offset: 2px;
+}
+.sequence-step[aria-pressed="true"]::after {
+  content: "";
+}
+.concrete-playback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.concrete-playback-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+@media (max-width: 560px) {
+  .sequence-track {
+    grid-template-columns: 78px minmax(540px, 1fr);
+  }
+}
