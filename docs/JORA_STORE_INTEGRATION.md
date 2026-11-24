@@ -25,7 +25,7 @@ Mora / Jora composer
   -> Reaper resolves dependencies and writes manifest, source scaffold and locales
   -> new Reaper project directory
 
-The native bridge requires an existing regular .json request file, rejects symlinks and requests larger than 1 MiB, requires a new output path and delegates through Reaper's existing bounded subprocess adapter. It does not import Reaper into the DuckOS process.
+The native Duck Desktop Reaper tab can select the exported JSON request, choose a destination path and start generation on a worker thread. The CLI is also available. Both use the same native bridge, which requires an existing regular .json request file, rejects symlinks and requests larger than 1 MiB, requires a new output path and delegates through Reaper's existing bounded subprocess adapter. It does not import Reaper into the DuckOS process.
 
 ## Generated artifact contract
 
