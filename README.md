@@ -89,7 +89,7 @@ See [Release and deployment tooling](docs/DEPLOYMENT.md). These commands produce
 
 ## Predictive security stack
 
-DuckOS includes a Reaper policy contract and a bounded user-space analysis service for predictive security. The service accepts versioned telemetry batches, correlates process/file/network/identity/integrity events, builds causal chains, scores supplied indicators, produces explainable advisory recommendations and exports redacted forensic context. It also provides an explicit managed-root file snapshot API, read-only SHA-256 manifest verification, HMAC-authenticated mesh-alert envelopes and workload-aware scan hints.
+DuckOS includes a compiled C11 security foundation, Reaper system-policy contracts and a bounded Python user-space analysis service for predictive security. The service accepts versioned telemetry batches, correlates process/file/network/identity/integrity events, builds causal chains, scores supplied indicators, produces explainable advisory recommendations and exports redacted forensic context. It also provides an explicit managed-root file snapshot API, read-only SHA-256 manifest verification, HMAC-authenticated mesh-alert envelopes and workload-aware scan hints.
 
 Native CLI entry points:
 

@@ -162,3 +162,19 @@ The existing implemented/partial boundary list above remains authoritative. This
 
 The checked boxes describe implemented user-space policy and evidence services only. They do not represent active kernel protection. Refer to SECURITY_ARCHITECTURE.md for exact boundaries and native bring-up gates.
 
+
+
+## Native C11 security foundation — 2026-11-24
+
+- [x] Versioned fixed-width C11 event/evaluation ABI with bounded identifiers and explicit trust labels.
+- [x] Fixed-capacity 128-entry event ring with no heap allocation in the ingestion path.
+- [x] Fail-closed event validation, trusted-source enforcement, event ID deduplication and per-host sequence/monotonic-time ordering.
+- [x] Native deterministic risk indicators for process injection, sensitive memory reads, credential material, protected-component tampering, unverified driver observations, file mutation bursts, entropy changes, malicious destinations, beacon hints, LOLBin context and cross-host IOC clusters.
+- [x] Bounded causal ancestry and explainable advisory recommendation.
+- [x] Separate deny-by-default C authorization API with least-privilege capability bits, fresh evidence/policy requirements, explicit destructive-action approval and verified snapshot/target conditions for restore.
+- [x] CMake library and CTest regression target.
+- [ ] Connect kernel/process/filesystem/network sensor callbacks to the native event ABI.
+- [ ] Link the security foundation into a booted kernel/service image and enforce authorization at privileged syscall/device boundaries.
+- [ ] Add a platform-native filesystem filter/journal, process sandbox and hardware-backed isolation.
+
+The native C foundation is compiled and tested as a static library. It is not yet a kernel driver or boot-time enforcement mechanism.

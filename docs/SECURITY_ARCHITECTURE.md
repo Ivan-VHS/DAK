@@ -1,6 +1,6 @@
 # DuckOS predictive security architecture
 
-**Status:** implemented user-space foundations plus Reaper policy contracts; native enforcement remains gated.  
+**Status:** compiled C11 event/risk/authorization foundation, Python user-space evidence/snapshot services and Reaper OS policy contracts are implemented; live native sensors and enforcement remain gated.  
 **Scope:** DuckOS operating-system security services, not a detached antivirus application.
 
 **Runtime alignment:** this repository currently exposes a Python user-space CLI/service and Reaper policy contracts; it contains no Java/JVM runtime or Java build module. No unsupported Java sidecar was introduced. A Java implementation can only be integrated after the OS defines a supported JVM lifecycle and cross-language contract; the present implementation keeps Reaper as the shared policy plane and uses the existing DuckOS runtime.
@@ -9,11 +9,12 @@
 
 The security capability has four cooperating boundaries:
 
-1. **Reaper policy plane** — deterministic risk scoring, action selection, snapshot requirements, mesh-signal acceptance, recovery authorization and workload-profile decisions.
-2. **DuckOS user-space evidence plane** — strict event ingestion, bounded causal correlation, indicator clustering, explainable risk evaluations, in-memory flight recorder, explicit file snapshots, integrity verification and authenticated mesh-alert envelopes.
-3. **Native sensor and enforcement plane** — future kernel/system services that collect events and enforce decisions through versioned capabilities. No native hook is claimed by the current user-space implementation.
-4. **OS service lifecycle** — duckos/services/security.rpr registers the security service identity, dependencies, startup gates, health/backpressure states, bounded supervisor restart decisions and per-action capability checks. This is a lifecycle contract, not a running native daemon.
-5. **Mora presentation plane** — system policy advertises the capability as partial and cannot turn an advisory recommendation into a claim of active protection.
+1. **Native C11 foundation** — fixed-size versioned event ABI, bounded 128-record ring, trust/sequence/duplicate validation, deterministic risk scoring, file-mutation/entropy rules, LOLBin and credential signals, bounded causal ancestry, cross-host indicator clustering and fail-closed capability authorization. No dynamic allocation is performed in the event ingestion path.
+2. **Reaper policy plane** — deterministic risk scoring, action selection, snapshot requirements, mesh-signal acceptance, recovery authorization and workload-profile decisions.
+3. **DuckOS user-space evidence plane** — strict event ingestion, bounded causal correlation, indicator clustering, explainable risk evaluations, in-memory flight recorder, explicit file snapshots, integrity verification and authenticated mesh-alert envelopes.
+4. **Native sensor and enforcement plane** — future kernel/system services that collect events and enforce decisions through versioned capabilities. No native hook is claimed by the current user-space implementation.
+5. **OS service lifecycle** — duckos/services/security.rpr registers the security service identity, dependencies, startup gates, health/backpressure states, bounded supervisor restart decisions and per-action capability checks. This is a lifecycle contract, not a running native daemon.
+6. **Mora presentation plane** — system policy advertises the capability as partial and cannot turn an advisory recommendation into a claim of active protection.
 
 Dependencies point inward to versioned contracts. The analyzer cannot call privileged OS operations. Sensor adapters must produce validated events; they must not pass kernel pointers, secrets, unbounded command lines or arbitrary nested payloads into the policy engine. The kernel security authorization contract consumes trust labels, explicit capability grants, evidence freshness, policy validity, approval state and authenticated snapshot metadata before allowing a privileged action. Telemetry publication and IPC reads have separate least-privilege grants; security-sensor driver descriptors additionally require a verified signer, non-revoked publisher, matching image digest and measured secure-boot state.
 
@@ -21,19 +22,19 @@ Dependencies point inward to versioned contracts. The analyzer cannot call privi
 
 | Direction | Current DuckOS implementation | Native work still required |
 |---|---|---|
-| Threat epidemiology | Distinct-host indicator clustering over supplied events with bounded time windows | Global intelligence ingestion, trusted peer inventory, temporal normalization and fleet topology |
+| Threat epidemiology | C11 and Python distinct-host indicator clustering over trusted event input in bounded time windows | Global intelligence ingestion, trusted peer inventory, temporal normalization and fleet topology |
 | Pre-action snapshots | Explicit bounded snapshots for caller-selected regular files under a managed root | Filesystem filter, pre-write journal, crash consistency and system-level rollback |
 | Hardware memory vault | Reaper security trust/capability contracts | VBS/virtualization integration, protected memory, measured boot and platform qualification |
-| Causal attack graph | Bounded process-parent/event chain and incident edge export | Kernel event IDs, durable graph store and cross-source causal joins |
+| Causal attack graph | C11 bounded parent-event ancestry; Python incident edge export | Kernel event IDs from live sensors, durable graph store and cross-source causal joins |
 | Context-aware sandbox | Risk engine recommends sandbox handling for untrusted context | Isolated process execution, filesystem/network/device namespaces and escape testing |
-| Intent and entropy | Supplied entropy delta, file mutation and periodic beacon signals | Native file/network telemetry and calibrated behavioral baselines |
-| LOLBins | Context-aware rules for common system tools; names alone are not treated as malicious | Signed image identity, command-line capture, parent provenance and native process callbacks |
+| Intent and entropy | C11/Python analysis of supplied entropy deltas, file mutation and periodic beacon signals | Native file/network telemetry and calibrated behavioral baselines |
+| LOLBins | C11/Python context-aware rules for common system tools; names alone are not treated as malicious | Signed image identity, command-line capture, parent provenance and native process callbacks |
 | Self-healing | Read-only manifest verification; no repair from untrusted local data | Independently protected signed baseline, transactional repair and recovery tests |
 | Session and token shield | Risk rule for sensor-reported unauthorized access to credential material | Browser/OS credential provider integration and least-privilege access telemetry |
 | Adaptive resource governor | Workload hints defer deep scan while preserving collection and thresholds | Native scheduler/power/thermal integration and latency budgets |
 | Mesh threat sharing | HMAC-SHA256 envelope, bounded lifetime and replay protection | Mutually authenticated transport, secure key provisioning, rotation, peer revocation and scope |
 | Flight recorder | Bounded in-memory event ring, secret-key redaction and causal report | Native low-overhead event source, durable protected retention and export controls |
-| Explainable verdict | Score, confidence, indicators, causal root, recommended action and advisory status | Evidence provenance, calibrated model validation and privileged decision broker |
+| Explainable verdict | C11/Python score, confidence, indicator bits, causal root, recommendation and advisory status | Evidence provenance, calibrated model validation and privileged decision broker |
 
 ## Kernel and telemetry integration
 
@@ -42,6 +43,14 @@ The kernel security contract is deny-by-default. It maps each security operation
 Security telemetry has a fixed tuple contract with a monotonic sequence, event/source/actor identifiers, object/parent references, trusted-source label and monotonic timestamp. The telemetry queue validates event kinds and source authority. IPC provides separate authorized producer and consumer paths so a sensor's publish grant cannot silently become the analysis service's read grant.
 
 The driver ABI adds a stricter security-sensor admission policy requiring verified signature, trusted and non-revoked signer, matching image digest, target architecture, granted sensor capabilities and measured secure-boot state. These are verifier outputs accepted by the policy contract, not cryptographic checks performed by the Reaper interpreter.
+
+## Native C11 ABI
+
+The compiled foundation exposes `duckos_security_event_v1` and `duckos_security_evaluation_v1` in `foundation/security.h`. The fixed-width event contains ABI version/size, source sequence, monotonic timestamp, wall-clock observation time, event kind, source trust, flags, bounded identifiers, entropy delta and repeat count. The engine retains at most 128 records in a fixed-size ring and performs no heap allocation while ingesting events.
+
+The native ring rejects untrusted sources, malformed or unterminated fixed strings, unknown flags/kinds, duplicate event IDs and per-host out-of-order sequence/timestamps. Risk output is explicitly advisory. The separate authorization request is deny-by-default and requires trust, fresh evidence, valid policy, a specific capability and approval for destructive actions. File restore additionally requires authenticated snapshot evidence, verified content and an authorized target.
+
+The low-level C ABI is a sensor/kernel-facing record, not the JSON batch format. A future IPC adapter maps `source_id` to the normalized event source, `observed_at_ms` to the JSON timestamp, and typed flags to bounded JSON attributes; sequence and monotonic clock remain transport metadata. The Reaper tuple contract defines the same producer trust/sequence gate. There is no live sensor adapter or syscall/kernel callback yet.
 
 ## Event contract
 
@@ -90,6 +99,8 @@ The integrity service compares regular files against a caller-supplied SHA-256 m
 The analyze command is offline replay only. The status output is the authoritative machine-readable statement of current implementation maturity.
 
 ## Native implementation gates
+
+The portable C11 security library and tests are compiled into the existing foundation target. This does not mean the library is linked into a booted kernel image: the repository currently has only a boot-info C foundation target and no complete kernel runtime. The native broker, event adapters and system image integration must follow the gates below.
 
 1. Define a stable versioned kernel-to-user event ABI with caller identity, monotonic sequence, bounded payload and loss accounting.
 2. Add read-only kernel/process/filesystem/network sensors behind platform-specific adapters, retaining graceful degradation when unavailable.
