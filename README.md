@@ -40,9 +40,20 @@ The native Beelzebub AV security application is implemented as a Java 17+ proces
 duckos beelzebub status
 duckos beelzebub gui
 duckos beelzebub scan "$HOME/Downloads"
+duckos beelzebub ingest
 ~~~
 
 The current implementation is a user-space scanner, not a complete kernel antivirus: no memory, network or boot scanning, process blocking, kernel filesystem filter, automatic disinfection, automatic deletion or bundled live malware feed is claimed. Build and verification details are in [Beelzebub AV](docs/BEELZEBUB_AV.md).
+
+## Beelzebub AV · Go honeypot integration
+
+The Java file scanner remains the endpoint-scanning component. An optional standard-library Go event bridge connects the upstream Beelzebub v3 deception runtime to a local behavioural-intelligence view inside the Java application. DuckOS starts it with:
+
+~~~sh
+duckos beelzebub ingest
+~~~
+
+The bridge binds only to loopback, uses a generated bearer token, stores redacted event metadata and hashes, and never receives authority to scan or quarantine host files. Upstream Beelzebub needs the separate patch-set under apps/beelzebub-av/upstream/beelzebub-v3; the DuckOS PR does not modify the third-party upstream repository directly. The patch is pinned to the upstream v3 commit in its README, and CI checks that it applies and runs the focused upstream Go tests.
 
 ## Native Reaper workbench
 

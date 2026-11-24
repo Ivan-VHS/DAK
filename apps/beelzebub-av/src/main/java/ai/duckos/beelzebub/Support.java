@@ -15,6 +15,7 @@ final class AppPaths {
     private AppPaths() {}
     static Path dataDirectory() {
         String override = System.getProperty("duckos.beelzebub.data");
+        if (override == null || override.isBlank()) override = System.getenv("BAV_DATA_DIR");
         if (override != null && !override.isBlank()) return Path.of(override).toAbsolutePath().normalize();
         String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
         if (os.contains("win")) {
@@ -28,6 +29,7 @@ final class AppPaths {
     }
     static Path quarantine() { return dataDirectory().resolve("quarantine"); }
     static Path localSignatures() { return dataDirectory().resolve("signatures.local"); }
+    static Path events() { return dataDirectory().resolve("events"); }
 }
 
 final class SignatureCatalog {
@@ -122,6 +124,11 @@ record ScanResult(Path target, long filesScanned, long bytesScanned, long skippe
 final class QuarantineService {
     record Entry(String id, String name, String originalPath, String sha256, long size) {}
     QuarantineService() throws IOException {
+        Files.createDirectories(AppPaths.dataDirectory());
+        if (Files.isSymbolicLink(AppPaths.dataDirectory()) || !Files.isDirectory(AppPaths.dataDirectory(), LinkOption.NOFOLLOW_LINKS))
+            throw new IOException("Каталог данных BAV должен быть обычной директорией.");
+        try { Files.setPosixFilePermissions(AppPaths.dataDirectory(), PosixFilePermissions.fromString("rwx------")); }
+        catch (UnsupportedOperationException ignored) {}
         Files.createDirectories(AppPaths.quarantine());
         if (Files.isSymbolicLink(AppPaths.quarantine()) || !Files.isDirectory(AppPaths.quarantine(), LinkOption.NOFOLLOW_LINKS))
             throw new IOException("Каталог карантина должен быть обычной директорией.");

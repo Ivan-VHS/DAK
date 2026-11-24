@@ -306,3 +306,9 @@ The prototype enforces a 20 MiB package limit, a 12 MiB per-clip limit, and boun
 
 It is not a kernel antivirus or a system-wide protection guarantee. No memory/network/boot scanning, process blocking, automatic disinfection, automatic deletion or maintained vendor malware corpus is included. See [Beelzebub AV implementation and security boundaries](BEELZEBUB_AV.md).
 
+
+
+## Beelzebub AV · Honeypot intelligence
+
+The native Java Beelzebub AV scanner can optionally receive events from the separate Go Beelzebub v3 deception runtime through a local loopback-only Go bridge. This adds a Honeypot Intel view for normalized behavioural telemetry; it does not treat an attack against a decoy as proof of malware on the user's host and does not trigger quarantine. The upstream Go runtime requires an explicit event-forwarder patch. The integration uses a separate bounded sink and does not consume or replace the existing RabbitMQ event queue.
+

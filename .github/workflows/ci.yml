@@ -92,3 +92,42 @@ jobs:
         run: |
           chmod +x apps/beelzebub-av/build.sh apps/beelzebub-av/test.sh
           apps/beelzebub-av/test.sh
+
+  beelzebub-av-go-bridge:
+    name: Beelzebub AV Go event bridge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.23.x"
+          cache-dependency-path: apps/beelzebub-av/bridge/go.mod
+      - name: Test and vet the local event bridge
+        working-directory: apps/beelzebub-av/bridge
+        env:
+          GOTOOLCHAIN: local
+        run: |
+          go test -race ./...
+          go vet ./...
+          go build -trimpath ./cmd/bav-bridge
+
+  beelzebub-upstream-bav-patch:
+    name: Beelzebub v3 upstream patch compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.0"
+      - name: Checkout pinned upstream source
+        run: |
+          git clone --filter=blob:none https://github.com/beelzebub-labs/beelzebub.git /tmp/beelzebub-upstream
+          git -C /tmp/beelzebub-upstream checkout 3f20be5355c7d6f144329e39c478cdd7ff98184c
+      - name: Apply and test the BAV event-forwarder patch
+        run: |
+          PATCH="$GITHUB_WORKSPACE/apps/beelzebub-av/upstream/beelzebub-v3/0001-bav-event-forwarder.patch"
+          git -C /tmp/beelzebub-upstream apply --check "$PATCH"
+          git -C /tmp/beelzebub-upstream apply "$PATCH"
+          cd /tmp/beelzebub-upstream
+          gofmt -w internal/parser/configurations_parser.go internal/builder/builder.go internal/builder/director.go internal/builder/bav_event_forwarder.go internal/builder/bav_event_forwarder_test.go
+          go test ./internal/parser ./internal/builder

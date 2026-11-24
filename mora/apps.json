@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.3.2",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -296,7 +296,7 @@
     {
       "id": "endpoint-protection",
       "maturity": "partial",
-      "scope": "Java 17+ user-space scanner: on-demand directory scan, local SHA-256 indicators, EICAR, conservative script heuristics, selected-folder WatchService and explicit quarantine; no kernel filtering or system-wide prevention"
+      "scope": "Java 17+ user-space scanner: on-demand directory scan, local SHA-256 indicators, EICAR, conservative script heuristics, selected-folder WatchService and explicit quarantine; no kernel filtering or system-wide prevention; optional local Go Beelzebub deception-event intake on loopback, redacted NDJSON telemetry, no quarantine coupling"
     }
   ]
 }

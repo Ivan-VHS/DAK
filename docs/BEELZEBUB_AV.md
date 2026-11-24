@@ -18,18 +18,22 @@ Mora browser shell
        └─ duckos beelzebub CLI
             ├─ status
             ├─ gui
-            └─ scan <directory>
-                 └─ JSON report: beelzebub.scan-report.v1
+            ├─ scan <directory>
+            └─ ingest
+                 ├─ JSON report: beelzebub.scan-report.v1
+            └─ ingest
+                 └─ Loopback Go Event Bridge → redacted NDJSON → Honeypot Intel view
 
 Java application
   ├─ ScannerEngine: bounded recursive walk, streaming SHA-256, EICAR, script heuristics
   ├─ SignatureCatalog: bundled + user-imported local SHA-256 indicators
   ├─ ScanWatcher: selected-directory WatchService
   ├─ QuarantineService: explicit move, hash-verified restore, collision refusal
-  └─ Swing UI: overview, scanner, live guard, quarantine, signatures
+  ├─ Go Event Bridge: local authenticated receiver, normalized event records, hash-only evidence
+  └─ Swing UI: overview, scanner, live guard, quarantine, signatures, Honeypot Intel
 ~~~
 
-The application is a separate process. DuckOS Python never embeds the JVM or Java classes. The browser shell cannot read host files or start programs; it only documents the native entry points and shares the Mora palette. No arbitrary manifest command or shell string is evaluated.
+The application is a separate process. DuckOS Python never embeds the JVM or Java classes. The optional Go bridge is built and launched as a second unprivileged local process; it does not share the Java scanner's file/quarantine authority. The browser shell cannot read host files or start programs; it only documents the native entry points and shares the Mora palette. No arbitrary manifest command or shell string is evaluated.
 
 ## Build and use
 
@@ -46,6 +50,7 @@ After installing the DuckOS Python package, use:
 duckos beelzebub status
 duckos beelzebub gui
 duckos beelzebub scan "$HOME/Downloads"
+duckos beelzebub ingest
 ~~~
 
 The --root option is available before the subcommand when developing from a non-standard DuckOS checkout:
@@ -73,6 +78,12 @@ schemas/beelzebub.scan-report.v1.schema.json describes the JSON emitted by --sca
 ## Security and maturity boundaries
 
 This is an implemented user-space scanner foundation, not a complete endpoint-protection platform or kernel antivirus. It cannot intercept every filesystem write, terminate or block processes, scan process memory, inspect network traffic, scan boot sectors, enforce system-wide policy, or provide guaranteed real-time prevention. It does not automatically delete, disinfect, or upload suspicious files. Local imported feeds are not cryptographically authenticated by this initial implementation.
+
+### Go Beelzebub deception integration
+
+The optional Go Event Bridge receives event JSON from a local Beelzebub honeypot runtime at `http://127.0.0.1:9777/v1/events`. Start it with `duckos beelzebub ingest` or from the Duck Desktop Beelzebub tab. It creates a 256-bit bearer token in `ingest.token`; configure the upstream Go runtime to use that token and loopback endpoint. The receiver only binds to loopback, rejects unauthenticated or oversized requests, and writes normalized NDJSON into the same BAV data directory. Only hashes and selected metadata are persisted; credentials, raw commands, cookies, request headers and request bodies are discarded. Honeypot telemetry is behavioural evidence from a decoy, not a confirmed infection, and never triggers file quarantine.
+
+The upstream Go runtime requires a small explicit event-forwarder patch because its public plugin API does not currently expose a tracer-event sink. The patch set and application guide are stored under `apps/beelzebub-av/upstream/beelzebub-v3/`; it preserves the existing stdout, RabbitMQ or Cloud sink and adds a separate bounded local BAV forwarder. It targets upstream commit `3f20be5355c7d6f144329e39c478cdd7ff98184c` and should be applied/revalidated against the chosen Beelzebub checkout. The integration is intended for a local binary or a container sharing the host network namespace; Docker bridge networking does not automatically reach the host loopback listener.
 
 The scanner is intended for a directory selected by the operator. WatchService may coalesce or miss events, and recursive registration is subject to host OS limits. No claim of complete system coverage or threat-free status is made. Java JDK installation is a prerequisite; DuckOS does not silently install a runtime.
 

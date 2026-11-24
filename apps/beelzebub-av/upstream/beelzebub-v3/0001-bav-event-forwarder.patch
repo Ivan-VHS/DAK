@@ -1,0 +1,503 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+Subject: [PATCH] Add bounded loopback Beelzebub AV event sink
+
+Base: beelzebub-labs/beelzebub v3 main at 3f20be5355c7d6f144329e39c478cdd7ff98184c
+
+Applies to the source layout at the recorded base. Re-check upstream changes before rebasing.
+
+diff --git a/internal/parser/configurations_parser.go b/internal/parser/configurations_parser.go
+--- a/internal/parser/configurations_parser.go
++++ b/internal/parser/configurations_parser.go
+@@ -39,11 +39,20 @@
+ 
+ // Tracings is the struct that contains the configurations of the tracings
+ 
+-type Tracings struct {
+-	RabbitMQ `yaml:"rabbit-mq"`
+-}
+-
+-type BeelzebubCloud struct {
++type Tracings struct {
++	RabbitMQ    `yaml:"rabbit-mq"`
++	BeelzebubAV BeelzebubAVTracing `yaml:"beelzebub-av"`
++}
++
++type BeelzebubAVTracing struct {
++	Enabled             bool   `yaml:"enabled"`
++	Endpoint            string `yaml:"endpoint"`
++	AuthToken           string `yaml:"auth-token"`
++	AuthTokenFile       string `yaml:"auth-token-file"`
++	TimeoutMilliseconds int    `yaml:"timeout-milliseconds"`
++}
++
++type BeelzebubCloud struct {
+ 
+ 	Enabled   bool   `yaml:"enabled"`
+ 	URI       string `yaml:"uri"`
+
+@@ -258,8 +267,10 @@
+ //	BEELZEBUB_LOGGING_LOG_DISABLE_TIMESTAMP, BEELZEBUB_LOGGING_LOGS_PATH,
+ //	BEELZEBUB_RABBITMQ_ENABLED, BEELZEBUB_RABBITMQ_URI,
+ 
+-//	BEELZEBUB_PROMETHEUS_ENABLED, BEELZEBUB_PROMETHEUS_PATH, BEELZEBUB_PROMETHEUS_PORT,
+-//	BEELZEBUB_CLOUD_ENABLED, BEELZEBUB_CLOUD_URI, BEELZEBUB_CLOUD_AUTH_TOKEN
++//	BEELZEBUB_PROMETHEUS_ENABLED, BEELZEBUB_PROMETHEUS_PATH, BEELZEBUB_PROMETHEUS_PORT,
++//	BEELZEBUB_CLOUD_ENABLED, BEELZEBUB_CLOUD_URI, BEELZEBUB_CLOUD_AUTH_TOKEN,
++//	BEELZEBUB_AV_ENABLED, BEELZEBUB_AV_ENDPOINT, BEELZEBUB_AV_AUTH_TOKEN,
++//	BEELZEBUB_AV_AUTH_TOKEN_FILE, BEELZEBUB_AV_TIMEOUT_MILLISECONDS
+ 
+ func applyEnvOverrides(cfg *BeelzebubCoreConfigurations) error {
+ 	parse := func(name, value string) (bool, error) {
+
+@@ -325,10 +336,31 @@
+ 		cfg.Core.BeelzebubCloud.URI = v
+ 	}
+ 
+-	if v := os.Getenv("BEELZEBUB_CLOUD_AUTH_TOKEN"); v != "" {
+-		cfg.Core.BeelzebubCloud.AuthToken = v
+-	}
+-	return nil
++	if v := os.Getenv("BEELZEBUB_CLOUD_AUTH_TOKEN"); v != "" {
++		cfg.Core.BeelzebubCloud.AuthToken = v
++	}
++	if v := os.Getenv("BEELZEBUB_AV_ENABLED"); v != "" {
++		parsed, err := parse("BEELZEBUB_AV_ENABLED", v)
++		if err != nil { return err }
++		cfg.Core.Tracings.BeelzebubAV.Enabled = parsed
++	}
++	if v := os.Getenv("BEELZEBUB_AV_ENDPOINT"); v != "" {
++		cfg.Core.Tracings.BeelzebubAV.Endpoint = v
++	}
++	if v := os.Getenv("BEELZEBUB_AV_AUTH_TOKEN"); v != "" {
++		cfg.Core.Tracings.BeelzebubAV.AuthToken = v
++	}
++	if v := os.Getenv("BEELZEBUB_AV_AUTH_TOKEN_FILE"); v != "" {
++		cfg.Core.Tracings.BeelzebubAV.AuthTokenFile = v
++	}
++	if v := os.Getenv("BEELZEBUB_AV_TIMEOUT_MILLISECONDS"); v != "" {
++		parsed, err := strconv.Atoi(v)
++		if err != nil || parsed < 100 || parsed > 5000 {
++			return fmt.Errorf("BEELZEBUB_AV_TIMEOUT_MILLISECONDS must be between 100 and 5000")
++		}
++		cfg.Core.Tracings.BeelzebubAV.TimeoutMilliseconds = parsed
++	}
++	return nil
+ 
+ }
+ 
+
+diff --git a/internal/builder/builder.go b/internal/builder/builder.go
+--- a/internal/builder/builder.go
++++ b/internal/builder/builder.go
+@@ -37,8 +37,9 @@
+ 	logsFile                       *os.File
+ 	startedServices                []plugin.ServicePlugin
+ 
+-	servicesCancel                 context.CancelFunc
+-	prometheusServer               *http.Server
++	servicesCancel                 context.CancelFunc
++	prometheusServer               *http.Server
++	bavForwarder                   *bavEventForwarder
+ 
+ }
+ 
+
+@@ -103,11 +104,14 @@
+ 		b.servicesCancel()
+ 	}
+ 
+-	for _, svc := range b.startedServices {
+-		svc.Stop()
+-	}
+-
+-	// Close log file if it was opened
++	for _, svc := range b.startedServices {
++		svc.Stop()
++	}
++	if b.bavForwarder != nil {
++		b.bavForwarder.Close()
++	}
++
++	// Close log file if it was opened
+ 
+ 	if b.logsFile != nil {
+ 		if err := b.logsFile.Close(); err != nil {
+
+@@ -224,11 +228,12 @@
+ 
+ func (b *Builder) build() *Builder {
+ 
+-	return &Builder{
+-		beelzebubServicesConfiguration: b.beelzebubServicesConfiguration,
+-		traceStrategy:                  b.traceStrategy,
+-		beelzebubCoreConfigurations:    b.beelzebubCoreConfigurations,
+-	}
++	return &Builder{
++		beelzebubServicesConfiguration: b.beelzebubServicesConfiguration,
++		traceStrategy:                  b.traceStrategy,
++		beelzebubCoreConfigurations:    b.beelzebubCoreConfigurations,
++		bavForwarder:                   b.bavForwarder,
++	}
+ 
+ }
+ 
+
+diff --git a/internal/builder/director.go b/internal/builder/director.go
+--- a/internal/builder/director.go
++++ b/internal/builder/director.go
+@@ -39,11 +39,29 @@
+ 	}
+ 
+ 
+-	if beelzebubCoreConfigurations.Core.BeelzebubCloud.Enabled {
+-		d.builder.setTraceStrategy(d.beelzebubCloudStrategy)
+-	}
+-
+-	return d.builder.build(), nil
++	if beelzebubCoreConfigurations.Core.BeelzebubCloud.Enabled {
++		d.builder.setTraceStrategy(d.beelzebubCloudStrategy)
++	}
++
++	// BAV is an additive, bounded event sink. Preserve the selected stdout,
++	// RabbitMQ or Cloud strategy rather than replacing it.
++	if conf := beelzebubCoreConfigurations.Core.Tracings.BeelzebubAV; conf.Enabled {
++		forwarder, err := newBAVEventForwarder(conf)
++		if err != nil {
++			_ = d.builder.Close()
++			return nil, err
++		}
++		previous := d.builder.traceStrategy
++		d.builder.bavForwarder = forwarder
++		d.builder.setTraceStrategy(func(event tracer.Event) {
++			if previous != nil {
++				previous(event)
++			}
++			forwarder.Enqueue(event)
++		})
++	}
++
++	return d.builder.build(), nil
+ 
+ }
+ 
+
+diff --git a/internal/builder/bav_event_forwarder.go b/internal/builder/bav_event_forwarder.go
+new file mode 100644
+--- /dev/null
++++ b/internal/builder/bav_event_forwarder.go
+@@ -0,0 +1,169 @@
++package builder
++
++import (
++	"bytes"
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"io"
++	"net"
++	"net/http"
++	"net/url"
++	"os"
++	"runtime"
++	"strings"
++	"sync"
++	"sync/atomic"
++	"time"
++
++	"github.com/beelzebub-labs/beelzebub/v3/internal/parser"
++	"github.com/beelzebub-labs/beelzebub/v3/internal/tracer"
++	log "github.com/sirupsen/logrus"
++)
++
++const (
++	bavQueueCapacity = 128
++	bavMaxEventBytes = 1 << 20
++)
++
++type bavEventForwarder struct {
++	endpoint string
++	token string
++	client *http.Client
++	queue chan []byte
++	ctx context.Context
++	cancel context.CancelFunc
++	done chan struct{}
++	closeOnce sync.Once
++	dropped atomic.Uint64
++}
++
++func newBAVEventForwarder(config parser.BeelzebubAVTracing) (*bavEventForwarder, error) {
++	if !config.Enabled { return nil, nil }
++	parsed, err := url.Parse(config.Endpoint)
++	if err != nil || parsed == nil || parsed.Scheme != "http" || parsed.User != nil ||
++		parsed.RawQuery != "" || parsed.Fragment != "" || parsed.Path != "/v1/events" {
++		return nil, errors.New("BAV endpoint must be an HTTP loopback URL ending in /v1/events")
++	}
++	host := strings.ToLower(parsed.Hostname())
++	ip := net.ParseIP(host)
++	if ip == nil || !ip.IsLoopback() {
++		return nil, errors.New("BAV endpoint must resolve to a loopback host")
++	}
++	token := strings.TrimSpace(config.AuthToken)
++	if config.AuthTokenFile != "" {
++		info, statErr := os.Lstat(config.AuthTokenFile)
++		if statErr != nil { return nil, fmt.Errorf("stat BAV token file: %w", statErr) }
++		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
++			return nil, errors.New("BAV token path must be a regular non-symlink file")
++		}
++		if info.Mode().Perm()&0o077 != 0 && runtime.GOOS != "windows" {
++			return nil, errors.New("BAV token file permissions must be 0600 or stricter")
++		}
++		data, readErr := os.ReadFile(config.AuthTokenFile)
++		if readErr != nil { return nil, fmt.Errorf("read BAV token file: %w", readErr) }
++		token = strings.TrimSpace(string(data))
++	}
++	if len(token) < 32 { return nil, errors.New("BAV auth token must contain at least 32 bytes") }
++	timeout := time.Duration(config.TimeoutMilliseconds) * time.Millisecond
++	if config.TimeoutMilliseconds == 0 { timeout = 750 * time.Millisecond }
++	if timeout < 100*time.Millisecond || timeout > 5*time.Second {
++		return nil, errors.New("BAV timeout must be between 100 and 5000 milliseconds")
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	transport := &http.Transport{
++		Proxy: nil,
++		DialContext: (&net.Dialer{Timeout: timeout, KeepAlive: 30*time.Second}).DialContext,
++		ResponseHeaderTimeout: timeout,
++		MaxIdleConns: 2, MaxIdleConnsPerHost: 1, IdleConnTimeout: 15*time.Second,
++	}
++	forwarder := &bavEventForwarder{
++		endpoint: config.Endpoint, token: token,
++		client: &http.Client{
++			Transport: transport, Timeout: timeout,
++			CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
++				return errors.New("BAV event forwarder does not follow redirects")
++			},
++		},
++		queue: make(chan []byte, bavQueueCapacity), ctx: ctx, cancel: cancel, done: make(chan struct{}),
++	}
++	go forwarder.run()
++	return forwarder, nil
++}
++
++// Enqueue never blocks the honeypot tracer workers. On saturation the event is
++// dropped and only a counter is logged; event contents and credentials are not logged.
++func (f *bavEventForwarder) Enqueue(event tracer.Event) {
++	if f == nil || f.ctx.Err() != nil { return }
++	payload, err := json.Marshal(event)
++	if err != nil || len(payload) > bavMaxEventBytes {
++		f.dropped.Add(1)
++		return
++	}
++	select {
++	case f.queue <- payload:
++	default:
++		count := f.dropped.Add(1)
++		if count == 1 || count%100 == 0 { log.WithField("dropped_events", count).Warn("BAV event queue is full") }
++	}
++}
++
++func (f *bavEventForwarder) run() {
++	defer close(f.done)
++	for {
++		select {
++		case <-f.ctx.Done():
++			return
++		case payload := <-f.queue:
++			f.deliver(payload)
++		}
++	}
++}
++
++func (f *bavEventForwarder) deliver(payload []byte) {
++	for attempt := 0; attempt < 2; attempt++ {
++		ctx, cancel := context.WithTimeout(f.ctx, f.client.Timeout)
++		request, err := http.NewRequestWithContext(ctx, http.MethodPost, f.endpoint, bytes.NewReader(payload))
++		if err == nil {
++			request.Header.Set("Content-Type", "application/json")
++			request.Header.Set("Authorization", "Bearer "+f.token)
++			var response *http.Response
++			response, err = f.client.Do(request)
++			if err == nil {
++				_, _ = io.Copy(io.Discard, io.LimitReader(response.Body, 1024))
++				status := response.StatusCode
++				_ = response.Body.Close()
++				cancel()
++				if status == http.StatusAccepted { return }
++				if status >= 400 && status < 500 && status != http.StatusTooManyRequests {
++					f.dropped.Add(1)
++					log.WithField("http_status", status).Warn("BAV rejected a honeypot event")
++					return
++				}
++			}
++		}
++		cancel()
++		if attempt == 0 {
++			timer := time.NewTimer(100 * time.Millisecond)
++			select {
++			case <-f.ctx.Done():
++				timer.Stop()
++				return
++			case <-timer.C:
++			}
++		}
++	}
++	count := f.dropped.Add(1)
++	if count == 1 || count%100 == 0 { log.WithField("dropped_events", count).Warn("BAV event delivery failed") }
++}
++
++func (f *bavEventForwarder) Close() {
++	if f == nil { return }
++	f.closeOnce.Do(f.cancel)
++	select {
++	case <-f.done:
++	case <-time.After(2 * time.Second):
++	}
++	f.client.CloseIdleConnections()
++}
+
+diff --git a/internal/builder/bav_event_forwarder_test.go b/internal/builder/bav_event_forwarder_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/builder/bav_event_forwarder_test.go
+@@ -0,0 +1,60 @@
++package builder
++
++import (
++	"encoding/json"
++	"net/http"
++	"net/http/httptest"
++	"testing"
++	"time"
++
++	"github.com/beelzebub-labs/beelzebub/v3/internal/parser"
++	"github.com/beelzebub-labs/beelzebub/v3/internal/tracer"
++	"github.com/stretchr/testify/require"
++)
++
++func TestBAVForwarderPostsEventToLoopbackReceiver(t *testing.T) {
++	received := make(chan tracer.Event, 1)
++	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
++		if r.Header.Get("Authorization") != "Bearer 0123456789abcdef0123456789abcdef" || r.Header.Get("Content-Type") != "application/json" {
++			http.Error(w, "invalid request headers", http.StatusUnauthorized)
++			return
++		}
++		var event tracer.Event
++		if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
++			http.Error(w, "invalid event JSON", http.StatusBadRequest)
++			return
++		}
++		received <- event
++		w.WriteHeader(http.StatusAccepted)
++	}))
++	defer server.Close()
++
++	forwarder, err := newBAVEventForwarder(parser.BeelzebubAVTracing{
++		Enabled: true, Endpoint: server.URL + "/v1/events",
++		AuthToken: "0123456789abcdef0123456789abcdef", TimeoutMilliseconds: 500,
++	})
++	require.NoError(t, err)
++	require.NotNil(t, forwarder)
++	forwarder.Enqueue(tracer.Event{Protocol: "SSH", User: "root", Password: "synthetic"})
++	select {
++	case event := <-received:
++		require.Equal(t, "SSH", event.Protocol)
++		require.Equal(t, "synthetic", event.Password)
++	case <-time.After(time.Second):
++		t.Fatal("timed out waiting for BAV event")
++	}
++	forwarder.Close()
++}
++
++func TestBAVForwarderRejectsNonLoopbackAndWeakToken(t *testing.T) {
++	_, err := newBAVEventForwarder(parser.BeelzebubAVTracing{
++		Enabled: true, Endpoint: "http://192.0.2.10:9777/v1/events",
++		AuthToken: "0123456789abcdef0123456789abcdef",
++	})
++	require.Error(t, err)
++	_, err = newBAVEventForwarder(parser.BeelzebubAVTracing{
++		Enabled: true, Endpoint: "http://127.0.0.1:9777/v1/events",
++		AuthToken: "weak",
++	})
++	require.Error(t, err)
++}
+
+diff --git a/configurations/beelzebub.yaml b/configurations/beelzebub.yaml
+--- a/configurations/beelzebub.yaml
++++ b/configurations/beelzebub.yaml
+@@ -5,10 +5,16 @@
+     logDisableTimestamp: true
+     logsPath: ./logs
+ 
+-  tracings:
+-    rabbit-mq:
+-      enabled: false
+-      uri: ""
++  tracings:
++    rabbit-mq:
++      enabled: false
++      uri: ""
++    beelzebub-av:
++      enabled: false
++      endpoint: "http://127.0.0.1:9777/v1/events"
++      auth-token: ""
++      auth-token-file: ""
++      timeout-milliseconds: 750
+   prometheus:
+     enabled: false
+     path: "/metrics"
+
+diff --git a/docker-compose.yml b/docker-compose.yml
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -26,7 +26,12 @@
+       BEELZEBUB_CLOUD_ENABLED: ${BEELZEBUB_CLOUD_ENABLED:-false}
+       BEELZEBUB_CLOUD_URI: ${BEELZEBUB_CLOUD_URI:-}
+ 
+-      BEELZEBUB_CLOUD_AUTH_TOKEN: ${BEELZEBUB_CLOUD_AUTH_TOKEN:-}
++      BEELZEBUB_CLOUD_AUTH_TOKEN: ${BEELZEBUB_CLOUD_AUTH_TOKEN:-}
++      BEELZEBUB_AV_ENABLED: ${BEELZEBUB_AV_ENABLED:-false}
++      BEELZEBUB_AV_ENDPOINT: ${BEELZEBUB_AV_ENDPOINT:-http://127.0.0.1:9777/v1/events}
++      BEELZEBUB_AV_AUTH_TOKEN: ${BEELZEBUB_AV_AUTH_TOKEN:-}
++      BEELZEBUB_AV_AUTH_TOKEN_FILE: ${BEELZEBUB_AV_AUTH_TOKEN_FILE:-}
++      BEELZEBUB_AV_TIMEOUT_MILLISECONDS: ${BEELZEBUB_AV_TIMEOUT_MILLISECONDS:-750}
+     volumes:
+       - "./configurations:/configurations"
+       - "./state:/state"
+
+diff --git a/docs/content/docs/reference/configuration.mdx b/docs/content/docs/reference/configuration.mdx
+--- a/docs/content/docs/reference/configuration.mdx
++++ b/docs/content/docs/reference/configuration.mdx
+@@ -23,7 +23,12 @@
+ | `beelzebub-cloud.enabled` | boolean | `false` | Enable Beelzebub Cloud reporting |
+ | `beelzebub-cloud.uri` | string | empty | Cloud endpoint |
+ 
+-| `beelzebub-cloud.auth-token` | string | empty | Cloud credential; prefer an environment secret |
++| `beelzebub-cloud.auth-token` | string | empty | Cloud credential; prefer an environment secret |
++| `tracings.beelzebub-av.enabled` | boolean | `false` | Forward event telemetry to the local DuckOS BAV bridge |
++| `tracings.beelzebub-av.endpoint` | URL | `http://127.0.0.1:9777/v1/events` | Loopback-only event receiver; redirects are not followed |
++| `tracings.beelzebub-av.auth-token` | string | empty | Bearer token; use auth-token-file where possible |
++| `tracings.beelzebub-av.auth-token-file` | path | empty | Owner-only token file generated by the DuckOS BAV bridge |
++| `tracings.beelzebub-av.timeout-milliseconds` | integer | `750` | Per-attempt HTTP timeout, bounded to 100–5000 ms |
+ 
+ 
+ ## Service Fields
+
+diff --git a/docs/content/docs/operations/integrations.mdx b/docs/content/docs/operations/integrations.mdx
+--- a/docs/content/docs/operations/integrations.mdx
++++ b/docs/content/docs/operations/integrations.mdx
+@@ -8,7 +8,13 @@
+ LLM providers are configured per service. OpenAI uses `OPEN_AI_SECRET_KEY`; Ollama uses a configured `host`. Keep provider egress allowlisted and document what captured input is sent to each provider.
+ 
+ 
+-These integrations are optional and are not required for a local static-handler deployment.
++These integrations are optional and are not required for a local static-handler deployment.
++
++## DuckOS Beelzebub AV Event Forwarding
++
++The optional `core.tracings.beelzebub-av` sink forwards a bounded copy of each tracer event to the local DuckOS BAV bridge. It is additive: stdout, RabbitMQ and Beelzebub Cloud keep their existing primary strategy. The forwarder uses a small in-memory queue, short request timeouts and non-blocking enqueue so a stopped BAV receiver cannot stall honeypot protocol workers.
++
++The destination must be an HTTP loopback URL ending in `/v1/events`; remote hosts and redirects are rejected. Configure `auth-token-file` to the bridge's owner-only `ingest.token` file. Use the local Beelzebub process or a container sharing the host network namespace; ordinary Docker bridge networking cannot reach the host loopback listener. The bridge stores normalized hashes and classifications, not the raw credentials, cookies, commands or request bodies.
+ 
+ 
+ ## Beyond Beelzebub Runtime

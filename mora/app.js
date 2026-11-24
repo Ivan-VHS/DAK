@@ -642,8 +642,9 @@ function panelMarkup(appId) {
         '<h2 class="window-heading">Локальная защита файлов DuckOS</h2>' +
         '<div class="setting-block"><strong>Потоковое сканирование</strong><span>SHA-256, EICAR, локальные индикаторы и ограниченные эвристики скриптов. Проверка выполняется отдельным Java-процессом.</span></div>' +
         '<div class="setting-block"><strong>Live Guard и карантин</strong><span>Наблюдение включается только для выбранных папок. Карантин обратим, восстановление проверяет SHA-256 и не перезаписывает существующие файлы.</span></div>' +
+        '<div class="setting-block"><strong>Go Beelzebub Event Bridge</strong><span>Локальная телеметрия honeypot. События не считаются заражением файлов и не запускают карантин.</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>Для доступа к файловой системе откройте нативную программу Duck Desktop или используйте команды ниже. Браузерная Mora не запускает процессы и не читает файлы хоста.</span></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos beelzebub status · duckos beelzebub gui · duckos beelzebub scan ~/Downloads</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>duckos beelzebub status · duckos beelzebub gui · duckos beelzebub scan ~/Downloads · duckos beelzebub ingest</span></div>' +
         '<p class="window-copy">Требуется JDK 17+. Это пользовательский сканер, а не kernel minifilter: нет перехвата всех системных операций, проверки памяти/сети/загрузки или автоматического удаления угроз.</p>';
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';

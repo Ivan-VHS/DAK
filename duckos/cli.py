@@ -140,6 +140,7 @@ def main(argv: list[str] | None = None) -> int:
     beelzebub_commands = beelzebub.add_subparsers(dest="beelzebub_command", required=True)
     beelzebub_commands.add_parser("status", help="inspect the Java runtime and scanner build state")
     beelzebub_commands.add_parser("gui", help="build if needed and open the native Beelzebub AV window")
+    beelzebub_commands.add_parser("ingest", help="build and start the loopback-only Go honeypot event receiver")
     beelzebub_scan = beelzebub_commands.add_parser("scan", help="scan a user-selected directory without executing files")
     beelzebub_scan.add_argument("path", type=Path)
     beelzebub_scan.add_argument("--timeout", type=int, default=3600, help="scan timeout in seconds (1..86400)")
@@ -290,6 +291,8 @@ def main(argv: list[str] | None = None) -> int:
             workbench = BeelzebubWorkbench(args.root)
             if args.beelzebub_command == "status":
                 result = workbench.inspect()
+            elif args.beelzebub_command == "ingest":
+                result = workbench.start_ingest_bridge()
             elif args.beelzebub_command == "gui":
                 process = workbench.open_gui()
                 result = {

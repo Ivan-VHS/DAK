@@ -49,6 +49,23 @@ class BeelzebubWorkbenchTests(unittest.TestCase):
         self.assertEqual(workbench.build_directory, cache / "build")
         self.assertEqual(workbench.jar_path, cache / "build" / "beelzebub-av.jar")
 
+    def test_bridge_sources_are_discovered_without_promoting_them_to_java_sources(self) -> None:
+        bridge = self.root / "apps" / "beelzebub-av" / "bridge" / "cmd" / "bav-bridge"
+        bridge.mkdir(parents=True)
+        (self.root / "apps" / "beelzebub-av" / "bridge" / "go.mod").write_text(
+            "module example.test/bav-bridge\n\ngo 1.23.0\n", encoding="utf-8"
+        )
+        (bridge / "main.go").write_text("package main\nfunc main() {}\n", encoding="utf-8")
+        status = self.workbench.inspect()
+        self.assertEqual(status["source_files"], 1)
+        self.assertEqual(status["bridge_source_files"], 1)
+        self.assertFalse(status["bridge_built"])
+
+    def test_ingest_bridge_rejects_non_loopback_bind_before_build(self) -> None:
+        with patch.dict(os.environ, {"BAV_EVENT_ADDR": "0.0.0.0:9777"}):
+            workbench = BeelzebubWorkbench(self.root)
+            with self.assertRaises(BeelzebubIntegrationError):
+                workbench.start_ingest_bridge()
     def test_scan_timeout_is_bounded(self) -> None:
         folder = self.root / "folder"
         folder.mkdir()

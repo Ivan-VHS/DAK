@@ -4,7 +4,7 @@
   "operating_system": "DuckOS",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only. The 21 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion. Beelzebub AV is a partial native Java user-space security application; its scope and boundaries are documented separately.",
+  "note": "Product specification only. The 21 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion. Beelzebub AV is a partial native Java user-space security application; its scope and boundaries are documented separately. The optional Go event bridge is a telemetry-only integration and does not expand the Java scanner's filesystem or quarantine privileges.",
   "applications": [
     {
       "id": "cockos",
@@ -450,7 +450,10 @@
         "local_sha256_indicator_import",
         "conservative_script_pattern_heuristics",
         "user_approved_file_quarantine",
-        "selected_directory_change_monitoring"
+        "selected_directory_change_monitoring",
+        "local_beelzebub_event_ingestion",
+        "redacted_honeypot_behavior_telemetry",
+        "loopback_authenticated_event_bridge"
       ],
       "boundaries": [
         "Runs as a separate Java 17+ user-space process; it is not a kernel minifilter.",
@@ -458,7 +461,10 @@
         "WatchService observes only explicitly selected folders and cannot intercept every filesystem operation or guarantee real-time prevention.",
         "No process blocking, memory, network or boot scanning, automatic disinfection, automatic deletion, cloud upload or automatic signature feed is implemented.",
         "Quarantine is an explicit user-approved move; restoration verifies SHA-256 and refuses to overwrite an existing destination.",
-        "The Mora browser panel cannot access the host filesystem; native scanning is exposed through Duck Desktop and the DuckOS CLI."
+        "The Mora browser panel cannot access the host filesystem; native scanning is exposed through Duck Desktop and the DuckOS CLI.",
+        "Honeypot telemetry is behavioural evidence from a decoy, not proof of host infection.",
+        "The Go event bridge binds to loopback only, requires a bearer token and stores normalized metadata/hashes rather than raw credentials, commands, cookies, headers or request bodies.",
+        "Honeypot events never initiate filesystem scanning, quarantine, deletion or remediation."
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
@@ -650,7 +656,9 @@
       ],
       "beelzebub-av": [
         "A separate Java 17+ native user-space scanner provides on-demand directory scans, local SHA-256 indicators, EICAR detection, bounded script heuristics, selected-folder WatchService monitoring and explicit quarantine.",
-        "Mora provides a discovery panel only; the native Duck Desktop adapter and CLI bridge to the Java process. Kernel-level and all-system real-time protection remain unimplemented."
+        "Mora provides a discovery panel only; the native Duck Desktop adapter and CLI bridge to the Java process. Kernel-level and all-system real-time protection remain unimplemented.",
+        "An optional Go bridge ingests authenticated loopback-only events from an external Beelzebub v3 deception runtime and displays redacted behavioural telemetry in Honeypot Intel.",
+        "Honeypot event classifications are not host malware verdicts and are isolated from the file scanner's quarantine workflow; upstream Beelzebub requires the companion event-forwarder patch."
       ]
     }
   },

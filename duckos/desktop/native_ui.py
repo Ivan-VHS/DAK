@@ -217,6 +217,7 @@ class DesktopWindow:
         ttk.Button(actions, text="Обновить статус", command=self._refresh_beelzebub_status).pack(side="left")
         ttk.Button(actions, text="Открыть Beelzebub AV", style="Accent.TButton", command=self._open_beelzebub).pack(side="left", padx=8)
         ttk.Button(actions, text="Сканировать папку", command=self._scan_beelzebub).pack(side="left")
+        ttk.Button(actions, text="Запустить Go event bridge", command=self._start_beelzebub_bridge).pack(side="left", padx=8)
         ttk.Label(tab, text="Результаты и границы работы", style="Muted.TLabel").pack(anchor="w", pady=(4, 5))
         self.beelzebub_output = ScrolledText(
             tab, height=18, wrap="word", bg=COLORS["surface"], fg=COLORS["text"],
@@ -272,6 +273,9 @@ class DesktopWindow:
             "pid": self.beelzebub.open_gui().pid,
             "shell": False,
         })
+
+    def _start_beelzebub_bridge(self) -> None:
+        self._run_beelzebub_task("запуск Go event bridge", self.beelzebub.start_ingest_bridge)
 
     def _scan_beelzebub(self) -> None:
         directory = filedialog.askdirectory(parent=self.root, title="Выберите папку для проверки")

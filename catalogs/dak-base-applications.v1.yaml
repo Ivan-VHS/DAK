@@ -42,6 +42,7 @@ services:
   - dak.game-library.v1
   - dak.executable-inspection.v1
   - dak.endpoint-protection.v1
+  - dak.beelzebub-events.v1
 
 applications:
   - id: dak.settings
@@ -244,5 +245,5 @@ applications:
     name: Beelzebub AV
     entry: app://dak.beelzebub-av/main
     category: security
-    permissions: [files.read.selected, files.watch.selected, security.scan.user, security.quarantine.manage]
-    services: [dak.endpoint-protection.v1, dak.vfs.v1]
+    permissions: [files.read.selected, files.watch.selected, security.scan.user, security.quarantine.manage, telemetry.honeypot.read.local, network.loopback.bind]
+    services: [dak.endpoint-protection.v1, dak.beelzebub-events.v1, dak.vfs.v1]

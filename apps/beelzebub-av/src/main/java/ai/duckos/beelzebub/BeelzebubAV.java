@@ -4,7 +4,10 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.*;
+import java.io.BufferedReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,6 +30,7 @@ final class BeelzebubAV {
     private final JList<ScanResult.Finding> findingList = new JList<>(findingModel);
     private final DefaultListModel<QuarantineService.Entry> quarantineModel = new DefaultListModel<>();
     private final JList<QuarantineService.Entry> quarantineList = new JList<>(quarantineModel);
+    private JTextArea intelOutput;
     private final ExecutorService workers = Executors.newFixedThreadPool(2, task -> {
         Thread thread = new Thread(task, "beelzebub-av-worker"); thread.setDaemon(true); return thread;
     });
@@ -82,6 +86,7 @@ final class BeelzebubAV {
         brand.add(brandText,BorderLayout.CENTER); sidebar.add(brand);
         nav(sidebar,"OVERVIEW","overview"); nav(sidebar,"SCANNER","scanner");
         nav(sidebar,"LIVE GUARD","guard"); nav(sidebar,"QUARANTINE","quarantine"); nav(sidebar,"SIGNATURES","signatures");
+        nav(sidebar,"HONEYPOT INTEL","intel");
         sidebar.add(Box.createVerticalGlue());
         JPanel footer = new JPanel(new GridLayout(2,1,0,6)); footer.setOpaque(false);
         footer.setBorder(BorderFactory.createEmptyBorder(18,18,22,18));
@@ -94,7 +99,7 @@ final class BeelzebubAV {
         heading.add(label("Endpoint protection · локальное сканирование",12,MUTED));
         header.add(heading,BorderLayout.WEST); header.add(state,BorderLayout.EAST);
         pages.add(overview(),"overview"); pages.add(scanner(),"scanner"); pages.add(guard(),"guard");
-        pages.add(quarantinePage(),"quarantine"); pages.add(signaturesPage(),"signatures");
+        pages.add(quarantinePage(),"quarantine"); pages.add(signaturesPage(),"signatures"); pages.add(intelPage(),"intel");
         root.add(sidebar,BorderLayout.WEST); root.add(header,BorderLayout.NORTH); root.add(pages,BorderLayout.CENTER);
         frame.setContentPane(root);
     }
@@ -192,6 +197,104 @@ final class BeelzebubAV {
         JButton refresh=button("Обновить список",false); refresh.addActionListener(e->refreshQuarantine()); actions.add(refresh);
         JButton restore=button("Восстановить выбранное",true); restore.addActionListener(e->restoreSelected()); actions.add(restore);
         panel.add(actions,BorderLayout.SOUTH); return panel;
+    }
+
+    private JPanel intelPage() {
+        JPanel panel=content(); panel.setLayout(new BorderLayout(0,12));
+        panel.add(section("HONEYPOT INTELLIGENCE","События Go Beelzebub · локальная аналитика · отдельный поток от файлового сканера"),BorderLayout.NORTH);
+        JPanel top=card(); top.setLayout(new BorderLayout(0,8));
+        top.add(label("Данные поступают от локального BAV Event Bridge. Учитываются только нормализованные события; исходные команды, пароли, cookies, заголовки и тела запросов не сохраняются.",12,MUTED),BorderLayout.CENTER);
+        JButton refresh=button("Обновить события",true); refresh.addActionListener(e->refreshIntel());
+        top.add(refresh,BorderLayout.SOUTH); panel.add(top,BorderLayout.NORTH);
+        intelOutput=new JTextArea(); intelOutput.setEditable(false); intelOutput.setBackground(PANEL);
+        intelOutput.setForeground(WHITE); intelOutput.setCaretColor(YELLOW);
+        intelOutput.setFont(new Font("Monospaced",Font.PLAIN,12));
+        intelOutput.setBorder(BorderFactory.createEmptyBorder(14,14,14,14));
+        panel.add(new JScrollPane(intelOutput),BorderLayout.CENTER);
+        panel.add(label("Важно: honeypot-событие показывает поведение клиента на приманке, а не подтверждённое заражение файла. Такие события не запускают карантин и не меняют файлы пользователя.",11,YELLOW),BorderLayout.SOUTH);
+        refreshIntel(); return panel;
+    }
+
+    private void refreshIntel() {
+        if(intelOutput==null)return;
+        Path root=AppPaths.events();
+        StringBuilder display=new StringBuilder("BEELZEBUB AV · HONEYPOT INTELLIGENCE\n");
+        display.append("Источник: ").append(root).append("\n\n");
+        if(Files.isSymbolicLink(root)) {
+            display.append("Отказ: каталог событий является символической ссылкой.");
+            intelOutput.setText(display.toString()); return;
+        }
+        if(!Files.isDirectory(root,LinkOption.NOFOLLOW_LINKS)) {
+            display.append("Пока нет событий. Запустите локальный Go-мост и подключите к нему Beelzebub.\n");
+            intelOutput.setText(display.toString()); return;
+        }
+        List<Path> logs=new ArrayList<>();
+        try(var stream=Files.list(root)) {
+            stream.filter(path->!Files.isSymbolicLink(path) && Files.isRegularFile(path,LinkOption.NOFOLLOW_LINKS)
+                    && path.getFileName().toString().matches("events-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}\\.ndjson"))
+                    .sorted(Comparator.comparing(path->path.getFileName().toString(),Comparator.reverseOrder()))
+                    .limit(8).forEach(logs::add);
+        } catch(Exception error) {
+            display.append("Ошибка чтения каталога событий: ").append(error.getMessage());
+            intelOutput.setText(display.toString()); return;
+        }
+        Deque<String> rows=new ArrayDeque<>();
+        int inspected=0;
+        for(Path file:logs) {
+            try(BufferedReader reader=Files.newBufferedReader(file,java.nio.charset.StandardCharsets.UTF_8)) {
+                String line;
+                while((line=reader.readLine())!=null) {
+                    if(++inspected>10_000) break;
+                    if(line.length()>48*1024)continue;
+                    if(line.contains("\"Password\"") || line.contains("\"Cookies\"") || line.contains("\"HeadersMap\"")
+                            || line.contains("\"CommandOutput\"") || line.contains("\"Body\"")) {
+                        rows.addLast("REJECTED · raw/unredacted event schema in "+file.getFileName());
+                    } else {
+                        String severity=jsonString(line,"severity");
+                        String protocol=jsonString(line,"protocol");
+                        String source=jsonString(line,"source_ip");
+                        String host=jsonString(line,"host");
+                        String path=jsonString(line,"request_path");
+                        String received=jsonString(line,"received_at");
+                        String labels=jsonArray(line,"classifications");
+                        rows.addLast(String.format(Locale.ROOT,"%s · %-8s %-6s %-21s %s %s %s",
+                                received,severity,protocol,source,host,path,labels));
+                    }
+                    if(rows.size()>300)rows.removeFirst();
+                }
+            } catch(Exception error) {
+                rows.addLast("READ ERROR · "+file.getFileName()+" · "+error.getMessage());
+            }
+        }
+        if(rows.isEmpty())display.append("Событий пока нет.\n");
+        else for(String row:rows)display.append(row).append('\n');
+        display.append("\nВсего показано последних записей: ").append(rows.size());
+        intelOutput.setText(display.toString()); intelOutput.setCaretPosition(0);
+    }
+
+    private static String jsonString(String json,String key) {
+        String marker="\""+key+"\":";
+        int start=json.indexOf(marker); if(start<0)return "-";
+        start+=marker.length();
+        while(start<json.length() && Character.isWhitespace(json.charAt(start)))start++;
+        if(start>=json.length() || json.charAt(start)!='"')return "-";
+        start++; StringBuilder value=new StringBuilder(); boolean escaped=false;
+        for(int index=start;index<json.length();index++) {
+            char ch=json.charAt(index);
+            if(escaped){value.append(ch);escaped=false;continue;}
+            if(ch=='\\'){escaped=true;continue;}
+            if(ch=='"')break;
+            if(ch>=0x20)value.append(ch);
+        }
+        return value.toString();
+    }
+
+    private static String jsonArray(String json,String key) {
+        String marker="\""+key+"\":[";
+        int start=json.indexOf(marker); if(start<0)return "[]";
+        start+=marker.length(); int end=json.indexOf(']',start);
+        if(end<0)return "[]";
+        return json.substring(start,end).replace('"',' ').trim();
     }
 
     private JPanel signaturesPage() {
