@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v9-jora-graphs";
+const CACHE = "mora-shell-v10-independent-app-names";
 const ASSETS = [
   "./",
   "./index.html",
