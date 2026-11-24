@@ -131,6 +131,18 @@ class ServiceProfileTests(unittest.TestCase):
         with self.assertRaises(ServiceProfileError):
             plan_service_startup([profile("one")] * 1025)
 
+    def test_serialized_profile_size_is_bounded(self):
+        item = profile("bounded")
+        with self.assertRaisesRegex(ServiceProfileError, "byte limit"):
+            plan_service_startup(
+                [item],
+                limits=ServicePlanLimits(max_profile_bytes=64),
+            )
+        item = profile("invalid-json")
+        item["runtime"] = object()
+        with self.assertRaisesRegex(ServiceProfileError, "finite JSON"):
+            validate_service_profile(item)
+
 
 if __name__ == "__main__":
     unittest.main()
