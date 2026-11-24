@@ -65,6 +65,15 @@ function validateApplicationName(value) {
   return value;
 }
 
+function boundApplicationName(candidate, shortTerms) {
+  if (candidate.length <= 80) return candidate;
+  for (let count = shortTerms.length; count > 0; count -= 1) {
+    const compact = shortTerms.slice(0, count).join(" / ") + " Workspace";
+    if (compact.length <= 80) return compact;
+  }
+  return "Workspace";
+}
+
 function safeText(value, maximum, field) {
   if (typeof value !== "string") {
     throw new TypeError(field + " must be text");
@@ -194,7 +203,7 @@ export function composeJoraRequest(options = {}) {
     naturalDomains + " Workspace",
     "Workspace for " + naturalActions,
     formulaTerms.join(" + ") + " Workspace"
-  ];
+  ].map((candidate) => boundApplicationName(candidate, shortTerms));
   nameSuggestions.forEach(validateApplicationName);
   const name = validateApplicationName(requestedName || nameSuggestions[NAME_STYLES.has(nameStyle)
     ? ["compact", "balanced", "descriptive", "formula"].indexOf(nameStyle)
