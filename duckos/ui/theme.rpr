@@ -68,3 +68,17 @@ export craft material_mode(backdrop_supported, reduced_transparency, forced_colo
     }
     yield "frosted"
 }
+
+
+export craft native_material_mode(platform, system_backdrop_supported, reduced_transparency, forced_colors) {
+    when forced_colors {
+        yield "system-opaque"
+    }
+    when reduced_transparency {
+        yield "opaque"
+    }
+    when platform == "win32" and system_backdrop_supported {
+        yield "mica-window"
+    }
+    yield "opaque"
+}
