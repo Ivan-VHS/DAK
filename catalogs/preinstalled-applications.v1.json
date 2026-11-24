@@ -278,17 +278,26 @@
       "capabilities": [
         "bpm_selection",
         "swing_selection",
-        "local_rhythm_profiles"
+        "local_rhythm_profiles",
+        "bounded_local_audio_sample_import",
+        "local_audio_sample_preview",
+        "sample_provenance_metadata",
+        "production_prompt_export_500_characters",
+        "reaper_timing_helper_export"
       ],
       "boundaries": [
-        "Saves rhythm metadata in Mora browser storage",
-        "Does not synthesize, record or route audio"
+        "Saves BPM, swing and sample metadata in Mora browser storage; audio file bytes are not stored in the profile",
+        "The browser prototype imports user-selected audio only for local preview; files are not uploaded or transmitted",
+        "Imported audio is not synthesized, transformed, mixed, recorded or routed",
+        "The Reaper helper calculates reference swing timing markers; it does not play audio, create MIDI or control a DAW",
+        "The catalogued native DuckOS application remains specified; the browser prototype is partial"
       ],
       "naming_review": "not_assessed",
       "prototype_status": "partial",
       "prototype_evidence": [
-        "mora/index.html",
-        "mora/app.js"
+        "mora/app.js",
+        "mora/concrete-thump.js",
+        "tests/mora-concrete-thump.test.mjs"
       ]
     },
     {
