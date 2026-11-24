@@ -3,7 +3,7 @@ const DB_VERSION = 1;
 const STORE_NAME = "documents";
 const FALLBACK_PREFIX = "duckos.mora.localdoc.v1:";
 const MAX_DOCUMENT_BYTES = 256 * 1024;
-const ID_PATTERN = /^[a-zA-Z0-9:_-]{1,96}$/;
+const ID_PATTERN = /^[a-zA-Z0-9:._-]{1,96}$/;
 
 function defaultStorage() {
   try { return globalThis.localStorage || null; } catch { return null; }
