@@ -1,4 +1,5 @@
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
+import { readLocalDocument, writeLocalDocument } from "./local-store.js";
 
 import {
   RECOVERY_KEY,
@@ -24,7 +25,7 @@ const appDefinitions = {
   unify: { name: "Unify", subtitle: "Устройства", color: DUCK_ACCENT, glyph: "∞" },
   sestem: { name: "Sestem", subtitle: "Статус системы", color: DUCK_ACCENT, glyph: "♟" },
   setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: DUCK_ACCENT, glyph: "✳" },
-  orriganize: { name: "Orriganize", subtitle: "Задачи и проекты", color: DUCK_ACCENT, glyph: "▦" },
+  orriganize: { name: "ORGze", subtitle: "Задачи и проекты", color: DUCK_ACCENT, glyph: "▦" },
   abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: DUCK_ACCENT, glyph: "▤" },
   olaab: { name: "Olaab", subtitle: "Медиатека", color: DUCK_ACCENT, glyph: "◈" },
   "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: DUCK_ACCENT, glyph: "♫" },
@@ -43,6 +44,7 @@ const appDefinitions = {
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
+  "red-sparrow": { name: "赤雀 · Red Sparrow", subtitle: "Wuxia · постановочная лаборатория", color: DUCK_ACCENT, glyph: "雀" },
   "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
 };
 
@@ -55,6 +57,49 @@ let toastTimeout = null;
 
 let preferences = loadPreferences();
 let pendingIntentPlan = null;
+
+const LOCALE_KEY = "duckos.mora.locale.v1";
+const LOCALE_TEXT = {
+  "ru-RU": { desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы", dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.", yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"28 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ", dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы", routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства", expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН" },
+  "zh-CN": { desktop:"桌面", system:"系统", systemStatus:"系统状态", dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。", yourSpace:"您的空间", applications:"应用程序", appsCount:"28 个应用与工具", dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务", routines:"场景", compass:"指南针", games:"游戏", devices:"设备", expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线" }
+};
+function readLocale() {
+  try { const value = localStorage.getItem(LOCALE_KEY); return value === "zh-CN" || value === "ru-RU" ? value : "ru-RU"; }
+  catch { return "ru-RU"; }
+}
+let currentLocale = readLocale();
+function applyChromeLocale() {
+  const dictionary = LOCALE_TEXT[currentLocale];
+  document.documentElement.lang = currentLocale;
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const value = dictionary[element.dataset.i18n];
+    if (typeof value === "string") element.textContent = value;
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+    const value = dictionary[element.dataset.i18nAria];
+    if (typeof value === "string") element.setAttribute("aria-label", value);
+  });
+  if (windowLayer.querySelectorAll(".app-window").length === 0) activeAppLabel.textContent = dictionary.desktop;
+}
+function setLocale(locale) {
+  if (locale !== "ru-RU" && locale !== "zh-CN") return false;
+  try { localStorage.setItem(LOCALE_KEY, locale); }
+  catch { showToast(locale === "zh-CN" ? "无法保存语言设置" : "Не удалось сохранить язык"); return false; }
+  currentLocale = locale;
+  applyChromeLocale();
+  updateClock();
+  updateWorkspacePanel();
+  const sparrow = windowLayer.querySelector('[data-window="red-sparrow"]');
+  if (sparrow) {
+    const note = sparrow.querySelector("[data-red-sparrow-note]")?.value || "";
+    sparrow.querySelector(".window-body").innerHTML = redSparrowPanelMarkup();
+    const input = sparrow.querySelector("[data-red-sparrow-note]");
+    if (input) input.value = note;
+    initRedSparrowPanel(sparrow);
+  }
+  showToast(locale === "zh-CN" ? "已切换到简体中文" : "Язык интерфейса: русский");
+  return true;
+}
 
 function applyPreferences() {
   document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
@@ -164,6 +209,8 @@ function updateSecurityPanel() {
 function updateWorkspacePanel() {
   const panel = windowLayer.querySelector('[data-window="workspace"]');
   if (!panel) return;
+  const localeSelect = panel.querySelector("[data-locale-select]");
+  if (localeSelect) localeSelect.value = currentLocale;
   panel.querySelectorAll("[data-power-profile]").forEach((button) => {
     const active = button.dataset.powerProfile === preferences.powerProfile;
     button.classList.toggle("active", active);
@@ -623,13 +670,17 @@ function panelMarkup(appId) {
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DuckOS ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
         '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
     case "workspace":
-      return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">Рабочая среда Mora</h2>' +
-        '<div class="setting-block"><strong>Профиль ресурсов</strong><span>Локальная настройка оболочки, не планировщик ядра</span>' +
-        '<div class="profile-options">' + profileButton("saver", "Экономия") + profileButton("balanced", "Баланс") + profileButton("performance", "Производительность") + '</div></div>' +
-        '<div class="permission-row"><div class="permission-copy"><strong>Режим фокуса</strong><span>Приглушить второстепенные элементы оболочки</span></div><button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' + (preferences.focusMode ? "Включено" : "Выключено") + '</button></div>' +
-        '<div class="permission-row"><div class="permission-copy"><strong>Снижение движения</strong><span>Убрать декоративные переходы и перемещения</span></div><button class="permission-toggle" data-setting="reducedMotion" aria-pressed="' + String(preferences.appearance.reducedMotion) + '">' + (preferences.appearance.reducedMotion ? "Включено" : "Выключено") + '</button></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>Адаптивная сетка и настройки доступности работают в оболочке. Аппаратные профили, VRR и NPU-планирование требуют native services.</span></div>' +
-        '<p class="window-copy">Настройки хранятся локально в профиле браузера и могут быть сброшены очисткой данных сайта.</p>';
+      return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">' + (currentLocale === "zh-CN" ? "Mora 工作空间" : "Рабочая среда Mora") + '</h2>' +
+        '<div class="setting-block"><strong>' + (currentLocale === "zh-CN" ? "界面语言" : "Язык интерфейса") + '</strong><span>' + (currentLocale === "zh-CN" ? "独立的简体中文（普通话）或俄语界面配置。" : "Отдельная настройка русского или упрощённого китайского интерфейса.") + '</span>' +
+        '<select class="locale-select" data-locale-select aria-label="Interface language"><option value="ru-RU"' + (currentLocale === "ru-RU" ? " selected" : "") + '>Русский</option><option value="zh-CN"' + (currentLocale === "zh-CN" ? " selected" : "") + '>简体中文（普通话）</option></select></div>' +
+        '<div class="setting-block"><strong>' + (currentLocale === "zh-CN" ? "资源配置" : "Профиль ресурсов") + '</strong><span>' + (currentLocale === "zh-CN" ? "仅调整桌面偏好，不控制内核调度。" : "Локальная настройка оболочки, не планировщик ядра") + '</span>' +
+        '<div class="profile-options">' + profileButton("saver", currentLocale === "zh-CN" ? "节能" : "Экономия") + profileButton("balanced", currentLocale === "zh-CN" ? "均衡" : "Баланс") + profileButton("performance", currentLocale === "zh-CN" ? "性能" : "Производительность") + '</div></div>' +
+        '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "专注模式" : "Режим фокуса") + '</strong><span>' + (currentLocale === "zh-CN" ? "弱化次要界面元素" : "Приглушить второстепенные элементы оболочки") + '</span></div><button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' + (preferences.focusMode ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
+        '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "减少动态效果" : "Снижение движения") + '</strong><span>' + (currentLocale === "zh-CN" ? "减少装饰性过渡和移动" : "Убрать декоративные переходы и перемещения") + '</span></div><button class="permission-toggle" data-setting="reducedMotion" aria-pressed="' + String(preferences.appearance.reducedMotion) + '">' + (preferences.appearance.reducedMotion ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>' + (currentLocale === "zh-CN" ? "自适应布局和无障碍偏好在桌面外壳中生效。硬件配置、VRR 与 NPU 调度仍需原生系统服务。" : "Адаптивная сетка и настройки доступности работают в оболочке. Аппаратные профили, VRR и NPU-планирование требуют native services.") + '</span></div>' +
+        '<p class="window-copy">' + (currentLocale === "zh-CN" ? "设置保存在当前浏览器配置中。" : "Настройки хранятся локально в профиле браузера и могут быть сброшены очисткой данных сайта.") + '</p>';
+    case "red-sparrow":
+      return redSparrowPanelMarkup();
     case "provenance":
       return '<p class="window-kicker">PROOF · FILE ORIGIN</p><h2 class="window-heading">Проверка файла</h2>' +
         '<p class="window-copy">SHA-256 вычисляется локально в браузере. Это помогает сравнить контрольные суммы, но не подтверждает автора или подлинность содержимого.</p>' +
@@ -643,11 +694,12 @@ function panelMarkup(appId) {
 
 function updateClock() {
   const now = new Date();
-  const time = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" }).format(now);
-  const date = new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now);
+  const locale = currentLocale || "ru-RU";
+  const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(now);
+  const date = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now);
   document.getElementById("hero-clock").textContent = time;
   document.getElementById("status-time").textContent = time;
-  document.getElementById("hero-date").textContent = date.charAt(0).toLocaleUpperCase("ru-RU") + date.slice(1);
+  document.getElementById("hero-date").textContent = currentLocale === "zh-CN" ? date : date.charAt(0).toLocaleUpperCase(locale) + date.slice(1);
 }
 
 function showToast(message) {
@@ -699,6 +751,7 @@ function openApp(appId) {
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
   if (appId === "mora-commons") initializeCommonsPanel(appWindow);
+  if (appId === "red-sparrow") initRedSparrowPanel(appWindow);
 
   const left = Math.max(16, Math.round((window.innerWidth - appWindow.offsetWidth) / 2));
   const top = Math.max(16, Math.round((window.innerHeight - appWindow.offsetHeight) / 2) - 14);
@@ -1047,6 +1100,8 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  const localeSelect = event.target.closest("[data-locale-select]");
+  if (localeSelect) { setLocale(localeSelect.value); updateWorkspacePanel(); return; }
   const archiveInput = event.target.closest("[data-archive-file]");
   if (archiveInput) {
     const report = archiveInput.closest(".app-window").querySelector("[data-archive-report]");
@@ -1108,6 +1163,8 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+document.documentElement.lang = currentLocale;
+applyChromeLocale();
 applyPreferences();
 updateClock();
 window.setInterval(updateClock, 1000);
