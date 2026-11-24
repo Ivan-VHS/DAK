@@ -230,6 +230,7 @@ export function initializeNewsPanel(appWindow) {
     });
     bookmarkCount.textContent = String(bookmarks.size);
     refreshButton.disabled = currentView === "saved";
+    if (currentView === "saved") refreshButton.classList.remove("is-loading");
   }
 
   function render() {
@@ -265,6 +266,8 @@ export function initializeNewsPanel(appWindow) {
     const elapsed = Date.now() - lastRequestAt;
     if (lastRequestAt > 0 && elapsed < MIN_REQUEST_INTERVAL_MS) {
       const wait = Math.ceil((MIN_REQUEST_INTERVAL_MS - elapsed) / 1000);
+      refreshButton.disabled = false;
+      refreshButton.classList.remove("is-loading");
       setStatus("Источник ограничивает частоту запросов. Повторите обновление через " + wait + " сек.", true);
       return;
     }
