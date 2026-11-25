@@ -40,7 +40,7 @@ Source evidence: `[publisher, digest, signature_state]`.
 
 Partition: `[partition_id, kind, start_byte, length_bytes]`, where kind is `efi`, `bios_boot`, `system`, `recovery` or `userdata`.
 
-A valid layout is sorted by start byte, starts after the first 1 MiB of disk metadata, contains exactly one `system_a` and one `system_b` partition, exactly one recovery partition and at most one user-data partition. The EFI or BIOS boot partition starts at the 1 MiB boundary. Partition IDs are unique. UEFI requires exactly one EFI partition and no BIOS boot partition; BIOS requires exactly one BIOS boot partition and no EFI partition. Every partition is 4 KiB aligned, in bounds and non-overlapping.
+A valid layout is sorted by start byte, starts after the first 1 MiB of disk metadata, contains exactly one `system_a` and one `system_b` partition, exactly one recovery partition and at most one user-data partition. The EFI or BIOS boot partition starts at the 1 MiB boundary. Partition IDs are unique. UEFI requires exactly one EFI partition and no BIOS boot partition; BIOS requires exactly one BIOS boot partition and no EFI partition. Every partition start and length is 4 KiB aligned, in bounds and non-overlapping.
 
 ### API
 
