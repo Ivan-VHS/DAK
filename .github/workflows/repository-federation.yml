@@ -51,7 +51,7 @@ jobs:
           submodules: false
 
       - name: Install Git subtree tooling
-        run: sudo apt-get update && sudo apt-get install -y git-subtree jq
+        run: jq --version && git subtree --version
 
       - name: Configure import identity
         run: |
@@ -103,7 +103,7 @@ jobs:
           node-version: "22"
 
       - name: Install verification tooling
-        run: sudo apt-get update && sudo apt-get install -y git-subtree jq
+        run: jq --version && git subtree --version
 
       - name: Verify source tree SHAs, file counts, byte counts and licenses
         run: bash scripts/vendor-ecosystem.sh --verify
