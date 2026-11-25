@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v9-ecosystem";
+const CACHE = "mora-shell-v10-imperial-glass";
 const ASSETS = [
   "./",
   "./index.html",
