@@ -944,7 +944,7 @@ private:
         layout->addWidget(brand);
         layout->addWidget(label("Рабочее пространство", "muted"));
         layout->addStretch(1);
-        layout->addWidget(label("DuckOS", "muted"));
+        layout->addWidget(label("Duck", "muted"));
 
         globalSearch_ = new QLineEdit;
         globalSearch_->setObjectName("global-search");
