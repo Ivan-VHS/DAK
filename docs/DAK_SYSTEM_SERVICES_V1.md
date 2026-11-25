@@ -56,7 +56,7 @@ Transaction path: `planned → validated → staged → ready_to_commit → comm
 
 ## 4. Driver runtime contract
 
-Driver descriptor: `[id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes]`. Device descriptors reuse the existing six-field DuckDriver resource record. Resource admission is mandatory inside driver admission and rejects conflicts with already registered device ranges or exclusive IRQ ownership.
+Driver descriptor: `[id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes]`. Device descriptors reuse the existing six-field DAK Driver Core resource record. Resource admission is mandatory inside driver admission and rejects conflicts with already registered device ranges or exclusive IRQ ownership.
 
 Admission requires a verified, non-revoked signature state, a non-empty publisher, matching architecture and bus, a supported ABI and a capability set contained by the grants. Payload size is bounded to 256 MiB.
 
@@ -69,7 +69,6 @@ Unload requires a running/stopping driver and affirmative evidence that IRQs are
 - `descriptor_valid(driver) -> bool`
 - `resource_admission(device, registered_devices) -> decision`
 - `admission(driver, device, registered_devices, target_arch, expected_abi, supported_buses, grants) -> decision`
-- `resource_admission(device, registered_devices) -> decision`
 - `transition_valid(current, next) -> bool`
 - `unload_policy(state, irqs_quiesced, dma_stopped, device_quiesced) -> decision`
 
