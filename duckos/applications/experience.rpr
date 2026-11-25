@@ -1,0 +1,134 @@
+# DuckOS application admission and experience policy.
+# These contracts describe required native-host behavior; they do not implement a sandbox or UI toolkit.
+
+export craft manifest_valid(app) {
+    when size(app) != 8 {
+        yield false
+    }
+    when app[0] == "" or not app[1] {
+        yield false
+    }
+    when app[2] != "process-sandbox" and app[2] != "wasm-component" {
+        yield false
+    }
+    when app[3] <= 0 or app[4] <= 0 {
+        yield false
+    }
+    when app[5] != "adaptive" and app[5] != "interactive" and app[5] != "suspend-when-hidden" {
+        yield false
+    }
+    when app[7] != "local-first" and app[7] != "user-selected-sync" {
+        yield false
+    }
+    yield true
+}
+
+export craft capabilities_subset(requested, granted) {
+    vary valid := true
+    each capability in requested {
+        vary found := false
+        each grant in granted {
+            when capability == grant {
+                change found := true
+            }
+        }
+        when not found {
+            change valid := false
+        }
+    }
+    yield valid
+}
+
+export craft capability_decision(capability, granted, user_approved, active_session) {
+    when capability == "kernel.write" or capability == "firmware.write" or capability == "driver.load" or capability == "system.modify" {
+        yield "deny"
+    }
+    when capability == "device.camera" or capability == "device.microphone" or capability == "device.location" or capability == "screen.capture" or capability == "clipboard.read" or capability == "personal-data.export" {
+        when not capabilities_subset([capability], granted) {
+            yield "deny"
+        }
+        when not user_approved or not active_session {
+            yield "prompt"
+        }
+        yield "allow"
+    }
+    when capabilities_subset([capability], granted) {
+        yield "allow"
+    }
+    yield "deny"
+}
+
+export craft feedback_mode(elapsed_ms, cancellable) {
+    when elapsed_ms < 0 {
+        yield "invalid"
+    }
+    when elapsed_ms <= 100 {
+        yield "immediate"
+    }
+    when elapsed_ms <= 1000 {
+        yield "subtle-status"
+    }
+    when elapsed_ms <= 2500 {
+        yield "phase-status"
+    }
+    when cancellable {
+        yield "progress-cancellable"
+    }
+    yield "progress"
+}
+
+export craft background_mode(visible, minimized, reduced_motion, battery_saver) {
+    when not visible {
+        yield "paused"
+    }
+    when minimized and battery_saver {
+        yield "paused"
+    }
+    when minimized {
+        yield "reduced"
+    }
+    when reduced_motion {
+        yield "static"
+    }
+    yield "interactive"
+}
+
+export craft notification_mode(user_allowed, do_not_disturb, critical) {
+    when not user_allowed {
+        yield "disabled"
+    }
+    when do_not_disturb and not critical {
+        yield "queued"
+    }
+    when critical {
+        yield "banner-no-focus"
+    }
+    yield "toast-no-focus"
+}
+
+export craft destructive_action_allowed(destructive, user_confirmed, recovery_available) {
+    when not destructive {
+        yield true
+    }
+    yield user_confirmed and recovery_available
+}
+
+export craft density_mode(preference) {
+    when preference == "comfortable" or preference == "balanced" or preference == "compact" {
+        yield preference
+    }
+    yield "balanced"
+}
+
+export craft recovery_choice(autosave_available, snapshot_valid, original_preserved) {
+    when autosave_available and snapshot_valid and original_preserved {
+        yield "offer-restore-or-inspect"
+    }
+    when autosave_available and not snapshot_valid {
+        yield "quarantine-recovery-copy"
+    }
+    when not original_preserved {
+        yield "manual-recovery-required"
+    }
+    yield "no-recovery-data"
+}

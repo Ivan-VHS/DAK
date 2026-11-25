@@ -31,6 +31,10 @@ import "duckos/ui/canvas.rpr" as canvas
 import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
 
+import "duckos/services/lifecycle.rpr" as lifecycle
+import "duckos/applications/experience.rpr" as app_experience
+import "duckos/security/bav.rpr" as bav
+
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
 assert(boot["transition_valid"]("memory", "interrupts"), "memory must precede interrupt setup")
@@ -261,4 +265,92 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
+
+# Service lifecycle and readiness policy.
+make no_capabilities := []
+make bav_service := ["bav.scanner", "system", "core", 3, 250, 4000, 100, 65536, ["file.scan", "file.quarantine"]]
+assert(lifecycle["descriptor_valid"](bav_service), "service descriptor validates")
+assert(not lifecycle["descriptor_valid"](["", "system", "core", 3, 250, 4000, 100, 65536, no_capabilities]), "service ID is required")
+assert(not lifecycle["descriptor_valid"](["svc", "system", "unknown", 3, 250, 4000, 100, 65536, no_capabilities]), "unknown startup phase is rejected")
+assert(lifecycle["startup_action"](true, true, false, "core", false) == "start", "core service starts without a user session")
+assert(lifecycle["startup_action"](true, false, true, "core", false) == "wait-dependencies", "service waits for required dependencies")
+assert(lifecycle["startup_action"](true, true, false, "desktop", false) == "wait-session", "desktop service waits for a session")
+assert(lifecycle["startup_action"](true, true, true, "on-demand", false) == "dormant", "on-demand service stays dormant until requested")
+assert(lifecycle["startup_action"](false, true, true, "core", true) == "disabled", "disabled service does not start")
+assert(lifecycle["state_transition_allowed"]("inactive", "starting"), "service can enter startup")
+assert(lifecycle["state_transition_allowed"]("ready", "degraded"), "ready service can degrade")
+assert(not lifecycle["state_transition_allowed"]("stopped", "ready"), "service cannot bypass startup")
+assert(lifecycle["restart_action"](0, 0, 3) == "stopped", "clean service exit is not restarted")
+assert(lifecycle["restart_action"](1, 1, 3) == "restart", "service restart is bounded by its retry budget")
+assert(lifecycle["restart_action"](1, 3, 3) == "failed", "exhausted service retry budget is terminal")
+assert(lifecycle["restart_delay"](2, 250, 3000) == 1000, "service backoff is deterministic")
+assert(lifecycle["restart_delay"](5, 250, 3000) == 3000, "service backoff is capped")
+assert(lifecycle["restart_delay"](0, 500, 100) == -1, "invalid backoff bounds are rejected")
+assert(lifecycle["health_state"](false, 0, 1000, 0, 3) == "starting", "service readiness is explicit")
+assert(lifecycle["health_state"](true, 1200, 1000, 0, 3) == "unresponsive", "stale service heartbeat is detected")
+assert(lifecycle["health_state"](true, 100, 1000, 3, 3) == "degraded", "repeated health errors degrade service")
+assert(lifecycle["health_state"](true, 100, 1000, 0, 3) == "healthy", "fresh service heartbeat passes readiness")
+assert(not lifecycle["network_listen_allowed"](true, true, false), "network listener requires operator opt-in")
+assert(lifecycle["network_listen_allowed"](true, true, true), "explicitly enabled listener passes policy")
+assert(lifecycle["config_commit_action"](false, true, true) == "reject-invalid", "invalid service configuration is rejected")
+assert(lifecycle["config_commit_action"](true, false, true) == "stage-required", "configuration must be staged")
+assert(lifecycle["config_commit_action"](true, true, false) == "reject-no-rollback", "configuration commit requires rollback")
+assert(lifecycle["config_commit_action"](true, true, true) == "commit-atomically", "validated configuration commits atomically")
+assert(lifecycle["update_action"](false, true, true, true, true) == "reject", "unsigned updates are rejected")
+assert(lifecycle["update_action"](true, true, true, false, true) == "stage", "verified updates are staged first")
+assert(lifecycle["update_action"](true, true, true, true, false) == "rollback", "failed update health check rolls back")
+assert(lifecycle["update_action"](true, true, true, true, true) == "commit", "healthy staged update commits")
+assert(lifecycle["shutdown_action"](true, false, false) == "drain-or-cancel", "service shutdown drains or cancels active work")
+assert(lifecycle["shutdown_action"](true, true, true) == "checkpoint-then-stop", "deadline shutdown checkpoints recoverable state")
+assert(lifecycle["shutdown_action"](true, true, false) == "report-uncommitted-state", "service reports uncommitted state instead of silent data loss")
+assert(lifecycle["shutdown_action"](false, true, false) == "stop", "idle service stops cleanly")
+
+# Application admission, permissions and interaction feedback.
+make po_manifest := ["po", true, "process-sandbox", 262144, 100, "adaptive", ["network.egress"], "user-selected-sync"]
+assert(app_experience["manifest_valid"](po_manifest), "application manifest has a verified sandbox and resource budget")
+assert(not app_experience["manifest_valid"](["po", false, "process-sandbox", 262144, 100, "adaptive", no_capabilities, "local-first"]), "unverified application package is rejected")
+assert(app_experience["capabilities_subset"](["network.egress"], ["network.egress", "storage.read"]), "app grants may include declared requests")
+assert(not app_experience["capabilities_subset"](["driver.load"], ["network.egress"]), "application cannot amplify capabilities")
+assert(app_experience["capability_decision"]("device.microphone", ["device.microphone"], false, true) == "prompt", "microphone use needs a visible user decision")
+assert(app_experience["capability_decision"]("device.microphone", ["device.microphone"], true, true) == "allow", "foreground microphone use is allowed after approval")
+assert(app_experience["capability_decision"]("device.microphone", ["device.microphone"], true, false) == "prompt", "background microphone activation requires a new decision")
+assert(app_experience["capability_decision"]("kernel.write", ["kernel.write"], true, true) == "deny", "kernel writes are not an ordinary app permission")
+assert(app_experience["capability_decision"]("storage.read", ["storage.read"], false, true) == "allow", "granted non-sensitive read capability is usable")
+assert(app_experience["feedback_mode"](80, true) == "immediate", "fast UI action responds immediately")
+assert(app_experience["feedback_mode"](800, true) == "subtle-status", "short operation uses subtle feedback")
+assert(app_experience["feedback_mode"](2000, true) == "phase-status", "medium operation exposes its phase")
+assert(app_experience["feedback_mode"](3000, true) == "progress-cancellable", "long operation exposes progress and cancellation")
+assert(app_experience["feedback_mode"](3000, false) == "progress", "non-cancellable operation still exposes progress")
+assert(app_experience["background_mode"](false, true, false, false) == "paused", "hidden app pauses optional background work")
+assert(app_experience["background_mode"](true, true, false, true) == "paused", "battery saver pauses minimized work")
+assert(app_experience["background_mode"](true, true, false, false) == "reduced", "minimized app reduces background activity")
+assert(app_experience["background_mode"](true, false, true, false) == "static", "reduced motion removes non-essential animation")
+assert(app_experience["notification_mode"](true, true, false) == "queued", "DND queues non-critical notifications")
+assert(app_experience["notification_mode"](true, true, true) == "banner-no-focus", "critical notification does not steal focus")
+assert(app_experience["notification_mode"](true, false, false) == "toast-no-focus", "normal notification does not steal focus")
+assert(app_experience["notification_mode"](false, false, true) == "disabled", "disabled notification category remains disabled")
+assert(not app_experience["destructive_action_allowed"](true, false, true), "destructive action requires user confirmation")
+assert(not app_experience["destructive_action_allowed"](true, true, false), "destructive action requires a recovery path")
+assert(app_experience["destructive_action_allowed"](true, true, true), "confirmed reversible destructive action is allowed")
+assert(app_experience["density_mode"]("compact") == "compact", "application density preference is respected")
+assert(app_experience["density_mode"]("unknown") == "balanced", "unknown density preference has a safe default")
+assert(app_experience["recovery_choice"](true, true, true) == "offer-restore-or-inspect", "valid autosave is offered without overwriting original")
+assert(app_experience["recovery_choice"](true, false, true) == "quarantine-recovery-copy", "invalid recovery data is quarantined")
+assert(app_experience["recovery_choice"](false, false, false) == "manual-recovery-required", "missing original data is reported honestly")
+
+# BAV signed report bundle and reversible scan decisions.
+make bav_report := ["DUCKBAV1", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "ed25519", "key.bav.release.v1", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 1000, 3]
+assert(bav["artifact_valid"](bav_report, true), "BAV report passes after trusted signature verification")
+assert(not bav["artifact_valid"](bav_report, false), "BAV reader rejects an artifact when the trusted verifier fails")
+assert(not bav["artifact_valid"](["wrong-magic", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "ed25519", "key.bav.release.v1", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 1000, 3], true), "BAV reader rejects unknown artifact magic")
+assert(not bav["artifact_valid"](["DUCKBAV1", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "rsa", "key.bav.release.v1", "signature", 1000, 3], true), "BAV reader rejects an unsupported signature algorithm")
+assert(bav["scan_disposition"]("clean", 10000, true) == "allow", "clean scan does not block access")
+assert(bav["scan_disposition"]("malicious", 9999, true) == "quarantine-reversible", "high-confidence malware uses reversible quarantine")
+assert(bav["scan_disposition"]("malicious", 9999, false) == "block-and-preserve", "malware is blocked without destroying original evidence")
+assert(bav["scan_disposition"]("suspicious", 7000, true) == "user-review", "suspicious result requires review")
+assert(bav["scan_disposition"]("unknown", 0, true) == "unknown-review", "unknown verdict remains reviewable")
+assert(not bav["update_allowed"](true, false, true, true), "BAV intelligence update requires user opt-in")
+assert(bav["update_allowed"](true, true, true, true), "BAV update requires verified signatures and digest")
+assert(not bav["sample_execution_allowed"](), "BAV never executes a sample for detection")
+
 emit "DUCKOS_REAPER_CONTRACTS_OK"
