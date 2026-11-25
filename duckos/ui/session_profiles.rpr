@@ -1,0 +1,186 @@
+# Desktop session profiles v1.
+# Profiles describe external DE/WM compatibility. A catalog entry is not an
+# installed package and does not imply that DuckOS can launch it today.
+
+export craft profile_catalog() {
+    yield [
+        ["gnome", "GNOME", "desktop-environment", "either", "mutter", "catalog-only"],
+        ["xfce", "Xfce", "desktop-environment", "x11", "xfwm4", "catalog-only"],
+        ["cinnamon", "Cinnamon", "desktop-environment", "x11", "muffin", "catalog-only"],
+        ["mate", "MATE", "desktop-environment", "x11", "marco", "catalog-only"],
+        ["lxqt", "LXQt", "desktop-environment", "either", "configurable-wm", "catalog-only"],
+        ["budgie", "Budgie", "desktop-environment", "x11", "mutter", "catalog-only"],
+        ["pantheon", "Pantheon", "desktop-environment", "x11", "gala", "catalog-only"],
+        ["deepin", "Deepin Desktop Environment", "desktop-environment", "either", "kwin", "catalog-only"],
+        ["unity", "Unity", "desktop-environment", "x11", "compiz", "catalog-only"],
+        ["enlightenment", "Enlightenment", "desktop-environment", "either", "enlightenment", "catalog-only"],
+        ["i3wm", "i3", "window-manager", "x11", "i3", "catalog-only"],
+        ["sway", "Sway", "window-manager", "wayland", "sway", "catalog-only"],
+        ["awesomewm", "AwesomeWM", "window-manager", "x11", "awesome", "catalog-only"],
+        ["xmonad", "Xmonad", "window-manager", "x11", "xmonad", "catalog-only"],
+        ["hyprland", "Hyprland", "window-manager", "wayland", "hyprland", "catalog-only"],
+        ["openbox", "Openbox", "window-manager", "x11", "openbox", "catalog-only"],
+        ["fluxbox", "Fluxbox", "window-manager", "x11", "fluxbox", "catalog-only"],
+        ["jwm", "JWM", "window-manager", "x11", "jwm", "catalog-only"],
+        ["icewm", "IceWM", "window-manager", "x11", "icewm", "catalog-only"],
+        ["ratpoison", "Ratpoison", "window-manager", "x11", "ratpoison", "catalog-only"]
+    ]
+}
+
+export craft contains(items, value) {
+    when size(items) > 256 {
+        yield false
+    }
+    each item in items {
+        when item == value {
+            yield true
+        }
+    }
+    yield false
+}
+
+export craft profile_valid(profile) {
+    when size(profile) != 6 {
+        yield false
+    }
+    when profile[0] == "" or profile[1] == "" or profile[4] == "" {
+        yield false
+    }
+    when profile[2] != "desktop-environment" and profile[2] != "window-manager" {
+        yield false
+    }
+    when profile[3] != "x11" and profile[3] != "wayland" and profile[3] != "either" {
+        yield false
+    }
+    yield profile[5] == "catalog-only"
+}
+
+export craft catalog_valid() {
+    make items := profile_catalog()
+    when size(items) != 20 {
+        yield false
+    }
+    each profile in items {
+        when not profile_valid(profile) {
+            yield false
+        }
+        when size(items) != size(items) {
+            yield false
+        }
+    }
+    make index := 0
+    each profile in items {
+        make other_index := 0
+        each other in items {
+            when index != other_index and profile[0] == other[0] {
+                yield false
+            }
+            change other_index := other_index + 1
+        }
+        change index := index + 1
+    }
+    yield true
+}
+
+export craft find_profile(profile_id) {
+    each profile in profile_catalog() {
+        when profile[0] == profile_id {
+            yield profile
+        }
+    }
+    yield []
+}
+
+export craft fallback_session() {
+    yield "safe-console"
+}
+
+export craft required_services(backend) {
+    make shared := ["process-manager", "session-manager", "window-manager", "input-service", "vfs", "capability-broker", "linux-abi"]
+    when backend == "x11" {
+        yield push(shared, "x11-host")
+    }
+    when backend == "wayland" {
+        yield push(shared, "wayland-host")
+    }
+    yield []
+}
+
+export craft session_plan(profile_id, installed_profiles, display_backends, available_services) {
+    make profile := find_profile(profile_id)
+    when size(profile) != 6 {
+        yield ["reject", "unknown-profile"]
+    }
+    when not contains(installed_profiles, profile_id) {
+        yield ["defer", "profile-not-installed"]
+    }
+    vary backend := profile[3]
+    when backend == "either" {
+        when contains(display_backends, "wayland") and contains(available_services, "wayland-host") {
+            change backend := "wayland"
+        } otherwise {
+            when contains(display_backends, "x11") and contains(available_services, "x11-host") {
+                change backend := "x11"
+            } otherwise {
+                yield ["defer", "no-compatible-display-host"]
+            }
+        }
+    }
+    when backend == "x11" and not contains(display_backends, "x11") {
+        yield ["defer", "x11-backend-unavailable"]
+    }
+    when backend == "wayland" and not contains(display_backends, "wayland") {
+        yield ["defer", "wayland-backend-unavailable"]
+    }
+    each service in required_services(backend) {
+        when not contains(available_services, service) {
+            yield ["defer", "service-unavailable", service]
+        }
+    }
+    yield ["ready-to-launch", profile_id, backend, "session-adapter:" ++ profile_id]
+}
+
+export craft switch_decision(current_profile, target_profile, installed_profiles, display_backends, available_services, capabilities, checkpoint_valid) {
+    when current_profile == "" {
+        yield ["reject", "missing-current-profile"]
+    }
+    when current_profile == target_profile {
+        yield ["no-op", current_profile]
+    }
+    when not contains(capabilities, "desktop.session.switch") {
+        yield ["deny", "capability-required"]
+    }
+    when not checkpoint_valid {
+        yield ["deny", "recovery-checkpoint-required"]
+    }
+    make plan := session_plan(target_profile, installed_profiles, display_backends, available_services)
+    when plan[0] != "ready-to-launch" {
+        yield ["keep-current", plan[0], plan[1]]
+    }
+    yield ["prepare-switch", current_profile, target_profile, plan[2]]
+}
+
+export craft switch_transition(phase, candidate_healthy, previous_alive) {
+    when phase == "prepared" {
+        yield ["start-candidate"]
+    }
+    when phase == "starting" or phase == "committing" {
+        when candidate_healthy and phase == "starting" {
+            yield ["commit-candidate"]
+        }
+        when candidate_healthy and phase == "committing" {
+            yield ["committed"]
+        }
+        when previous_alive {
+            yield ["rollback-previous"]
+        }
+        yield ["safe-console", fallback_session()]
+    }
+    when phase == "rollback" {
+        when previous_alive {
+            yield ["restored-previous"]
+        }
+        yield ["safe-console", fallback_session()]
+    }
+    yield ["reject", "unknown-transition"]
+}
