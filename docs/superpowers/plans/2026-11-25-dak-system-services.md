@@ -38,8 +38,9 @@
 **Interfaces:**
 - Consumes: `dak/kernel/memory.rpr::region_fits`, `dak/platform/targets.rpr::architecture_known`.
 - Produces: `target_valid`, `admission`, `partition_valid`, `layout_valid`, `transition_valid`, `commit_policy`.
+- Admission consumes the candidate layout so callers cannot skip partition validation.
 
-- [x] Write tests for explicit consent, publisher/digest/signature evidence, recovery readiness, canonical A/B slot IDs, BIOS/UEFI layout, partition overlap, skipped states and unverified boot.
+- [x] Write tests for explicit consent, publisher/digest/signature evidence, recovery readiness, canonical A/B slot IDs, BIOS/UEFI layout, mandatory admission-time layout validation, partition overlap, skipped states and unverified boot.
 - [x] Implement policy module; all results are plan-only and never write storage.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -66,8 +67,9 @@
 **Interfaces:**
 - Consumes: `dak/platform/targets.rpr`, `dak/security/capabilities.rpr`, `dak/storage/vfs.rpr`.
 - Produces: `package_valid`, `dependencies_satisfied`, `paths_valid`, `admission`, `transition_valid`, `remove_policy`.
+- Admission consumes payload paths and rejects traversal before returning an install plan.
 
-- [x] Test malformed manifests and field types, publisher/digest fields, dependency absence, dot traversal, embedded POSIX/Windows separators, capability denial and protected/dependent removal.
+- [x] Test malformed manifests and field types, publisher/digest fields, dependency absence, dot traversal, embedded POSIX/Windows separators, mandatory admission-time payload-path validation, capability denial and protected/dependent removal.
 - [x] Implement bounded manifest and transaction policy; no payload is extracted or executed.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
