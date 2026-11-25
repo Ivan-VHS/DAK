@@ -127,5 +127,11 @@
     "Define and exercise a versioned native boundary between Reaper and the DAK kernel.",
     "Attach exact source, regression-test and target-CI evidence to each promoted gate."
   ],
-  "semver_independent": true
+  "semver_independent": true,
+  "limitations": [
+    "The experimental x86-64 Stage 1 kernel image halts after early boot validation and frame allocation; it is not a usable process/service OS session.",
+    "A complete process model, syscall layer, filesystem, service supervisor, driver runtime and kernel compositor are not implemented.",
+    "The release and QEMU boot workflows were reviewed as evidence references but were not re-run during this maturity adoption.",
+    "Mora is a host-native desktop application and is not yet launched inside a DAK kernel-owned user session."
+  ]
 }
