@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v8-local-documents";
+const CACHE = "mora-shell-v9-ecosystem";
 const ASSETS = [
   "./",
   "./index.html",

@@ -66,3 +66,18 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_
         COMMENT "Building the DuckOS x86_64 BIOS/UEFI stage-1 ISO"
     )
 endif()
+
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+    add_custom_target(duckos-release-iso
+        COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/boot/build-release-iso.sh"
+            --work-dir "${CMAKE_BINARY_DIR}/release"
+            --output "${CMAKE_BINARY_DIR}/DuckOS-Release-x86_64.iso"
+        BYPRODUCTS
+            "${CMAKE_BINARY_DIR}/DuckOS-Release-x86_64.iso"
+            "${CMAKE_BINARY_DIR}/DuckOS-Release-x86_64.iso.sha256"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        USES_TERMINAL
+        COMMENT "Building the DuckOS ecosystem release ISO and testing federated projects"
+    )
+endif()

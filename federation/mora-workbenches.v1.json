@@ -1,0 +1,60 @@
+{
+  "schema": "duckos.mora-workbenches.v1",
+  "version": 1,
+  "policy": {
+    "browser_launch": "panel-only",
+    "external_process_launch": false,
+    "auto_execute": false,
+    "source_root": "projects"
+  },
+  "workbenches": [
+    {
+      "id": "reaper-workbench",
+      "name": "Reaper",
+      "project": "reaper",
+      "path": "projects/reaper",
+      "entrypoint": "release/bin/reaper-c",
+      "license": "Apache-2.0",
+      "runtime_boundary": "user-space toolchain",
+      "build": "cmake -S projects/reaper -B build/reaper -DCMAKE_BUILD_TYPE=Release -DREAPER_BUILD_TESTS=ON",
+      "test": "ctest --test-dir build/reaper --output-on-failure",
+      "documentation": "projects/reaper/README.md"
+    },
+    {
+      "id": "pytyliki-workbench",
+      "name": "Pytyliki",
+      "project": "pytyliki",
+      "path": "projects/pytyliki",
+      "entrypoint": "release/bin/pytyliki",
+      "license": "MIT",
+      "runtime_boundary": "user-space compute and read-only host inspection",
+      "build": "cmake -S projects/pytyliki -B build/pytyliki -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON",
+      "test": "ctest --test-dir build/pytyliki --output-on-failure",
+      "documentation": "projects/pytyliki/README.md"
+    },
+    {
+      "id": "oplague-workbench",
+      "name": "OPlague",
+      "project": "oplague",
+      "path": "projects/oplague",
+      "entrypoint": "projects/oplague/oplague_app.py",
+      "license": "Apache-2.0",
+      "runtime_boundary": "read-only user-space device and driver evidence",
+      "build": "python3 -m compileall -q projects/oplague/oplague_app.py projects/oplague/oplague projects/oplague/tests",
+      "test": "cd projects/oplague && python3 -m unittest discover -s tests -v",
+      "documentation": "projects/oplague/README.md"
+    },
+    {
+      "id": "ventusample-workbench",
+      "name": "VentuSample",
+      "project": "ventusample",
+      "path": "projects/ventusample",
+      "entrypoint": "release/bin/VentuSample",
+      "license": "Apache-2.0",
+      "runtime_boundary": "offline-by-default user-space audio and DSP",
+      "build": "cmake -S projects/ventusample -B build/ventusample -DVENTU_BUILD_DESKTOP=ON -DVENTU_BUILD_TESTS=ON -DREAPER_SOURCE_DIR=$PWD/projects/reaper",
+      "test": "ctest --test-dir build/ventusample --output-on-failure",
+      "documentation": "projects/ventusample/README.md"
+    }
+  ]
+}

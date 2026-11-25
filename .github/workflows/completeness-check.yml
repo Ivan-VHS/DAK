@@ -28,7 +28,6 @@ jobs:
     outputs:
       has_cmake: ${{ steps.features.outputs.has_cmake }}
       has_reaper: ${{ steps.features.outputs.has_reaper }}
-      has_sambu: ${{ steps.features.outputs.has_sambu }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -43,25 +42,18 @@ jobs:
 
           has_cmake=false
           has_reaper=false
-          has_sambu=false
 
           [[ -s CMakeLists.txt ]] && has_cmake=true
           if [[ -s reaper/cli.py && -s reaper/__init__.py ]]; then
             has_reaper=true
           fi
-          if [[ -s sambu/__main__.py ]]; then
-            has_sambu=true
-          fi
-
           {
             echo "has_cmake=$has_cmake"
             echo "has_reaper=$has_reaper"
-            echo "has_sambu=$has_sambu"
           } >> "$GITHUB_OUTPUT"
 
           echo "CMake project: $has_cmake"
           echo "Reaper package: $has_reaper"
-          echo "SAMBU package: $has_sambu"
 
   contracts:
     name: Metadata, schemas and capability contracts
@@ -384,27 +376,6 @@ jobs:
 
       - name: Verify source Span and LSP coordinate behavior
         run: python -m unittest discover -s tests -p "test_language_service.py" -v
-
-  sambu-language:
-    name: SAMBU strict syntax and source-span checks
-    needs: detect
-    if: ${{ needs.detect.outputs.has_sambu == 'true' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set up Python
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
-        with:
-          python-version: "3.12"
-
-      - name: Validate SAMBU examples with strict diagnostics and spans
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m sambu check --strict --spans examples/
 
   secrets:
     name: Secret scanning

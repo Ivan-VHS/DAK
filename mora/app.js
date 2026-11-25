@@ -45,7 +45,11 @@ const appDefinitions = {
   "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
   "red-sparrow": { name: "赤雀 · Red Sparrow", subtitle: "Wuxia · постановочная лаборатория", color: DUCK_ACCENT, glyph: "雀" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" }
+  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
+  "reaper-workbench": { name: "Reaper", subtitle: "Язык и toolchain", color: DUCK_ACCENT, glyph: "R" },
+  "pytyliki-workbench": { name: "Pytyliki", subtitle: "Вычисления и диагностика", color: DUCK_ACCENT, glyph: "P" },
+  "oplague-workbench": { name: "OPlague", subtitle: "Инспекция устройств", color: DUCK_ACCENT, glyph: "O" },
+  "ventusample-workbench": { name: "VentuSample", subtitle: "Аудио и DSP", color: DUCK_ACCENT, glyph: "V" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -60,8 +64,8 @@ let pendingIntentPlan = null;
 
 const LOCALE_KEY = "duckos.mora.locale.v1";
 const LOCALE_TEXT = {
-  "ru-RU": { desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы", dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.", yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"30 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ", dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы", routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства", expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН" },
-  "zh-CN": { desktop:"桌面", system:"系统", systemStatus:"系统状态", dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。", yourSpace:"您的空间", applications:"应用程序", appsCount:"30 个应用与工具", dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务", routines:"场景", compass:"指南针", games:"游戏", devices:"设备", expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线" }
+  "ru-RU": { desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы", dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.", yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"34 ПРИЛОЖЕНИЯ И ИНСТРУМЕНТА", dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы", routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства", expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН" },
+  "zh-CN": { desktop:"桌面", system:"系统", systemStatus:"系统状态", dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。", yourSpace:"您的空间", applications:"应用程序", appsCount:"34 个应用与工具", dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务", routines:"场景", compass:"指南针", games:"游戏", devices:"设备", expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线" }
 };
 function readLocale() {
   try { const value = localStorage.getItem(LOCALE_KEY); return value === "zh-CN" || value === "ru-RU" ? value : "ru-RU"; }
@@ -553,6 +557,57 @@ function initializeCommonsPanel(appWindow) {
   renderGrid();
 }
 
+function federatedProjectPanel(projectId) {
+  const projects = {
+    reaper: {
+      name: "Reaper", kind: "НАТИВНЫЙ C17 TOOLCHAIN",
+      summary: "Язык Reaper, компиляторная инфраструктура, CLI и FFI для пользовательских инструментов.",
+      boundary: "User-space only. Это не freestanding kernel compiler и не исполняемая часть ядра DuckOS.",
+      source: "../projects/reaper/README.md", license: "../projects/reaper/LICENSE",
+      build: "cmake -S projects/reaper -B build/reaper -DCMAKE_BUILD_TYPE=Release -DREAPER_BUILD_TESTS=ON",
+      test: "ctest --test-dir build/reaper --output-on-failure", command: "release/bin/reaper-c"
+    },
+    pytyliki: {
+      name: "Pytyliki", kind: "НАТИВНЫЙ C11 COMPUTE",
+      summary: "Инструменты измерений, профилирования, системных отчётов и локальной диагностики.",
+      boundary: "Пользовательский уровень. Инвентаризация хоста ограничена read-only операциями.",
+      source: "../projects/pytyliki/README.md", license: "../projects/pytyliki/LICENSE",
+      build: "cmake -S projects/pytyliki -B build/pytyliki -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON",
+      test: "ctest --test-dir build/pytyliki --output-on-failure", command: "release/bin/pytyliki"
+    },
+    oplague: {
+      name: "OPlague", kind: "READ-ONLY DEVICE WORKBENCH",
+      summary: "Инспекция устройств, PE/INF и driver package evidence, хешей и совместимости.",
+      boundary: "Python/Tk user-space. Не устанавливает, не включает и не выгружает драйверы.",
+      source: "../projects/oplague/README.md", license: "../projects/oplague/LICENSE",
+      build: "python3 -m compileall -q projects/oplague/oplague_app.py projects/oplague/oplague",
+      test: "cd projects/oplague && python3 -m unittest discover -s tests -v",
+      command: "python3 projects/oplague/oplague_app.py"
+    },
+    ventusample: {
+      name: "VentuSample", kind: "C++20 · C11 DSP · QT 6",
+      summary: "Генерация и обработка сэмплов, WAV/MIDI, офлайн-DSP и локальные пресеты.",
+      boundary: "Пользовательский аудиосервис, offline-by-default. Не заменяет kernel audio/driver stack.",
+      source: "../projects/ventusample/README.md", license: "../projects/ventusample/LICENSE",
+      build: "cmake -S projects/ventusample -B build/ventusample -DVENTU_BUILD_DESKTOP=ON -DVENTU_BUILD_TESTS=ON -DREAPER_SOURCE_DIR=$PWD/projects/reaper",
+      test: "ctest --test-dir build/ventusample --output-on-failure", command: "release/bin/VentuSample"
+    }
+  };
+  const project = projects[projectId];
+  if (!project) return '<h2 class="window-heading">Workbench not found</h2>';
+  return '<p class="window-kicker">' + project.kind + '</p>' +
+    '<h2 class="window-heading">' + project.name + '</h2>' +
+    '<p class="window-copy">' + project.summary + '</p>' +
+    '<div class="system-notice"><span class="notice-dot"></span><span>' + project.boundary + '</span></div>' +
+    '<div class="setting-block"><strong>В релизном образе</strong><span>Полные исходники, документация и лицензия включены в каталог projects/. Сборки находятся в release/bin/ и предназначены для Linux x86_64 host.</span></div>' +
+    '<div class="system-notice"><span class="notice-dot"></span><span><code>' + project.build + '</code></span></div>' +
+    '<div class="system-notice"><span class="notice-dot"></span><span><code>' + project.test + '</code></span></div>' +
+    '<div class="system-notice"><span class="notice-dot"></span><span>Исполняемая точка: <code>' + project.command + '</code>. Mora показывает команду как справку и не запускает её.</span></div>' +
+    '<div class="approval-actions"><a class="action-button" href="' + project.source + '" target="_blank" rel="noopener">Открыть локальный README</a>' +
+    '<a class="subtle-button" href="' + project.license + '" target="_blank" rel="noopener">Лицензия</a></div>' +
+    '<p class="window-copy">Внешнее выполнение отключено. Запускать host-программы следует вручную после проверки целевой платформы и разрешений.</p>';
+}
+
 function panelMarkup(appId) {
   switch (appId) {
     case "cockos":
@@ -691,6 +746,14 @@ function panelMarkup(appId) {
         '<label class="file-picker">Выбрать файл для проверки<input type="file" data-provenance-file></label>' +
         '<div class="inspection-report" data-provenance-report>Файл ещё не выбран.</div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Проверка подписей и C2PA provenance manifest пока не реализована. Не считайте хеш криптографическим подтверждением происхождения.</span></div>';
+    case "reaper-workbench":
+      return federatedProjectPanel("reaper");
+    case "pytyliki-workbench":
+      return federatedProjectPanel("pytyliki");
+    case "oplague-workbench":
+      return federatedProjectPanel("oplague");
+    case "ventusample-workbench":
+      return federatedProjectPanel("ventusample");
     default:
       return '<h2 class="window-heading">Приложение не найдено</h2>';
   }

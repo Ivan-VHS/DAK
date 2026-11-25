@@ -8,6 +8,8 @@ WORK_DIR="/tmp/duckos-boot-build"
 TMP_ROOT="$(printenv TMPDIR || true)"
 if [[ -n "$TMP_ROOT" ]]; then WORK_DIR="$TMP_ROOT/duckos-boot-build"; fi
 OUTPUT="$ROOT/dist/DuckOS-Stage1-x86_64.iso"
+PAYLOAD_DIR=""
+VOLUME_ID="DUCKOS_STAGE1"
 
 while (($#)); do
     case "$1" in
@@ -17,8 +19,14 @@ while (($#)); do
         --output)
             [[ $# -ge 2 ]] || { echo "missing value for --output" >&2; exit 2; }
             OUTPUT="$2"; shift 2 ;;
+        --payload-dir)
+            [[ $# -ge 2 ]] || { echo "missing value for --payload-dir" >&2; exit 2; }
+            PAYLOAD_DIR="$2"; shift 2 ;;
+        --volume-id)
+            [[ $# -ge 2 ]] || { echo "missing value for --volume-id" >&2; exit 2; }
+            VOLUME_ID="$2"; shift 2 ;;
         -h|--help)
-            echo "Usage: boot/build-iso.sh [--work-dir DIR] [--output FILE]"
+            echo "Usage: boot/build-iso.sh [--work-dir DIR] [--output FILE] [--payload-dir DIR] [--volume-id LABEL]"
             exit 0 ;;
         *)
             echo "unknown argument: $1" >&2
@@ -39,6 +47,12 @@ case "$target" in
     x86_64-*|amd64-*) ;;
     *) echo "DuckOS stage-1 targets x86_64; compiler target is: $target" >&2; exit 1 ;;
 esac
+
+[[ "$VOLUME_ID" =~ ^[A-Z0-9_]{1,32}$ ]] || { echo "volume id must use 1-32 uppercase letters, digits or underscores" >&2; exit 2; }
+if [[ -n "$PAYLOAD_DIR" && ! -d "$PAYLOAD_DIR" ]]; then
+    echo "payload directory does not exist: $PAYLOAD_DIR" >&2
+    exit 2
+fi
 
 mkdir -p "$WORK_DIR/download" "$WORK_DIR/toolchain" "$WORK_DIR/objects" "$WORK_DIR/iso-root"
 mkdir -p "$(dirname -- "$OUTPUT")"
@@ -135,9 +149,14 @@ cp "$LIMINE_UEFI_CD" "$iso_root/boot/limine-uefi-cd.bin"
 cp "$LIMINE_EFI" "$iso_root/EFI/BOOT/BOOTX64.EFI"
 curl --fail --location --retry 3 --output "$iso_root/third_party/Limine-COPYING.txt" "$LIMINE_COPYING_URL"
 
+if [[ -n "$PAYLOAD_DIR" ]]; then
+    mkdir -p "$iso_root/duckos"
+    cp -a "$PAYLOAD_DIR"/. "$iso_root/duckos/"
+fi
+
 rm -f "$OUTPUT"
 xorriso -as mkisofs \
-    -R -r -J -V DUCKOS_STAGE1 \
+    -R -r -J -V "$VOLUME_ID" \
     -b boot/limine-bios-cd.bin \
     -no-emul-boot -boot-load-size 4 -boot-info-table \
     --efi-boot boot/limine-uefi-cd.bin \
@@ -146,6 +165,6 @@ xorriso -as mkisofs \
 
 "$LIMINE_BIN" bios-install "$OUTPUT"
 (cd "$OUTPUT_DIR" && sha256sum "$(basename -- "$OUTPUT")" > "$(basename -- "$OUTPUT").sha256")
-echo "DuckOS Stage 1 ISO ready: $OUTPUT"
+echo "DuckOS ISO ready ($VOLUME_ID): $OUTPUT"
 echo "Kernel ELF: $WORK_DIR/duckos.elf"
 cat "$OUTPUT.sha256"

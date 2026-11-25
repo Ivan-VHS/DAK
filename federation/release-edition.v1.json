@@ -1,0 +1,73 @@
+{
+  "schema": "duckos.release-edition.v1",
+  "version": "1.0.0-preview.1",
+  "edition": "ecosystem",
+  "architecture": "x86_64",
+  "firmware": [
+    "BIOS",
+    "UEFI"
+  ],
+  "boot": {
+    "loader": "Limine v12.11.1",
+    "kernel_stage": 1,
+    "kernel_runtime": "boot-and-halt",
+    "desktop_session_from_kernel": false
+  },
+  "desktop": {
+    "name": "Mora",
+    "delivery": "offline-browser-shell",
+    "user_data": "local-browser-profile",
+    "external_process_launch": false,
+    "launchers": [
+      "scripts/run-mora.sh",
+      "scripts/run-mora.ps1"
+    ]
+  },
+  "projects": [
+    {
+      "id": "reaper",
+      "repository": "Ivan-VHS/Reaper",
+      "path": "projects/reaper",
+      "commit": "02c6cda6bc67f7b9323e1635477efe15fe2bf4c0",
+      "license": "Apache-2.0",
+      "build": "CMake / C17 native CLI and FFI",
+      "scope": "user-space language and toolchain"
+    },
+    {
+      "id": "pytyliki",
+      "repository": "Ivan-VHS/Pytyliki",
+      "path": "projects/pytyliki",
+      "commit": "4f679d24d4073cfac5fd4ec566b0f070dd4756d5",
+      "license": "MIT",
+      "build": "CMake / C11 native CLI and FFI",
+      "scope": "user-space compute tools and host inspection"
+    },
+    {
+      "id": "oplague",
+      "repository": "Ivan-VHS/OPlague",
+      "path": "projects/oplague",
+      "commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "license": "Apache-2.0",
+      "build": "Python 3.12 / Tk user-space application and tests",
+      "scope": "read-only host device and driver evidence"
+    },
+    {
+      "id": "ventusample",
+      "repository": "Ivan-VHS/VentuSample",
+      "path": "projects/ventusample",
+      "commit": "45aeba3b78359bb4a3ef82d61315c962408563e7",
+      "license": "Apache-2.0",
+      "build": "C++20 / C11 DSP / optional Qt 6 desktop",
+      "scope": "offline-by-default audio and DSP"
+    }
+  ],
+  "release_policy": {
+    "source_pinned": true,
+    "native_build_tests_required": true,
+    "host_binaries_are_not_kernel_binaries": true,
+    "automatic_external_execution": false,
+    "driver_installation": false,
+    "firmware_writes": false,
+    "artificial_size_padding": false
+  }
+}
