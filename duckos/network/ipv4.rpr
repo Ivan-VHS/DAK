@@ -44,7 +44,7 @@ export craft packet_valid(packet, verify_checksum) {
     when packet[8] == 0 {
         yield false
     }
-    when packet[9] != 1 and packet[9] != 6 and packet[9] != 17 and packet[9] != 58 {
+    when packet[9] != 1 and packet[9] != 6 and packet[9] != 17 {
         yield false
     }
     when verify_checksum and not header_checksum_valid(packet, header_bytes) {
@@ -58,7 +58,7 @@ export craft fragment_policy(packet) {
         yield "drop-invalid-packet"
     }
     make fragment_field := packet[6] * 256 + packet[7]
-    when fragment_field % 8192 >= 1 {
+    when fragment_field % 8192 >= 1 or fragment_field % 16384 >= 8192 {
         yield "reassemble-before-transport"
     }
     yield "deliver-to-transport"

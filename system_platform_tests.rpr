@@ -105,6 +105,8 @@ make ip_packet := [69, 0, 0, 20, 0, 0, 0, 0, 64, 17, 0, 0, 192, 168, 1, 1, 192, 
 assert(ipv4.packet_valid(ip_packet, false), "well-formed IPv4 header is accepted")
 assert(not ipv4.header_checksum_valid(ip_packet, 20), "invalid IPv4 checksum is rejected")
 assert(ipv4.fragment_policy(ip_packet) == "deliver-to-transport", "unfragmented IPv4 packet reaches transport")
+make fragmented_ip_packet := [69, 0, 0, 20, 0, 0, 32, 0, 64, 17, 0, 0, 192, 168, 1, 1, 192, 168, 1, 2]
+assert(ipv4.fragment_policy(fragmented_ip_packet) == "reassemble-before-transport", "IPv4 fragments are reassembled before transport")
 assert(not ipv4.packet_valid([69, 0, 0, 20], false), "truncated IPv4 header is rejected")
 make udp_segment := [0, 53, 0, 53, 0, 8, 0, 0]
 assert(udp.datagram_valid(udp_segment), "minimum UDP datagram is valid")
