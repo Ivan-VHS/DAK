@@ -1,13 +1,13 @@
 # DAK Native System Services v1
 
 **Status:** Reaper reference-runtime contracts implemented; native privileged providers pending.  
-**Language:** Reaper (`.rpr`) for all four subsystem policy modules.  
+**Language:** Reaper (`.rpr`) for all four system services and their shared audit policy.  
 **Primary platform:** Intel/AMD x86-64. Elbrus remains a preserved compatibility track.  
-**Scope:** Installer, driver runtime, package manager and update system.
+**Scope:** Installer, driver runtime, package manager, update system and shared audit journal.
 
 ## 1. Architecture
 
-The four modules are independent Reaper policy services. Each validates bounded input, returns a deterministic decision and exposes an explicit transaction or lifecycle state machine.
+The service modules are independent Reaper policy services. Each validates bounded input, returns a deterministic decision and exposes an explicit transaction or lifecycle state machine.
 
 | Subsystem | Reaper module | Owns |
 |---|---|---|
@@ -56,7 +56,7 @@ Transaction path: `planned → validated → staged → ready_to_commit → comm
 
 ## 4. Driver runtime contract
 
-Driver descriptor: `[id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes]`. Device descriptors reuse the existing six-field DuckDriver resource record.
+Driver descriptor: `[id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes]`. Device descriptors reuse the existing six-field DuckDriver resource record. Resource admission rejects conflicts with already registered device ranges or exclusive IRQ ownership.
 
 Admission requires a verified, non-revoked signature state, a non-empty publisher, matching architecture and bus, a supported ABI and a capability set contained by the grants. Payload size is bounded to 256 MiB.
 
@@ -68,6 +68,7 @@ Unload requires a running/stopping driver and affirmative evidence that IRQs are
 
 - `descriptor_valid(driver) -> bool`
 - `admission(driver, device, target_arch, expected_abi, supported_buses, grants) -> decision`
+- `resource_admission(device, registered_devices) -> decision`
 - `transition_valid(current, next) -> bool`
 - `unload_policy(state, irqs_quiesced, dma_stopped, device_quiesced) -> decision`
 
@@ -88,9 +89,9 @@ Transaction path: `planned → verified → resolved → staged → committed`, 
 - `transition_valid(current, next) -> bool`
 - `remove_policy(state, dependent_count, protected) -> decision`
 
-## Audit journal contract
+## 6. Audit journal contract
 
-Audit record: `[sequence, request_id, actor, action, resource, outcome, reason]`. Records are strictly sequenced from 1; the journal is bounded by the caller's configured maximum and append intent is rejected for gaps, malformed entries, invalid existing history or capacity exhaustion.
+Audit record: `[sequence, request_id, actor, action, resource, outcome, reason, previous_digest, digest]`. Records are strictly sequenced from 1, link each event to the prior digest (the first record links to `genesis`), and are bounded by the caller's configured maximum. Append intent is rejected for gaps, malformed entries, invalid prior history, broken digest links or capacity exhaustion.
 
 ### API
 
@@ -99,7 +100,7 @@ Audit record: `[sequence, request_id, actor, action, resource, outcome, reason]`
 - `append_policy(records, record, max_records) -> decision`
 
 This Reaper module validates append intent only. Durable append-only storage, tamper-evident hashing/signing, access control and retention policy belong to the trusted storage/security provider.
-## 6. Update system contract
+## 7. Update system contract
 
 Update manifest: `[channel, major, minor, patch, architecture, sequence, payload_bytes, digest, publisher, signature_state]`.
 
@@ -116,13 +117,13 @@ Transaction path: `idle → verified → staged → armed → boot_pending → c
 - `transition_valid(current, next) -> bool`
 - `boot_result_policy(health, attempts, max_attempts) -> decision`
 
-## 7. Verification matrix
+## 8. Verification matrix
 
 The DAK Reaper contract workflow must validate every `.rpr` file under `dak/`, then execute `contract_tests.rpr` under both the tree-walk engine and VM.
 
 Audit coverage includes malformed request identities, non-consecutive sequences, corrupted prior journals and append-capacity exhaustion. Required negative coverage includes: missing consent, unverified/revoked provenance, missing recovery, malformed and overlapping partitions, driver bus/architecture/ABI/capability mismatch, active DMA/IRQ during unload, missing dependencies, path traversal, protected package removal, version and sequence rollback, invalid A/B slot, skipped state transitions and unhealthy boot confirmation.
 
-## 8. Native implementation gates
+## 9. Native implementation gates
 
 These Reaper contracts are not a disk installer, package extractor, driver loader or updater. A privileged implementation must not be marked delivered until the following independent gates exist and pass:
 
@@ -138,4 +139,4 @@ These Reaper contracts are not a disk installer, package extractor, driver loade
 10. Bounded audit-journal storage with tamper-evident event authentication, retention and recovery tests.
 11. Full tree-walk/VM/native conformance, resource-limit, malformed-input, corruption, power-loss and rollback tests.
 
-Until then, all five Reaper policy modules remain policy-only and return plan-only decisions. This boundary is intentional and security-critical.
+Until then, the four system-service modules and shared audit policy remain policy-only and return plan-only decisions. This boundary is intentional and security-critical.
