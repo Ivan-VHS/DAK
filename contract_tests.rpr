@@ -325,6 +325,7 @@ assert(installer["commit_policy"]("ready_to_commit", true, verified_source, "rea
 assert(installer["commit_policy"]("ready_to_commit", true, verified_source, "ready", "pending") == "reject-boot-unverified", "installer refuses an unverified boot result")
 assert(not installer["partition_valid"](["too_early", "efi", 4096, 4096], 4000000), "installer reserves the leading disk metadata region")
 assert(not installer["partition_valid"](["fractional", "efi", 1048576.5, 262144], 4000000), "installer rejects fractional partition offsets")
+assert(not installer["partition_valid"](["unaligned_length", "efi", 1048576, 262145], 4000000), "installer rejects a partition length that is not 4 KiB aligned")
 make bios_layout := [
     ["bios_boot", "bios_boot", 1048576, 1048576],
     ["system_a", "system", 2097152, 524288],
@@ -356,6 +357,8 @@ assert(driver_runtime["resource_admission"](driver_device, [device_c]) == "resou
 make duplicate_device_id := ["nvme0", "pci", 8192, 256, 12, false]
 assert(driver_runtime["resource_admission"](driver_device, [duplicate_device_id]) == "reject-resource-conflict", "driver runtime rejects duplicate device identities")
 assert(not driver_runtime["descriptor_valid"](["nvme.sample", 1.5, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]), "driver runtime rejects fractional ABI versions")
+assert(not driver_runtime["descriptor_valid"](["nvme.sample", 1, "pci", "x86_64", [7], "Ivan-VHS", "sha256:driver", "verified", 65536]), "driver runtime rejects non-text requested capabilities")
+assert(driver_runtime["admission"](verified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], [7]) == "reject-descriptor", "driver runtime rejects non-text capability grants")
 assert(driver_runtime["descriptor_valid"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "", "verified", 65536]) == false, "driver runtime requires a payload digest")
 assert(driver_runtime["admission"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "revoked", 65536], driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-revoked", "driver runtime rejects revoked publisher evidence")
 assert(driver_runtime["transition_valid"]("verified", "admitted"), "driver runtime advances verified metadata")
