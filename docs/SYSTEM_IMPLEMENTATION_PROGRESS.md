@@ -10,6 +10,7 @@ This branch adds executable Reaper policy/state contracts and wires the existing
 
 | Subsystem | Added source | What is now checked | What is still absent |
 |---|---|---|---|
+| Boot protocol adapter | `duckos/kernel/limine_map.rpr` | known Limine memory types, split-u64 range overflow, sorted/non-overlapping map validation, deferred loader-memory reclamation | native Limine pointer/response validation, validated boot-info construction, loader response lifetime and actual boot entry |
 | Process identity | `duckos/kernel/process.rpr` | PID/generation handles, descriptor validation, state transitions, parent relation, capability attenuation | kernel stacks, page-table roots, context switch, scheduling/preemption, user-mode execution |
 | Syscall boundary | `duckos/kernel/syscall.rpr` | ABI version, call IDs, argument/payload bounds, stale-handle rejection, user-buffer metadata, BAV decision | CPU syscall entry/return, privilege transition, safe copy-in/out, native handler table |
 | Virtual memory | `duckos/kernel/vm.rpr` | 4 KiB alignment, owner/address-space scope, no W+X, overlap, permission-aware translation policy | physical frame allocator, page-table edits, TLB shootdown, fault handler |
