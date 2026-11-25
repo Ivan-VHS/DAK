@@ -24,8 +24,8 @@ export craft target_valid(target) {
     yield true
 }
 
-# Source: [publisher, digest, signature_state].
-# "verified" must be emitted by a trusted cryptographic provider, not by the image itself.
+# Source evidence: [publisher, digest, signature_state].
+# "verified" must come from a trusted verifier, not from the image itself.
 export craft source_record_valid(source) {
     when size(source) != 3 {
         yield false
@@ -83,7 +83,7 @@ export craft partition_valid(partition, disk_bytes) {
 
 # Layout is sorted by start byte and must contain system A/B and recovery.
 # UEFI requires one EFI partition; BIOS requires one BIOS boot partition.
-# User data is optional. Adjacent partitions are valid; overlap is not.
+# User data is optional. Adjacent partitions are valid; overlap and duplicate IDs are not.
 export craft layout_valid(partitions, disk_bytes, firmware_mode) {
     when size(partitions) < 4 or size(partitions) > 5 or disk_bytes <= 1048576 {
         yield false
@@ -93,6 +93,7 @@ export craft layout_valid(partitions, disk_bytes, firmware_mode) {
     }
 
     vary previous_end := 0
+    vary seen_ids := []
     vary efi_count := 0
     vary bios_boot_count := 0
     vary system_count := 0
@@ -106,8 +107,14 @@ export craft layout_valid(partitions, disk_bytes, firmware_mode) {
         when partition[2] < previous_end {
             yield false
         }
-
+        each seen_id in seen_ids {
+            when seen_id == partition[0] {
+                yield false
+            }
+        }
+        change seen_ids := push(seen_ids, partition[0])
         change previous_end := partition[2] + partition[3]
+
         when partition[1] == "efi" {
             change efi_count := efi_count + 1
         }
