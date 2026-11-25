@@ -78,6 +78,9 @@ export craft partition_valid(partition, disk_bytes) {
     when partition[1] != "efi" and partition[1] != "bios_boot" and partition[1] != "system" and partition[1] != "recovery" and partition[1] != "userdata" {
         yield false
     }
+    when (partition[1] == "efi" or partition[1] == "bios_boot") and partition[2] != 1048576 {
+        yield false
+    }
     yield true
 }
 
@@ -122,14 +125,14 @@ export craft layout_valid(partitions, disk_bytes, firmware_mode) {
         when partition[1] == "bios_boot" {
             change bios_boot_count := bios_boot_count + 1
         }
-        when partition[1] == "system" {
-            when partition[0] == "system_a" {
-                change system_a_count := system_a_count + 1
-            } otherwise when partition[0] == "system_b" {
-                change system_b_count := system_b_count + 1
-            } otherwise {
-                yield false
-            }
+        when partition[1] == "system" and partition[0] == "system_a" {
+            change system_a_count := system_a_count + 1
+        }
+        when partition[1] == "system" and partition[0] == "system_b" {
+            change system_b_count := system_b_count + 1
+        }
+        when partition[1] == "system" and partition[0] != "system_a" and partition[0] != "system_b" {
+            yield false
         }
         when partition[1] == "recovery" {
             change recovery_count := recovery_count + 1
