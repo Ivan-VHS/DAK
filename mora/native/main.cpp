@@ -305,7 +305,7 @@ public:
             QMainWindow { background: #070707; color: #FFFFFF; }
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QFrame#panel { background: #111111; border: 1px solid rgba(255,255,255,38); border-top-color: rgba(255,255,255,82); border-radius: 6px; }
-            QLabel[role="muted"] { color: #FFFFFF; }
+            QLabel[role="muted"] { color: rgba(255,255,255,122); }
             QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QPushButton { color: #FFFFFF; background: #1B1B1B; border: 1px solid #333333; border-radius: 4px; padding: 9px 14px; }
             QPushButton:hover { border-color: #FFD700; background: #1B1B1B; }
@@ -596,19 +596,19 @@ private:
     {
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
-            QLabel[role="muted"] { color: #FFFFFF; }
+            QLabel[role="muted"] { color: rgba(255,255,255,122); }
             QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QLabel[role="title"] { color: #FFFFFF; font-size: 25pt; font-weight: 650; }
-            QLabel[role="subtitle"] { color: #FFFFFF; }
+            QLabel[role="subtitle"] { color: rgba(255,255,255,184); }
             QFrame#panel { background: rgba(17,17,17,244); border: 1px solid rgba(255,255,255,38); border-top-color: rgba(255,255,255,82); border-radius: 6px; }
             QFrame#softPanel { background: rgba(27,27,27,238); border: 1px solid rgba(255,255,255,30); border-top-color: rgba(255,255,255,64); border-radius: 6px; }
-            QPushButton { color: #FFFFFF; background: #111111; border: 1px solid #333333; border-radius: 4px; padding: 9px 12px; text-align: left; }
+            QPushButton { color: #FFFFFF; background: #1B1B1B; border: 1px solid #333333; border-radius: 4px; padding: 9px 12px; text-align: left; }
             QPushButton:hover { border-color: #FFD700; background: #1B1B1B; }
             QPushButton:checked { color: #070707; background: #FFD700; border-color: #FFD700; }
             QPushButton:disabled { color: #FFFFFF; background: #1B1B1B; border-color: #333333; }
-            QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 6px; min-height: 78px; }
+            QPushButton#appTile { background: rgba(17,17,17,235); border-radius: 6px; min-height: 78px; }
             QPushButton#appTile:hover { background: #1B1B1B; border-color: #FFD700; }
-            QLineEdit, QComboBox { color: #FFFFFF; background: #111111; border: 1px solid #333333; border-radius: 4px; padding: 9px 12px; min-height: 24px; }
+            QLineEdit, QComboBox { color: #FFFFFF; background: #1B1B1B; border: 1px solid #333333; border-radius: 4px; padding: 9px 12px; min-height: 24px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
             QScrollArea { border: 0; background: transparent; }
         )")));
