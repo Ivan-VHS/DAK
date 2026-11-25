@@ -1,0 +1,5 @@
+# Local build outputs and generated boot media
+/build/
+/dist/
+*.iso
+*.iso.sha256
