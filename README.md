@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="docs/IMPLEMENTATION_STATUS.md">Mora native shell status</a> · <a href="mora/index.html">Browser preview</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a> · <a href="SECURITY.md">Security</a> ·
   <a href="docs/RELEASE_EDITION.md">Release edition</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
