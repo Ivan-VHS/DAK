@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(28);
+select plan(30);
 
 select extensions.has_table('public', 'ecosystem_organizations', 'organization metadata table exists');
 select extensions.has_table('public', 'ecosystem_memberships', 'membership table exists');
@@ -113,16 +113,18 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
 select set_config('request.jwt.claims', '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
 select extensions.is((select count(*)::integer from public.ecosystem_organizations), 1, 'user A sees only organization A');
+select extensions.is((select count(*)::integer from public.ecosystem_memberships), 1, 'user A sees only their own membership');
 select extensions.is((select count(*)::integer from public.ecosystem_projects), 1, 'user A sees only project A');
 select extensions.is((select count(*)::integer from public.ecosystem_artifacts), 1, 'user A sees only artifact A');
-select extensions.ok((select count(*) > 0 from public.ecosystem_audit_events), 'user A can read audit events created by their own changes');
+select extensions.is((select count(*)::integer from public.ecosystem_audit_events), 4, 'user A sees only audit events from their own organization');
 
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000002', true);
 select set_config('request.jwt.claims', '{"sub":"20000000-0000-4000-8000-000000000002","role":"authenticated"}', true);
 select extensions.is((select count(*)::integer from public.ecosystem_organizations), 1, 'user B sees only organization B');
+select extensions.is((select count(*)::integer from public.ecosystem_memberships), 1, 'user B sees only their own membership');
 select extensions.is((select count(*)::integer from public.ecosystem_projects), 1, 'user B sees only project B');
 select extensions.is((select count(*)::integer from public.ecosystem_artifacts), 1, 'user B sees only artifact B');
-select extensions.ok((select count(*) > 0 from public.ecosystem_audit_events), 'user B can read audit events created by their own changes');
+select extensions.is((select count(*)::integer from public.ecosystem_audit_events), 4, 'user B sees only audit events from their own organization');
 
 select * from extensions.finish();
 rollback;
