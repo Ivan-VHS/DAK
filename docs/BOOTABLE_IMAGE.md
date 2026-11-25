@@ -1,6 +1,6 @@
 # DuckOS x86_64 bootable Stage 1 image
 
-**Status:** experimental native kernel foundation, not a complete operating system.  
+**Status:** experimental native kernel Stage 2 paging foundation, not a complete operating system.  
 **Architecture:** x86_64, Limine protocol v12.11.1, BIOS and UEFI hybrid ISO.  
 **Kernel ownership:** DuckOS owns the freestanding entry point, memory-map adapter, Boot Info validation, early physical-frame allocator and framebuffer/serial output. Limine is a separately licensed third-party bootloader.
 
@@ -8,9 +8,9 @@
 
 The image starts a native DuckOS ELF kernel through Limine. Early in the entry path, DuckOS disables maskable interrupts and installs an IDT for CPU exception vectors 0–31 using the active code selector. The entry point then validates protocol base revision 6, firmware identity, HHDM, executable physical/virtual base, framebuffer and memory map. It converts firmware memory regions to DuckOS Boot Info v1 and verifies that the kernel and framebuffer are covered by the expected reserved/MMIO ranges.
 
-After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel emits the IDT-installed marker before processing firmware responses. It then reports available/allocated page counts and finally emits `DUCKOS_BOOT_OK stage=1`. CPU exceptions are logged to COM1 with their vector, error code, RIP and (for page faults) CR2; when a 32-bit RGB framebuffer is available, a fatal banner is drawn before the kernel halts.
+After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. The current paging branch then deep-clones the Limine-provided active four-level hierarchy into allocator-owned page-table frames and switches CR3 to the DuckOS-owned PML4, preserving the active kernel, boot stack, HHDM and framebuffer mappings. It enables EFER.NXE when supported, sets CR0.WP, and applies section permissions: executable/read-only kernel text, read-only/NX Limine request and rodata pages, and writable/NX data pages. The kernel performs a live 4 KiB map/translate/protect/unmap test and returns the test frame to the allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel emits the IDT-installed marker before processing firmware responses. It then reports available/allocated page counts and finally emits `DUCKOS_BOOT_OK stage=1`. CPU exceptions are logged to COM1 with their vector, error code, RIP and (for page faults) CR2; when a 32-bit RGB framebuffer is available, a fatal banner is drawn before the kernel halts.
 
-This allocator is intentionally monotonic: it does not free pages, merge ranges, reclaim memory, construct page tables or provide a heap. It is a first native memory primitive, not a finished virtual-memory subsystem.
+The current early allocator reuses released 4 KiB frames from a bounded free stack; it is still single-core and is not a buddy allocator. The page-table manager owns the PML4 and intermediate table pages it creates, while mapped data frames remain caller-owned. This is a native paging foundation, not yet a general virtual-memory manager.
 
 The existing .rpr kernel files remain the policy/reference layer. Reaper's current native compiler is not yet a freestanding kernel compiler, so the privileged platform entry bridge is C11. The current Reaper AOT slice is not claimed to compile the kernel.
 
@@ -36,7 +36,7 @@ Install qemu-system-x86 and OVMF firmware, then run:
 
     boot/test-qemu.sh --iso build/DuckOS-Stage1-x86_64.iso --ovmf-code /usr/share/OVMF/OVMF_CODE.fd --ovmf-vars /usr/share/OVMF/OVMF_VARS.fd
 
-The test boots through BIOS and UEFI and requires both the IDT-installed marker and `DUCKOS_BOOT_OK stage=1` in the serial log. This verifies that `lidt` was reached; it does not inject a fault to exercise every exception handler. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
+The paging branch's test boots through BIOS and UEFI and requires the IDT-installed marker, the owned-CR3 marker, the live map/protect/unmap marker, and `DUCKOS_BOOT_OK stage=2` in the serial log. This verifies that `lidt` was reached; it does not inject a fault to exercise every exception handler. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
 
 GitHub Actions builds the same ISO, runs Boot Info, frame-allocator and IDT CTests, boots the image in BIOS and OVMF UEFI, and uploads the ISO, checksum and serial logs.
 
