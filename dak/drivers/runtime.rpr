@@ -1,4 +1,4 @@
-# DAK Driver Runtime v1 — admission, lifecycle and safe-unload policy.
+# DAK Driver Runtime v1 — admission, resource and safe-unload policy.
 # No PCI/USB enumeration, module mapping, IRQ routing, MMIO or DMA occurs here.
 
 import "abi.rpr" as abi
@@ -54,6 +54,18 @@ export craft admission(driver, device, target_arch, expected_abi, supported_buse
         yield "reject-capability-or-abi"
     }
     yield "admit-isolated-plan-only"
+}
+
+export craft resource_admission(device, registered_devices) {
+    when not orchestrator["device_valid"](device) {
+        yield "reject-invalid-device"
+    }
+    each registered in registered_devices {
+        when orchestrator["resources_conflict"](device, registered) {
+            yield "reject-resource-conflict"
+        }
+    }
+    yield "resource-plan-only"
 }
 
 # candidate -> verified -> admitted -> mapped -> initialized -> running.
