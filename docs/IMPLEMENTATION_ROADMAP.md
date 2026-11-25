@@ -41,9 +41,9 @@ The Reaper reference contracts define a future update transaction order (kernel,
 ### Next native gates
 
 - **Package lifecycle:** filesystem, trust store, package manifests, signature verification, dependency solver, atomic transaction journal and recovery before enabling installation.
-- **Update service:** staged update engine with disk-space preflight, per-group backups, boot-success confirmation, failure recovery and A/B slot support.
+- **Update service:** staged update engine with disk-space and boot-partition preflight, signed repository metadata, dependency-conflict diagnostics, per-group backups, last-known-good kernel retention, boot-success confirmation, failure recovery and A/B slot support.
 - **Hardware center:** native PCI/USB/ACPI discovery, signed driver packages, isolated driver execution, permissions and hardware test matrix.
-- **Gaming and creator runtime:** native process/session model, input/controller service, audio and graphics stack, compositor and independently validated GPU providers.
+- **Gaming and creator runtime:** native process/session model, input/controller service, audio and graphics stack, compositor and independently validated GPU providers; only then evaluate GPU overlays, instant replay, capture APIs and encode/decode matrices.
 - **Installer and first boot:** disk layout planner, destructive-action preview, image verification, boot recovery and guided first-run setup after persistent storage and user-session services exist.
 
 ## Native implementation sequence

@@ -44,3 +44,13 @@ export craft transaction_state_valid(state) {
     yield state == "idle" or state == "preflight" or state == "applying" or
         state == "rolling-back" or state == "committed" or state == "recovery-required"
 }
+
+export craft fallback_kernel_set_valid(available_images, minimum_required) {
+    when minimum_required < 2 { yield false }
+    yield available_images >= minimum_required
+}
+
+export craft boot_failure_action(previous_image_verified) {
+    when previous_image_verified { yield "boot-last-known-good" }
+    yield "recovery-required"
+}

@@ -6,13 +6,10 @@ export craft source_kind_known(kind) {
         kind == "third-party-explicit"
 }
 
-export craft source_metadata_state(kind, license_declared, publisher_trusted, digest_verified) {
+export craft source_metadata_state(kind, license_declared, digest_verified) {
     when not source_kind_known(kind) { yield "reject-unknown-source-kind" }
     when not license_declared { yield "needs-license-review" }
     when not digest_verified { yield "integrity-unverified" }
-    when kind == "third-party-explicit" and not publisher_trusted {
-        yield "untrusted-third-party-metadata"
-    }
     yield "metadata-admissible-not-installable"
 }
 
