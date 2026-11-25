@@ -8,6 +8,7 @@ on:
       - "foundation/**"
       - "tests/test_boot_info.c"
       - "tests/test_frame_allocator.c"
+      - "tests/test_idt.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
   push:

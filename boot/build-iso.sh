@@ -107,7 +107,7 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
     -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
     -mgeneral-regs-only \
-    -I "$ROOT/foundation" -I "$ROOT/third_party/limine-protocol" \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" -I "$ROOT/third_party/limine-protocol" \
     -c "$ROOT/kernel/boot/entry.c" -o "$WORK_DIR/objects/duckos-entry.o"
 
 gcc -std=c11 -O2 -Wall -Wextra -Werror \
@@ -126,11 +126,33 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -I "$ROOT/foundation" \
     -c "$ROOT/foundation/frame_allocator.c" -o "$WORK_DIR/objects/frame-allocator.o"
 
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
+    -I "$ROOT/foundation" \
+    -c "$ROOT/foundation/idt.c" -o "$WORK_DIR/objects/idt.o"
+
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" \
+    -c "$ROOT/kernel/arch/x86_64/interrupts.c" -o "$WORK_DIR/objects/interrupts.o"
+
+gcc -m64 -mcmodel=kernel -mno-red-zone -fno-pic -fno-pie \
+    -c "$ROOT/kernel/arch/x86_64/exceptions.S" -o "$WORK_DIR/objects/exceptions.o"
+
 ld -nostdlib -static -z max-page-size=0x1000 \
     -T "$ROOT/kernel/linker.ld" \
     "$WORK_DIR/objects/duckos-entry.o" \
     "$WORK_DIR/objects/boot-info.o" \
     "$WORK_DIR/objects/frame-allocator.o" \
+    "$WORK_DIR/objects/idt.o" \
+    "$WORK_DIR/objects/interrupts.o" \
+    "$WORK_DIR/objects/exceptions.o" \
     -o "$WORK_DIR/duckos.elf"
 
 readelf -h "$WORK_DIR/duckos.elf" | grep -q 'Class:.*ELF64'
