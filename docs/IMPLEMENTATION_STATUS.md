@@ -178,11 +178,12 @@ The existing implemented/partial boundary list above remains authoritative. This
 
 ## Reaper-native system services — 2026-11-25
 
-- [x] Added Reaper policy modules for DAK Installer, Driver Runtime, Package Manager and Update System.
-- [x] Added explicit installer consent, verified-source and recovery gates; sorted, aligned, bounded A/B + recovery partition-layout validation.
-- [x] Added driver provenance/signature-state, bus/architecture/ABI, capability and safe-unload (IRQ/DMA/device quiescence) policies.
-- [x] Added package manifest bounds, dependency resolution, VFS component-path validation, capability subset and protected/dependent removal policies.
+- [x] Added Reaper policy modules for DAK Installer, Driver Runtime, Package Manager, Update System and the shared Audit Journal.
+- [x] Added explicit installer consent, verified-source and recovery gates; sorted, aligned, bounded BIOS/UEFI + A/B + recovery partition-layout validation.
+- [x] Added driver publisher/digest/signature state, bus/architecture/ABI, capability and safe-unload (IRQ/DMA/device quiescence) policies.
+- [x] Added package manifest bounds, publisher/digest fields, dependency resolution, VFS component-path validation, capability subset and protected/dependent removal policies.
 - [x] Added update manifest, version and monotonic-sequence rollback checks, inactive A/B slot selection, bounded boot confirmation and rollback policy.
+- [x] Added bounded append-only audit-record and sequence validation in `dak/system/audit.rpr`.
 - [x] Added contract assertions for allowed, rejected, malformed and skipped-state cases in the shared Reaper suite.
 - [ ] Confirm final tree-walk and VM test runs on the exact PR head.
 - [ ] Implement trusted cryptographic signature verification and authenticated publisher/key lifecycle.
