@@ -1,0 +1,167 @@
+# Process identity and lifecycle contract v1.
+# Descriptors are policy records; this module does not switch CPU contexts,
+# allocate stacks, create address spaces or execute user instructions.
+#
+# Process descriptor:
+# [pid, generation, parent_pid, parent_generation, state,
+#  stack_base, stack_bytes, address_space_id, capabilities, exit_code]
+
+export craft state_valid(state) {
+    yield state == "created" or state == "ready" or state == "running" or state == "blocked" or state == "exited" or state == "killed"
+}
+
+export craft transition_valid(current, next) {
+    when current == "created" {
+        yield next == "ready" or next == "killed"
+    }
+    when current == "ready" {
+        yield next == "running" or next == "killed"
+    }
+    when current == "running" {
+        yield next == "ready" or next == "blocked" or next == "exited" or next == "killed"
+    }
+    when current == "blocked" {
+        yield next == "ready" or next == "killed"
+    }
+    yield false
+}
+
+export craft descriptor_valid(process) {
+    when size(process) != 10 {
+        yield false
+    }
+    when process[0] <= 0 or process[1] <= 0 or process[2] < 0 or process[3] < 0 {
+        yield false
+    }
+    when (process[2] == 0 and process[3] != 0) or (process[2] != 0 and process[3] == 0) {
+        yield false
+    }
+    when not state_valid(process[4]) or process[5] < 4096 or process[6] < 4096 or process[7] <= 0 {
+        yield false
+    }
+    when process[5] % 16 != 0 or process[6] % 16 != 0 {
+        yield false
+    }
+    when process[5] > 9223372036854775807 - process[6] {
+        yield false
+    }
+    when size(process[8]) > 64 {
+        yield false
+    }
+    each capability in process[8] {
+        when capability == "" {
+            yield false
+        }
+    }
+    when process[4] == "exited" or process[4] == "killed" {
+        when process[9] == nothing {
+            yield false
+        }
+    } otherwise {
+        when process[9] != nothing {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft transition(process, next_state, exit_code) {
+    when not descriptor_valid(process) or not state_valid(next_state) {
+        yield ["invalid", process]
+    }
+    when not transition_valid(process[4], next_state) {
+        yield ["denied", process]
+    }
+    when (next_state == "exited" or next_state == "killed") and exit_code == nothing {
+        yield ["missing-exit-code", process]
+    }
+    when next_state != "exited" and next_state != "killed" and exit_code != nothing {
+        yield ["unexpected-exit-code", process]
+    }
+    make updated := [process[0], process[1], process[2], process[3], next_state, process[5], process[6], process[7], process[8], exit_code]
+    yield ["transitioned", updated]
+}
+
+export craft handle_matches(handle, process) {
+    when size(handle) != 2 or not descriptor_valid(process) {
+        yield false
+    }
+    yield handle[0] == process[0] and handle[1] == process[1]
+}
+
+export craft child_authority_valid(parent, child) {
+    when not descriptor_valid(parent) or not descriptor_valid(child) {
+        yield false
+    }
+    when parent[4] != "running" or child[4] != "created" {
+        yield false
+    }
+    when child[2] != parent[0] or child[3] != parent[1] {
+        yield false
+    }
+    import "duckos/security/capabilities.rpr" as capabilities
+    yield capabilities["child_is_subset"](parent[8], child[8])
+}
+
+export craft pid_available(processes, pid) {
+    when pid <= 0 or size(processes) > 4096 {
+        yield false
+    }
+    vary available := true
+    each process in processes {
+        when descriptor_valid(process) and process[0] == pid {
+            change available := false
+        }
+    }
+    yield available
+}
+
+export craft table_valid(processes) {
+    when size(processes) > 4096 {
+        yield false
+    }
+    each index in range(0, size(processes)) {
+        when not descriptor_valid(processes[index]) {
+            yield false
+        }
+        each other_index in range(index + 1, size(processes)) {
+            when processes[index][0] == processes[other_index][0] {
+                yield false
+            }
+        }
+    }
+    yield true
+}
+
+export craft lookup(processes, handle) {
+    when size(handle) != 2 or not table_valid(processes) {
+        yield nothing
+    }
+    vary found := nothing
+    each process in processes {
+        when process[0] == handle[0] and process[1] == handle[1] {
+            change found := process
+        }
+    }
+    yield found
+}
+
+export craft spawn(processes, parent_handle, child) {
+    when not table_valid(processes) or size(parent_handle) != 2 or not descriptor_valid(child) {
+        yield ["invalid", processes]
+    }
+    when size(processes) >= 4096 or not pid_available(processes, child[0]) {
+        yield ["capacity-or-pid-conflict", processes]
+    }
+    when parent_handle[0] == 0 and parent_handle[1] == 0 {
+        when child[2] != 0 or child[3] != 0 or size(child[8]) != 0 {
+            yield ["kernel-child-must-start-unprivileged", processes]
+        }
+        yield ["created", push(processes, child)]
+    }
+    make parent := lookup(processes, parent_handle)
+    when parent == nothing or not child_authority_valid(parent, child) {
+        yield ["parent-or-authority-denied", processes]
+    }
+    yield ["created", push(processes, child)]
+}
