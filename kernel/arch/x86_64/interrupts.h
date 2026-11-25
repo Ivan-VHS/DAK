@@ -3,14 +3,6 @@
 
 #include <stdint.h>
 
-#if defined(_MSC_VER)
-#define DUCKOS_NORETURN __declspec(noreturn)
-#elif defined(__GNUC__) || defined(__clang__)
-#define DUCKOS_NORETURN __attribute__((noreturn))
-#else
-#define DUCKOS_NORETURN
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,13 +33,11 @@ typedef struct duckos_x86_exception_frame {
 /* Installs exception gates 0..31. CPU maskable interrupts remain disabled. */
 int duckos_x86_interrupts_init(void);
 
-void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame)
-    DUCKOS_NORETURN;
+void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame);
 
 #ifdef __cplusplus
 }
 #endif
 
-#undef DUCKOS_NORETURN
 
 #endif
