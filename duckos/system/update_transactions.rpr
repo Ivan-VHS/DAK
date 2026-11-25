@@ -45,7 +45,8 @@ export craft transaction_state_valid(state) {
         state == "rolling-back" or state == "committed" or state == "recovery-required"
 }
 
-export craft fallback_kernel_set_valid(available_images, minimum_required) {
+export craft fallback_kernel_set_valid(available_images, minimum_required, inventory_verified) {
+    when not inventory_verified { yield false }
     when minimum_required < 2 { yield false }
     yield available_images >= minimum_required
 }
