@@ -6,9 +6,10 @@ import "../security/capabilities.rpr" as capabilities
 import "../storage/vfs.rpr" as vfs
 
 # Package: [id, major, minor, patch, architecture, abi, kind,
-#           dependencies, requested_capabilities, signature_state, payload_bytes].
+#           dependencies, requested_capabilities, digest, publisher,
+#           signature_state, payload_bytes].
 export craft package_valid(package) {
-    when size(package) != 11 {
+    when size(package) != 13 {
         yield false
     }
     when package[0] == "" or package[1] < 0 or package[2] < 0 or package[3] < 0 {
@@ -23,10 +24,13 @@ export craft package_valid(package) {
     when size(package[7]) > 256 or size(package[8]) > 64 {
         yield false
     }
-    when package[9] != "verified" and package[9] != "unverified" and package[9] != "revoked" {
+    when package[9] == "" or package[10] == "" {
         yield false
     }
-    when package[10] <= 0 or package[10] > 2147483648 {
+    when package[11] != "verified" and package[11] != "unverified" and package[11] != "revoked" {
+        yield false
+    }
+    when package[12] <= 0 or package[12] > 2147483648 {
         yield false
     }
     yield true
@@ -47,7 +51,8 @@ export craft dependencies_satisfied(required, installed_ids) {
     yield true
 }
 
-# Every payload path is represented as path components, not a host-native string.
+# Every payload path is represented as normalized path components.
+# The archive parser must reject separators inside individual components.
 export craft paths_valid(paths) {
     when size(paths) == 0 or size(paths) > 4096 {
         yield false
@@ -64,10 +69,10 @@ export craft admission(package, target_arch, expected_abi, installed_ids, grants
     when not package_valid(package) {
         yield "reject-manifest"
     }
-    when package[9] == "revoked" {
+    when package[11] == "revoked" {
         yield "reject-revoked"
     }
-    when package[9] != "verified" {
+    when package[11] != "verified" {
         yield "reject-signature"
     }
     when package[4] != target_arch {
