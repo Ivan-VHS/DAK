@@ -42,6 +42,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential binutils curl xorriso qemu-system-x86 ovmf
 
+      - name: Test Limine external boot-menu renderer
+        run: bash boot/test-loader-menu.sh
+
       - name: Build host boot contract tests
         run: |
           cmake -S . -B build/host -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
