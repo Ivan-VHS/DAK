@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QCloseEvent>
+#include <QColor>
 #include <QComboBox>
 #include <QDateTime>
 #include <QDir>
@@ -46,19 +47,80 @@
 #ifndef DUCKOS_MORA_CATALOG_PATH
 #define DUCKOS_MORA_CATALOG_PATH "mora/apps.json"
 #endif
+#ifndef DUCKOS_MORA_THEME_PATH
+#define DUCKOS_MORA_THEME_PATH "mora/theme.json"
+#endif
 
 namespace {
 
-const QColor kPage("#080808");
-const QColor kSurface("#151515");
-const QColor kRaised("#242424");
-const QColor kText("#FFFFFF");
-const QColor kSecondary("#E5E5E5");
-const QColor kMuted("#A6A6A6");
-const QColor kBrand("#FFD400");
-const QColor kBrandHover("#FFE45C");
-const QColor kBorder("#3A3A3A");
-const QColor kSelection("#3A3100");
+QColor kPage("#080808");
+QColor kSurface("#151515");
+QColor kRaised("#242424");
+QColor kText("#FFFFFF");
+QColor kSecondary("#E5E5E5");
+QColor kMuted("#A6A6A6");
+QColor kBrand("#FFD400");
+QColor kBrandHover("#FFE45C");
+QColor kBorder("#3A3A3A");
+QColor kSelection("#3A3100");
+
+void loadThemeTokens()
+{
+    QFile file(QString::fromUtf8(DUCKOS_MORA_THEME_PATH));
+    if (!file.open(QIODevice::ReadOnly)) return;
+
+    QJsonParseError error{};
+    const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &error);
+    if (error.error != QJsonParseError::NoError || !document.isObject()) return;
+
+    const QJsonObject palette = document.object()
+        .value("palettes").toObject().value("duck").toObject();
+
+    auto readColor = [&palette](const char* key, QColor& target) {
+        const QColor candidate(palette.value(QLatin1String(key)).toString());
+        if (candidate.isValid()) target = candidate;
+    };
+    readColor("page", kPage);
+    readColor("surface", kSurface);
+    readColor("elevated", kRaised);
+    readColor("text", kText);
+    readColor("secondary", kSecondary);
+    readColor("muted", kMuted);
+    readColor("brand", kBrand);
+    readColor("brandHover", kBrandHover);
+    readColor("border", kBorder);
+    readColor("selection", kSelection);
+}
+
+QString applyThemeTokens(QString style)
+{
+    const QList<QPair<QString, QString>> replacements{
+        {"#080808", "@@MORA_PAGE@@"},
+        {"#151515", "@@MORA_SURFACE@@"},
+        {"#242424", "@@MORA_RAISED@@"},
+        {"#FFFFFF", "@@MORA_TEXT@@"},
+        {"#E5E5E5", "@@MORA_SECONDARY@@"},
+        {"#A6A6A6", "@@MORA_MUTED@@"},
+        {"#FFD400", "@@MORA_BRAND@@"},
+        {"#FFE45C", "@@MORA_BRAND_HOVER@@"},
+        {"#3A3A3A", "@@MORA_BORDER@@"},
+        {"#3A3100", "@@MORA_SELECTION@@"}
+    };
+    for (const auto& replacement : replacements) {
+        style.replace(replacement.first, replacement.second);
+    }
+    style.replace("@@MORA_PAGE@@", kPage.name(QColor::HexRgb));
+    style.replace("@@MORA_SURFACE@@", kSurface.name(QColor::HexRgb));
+    style.replace("@@MORA_RAISED@@", kRaised.name(QColor::HexRgb));
+    style.replace("@@MORA_TEXT@@", kText.name(QColor::HexRgb));
+    style.replace("@@MORA_SECONDARY@@", kSecondary.name(QColor::HexRgb));
+    style.replace("@@MORA_MUTED@@", kMuted.name(QColor::HexRgb));
+    style.replace("@@MORA_BRAND@@", kBrand.name(QColor::HexRgb));
+    style.replace("@@MORA_BRAND_HOVER@@", kBrandHover.name(QColor::HexRgb));
+    style.replace("@@MORA_BORDER@@", kBorder.name(QColor::HexRgb));
+    style.replace("@@MORA_SELECTION@@", kSelection.name(QColor::HexRgb));
+    return style;
+}
 
 struct AppInfo {
     QString id;
@@ -239,7 +301,7 @@ public:
         setWindowTitle(app_.name + " — Mora");
         setMinimumSize(480, 340);
         resize(720, 470);
-        setStyleSheet(QString::fromUtf8(R"(
+        setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QMainWindow { background: #080808; color: #FFFFFF; }
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QFrame#panel { background: #151515; border: 1px solid #3A3A3A; border-radius: 16px; }
@@ -249,7 +311,7 @@ public:
             QPushButton:hover { border-color: #FFD400; background: #2B281A; }
             QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; selection-background-color: #3A3100; }
             QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 7px; }
-        )"));
+        )")));
         buildContent();
     }
 
@@ -532,7 +594,7 @@ private:
 
     void buildInterface()
     {
-        setStyleSheet(QString::fromUtf8(R"(
+        setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QLabel[role="muted"] { color: #A6A6A6; }
             QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
@@ -549,7 +611,7 @@ private:
             QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
             QScrollArea { border: 0; background: transparent; }
-        )"));
+        )")));
 
         auto* background = new Backdrop;
         auto* outer = new QVBoxLayout(background);
@@ -991,6 +1053,7 @@ private:
 int main(int argc, char* argv[])
 {
     QApplication application(argc, argv);
+    loadThemeTokens();
     QApplication::setApplicationName("Mora");
     QApplication::setOrganizationName("DuckOS");
 
