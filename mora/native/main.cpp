@@ -958,7 +958,7 @@ private:
 
         auto* window = new AppWindow(app, this);
         windows_.insert(id, window);
-        QObject::connect(window, &QObject::destroyed, this, [this, id]() { windows_.remove(id); });
+        // QPointer tracks window lifetime without a callback into MoraWindow during base-class teardown.
 
         const QRect available = QApplication::primaryScreen()
             ? QApplication::primaryScreen()->availableGeometry() : QRect(0, 0, 1440, 900);
