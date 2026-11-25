@@ -1,0 +1,42 @@
+name: Mora native desktop
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "CMakeLists.txt"
+      - "mora/**"
+      - ".github/workflows/native-mora.yml"
+  push:
+    branches: [main, "feat/**"]
+    paths:
+      - "CMakeLists.txt"
+      - "mora/**"
+      - ".github/workflows/native-mora.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-mora:
+    name: Qt 6 host-native shell
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Qt 6 Widgets
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y cmake ninja-build qt6-base-dev qt6-qpa-plugins
+      - name: Configure
+        run: >-
+          cmake -S . -B build/native-mora -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTING=ON
+          -DDUCKOS_BUILD_NATIVE_MORA=ON
+      - name: Build
+        run: cmake --build build/native-mora --target duckos_mora_native --parallel 2
+      - name: Native window and navigation smoke test
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: ctest --test-dir build/native-mora --output-on-failure -R duckos-mora-native-smoke
