@@ -147,7 +147,7 @@ The branch `feat/kernel-syscall-process-contracts-v1` adds Reaper-authored, exec
 - [x] Interrupt route, mask, priority and nesting policy.
 - [x] Capability-gated bounded IPC endpoint and sequence model reusing `duckos/kernel/ipc.rpr` for canonical FIFO/backpressure behavior.
 - [x] BAV deny-by-default rule matching, trust-state checks and sequence audit model.
-- [x] Service dependency, health and finite restart policy.
+- [x] Service dependency and health lifecycle model reuses the existing finite restart policy in `duckos/services/supervisor.rpr`.
 - [x] Native desktop window/display state, keyboard movement and focus-order policy.
 - [x] Package admission and reversible inactive-slot transaction model.
 - [x] Limine memory-map type conversion with split-u64 end-overflow, sort and overlap checks; loader/module ranges stay reserved until safe release.
