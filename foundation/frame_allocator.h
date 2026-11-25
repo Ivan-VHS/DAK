@@ -40,7 +40,7 @@ typedef enum duckos_frame_allocator_status {
 } duckos_frame_allocator_status;
 
 /*
- * Initializes a single-core, monotonic bootstrap frame allocator.
+ * Initializes a single-core bootstrap frame allocator with bounded page reclamation.
  * Only validated USABLE regions are exposed; all other memory types remain
  * reserved. min_address excludes low firmware memory (normally the first MiB).
  */
