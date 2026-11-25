@@ -4,6 +4,7 @@
 #include "boot_info.h"
 #include "frame_allocator.h"
 #include "limine.h"
+#include "interrupts.h"
 
 #define SERIAL_PORT 0x3f8u
 #define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
@@ -419,9 +420,59 @@ static void boot_failure(const char *reason) {
     halt_forever();
 }
 
+
+static const char *exception_name(uint64_t vector) {
+    static const char *const names[DUCKOS_X86_EXCEPTION_COUNT] = {
+        "DIVIDE ERROR", "DEBUG", "NON-MASKABLE INTERRUPT", "BREAKPOINT",
+        "OVERFLOW", "BOUND RANGE", "INVALID OPCODE", "DEVICE NOT AVAILABLE",
+        "DOUBLE FAULT", "COPROCESSOR OVERRUN", "INVALID TSS",
+        "SEGMENT NOT PRESENT", "STACK FAULT", "GENERAL PROTECTION",
+        "PAGE FAULT", "RESERVED", "X87 FLOATING POINT", "ALIGNMENT CHECK",
+        "MACHINE CHECK", "SIMD FLOATING POINT", "VIRTUALIZATION",
+        "CONTROL PROTECTION", "RESERVED", "RESERVED", "RESERVED",
+        "RESERVED", "RESERVED", "RESERVED", "HYPERVISOR INJECTION",
+        "VMM COMMUNICATION", "SECURITY EXCEPTION", "RESERVED"
+    };
+    return vector < DUCKOS_X86_EXCEPTION_COUNT ? names[vector] : "UNKNOWN";
+}
+
+void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame) {
+    __asm__ volatile ("cli");
+    serial_write("\nDUCKOS_EXCEPTION ");
+    if (frame == NULL) {
+        serial_write("frame=null\n");
+    } else {
+        serial_write("vector=");
+        serial_decimal(frame->vector);
+        serial_write(" name=");
+        serial_write(exception_name(frame->vector));
+        serial_write(" error=");
+        serial_hex(frame->error_code);
+        serial_write(" rip=");
+        serial_hex(frame->rip);
+        serial_write(" cs=");
+        serial_hex(frame->cs);
+        serial_write(" rflags=");
+        serial_hex(frame->rflags);
+        serial_write("\n");
+    }
+
+    if (active_framebuffer != NULL && active_framebuffer->bpp == 32u) {
+        draw_rect(0u, 0u, active_framebuffer->width, 84u, 150u, 22u, 22u);
+        draw_text(24u, 20u, "KERNEL EXCEPTION", 3u, 255u, 255u, 255u);
+        draw_text(24u, 52u, "SYSTEM HALTED", 2u, 255u, 212u, 0u);
+    }
+    halt_forever();
+}
+
 void _start(void) __attribute__((noreturn));
 void _start(void) {
+    __asm__ volatile ("cli");
     serial_init();
+    if (!duckos_x86_interrupts_init()) {
+        boot_failure("could not install CPU exception IDT");
+    }
+    serial_write("exceptions=0..31 idt=loaded maskable_interrupts=disabled\\n");
     serial_write("\nDUCKOS_BOOT begin protocol=limine base_revision=6\n");
 
     if (!LIMINE_BASE_REVISION_SUPPORTED(base_revision)) {
