@@ -428,5 +428,9 @@ assert(bootloader_region[4] == 2 and bootloader_region[5], "bootloader memory is
 assert(limine_map["reclaim_policy"](bootloader_region, false) == "retain-reserved", "bootloader memory is retained while boot responses remain live")
 assert(limine_map["reclaim_policy"](bootloader_region, true) == "reclaim-eligible", "bootloader memory becomes eligible only after consumers release responses")
 assert(limine_map["translate_region"]([0, 0, 0, 0, 9])[0] == "reject", "unknown Limine region types are not translated")
+assert(limine_map["translate_region"]([4294967295, 4294967295, 0, 1, 0])[0] == "reject", "u64 region-end overflow is rejected")
+assert(limine_map["translate_map"]([[0, 8192, 0, 4096, 0], [0, 4096, 0, 4096, 0]])[0] == "reject", "unsorted memory maps are rejected")
+assert(limine_map["translate_map"]([[0, 4096, 0, 4096, 0], [0, 6144, 0, 4096, 0]])[0] == "reject", "overlapping memory maps are rejected")
+assert(limine_map["translate_map"]([[0, 4096, 0, 0, 0]])[0] == "reject", "zero-length memory regions are rejected")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"
