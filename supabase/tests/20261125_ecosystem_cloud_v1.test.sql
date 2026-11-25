@@ -132,7 +132,7 @@ select lives_ok(
 );
 
 select throws_ok(
-  $$$insert into public.sync_events (
+  $$insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
       schema_id, schema_version, event_type, occurred_at, payload
     ) values (
@@ -149,7 +149,7 @@ select throws_ok(
 );
 
 select throws_ok(
-  $$$insert into public.sync_events (
+  $$insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
       schema_id, schema_version, event_type, occurred_at, payload
     ) values (
