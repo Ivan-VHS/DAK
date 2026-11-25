@@ -37,7 +37,8 @@ export craft endpoint_valid(endpoint) {
 }
 
 export craft create(endpoint_id, owner_pid, capacity, max_message_bytes, send_capability) {
-    make endpoint := [endpoint_id, owner_pid, capacity, max_message_bytes, send_capability, 1, []]
+    make empty_queue := []
+    make endpoint := [endpoint_id, owner_pid, capacity, max_message_bytes, send_capability, 1, empty_queue]
     when not endpoint_valid(endpoint) {
         yield ["invalid", nothing]
     }
