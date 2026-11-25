@@ -183,9 +183,11 @@ The existing implemented/partial boundary list above remains authoritative. This
 - [x] Added driver publisher/digest/signature state, bus/architecture/ABI, capability and safe-unload (IRQ/DMA/device quiescence) policies.
 - [x] Added package manifest bounds, publisher/digest fields, dependency resolution, VFS component-path validation, capability subset and protected/dependent removal policies.
 - [x] Added update manifest, version and monotonic-sequence rollback checks, inactive A/B slot selection, bounded boot confirmation and rollback policy.
-- [x] Added bounded append-only audit-record and sequence validation in `dak/system/audit.rpr`.
+- [x] Added bounded append-only audit-record and digest-link validation in `dak/system/audit.rpr`.
+- [x] Extended the shared VFS path-component contract to reject embedded POSIX and Windows separators before package-path admission.
+- [x] Made device-resource conflict checks mandatory inside driver admission and required canonical A/B partition identities plus verified inactive-slot boot-entry arming.
 - [x] Added contract assertions for allowed, rejected, malformed and skipped-state cases in the shared Reaper suite.
-- [ ] Confirm final tree-walk and VM test runs on the exact PR head.
+- [ ] Confirm final tree-walk and VM test runs on the exact PR head; latest GitHub Actions runs are queued.
 - [ ] Implement trusted cryptographic signature verification and authenticated publisher/key lifecycle.
 - [ ] Connect these contracts to kernel-enforced DABI64 providers, storage transactions and the native service supervisor.
 - [ ] Implement and qualify actual disk writes, package extraction/database, driver mapping and A/B boot-slot switching.
