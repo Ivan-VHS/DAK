@@ -522,6 +522,14 @@ public:
         if (!pageStack_ || !homePage_ || !appsPage_ || !workspacePage_) {
             return fail("A required desktop page was not created.");
         }
+        const QStringList shellActions{
+            "open-overview", "open-app-launcher", "open-notifications", "open-quick-settings"
+        };
+        for (const QString& action : shellActions) {
+            if (!findChild<QPushButton*>(action)) {
+                return fail(QString("The native shell action is missing: %1").arg(action));
+            }
+        }
         auto* appsButton = findChild<QPushButton*>("nav-apps");
         if (!appsButton) return fail("The native app navigation control is missing.");
         appsButton->click();
@@ -545,8 +553,10 @@ public:
             || !quickSettingsPanel_->findChild<QCheckBox*>("quiet-mode-toggle")) {
             return fail("The native quick-settings panel or its local focus control is missing.");
         }
+        auto* launcherResults = launcherPanel_
+            ? launcherPanel_->findChild<QListWidget*>("launcher-results") : nullptr;
         if (!launcherPanel_ || !launcherPanel_->isVisible()
-            || !launcherPanel_->findChild<QListWidget*>("launcher-results")) {
+            || !launcherResults || launcherResults->count() == 0) {
             return fail("The native app launcher did not populate local catalogue results.");
         }
         overviewPanel_->close();
@@ -805,7 +815,7 @@ private:
             notifications_.clear();
             saveNotifications();
             dialog->close();
-            openNotifications();
+            QTimer::singleShot(0, this, [this]() { openNotifications(); });
         });
 
         auto* scroll = new QScrollArea;
@@ -1018,7 +1028,7 @@ private:
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
             QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
             QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
-            QPushButton#shellAction { min-width: 40px; max-width: 40px; min-height: 40px; max-height: 40px; border-radius: 12px; padding: 0; text-align: center; font-size: 16pt; }
+            QPushButton[class="shellAction"] { min-width: 40px; max-width: 40px; min-height: 40px; max-height: 40px; border-radius: 12px; padding: 0; text-align: center; font-size: 16pt; }
             QCheckBox { spacing: 10px; }
             QCheckBox::indicator { width: 20px; height: 20px; }
             QListWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; }
