@@ -1,6 +1,6 @@
 # DuckOS native implementation roadmap
 
-**Reviewed:** 2026-11-24  
+**Reviewed:** 2026-11-25  
 **Product:** DuckOS operating-system foundation; Mora is the desktop/browser shell.  
 **Source of truth:** native source, Reaper contracts, tests, CMake targets, CI and the versioned system-capability profile.
 
@@ -10,7 +10,7 @@ DuckOS currently combines three distinct surfaces. They must never be conflated:
 
 1. **Mora browser shell:** application discovery, local preferences, local tools and UI workflows. Browser code cannot enforce kernel privileges or control host devices.
 2. **Reaper reference contracts:** executable policy models for boot sequencing, memory arithmetic, scheduling decisions, IPC admission, capabilities, service restart and telemetry classification. Passing these tests proves policy behavior on the Reaper reference runtime only.
-3. **Native foundation:** a host-buildable C11 boot-handoff validation library plus an experimental x86_64 freestanding stage-0 entry and reproducible Limine BIOS/UEFI ISO pipeline. The stage-0 target is not yet a process runtime, scheduler, driver stack or bootable desktop OS.
+3. **Native foundation:** a host-buildable C11 boot-handoff validation library plus an experimental x86_64 freestanding Stage 1 kernel and reproducible Limine BIOS/UEFI ISO pipeline. The Stage 1 target is not yet a process runtime, scheduler, driver stack or bootable desktop OS.
 
 | Maturity | Required evidence |
 |---|---|
@@ -25,12 +25,12 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 | Area | Delivered scope | Explicit boundary |
 |---|---|---|
-| C11 build | CMake foundation target and CTest test executable | Host build only; no freestanding target |
-| Boot handoff | Versioned fixed-width record, typed memory-map entries and validation | No firmware loader or kernel entry point |
-| Validation | Range overflow, overlap, framebuffer extent, map ordering/type and version/size checks | Validates metadata; does not allocate or map physical memory |
+| C11 build | Host CMake/CTest plus freestanding x86_64 kernel target | The freestanding entry is a narrow C11 platform bridge; Reaper is not yet a freestanding kernel compiler |
+| Boot handoff | Versioned Boot Info v1, Limine BIOS/UEFI handoff and native kernel entry | Limine is a pinned third-party bootloader; no in-house UEFI loader or Secure Boot policy |
+| Validation and early memory | Boot Info and memory-map validation; monotonic 4 KiB allocator over validated USABLE regions, allocating and clearing one HHDM-mapped frame | No free/reclaim, page tables, heap or virtual-memory manager |
 | Reaper contracts | Boot phases, resource budgets, scheduling/IPC policies, capabilities and service restart decisions | Reference-runtime policy, not kernel enforcement |
 | Mora | Browser desktop shell, app catalogue, local preferences and local UI tools | Not a native compositor or privileged shell |
-| Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature, non-destructive deployment planning and an experimental x86_64 stage-0 ISO pipeline | No disk installer, production image, verified boot chain or supported hardware matrix |
+| Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature, non-destructive deployment planning and an experimental x86_64 Stage 1 ISO pipeline | No disk installer, production image, verified boot chain or supported hardware matrix |
 
 ## Native implementation sequence
 
@@ -46,7 +46,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D1 — Freestanding target and firmware handoff
 
-**Status: Partial — experimental x86_64 Limine stage 0.**
+**Status: Partial — experimental x86_64 Limine Stage 1.**
 
 - First target selected: x86_64 with BIOS and UEFI firmware through the pinned Limine v12.11.1 boot protocol.
 - A freestanding GNU x86_64 ELF profile, high-half linker layout, entry symbol, Limine stack request and COM1 diagnostic path are present.
@@ -54,13 +54,14 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 - The Limine loader remains an attributed, pinned third-party component; this milestone does not implement an in-house UEFI application or bootloader.
 - Secure Boot signing/enrolment, verified boot policy, AP startup and other firmware services remain separate future work.
 
-**Stage-0 exit evidence: passed.** The reproducible freestanding kernel and ISO build, ISO checksum, host Boot Info v1 CTest, and pinned QEMU BIOS plus OVMF UEFI runs succeeded. Both serial logs contain `DUCKOS_BOOT_OK stage=0`; see [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). The wider D1 milestone remains partial until allocator, page tables, interrupt/timer setup and a supported freestanding Reaper target are implemented and verified.
+**Stage-1 boot evidence: passed.** The freestanding kernel and ISO build, host Boot Info and frame-allocator CTests, ISO checksum, and pinned QEMU BIOS plus OVMF UEFI runs all succeeded. Both serial logs contain `DUCKOS_BOOT_OK stage=1`; see [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45527148367). The wider D1 milestone remains partial until reusable memory management, page tables, interrupt/timer setup and a supported freestanding Reaper target are implemented and verified.
 
 ### D2 — Physical memory and virtual address spaces
 
-**Status: Planned.**
+**Status: Partial — early monotonic physical-frame allocator.**
 
 - Implement a physical page-frame allocator from the validated firmware memory map.
+- **Delivered in Stage 1:** freestanding 4 KiB monotonic allocation from validated USABLE regions, with a 1 MiB low-memory floor and HHDM zeroing of the first allocated frame. There is no free/reclaim path, page-table construction or heap yet.
 - Reserve firmware, kernel, initramfs, framebuffer, ACPI and boot-service regions before allocating.
 - Add page-table construction, mapping permissions, guard regions, canonical-address checks and safe unmap/free behavior.
 - Specify ownership, alignment, overflow, fragmentation and allocation-failure semantics.
@@ -144,14 +145,14 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 **Status: Partial — experimental x86_64 hybrid ISO build and emulator boot gate; installer and production qualification remain planned.**
 
-- Build a reproducible x86_64 BIOS/UEFI stage-0 ISO from the pinned Limine bootloader, DuckOS ELF entry and explicit boot configuration; attach a SHA-256 sidecar.
+- Build a reproducible x86_64 BIOS/UEFI Stage 1 ISO from the pinned Limine bootloader, DuckOS ELF entry and explicit boot configuration; attach a SHA-256 sidecar.
 - Boot-test the image in QEMU BIOS and OVMF UEFI in CI, retaining serial logs and the ISO artifact.
 - Add a native installer, disk writes and USB provisioning only behind explicit operator approval and destructive-operation preview.
 - Add verified boot only after signing identity, key custody, revocation and recovery policy are implemented.
 - Implement A/B slot update, boot-success confirmation and recovery only after filesystem and boot stages are qualified.
 - Keep cloud targets out of the release matrix until a real format conversion and target boot test exist.
 
-**Stage-0 image exit evidence: passed.** A reproducible ISO, SHA-256 verification, BIOS and UEFI emulator boot, and QEMU serial logs are published in the [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). Production release additionally requires USB/installer qualification, a supported hardware matrix, verified signing policy, installation rollback and recovery drill.
+**Stage-1 image exit evidence: passed.** A reproducible ISO, SHA-256 verification, BIOS and UEFI emulator boot, and QEMU serial logs are published in the [verified Stage 1 workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45527148367). Production release additionally requires USB/installer qualification, a supported hardware matrix, verified signing policy, installation rollback and recovery drill.
 
 ### D10 — BAV malware inspection and policy service
 
@@ -188,4 +189,4 @@ A hosted web service, remote orchestration control plane, automatic driver insta
 
 ## Release rule
 
-Do not claim DuckOS is a complete or usable desktop operating system until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. The x86_64 stage-0 image now boots in QEMU BIOS and UEFI, but it halts after validated Boot Info v1 handoff and does not yet run a scheduler, processes, services or Mora.
+Do not claim DuckOS is a complete or usable desktop operating system until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. The x86_64 Stage 1 image now boots in QEMU BIOS and UEFI, but it halts after validated Boot Info v1 handoff and does not yet run a scheduler, processes, services or Mora.
