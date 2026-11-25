@@ -1,0 +1,80 @@
+# Interrupt routing and acknowledgement policy v1.
+# This validates routes and nesting rules; it does not install an IDT,
+# register an ISR, mask a hardware controller or issue an EOI instruction.
+
+export craft descriptor_valid(route) {
+    # [vector, priority, trigger, owner, eoi_provider, masked, shared, max_nesting]
+    when size(route) != 8 {
+        yield false
+    }
+    when route[0] < 32 or route[0] > 255 or route[1] < 0 or route[1] > 255 {
+        yield false
+    }
+    when route[2] != "edge" and route[2] != "level" {
+        yield false
+    }
+    when route[3] == "" {
+        yield false
+    }
+    when route[4] != "lapic" and route[4] != "ioapic" and route[4] != "platform" {
+        yield false
+    }
+    when (route[5] != true and route[5] != false) or (route[6] != true and route[6] != false) {
+        yield false
+    }
+    when route[7] < 0 or route[7] > 16 {
+        yield false
+    }
+    yield true
+}
+
+export craft dispatch_policy(route, event) {
+    # Event: [vector, pending, nesting_depth, active_priority, source_valid]
+    when size(event) != 5 or not descriptor_valid(route) {
+        yield "invalid"
+    }
+    when event[0] != route[0] {
+        yield "vector-mismatch"
+    }
+    when route[5] {
+        yield "masked"
+    }
+    when not event[1] {
+        yield "not-pending"
+    }
+    when not event[4] {
+        yield "untrusted-source"
+    }
+    when event[2] < 0 or event[2] > 16 or event[3] < 0 or event[3] > 255 {
+        yield "invalid-nesting-state"
+    }
+    when event[2] > 0 {
+        when route[7] == 0 or event[2] >= route[7] {
+            yield "defer"
+        }
+        when route[1] >= event[3] {
+            yield "defer"
+        }
+    }
+    yield "dispatch"
+}
+
+export craft acknowledge(route, handler_id, grants) {
+    when not descriptor_valid(route) or handler_id == "" {
+        yield "invalid"
+    }
+    when handler_id != route[3] {
+        yield "wrong-handler"
+    }
+    when not contains(grants, "interrupt.ack") {
+        yield "capability-denied"
+    }
+    yield "acknowledged"
+}
+
+export craft set_mask(route, masked) {
+    when not descriptor_valid(route) or (masked != true and masked != false) {
+        yield ["invalid", route]
+    }
+    yield ["updated", [route[0], route[1], route[2], route[3], route[4], masked, route[6], route[7]]]
+}
