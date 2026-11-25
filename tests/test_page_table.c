@@ -150,7 +150,7 @@ static void test_map_translate_protect_and_unmap(void) {
 }
 
 static void test_splits_two_megabyte_mapping_before_modifying_one_page(void) {
-    test_page_pool pool = {0};
+    reset_pool();
     const duckos_page_table_ops ops = test_ops(&pool);
     duckos_page_table_space space = {0};
     uint64_t *root;
@@ -258,7 +258,7 @@ static void test_splits_one_gigabyte_mapping_before_modifying_one_page(void) {
 }
 
 static void test_clones_existing_hierarchy_into_owned_pages(void) {
-    test_page_pool pool = {0};
+    reset_pool();
     const duckos_page_table_ops ops = test_ops(&pool);
     duckos_page_table_space source = {0};
     duckos_page_table_space clone = {0};
@@ -284,7 +284,7 @@ static void test_clones_existing_hierarchy_into_owned_pages(void) {
 }
 
 static void test_rejects_writable_executable_and_unsupported_nx(void) {
-    test_page_pool pool = {0};
+    reset_pool();
     const duckos_page_table_ops ops = test_ops(&pool);
     duckos_page_table_space no_nx = {0};
 
