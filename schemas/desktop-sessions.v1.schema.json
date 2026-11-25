@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/desktop-sessions.v1.schema.json",
+  "title": "DuckOS desktop session catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema","catalog_version","status","default_session","execution_boundary","desktop_sessions","switching_contract"],
+  "properties": {
+    "schema": {"const":"duckos.desktop-session-catalog/v1"},
+    "catalog_version": {"const":1},
+    "status": {"const":"compatibility-catalog"},
+    "default_session": {"const":"mora"},
+    "execution_boundary": {"const":"catalog-only"},
+    "desktop_sessions": {
+      "type":"array",
+      "minItems":20,
+      "maxItems":20,
+      "uniqueItems":true,
+      "items":{
+        "type":"object",
+        "additionalProperties":false,
+        "required":["id","name","class","display_protocol","windowing_component","execution_state","native_supported","requires_linux_abi","notes"],
+        "properties":{
+          "id":{"type":"string","pattern":"^[a-z0-9-]+$"},
+          "name":{"type":"string","minLength":1,"maxLength":96},
+          "class":{"enum":["desktop-environment","window-manager"]},
+          "display_protocol":{"enum":["x11","wayland","x11-or-wayland"]},
+          "windowing_component":{"type":"string","minLength":1,"maxLength":96},
+          "execution_state":{"const":"catalog-only"},
+          "native_supported":{"const":false},
+          "requires_linux_abi":{"const":true},
+          "notes":{"type":"string","minLength":1,"maxLength":400}
+        }
+      }
+    },
+    "switching_contract":{
+      "type":"object",
+      "additionalProperties":false,
+      "required":["requires_installation","requires_services","requires_recovery_checkpoint","requires_capability","transaction","fallback_policy"],
+      "properties":{
+        "requires_installation":{"const":true},
+        "requires_services":{"type":"array","minItems":7,"uniqueItems":true,"items":{"type":"string"}},
+        "requires_recovery_checkpoint":{"const":true},
+        "requires_capability":{"const":"desktop.session.switch"},
+        "transaction":{"const":["prepare","start-candidate","health-check","commit-or-rollback"]},
+        "fallback_policy":{"const":"retain-previous-session-or-safe-console"}
+      }
+    }
+  }
+}
