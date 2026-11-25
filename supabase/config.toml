@@ -1,1 +1,4 @@
 project_id = "ivan-vhs-ecosystem"
+
+[db]
+major_version = 17
