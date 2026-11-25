@@ -18,7 +18,7 @@ export craft target_valid(target) {
     when kind(target[4]) != "text" or kind(target[5]) != "boolean" {
         yield false
     }
-    when target[2] <= 1048576 or (target[3] != 512 and target[3] != 4096) {
+    when target[2] % 1 != 0 or target[3] % 1 != 0 or target[2] <= 1048576 or (target[3] != 512 and target[3] != 4096) {
         yield false
     }
     when target[4] != "uefi" and target[4] != "bios" {
@@ -84,10 +84,10 @@ export craft partition_valid(partition, disk_bytes) {
     when partition[0] == "" or partition[1] == "" {
         yield false
     }
-    when partition[2] < 1048576 {
+    when partition[2] % 1 != 0 or partition[3] % 1 != 0 or partition[2] < 1048576 {
         yield false
     }
-    when kind(disk_bytes) != "number" or not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
+    when kind(disk_bytes) != "number" or disk_bytes % 1 != 0 or not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
         yield false
     }
     when partition[1] != "efi" and partition[1] != "bios_boot" and partition[1] != "system" and partition[1] != "recovery" and partition[1] != "userdata" {
@@ -103,7 +103,7 @@ export craft partition_valid(partition, disk_bytes) {
 # UEFI requires one EFI partition; BIOS requires one BIOS boot partition.
 # User data is optional. Adjacent partitions are valid; overlap and duplicate IDs are not.
 export craft layout_valid(partitions, disk_bytes, firmware_mode) {
-    when kind(partitions) != "list" or kind(disk_bytes) != "number" or kind(firmware_mode) != "text" {
+    when kind(partitions) != "list" or kind(disk_bytes) != "number" or kind(firmware_mode) != "text" or disk_bytes % 1 != 0 {
         yield false
     }
     when size(partitions) < 4 or size(partitions) > 5 or disk_bytes <= 1048576 {
