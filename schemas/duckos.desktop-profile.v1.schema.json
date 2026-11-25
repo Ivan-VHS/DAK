@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/duckos.desktop-profile.v1.schema.json",
+  "title": "DuckOS desktop profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "profiles"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.desktop-profiles.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 20,
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "display_name",
+        "inspiration",
+        "layout",
+        "launcher",
+        "window_policy",
+        "workspace_policy",
+        "motion",
+        "density",
+        "required_services"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 48
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "inspiration": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "layout": {
+          "enum": [
+            "classic-panels",
+            "overview",
+            "panel-dock",
+            "control-center",
+            "touch-shell",
+            "tiling"
+          ]
+        },
+        "launcher": {
+          "enum": [
+            "menu",
+            "search",
+            "dash",
+            "fullscreen",
+            "tile-grid"
+          ]
+        },
+        "window_policy": {
+          "enum": [
+            "floating",
+            "tiling",
+            "dynamic"
+          ]
+        },
+        "workspace_policy": {
+          "enum": [
+            "single",
+            "static",
+            "virtual",
+            "dynamic"
+          ]
+        },
+        "motion": {
+          "enum": [
+            "full",
+            "reduced",
+            "none"
+          ]
+        },
+        "density": {
+          "enum": [
+            "compact",
+            "normal",
+            "comfortable"
+          ]
+        },
+        "required_services": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "duck-session",
+              "duck-display",
+              "duck-compositor",
+              "duck-window",
+              "duck-input",
+              "duck-shell",
+              "duck-settings",
+              "duck-portal",
+              "duck-theme"
+            ]
+          }
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 240
+        }
+      }
+    }
+  }
+}
