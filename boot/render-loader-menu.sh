@@ -85,6 +85,7 @@ done
 temporary="$(mktemp "${OUTPUT}.tmp.XXXXXX")"
 trap 'rm -f "$temporary"' EXIT
 cp -- "$OUTPUT" "$temporary"
+chmod --reference="$OUTPUT" "$temporary"
 
 for name in "${EFI_ENTRIES[@]}"; do
     cat >> "$temporary" <<EOF
