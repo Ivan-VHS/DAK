@@ -109,6 +109,7 @@ function setLocale(locale) {
 
 function applyPreferences() {
   document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
+  document.documentElement.classList.toggle("reduce-transparency", preferences.appearance.reduceTransparency);
   document.documentElement.dataset.theme = "duck";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
@@ -183,6 +184,8 @@ function executeApprovedPlan() {
       preferences.powerProfile = action.value;
     } else if (action.type === "set" && action.setting === "reducedMotion") {
       preferences.appearance.reducedMotion = action.value === true;
+    } else if (action.type === "set" && action.setting === "reduceTransparency") {
+      preferences.appearance.reduceTransparency = action.value === true;
     }
   }
 
@@ -225,7 +228,9 @@ function updateWorkspacePanel() {
   panel.querySelectorAll("[data-setting]").forEach((button) => {
     const enabled = button.dataset.setting === "focusMode"
       ? preferences.focusMode
-      : preferences.appearance.reducedMotion;
+      : button.dataset.setting === "reducedMotion"
+        ? preferences.appearance.reducedMotion
+        : preferences.appearance.reduceTransparency;
     button.setAttribute("aria-pressed", String(enabled));
     button.textContent = enabled
       ? (currentLocale === "zh-CN" ? "已开启" : "Включено")
@@ -736,6 +741,7 @@ function panelMarkup(appId) {
         '<div class="profile-options">' + profileButton("saver", currentLocale === "zh-CN" ? "节能" : "Экономия") + profileButton("balanced", currentLocale === "zh-CN" ? "均衡" : "Баланс") + profileButton("performance", currentLocale === "zh-CN" ? "性能" : "Производительность") + '</div></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "专注模式" : "Режим фокуса") + '</strong><span>' + (currentLocale === "zh-CN" ? "弱化次要界面元素" : "Приглушить второстепенные элементы оболочки") + '</span></div><button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' + (preferences.focusMode ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "减少动态效果" : "Снижение движения") + '</strong><span>' + (currentLocale === "zh-CN" ? "减少装饰性过渡和移动" : "Убрать декоративные переходы и перемещения") + '</span></div><button class="permission-toggle" data-setting="reducedMotion" aria-pressed="' + String(preferences.appearance.reducedMotion) + '">' + (preferences.appearance.reducedMotion ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
+        '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "减少透明度" : "Снижение прозрачности") + '</strong><span>' + (currentLocale === "zh-CN" ? "使用不透明表面并关闭背景模糊" : "Заменить стекло плотными поверхностями и отключить размытие") + '</span></div><button class="permission-toggle" data-setting="reduceTransparency" aria-pressed="' + String(preferences.appearance.reduceTransparency) + '">' + (preferences.appearance.reduceTransparency ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>' + (currentLocale === "zh-CN" ? "自适应布局和无障碍偏好在桌面外壳中生效。硬件配置、VRR 与 NPU 调度仍需原生系统服务。" : "Адаптивная сетка и настройки доступности работают в оболочке. Аппаратные профили, VRR и NPU-планирование требуют native services.") + '</span></div>' +
         '<p class="window-copy">' + (currentLocale === "zh-CN" ? "设置保存在当前浏览器配置中。" : "Настройки хранятся локально в профиле браузера и могут быть сброшены очисткой данных сайта.") + '</p>';
     case "red-sparrow":
@@ -873,9 +879,23 @@ function openApp(appId) {
 }
 
 function closeWindow(appWindow) {
-  if (!appWindow) return;
-  appWindow.remove();
-  updateActiveApp();
+  if (!appWindow || appWindow.dataset.closing === "true") return;
+  const reducedMotion = document.documentElement.classList.contains("reduce-motion") ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducedMotion) {
+    appWindow.remove();
+    updateActiveApp();
+    return;
+  }
+  appWindow.dataset.closing = "true";
+  appWindow.classList.add("is-closing");
+  const finishClose = () => {
+    if (!appWindow.isConnected) return;
+    appWindow.remove();
+    updateActiveApp();
+  };
+  appWindow.addEventListener("animationend", finishClose, { once: true });
+  window.setTimeout(finishClose, 160);
 }
 
 function closeTopWindow() {
@@ -1174,6 +1194,8 @@ document.addEventListener("click", (event) => {
       preferences.focusMode = !preferences.focusMode;
     } else if (setting.dataset.setting === "reducedMotion") {
       preferences.appearance.reducedMotion = !preferences.appearance.reducedMotion;
+    } else if (setting.dataset.setting === "reduceTransparency") {
+      preferences.appearance.reduceTransparency = !preferences.appearance.reduceTransparency;
     } else {
       return;
     }

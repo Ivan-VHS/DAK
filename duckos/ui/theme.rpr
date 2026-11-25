@@ -1,5 +1,5 @@
-# DuckOS single-palette design contract.
-# 65% black, 25% white and 10% yellow.
+# DuckOS Industrial Glass material policy.
+# Black/White/Gold is canonical; opaque paint is always a valid fallback.
 
 export craft palette_ratios() {
     yield [65, 25, 10]
@@ -14,35 +14,65 @@ export craft palette_valid(ratios) {
 
 export craft palette_color(role) {
     when role == "page" {
-        yield "#080808"
+        yield "#050505"
     }
     when role == "surface" {
-        yield "#151515"
+        yield "#101010"
     }
     when role == "elevated" {
-        yield "#242424"
+        yield "#181818"
     }
     when role == "navigation" {
-        yield "#FFD400"
+        yield "#FFD700"
     }
     when role == "accent" {
-        yield "#FFD400"
+        yield "#FFD700"
     }
     when role == "alert" {
-        yield "#FFD400"
+        yield "#FFD700"
     }
     when role == "border" {
         yield "#3A3A3A"
     }
     when role == "focus" {
-        yield "#FFE45C"
+        yield "#FFD700"
     }
     yield "#FFFFFF"
+}
+
+export craft glass_opacity(surface) {
+    when surface == "modal" or surface == "chrome" {
+        yield 0.86
+    }
+    when surface == "content" or surface == "notification" {
+        yield 0.78
+    }
+    yield 1.0
+}
+
+export craft glass_blur(surface, reduce_transparency, eco_visuals) {
+    when reduce_transparency or eco_visuals {
+        yield 0
+    }
+    when surface == "modal" or surface == "chrome" {
+        yield 22
+    }
+    when surface == "content" or surface == "notification" {
+        yield 18
+    }
+    yield 0
+}
+
+export craft glass_surface_valid(surface, nesting_depth) {
+    when nesting_depth < 0 or nesting_depth > 1 {
+        yield false
+    }
+    yield surface == "chrome" or surface == "content" or surface == "modal" or surface == "notification"
 }
 
 export craft motion_profile(reduced_motion) {
     when reduced_motion {
         yield "static"
     }
-    yield "fluid"
+    yield "digital-physics"
 }

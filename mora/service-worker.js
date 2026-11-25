@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v10-imperial-noir-glass";
+const CACHE = "mora-shell-v11-industrial-glass-motion";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const ASSETS = [
   "./apps.json",
   "./system-policy.json",
   "./theme.json",
+  "./glass-noise.svg",
   "./manifest.webmanifest",
   "./icon.svg"
 ];

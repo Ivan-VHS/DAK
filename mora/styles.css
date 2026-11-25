@@ -7,8 +7,8 @@
   --mora-surface: #101010;
   --mora-elevated: #181818;
   --mora-text: #FFFFFF;
-  --mora-secondary: #E5E5E5;
-  --mora-muted: #A6A6A6;
+  --mora-secondary: rgba(255,255,255,.70);
+  --mora-muted: rgba(255,255,255,.40);
   --mora-brand: #FFD700;
   --mora-brand-hover: #FFE45C;
   --mora-secondary-accent: #FFD700;
@@ -889,4 +889,293 @@ input[type="range"] { accent-color: #FFD700; }
 
 @media (prefers-reduced-motion: reduce) {
   .app-tile, .widget-card, .dock-item { transition: none; }
+}
+
+
+/* DuckOS Industrial Glass + Digital Physics v1.
+   Only structural/content/modal/notification surfaces use backdrop blur.
+   Interactive tiles and controls remain optically solid. */
+:root {
+  --mora-page: #050505;
+  --mora-surface: #101010;
+  --mora-elevated: #181818;
+  --mora-text: #FFFFFF;
+  --mora-secondary: #E5E5E5;
+  --mora-muted: #A6A6A6;
+  --mora-brand: #FFD700;
+  --mora-brand-hover: #FFE45C;
+  --mora-focus: #FFD700;
+  --ink: var(--mora-text);
+  --muted: var(--mora-muted);
+  --glass-fill: rgba(7,7,7,.78);
+  --glass-strong-fill: rgba(7,7,7,.86);
+  --glass-fallback: #101010;
+  --glass-strong-fallback: #070707;
+  --glass-edge: rgba(255,255,255,.16);
+  --glass-warm: rgba(255,215,0,.07);
+  --glass-blur: 18px;
+  --glass-strong-blur: 22px;
+  --glass-grain-opacity: .035;
+  --glass-radius: 8px;
+  --glass-control-radius: 6px;
+  --ease-spring: cubic-bezier(.34,1.12,.64,1);
+  --ease-strict: cubic-bezier(.65,0,.35,1);
+  --motion-micro: 100ms;
+  --motion-fast: 140ms;
+  --motion-standard: 180ms;
+  --motion-spatial: 220ms;
+  --motion-emphasis: 280ms;
+}
+:root[data-theme="duck"] { color-scheme: dark; }
+
+/* Opaque paint is always available before progressive backdrop enhancement. */
+.statusbar,
+.widget-card,
+.dock,
+.app-window,
+.toast {
+  position: relative;
+  isolation: isolate;
+  border-color: var(--glass-edge);
+  border-radius: var(--glass-radius);
+  background: var(--glass-fallback);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.statusbar {
+  background: var(--glass-strong-fallback);
+  border-bottom-color: var(--glass-edge);
+}
+.widget-card, .dock, .toast {
+  background: var(--glass-fallback);
+}
+.app-window {
+  background: var(--glass-strong-fallback);
+  border: 1px solid var(--glass-edge);
+  border-radius: 8px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.12);
+  animation: duck-window-in var(--motion-spatial) var(--ease-spring) both;
+}
+
+/* Five bounded blur surfaces: no nested blur and no animated backdrop-filter. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .statusbar {
+    background: var(--glass-strong-fill);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+  }
+  .widget-card, .dock, .toast {
+    background: linear-gradient(145deg, rgba(255,255,255,.045), var(--glass-fill) 42%);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+  }
+  .app-window {
+    background: linear-gradient(145deg, rgba(255,255,255,.055), var(--glass-strong-fill) 44%);
+    -webkit-backdrop-filter: blur(var(--glass-strong-blur));
+    backdrop-filter: blur(var(--glass-strong-blur));
+  }
+}
+
+/* Local monochrome grain and the shared top-left specular light vector. */
+.statusbar::before,
+.widget-card::before,
+.dock::before,
+.app-window::before,
+.toast::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: url("./glass-noise.svg");
+  background-repeat: repeat;
+  opacity: var(--glass-grain-opacity);
+  mix-blend-mode: soft-light;
+}
+.statusbar::after,
+.widget-card::after,
+.dock::after,
+.app-window::after,
+.toast::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,.085);
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16),
+              inset 0 -1px 0 rgba(255,215,0,.055);
+}
+.statusbar > *,
+.widget-card > *,
+.dock > *,
+.app-window > *,
+.toast > * {
+  position: relative;
+  z-index: 2;
+}
+.app-window > .window-body { z-index: 2; }
+
+/* Hard controls stay solid, sharply bounded and geometrically stable. */
+.app-tile,
+.app-icon,
+.window-close,
+.permission-toggle,
+.profile-choice,
+.action-button,
+.subtle-button,
+input, select, textarea,
+.commons-filter,
+button[data-action] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.app-tile {
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(255,215,0,.055), rgba(16,16,16,.94));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 12px 28px rgba(0,0,0,.36);
+  transition: transform var(--motion-fast) var(--ease-strict),
+              border-color var(--motion-fast) var(--ease-strict),
+              box-shadow var(--motion-fast) var(--ease-strict),
+              background-color var(--motion-fast) var(--ease-strict);
+}
+.app-tile:hover {
+  border-color: rgba(255,215,0,.58);
+  background: linear-gradient(145deg, rgba(255,215,0,.11), rgba(16,16,16,.96));
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 16px 32px rgba(0,0,0,.42);
+}
+.app-tile:active {
+  transform: translateY(1px) scale(.99);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.38);
+}
+.app-icon {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  background: rgba(255,215,0,.09);
+}
+.widget-card {
+  border-radius: 8px;
+  box-shadow: 0 18px 42px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.10);
+  transition: transform var(--motion-standard) var(--ease-strict),
+              border-color var(--motion-fast) var(--ease-strict),
+              box-shadow var(--motion-standard) var(--ease-strict);
+}
+.widget-card:hover {
+  border-color: rgba(255,215,0,.42);
+  transform: translateY(-2px);
+  box-shadow: 0 22px 48px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.window-titlebar { border-bottom-color: rgba(255,255,255,.12); }
+.window-close {
+  border-radius: 6px;
+  background: #181818;
+  transition: transform var(--motion-fast) var(--ease-spring),
+              background-color var(--motion-fast) var(--ease-strict);
+}
+.window-close:active { transform: translateY(1px) scale(.97); }
+
+/* Digital Physics: stable poses, bounded overshoot and interruptible transitions. */
+@keyframes duck-window-in {
+  0% { opacity: 0; transform: translateY(8px) scale(.985); }
+  72% { opacity: 1; transform: translateY(0) scale(1.008); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes duck-window-out {
+  0% { opacity: 1; transform: scale(1); }
+  35% { opacity: 1; transform: scale(.985); }
+  100% { opacity: 0; transform: scale(.96); }
+}
+.app-window.is-closing {
+  pointer-events: none;
+  animation: duck-window-out 120ms var(--ease-strict) both;
+}
+.app-window, .app-tile, .widget-card, .dock-item, .window-close {
+  will-change: auto;
+}
+:focus-visible {
+  outline: 2px solid #FFD700;
+  outline-offset: 3px;
+}
+.app-window:focus-within { border: 1px solid #FFD700; }
+
+/* Power and viewport profiles reduce the material budget before dropping layout. */
+@media (max-width: 760px) {
+  :root {
+    --glass-blur: 10px;
+    --glass-strong-blur: 14px;
+  }
+}
+:root[data-power-profile="saver"] {
+  --glass-blur: 9px;
+  --glass-strong-blur: 11px;
+  --glass-grain-opacity: 0;
+}
+:root[data-power-profile="saver"] .statusbar,
+:root[data-power-profile="saver"] .widget-card,
+:root[data-power-profile="saver"] .dock,
+:root[data-power-profile="saver"] .app-window,
+:root[data-power-profile="saver"] .toast {
+  box-shadow: 0 10px 28px rgba(0,0,0,.36);
+}
+
+/* Transparency and motion preferences immediately resolve to stable opaque poses. */
+:root.reduce-transparency .statusbar,
+:root.reduce-transparency .widget-card,
+:root.reduce-transparency .dock,
+:root.reduce-transparency .app-window,
+:root.reduce-transparency .toast {
+  background: var(--glass-strong-fallback);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+:root.reduce-transparency .statusbar::before,
+:root.reduce-transparency .widget-card::before,
+:root.reduce-transparency .dock::before,
+:root.reduce-transparency .app-window::before,
+:root.reduce-transparency .toast::before { display: none; }
+@media (prefers-reduced-transparency: reduce) {
+  .statusbar, .widget-card, .dock, .app-window, .toast {
+    background: var(--glass-strong-fallback);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  .statusbar::before, .widget-card::before, .dock::before,
+  .app-window::before, .toast::before { display: none; }
+}
+@media (forced-colors: active) {
+  .statusbar, .widget-card, .dock, .app-window, .toast,
+  .app-tile, .window-close {
+    color: CanvasText;
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .statusbar::before, .widget-card::before, .dock::before,
+  .app-window::before, .toast::before { display: none; }
+}
+:root.reduce-motion .app-window,
+:root.reduce-motion .app-tile,
+:root.reduce-motion .widget-card,
+:root.reduce-motion .dock-item,
+:root.reduce-motion .window-close {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+  .app-window { animation: none !important; }
 }

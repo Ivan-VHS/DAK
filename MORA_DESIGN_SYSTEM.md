@@ -20,8 +20,8 @@ The standard workspace remains visually stable at the centre. Secondary content 
 | Surface | `#101010` | Primary panel |
 | Elevated | `#181818` | Secondary panel |
 | Text | `#FFFFFF` | Main copy |
-| Secondary | `#E5E5E5` | Supporting copy |
-| Muted | `#A6A6A6` | Quiet metadata |
+| Secondary | `rgba(255,255,255,.70)` | Supporting copy |
+| Muted | `rgba(255,255,255,.40)` | Quiet metadata only |
 | Brand | `#FFD700` | Primary action and selection |
 | Brand hover / focus | `#FFE45C` | Hover and keyboard focus |
 | Brand text | `#050505` | Text on yellow |
@@ -74,3 +74,13 @@ The supplied source register and per-surface adoption gates live in
 [FIGMA_VISUAL_INTEGRATION_2026.md](docs/FIGMA_VISUAL_INTEGRATION_2026.md).
 Figma sources are references, not permission to flatten screens or replace
 native interaction patterns.
+
+
+## Industrial Glass & Digital Physics
+
+The shell uses the normative [DuckOS Industrial Glass & Digital Physics v1](docs/INDUSTRIAL_GLASS_DIGITAL_PHYSICS_V1.md) contract. The material uses a 78% dark content fill / 86% modal fill, 18px / 22px blur, local monochrome grain, a shared top-left specular rim and opaque fallbacks. Hard controls remain solid and crisp.
+
+The shared geometry is architectural: system windows/cards use an 8px radius, controls use 6px. Motion is token-driven, interruptible and capped at 280ms for decorative transitions. Reduced Motion and Reduced Transparency preferences resolve to stable poses and opaque materials. Mora browser styling is not a claim of native compositor/GPU implementation; Reaper policy and future native rendering must keep the same contracts.
+
+
+The canonical text hierarchy uses white alpha rather than a parallel grey palette: primary 100%, secondary 70%, tertiary 40%. Tertiary text is reserved for nonessential metadata; important labels and instructions must retain WCAG AA contrast.

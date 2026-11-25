@@ -1,5 +1,5 @@
-# UI motion and frame-budget policy.
-# The compositor/renderer is a separate native subsystem.
+# DuckOS Digital Physics motion policy.
+# The compositor/renderer remains a separate native subsystem.
 
 export craft motion_mode(reduced_motion) {
     when reduced_motion {
@@ -19,4 +19,55 @@ export craft frame_state(frame_time_us, budget_us, reduced_motion) {
         yield "within-budget"
     }
     yield "late"
+}
+
+export craft motion_duration_ms(token, reduced_motion, eco_visuals) {
+    when reduced_motion or eco_visuals {
+        yield 0
+    }
+    when token == "instant" {
+        yield 0
+    }
+    when token == "micro" {
+        yield 100
+    }
+    when token == "fast" {
+        yield 140
+    }
+    when token == "standard" {
+        yield 180
+    }
+    when token == "spatial" {
+        yield 220
+    }
+    when token == "emphasis" {
+        yield 280
+    }
+    yield 180
+}
+
+export craft motion_curve(token) {
+    when token == "spring" {
+        yield "cubic-bezier(0.34, 1.12, 0.64, 1)"
+    }
+    when token == "strict" {
+        yield "cubic-bezier(0.65, 0, 0.35, 1)"
+    }
+    yield "cubic-bezier(0.65, 0, 0.35, 1)"
+}
+
+export craft distance_duration_ms(distance_px, reduced_motion) {
+    when reduced_motion {
+        yield 0
+    }
+    when distance_px <= 0 {
+        yield 0
+    }
+    when distance_px <= 10 {
+        yield 150
+    }
+    when distance_px >= 500 {
+        yield 280
+    }
+    yield 150 + (distance_px - 10) * 130 / 490
 }
