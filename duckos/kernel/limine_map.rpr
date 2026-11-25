@@ -39,19 +39,70 @@ export craft memory_type(limine_type) {
     yield [0, false]
 }
 
+export craft u64_words_valid(high, low) {
+    yield high >= 0 and high <= 4294967295 and low >= 0 and low <= 4294967295
+}
+
+export craft u64_is_zero(high, low) {
+    yield high == 0 and low == 0
+}
+
+export craft u64_range_valid(base_high, base_low, length_high, length_low) {
+    when not (u64_words_valid(base_high, base_low) and u64_words_valid(length_high, length_low)) {
+        yield false
+    }
+    when u64_is_zero(length_high, length_low) {
+        yield false
+    }
+    make low_sum := base_low + length_low
+    vary carry := 0
+    when low_sum >= 4294967296 {
+        change carry := 1
+    }
+    make high_sum := base_high + length_high + carry
+    yield high_sum <= 4294967295
+}
+
+export craft u64_end_high(base_high, base_low, length_high, length_low) {
+    make low_sum := base_low + length_low
+    vary carry := 0
+    when low_sum >= 4294967296 {
+        change carry := 1
+    }
+    yield base_high + length_high + carry
+}
+
+export craft u64_end_low(base_high, base_low, length_high, length_low) {
+    yield (base_low + length_low) % 4294967296
+}
+
+export craft u64_less(first_high, first_low, second_high, second_low) {
+    when first_high < second_high {
+        yield true
+    }
+    when first_high > second_high {
+        yield false
+    }
+    yield first_low < second_low
+}
+
 export craft region_valid(region) {
     when size(region) != 5 {
         yield false
     }
-    each word in [region[0], region[1], region[2], region[3]] {
-        when word < 0 or word > 4294967295 {
-            yield false
-        }
-    }
-    when region[2] == 0 and region[3] == 0 {
+    when not u64_range_valid(region[0], region[1], region[2], region[3]) {
         yield false
     }
     yield memory_type(region[4])[0] != 0
+}
+
+export craft regions_ordered(previous, current) {
+    when not (region_valid(previous) and region_valid(current)) {
+        yield false
+    }
+    make previous_end_high := u64_end_high(previous[0], previous[1], previous[2], previous[3])
+    make previous_end_low := u64_end_low(previous[0], previous[1], previous[2], previous[3])
+    yield not u64_less(current[0], current[1], previous_end_high, previous_end_low)
 }
 
 export craft translate_region(region) {
@@ -67,7 +118,14 @@ export craft translate_map(regions) {
         yield ["reject", "region-count", []]
     }
     vary translated := []
-    each region in regions {
+    each index in range(0, size(regions)) {
+        make region := regions[index]
+        when index > 0 {
+            make previous := regions[index - 1]
+            when not regions_ordered(previous, region) {
+                yield ["reject", "unsorted-overlapping-or-invalid-region", []]
+            }
+        }
         make result := translate_region(region)
         when result[0] != "translated" {
             yield ["reject", "invalid-region", []]
