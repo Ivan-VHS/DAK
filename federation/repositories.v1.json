@@ -62,7 +62,7 @@
       "url": "https://github.com/Ivan-VHS/OPlague.git",
       "path": "projects/oplague",
       "default_branch": "main",
-      "pinned_commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "pinned_commit": "a7b9d6bca778cd0556fd7c0f621e7715ad282063",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "device-and-driver-evidence",
