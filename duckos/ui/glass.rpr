@@ -1,0 +1,117 @@
+# Industrial Glass material policy.
+# This is a deterministic contract; native adapters own actual rendering.
+
+export craft material_role_valid(role) {
+    yield role == "background" or role == "content" or role == "interactive" or role == "modal" or role == "fallback"
+}
+
+export craft material_fill(role) {
+    when not material_role_valid(role) {
+        yield ""
+    }
+    when role == "background" or role == "fallback" {
+        yield "#070707"
+    }
+    when role == "content" or role == "modal" {
+        yield "#111111"
+    }
+    yield "#1B1B1B"
+}
+
+export craft material_opacity(role) {
+    when not material_role_valid(role) {
+        yield -1
+    }
+    when role == "background" {
+        yield 0.88
+    }
+    when role == "content" {
+        yield 0.88
+    }
+    when role == "interactive" {
+        yield 0.96
+    }
+    when role == "modal" {
+        yield 0.94
+    }
+    yield 0.98
+}
+
+export craft material_blur_px(role) {
+    when not material_role_valid(role) {
+        yield -1
+    }
+    when role == "background" {
+        yield 28
+    }
+    when role == "content" {
+        yield 18
+    }
+    when role == "modal" {
+        yield 32
+    }
+    yield 0
+}
+
+export craft material_grain_opacity(role) {
+    when not material_role_valid(role) {
+        yield -1
+    }
+    when role == "background" {
+        yield 0.03
+    }
+    when role == "content" {
+        yield 0.025
+    }
+    when role == "modal" {
+        yield 0.035
+    }
+    yield 0
+}
+
+export craft glass_depth_valid(depth) {
+    when kind(depth) != "number" or depth < 0 or depth > 2 {
+        yield false
+    }
+    yield true
+}
+
+export craft nested_glass_valid(parent_depth, child_role) {
+    when not glass_depth_valid(parent_depth) or not material_role_valid(child_role) {
+        yield false
+    }
+    when child_role == "interactive" or child_role == "fallback" {
+        yield true
+    }
+    yield parent_depth < 2
+}
+
+export craft material_policy(role, reduced_transparency, eco_visuals) {
+    when not material_role_valid(role) {
+        yield ["invalid", "", 0, -1, 0]
+    }
+    when reduced_transparency or eco_visuals {
+        yield ["solid-fallback", "#070707", 0.98, 0, 0]
+    }
+    yield [role, material_fill(role), material_opacity(role), material_blur_px(role), material_grain_opacity(role)]
+}
+
+export craft active_edge_color(active) {
+    when active {
+        yield "#FFD700"
+    }
+    yield "#333333"
+}
+
+export craft text_opacity(role) {
+    when role == "primary" {
+        yield 1
+    }
+    when role == "secondary" {
+        yield 0.72
+    }
+    when role == "tertiary" {
+        yield 0.42
+    }
+    yield -1
+}
