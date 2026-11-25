@@ -1,4 +1,4 @@
-name: DuckOS bootable stage-0 ISO
+name: DuckOS bootable Stage 1 ISO
 
 on:
   pull_request:
