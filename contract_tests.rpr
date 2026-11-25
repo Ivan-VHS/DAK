@@ -372,8 +372,10 @@ assert(bav["audit_valid"](audit_record[1]), "BAV audit journal is monotonic")
 assert(not bav["audit_valid"]([[2, 42, "storage.read", "user/documents", "read", "allow"]]), "BAV rejects audit sequence gaps")
 
 # Service dependency readiness and restart budgets are explicit.
-make storage_service := ["storage", 1, "ready", 0, 3, 100, [], ["storage.read"]]
-make desktop_service := ["desktop", 1, "stopped", 0, 2, 101, ["storage"], []]
+make no_service_dependencies := []
+make no_service_capabilities := []
+make storage_service := ["storage", 1, "ready", 0, 3, 100, no_service_dependencies, ["storage.read"]]
+make desktop_service := ["desktop", 1, "stopped", 0, 2, 101, ["storage"], no_service_capabilities]
 assert(service_lifecycle["descriptor_valid"](storage_service), "service descriptor is valid")
 assert(service_lifecycle["dependency_state"](desktop_service, [storage_service]) == "ready", "service starts after dependencies are ready")
 assert(service_lifecycle["start_policy"](desktop_service, [storage_service])[0] == "start", "ready dependencies allow service start")
