@@ -12,7 +12,7 @@ DuckOS is the operating-system project. **Mora** is its unified desktop shell an
 - **Hardware and compatibility:** bounded read-only PCI/USB or Windows PnP inventory, PE inspection and dry-run runtime discovery.
 - **Deployment tooling:** verified component bundles and non-destructive disk-layout plans.
 
-An experimental x86_64 firmware-bootable stage-0 image is now defined in [Bootable image](docs/BOOTABLE_IMAGE.md): pinned Limine BIOS/UEFI media, a DuckOS-owned kernel entry, Boot Info v1 handoff validation and QEMU serial boot checks. This is not yet a complete OS. Processes, scheduler execution, syscalls, page allocator, drivers, filesystem, service runtime and native Mora compositor remain unimplemented. The [implementation status](docs/IMPLEMENTATION_STATUS.md) and [roadmap](docs/IMPLEMENTATION_ROADMAP.md) separate delivered, partial and planned work.
+An experimental x86_64 firmware-bootable stage-0 image is built and QEMU-verified in both BIOS and UEFI modes; see [Bootable image](docs/BOOTABLE_IMAGE.md) and the [verified CI run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). It uses pinned Limine media, a DuckOS-owned kernel entry and Boot Info v1 handoff validation. This is not yet a complete OS. Processes, scheduler execution, syscalls, page allocator, drivers, filesystem, service runtime and native Mora compositor remain unimplemented. The [implementation status](docs/IMPLEMENTATION_STATUS.md) and [roadmap](docs/IMPLEMENTATION_ROADMAP.md) separate delivered, partial and planned work.
 
 ## Workspace
 

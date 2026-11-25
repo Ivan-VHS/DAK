@@ -54,7 +54,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 - The Limine loader remains an attributed, pinned third-party component; this milestone does not implement an in-house UEFI application or bootloader.
 - Secure Boot signing/enrolment, verified boot policy, AP startup and other firmware services remain separate future work.
 
-**Exit evidence:** reproducible freestanding kernel build, ISO checksum, and pinned QEMU BIOS plus OVMF UEFI runs whose serial logs contain the DuckOS stage-0 success marker. The GitHub Actions boot-image workflow is the acceptance gate; before it passes, the pipeline is implemented but not yet verified. Add malformed map, missing response and range-ownership fixtures to host CTest.
+**Stage-0 exit evidence: passed.** The reproducible freestanding kernel and ISO build, ISO checksum, host Boot Info v1 CTest, and pinned QEMU BIOS plus OVMF UEFI runs succeeded. Both serial logs contain `DUCKOS_BOOT_OK stage=0`; see [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). The wider D1 milestone remains partial until allocator, page tables, interrupt/timer setup and a supported freestanding Reaper target are implemented and verified.
 
 ### D2 — Physical memory and virtual address spaces
 
@@ -151,7 +151,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 - Implement A/B slot update, boot-success confirmation and recovery only after filesystem and boot stages are qualified.
 - Keep cloud targets out of the release matrix until a real format conversion and target boot test exist.
 
-**Exit evidence:** for the experimental stage-0 milestone, reproducible ISO, SHA-256 verification, BIOS and UEFI emulator boot, and stored QEMU serial logs. Production release additionally requires USB/installer qualification, supported hardware matrix, verified signing policy, installation rollback and recovery drill.
+**Stage-0 image exit evidence: passed.** A reproducible ISO, SHA-256 verification, BIOS and UEFI emulator boot, and QEMU serial logs are published in the [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). Production release additionally requires USB/installer qualification, a supported hardware matrix, verified signing policy, installation rollback and recovery drill.
 
 ### D10 — BAV malware inspection and policy service
 
@@ -188,4 +188,4 @@ A hosted web service, remote orchestration control plane, automatic driver insta
 
 ## Release rule
 
-Do not claim DuckOS is bootable until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. Until then, describe the project as a host-tested OS foundation and a Reaper-backed contract model with a browser desktop shell.
+Do not claim DuckOS is a complete or usable desktop operating system until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. The x86_64 stage-0 image now boots in QEMU BIOS and UEFI, but it halts after validated Boot Info v1 handoff and does not yet run a scheduler, processes, services or Mora.

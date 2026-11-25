@@ -32,7 +32,7 @@ Updated: 2026-11-25
 
 ## Partial or external boundaries
 
-- [ ] Experimental x86_64 stage-0 boot image pipeline is implemented in the current boot-image change: Limine v12.11.1 is pinned; the DuckOS-owned freestanding entry validates firmware memory-map and framebuffer handoff, reports to COM1, and has BIOS/UEFI ISO build plus QEMU test scripts. It remains unverified until the BIOS and UEFI CI boots both pass; it is not yet a running OS session.
+- [x] Experimental x86_64 stage-0 boot image built and verified: pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 memory-map/framebuffer handoff; BIOS and UEFI QEMU runs both emitted `DUCKOS_BOOT_OK stage=0`. [Verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). This is a bootable stage-0 kernel handoff, not yet a running process/service OS session.
 
 - [ ] Real frame/page allocator, page tables, MMIO and DMA.
 - [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
