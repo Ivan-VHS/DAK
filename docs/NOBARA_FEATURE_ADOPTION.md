@@ -28,9 +28,6 @@ Primary sources:
 - [Updating troubleshooting](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/updating-troubleshooting)
 - [Kernel fallback versions](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/why-3-versions)
 - [DaVinci Resolve wizard guidance](https://wiki.nobaraproject.org/en/general-usage/additional-software/davinci-resolve)
-- [Updating troubleshooting](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/updating-troubleshooting)
-- [Kernel fallback versions](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/why-3-versions)
-- [DaVinci Resolve wizard guidance](https://wiki.nobaraproject.org/en/general-usage/additional-software/davinci-resolve)
 
 This is a feature and documentation review, not a claim that every Wiki.js article, historical post or external package was independently audited.
 
@@ -47,8 +44,6 @@ This is a feature and documentation review, not a claim that every Wiki.js artic
 | Gaming-ready desktop | Mora Boost stores a user-local gaming preference (Balanced / Low latency / Image quality) | Partial local preference |
 | Gamescope/Steam living-room and handheld paths | UI profiles prepare larger catalogue tiles and controller-first presentation preferences | Partial presentation only; no Gamescope/session/input runtime |
 | OBS, capture, audio and creator tools | Preserve Reaper, VentuSample and OPlague as independently licensed ecosystem workbenches; future creator profile is presentation only | Existing integrations remain separate user-space tools |
-| GPU overlay and screen capture | Future GPU service must report provider, codec, permission and capture scope; no screen recorder or instant-replay service is connected | Planned |
-| OBS and professional media applications | Treat hardware encode/decode and plug-in compatibility as target-specific; third-party apps stay separately licensed and user-installed | No bundled creator packages |
 | GPU overlay and screen capture | Future GPU service must report provider, codec, permission and capture scope; no screen recorder or instant-replay service is connected | Planned |
 | OBS and professional media applications | Treat hardware encode/decode and plug-in compatibility as target-specific; third-party apps stay separately licensed and user-installed | No bundled creator packages |
 | Controller, GPU and codec compatibility guides | Add a future device compatibility matrix with exact device/driver/runtime evidence; support claims expire when upstream driver support changes | Planned |
