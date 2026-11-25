@@ -64,13 +64,7 @@ export craft exit_decision(exit_code, retries, retry_limit) {
     when retries < 0 or retry_limit < 0 or retries > retry_limit or retry_limit > 32 {
         yield ["invalid", retries]
     }
-    when exit_code == 0 {
-        yield ["stopped", retries]
-    }
-    when retries >= retry_limit {
-        yield ["failed", retries]
-    }
-    yield ["restart", retries + 1]
+    yield supervisor["decide"](exit_code, retries, retry_limit)
 }
 
 export craft health_transition(service, healthy, owner_pid) {
