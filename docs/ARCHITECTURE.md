@@ -118,7 +118,7 @@ Each gate needs a conformance suite and target hardware or emulator evidence. Do
 
 ## First-party system services
 
-DAK owns four Reaper-first policy modules: Installer, Driver Runtime, Package Manager and Update System. They reuse the current capability, VFS, device-resource, architecture and memory contracts rather than duplicating those primitives.
+DAK owns four Reaper-first system-service policy modules: Installer, Driver Runtime, Package Manager and Update System, plus a shared Reaper audit-journal contract. They reuse the current capability, VFS, device-resource, architecture and memory contracts rather than duplicating those primitives.
 
 The service graph is:
 
@@ -127,7 +127,8 @@ Reaper policy contracts
   ├─ Installer ──> verified image + recovery + A/B layout plan
   ├─ Driver Runtime ──> signed descriptor + device match + isolated lifecycle plan
   ├─ Package Manager ──> verified manifest + dependencies + bounded payload-path plan
-  └─ Update System ──> signed manifest + anti-rollback + inactive-slot plan
+  ├─ Update System ──> signed manifest + anti-rollback + inactive-slot plan
+  └─ Audit Journal ──> bounded request/action/outcome records + monotonic sequence
                          |
              Future privileged DAK providers
                          |
@@ -136,4 +137,4 @@ Reaper policy contracts
         Kernel / storage / device runtime / boot control
 ```
 
-The four Reaper modules are policy-only. The `verified` trust state must come from an authenticated cryptographic provider; policy code cannot turn an untrusted string or digest into publisher trust. Native providers must re-check identity, capabilities and state at the privilege boundary. No disk or device mutation is implied by these contracts. See [DAK System Services v1](DAK_SYSTEM_SERVICES_V1.md).
+The Reaper policy modules are policy-only. The `verified` trust state must come from an authenticated cryptographic provider; policy code cannot turn an untrusted string or digest into publisher trust. Native providers must re-check identity, capabilities and state at the privilege boundary. No disk or device mutation is implied by these contracts. See [DAK System Services v1](DAK_SYSTEM_SERVICES_V1.md).
