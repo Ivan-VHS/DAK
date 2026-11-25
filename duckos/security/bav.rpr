@@ -28,11 +28,13 @@ export craft policy_valid(rules) {
         yield false
     }
     each index in range(0, size(rules)) {
-        when not rule_valid(rules[index]) {
+        make current_rule := rules[index]
+        when not rule_valid(current_rule) {
             yield false
         }
         each other_index in range(index + 1, size(rules)) {
-            when rules[index][0] == rules[other_index][0] and rules[index][1] == rules[other_index][1] and rules[index][2] == rules[other_index][2] {
+            make other_rule := rules[other_index]
+            when current_rule[0] == other_rule[0] and current_rule[1] == other_rule[1] and current_rule[2] == other_rule[2] {
                 yield false
             }
         }
