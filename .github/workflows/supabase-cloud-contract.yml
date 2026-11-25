@@ -1,0 +1,48 @@
+name: Supabase local cloud contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase-cloud-contract.yml"
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase-cloud-contract.yml"
+      - "federation/ecosystem-cloud.v1.json"
+      - "schemas/ivan-vhs.ecosystem-cloud.v1.schema.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-cloud-contract-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  local-database:
+    name: Local migrations and RLS tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3
+        with:
+          version: 3.4.0
+
+      - name: Start local Supabase stack
+        run: supabase start
+
+      - name: Apply all migrations from a clean database
+        run: supabase db reset
+
+      - name: Run pgTAP database tests
+        run: supabase test db
+
+      - name: Stop local Supabase stack
+        if: always()
+        run: supabase stop --no-backup

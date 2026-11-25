@@ -74,6 +74,9 @@ jobs:
       - name: Test Markdown integrity validator
         run: python -m unittest discover -s tests -p "test_markdown_inventory.py" -v
 
+      - name: Test Mora and ecosystem cloud contracts
+        run: node --test tests/mora-*.test.mjs
+
       - name: Check repository completeness inputs
         shell: bash
         run: |
