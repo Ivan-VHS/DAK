@@ -2,33 +2,55 @@
 
 ## Role in DuckOS
 
-DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
+DuckOS is the operating-system project; Mora is its unified desktop shell. Mora now ships a Qt 6 Widgets host-native application with real top-level host windows, plus the previous browser shell retained as a reference preview. Neither surface is yet launched by the Stage 1 DuckOS kernel, and the host-native adapter is not the future kernel-owned compositor.
 
-The default Mora Amber profile uses warm vertical drapery with a repeating fold rhythm, a deep radial workspace centre, walnut/graphite panels, muted olive support surfaces and one restrained red critical marker. Material depth comes from soft light, edge highlights and tonal separation rather than neon fills. The compact dock and existing app IDs remain stable; Dark and Light remain selectable alternatives.
+Mora follows the fixed DuckOS black/white/yellow visual identity: deep black structural surfaces, white content, graphite depth and a single yellow accent for selection, focus and primary actions. The Figma composition uses a radial workspace, restrained vertical folds, glass-like surfaces, a compact top status area, left navigation, application catalogue and bottom dock. The canonical semantic tokens live in mora/theme.json; the palette is not user-switchable.
 
 ## Shell components
 
 | Surface | Responsibility | Current boundary |
 |---|---|---|
-| Desktop | Clock, status bar, app launcher, widgets and dock | Browser-hosted |
-| App windows | Focus, move, close, running state and Escape handling | DOM window manager |
-| Mora AI | Parse safe local intents, preview plan, request approval | Allowlisted rules, no model or shell |
-| Sentinel | Show and store capability preferences | No native process enforcement |
-| Restore | Save/restore shell settings and preview an update sequence | No OS image update/rollback |
-| Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
-| Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
-| Proof | Calculate local SHA-256 | No signer or C2PA verification |
+| Desktop | Clock, status bar, home workspace, application catalogue and dock | Qt 6 Widgets host-native shell; browser preview retained separately |
+| App windows | Focus, move, close, title, host input and native window decoration | Separate top-level Qt windows managed by the host OS; not a DuckOS kernel window manager |
+| Mora AI | Parse safe local intents, preview plan, request approval | Browser preview only; native agent and approval broker not connected |
+| Sentinel | Show and store capability preferences | Browser preview only; no native process enforcement |
+| Restore | Save/restore shell settings and preview an update sequence | Browser preview only; no OS image update/rollback |
+| Bridge | Inspect PE/ELF file headers and architecture | Browser preview only; no executable loading |
+| Control | Persist focus, motion and resource-profile choices | Browser preview only; no kernel/device scheduler |
+| Proof | Calculate local SHA-256 | Browser preview only; no signer or C2PA verification |
 | Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
 
 The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
 
-Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. The panels provide bounded local browser interactions, share the existing window manager and profile storage, and do not claim native service implementations.
+The browser reference preview also contains 13 extended first-party app concepts: Sestem, SetupUP, ORGze, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. Those panels provide bounded browser interactions and do not claim native service implementations. The Qt shell currently integrates only the native Poi, Abriganza and illustrative VentuSample panels; other catalogue entries open descriptive placeholder windows.
 
 ## Run and validate
 
-Open **mora/index.html** directly in a modern browser. The desktop itself requires no network request. Some browser APIs such as Web Crypto may require a secure context.
+### Host-native Mora
 
-Run **npm test** with Node.js 18 or newer. Contract tests check the static shell, registry and local policy helpers. They do not certify native OS operation or interaction with actual hardware.
+Build with Qt 6 Widgets using the root CMake target.
+
+Linux:
+```sh
+cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --target duckos_mora_native --parallel
+./build/mora-native/duckos_mora_native
+```
+
+Windows (Qt 6 Widgets and its CMake package configured):
+```powershell
+cmake -S . -B build/mora-native -A x64 -DDUCKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --config Release --target duckos_mora_native
+.\build\mora-native\Release\duckos_mora_native.exe
+```
+
+The native host app reads mora/apps.json and does not execute manifest commands. Poi drafts use host-local QSettings; Abriganza only lists metadata after the user explicitly selects a folder; the VentuSample waveform is a visual sample, not an audio engine. Other catalogue entries open descriptive placeholder windows until their native applications are integrated.
+
+### Browser reference preview
+
+Open mora/index.html directly or use the existing local run script. Browser-specific AI, intent, recovery and compatibility panels remain reference-preview capabilities; they do not become host-native system services.
+
+Run npm test with Node.js 22 or newer. These contract tests validate the browser preview and shared catalogue/policy contracts; the native Qt build and window lifecycle are validated by the dedicated Mora native desktop CI workflow.
 
 ## Intent actions and approval
 
@@ -42,7 +64,7 @@ A future agent service must return a typed action plan with versioned schemas, t
 
 Sentinel stores only six shell preferences: microphone, camera, location, personal files, network and clipboard. All begin denied. A switch changes the local Mora preference object; it does not grant or revoke permission in the browser, kernel or another process.
 
-The native design must use deny-by-default capabilities, short-lived grants, per-app identity, path and device scoping, revocation, resource limits and audit events. Apps must run inside an actual sandbox before this UI can be represented as an enforcement surface.
+The future DuckOS-native design must use deny-by-default capabilities, short-lived grants, per-app identity, path and device scoping, revocation, resource limits and audit events. The current Qt host application does not start external applications or enforce a DuckOS sandbox; apps must run inside a real process/capability boundary before any UI can be represented as an enforcement surface.
 
 ## Recovery and atomic updates
 
@@ -60,19 +82,19 @@ A native compatibility environment still needs PE loading, Win32/NT services, pr
 
 Proof computes SHA-256 through Web Crypto when available. A digest can identify a file for comparison; it does not establish authorship, signer trust, edit history or C2PA provenance. Those require manifest parsing, signature verification, trusted certificate policy and explicit failure reporting.
 
-## Installable web shell
+The Mora shell publishes a web manifest for installation in supported browsers.
 
 The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript, catalogue, policy and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
 
-The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser shell provides a persisted light/dark preference; native toolkit adapters must implement the same semantic tokens independently.
+The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser preview normalizes legacy theme preferences to the single Duck palette; the host-native Qt adapter uses the same semantic color roles.
 
 ## Responsive workspace and accessibility
 
-Mora supports a responsive browser layout and a reduced-motion preference. Its focus and power-profile controls affect only the shell presentation. Native display migration, XR, voice, gesture input, high-contrast profiles, VRR and hardware resource scheduling require dedicated services and accessibility testing.
+The browser preview supports a responsive layout and reduced-motion preference. The host-native Qt shell uses host-native keyboard focus, pointer input, window decorations and DPI handling. Its current workspace is a single host window with independently managed app windows; DuckOS-native virtual workspaces, compositor-level display migration, XR, voice/gesture input, high-contrast profiles, VRR and hardware resource scheduling require dedicated kernel/user-session services and platform accessibility testing.
 
 ## Data handling
 
-All legacy photo, budget, game, compass, device and audio content remains clearly identified as fictional demo content. New settings are stored in the browser's local storage. Selected executable and provenance files are read locally by the page; the shell does not transmit them.
+Browser-preview demo content remains explicitly fictional. Browser-preview settings use its bounded local store; native shell geometry and Poi drafts use host-local QSettings. Abriganza reads only metadata for a directory the user explicitly selects. The shell does not upload selected files or execute them.
 
 The local browser profile can be removed by clearing site data. The snapshot is a copy of Mora preferences only and should not be called a system restore point.
 

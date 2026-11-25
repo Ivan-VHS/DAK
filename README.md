@@ -9,9 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="mora/index.html">Open Mora</a> ·
-  <a href="CONTRIBUTING.md">Contributing</a> ·
-  <a href="SECURITY.md">Security</a> ·
+  <a href="docs/IMPLEMENTATION_STATUS.md">Mora native shell status</a> · <a href="mora/index.html">Browser preview</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a> · <a href="SECURITY.md">Security</a> ·
   <a href="docs/RELEASE_EDITION.md">Release edition</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
@@ -19,7 +18,7 @@
   <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
 </p>
 
-> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora is a separate host-browser application; it is not started by this kernel.
+> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
 
 ## System map
 
@@ -40,21 +39,22 @@ flowchart TB
     C --> T["Contract tests and CI"]
   end
 
-  subgraph HOST["Mora host application — separate from kernel"]
-    W["Local static server / browser"] --> S["Mora shell"]
-    S --> A["Launcher, windows, preferences"]
-    S --> P["Project workbench panels"]
+  subgraph HOST["Mora host-native application — separate from kernel"]
+    Q["Qt 6 Widgets"] --> S["Mora native shell"]
+    S --> A["Host-managed top-level windows"]
+    S --> P["Local app catalogue and panels"]
+    W["Browser reference preview — separate reference surface"]
   end
 
+  BOOT -.->|kernel desktop integration pending| HOST
   BOOT -.->|native runtime integration pending| POLICY
-  HOST -.->|not launched by Stage 1| BOOT
 ```
 
 ## What is included
 
 | Area | Present today | Boundary |
 |---|---|---|
-| **Mora desktop shell** | Responsive local browser workspace, launcher, interactive windows, dock, local preferences, reduced-motion mode, local app data and scoped offline cache | Runs on the host browser; not a native kernel compositor |
+| **Mora desktop** | Qt 6 Widgets host-native shell, host-managed top-level windows, local app catalogue, Poi drafts, user-selected read-only file listing, plus browser reference preview | Native to the host OS; not yet launched inside a DuckOS user session or kernel compositor |
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
 | **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
@@ -72,25 +72,33 @@ The four repositories below are pinned by exact Git commits in `federation/repos
 | [OPlague](https://github.com/Ivan-VHS/OPlague) | Read-only device/driver evidence and compatibility workbench | Local user-space inspection tools |
 | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | Procedural samples and offline audio processing | C++20 core and optional Qt 6 desktop |
 
-Mora workbench panels provide local documentation, descriptions and build/test guidance. Browser code does not execute external commands or grant hardware privileges.
+Mora workbench panels provide local documentation, descriptions and build/test guidance. The native shell does not execute manifest command strings or grant hardware privileges. The browser version is retained only as a reference preview.
 
-## Open Mora
+## Build and run native Mora
 
-For a browser preview, open `mora/index.html`. For offline assets and the bundled project documentation, run the local server.
+Mora's native host application uses Qt 6 Widgets. App windows are separate top-level host windows managed by Windows, Linux or another supported host desktop. It does not embed a browser engine, WebView or HTML application surface.
 
 **Linux**
 ```sh
-./scripts/run-mora.sh
+cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --target duckos_mora_native --parallel
+./build/mora-native/duckos_mora_native
 ```
 
-**Windows PowerShell**
+**Windows PowerShell** (with Qt 6 Widgets and its CMake package configured)
 ```powershell
-.\scripts\run-mora.ps1
+cmake -S . -B build/mora-native -A x64 -DDUCKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --config Release --target duckos_mora_native
+.\build\mora-native\Release\duckos_mora_native.exe
 ```
 
-The server binds to `127.0.0.1`. Keep its terminal open while Mora is in use. No cloud service or external CDN is required for the shell itself.
+The optional target is skipped when Qt 6 Widgets is not found. Its native shell smoke test runs through CTest in the dedicated Mora native desktop workflow. mora/apps.json is the local catalogue source; app entries do not execute commands. Poi stores drafts in host-local application settings, Abriganza lists metadata only after a folder is selected, and the VentuSample waveform remains a visual preview until an audio engine is connected.
 
-Run the Mora contract suite with Node.js 22+:
+## Browser reference preview
+
+The previous browser shell is retained for reference only. To open it, run ./scripts/run-mora.sh on Linux or .\scripts\run-mora.ps1 on Windows. The local server binds to 127.0.0.1.
+
+Run the browser-shell contract suite with Node.js 22+:
 
 ```sh
 npm test

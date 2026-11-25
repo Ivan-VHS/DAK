@@ -22,7 +22,7 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
 | Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
-| Desktop | Tri-Color Duck palette, reduced-motion and frame-budget policy | design policy implemented; compositor/renderer pending |
+| Desktop | Black/white/yellow Mora design contract, Reaper UI policies and a Qt 6 Widgets host-native shell | host-native app windows are separate from the still-pending DuckOS compositor/renderer |
 
 ## Startup contract
 
@@ -90,7 +90,11 @@ The shared DuckOS/Mora shell uses the black/white/yellow product identity and se
 
 The [interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) is normative for browser and native surfaces. It covers keyboard-first operation, focus, pointer/touch targets, window and workspace behavior, density, text scaling, accessible semantics, asynchronous feedback, drafts, Undo, error recovery, privacy and measurable usability. The native implementation must be verified separately for each supported platform.
 
-This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS guarantee. Rendering, input handling, font shaping and accessibility integration require native desktop modules.
+## Mora native host adapter
+
+Mora now has a separate host-native application built with Qt 6 Widgets. It uses the host operating system's normal top-level window, focus, input and decoration path; no browser engine or HTML surface is embedded. The launcher reads the versioned local application catalogue, stores Poi drafts in local application settings, and opens read-only folder metadata in Abriganza only after the user selects a folder. VentuSample's waveform is explicitly a visual sample; no audio engine or device routing is implied.
+
+This is a native host application, not yet the native DuckOS desktop session. It is not launched by the Stage 1 kernel and does not create DuckOS processes, map framebuffer pages, manage host devices or enforce kernel capabilities. The browser shell remains a reference preview. Kernel-owned window management, compositor, input routing, font shaping, accessibility services and a freestanding Reaper UI runtime remain pending.
 
 ## Native bring-up gates
 
