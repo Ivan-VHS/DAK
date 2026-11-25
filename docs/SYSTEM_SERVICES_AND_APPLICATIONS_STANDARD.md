@@ -117,6 +117,7 @@ A manifest is not itself a sandbox. The application is considered sandboxed only
 - Public, non-sensitive read-only capabilities are still granted explicitly by package policy.
 - Camera, microphone, location, screen capture, clipboard read and personal-data export require an understandable prompt and a visible active-use indicator.
 - Microphone/camera access must be revocable while the application is running.
+- An explicitly approved recording/capture session may continue while its window is minimized; backgrounding must never start a new capture session silently, and the active-use indicator and revocation control remain available.
 - Firmware, kernel, driver, credential-store and system-wide mutation capabilities are not ordinary application permissions. They require a separate privileged broker and operator confirmation.
 - A permission decision records the app identity, capability, purpose, scope, decision time and revocation path.
 
