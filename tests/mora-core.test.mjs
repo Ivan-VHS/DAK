@@ -112,3 +112,23 @@ test("legacy appearance settings migrate to the fixed DuckOS palette", () => {
     assert.equal(normalizePreferences({ appearance: { theme } }).appearance.theme, "duck");
   }
 });
+
+
+test("reduced transparency is validated, persisted and defaults to the glass material", () => {
+  const storage = new MemoryStorage();
+  const settings = createDefaultPreferences();
+  assert.equal(settings.appearance.reduceTransparency, false);
+  settings.appearance.reduceTransparency = true;
+  assert.equal(savePreferences(settings, storage), true);
+  assert.equal(loadPreferences(storage).appearance.reduceTransparency, true);
+  assert.equal(normalizePreferences({ appearance: { reduceTransparency: "yes" } }).appearance.reduceTransparency, false);
+});
+
+test("local intent plans can select opaque or glass material without external actions", () => {
+  const off = buildIntentPlan("отключи прозрачность");
+  assert.equal(off.ok, true);
+  assert.deepEqual(off.actions.map((action) => [action.setting, action.value]), [["reduceTransparency", true]]);
+  const on = buildIntentPlan("включи прозрачность");
+  assert.equal(on.ok, true);
+  assert.deepEqual(on.actions.map((action) => [action.setting, action.value]), [["reduceTransparency", false]]);
+});
