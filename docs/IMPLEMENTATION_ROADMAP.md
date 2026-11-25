@@ -21,6 +21,10 @@ DuckOS currently combines three distinct surfaces. They must never be conflated:
 
 A policy model, browser preference, catalogue entry, manifest, generated archive or host-side unit test cannot be relabelled as a native kernel, driver, boot service or physical-device capability.
 
+## Reaper 666 function categories
+
+DuckOS consumes the canonical seven-category taxonomy owned by Reaper: `kernel-runtime` (121), `language-compiler` (260), `desktop-ui` (22), `network-distributed` (21), `storage-data` (121), `security-resilience` (100) and `ecosystem-tooling` (21). The seven categories cover all 666 stable function IDs while preserving Reaper's original 13 registry groups. The category-to-subsystem mapping, ownership rules and implementation sequence are maintained in [Reaper 666 category integration](REAPER_666_CATEGORIES.md). This taxonomy is a planning and traceability layer, not evidence that all 666 functions are implemented.
+
 ## Current delivered foundation
 
 | Area | Delivered scope | Explicit boundary |
