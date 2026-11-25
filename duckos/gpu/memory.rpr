@@ -92,25 +92,29 @@ export craft reserve(pool, bytes, tier) {
         when bytes > pool[0] - pool[1] - pool[2] {
             yield ["out-of-tier-capacity", pool]
         }
-        yield ["reserved", [pool[0], pool[1], pool[2] + bytes, pool[3], pool[4], pool[5], pool[6], pool[7], pool[8], pool[9]]]
+        make reserved_vram_pool := [pool[0], pool[1], pool[2] + bytes, pool[3], pool[4], pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["reserved", reserved_vram_pool]
     }
     when tier == "host-ram" {
         when bytes > pool[3] - pool[4] {
             yield ["out-of-tier-capacity", pool]
         }
-        yield ["reserved", [pool[0], pool[1], pool[2], pool[3], pool[4] + bytes, pool[5], pool[6], pool[7], pool[8], pool[9]]]
+        make reserved_host_pool := [pool[0], pool[1], pool[2], pool[3], pool[4] + bytes, pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["reserved", reserved_host_pool]
     }
     when tier == "compressed-host-ram" {
         when bytes > pool[5] - pool[6] {
             yield ["out-of-tier-capacity", pool]
         }
-        yield ["reserved", [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6] + bytes, pool[7], pool[8], pool[9]]]
+        make reserved_compressed_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6] + bytes, pool[7], pool[8], pool[9] ]
+        yield ["reserved", reserved_compressed_pool]
     }
     when tier == "swap" {
         when bytes > pool[7] - pool[8] {
             yield ["out-of-tier-capacity", pool]
         }
-        yield ["reserved", [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6], pool[7], pool[8] + bytes, pool[9]]]
+        make reserved_swap_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6], pool[7], pool[8] + bytes, pool[9] ]
+        yield ["reserved", reserved_swap_pool]
     }
     yield ["invalid-tier", pool]
 }
@@ -123,25 +127,29 @@ export craft release(pool, bytes, tier) {
         when bytes > pool[2] {
             yield ["underflow", pool]
         }
-        yield ["released", [pool[0], pool[1], pool[2] - bytes, pool[3], pool[4], pool[5], pool[6], pool[7], pool[8], pool[9]]]
+        make released_vram_pool := [pool[0], pool[1], pool[2] - bytes, pool[3], pool[4], pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["released", released_vram_pool]
     }
     when tier == "host-ram" {
         when bytes > pool[4] {
             yield ["underflow", pool]
         }
-        yield ["released", [pool[0], pool[1], pool[2], pool[3], pool[4] - bytes, pool[5], pool[6], pool[7], pool[8], pool[9]]]
+        make released_host_pool := [pool[0], pool[1], pool[2], pool[3], pool[4] - bytes, pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["released", released_host_pool]
     }
     when tier == "compressed-host-ram" {
         when bytes > pool[6] {
             yield ["underflow", pool]
         }
-        yield ["released", [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6] - bytes, pool[7], pool[8], pool[9]]]
+        make released_compressed_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6] - bytes, pool[7], pool[8], pool[9] ]
+        yield ["released", released_compressed_pool]
     }
     when tier == "swap" {
         when bytes > pool[8] {
             yield ["underflow", pool]
         }
-        yield ["released", [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6], pool[7], pool[8] - bytes, pool[9]]]
+        make released_swap_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6], pool[7], pool[8] - bytes, pool[9] ]
+        yield ["released", released_swap_pool]
     }
     yield ["invalid-tier", pool]
 }
