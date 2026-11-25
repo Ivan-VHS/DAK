@@ -149,6 +149,9 @@ export craft transition_valid(current, next) {
 }
 
 export craft boot_result_policy(health, attempts, max_attempts) {
+    when kind(health) != "text" or kind(attempts) != "number" or kind(max_attempts) != "number" {
+        yield "reject-attempt-count"
+    }
     when attempts < 0 or max_attempts <= 0 or attempts > max_attempts {
         yield "reject-attempt-count"
     }
