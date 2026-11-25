@@ -1,0 +1,71 @@
+# Process-aware adapter over the canonical deterministic scheduler.
+# Scheduling metadata: [pid, generation, priority, absolute_deadline].
+# This selects a ready process; it does not save/restore registers, switch stacks,
+# set CR3, preempt CPUs or dispatch execution.
+
+import "duckos/kernel/process.rpr" as process
+import "duckos/kernel/scheduler.rpr" as scheduler
+
+export craft record_valid(record) {
+    when size(record) != 4 {
+        yield false
+    }
+    when record[0] <= 0 or record[1] <= 0 {
+        yield false
+    }
+    when record[2] < -2147483648 or record[2] > 2147483647 or record[3] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft records_valid(records, processes) {
+    when size(records) > 4096 or not process["table_valid"](processes) {
+        yield false
+    }
+    each index in range(0, size(records)) {
+        make record := records[index]
+        when not record_valid(record) {
+            yield false
+        }
+        make handle := [record[0], record[1]]
+        make descriptor := process["lookup"](processes, handle)
+        when descriptor == nothing or descriptor[4] != "ready" {
+            yield false
+        }
+        each other_index in range(index + 1, size(records)) {
+            make other_record := records[other_index]
+            when record[0] == other_record[0] and record[1] == other_record[1] {
+                yield false
+            }
+        }
+    }
+    yield true
+}
+
+export craft pick(processes, records) {
+    when not records_valid(records, processes) {
+        yield ["reject", "invalid-or-stale-scheduling-record"]
+    }
+    vary tasks := []
+    each record in records {
+        make handle := [record[0], record[1]]
+        make descriptor := process["lookup"](processes, handle)
+        make task := [record[0], record[2], record[3], descriptor[4]]
+        change tasks := push(tasks, task)
+    }
+    make selected_pid := scheduler["pick_ready"](tasks)
+    when selected_pid == "" {
+        yield ["idle", nothing]
+    }
+    vary selected := nothing
+    each record in records {
+        when record[0] == selected_pid {
+            change selected := record
+        }
+    }
+    when selected == nothing {
+        yield ["reject", "scheduler-returned-unknown-process"]
+    }
+    yield ["selected", [selected[0], selected[1]], selected[2], selected[3]]
+}
