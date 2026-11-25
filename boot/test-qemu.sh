@@ -87,7 +87,7 @@ run_uefi() {
         cat "$log" >&2 || true
         return 1
     fi
-    if ! grep -Fq "DUCKOS_BOOT_OK stage=1" "$log"; then
+    if ! grep -Fq "DUCKOS_BOOT_OK stage=2" "$log"; then
         echo "UEFI QEMU did not reach the DuckOS boot handoff:" >&2
         cat "$log" >&2 || true
         return 1
