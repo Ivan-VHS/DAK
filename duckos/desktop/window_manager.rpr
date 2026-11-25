@@ -38,8 +38,8 @@ export craft clamp_to_display(window, display) {
     when not window_valid(window) or not display_valid(display) {
         yield ["invalid", window]
     }
-    make width := window[5]
-    make height := window[6]
+    vary width := window[5]
+    vary height := window[6]
     when width > display[3] {
         change width := display[3]
     }
