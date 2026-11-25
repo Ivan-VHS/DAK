@@ -15,7 +15,7 @@ export craft artifact_valid(artifact, signature_verified) {
     when artifact[2] != 1 or artifact[3] == "" or artifact[4] == "" {
         yield false
     }
-    when artifact[5] != "ed25519" or artifact[6] == "" or artifact[7] == "" {
+    when artifact[5] != "ed25519" or artifact[6] == "" or size(artifact[7]) < 80 or size(artifact[7]) > 128 {
         yield false
     }
     when artifact[8] <= 0 or artifact[9] < 0 or not signature_verified {
