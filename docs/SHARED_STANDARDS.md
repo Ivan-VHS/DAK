@@ -11,6 +11,8 @@ DuckOS hosts the canonical shared standards for the Ivan-VHS project ecosystem. 
 
 ## Architecture and shared contracts
 
+- [NEXUS Architecture Profile v1](NEXUS_ARCHITECTURE_V1.md) — additive federation vocabulary, ownership boundaries, safe integration rules and staged adoption.
+- [NEXUS Application Catalog v1](NEXUS_APPLICATION_CATALOG_V1.md) — proposed new Mora applications; all existing application identities remain unchanged.
 - [Backend engineering](BACKEND_ENGINEERING_STANDARD.md) — service boundaries, contracts, resource limits, failure handling and observability.
 - [Unified report envelope](REPORT_ENVELOPE.md) — shared ivan-vhs.report.v1 metadata contract.
 - [System capability profile](SYSTEM_CAPABILITY_PROFILE.md) — evidence-based maturity assessment; each repository owns its own profile data.
@@ -18,7 +20,7 @@ DuckOS hosts the canonical shared standards for the Ivan-VHS project ecosystem. 
 
 ## Desktop experience
 
-- [UI/UX Codex 40026](UI_UX_CODEX_40026.md) — common 666-rule desktop interaction contract.
+- [UI/UX Codex 40026](UI_UX_CODEX_40026.md) — common desktop interaction contract.
 - [Motion Constitution v2026](MOTION_CONSTITUTION_V2026.md) — shared motion tokens, reduced-motion rules, telemetry and acceptance matrix.
 
 ## Governance
