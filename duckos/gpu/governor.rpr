@@ -21,10 +21,16 @@ export craft sample_valid(sample) {
     when sample[3] < 0 or sample[3] > 100 {
         yield false
     }
-    when sample[4] < 0 or sample[5] <= 0 or sample[4] > sample[5] {
+    when sample[4] < -1 or sample[5] < -1 {
         yield false
     }
-    when sample[6] < 0 or sample[7] < 0 or sample[8] < 0 or sample[9] < 0 {
+    when sample[4] >= 0 and sample[5] >= 0 and sample[4] > sample[5] {
+        yield false
+    }
+    when sample[6] < -1 or sample[7] < -1 or sample[8] < -1 or sample[9] < 0 {
+        yield false
+    }
+    when sample[10] == "available" and (sample[4] < 0 or sample[5] <= 0) {
         yield false
     }
     yield sample[10] == "available" or sample[10] == "unavailable"
@@ -61,6 +67,9 @@ export craft predicted_temperature(previous, current, config) {
 export craft governor_action(previous, current, config, now_ms) {
     when not sample_valid(previous) or not sample_valid(current) or not config_valid(config) or now_ms < current[1] {
         yield ["fail-safe-hold", "invalid-or-regressed-telemetry"]
+    }
+    when previous[10] != "available" {
+        yield ["fail-safe-hold", "previous-sensor-unavailable"]
     }
     when current[10] != "available" {
         yield ["fail-safe-hold", "sensor-unavailable"]

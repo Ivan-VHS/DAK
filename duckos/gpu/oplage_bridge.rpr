@@ -53,35 +53,35 @@ export craft to_governor_sample(sequence, monotonic_ms, row, memory_used_bytes, 
     when not gpu_row_valid(row) or sequence <= 0 or monotonic_ms < 0 or errors < 0 {
         yield ["invalid", nothing]
     }
-    make temperature := -1
+    vary temperature := -1
     when row[2] >= 0 {
         change temperature := row[2] * 10
     }
-    make utilization := row[3]
+    vary utilization := row[3]
     when utilization < 0 {
         change utilization := 0
     }
-    make used := memory_used_bytes
+    vary used := memory_used_bytes
     when used < 0 and row[4] >= 0 {
         change used := row[4] * 1048576
     }
-    make total := memory_total_bytes
+    vary total := memory_total_bytes
     when total < 0 and row[5] >= 0 {
         change total := row[5] * 1048576
     }
-    make power := power_mw
+    vary power := power_mw
     when power < 0 and row[6] >= 0 {
         change power := row[6] * 1000
     }
-    make graphics_clock := row[7]
+    vary graphics_clock := row[7]
     when graphics_clock < 0 {
         change graphics_clock := 0
     }
-    make memory_clock := row[8]
+    vary memory_clock := row[8]
     when memory_clock < 0 {
         change memory_clock := 0
     }
-    make sensor_state := "available"
+    vary sensor_state := "available"
     when temperature < 0 or used < 0 or total <= 0 {
         change sensor_state := "unavailable"
     }
