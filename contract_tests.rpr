@@ -324,6 +324,7 @@ assert(not installer["transition_valid"]("planned", "committed"), "installer can
 assert(installer["commit_policy"]("ready_to_commit", true, verified_source, "ready", "healthy") == "commit-plan-only", "installer requires all commit gates")
 assert(installer["commit_policy"]("ready_to_commit", true, verified_source, "ready", "pending") == "reject-boot-unverified", "installer refuses an unverified boot result")
 assert(not installer["partition_valid"](["too_early", "efi", 4096, 4096], 4000000), "installer reserves the leading disk metadata region")
+assert(not installer["partition_valid"](["fractional", "efi", 1048576.5, 262144], 4000000), "installer rejects fractional partition offsets")
 make bios_layout := [
     ["bios_boot", "bios_boot", 1048576, 1048576],
     ["system_a", "system", 2097152, 524288],
@@ -352,6 +353,9 @@ make conflicting_devices := [["gpu0", "pci", 4200, 128, 11, false]]
 assert(driver_runtime["resource_admission"](driver_device, conflicting_devices) == "reject-resource-conflict", "driver runtime rejects overlapping MMIO or exclusive IRQ ownership")
 assert(driver_runtime["admission"](verified_driver, driver_device, conflicting_devices, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-resource-conflict", "driver admission cannot bypass resource conflict checks")
 assert(driver_runtime["resource_admission"](driver_device, [device_c]) == "resource-plan-only", "driver runtime admits non-conflicting resource plans")
+make duplicate_device_id := ["nvme0", "pci", 8192, 256, 12, false]
+assert(driver_runtime["resource_admission"](driver_device, [duplicate_device_id]) == "reject-resource-conflict", "driver runtime rejects duplicate device identities")
+assert(not driver_runtime["descriptor_valid"](["nvme.sample", 1.5, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]), "driver runtime rejects fractional ABI versions")
 assert(driver_runtime["descriptor_valid"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "", "verified", 65536]) == false, "driver runtime requires a payload digest")
 assert(driver_runtime["admission"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "revoked", 65536], driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-revoked", "driver runtime rejects revoked publisher evidence")
 assert(driver_runtime["transition_valid"]("verified", "admitted"), "driver runtime advances verified metadata")
@@ -389,6 +393,8 @@ make downgrade_manifest := ["stable", 0, 9, 0, "x86_64", 3, 10485760, "sha256:pa
 make unsigned_update := ["stable", 1, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "unverified"]
 assert(updates["manifest_valid"](update_manifest), "update manager accepts a bounded signed manifest")
 assert(not updates["manifest_valid"]("malformed-update"), "update manager rejects a non-list manifest")
+make fractional_update := ["stable", 1.5, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "verified"]
+assert(not updates["manifest_valid"](fractional_update), "update manager rejects fractional semantic versions")
 assert(updates["admission"](update_manifest, "x86_64", [1, 0, 0], 1) == "stage-inactive-slot-plan-only", "update manager stages a newer verified image")
 assert(updates["admission"](downgrade_manifest, "x86_64", [1, 0, 0], 1) == "reject-downgrade", "update manager rejects version rollback")
 assert(updates["admission"](unsigned_update, "x86_64", [1, 0, 0], 1) == "reject-signature", "update manager rejects unverified update signatures")
@@ -415,6 +421,7 @@ make audit_one := [1, "req-1", "installer", "install.plan", "disk0", "accepted",
 make audit_two := [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "signature-and-rollback-checked", "sha256:audit-1", "sha256:audit-2"]
 assert(audit["record_valid"](audit_one), "audit accepts a complete bounded event")
 assert(not audit["record_valid"]("malformed-audit"), "audit rejects a non-list event record")
+assert(not audit["record_valid"]([1.5, "req-1", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", "sha256:audit"]), "audit rejects fractional sequence numbers")
 assert(not audit["record_valid"]([1, "", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", "sha256:audit"]), "audit requires a request identity")
 assert(not audit["record_valid"]([1, "req-1", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", ""]), "audit requires a record digest")
 assert(audit["append_policy"]([], audit_one, 1024) == "append-plan-only", "audit plans the first journal record")
