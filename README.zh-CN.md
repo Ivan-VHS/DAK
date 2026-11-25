@@ -1,6 +1,6 @@
-<p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
+# 🦆 Duck — Reaper 优先的操作系统项目
 
-<h1 align="center"><strong>🦆 Duck — Reaper 优先的操作系统项目</strong></h1>
+<p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native Mora](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20Mora)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
@@ -142,3 +142,7 @@ git submodule update --init --recursive
 ---
 
 <p align="center"><sub>Psychoporter 666 README Standard v1.0 · Ivan-VHS · 2026-11-25 UTC</sub></p>
+
+## 参与贡献
+
+修改代码、契约或文档前，请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。保持更改可审查，运行相关检查，并准确说明实现证据。
