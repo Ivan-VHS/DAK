@@ -8,7 +8,7 @@
 
 The image starts a native DuckOS ELF kernel through Limine. Early in the entry path, DuckOS disables maskable interrupts and installs an IDT for CPU exception vectors 0–31 using the active code selector. The entry point then validates protocol base revision 6, firmware identity, HHDM, executable physical/virtual base, framebuffer and memory map. It converts firmware memory regions to DuckOS Boot Info v1 and verifies that the kernel and framebuffer are covered by the expected reserved/MMIO ranges.
 
-After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel reports available/allocated page counts and emits the `exceptions=0..31 idt=loaded maskable_interrupts=disabled` marker followed by `DUCKOS_BOOT_OK stage=1`. CPU exceptions are logged to COM1 with their vector, error code, RIP and (for page faults) CR2; when a 32-bit RGB framebuffer is available, a fatal banner is drawn before the kernel halts.
+After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel emits the IDT-installed marker before processing firmware responses. It then reports available/allocated page counts and finally emits `DUCKOS_BOOT_OK stage=1`. CPU exceptions are logged to COM1 with their vector, error code, RIP and (for page faults) CR2; when a 32-bit RGB framebuffer is available, a fatal banner is drawn before the kernel halts.
 
 This allocator is intentionally monotonic: it does not free pages, merge ranges, reclaim memory, construct page tables or provide a heap. It is a first native memory primitive, not a finished virtual-memory subsystem.
 
@@ -20,7 +20,7 @@ On Linux x86_64 install gcc, binutils, curl, tar, xorriso and sha256sum.
 
     boot/build-iso.sh
 
-The script downloads the pinned Limine binary release, checks its SHA-256 before use, compiles the freestanding DuckOS kernel and allocator, validates the ELF class/architecture/request section, creates a hybrid BIOS/UEFI ISO and writes a SHA-256 sidecar.
+The script downloads the pinned Limine binary release, checks its SHA-256 before use, compiles the freestanding DuckOS kernel, IDT gate builder, exception entry stubs and allocator, validates the ELF class/architecture/request section, creates a hybrid BIOS/UEFI ISO and writes a SHA-256 sidecar.
 
     boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage1-x86_64.iso
 
@@ -38,7 +38,7 @@ Install qemu-system-x86 and OVMF firmware, then run:
 
 The test boots through BIOS and UEFI and requires both the IDT-installed marker and `DUCKOS_BOOT_OK stage=1` in the serial log. This verifies that `lidt` was reached; it does not inject a fault to exercise every exception handler. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
 
-GitHub Actions builds the same ISO, runs Boot Info and frame-allocator CTests, boots the image in BIOS and OVMF UEFI, and uploads the ISO, checksum and serial logs.
+GitHub Actions builds the same ISO, runs Boot Info, frame-allocator and IDT CTests, boots the image in BIOS and OVMF UEFI, and uploads the ISO, checksum and serial logs.
 
 ## Allocator contract and tests
 
