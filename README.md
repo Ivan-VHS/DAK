@@ -1,29 +1,36 @@
-# 🦆 Duck — Reaper-First Operating-System Project
+# 🦆 DAK — Reaper-First Operating-System Project
 
 <p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
 
-[![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native Mora](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20Mora)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native DAK](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20DAK)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
 > **A Reaper-first system foundation, a native host desktop and a federated local-first toolchain — with every boundary visible.**
 
 **State:** Experimental · x86_64 Stage 1 QEMU-verified · **Version:** Stage 1 boot foundation · **README standard:** Psychoporter 666 v1.0 · **Last reviewed:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="Duck system architecture overview" width="100%"></p>
+<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
 
 ## Quick navigation
 
-[🚀 Demo: Browser reference preview](mora/index.html) · [Documentation](docs/README.md) · [Source](https://github.com/Ivan-VHS/DAK) · [Issues](https://github.com/Ivan-VHS/DAK/issues)
+[🚀 DAK Desktop HTML demo](desktop/demo/index.html) · [Documentation](docs/README.md) · [Source](https://github.com/Ivan-VHS/DAK) · [Issues](https://github.com/Ivan-VHS/DAK/issues)
 
 ## Mission & scope
 
-Duck is an experimental Reaper-first operating-system project. Its current work is intentionally split into a bootable kernel foundation, Reaper policy contracts and a host-native Mora desktop application.
+DAK is an experimental Reaper-first operating-system project. Its current work is intentionally split into a bootable kernel foundation, Reaper policy contracts and a host-native DAK desktop application.
 
 ## Capabilities
 
 - The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, emits DUCKOS_BOOT_OK stage=1 and halts. QEMU BIOS and UEFI checks pass.
 - Reaper provides a reference policy-contract track, including 40 Core Subsystem MVP contracts. Native kernel enforcement remains pending.
-- Mora has a Qt 6 Widgets host-native desktop application with host-managed windows and a local app catalogue. It is not launched by the Stage 1 kernel.
-- mora/index.html remains available as a browser reference preview. It is not a native compositor or the kernel desktop.
+- DAK has a Qt 6 Widgets host-native desktop application with host-managed windows and a local app catalogue. It is not launched by the Stage 1 kernel.
+- desktop/demo/index.html remains available as a browser reference preview. It is not a native compositor or the kernel desktop.
+
+## DAK Desktop
+
+- The Qt 6 host-native shell opens separate top-level windows managed by the host OS; it is not the DAK kernel compositor.
+- Reaper desktop policies validate window actions, geometry, density profiles and versioned session snapshots.
+- The [interactive HTML demo](desktop/demo/index.html) runs locally; resource and device values are illustrative demo data.
+- Architecture and engineering direction: **Ivan-VHS**. See [DAK Desktop](docs/DAK_DESKTOP.md).
 
 ## System map
 
@@ -38,24 +45,24 @@ flowchart TB
     R["Reference contracts"] --> T["Contract tests"]
     T -.-> N["Native enforcement pending"]
   end
-  subgraph HOST["Mora host desktop — separate from kernel"]
+  subgraph HOST["DAK host desktop — separate from kernel"]
     Q["Qt 6 Widgets"] --> W["Host-managed windows"]
     H["Browser reference preview"]
   end
   BOOT -.->|"desktop integration pending"| HOST
 ~~~
 
-## Build native Mora
+## Build native DAK
 
 The release-image path targets Linux x86_64 and requires Git/submodules, GCC/G++, CMake, Python 3 build tooling, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
 
 ~~~sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
-ctest --test-dir build/mora-native --output-on-failure
+cmake -S . -B build/dak-native -DCMAKE_BUILD_TYPE=Release -DDAK_BUILD_NATIVE_DESKTOP=ON
+cmake --build build/dak-native --target dak_desktop_native --parallel
+ctest --test-dir build/dak-native --output-on-failure
 ~~~
 
-The Qt desktop target is optional and is skipped when Qt 6 Widgets is not found. Mora runs as a host-native application; it is not started by the Stage 1 kernel.
+The Qt desktop target is optional and is skipped when Qt 6 Widgets is not found. DAK runs as a host-native application; it is not started by the Stage 1 kernel.
 
 ## Browser reference preview
 
@@ -75,7 +82,7 @@ The browser shell is a reference surface. It is not a native compositor and does
 ## Build the release image
 
 ~~~sh
-bash boot/build-release-iso.sh --work-dir build/release --output dist/Duck-Release-x86_64.iso
+bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Release-x86_64.iso
 ~~~
 
 The release pipeline validates pinned repositories, runs project builds/tests, generates a SHA-256 inventory and assembles a hybrid BIOS/UEFI ISO. This is a source-and-tools preview, not a complete installable OS.
@@ -95,7 +102,7 @@ The release pipeline validates pinned repositories, runs project builds/tests, g
 | Filesystem, service supervisor, installer and persistent session | Pending |
 | Native compositor, GPU and audio stack | Pending |
 
-The current kernel stage stops after firmware-handoff validation and early frame allocation. It does not yet provide process isolation, driver loading, storage, networking, a persistent user session or kernel-enforced sandboxing. Mora catalogue entries do not execute manifest commands or grant hardware privileges.
+The current kernel stage stops after firmware-handoff validation and early frame allocation. It does not yet provide process isolation, driver loading, storage, networking, a persistent user session or kernel-enforced sandboxing. DAK catalogue entries do not execute manifest commands or grant hardware privileges.
 
 ## Architecture targets
 

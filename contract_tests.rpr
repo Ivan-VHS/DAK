@@ -31,6 +31,7 @@ import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
 import "duckos/ui/canvas.rpr" as canvas
 import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
+import "duckos/ui/shell_policy.rpr" as shell_policy
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -180,9 +181,11 @@ make window_c := telemetry["append_window"](window_b[1], sample_c, 2)
 assert(window_c[1] == [sample_b, sample_c], "telemetry history remains bounded")
 assert(telemetry["sequence_valid"](window_c[1]), "telemetry sequence is monotonic")
 
-assert(theme["palette_valid"](theme["palette_ratios"]()), "DuckOS palette proportions")
-assert(theme["palette_color"]("navigation") == "#FFD400", "navigation uses Duck yellow")
-assert(theme["palette_color"]("alert") == "#FFD400", "alerts use Duck yellow")
+assert(theme["palette_valid"](theme["palette_ratios"]()), "DAK palette proportions")
+assert(theme["palette_color"]("page") == "#050505", "DAK uses the Imperial Noir canvas")
+assert(theme["palette_color"]("focus") == "#FFE6A3", "DAK uses warm gold focus feedback")
+assert(theme["palette_color"]("navigation") == "#FFD700", "navigation uses DAK gold")
+assert(theme["palette_color"]("alert") == "#FFD700", "alerts use DAK gold")
 assert(theme["motion_profile"](true) == "static", "reduced-motion preference is respected")
 assert(motion["frame_state"](15900, 16000, false) == "within-budget", "frame stays within 16 ms budget")
 assert(motion["frame_state"](17000, 16000, false) == "late", "late frame is observable")
@@ -204,6 +207,28 @@ assert(desktop["background_state"](25, 4) == "review", "high CPU use is flagged"
 assert(desktop["background_state"](4, 11) == "review", "high memory use is flagged")
 assert(desktop["background_state"](101, 0) == "invalid", "out-of-range metrics are rejected")
 
+
+assert(shell_policy["workspace_id_valid"]("engineering"), "engineering workspace is supported")
+assert(not shell_policy["workspace_id_valid"]("root"), "unknown workspace is rejected")
+assert(shell_policy["density_profile_valid"]("compact"), "compact density is supported")
+assert(not shell_policy["density_profile_valid"]("tiny"), "unknown density is rejected")
+assert(shell_policy["window_mode_valid"]("floating"), "floating window mode is supported")
+assert(not shell_policy["window_mode_valid"]("detached"), "unknown window mode is rejected")
+assert(shell_policy["window_action_valid"]("focus", "user_session"), "focus stays inside the user session")
+assert(not shell_policy["window_action_valid"]("focus", "machine"), "machine scope is denied")
+assert(not shell_policy["window_action_valid"]("delete", "user_session"), "unknown window actions are denied")
+assert(shell_policy["window_placement_valid"](0, 0, 640, 480, 1920, 1080), "bounded window geometry is accepted")
+assert(not shell_policy["window_placement_valid"](-1, 0, 640, 480, 1920, 1080), "negative window coordinates are rejected")
+assert(not shell_policy["window_placement_valid"](0, 0, 2000, 480, 1920, 1080), "oversized window geometry is rejected")
+assert(shell_policy["window_count_valid"](8, 16), "window count stays inside its cap")
+assert(not shell_policy["window_count_valid"](17, 16), "window count over the cap is rejected")
+assert(shell_policy["focus_target_valid"](true, true, true), "focus requires a visible enabled target")
+assert(not shell_policy["focus_target_valid"](true, false, true), "hidden windows cannot receive focus")
+make valid_desktop_session := ["dak.session.v1", "main", "standard", 3, "poi", false, false]
+make invalid_desktop_session := ["dak.session.v1", "main", "standard", 17, "poi", false, false]
+assert(shell_policy["session_snapshot_valid"](valid_desktop_session), "versioned desktop session is accepted")
+assert(not shell_policy["session_snapshot_valid"](invalid_desktop_session), "invalid session snapshot is rejected")
+assert(shell_policy["layout_for"]("engineering") == "editor-diagnostics-inspector", "engineering workspace selects its task layout")
 
 make history_root := [1, 0, "main", "create", "initial"]
 make history_row_a := history["append_revision"]([history_root], 2, 1, "main", "edit", "first")

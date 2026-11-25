@@ -1,14 +1,16 @@
-# Duck documentation
+# DAK documentation
 
 > **Psychoporter 666 documentation profile v1.0** · Reviewed 2026-11-25 (UTC)
 
-Start with the [project README](../README.md) for the current Stage 1 boot evidence, native Mora host application and release boundary. The [documentation map](INFORMATION_ARCHITECTURE.md) links the full catalogue.
+Start with the [project README](../README.md) for the current Stage 1 boot evidence, native DAK host application and release boundary. The [documentation map](INFORMATION_ARCHITECTURE.md) links the full catalogue.
 
 ## Desktop and application interfaces
 
-- [Mora native integration](MORA_INTEGRATION.md) — host-native Qt 6 application, top-level windows and native-service boundary.
-- [Mora Commons](MORA_COMMONS.md) — local app-discovery hub and catalogue responsibilities.
-- [Duck design system](../MORA_DESIGN_SYSTEM.md) — versioned interface tokens and visual language.
+- [DAK Desktop](DAK_DESKTOP.md) — native host shell, Reaper session policies and interactive HTML demo.
+
+- [DAK native integration](MORA_INTEGRATION.md) — host-native Qt 6 application, top-level windows and native-service boundary.
+- [DAK Commons](MORA_COMMONS.md) — local app-discovery hub and catalogue responsibilities.
+- [DAK design system](../MORA_DESIGN_SYSTEM.md) — versioned interface tokens and visual language.
 - [Browser reference preview](../mora/index.html) — retained browser prototype, not a native compositor.
 
 ## Native boot and kernel
@@ -23,7 +25,7 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 - [Ecosystem integration](ECOSYSTEM_INTEGRATION.md) — peer repositories, source pins and adapters.
 - [Repository federation](REPOSITORY_FEDERATION.md) — repository-level integration record.
 - [BAV security bundle](BAV_SECURITY_BUNDLE_V1.md) — declarative format and planned security services; schema validation is not scanning or signature verification.
-- [Windows compatibility](WINDOWS_COMPATIBILITY.md) and [DuckBridge](DUCKBRIDGE.md) — offline inspection and dry-run plans, not target-process execution.
+- [Windows compatibility](WINDOWS_COMPATIBILITY.md) and [DAKBridge](DUCKBRIDGE.md) — offline inspection and dry-run plans, not target-process execution.
 
 ## Planning and evidence
 
