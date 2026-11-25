@@ -67,3 +67,16 @@ These figures describe the QEMU configurations in that workflow, not a minimum h
 This image does not yet provide a reusable allocator/free path, page-table manager, virtual-memory heap or address-space isolation; IDT, exception/interrupt handlers, APIC/PIC, timer or preemptive context switching; processes, threads, syscalls, user mode, scheduler execution or IPC runtime; ACPI/PCI/USB drivers, DMA or production driver manager; filesystem, init/service supervisor, package manager or persistence; native Mora compositor, window manager, GPU acceleration, audio stack or user applications; Secure Boot signing/enrolment, authenticated updates, rollback, installer or production recovery.
 
 It is not tested on physical hardware. The current QEMU BIOS/UEFI tests prove only the declared x86_64 firmware path in the emulator. No blanket device or laptop compatibility claim is made.
+
+## Optional external boot-menu entries
+
+The pinned Limine menu can expose other already-installed boot entries without replacing the DuckOS entry. Add exact UEFI firmware entry descriptions or explicit BIOS disk/partition targets when building the ISO:
+
+```sh
+boot/build-iso.sh --efi-entry "Windows Boot Manager" --efi-entry "rEFInd"
+boot/build-iso.sh --bios-target 1:0 --bios-target 2:1
+```
+
+UEFI entry names are matched against existing firmware Boot#### descriptions. BIOS drive numbers are 1-based; partition 0 selects the whole disk/MBR. Targets are supplied by the operator; the build does not scan NVRAM or physical disks. The renderer rejects malformed/duplicate targets and keeps the existing DuckOS menu entry as the default. The same options are forwarded by `boot/build-release-iso.sh`.
+
+See [desktop and boot target profiles](PLATFORM_PROFILES.md) for all 20 classified entries, switching policy, non-equivalent tools and implementation boundaries. The external menu is a build-time Limine feature; no firmware flashing, loader installation, disk rewrite or Secure Boot guarantee is performed.
