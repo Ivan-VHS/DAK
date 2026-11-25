@@ -32,7 +32,7 @@ require_tool() {
         exit 1
     }
 }
-for tool in gcc ld readelf curl tar sha256sum xorriso find; do require_tool "$tool"; done
+for tool in gcc ld readelf curl tar sha256sum xorriso find make; do require_tool "$tool"; done
 
 target="$(gcc -dumpmachine)"
 case "$target" in
@@ -60,6 +60,16 @@ printf '%s  %s\n' "$LIMINE_BINARY_SHA256" "$archive" | sha256sum --check
 toolchain_dir="$WORK_DIR/toolchain/limine"
 mkdir -p "$toolchain_dir"
 tar -xf "$archive" -C "$toolchain_dir"
+
+# The official binary release ships the host-side 'limine' installer as
+# portable source. Upstream documents rebuilding it with make after unpacking.
+limine_makefile="$(find "$toolchain_dir" -type f -name Makefile -print -quit)"
+[[ -n "$limine_makefile" ]] || {
+    echo "pinned Limine binary archive is missing its host-tool Makefile" >&2
+    exit 1
+}
+limine_source_dir="$(dirname -- "$limine_makefile")"
+make -C "$limine_source_dir"
 
 find_one() {
     local filename="$1"
