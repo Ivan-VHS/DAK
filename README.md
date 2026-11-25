@@ -14,7 +14,7 @@
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
   <a href="docs/IMPLEMENTATION_ROADMAP.md">Roadmap</a> ·
-  <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
+  <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a> · <a href="docs/DAK_SYSTEM_SERVICES_V1.md">System services v1</a>
 </p>
 
 > **Current release boundary:** DAK has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DAK_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
@@ -56,6 +56,7 @@ flowchart TB
 | **Mora desktop** | Qt 6 Widgets host-native shell, host-managed top-level windows, local app catalogue, Poi drafts, user-selected read-only file listing, plus browser reference preview | Native to the host OS; not yet launched inside a DAK user session or kernel compositor |
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
+| **Reaper-native system services** | Four Reaper policy modules for the installer, driver runtime, package manager and A/B updates | Plan-only decisions; no privileged disk, package, driver, firmware or boot-slot effects |
 | **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
 | **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DAK kernel executables |
 | **Release pipeline** | Source-pin validation, project builds/tests, SHA-256 inventory, hybrid BIOS/UEFI ISO and QEMU boot checks | Preview source-and-tools distribution, not a complete installable OS |
