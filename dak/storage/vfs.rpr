@@ -9,7 +9,7 @@ export craft components_valid(components) {
         when kind(component) != "text" {
             yield false
         }
-        when component == "" or component == "." or component == ".." {
+        when component == "" or component == "." or component == ".." or size(component) > 255 {
             yield false
         }
         when contains(component, "/") or contains(component, "\\") {
