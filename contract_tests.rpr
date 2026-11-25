@@ -31,6 +31,10 @@ import "dak/security/plugin_sandbox.rpr" as plugin_sandbox
 import "dak/ui/canvas.rpr" as canvas
 import "dak/input/spatial.rpr" as spatial_input
 import "dak/ui/desktop.rpr" as desktop
+import "dak/system/installer.rpr" as installer
+import "dak/drivers/runtime.rpr" as driver_runtime
+import "dak/packages/manager.rpr" as packages
+import "dak/system/updates.rpr" as updates
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -282,3 +286,81 @@ assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node",
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
 emit "DAK_REAPER_CONTRACTS_OK"
+
+
+# DAK native-system-service contracts. These prove policy decisions only.
+# They do not write disks, install packages, map drivers or activate boot slots.
+
+make install_target := ["disk0", "x86_64", 1000000, 512, "uefi", true]
+make install_target_no_consent := ["disk0", "x86_64", 1000000, 512, "uefi", false]
+assert(installer["target_valid"](install_target), "installer accepts a bounded x86_64 UEFI target")
+assert(not installer["target_valid"](["", "x86_64", 1000000, 512, "uefi", true]), "installer rejects an unnamed disk")
+assert(installer["admission"](install_target, "verified", "ready") == "admit-plan-only", "installer admits only a verified, recoverable plan")
+assert(installer["admission"](install_target_no_consent, "verified", "ready") == "reject-consent", "installer requires explicit destructive-operation consent")
+assert(installer["admission"](install_target, "unverified", "ready") == "reject-source-trust", "installer rejects an unverified source")
+assert(installer["admission"](install_target, "verified", "missing") == "reject-recovery", "installer requires a recovery path")
+
+make install_layout := [
+    ["efi", "efi", 4096, 4096],
+    ["system_a", "system", 8192, 131072],
+    ["system_b", "system", 139264, 131072],
+    ["recovery", "recovery", 270336, 65536]
+]
+make overlapping_layout := [
+    ["efi", "efi", 4096, 4096],
+    ["system_a", "system", 8192, 131072],
+    ["system_b", "system", 102400, 131072],
+    ["recovery", "recovery", 270336, 65536]
+]
+assert(installer["layout_valid"](install_layout, 1000000), "installer accepts ordered non-overlapping A/B and recovery partitions")
+assert(not installer["layout_valid"](overlapping_layout, 1000000), "installer rejects overlapping partitions")
+assert(installer["transition_valid"]("planned", "validated"), "installer advances a validated plan")
+assert(not installer["transition_valid"]("planned", "committed"), "installer cannot skip staging and boot verification")
+assert(installer["commit_policy"]("ready_to_commit", true, true, true, true) == "commit-plan-only", "installer requires all commit gates")
+assert(installer["commit_policy"]("ready_to_commit", true, true, true, false) == "reject-boot-unverified", "installer refuses an unverified boot result")
+
+make driver_device := ["nvme0", "pci", 4096, 256, 11, true]
+make verified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "verified", 65536]
+make unverified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "unverified", 65536]
+make wrong_bus_driver := ["nvme.sample", 1, "usb", "x86_64", ["read.device"], "Ivan-VHS", "verified", 65536]
+make driver_grants := ["read.device"]
+assert(driver_runtime["admission"](verified_driver, driver_device, "x86_64", 1, ["pci", "usb"], driver_grants) == "admit-isolated-plan-only", "driver admission requires verified provenance and least authority")
+assert(driver_runtime["admission"](unverified_driver, driver_device, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-signature", "driver runtime rejects unverified signatures")
+assert(driver_runtime["admission"](wrong_bus_driver, driver_device, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-device-match", "driver runtime rejects a bus mismatch")
+assert(driver_runtime["transition_valid"]("verified", "admitted"), "driver runtime advances verified metadata")
+assert(not driver_runtime["transition_valid"]("candidate", "running"), "driver runtime cannot jump directly to execution")
+assert(driver_runtime["unload_policy"]("running", true, true, true) == "unload-plan-only", "driver unload requires quiesced IRQ and DMA")
+assert(driver_runtime["unload_policy"]("running", true, false, true) == "reject-dma-active", "driver unload refuses active DMA")
+
+make installed_ids := ["lib.core", "shell.base"]
+make app_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "verified", 1048576]
+make unsigned_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "unverified", 1048576]
+assert(packages["package_valid"](app_package), "package manager accepts a bounded package manifest")
+assert(not packages["package_valid"](["", 1, 0, 0, "x86_64", 1, "application", [], [], "verified", 1048576]), "package manager rejects an empty package identity")
+assert(packages["dependencies_satisfied"](["lib.core"], installed_ids), "package manager resolves installed dependencies")
+assert(not packages["dependencies_satisfied"](["missing.lib"], installed_ids), "package manager rejects missing dependencies")
+assert(packages["paths_valid"]([["usr", "bin", "example"], ["usr", "share", "example"]]), "package manager accepts safe relative payload paths")
+assert(not packages["paths_valid"]([["usr", "..", "system"]]), "package manager rejects parent traversal in payload paths")
+assert(packages["admission"](app_package, "x86_64", 1, installed_ids) == "admit-transaction-plan-only", "package manager admits a verified dependency-complete plan")
+assert(packages["admission"](unsigned_package, "x86_64", 1, installed_ids) == "reject-signature", "package manager rejects unverified package provenance")
+assert(packages["transition_valid"]("resolved", "staged"), "package transaction may stage after dependency resolution")
+assert(not packages["transition_valid"]("planned", "committed"), "package transaction cannot skip verification and staging")
+assert(packages["remove_policy"]("installed", 0, false) == "remove-plan-only", "package removal is allowed only as a plan")
+assert(packages["remove_policy"]("installed", 1, false) == "reject-dependents", "package manager protects active dependents")
+assert(packages["remove_policy"]("installed", 0, true) == "reject-protected", "package manager protects system packages")
+
+make update_manifest := ["stable", 1, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "verified"]
+make downgrade_manifest := ["stable", 0, 9, 0, "x86_64", 3, 10485760, "sha256:payload", "DAK Release", "verified"]
+make unsigned_update := ["stable", 1, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "unverified"]
+assert(updates["manifest_valid"](update_manifest), "update manager accepts a bounded signed manifest")
+assert(updates["admission"](update_manifest, "x86_64", [1, 0, 0], 1) == "stage-inactive-slot-plan-only", "update manager stages a newer verified image")
+assert(updates["admission"](downgrade_manifest, "x86_64", [1, 0, 0], 1) == "reject-downgrade", "update manager rejects version rollback")
+assert(updates["admission"](unsigned_update, "x86_64", [1, 0, 0], 1) == "reject-signature", "update manager rejects unverified update signatures")
+assert(updates["inactive_slot"]("A") == "B", "A/B update targets the inactive B slot")
+assert(updates["inactive_slot"]("B") == "A", "A/B update targets the inactive A slot")
+assert(updates["inactive_slot"]("unknown") == "", "A/B update rejects an unknown active slot")
+assert(updates["transition_valid"]("staged", "armed"), "update manager arms only a staged payload")
+assert(not updates["transition_valid"]("staged", "confirmed"), "update manager requires a successful boot before confirmation")
+assert(updates["boot_result_policy"]("healthy", 1, 3) == "confirm-plan-only", "update manager confirms only a healthy boot")
+assert(updates["boot_result_policy"]("failed", 3, 3) == "rollback-plan-only", "update manager rolls back after the bounded retry limit")
+assert(updates["boot_result_policy"]("pending", 1, 3) == "await-confirmation", "update manager waits for explicit boot confirmation")
