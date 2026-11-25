@@ -347,6 +347,9 @@ assert(vm["translate"](mapped[1], 17, 42, 4112, "execute")[0] == "fault", "writa
 assert(vm["map"](mapped[1], [8192, 16384, 4096, "r", 42, 17, "allocated"])[0] == "reject", "overlapping virtual mappings are rejected")
 assert(vm["map"]([], [4096, 8192, 4096, "rwx", 42, 17, "allocated"])[0] == "reject", "W+X mapping is impossible")
 assert(vm["map"]([], [4096, 8192, 4096, "rw", 42, 17, "unverified"])[0] == "reject", "mapping requires allocator-issued backing state")
+make corrupted_mapping_table := [[4096, 8192, 8192, "rw", 42, 17, "allocated"], [6144, 16384, 4096, "r", 42, 17, "allocated"]]
+assert(not vm["page_map_valid"](corrupted_mapping_table), "page map validation catches pre-existing overlaps")
+assert(vm["translate"](corrupted_mapping_table, 17, 42, 4112, "read")[0] == "fault", "translation refuses a corrupt page map")
 make unmapped := vm["unmap"](mapped[1], 17, 42, 4096)
 assert(unmapped[0] == "unmapped" and size(unmapped[1]) == 0, "unmap removes only the owning address-space mapping")
 
