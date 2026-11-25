@@ -27,7 +27,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 |---|---|---|
 | C11 build | Host CMake/CTest plus freestanding x86_64 kernel target | The freestanding entry is a narrow C11 platform bridge; Reaper is not yet a freestanding kernel compiler |
 | Boot handoff | Versioned Boot Info v1, Limine BIOS/UEFI handoff and native kernel entry | Limine is a pinned third-party bootloader; no in-house UEFI loader or Secure Boot policy |
-| Validation and early memory | Boot Info and memory-map validation; monotonic 4 KiB allocator over validated USABLE regions, allocating and clearing one HHDM-mapped frame | No free/reclaim, page tables, heap or virtual-memory manager |
+| Validation and early memory | Boot Info and memory-map validation; bounded single-core 4 KiB physical-frame extent allocator with contiguous alignment, release, coalescing and HHDM allocate/free/reuse smoke test | Page tables, heap, SMP locking, reclaim and virtual-memory manager remain pending |
 | Reaper contracts | Boot phases, resource budgets, scheduling/IPC policies, capabilities and service restart decisions | Reference-runtime policy, not kernel enforcement |
 | Mora | Qt 6 Widgets host-native shell, local app catalogue, native host windows and a retained browser reference preview | Not yet a kernel-launched DuckOS desktop or privileged shell |
 | Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature, non-destructive deployment planning and an experimental x86_64 Stage 1 ISO pipeline | No disk installer, production image, verified boot chain or supported hardware matrix |
@@ -58,10 +58,10 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D2 — Physical memory and virtual address spaces
 
-**Status: Partial — early monotonic physical-frame allocator.**
+**Status: Partial — reusable single-core physical-frame allocator; virtual memory is pending.**
 
 - Implement a physical page-frame allocator from the validated firmware memory map.
-- **Delivered in Stage 1:** freestanding 4 KiB monotonic allocation from validated USABLE regions, with a 1 MiB low-memory floor and HHDM zeroing of the first allocated frame. There is no free/reclaim path, page-table construction or heap yet.
+- **Delivered in Stage 1:** bounded freestanding 4 KiB extent allocation from validated USABLE regions, a 1 MiB low-memory floor, power-of-two alignment for contiguous runs, tracked release, adjacent-range coalescing and HHDM allocate/clear/release/reallocate verification. It remains single-core; there is no page-table construction, virtual-memory manager, heap or SMP locking yet.
 - Reserve firmware, kernel, initramfs, framebuffer, ACPI and boot-service regions before allocating.
 - Add page-table construction, mapping permissions, guard regions, canonical-address checks and safe unmap/free behavior.
 - Specify ownership, alignment, overflow, fragmentation and allocation-failure semantics.

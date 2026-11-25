@@ -17,7 +17,7 @@
   <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
 </p>
 
-> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
+> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates, clears, releases and verifies reuse of an early 4 KiB physical frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
 
 ## System map
 
@@ -28,7 +28,7 @@ flowchart TB
   subgraph BOOT["DuckOS native boot path — QEMU verified"]
     L["Limine firmware handoff"] --> B["x86_64 Stage 1 entry"]
     B --> V["Boot Info v1 validation"]
-    V --> F["Early 4 KiB frame allocation"]
+    V --> F["Physical frame allocate / free / reuse smoke test"]
     F --> M["DUCKOS_BOOT_OK stage=1"]
     M --> H["Kernel halts"]
   end
@@ -56,7 +56,7 @@ flowchart TB
 | **Mora desktop** | Qt 6 Widgets host-native shell, host-managed top-level windows, local app catalogue, Poi drafts, user-selected read-only file listing, plus browser reference preview | Native to the host OS; not yet launched inside a DuckOS user session or kernel compositor |
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
-| **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
+| **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, bounded reusable physical-frame extent allocation and serial boot marker | Stage 1 only; no process or service session |
 | **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DuckOS kernel executables |
 | **Release pipeline** | Source-pin validation, project builds/tests, SHA-256 inventory, hybrid BIOS/UEFI ISO and QEMU boot checks | Preview source-and-tools distribution, not a complete installable OS |
 
@@ -122,9 +122,9 @@ The ISO is content-sized. It is not padded to 4 GiB: empty bytes would only incr
 | Layer | Status |
 |---|---|
 | Limine firmware handoff and Boot Info v1 validation | Implemented and QEMU-verified |
-| Early physical-frame allocation | Implemented for the Stage 1 boot path |
+| Reusable physical-frame extent allocator | Implemented for the Stage 1 boot path; single-core and bounded |
 | Reaper core subsystem MVP (40 contracts) | Implemented on the reference runtime; native enforcement pending |
-| Reusable memory manager, page tables and address spaces | Pending |
+| Virtual memory manager, page tables and address spaces | Pending |
 | Interrupts, timers, preemptive scheduler and process model | Pending |
 | Syscall ABI, kernel-enforced capabilities and zero-copy IPC | Pending |
 | PCI/USB/ACPI discovery and isolated driver runtime | Pending |

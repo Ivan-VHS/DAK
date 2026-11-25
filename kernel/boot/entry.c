@@ -394,20 +394,38 @@ static int initialize_early_memory(uint32_t memory_region_count) {
         return 0;
     }
 
+    const uint64_t original_frame_phys = first_frame_phys;
     if (hhdm->offset > (uint64_t)UINTPTR_MAX ||
-        first_frame_phys > (uint64_t)UINTPTR_MAX - hhdm->offset) {
+        original_frame_phys > (uint64_t)UINTPTR_MAX - hhdm->offset) {
         return 0;
     }
 
     const uintptr_t mapped_address =
-        (uintptr_t)(hhdm->offset + first_frame_phys);
+        (uintptr_t)(hhdm->offset + original_frame_phys);
     volatile uint64_t *page = (volatile uint64_t *)mapped_address;
     for (size_t index = 0u;
          index < (size_t)(DUCKOS_FRAME_PAGE_SIZE / sizeof(uint64_t));
          ++index) {
         page[index] = 0u;
     }
-    return 1;
+
+    if (duckos_frame_allocator_release(
+            &early_frame_allocator, original_frame_phys, 1u
+        ) != DUCKOS_FRAME_ALLOCATOR_OK) {
+        return 0;
+    }
+
+    uint64_t reused_frame_phys = 0u;
+    if (duckos_frame_allocator_allocate(
+            &early_frame_allocator, &reused_frame_phys
+        ) != DUCKOS_FRAME_ALLOCATOR_OK || reused_frame_phys != original_frame_phys) {
+        return 0;
+    }
+
+    first_frame_phys = reused_frame_phys;
+    return early_frame_allocator.allocated_pages == 1u &&
+        early_frame_allocator.free_pages + early_frame_allocator.allocated_pages ==
+            early_frame_allocator.total_pages;
 }
 
 static void boot_failure(const char *reason) __attribute__((noreturn));
@@ -527,13 +545,15 @@ void _start(void) {
     serial_decimal(info.kernel_size);
     serial_write("\n");
 
-    serial_write("memory=early-frame-allocator page_size=4096 usable_pages=");
+    serial_write("memory=physical-frame-extents page_size=4096 usable_pages=");
     serial_decimal(early_frame_allocator.total_pages);
+    serial_write(" free_pages=");
+    serial_decimal(early_frame_allocator.free_pages);
     serial_write(" allocated_pages=");
     serial_decimal(early_frame_allocator.allocated_pages);
     serial_write(" first_frame_phys=");
     serial_hex(first_frame_phys);
-    serial_write("\n");
+    serial_write(" reuse=verified\n");
 
     if (active_framebuffer != NULL) {
         draw_boot_screen();
@@ -548,6 +568,6 @@ void _start(void) {
         serial_write("framebuffer=unavailable; serial console remains active\n");
     }
 
-    serial_write("DUCKOS_BOOT_OK stage=1 handoff=v1 frames=1 reaper_policy=reference-only\n");
+    serial_write("DUCKOS_BOOT_OK stage=1 handoff=v1 frames=allocate-release-reallocate reaper_policy=reference-only\n");
     halt_forever();
 }
