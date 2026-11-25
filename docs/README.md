@@ -1,5 +1,9 @@
 # DuckOS documentation
 
+## NEXUS system architecture
+
+[NEXUS System Components and Internal Services v1](NEXUS_SYSTEM_SERVICES_V1.md) defines component ownership, the six internal service descriptors, cross-repository boundaries and implementation gates. Its machine-readable registry is `../catalogs/nexus-system-services.v1.json` and its schema is `../schemas/nexus-system-services.v1.schema.json`.
+
 ## Desktop and application interfaces
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.

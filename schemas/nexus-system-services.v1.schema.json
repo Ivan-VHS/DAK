@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/nexus-system-services.v1.schema.json",
+  "title": "NEXUS System Services v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "identity",
+    "components",
+    "services",
+    "integration_invariants"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.nexus-system-services.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "operating_system",
+        "systems_language",
+        "repository_identity_policy",
+        "scope"
+      ],
+      "properties": {
+        "architecture": {
+          "const": "NEXUS"
+        },
+        "operating_system": {
+          "const": "DuckOS"
+        },
+        "systems_language": {
+          "const": "Reaper"
+        },
+        "repository_identity_policy": {
+          "const": "immutable"
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 300
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "owner_repository",
+          "provider_repositories",
+          "maturity",
+          "current_scope",
+          "missing_capabilities",
+          "evidence",
+          "interfaces"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "kernel_core",
+              "nexus_shell",
+              "audio_subsys",
+              "security_module",
+              "network_stack",
+              "graphics_engine",
+              "build_toolchain",
+              "ai_layer"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 32
+          },
+          "owner_repository": {
+            "enum": [
+              "Ivan-VHS/DuckOS",
+              "Ivan-VHS/Reaper",
+              "unassigned"
+            ]
+          },
+          "provider_repositories": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "Ivan-VHS/DuckOS",
+                "Ivan-VHS/Reaper",
+                "Ivan-VHS/Pytyliki",
+                "Ivan-VHS/OPlague",
+                "Ivan-VHS/VentuSample"
+              ]
+            }
+          },
+          "maturity": {
+            "enum": [
+              "partial",
+              "specified",
+              "reserved"
+            ]
+          },
+          "current_scope": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 300
+            }
+          },
+          "missing_capabilities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 300
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 300
+            }
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 200
+            }
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "service_type",
+          "owner_repository",
+          "maturity",
+          "runtime_state",
+          "execution_model",
+          "readiness",
+          "component_dependencies",
+          "project_dependencies",
+          "purpose",
+          "prerequisites",
+          "outputs",
+          "host_technology_options",
+          "safety_boundary"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,47}$"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{2,47}$"
+          },
+          "service_type": {
+            "const": "internal_system_service"
+          },
+          "owner_repository": {
+            "const": "Ivan-VHS/DuckOS"
+          },
+          "maturity": {
+            "const": "specified"
+          },
+          "runtime_state": {
+            "const": "not_implemented"
+          },
+          "execution_model": {
+            "const": "planned_user_space_service"
+          },
+          "readiness": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,63}$"
+          },
+          "component_dependencies": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "kernel_core",
+                "nexus_shell",
+                "audio_subsys",
+                "security_module",
+                "network_stack",
+                "graphics_engine",
+                "build_toolchain",
+                "ai_layer"
+              ]
+            }
+          },
+          "project_dependencies": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "Ivan-VHS/DuckOS",
+                "Ivan-VHS/Reaper",
+                "Ivan-VHS/Pytyliki",
+                "Ivan-VHS/OPlague",
+                "Ivan-VHS/VentuSample"
+              ]
+            }
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 400
+          },
+          "prerequisites": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 300
+            }
+          },
+          "outputs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 250
+            }
+          },
+          "host_technology_options": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 300
+            }
+          },
+          "safety_boundary": {
+            "type": "string",
+            "minLength": 25,
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "integration_invariants": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 20,
+        "maxLength": 400
+      }
+    }
+  }
+}
