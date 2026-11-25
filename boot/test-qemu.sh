@@ -51,6 +51,11 @@ run_bios() {
         cat "$log" >&2 || true
         return 1
     fi
+    if ! grep -Fq "vm=map-protect-unmap-verified" "$log"; then
+        echo "BIOS QEMU did not pass the live virtual-memory smoke test:" >&2
+        cat "$log" >&2 || true
+        return 1
+    fi
     if ! grep -Fq "DUCKOS_BOOT_OK stage=2" "$log"; then
         echo "BIOS QEMU did not reach the DuckOS boot handoff:" >&2
         cat "$log" >&2 || true
@@ -84,6 +89,11 @@ run_uefi() {
     fi
     if ! grep -Fq "exceptions=0..31 idt=loaded maskable_interrupts=disabled" "$log"; then
         echo "UEFI QEMU did not confirm CPU exception IDT installation:" >&2
+        cat "$log" >&2 || true
+        return 1
+    fi
+    if ! grep -Fq "vm=map-protect-unmap-verified" "$log"; then
+        echo "UEFI QEMU did not pass the live virtual-memory smoke test:" >&2
         cat "$log" >&2 || true
         return 1
     fi
