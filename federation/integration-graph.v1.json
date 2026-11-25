@@ -116,14 +116,11 @@
       "status": "policy_adapter_only",
       "transport": "trusted-ingest-normalized-record",
       "artifacts": [
-        "projects/oplague/schemas/oplage.gpu-telemetry.v1.schema.json",
-        "projects/oplague/tools/gpu_telemetry_export.py",
-        "projects/oplague/docs/GPU_TELEMETRY_BRIDGE_V1.md",
         "duckos/gpu/oplage_bridge.rpr",
         "duckos/system/telemetry.rpr",
         "contract_tests.rpr"
       ],
-      "boundary": "Reaper adapter accepts normalized records only after a trusted ingest layer validates schema and canonical digest. Production JSON ingestion, publisher attestation and AMD/Intel providers remain pending. Telemetry grants no hardware capabilities."
+      "boundary": "The DuckOS Reaper policy adapter and contract tests exist, but the OPlague schema/exporter/docs for this contract are only on upstream main and are absent from the OPlague commit pinned by DuckOS. This is not end-to-end producer/consumer interoperability until a reviewed upstream pin update includes those files. The adapter requires trusted JSON/schema/digest ingestion; publisher attestation and AMD/Intel providers remain pending."
     },
     {
       "id": "ventusample.reaper.pack.v1",
@@ -135,10 +132,9 @@
       "transport": "offline-json-manifest",
       "artifacts": [
         "projects/ventusample/schemas/ventusample.pack.v1.schema.json",
-        "projects/ventusample/docs/REAPER_PACK_AUDIT.md",
-        "projects/reaper/docs/NEXUS_FEDERATION_PROFILE_V1.md"
+        "projects/ventusample/docs/REAPER_PACK_AUDIT.md"
       ],
-      "boundary": "Metadata interface is documented. No Reaper pack consumer implementation was found in the pinned Reaper source; do not claim a working runtime integration."
+      "boundary": "The VentuSample pack-v1 producer schema and audit document exist in the pinned VentuSample source. The pinned Reaper checkout has no pack consumer or the newer NEXUS federation profile document; treat the edge as metadata-only and specified-only."
     }
   ],
   "release_pipeline": {
