@@ -196,7 +196,7 @@
       "current_evidence": [
         "mora/index.html",
         "docs/MORA_INTEGRATION.md",
-        "duckos/desktop/reaper.rpr",
+        "duckos/ui/desktop.rpr",
         "duckos/graphics/compositor.rpr"
       ],
       "verification": [
