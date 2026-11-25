@@ -12,7 +12,7 @@ DuckOS is the operating-system project. **Mora** is its unified desktop shell an
 - **Hardware and compatibility:** bounded read-only PCI/USB or Windows PnP inventory, PE inspection and dry-run runtime discovery.
 - **Deployment tooling:** verified component bundles and non-destructive disk-layout plans.
 
-An experimental x86_64 firmware-bootable stage-0 image is built and QEMU-verified in both BIOS and UEFI modes; see [Bootable image](docs/BOOTABLE_IMAGE.md) and the [verified CI run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). It uses pinned Limine media, a DuckOS-owned kernel entry and Boot Info v1 handoff validation. This is not yet a complete OS. Processes, scheduler execution, syscalls, page allocator, drivers, filesystem, service runtime and native Mora compositor remain unimplemented. The [implementation status](docs/IMPLEMENTATION_STATUS.md) and [roadmap](docs/IMPLEMENTATION_ROADMAP.md) separate delivered, partial and planned work.
+An experimental x86_64 firmware-bootable stage-1 image is built and QEMU-verified in both BIOS and UEFI modes; see [Bootable image](docs/BOOTABLE_IMAGE.md) and the [verified CI run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). It uses pinned Limine media, a DuckOS-owned kernel entry, Boot Info v1 validation and a native monotonic 4 KiB physical-frame allocator that allocates only from validated usable RAM. The allocator is an early-boot primitive: it has no free/reclaim path or page-table manager. This is not yet a complete OS. Processes, scheduler execution, syscalls, reusable memory management, drivers, filesystem, service runtime and native Mora compositor remain unimplemented. The [implementation status](docs/IMPLEMENTATION_STATUS.md) and [roadmap](docs/IMPLEMENTATION_ROADMAP.md) separate delivered, partial and planned work.
 
 ## Workspace
 
@@ -35,7 +35,7 @@ duckos reaper check ./examples/program.rpr
 
 On Linux x86_64, install GCC, binutils, curl, tar, xorriso and sha256sum, then run:
 
-    boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage0-x86_64.iso
+    boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage1-x86_64.iso
 
 The pinned Limine binary archive is SHA-256 checked before use. The ISO is intended for BIOS and UEFI x86_64 boot. QEMU verification with OVMF is documented in [Bootable image](docs/BOOTABLE_IMAGE.md); a successful build alone is not evidence that every physical machine is supported.
 
