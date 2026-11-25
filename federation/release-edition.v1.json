@@ -69,5 +69,7 @@
     "driver_installation": false,
     "firmware_writes": false,
     "artificial_size_padding": false
-  }
+  },
+  "source_layout": "vendored-monorepo",
+  "source_provenance": "federation/vendor-sources.v1.json"
 }

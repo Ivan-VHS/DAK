@@ -1,0 +1,66 @@
+{
+  "schema": "duckos.vendor-sources.v1",
+  "version": 1,
+  "strategy": "git-subtree-squash",
+  "projects_root": "projects",
+  "total_source_files": 1321,
+  "total_source_bytes": 8799019,
+  "sources": [
+    {
+      "id": "reaper",
+      "repository": "Ivan-VHS/Reaper",
+      "upstream_url": "https://github.com/Ivan-VHS/Reaper.git",
+      "upstream_branch": "main",
+      "upstream_commit": "95605b454ecef6c01da6ef24dd8671b45798306a",
+      "upstream_tree_sha": "9005db4985b95d9f2a7d24b51344f159af837a33",
+      "path": "projects/reaper",
+      "file_count": 426,
+      "content_bytes": 4099931,
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "commit_signature_verified": true
+    },
+    {
+      "id": "pytyliki",
+      "repository": "Ivan-VHS/Pytyliki",
+      "upstream_url": "https://github.com/Ivan-VHS/Pytyliki.git",
+      "upstream_branch": "main",
+      "upstream_commit": "455e1c9d397b6dd308a9ce68aa194e686fa4fa1a",
+      "upstream_tree_sha": "caf4f2411b63c92869018eed13d3ff15714280ed",
+      "path": "projects/pytyliki",
+      "file_count": 327,
+      "content_bytes": 1539388,
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "commit_signature_verified": true
+    },
+    {
+      "id": "oplague",
+      "repository": "Ivan-VHS/OPlague",
+      "upstream_url": "https://github.com/Ivan-VHS/OPlague.git",
+      "upstream_branch": "main",
+      "upstream_commit": "a7b9d6bca778cd0556fd7c0f621e7715ad282063",
+      "upstream_tree_sha": "60616bd78e1d856751887fd684fb510ae22df520",
+      "path": "projects/oplague",
+      "file_count": 286,
+      "content_bytes": 1523039,
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "commit_signature_verified": true
+    },
+    {
+      "id": "ventusample",
+      "repository": "Ivan-VHS/VentuSample",
+      "upstream_url": "https://github.com/Ivan-VHS/VentuSample.git",
+      "upstream_branch": "main",
+      "upstream_commit": "8363c33138027856ac6cac4821b471e990caeace",
+      "upstream_tree_sha": "001f9e9ac4ce8f00c4b2697b1b901e77a6f8990d",
+      "path": "projects/ventusample",
+      "file_count": 282,
+      "content_bytes": 1636661,
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "commit_signature_verified": true
+    }
+  ]
+}

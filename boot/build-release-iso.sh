@@ -22,7 +22,7 @@ require_tool() {
         exit 1
     }
 }
-for tool in git python3 cmake ctest gcc g++ node npm tar sha256sum install find readelf; do
+for tool in git python3 jq cmake ctest gcc g++ node npm tar sha256sum install find readelf; do
     require_tool "$tool"
 done
 
@@ -33,11 +33,8 @@ OUTPUT="$OUTPUT_DIR/$(basename -- "$OUTPUT")"
 BUILD_DIR="$WORK_DIR/build"
 PAYLOAD="$WORK_DIR/payload"
 
-echo "[1/8] Synchronize and validate exact source pins"
-git -C "$ROOT" submodule sync --recursive
-git -C "$ROOT" submodule update --init --recursive
-python3 "$ROOT/tools/federate_repositories.py" validate --json
-python3 "$ROOT/tools/federate_repositories.py" status --json
+echo "[1/8] Validate self-contained vendored source trees"
+bash "$ROOT/scripts/vendor-ecosystem.sh" --verify
 
 for project in pytyliki reaper oplague ventusample; do
     [[ -f "$ROOT/projects/$project/LICENSE" ]] || {
@@ -134,10 +131,10 @@ cat > "$PAYLOAD/duckos/release/BUILD-INFO.txt" <<EOF
 DuckOS Ecosystem Release Edition
 Build date (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)
 DuckOS source revision: $(git -C "$ROOT" rev-parse HEAD)
-Reaper: $(git -C "$ROOT/projects/reaper" rev-parse HEAD)
-Pytyliki: $(git -C "$ROOT/projects/pytyliki" rev-parse HEAD)
-OPlague: $(git -C "$ROOT/projects/oplague" rev-parse HEAD)
-VentuSample: $(git -C "$ROOT/projects/ventusample" rev-parse HEAD)
+Reaper: $(jq -r '.sources[] | select(.id == "reaper") | .upstream_commit' "$ROOT/federation/vendor-sources.v1.json")
+Pytyliki: $(jq -r '.sources[] | select(.id == "pytyliki") | .upstream_commit' "$ROOT/federation/vendor-sources.v1.json")
+OPlague: $(jq -r '.sources[] | select(.id == "oplague") | .upstream_commit' "$ROOT/federation/vendor-sources.v1.json")
+VentuSample: $(jq -r '.sources[] | select(.id == "ventusample") | .upstream_commit' "$ROOT/federation/vendor-sources.v1.json")
 
 Mora: offline browser desktop shell with local application state.
 Host tools: Linux x86_64 builds, not DuckOS kernel executables.

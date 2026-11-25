@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/vendor-sources.v1.schema.json",
+  "title": "DuckOS vendored source provenance lock v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "strategy",
+    "projects_root",
+    "total_source_files",
+    "total_source_bytes",
+    "sources"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.vendor-sources.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "strategy": {
+      "const": "git-subtree-squash"
+    },
+    "projects_root": {
+      "const": "projects"
+    },
+    "total_source_files": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "total_source_bytes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "repository",
+          "upstream_url",
+          "upstream_branch",
+          "upstream_commit",
+          "upstream_tree_sha",
+          "path",
+          "file_count",
+          "content_bytes",
+          "license",
+          "license_file",
+          "commit_signature_verified"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "reaper",
+              "pytyliki",
+              "oplague",
+              "ventusample"
+            ]
+          },
+          "repository": {
+            "type": "string",
+            "pattern": "^Ivan-VHS/[A-Za-z0-9_.-]+$"
+          },
+          "upstream_url": {
+            "type": "string",
+            "pattern": "^https://github\\\\.com/Ivan-VHS/[A-Za-z0-9_.-]+\\\\.git$"
+          },
+          "upstream_branch": {
+            "const": "main"
+          },
+          "upstream_commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "upstream_tree_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^projects/[a-z][a-z0-9-]*$"
+          },
+          "file_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "content_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "license": {
+            "enum": [
+              "MIT",
+              "Apache-2.0"
+            ]
+          },
+          "license_file": {
+            "const": "LICENSE"
+          },
+          "commit_signature_verified": {
+            "const": true
+          }
+        }
+      }
+    }
+  }
+}

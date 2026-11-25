@@ -1,71 +1,77 @@
-# DuckOS repository federation
+# DuckOS monorepo and source provenance
 
-DuckOS keeps the four specialist repositories as pinned Git submodules. This gives the OS workspace a real checkout of every source project while preserving each project's own Git history, release cadence, build system, contributors and licence notices.
+DuckOS is the integration host and the single monorepo checkout. The four specialist upstream repositories are vendored as ordinary tracked directory trees under `projects/`. A normal clone contains every source file; it does not require submodule initialization, a second checkout or network access to populate the source trees.
 
-## Included repositories
+## Monorepo layout
 
-| Workspace path | Upstream project | Domain | License |
+| Workspace path | Upstream project | Source responsibility | License |
 |---|---|---|---|
-| `projects/pytyliki` | [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | C11 processor and host systems workstation | MIT |
-| `projects/reaper` | [Reaper](https://github.com/Ivan-VHS/Reaper) | language, reference runtime, IDE and toolchain | Apache-2.0 |
-| `projects/oplague` | [OPlague](https://github.com/Ivan-VHS/OPlague) | read-only device and driver evidence workstation | Apache-2.0 |
-| `projects/ventusample` | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | C++20 procedural audio and offline DSP | Apache-2.0 |
+| `projects/reaper` | [Reaper](https://github.com/Ivan-VHS/Reaper) | Primary language, compiler/toolchain and system-policy contracts | Apache-2.0 |
+| `projects/pytyliki` | [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | C11 processor, memory and diagnostics workstation | MIT |
+| `projects/oplague` | [OPlague](https://github.com/Ivan-VHS/OPlague) | Read-only device, driver, signature and GPU evidence | Apache-2.0 |
+| `projects/ventusample` | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | C++20 procedural audio and offline DSP workstation | Apache-2.0 |
 
-DuckOS itself is the fifth repository and remains the superproject. It must not add itself as a submodule.
+DuckOS root owns the kernel, boot, Mora desktop, system contracts, release pipeline and cross-project adapters. Each imported product keeps its own source layout: source, headers, tests, docs, schemas, tools, examples, assets, build files and project-local metadata are not flattened into one namespace.
+
+## Source identity and provenance
+
+Two versioned files are authoritative:
+
+- `federation/repositories.v1.json` describes product roles, workspace paths, licenses, runtime boundaries and integration policy.
+- `federation/vendor-sources.v1.json` pins the exact upstream commit SHA and root tree SHA for each copied source tree, together with file counts, content byte counts and license information.
+
+The vendored directory is accepted only when its Git tree SHA, tracked file count, content byte count and upstream LICENSE match the source lock. The source commit signatures were verified when the current pins were selected. A content/tree match proves snapshot identity; it does not certify the project or its runtime behavior.
 
 ## First checkout
 
 ```sh
-git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git
+git clone https://github.com/Ivan-VHS/DuckOS.git
 cd DuckOS
-python tools/federate_repositories.py status
+bash scripts/vendor-ecosystem.sh --verify
 ```
 
-For an existing DuckOS clone:
+No `--recurse-submodules` flag is needed. `.gitmodules` is not part of the monorepo layout.
+
+## Import and update process
+
+The source importer is `scripts/vendor-ecosystem.sh`. Its `--import` mode:
+
+1. Refuses to run on a dirty worktree.
+2. Removes only the four expected Git submodule entries and the obsolete `.gitmodules` file.
+3. Imports each exact upstream commit with `git subtree add --squash`.
+4. Preserves each upstream repository's root tree below its existing `projects/<id>` path.
+5. Verifies tree SHA, file count, source byte count and license file after import.
+
+The importer never selects a floating branch head and never overwrites an already-vendored directory with a different tree. A new upstream revision requires a reviewed change to both provenance manifests and a successful import/verification run.
+
+The Git subtree squash commit records the upstream split commit in Git metadata. Full source history remains authoritative in the original upstream repository; the vendored snapshot and its provenance are part of DuckOS history. This keeps DuckOS's mainline history reviewable instead of replaying every historical upstream commit into the OS repository.
+
+## Build and verification
 
 ```sh
-python tools/federate_repositories.py sync
+npm test
+bash scripts/vendor-ecosystem.sh --verify
+bash boot/build-release-iso.sh --work-dir build/release --output dist/DuckOS-Release-x86_64.iso
 ```
 
-The sync command validates the registry, `.gitmodules` and all four pinned Git links, then runs Git's recursive submodule initialization at the exact commits recorded in the superproject. It does not use `--remote`, so it will not silently advance to whatever happens to be newest on upstream `main`.
-
-## Status and validation
-
-```sh
-python tools/federate_repositories.py validate
-python tools/federate_repositories.py status --json
-python -m unittest tests.test_repository_federation -v
-```
-
-The registry is machine-readable at `federation/repositories.v1.json`; its contract is in `schemas/repository-federation.v1.schema.json`. The existing `manifests/ivan-vhs-program-adoption.v1.json` remains the authority for the disjoint 1,000-entry catalogue allocation. The repository federation registry is the authority for source URLs, checkout paths, commit pins, licences and runtime boundaries.
+The release pipeline builds and tests Reaper's native C17 tools, Pytyliki's C11 tools, VentuSample's C++20/Qt target and OPlague's user-space inspection/test suite, packages source and license notices, then verifies the x86_64 BIOS/UEFI Stage 1 image in QEMU. Host binaries remain host tools; they are not implicitly kernel executables.
 
 ## How projects fit together
 
-- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. DuckOS should call narrow versioned interfaces or consume JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.
-- **Reaper** is the user-space language and toolchain. Its federation status is `native-workbench`: Duck Desktop and the `duckos reaper` CLI can launch Studio or request static checks through a bounded subprocess bridge. It can implement system policy and developer tools, but imported interpreters, plugins and programs never become kernel code.
-- **OPlague** provides read-only device, package and driver evidence. Device matches are candidates, not permission to install a driver.
-- **VentuSample** owns audio generation and offline DSP. Its CMake project supports an optional local Reaper source path; this is recorded as an optional dependency, not a mandatory boot dependency. Real-time audio and device access need a separate service design.
+- **Reaper** is the primary language and toolchain for DuckOS-owned system code. Its present native/host workbench and DABI64 frame validators are distinct from a freestanding kernel compiler or kernel IPC implementation.
+- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. It must not change clocks, voltage, affinity, fan curves, firmware, MMIO or scheduler state.
+- **OPlague** provides read-only device, package, driver-signature and GPU evidence. Device matches are candidates, not permission to install a driver.
+- **VentuSample** owns audio generation and offline DSP. Its existing renderer does not automatically become a real-time audio service or kernel driver.
 
-Preferred integration order is versioned JSON first, narrow C ABI second, and IPC only after DuckOS has a process model, capabilities, resource quotas, cancellation and audit. Keep the upstream projects separate; use adapters under DuckOS rather than copying source files into kernel or Mora directories.
+Preferred peer exchange remains versioned JSON/artifacts first, explicit trusted C ABI second and kernel IPC only after DuckOS has processes, capabilities, quotas, cancellation and audit.
 
 ## Reproducibility and safety
 
-Every superproject commit pins exact submodule commits. Update pins intentionally in a reviewed change after upstream tests and license/provenance checks. Do not use branch heads as build inputs.
+- Preserve each upstream `LICENSE`, `NOTICE`, copyright header and nested third-party notice in its original relative path.
+- Do not flatten project files or silently rename public APIs during import.
+- Retain upstream `.github/workflows` files inside each project as provenance and project documentation; only DuckOS root workflows execute for this monorepo.
+- The OS build does not automatically launch imported apps, scripts, plugins, drivers or installers.
+- Keep Reaper, Pytyliki, OPlague and VentuSample runtime boundaries explicit. Vendoring source does not grant kernel, administrator, FFI, device or microphone privileges.
+- Apply changes upstream first when the product's own repository is authoritative, then update its exact DuckOS snapshot in a separate reviewed PR.
 
-Before syncing, the tool refuses to proceed if an initialized top-level submodule has local modifications or untracked files. Commit or move local work first. Recursive submodules are included if an upstream project adds any later.
-
-Submodule initialization only downloads source. The federation tool never compiles or runs imported content. All entries have `auto_build=false` and `auto_execute=false`. A cloned repository is not thereby a DuckOS app, kernel driver, trusted package or bootable OS feature.
-
-Each upstream LICENSE and its notices remain in the original checkout. Pytyliki is MIT; Reaper, OPlague and VentuSample are Apache-2.0. Preserve both the top-level notices and any third-party attribution shipped by each project.
-
-## Optional local VentuSample + Reaper CMake integration
-
-VentuSample can be configured against the pinned Reaper checkout when that optional native integration is needed:
-
-```sh
-cmake -S projects/ventusample -B build/ventusample \
-  -DREAPER_SOURCE_DIR="$PWD/projects/reaper"
-cmake --build build/ventusample --parallel
-```
-
-This is a developer build of those user-space projects; it is not part of DuckOS's boot chain and is not automatically invoked by the OS build.
+The NEXUS peer contract map is documented in [Ecosystem NEXUS integration](ECOSYSTEM_NEXUS_INTEGRATION.md).

@@ -3,7 +3,7 @@
   "version": 1,
   "owner": "Ivan-VHS",
   "integration_host": "DuckOS",
-  "checkout_strategy": "git-submodules",
+  "checkout_strategy": "vendored-monorepo",
   "projects_root": "projects",
   "repositories": [
     {
@@ -13,6 +13,9 @@
       "path": "projects/pytyliki",
       "default_branch": "main",
       "pinned_commit": "455e1c9d397b6dd308a9ce68aa194e686fa4fa1a",
+      "upstream_tree_sha": "caf4f2411b63c92869018eed13d3ff15714280ed",
+      "source_files": 327,
+      "source_bytes": 1539388,
       "license": "MIT",
       "license_file": "LICENSE",
       "domain": "processor-systems",
@@ -26,7 +29,7 @@
       "build_system": "CMake / C11",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "source-pinned-only",
+      "integration_status": "source-vendored",
       "auto_build": false,
       "auto_execute": false
     },
@@ -37,22 +40,24 @@
       "path": "projects/reaper",
       "default_branch": "main",
       "pinned_commit": "95605b454ecef6c01da6ef24dd8671b45798306a",
+      "upstream_tree_sha": "9005db4985b95d9f2a7d24b51344f159af837a33",
+      "source_files": 426,
+      "source_bytes": 4099931,
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "language-and-toolchain",
-      "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser, static type diagnostics and native toolchain contracts.",
+      "responsibility": "Reaper language, compiler/toolchain, reference runtime, CLI/REPL, Studio, LSP/DAP and system-policy contracts.",
       "integration_mode": [
-        "native Duck Desktop workbench",
-        "bounded user-space subprocess bridge",
-        "user-space CLI",
-        "versioned JSON protocol",
-        "sandboxed extension ABI"
+        "primary DuckOS system language",
+        "native compiler/toolchain workbench",
+        "versioned peer interfaces",
+        "DABI64 desktop host boundary"
       ],
-      "runtime_boundary": "user-space-only",
-      "build_system": "CMake / C17 plus Python reference runtime",
+      "runtime_boundary": "user-space-toolchain; freestanding kernel target pending",
+      "build_system": "CMake / C17 plus Reaper reference runtime",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "native-workbench",
+      "integration_status": "source-vendored",
       "auto_build": false,
       "auto_execute": false
     },
@@ -63,19 +68,23 @@
       "path": "projects/oplague",
       "default_branch": "main",
       "pinned_commit": "a7b9d6bca778cd0556fd7c0f621e7715ad282063",
+      "upstream_tree_sha": "60616bd78e1d856751887fd684fb510ae22df520",
+      "source_files": 286,
+      "source_bytes": 1523039,
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "device-and-driver-evidence",
-      "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes and SBOM metadata.",
+      "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes, SBOM and GPU telemetry.",
       "integration_mode": [
-        "read-only user-space service",
-        "versioned JSON evidence reports"
+        "read-only user-space workbench",
+        "versioned JSON evidence reports",
+        "device compatibility evidence"
       ],
       "runtime_boundary": "user-space-read-only",
       "build_system": "Python 3.10+ / Tkinter; Windows live inventory",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "source-pinned-only",
+      "integration_status": "source-vendored",
       "auto_build": false,
       "auto_execute": false
     },
@@ -86,6 +95,9 @@
       "path": "projects/ventusample",
       "default_branch": "main",
       "pinned_commit": "8363c33138027856ac6cac4821b471e990caeace",
+      "upstream_tree_sha": "001f9e9ac4ce8f00c4b2697b1b901e77a6f8990d",
+      "source_files": 282,
+      "source_bytes": 1636661,
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "audio-and-dsp",
@@ -93,7 +105,7 @@
       "integration_mode": [
         "versioned C/C++ library boundary",
         "offline render jobs",
-        "JSON manifests"
+        "JSON pack/preset manifests"
       ],
       "runtime_boundary": "user-space-offline-by-default",
       "build_system": "CMake / C++20; optional Qt 6 desktop",
@@ -101,21 +113,22 @@
       "optional_dependencies": [
         "reaper"
       ],
-      "integration_status": "source-pinned-only",
+      "integration_status": "source-vendored",
       "auto_build": false,
       "auto_execute": false
     }
   ],
   "shared_rules": [
-    "Each upstream repository remains an independently versioned Git repository and is pinned by an exact commit in the DuckOS superproject.",
-    "Use git submodule update --init --recursive; never use --remote in a reproducible build or silently advance pins.",
-    "Do not copy upstream source files into DuckOS directories; preserve repository history, license files and notices.",
-    "Do not automatically build, load, launch or execute imported project content.",
-    "Reaper tools and extensions run only in user space with explicit filesystem scope, capabilities, quotas and audit.",
-    "The native Duck Desktop Reaper workbench uses a bounded subprocess bridge; it does not grant kernel, driver, administrator or ambient FFI privileges.",
-    "Pytyliki and OPlague hardware inspection remains read-only; no clock, voltage, firmware, device or driver writes.",
-    "VentuSample processing is offline by default; real-time audio and device access need a separate reviewed OS service contract.",
-    "Validate licenses, provenance, schema versions and dependency boundaries before creating a native cross-project link.",
-    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image."
+    "DuckOS stores complete upstream source snapshots as ordinary tracked directories under projects/<id>; a normal clone contains all four source trees without submodule initialization.",
+    "Import snapshots with git subtree --squash at exact source commits; never vendor a floating branch head.",
+    "The upstream commit SHA and root tree SHA are recorded in federation/vendor-sources.v1.json and checked against the committed directory tree.",
+    "Keep every upstream LICENSE, NOTICE, contributor attribution and nested third-party notice in its original relative path.",
+    "Do not flatten or merge product source directories; keep project-local include, src, tests, docs, schemas, tools and build files intact.",
+    "Reconcile root-level build, CI and package metadata centrally; nested upstream .github workflows are retained as provenance but are not active root workflows.",
+    "Upstream repositories remain independent development and release sources; sync changes as reviewed, reproducible subtree updates.",
+    "Do not automatically execute imported programs, plugins, drivers, installers, scripts or manifests during normal OS boot.",
+    "Reaper programs and extensions remain user-space unless a separate freestanding ABI, kernel gate and target test explicitly authorize a native system component.",
+    "Pytyliki and OPlague hardware evidence remains read-only; VentuSample remains offline by default.",
+    "An imported source tree is not proof of runtime integration, native DuckOS execution, kernel privilege, device support or release qualification."
   ]
 }

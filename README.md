@@ -105,10 +105,10 @@ npm test
 
 ## Build the release ISO
 
-The reproducible release pipeline targets Linux x86_64 and expects Git/submodules, GCC/G++, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
+The reproducible release pipeline targets Linux x86_64 and expects Git with subtree support, GCC/G++, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
 
 ```sh
-git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git
+git clone https://github.com/Ivan-VHS/DuckOS.git
 cd DuckOS
 bash boot/build-release-iso.sh --work-dir build/release --output dist/DuckOS-Release-x86_64.iso
 ```
@@ -142,10 +142,10 @@ DuckOS now records **x86_64 as the primary target for Intel and AMD**. The archi
 
 The [NEXUS ecosystem integration map](docs/ECOSYSTEM_NEXUS_INTEGRATION.md) records the direct peer contracts, data boundaries and native implementation gates. The machine-readable peer registry is `federation/nexus-peers.v1.json`.
 
-The active source set is defined in `federation/repositories.v1.json`. Initialize the exact pinned sources with:
+The complete source trees are vendored under `projects/` as ordinary tracked directories. `federation/repositories.v1.json` records project roles; `federation/vendor-sources.v1.json` locks exact upstream commits and source tree hashes. Verify the monorepo snapshot with:
 
 ```sh
-git submodule update --init --recursive
+bash scripts/vendor-ecosystem.sh --verify
 ```
 
 The pre-release DuckOS repository snapshot is preserved on `archive/pre-release-snapshot-2026-11-25`. That branch preserves this repository's Git state; it does not recreate the histories of external repositories.

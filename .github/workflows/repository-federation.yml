@@ -32,13 +32,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate registry, Git links and .gitmodules
-        run: python tools/federate_repositories.py validate --json
-      - name: Confirm every repository is checked out at its pin
-        run: python tools/federate_repositories.py status --json
-      - name: Test federation policy
-        run: python -m unittest tests.test_repository_federation -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate vendored source trees and provenance
+        run: bash scripts/vendor-ecosystem.sh --verify
+      - name: Test monorepo source boundaries
+        run: node --test tests/mora-vendored-sources.test.mjs
