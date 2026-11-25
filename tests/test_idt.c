@@ -1,4 +1,5 @@
 #include "idt.h"
+#include "interrupts.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -29,6 +30,17 @@ static void test_gate_layout_and_round_trip(void) {
     assert(duckos_idt_gate_target(&gate) == handler);
 }
 
+static void test_exception_frame_matches_assembly_layout(void) {
+    assert(sizeof(duckos_x86_exception_frame) == 160u);
+    assert(offsetof(duckos_x86_exception_frame, r15) == 0u);
+    assert(offsetof(duckos_x86_exception_frame, rax) == 112u);
+    assert(offsetof(duckos_x86_exception_frame, vector) == 120u);
+    assert(offsetof(duckos_x86_exception_frame, error_code) == 128u);
+    assert(offsetof(duckos_x86_exception_frame, rip) == 136u);
+    assert(offsetof(duckos_x86_exception_frame, cs) == 144u);
+    assert(offsetof(duckos_x86_exception_frame, rflags) == 152u);
+}
+
 static void test_ist_is_bounded(void) {
     duckos_idt_gate gate = {0};
 
@@ -53,6 +65,7 @@ static void test_invalid_inputs_fail_closed(void) {
 
 int main(void) {
     test_gate_layout_and_round_trip();
+    test_exception_frame_matches_assembly_layout();
     test_ist_is_bounded();
     test_invalid_inputs_fail_closed();
     puts("DuckOS IDT contract tests passed");
