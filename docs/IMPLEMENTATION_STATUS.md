@@ -32,7 +32,7 @@ Updated: 2026-11-25
 
 ## Partial or external boundaries
 
-- [~] Experimental x86_64 Stage 1 boot image (CI verification pending): pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native monotonic 4 KiB physical-frame allocator over validated USABLE regions. The kernel allocates and clears one frame through HHDM and emits `DUCKOS_BOOT_OK stage=1`. BIOS/UEFI target verification for this Stage 1 revision is pending its CI run; this is not yet a running process/service OS session.
+- [x] Experimental x86_64 Stage 1 boot image (QEMU BIOS/UEFI verification passed): pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native monotonic 4 KiB physical-frame allocator over validated USABLE regions. The kernel allocates and clears one frame through HHDM and emits `DUCKOS_BOOT_OK stage=1`. CI run 45527148367 passed host CTests, freestanding ISO build, BIOS and UEFI QEMU boots; both serial logs report `DUCKOS_BOOT_OK stage=1`. This is not yet a running process/service OS session.
 - [x] Host-tested frame allocator contract: alignment, reserved-range exclusion, minimum address, malformed/overlapping/overflowing map rejection and exhaustion.
 - [ ] Reusable frame allocator/free path, page tables, MMIO and DMA.
 - [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
