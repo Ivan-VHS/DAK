@@ -4,13 +4,16 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_DIR="$ROOT/build/release"
 OUTPUT="$ROOT/dist/DuckOS-Release-x86_64.iso"
+declare -a LOADER_MENU_ARGS=()
 
 while (($#)); do
     case "$1" in
         --work-dir) [[ $# -ge 2 ]] || { echo "missing --work-dir value" >&2; exit 2; }; WORK_DIR="$2"; shift 2 ;;
         --output) [[ $# -ge 2 ]] || { echo "missing --output value" >&2; exit 2; }; OUTPUT="$2"; shift 2 ;;
+        --efi-entry) [[ $# -ge 2 ]] || { echo "missing --efi-entry value" >&2; exit 2; }; LOADER_MENU_ARGS+=(--efi-entry "$2"); shift 2 ;;
+        --bios-target) [[ $# -ge 2 ]] || { echo "missing --bios-target value" >&2; exit 2; }; LOADER_MENU_ARGS+=(--bios-target "$2"); shift 2 ;;
         -h|--help)
-            echo "Usage: boot/build-release-iso.sh [--work-dir DIR] [--output FILE]"
+            echo "Usage: boot/build-release-iso.sh [--work-dir DIR] [--output FILE] [--efi-entry NAME]... [--bios-target DRIVE:PARTITION]..."
             exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
@@ -156,7 +159,8 @@ bash "$ROOT/boot/build-iso.sh" \
     --work-dir "$BUILD_DIR/boot" \
     --payload-dir "$PAYLOAD/duckos" \
     --volume-id DUCKOS_RELEASE \
-    --output "$OUTPUT"
+    --output "$OUTPUT" \
+    "${LOADER_MENU_ARGS[@]}"
 
 ISO_BYTES="$(wc -c < "$OUTPUT" | tr -d ' ')"
 echo "DuckOS Release ISO ready: $OUTPUT"
