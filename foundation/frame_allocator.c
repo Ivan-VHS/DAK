@@ -96,6 +96,7 @@ duckos_frame_allocator_status duckos_frame_allocator_init(
     allocator->free_pages = 0u;
     allocator->allocated_pages = 0u;
     allocator->range_count = 0u;
+    allocator->allocation_count = 0u;
 
     for (uint32_t index = 0u; index < region_count; ++index) {
         const duckos_memory_region *region = &regions[index];
@@ -197,6 +198,9 @@ duckos_frame_allocator_status duckos_frame_allocator_allocate_pages(
     allocation_bytes = page_count * DUCKOS_FRAME_PAGE_SIZE;
     alignment_bytes = alignment_pages * DUCKOS_FRAME_PAGE_SIZE;
     if (page_count > allocator->free_pages) return DUCKOS_FRAME_ALLOCATOR_EXHAUSTED;
+    if (allocator->allocation_count >= DUCKOS_FRAME_ALLOCATOR_MAX_ALLOCATIONS) {
+        return DUCKOS_FRAME_ALLOCATOR_ALLOCATION_METADATA_EXHAUSTED;
+    }
 
     current_phys = allocator->free_head_phys;
     while (current_phys != 0u) {
@@ -248,6 +252,9 @@ duckos_frame_allocator_status duckos_frame_allocator_allocate_pages(
 
             allocator->free_pages -= page_count;
             allocator->allocated_pages += page_count;
+            allocator->allocations[allocator->allocation_count].base = allocation_begin;
+            allocator->allocations[allocator->allocation_count].end = allocation_end;
+            ++allocator->allocation_count;
             *physical_address = allocation_begin;
             return DUCKOS_FRAME_ALLOCATOR_OK;
         }
@@ -321,6 +328,22 @@ duckos_frame_allocator_status duckos_frame_allocator_free(
         return DUCKOS_FRAME_ALLOCATOR_COUNTER_ERROR;
     }
 
+    /*
+     * Only an exact allocation returned by this allocator may be released.
+     * Check free extents first so a repeated release keeps ALREADY_FREE.
+     */
+    uint32_t allocation_index = allocator->allocation_count;
+    for (uint32_t index = 0u; index < allocator->allocation_count; ++index) {
+        if (allocator->allocations[index].base == physical_address &&
+            allocator->allocations[index].end == end) {
+            allocation_index = index;
+            break;
+        }
+    }
+    if (allocation_index == allocator->allocation_count) {
+        return DUCKOS_FRAME_ALLOCATOR_INVALID_RELEASE;
+    }
+
     merged_base = physical_address;
     if (previous != NULL) {
         uint64_t previous_bytes;
@@ -364,5 +387,13 @@ duckos_frame_allocator_status duckos_frame_allocator_free(
 
     allocator->free_pages += page_count;
     allocator->allocated_pages -= page_count;
+
+    --allocator->allocation_count;
+    if (allocation_index != allocator->allocation_count) {
+        allocator->allocations[allocation_index] =
+            allocator->allocations[allocator->allocation_count];
+    }
+    allocator->allocations[allocator->allocation_count].base = 0u;
+    allocator->allocations[allocator->allocation_count].end = 0u;
     return DUCKOS_FRAME_ALLOCATOR_OK;
 }
