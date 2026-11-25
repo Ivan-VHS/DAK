@@ -5,9 +5,9 @@ import "abi.rpr" as abi
 import "orchestrator.rpr" as orchestrator
 import "../platform/targets.rpr" as targets
 
-# Driver: [id, abi, bus, architecture, capabilities, publisher, signature_state, payload_bytes].
+# Driver: [id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes].
 export craft descriptor_valid(driver) {
-    when size(driver) != 8 {
+    when size(driver) != 9 {
         yield false
     }
     when driver[0] == "" or driver[1] <= 0 or driver[2] == "" {
@@ -16,13 +16,13 @@ export craft descriptor_valid(driver) {
     when not targets["architecture_known"](driver[3]) {
         yield false
     }
-    when size(driver[4]) > 64 or driver[5] == "" {
+    when size(driver[4]) > 64 or driver[5] == "" or driver[6] == "" {
         yield false
     }
-    when driver[6] != "verified" and driver[6] != "unverified" and driver[6] != "revoked" {
+    when driver[7] != "verified" and driver[7] != "unverified" and driver[7] != "revoked" {
         yield false
     }
-    when driver[7] <= 0 or driver[7] > 268435456 {
+    when driver[8] <= 0 or driver[8] > 268435456 {
         yield false
     }
     yield true
@@ -33,14 +33,17 @@ export craft admission(driver, device, target_arch, expected_abi, supported_buse
     when not descriptor_valid(driver) or not orchestrator["device_valid"](device) {
         yield "reject-descriptor"
     }
-    when driver[6] == "revoked" {
+    when driver[7] == "revoked" {
         yield "reject-revoked"
     }
-    when driver[6] != "verified" {
+    when driver[7] != "verified" {
         yield "reject-signature"
     }
-    when driver[5] == "" or driver[3] != target_arch {
-        yield "reject-provenance-or-architecture"
+    when driver[5] == "" or driver[6] == "" {
+        yield "reject-provenance"
+    }
+    when driver[3] != target_arch {
+        yield "reject-architecture"
     }
     when driver[2] != device[1] {
         yield "reject-device-match"
