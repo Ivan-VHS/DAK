@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ivan-vhs.dev/ecosystem-artifact.v1.schema.json",
+  "title": "Ivan-VHS Ecosystem Artifact Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "artifact_id",
+    "organization_id",
+    "source_project",
+    "artifact_kind",
+    "storage_key",
+    "sha256",
+    "byte_size",
+    "metadata"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ivan-vhs.ecosystem-artifact.v1"
+    },
+    "artifact_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_project": {
+      "enum": [
+        "duckos",
+        "reaper",
+        "pytyliki",
+        "ventusample",
+        "oplague"
+      ]
+    },
+    "artifact_kind": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+    },
+    "storage_key": {
+      "type": "string",
+      "maxLength": 512,
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[^\\\\x00-\\\\x1f]+$",
+      "not": {
+        "pattern": "(^|/)[.][.]?(/|$)"
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "byte_size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 536870912
+    },
+    "metadata": {
+      "type": "object",
+      "maxProperties": 32
+    }
+  }
+}
