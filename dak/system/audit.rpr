@@ -1,9 +1,11 @@
 # DAK System Audit v1 — bounded append-only journal policy.
-# This module validates records and append intent; durable storage and
-# cryptographic journal authentication are supplied by a trusted provider.
+# This module validates record shape and append intent; durable storage and
+# authenticated hash computation are supplied by a trusted provider.
 
+# Record: [sequence, request_id, actor, action, resource, outcome, reason,
+#          previous_digest, digest].
 export craft record_valid(record) {
-    when size(record) != 7 {
+    when size(record) != 9 {
         yield false
     }
     when record[0] <= 0 {
@@ -15,18 +17,23 @@ export craft record_valid(record) {
     when record[4] == "" or record[5] == "" or record[6] == "" {
         yield false
     }
+    when record[7] == "" or record[8] == "" {
+        yield false
+    }
     yield true
 }
 
 export craft chain_valid(records) {
     vary expected_sequence := 1
+    vary previous_digest := "genesis"
     each record in records {
         when not record_valid(record) {
             yield false
         }
-        when record[0] != expected_sequence {
+        when record[0] != expected_sequence or record[7] != previous_digest {
             yield false
         }
+        change previous_digest := record[8]
         change expected_sequence := expected_sequence + 1
     }
     yield true
@@ -40,19 +47,17 @@ export craft append_policy(records, record, max_records) {
         yield "reject-invalid-record"
     }
 
-    when size(records) == 0 {
-        when record[0] != 1 {
-            yield "reject-sequence"
-        }
-        yield "append-plan-only"
-    }
-
-    vary previous_sequence := 0
+    vary expected_sequence := 1
+    vary previous_digest := "genesis"
     each previous in records {
-        change previous_sequence := previous[0]
+        change expected_sequence := previous[0] + 1
+        change previous_digest := previous[8]
     }
-    when record[0] != previous_sequence + 1 {
+    when record[0] != expected_sequence {
         yield "reject-sequence"
+    }
+    when record[7] != previous_digest {
+        yield "reject-chain-link"
     }
     yield "append-plan-only"
 }
