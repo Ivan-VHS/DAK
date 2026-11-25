@@ -46,7 +46,7 @@ A valid layout is sorted by start byte, starts after the first 1 MiB of disk met
 
 - `target_valid(target) -> bool`
 - `source_record_valid(source) -> bool`
-- `admission(target, source, recovery_state) -> decision`
+- `admission(target, source, recovery_state, partitions) -> decision`
 - `partition_valid(partition, disk_bytes) -> bool`
 - `layout_valid(partitions, disk_bytes, firmware_mode) -> bool`
 - `transition_valid(current, next) -> bool`
@@ -76,7 +76,7 @@ Unload requires a running/stopping driver and affirmative evidence that IRQs are
 
 Package record: `[id, major, minor, patch, architecture, abi, kind, dependencies, requested_capabilities, digest, publisher, signature_state, payload_bytes]`.
 
-Supported kinds are application, system, driver and library. Payloads are bounded to 2 GiB. Every payload path is passed as normalized path components. The shared VFS contract rejects empty, dot, parent, embedded slash and embedded backslash components. All dependencies must be present before staging; requested capabilities must be a subset of the package manager's explicit grants.
+Supported kinds are application, system, driver and library. Payloads are bounded to 2 GiB. Every payload path is passed as normalized path components. Package admission itself requires these paths and rejects the package when the shared VFS contract finds empty, dot, parent, embedded slash or embedded backslash components. All dependencies must be present before staging; requested capabilities must be a subset of the package manager's explicit grants.
 
 Transaction path: `planned → verified → resolved → staged → committed`, with rollback from verified/resolved/staged states. Protected system packages and packages with dependents cannot be removed by the plan.
 
@@ -85,7 +85,7 @@ Transaction path: `planned → verified → resolved → staged → committed`, 
 - `package_valid(package) -> bool`
 - `dependencies_satisfied(required, installed_ids) -> bool`
 - `paths_valid(paths) -> bool`
-- `admission(package, target_arch, expected_abi, installed_ids, grants) -> decision`
+- `admission(package, payload_paths, target_arch, expected_abi, installed_ids, grants) -> decision`
 - `transition_valid(current, next) -> bool`
 - `remove_policy(state, dependent_count, protected) -> decision`
 
