@@ -60,21 +60,15 @@ export craft catalog_valid() {
     when size(items) != 20 {
         yield false
     }
+    vary seen_ids := []
     each loader in items {
         when not loader_valid(loader) {
             yield false
         }
-    }
-    make index := 0
-    each loader in items {
-        make other_index := 0
-        each other in items {
-            when index != other_index and loader[0] == other[0] {
-                yield false
-            }
-            change other_index := other_index + 1
+        when contains(seen_ids, loader[0]) {
+            yield false
         }
-        change index := index + 1
+        change seen_ids := push(seen_ids, loader[0])
     }
     yield true
 }
