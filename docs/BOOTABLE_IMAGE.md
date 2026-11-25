@@ -52,6 +52,16 @@ The build pins Limine v12.11.1 binary archive by SHA-256 in boot/limine-toolchai
 
 Upstream references: https://github.com/Limine-Bootloader/limine-protocol/blob/trunk/PROTOCOL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/INSTALL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/USAGE.md
 
+## Verified Stage 1 build
+
+GitHub Actions run [45527148367](https://github.com/Ivan-VHS/DuckOS/actions/runs/45527148367) passed the host contracts, freestanding ELF/ISO build and QEMU BIOS plus OVMF UEFI tests. Both serial logs contain exactly one `DUCKOS_BOOT_OK stage=1` marker. The ISO is 4,376,576 bytes; SHA-256: `7b5bb3c29c0eeeb13b6e0a4514c15fe7df941969353287dac8d225f741f054f7`.
+
+Observed emulator memory:
+- BIOS: 18 map regions, 65,061 allocatable 4 KiB pages, one page allocated and cleared at physical address `0x00100000`.
+- UEFI: 32 map regions, 53,041 allocatable 4 KiB pages, one page allocated and cleared at physical address `0x00100000`.
+
+These figures describe the QEMU configurations in that workflow, not a minimum hardware requirement or a promise for every machine.
+
 ## Deliberate Stage 1 limits
 
 This image does not yet provide a reusable allocator/free path, page-table manager, virtual-memory heap or address-space isolation; IDT, exception/interrupt handlers, APIC/PIC, timer or preemptive context switching; processes, threads, syscalls, user mode, scheduler execution or IPC runtime; ACPI/PCI/USB drivers, DMA or production driver manager; filesystem, init/service supervisor, package manager or persistence; native Mora compositor, window manager, GPU acceleration, audio stack or user applications; Secure Boot signing/enrolment, authenticated updates, rollback, installer or production recovery.
