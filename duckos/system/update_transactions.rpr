@@ -1,0 +1,57 @@
+# Future package-update transaction policy.
+# This contract validates order and recovery preconditions; it does not update the host or kernel.
+
+export craft transaction_groups() {
+    yield ["kernel", "graphics", "system-core", "desktop", "optional"]
+}
+
+export craft group_order_valid(groups) {
+    when kind(groups) != "list" or size(groups) != 5 {
+        yield false
+    }
+    yield groups == transaction_groups()
+}
+
+export craft start_allowed(manifest_verified, disk_space_ready, approved) {
+    when not manifest_verified { yield ["deny", "manifest-not-verified"] }
+    when not disk_space_ready { yield ["deny", "insufficient-space"] }
+    when not approved { yield ["deny", "user-approval-required"] }
+    yield ["allow", "preflight-complete"]
+}
+
+export craft rollback_decision(group, snapshot_complete, snapshot_verified) {
+    when group != "kernel" and group != "graphics" and group != "system-core" and
+        group != "desktop" and group != "optional" {
+        yield "reject-unknown-group"
+    }
+    when not snapshot_complete or not snapshot_verified {
+        yield "stop-and-recovery-required"
+    }
+    yield "rollback-current-group-only"
+}
+
+export craft next_group_valid(current, next) {
+    when current == "preflight" { yield next == "kernel" }
+    when current == "kernel" { yield next == "graphics" }
+    when current == "graphics" { yield next == "system-core" }
+    when current == "system-core" { yield next == "desktop" }
+    when current == "desktop" { yield next == "optional" }
+    when current == "optional" { yield next == "commit" }
+    yield false
+}
+
+export craft transaction_state_valid(state) {
+    yield state == "idle" or state == "preflight" or state == "applying" or
+        state == "rolling-back" or state == "committed" or state == "recovery-required"
+}
+
+export craft fallback_kernel_set_valid(available_images, minimum_required, inventory_verified) {
+    when not inventory_verified { yield false }
+    when minimum_required < 2 { yield false }
+    yield available_images >= minimum_required
+}
+
+export craft boot_failure_action(previous_image_verified) {
+    when previous_image_verified { yield "boot-last-known-good" }
+    yield "recovery-required"
+}

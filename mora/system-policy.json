@@ -106,6 +106,30 @@
     "kernel_desktop": {
       "maturity": "planned",
       "scope": "kernel-owned compositor, window manager, display/input services, font shaping, accessibility bridge, process launcher and capability broker not yet present"
+    },
+    "first_run_assistant": {
+      "maturity": "partial",
+      "scope": "Native SetupUP persists four named Mora host-shell profiles in current-user QSettings; it does not alter kernel, driver, display-mode or power settings."
+    },
+    "workload_profiles": {
+      "maturity": "partial",
+      "scope": "Workstation, creator, living-room and handheld preferences change only Mora catalogue density and local navigation presentation; no OS resource scheduler or controller service is connected."
+    },
+    "update_management": {
+      "maturity": "planned",
+      "scope": "System Center exposes the unconnected updater boundary; Reaper reference contracts validate ordered transaction groups and rollback preconditions only. No native package transaction, repository sync, system image update or rollback service exists."
+    },
+    "software_source_management": {
+      "maturity": "partial",
+      "scope": "Local Mora Commons and federated workbench metadata only. Source/license metadata is not a package repository; installation, removal, signature verification and app execution are not connected."
+    },
+    "hardware_and_driver_center": {
+      "maturity": "planned",
+      "scope": "Unify exposes device-service maturity and current device-contract boundaries only; there is no native PCI/USB enumeration, driver installation, driver update or device control service."
+    },
+    "gaming_experience_profiles": {
+      "maturity": "partial",
+      "scope": "Mora stores a user-selected gaming preference locally; it does not detect games, create Gamescope sessions, alter clocks/TDP, read GPU sensors or remap controllers."
     }
   },
   "not_in_scope_as_implemented_features": [

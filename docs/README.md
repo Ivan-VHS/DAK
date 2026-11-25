@@ -10,6 +10,8 @@
 
 [Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical interface standard; [mora/theme.json](../mora/theme.json) contains the versioned color, shape, spacing, typography and motion tokens.
 
+[Nobara-inspired feature adoption](NOBARA_FEATURE_ADOPTION.md) records the clean-room feature mapping, implemented Mora host-shell profiles, deferred native services and copyright boundaries.
+
 ## Runnable prototypes
 
 [The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.

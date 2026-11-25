@@ -31,6 +31,9 @@ import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
 import "duckos/ui/canvas.rpr" as canvas
 import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
+import "duckos/system/workload_profiles.rpr" as workload_profiles
+import "duckos/system/update_transactions.rpr" as update_transactions
+import "duckos/system/software_sources.rpr" as software_sources
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -282,3 +285,43 @@ assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node",
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
 emit "DUCKOS_REAPER_CONTRACTS_OK"
+
+
+# Nobara-inspired host experience and package-service boundary contracts.
+assert(workload_profiles["profile_known"]("workstation"), "workstation presentation profile is known")
+assert(workload_profiles["profile_known"]("creator"), "creator presentation profile is known")
+assert(workload_profiles["profile_known"]("living-room"), "living-room presentation profile is known")
+assert(workload_profiles["profile_known"]("handheld"), "handheld presentation profile is known")
+assert(not workload_profiles["profile_known"]("overclock"), "unapproved profiles are rejected")
+assert(workload_profiles["profile_policy"]("creator", "mora.host-shell", true) == ["allow", "presentation-preference-only"], "approved profile affects only Mora presentation")
+assert(workload_profiles["profile_policy"]("creator", "kernel.scheduler", true) == ["deny", "scope-outside-host-shell"], "presentation profile cannot change kernel scheduling")
+assert(workload_profiles["profile_policy"]("creator", "mora.host-shell", false) == ["deny", "user-approval-required"], "host profile requires explicit user approval")
+assert(workload_profiles["game_profile_policy"]("low-latency", "mora.local-preference", true) == ["allow", "stored-preference-only"], "gaming mode is a local preference")
+assert(workload_profiles["game_profile_policy"]("low-latency", "device.power", true) == ["deny", "scope-outside-local-preference"], "gaming preference cannot tune device power")
+
+assert(update_transactions["group_order_valid"](["kernel", "graphics", "system-core", "desktop", "optional"]), "update groups use the declared safe order")
+assert(not update_transactions["group_order_valid"](["desktop", "kernel", "graphics", "system-core", "optional"]), "update groups reject reordered privileged stages")
+assert(update_transactions["start_allowed"](true, true, true) == ["allow", "preflight-complete"], "transaction preflight accepts verified and approved input")
+assert(update_transactions["start_allowed"](false, true, true) == ["deny", "manifest-not-verified"], "unverified update manifest is denied")
+assert(update_transactions["start_allowed"](true, false, true) == ["deny", "insufficient-space"], "transaction preflight checks available space")
+assert(update_transactions["start_allowed"](true, true, false) == ["deny", "user-approval-required"], "update transaction requires user approval")
+assert(update_transactions["rollback_decision"]("graphics", true, true) == "rollback-current-group-only", "rollback is scoped to the current verified group")
+assert(update_transactions["rollback_decision"]("kernel", true, false) == "stop-and-recovery-required", "unverified rollback snapshot fails closed")
+assert(update_transactions["rollback_decision"]("unknown", true, true) == "reject-unknown-group", "unknown transaction group is rejected")
+assert(update_transactions["next_group_valid"]("kernel", "graphics"), "kernel update precedes graphics update")
+assert(not update_transactions["next_group_valid"]("kernel", "desktop"), "update order cannot skip graphics and core")
+assert(update_transactions["transaction_state_valid"]("recovery-required"), "recovery-required is an explicit terminal state")
+assert(update_transactions["fallback_kernel_set_valid"](3, 2, true), "verified kernel image inventory provides a fallback path")
+assert(not update_transactions["fallback_kernel_set_valid"](3, 2, false), "unverified kernel image inventory cannot be trusted")
+assert(not update_transactions["fallback_kernel_set_valid"](1, 2, true), "single kernel image is not a fallback set")
+assert(update_transactions["boot_failure_action"](true) == "boot-last-known-good", "failed boot can select the verified previous image")
+assert(update_transactions["boot_failure_action"](false) == "recovery-required", "unverified previous image must enter recovery")
+
+assert(software_sources["source_kind_known"]("duck-first-party"), "Duck first-party source is recognized")
+assert(software_sources["source_kind_known"]("federated-project"), "federated project source is recognized")
+assert(software_sources["source_metadata_state"]("third-party-explicit", true, true) == "metadata-recorded-not-installable", "source metadata is not installation authority")
+assert(software_sources["source_metadata_state"]("third-party-explicit", false, true) == "needs-license-review", "missing license declaration requires review")
+assert(software_sources["source_metadata_state"]("federated-project", true, false) == "integrity-unverified", "missing digest verification is not trusted")
+assert(software_sources["source_action_policy"]("inspect") == "metadata-only", "source inspection remains metadata-only")
+assert(software_sources["source_action_policy"]("install") == "deny-no-native-package-or-process-service", "package installation remains disabled without native services")
+assert(software_sources["install_policy"](false, true) == ["deny", "package-service-unavailable"], "native package service absence denies installation")

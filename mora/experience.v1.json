@@ -1,0 +1,84 @@
+{
+  "schema": "duckos.mora.experience.v1",
+  "version": 1,
+  "product": "Duck",
+  "surface": "Mora host-native Qt 6 Widgets",
+  "persistence": "current-user QSettings; local only",
+  "profiles": [
+    {
+      "id": "workstation",
+      "name": "Рабочая станция",
+      "summary": "Сбалансированная навигация и многозадачность.",
+      "density": "standard",
+      "input_mode": "keyboard-pointer",
+      "catalogue_columns": 3,
+      "large_targets": false
+    },
+    {
+      "id": "creator",
+      "name": "Создание контента",
+      "summary": "Плотная компоновка для творческих и инженерных приложений.",
+      "density": "compact",
+      "input_mode": "keyboard-pointer",
+      "catalogue_columns": 4,
+      "large_targets": false
+    },
+    {
+      "id": "living-room",
+      "name": "Гостиная",
+      "summary": "Крупные элементы управления и приоритет геймпада.",
+      "density": "comfortable",
+      "input_mode": "controller-first-preference",
+      "catalogue_columns": 2,
+      "large_targets": true
+    },
+    {
+      "id": "handheld",
+      "name": "Портативный режим",
+      "summary": "Компактная навигация и сенсорный сценарий.",
+      "density": "compact",
+      "input_mode": "controller-touch-preference",
+      "catalogue_columns": 2,
+      "large_targets": true
+    }
+  ],
+  "feature_boundaries": {
+    "shell_profiles": {
+      "maturity": "partial",
+      "scope": "local presentation preferences only"
+    },
+    "updates": {
+      "maturity": "planned",
+      "native_service": false,
+      "policy_groups": [
+        "kernel",
+        "graphics",
+        "system-core",
+        "desktop",
+        "optional"
+      ],
+      "automatic_rollback": false
+    },
+    "software_sources": {
+      "maturity": "partial",
+      "native_install": false,
+      "source_types": [
+        "duck-first-party",
+        "federated-project",
+        "third-party-explicit"
+      ]
+    },
+    "devices": {
+      "maturity": "planned",
+      "live_enumeration": false,
+      "driver_install": false,
+      "driver_update": false
+    },
+    "gaming": {
+      "maturity": "partial",
+      "local_preferences_only": true,
+      "power_tuning": false,
+      "controller_enumeration": false
+    }
+  }
+}

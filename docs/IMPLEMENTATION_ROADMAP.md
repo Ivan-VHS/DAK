@@ -32,6 +32,20 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 | Mora | Qt 6 Widgets host-native shell, local app catalogue, native host windows and a retained browser reference preview | Not yet a kernel-launched DuckOS desktop or privileged shell |
 | Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature, non-destructive deployment planning and an experimental x86_64 Stage 1 ISO pipeline | No disk installer, production image, verified boot chain or supported hardware matrix |
 
+## Nobara-informed experience extension (clean-room)
+
+Mora now has local host-shell profiles for Workstation, Creator, Living-room and Handheld presentation. SetupUP persists the selected preference; Sestem, Unify and Mora Boost explain the current system, device and gaming boundaries. These are useful host-shell surfaces but are not operating-system services.
+
+The Reaper reference contracts define a future update transaction order (kernel, graphics, system core, desktop, optional packages), check update preconditions and reject unsafe rollback claims. They do not install or update packages. Software-source contracts distinguish metadata discovery from package admission; no source is currently allowed to install software because the native package service is absent.
+
+### Next native gates
+
+- **Package lifecycle:** filesystem, trust store, package manifests, signature verification, dependency solver, atomic transaction journal and recovery before enabling installation.
+- **Update service:** staged update engine with disk-space and boot-partition preflight, signed repository metadata, dependency-conflict diagnostics, per-group backups, last-known-good kernel retention, boot-success confirmation, failure recovery and A/B slot support.
+- **Hardware center:** native PCI/USB/ACPI discovery, signed driver packages, isolated driver execution, permissions and hardware test matrix.
+- **Gaming and creator runtime:** native process/session model, input/controller service, audio and graphics stack, compositor and independently validated GPU providers; only then evaluate GPU overlays, instant replay, capture APIs and encode/decode matrices.
+- **Installer and first boot:** disk layout planner, destructive-action preview, image verification, boot recovery and guided first-run setup after persistent storage and user-session services exist.
+
 ## Native implementation sequence
 
 ### D0 — Boot information and host conformance
