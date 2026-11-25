@@ -100,6 +100,9 @@ export craft partition_valid(partition, disk_bytes) {
 # UEFI requires one EFI partition; BIOS requires one BIOS boot partition.
 # User data is optional. Adjacent partitions are valid; overlap and duplicate IDs are not.
 export craft layout_valid(partitions, disk_bytes, firmware_mode) {
+    when kind(partitions) != "list" or kind(disk_bytes) != "number" or kind(firmware_mode) != "text" {
+        yield false
+    }
     when size(partitions) < 4 or size(partitions) > 5 or disk_bytes <= 1048576 {
         yield false
     }
@@ -196,7 +199,7 @@ export craft commit_policy(state, consent, source, recovery_state, boot_state) {
     when state != "ready_to_commit" {
         yield "reject-state"
     }
-    when not consent {
+    when kind(consent) != "boolean" or not consent {
         yield "reject-consent"
     }
     when not source_record_valid(source) {
