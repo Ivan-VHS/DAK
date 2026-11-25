@@ -1,0 +1,67 @@
+# Init and timer-service policy.
+# The supervisor still needs native processes, timers and durable logging.
+
+export craft unit_valid(unit) {
+    when size(unit) != 5 or unit[0] == "" or unit[1] == "" {
+        yield false
+    }
+    when size(unit[2]) > 32 or unit[3] < 0 or unit[3] > 10 {
+        yield false
+    }
+    yield unit[4] > 0 and unit[4] <= 300000
+}
+
+export craft start_decision(enabled, dependencies_ready, active, failed) {
+    when not enabled {
+        yield "disabled"
+    }
+    when active {
+        yield "already-active"
+    }
+    when failed {
+        yield "failed-needs-review"
+    }
+    when not dependencies_ready {
+        yield "wait-for-dependencies"
+    }
+    yield "start-policy-only"
+}
+
+export craft shutdown_decision(state, deadline_reached) {
+    when state == "stopped" {
+        yield "no-op"
+    }
+    when state == "running" {
+        yield "request-stop"
+    }
+    when state == "stopping" and not deadline_reached {
+        yield "wait"
+    }
+    when state == "stopping" and deadline_reached {
+        yield "terminate-after-timeout"
+    }
+    yield "reject-invalid-state"
+}
+
+export craft cron_valid(schedule) {
+    when size(schedule) != 5 {
+        yield false
+    }
+    when schedule[0] < -1 or schedule[0] > 59 {
+        yield false
+    }
+    when schedule[1] < -1 or schedule[1] > 23 {
+        yield false
+    }
+    when schedule[2] < -1 or schedule[2] > 31 or schedule[2] == 0 {
+        when schedule[2] != -1 {
+            yield false
+        }
+    }
+    when schedule[3] < -1 or schedule[3] > 12 or schedule[3] == 0 {
+        when schedule[3] != -1 {
+            yield false
+        }
+    }
+    yield schedule[4] >= -1 and schedule[4] <= 6
+}

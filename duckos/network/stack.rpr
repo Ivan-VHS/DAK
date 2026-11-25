@@ -1,0 +1,77 @@
+# Network configuration and firewall policy.
+# This module validates bounded inputs; it is not a TCP/IP implementation.
+
+export craft endpoint_valid(endpoint) {
+    when size(endpoint) != 4 {
+        yield false
+    }
+    when endpoint[0] != "tcp" and endpoint[0] != "udp" {
+        yield false
+    }
+    when endpoint[1] < 0 or endpoint[1] > 65535 or endpoint[2] <= 0 or endpoint[2] > 65535 {
+        yield false
+    }
+    when endpoint[3] != "new" and endpoint[3] != "listening" and endpoint[3] != "established" and endpoint[3] != "closing" and endpoint[3] != "closed" {
+        yield false
+    }
+    yield true
+}
+
+export craft firewall_decision(rules, direction, protocol, port) {
+    when direction != "ingress" and direction != "egress" {
+        yield "deny-invalid-direction"
+    }
+    when protocol != "tcp" and protocol != "udp" {
+        yield "deny-invalid-protocol"
+    }
+    when port < 0 or port > 65535 {
+        yield "deny-invalid-port"
+    }
+    each rule in rules {
+        when size(rule) != 5 {
+            yield "deny-invalid-rule-set"
+        }
+        when rule[2] < 0 or rule[3] > 65535 or rule[2] > rule[3] {
+            yield "deny-invalid-rule-set"
+        }
+        when rule[0] == direction and rule[1] == protocol and port >= rule[2] and port <= rule[3] {
+            when rule[4] == "allow" {
+                yield "allow"
+            }
+            yield "deny"
+        }
+    }
+    yield "deny-default"
+}
+
+export craft dns_query_valid(query) {
+    when size(query) != 4 {
+        yield false
+    }
+    when query[0] < 0 or query[0] > 65535 {
+        yield false
+    }
+    when query[1] <= 0 or query[1] > 253 {
+        yield false
+    }
+    when query[2] != "A" and query[2] != "AAAA" and query[2] != "CNAME" {
+        yield false
+    }
+    yield query[3] >= 12 and query[3] <= 4096
+}
+
+export craft vpn_profile_valid(profile) {
+    when size(profile) != 5 {
+        yield false
+    }
+    when profile[0] != "wireguard" and profile[0] != "ikev2" {
+        yield false
+    }
+    when profile[1] <= 0 or profile[1] > 65535 or profile[3] < 0 or profile[3] > 64 {
+        yield false
+    }
+    when profile[2] != "public-key" and profile[2] != "certificate" {
+        yield false
+    }
+    yield profile[4] == "provisioned"
+}

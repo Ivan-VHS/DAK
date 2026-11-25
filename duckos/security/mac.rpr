@@ -1,0 +1,69 @@
+# Mandatory access control and platform trust policy.
+# These decisions are not yet enforced by a privileged syscall boundary.
+
+export craft authorize(subject_label, object_label, action, rules) {
+    each rule in rules {
+        when size(rule) != 4 {
+            yield "deny-invalid-policy"
+        }
+        when rule[0] == subject_label and rule[1] == object_label and rule[2] == action {
+            when rule[3] == "allow" {
+                yield "allow"
+            }
+            yield "deny"
+        }
+    }
+    yield "deny-default"
+}
+
+export craft label_transition(current, next, validation_passed, administrator) {
+    when next == "quarantined" {
+        yield "allow"
+    }
+    when current == "quarantined" {
+        yield "recovery-required"
+    }
+    when current == "untrusted" and next == "validated" and validation_passed {
+        yield "allow"
+    }
+    when current == "validated" and next == "trusted" and administrator {
+        yield "allow"
+    }
+    when current == next and current != "" {
+        yield "allow"
+    }
+    yield "deny"
+}
+
+export craft secure_boot_decision(firmware_verified, bootloader_verified, kernel_verified, policy_present) {
+    when firmware_verified and bootloader_verified and kernel_verified and policy_present {
+        yield "continue-policy-only"
+    }
+    yield "recovery"
+}
+
+export craft tpm_evidence_valid(evidence) {
+    when size(evidence) != 4 or evidence[1] != 2 {
+        yield false
+    }
+    when evidence[2] < 16 or evidence[2] > 64 {
+        yield false
+    }
+    when evidence[0] != "quote" and evidence[0] != "seal" {
+        yield false
+    }
+    when evidence[0] == "quote" and not evidence[3] {
+        yield false
+    }
+    yield true
+}
+
+export craft encryption_profile_valid(profile) {
+    when size(profile) != 4 {
+        yield false
+    }
+    when profile[0] != "aes-256" or profile[1] != 256 or profile[2] == "" {
+        yield false
+    }
+    yield profile[3] == "ready" or profile[3] == "rotating"
+}

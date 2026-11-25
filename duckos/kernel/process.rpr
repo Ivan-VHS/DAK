@@ -1,0 +1,88 @@
+# Process lifecycle and resource policy.
+# These contracts do not create address spaces or switch CPU contexts.
+
+export craft descriptor_valid(process) {
+    when size(process) != 7 {
+        yield false
+    }
+    when process[0] <= 0 or process[1] < 0 {
+        yield false
+    }
+    when process[2] < 0 or process[2] > 255 {
+        yield false
+    }
+    when process[3] <= 0 or process[4] <= 0 or process[4] > 100 {
+        yield false
+    }
+    when process[5] != "created" and process[5] != "ready" and process[5] != "running" and process[5] != "waiting" and process[5] != "terminated" and process[5] != "failed" {
+        yield false
+    }
+    yield true
+}
+
+export craft spawn_policy(parent, child) {
+    when not descriptor_valid(parent) or not descriptor_valid(child) {
+        yield "reject-invalid-descriptor"
+    }
+    when parent[5] != "running" {
+        yield "reject-parent-not-running"
+    }
+    when child[1] != parent[0] {
+        yield "reject-parent-mismatch"
+    }
+
+    each requested in child[6] {
+        vary granted := false
+        each capability in parent[6] {
+            when requested == capability {
+                change granted := true
+            }
+        }
+        when not granted {
+            yield "reject-capability-amplification"
+        }
+    }
+    yield "admit-policy-only"
+}
+
+export craft transition_valid(current, next) {
+    when current == "created" and next == "ready" {
+        yield true
+    }
+    when current == "ready" and (next == "running" or next == "terminated") {
+        yield true
+    }
+    when current == "running" and (next == "ready" or next == "waiting" or next == "terminated" or next == "failed") {
+        yield true
+    }
+    when current == "waiting" and (next == "ready" or next == "terminated" or next == "failed") {
+        yield true
+    }
+    yield false
+}
+
+export craft usage_valid(cpu_percent, memory_bytes, cpu_limit, memory_limit) {
+    when cpu_percent < 0 or cpu_percent > 100 {
+        yield false
+    }
+    when memory_bytes < 0 or memory_limit <= 0 or memory_bytes > memory_limit {
+        yield false
+    }
+    when cpu_limit <= 0 or cpu_percent > cpu_limit {
+        yield false
+    }
+    yield true
+}
+
+export craft shutdown_action(state, deadline_reached) {
+    when state == "terminated" or state == "failed" {
+        yield "already-stopped"
+    }
+    when state == "created" or state == "ready" or state == "running" or state == "waiting" {
+        when deadline_reached {
+            yield "force-exit-after-grace-period"
+        }
+        yield "request-graceful-stop"
+    }
+    yield "reject-invalid-state"
+}

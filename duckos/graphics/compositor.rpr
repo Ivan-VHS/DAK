@@ -1,0 +1,67 @@
+# Display and compositor input contracts.
+# Framebuffer writing and GPU command submission require native backends.
+
+export craft framebuffer_valid(framebuffer) {
+    when size(framebuffer) != 5 {
+        yield false
+    }
+    when framebuffer[0] < 320 or framebuffer[0] > 16384 or framebuffer[1] < 200 or framebuffer[1] > 16384 {
+        yield false
+    }
+    when framebuffer[3] != 16 and framebuffer[3] != 24 and framebuffer[3] != 32 {
+        yield false
+    }
+    when framebuffer[2] <= 0 or framebuffer[4] <= 0 {
+        yield false
+    }
+    make minimum_pitch := framebuffer[0] * (framebuffer[3] / 8)
+    when framebuffer[2] < minimum_pitch or framebuffer[1] > framebuffer[4] / framebuffer[2] {
+        yield false
+    }
+    yield true
+}
+
+export craft monitor_valid(monitor) {
+    when size(monitor) != 6 or monitor[0] <= 0 {
+        yield false
+    }
+    when monitor[1] < -32768 or monitor[1] > 32767 or monitor[2] < -32768 or monitor[2] > 32767 {
+        yield false
+    }
+    when monitor[3] < 320 or monitor[3] > 16384 or monitor[4] < 200 or monitor[4] > 16384 {
+        yield false
+    }
+    yield monitor[5] >= 500 and monitor[5] <= 4000
+}
+
+export craft backend_select(backends) {
+    each backend in backends {
+        when backend == "vulkan" {
+            yield "vulkan"
+        }
+    }
+    each backend in backends {
+        when backend == "opengl" {
+            yield "opengl"
+        }
+    }
+    each backend in backends {
+        when backend == "framebuffer" {
+            yield "framebuffer"
+        }
+    }
+    yield "unavailable"
+}
+
+export craft frame_budget_state(frame_time_us, refresh_hz, reduced_motion) {
+    when frame_time_us < 0 or refresh_hz < 24 or refresh_hz > 360 {
+        yield "invalid"
+    }
+    when reduced_motion {
+        yield "static"
+    }
+    when frame_time_us <= 1000000 / refresh_hz {
+        yield "within-budget"
+    }
+    yield "late"
+}
