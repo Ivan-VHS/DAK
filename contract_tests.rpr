@@ -39,6 +39,7 @@ import "duckos/security/bav.rpr" as bav
 import "duckos/services/lifecycle.rpr" as service_lifecycle
 import "duckos/desktop/window_manager.rpr" as window_manager
 import "duckos/packages/transaction.rpr" as package_transaction
+import "duckos/kernel/limine_map.rpr" as limine_map
 import "duckos/kernel/process.rpr" as process
 import "duckos/kernel/syscall.rpr" as syscall
 import "duckos/kernel/interrupts.rpr" as interrupts
@@ -394,5 +395,24 @@ make package_switch := package_transaction["activate"](package_stage[1])
 assert(package_switch[0] == "switch-pending-health", "package activation waits for health confirmation")
 assert(package_transaction["accept_health"](package_switch[1], false)[0] == "rollback-required", "failed first boot requires rollback")
 assert(package_transaction["rollback"](package_switch[1])[0] == "rolled-back", "package rollback restores prior version")
+
+
+# Limine-to-DuckOS memory type conversion is conservative and defers reclaim.
+assert(limine_map["memory_type"](0) == [1, false], "Limine usable becomes DuckOS usable")
+assert(limine_map["memory_type"](2) == [3, false], "Limine ACPI reclaimable is preserved")
+assert(limine_map["memory_type"](3) == [4, false], "Limine ACPI NVS is preserved")
+assert(limine_map["memory_type"](4) == [6, false], "Limine bad memory remains unavailable")
+assert(limine_map["memory_type"](5) == [2, true], "bootloader-reclaimable memory remains reserved until explicit release")
+assert(limine_map["memory_type"](6) == [2, false], "kernel and module images remain reserved")
+assert(limine_map["memory_type"](7) == [5, false], "framebuffer is represented as device memory")
+assert(limine_map["memory_type"](8) == [2, false], "reserved-mapped memory stays reserved")
+assert(limine_map["memory_type"](99)[0] == 0, "unknown memory map type is rejected")
+make limine_boot_regions := [[0, 0, 0, 4096, 0], [0, 4096, 0, 4096, 5], [0, 8192, 0, 4096, 7]]
+make duck_boot_regions := limine_map["translate_map"](limine_boot_regions)
+assert(duck_boot_regions[0] == "translated" and size(duck_boot_regions[1]) == 3, "Limine memory map types convert to bounded DuckOS regions")
+assert(duck_boot_regions[1][1][4] == 2 and duck_boot_regions[1][1][5], "bootloader memory is not released during initial handoff")
+assert(limine_map["reclaim_policy"](duck_boot_regions[1][1], false) == "retain-reserved", "bootloader memory is retained while boot responses remain live")
+assert(limine_map["reclaim_policy"](duck_boot_regions[1][1], true) == "reclaim-eligible", "bootloader memory becomes eligible only after consumers release responses")
+assert(limine_map["translate_region"]([0, 0, 0, 0, 9])[0] == "reject", "unknown Limine region types are not translated")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"
