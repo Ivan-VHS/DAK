@@ -147,3 +147,19 @@ The release edition adds four first-party workbench panels to the Mora system-ap
 - **VentuSample** — C++20 audio/DSP workbench, with Qt 6 desktop when built.
 
 Each panel links to its local source README and lists reproducible build/test commands. These are host user-space applications. Mora does not invoke their commands, load binaries or grant them device access. See [the release edition](RELEASE_EDITION.md) and [the workbench manifest](../federation/mora-workbenches.v1.json).
+
+
+## Native shell panels — design transfer
+
+The Qt host-native adapter now maps the four Duck Shell Figma surfaces into native panels: window overview, local notification center, quick settings and the application launcher. Their entry points, local data contracts, keyboard shortcuts, build verification and maturity boundaries are recorded in [Native Shell Design Transfer](NATIVE_SHELL_DESIGN_TRANSFER.md).
+
+These panels operate only on existing host-native Mora windows and the local application catalogue. The quick-settings panel persists Mora quiet mode; hardware and host-service controls remain unavailable rather than simulated. This work does not implement the kernel compositor, native DuckOS process sessions, DABI64/IPC, virtual workspaces or capability enforcement.
+
+
+## Imperial Noir & Glass material language
+
+The supplied [Figma material library](https://www.figma.com/design/RWjphsEdITgECaS8G31o9H/Untitled?node-id=0-1) is used as a geometry and lighting reference, not as a set of finished app screens. Mora adapts its light folds, glass rings, dune curves, radial fields and overlapping geometric forms to the desktop backdrop, app tiles, overview cards, launcher, notification feed and quick settings.
+
+All shell variants use the same semantic tokens from `mora/theme.json`: canvas `#050505`, shell `#070707`, charcoal surfaces and gold `#FFD700`. Copper and amber lighting in the Figma source is recoloured as a subtle gold reflection; it does not become a second accent. Status roles are green, red and blue for success, danger and information. Browser backdrop filtering is progressive enhancement; native Qt surfaces use translucent widget fills and painted edge highlights.
+
+The native panel interactions remain unchanged: window overview activates or closes existing Mora windows; notifications show the local bounded event history; quick settings persists Mora-only quiet mode and reports unavailable host services honestly; the launcher searches the local catalogue. See [Mora Design System](../MORA_DESIGN_SYSTEM.md), [Native Shell Design Transfer](NATIVE_SHELL_DESIGN_TRANSFER.md) and [Material Language Transfer](MATERIAL_LANGUAGE_TRANSFER.md) for the mapping and implementation boundaries.
