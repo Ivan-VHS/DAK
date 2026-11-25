@@ -1,0 +1,357 @@
+{
+  "schema": "duckos.boot-integrations.v1",
+  "version": 1,
+  "targets": [
+    {
+      "id": "limine",
+      "name": "Limine",
+      "kind": "bootloader",
+      "maturity": "current-bootstrap",
+      "firmware": [
+        "bios",
+        "uefi"
+      ],
+      "scope": "Current pinned Stage 0 provider for the experimental x86_64 kernel.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify"
+      ],
+      "notes": "Do not remove until DuckBoot has qualified fallback and recovery."
+    },
+    {
+      "id": "grub2",
+      "name": "GNU GRUB 2",
+      "kind": "bootloader",
+      "maturity": "planned",
+      "firmware": [
+        "bios",
+        "uefi"
+      ],
+      "scope": "Config discovery and later qualified install or chainload adapter.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload",
+        "install",
+        "set-default",
+        "set-once",
+        "rollback",
+        "remove"
+      ],
+      "notes": "Each operation remains disabled until its adapter and recovery tests pass."
+    },
+    {
+      "id": "grub-legacy",
+      "name": "GRUB Legacy",
+      "kind": "legacy-loader",
+      "maturity": "legacy-read-only",
+      "firmware": [
+        "bios"
+      ],
+      "scope": "Bounded read-only inspection and migration guidance.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan"
+      ],
+      "notes": "No new default installation."
+    },
+    {
+      "id": "systemd-boot",
+      "name": "systemd-boot",
+      "kind": "boot-manager",
+      "maturity": "planned",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "ESP and XBOOTLDR entry discovery and supported selection operations.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload",
+        "install",
+        "set-default",
+        "set-once",
+        "rollback",
+        "remove"
+      ]
+    },
+    {
+      "id": "refind",
+      "name": "rEFInd",
+      "kind": "boot-manager",
+      "maturity": "planned",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "UEFI discovery and chainload integration while preserving upstream configuration.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ]
+    },
+    {
+      "id": "syslinux",
+      "name": "SYSLINUX",
+      "kind": "bootloader",
+      "maturity": "planned",
+      "firmware": [
+        "bios"
+      ],
+      "scope": "BIOS configuration and module-aware inspection.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify"
+      ]
+    },
+    {
+      "id": "isolinux",
+      "name": "ISOLINUX",
+      "kind": "bootloader",
+      "maturity": "planned",
+      "firmware": [
+        "bios"
+      ],
+      "scope": "ISO and live-media boot-entry inspection.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify"
+      ]
+    },
+    {
+      "id": "extlinux",
+      "name": "EXTLINUX",
+      "kind": "bootloader",
+      "maturity": "planned",
+      "firmware": [
+        "bios"
+      ],
+      "scope": "Filesystem boot configuration inspection where support is qualified.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify"
+      ]
+    },
+    {
+      "id": "pxelinux",
+      "name": "PXELINUX",
+      "kind": "network-loader",
+      "maturity": "planned",
+      "firmware": [
+        "pxe"
+      ],
+      "scope": "PXE menu discovery; does not imply DHCP or TFTP server provisioning.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify"
+      ]
+    },
+    {
+      "id": "ipxe",
+      "name": "iPXE",
+      "kind": "network-loader",
+      "maturity": "planned",
+      "firmware": [
+        "pxe",
+        "uefi",
+        "bios"
+      ],
+      "scope": "Explicit network boot chain with local trust policy.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ],
+      "notes": "Network boot is opt-in and disabled by default."
+    },
+    {
+      "id": "uefi-efi-stub",
+      "name": "UEFI EFI-stub",
+      "kind": "firmware-kernel-path",
+      "maturity": "planned",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "Direct firmware launch of a kernel with a qualified EFI entry point.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "set-once"
+      ]
+    },
+    {
+      "id": "uki",
+      "name": "Unified Kernel Image",
+      "kind": "artifact-format",
+      "maturity": "format-only",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "Verify and select a single signed boot artifact; not a separate bootloader.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify"
+      ],
+      "notes": "Signature verification and anti-rollback are required before trusted status."
+    },
+    {
+      "id": "windows-boot-manager",
+      "name": "Windows Boot Manager",
+      "kind": "chainload-target",
+      "maturity": "external-chainload",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "Discover and chainload external Windows-owned EFI entry; preserve its files.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "chainload"
+      ]
+    },
+    {
+      "id": "shim",
+      "name": "shim",
+      "kind": "secure-boot-stage",
+      "maturity": "external-chainload",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "Record trust-chain stage and chain into a compatible next-stage loader.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ],
+      "notes": "Not a standalone desktop boot menu."
+    },
+    {
+      "id": "u-boot",
+      "name": "U-Boot",
+      "kind": "embedded-loader",
+      "maturity": "platform-specific",
+      "firmware": [
+        "board-firmware"
+      ],
+      "scope": "Separate board-specific embedded adapter; not a default x86 desktop dependency.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ]
+    },
+    {
+      "id": "barebox",
+      "name": "Barebox",
+      "kind": "embedded-loader",
+      "maturity": "platform-specific",
+      "firmware": [
+        "board-firmware",
+        "uefi"
+      ],
+      "scope": "Separate embedded adapter with explicit board and firmware capability declaration.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ]
+    },
+    {
+      "id": "petitboot",
+      "name": "Petitboot",
+      "kind": "boot-manager",
+      "maturity": "platform-specific",
+      "firmware": [
+        "board-firmware"
+      ],
+      "scope": "Discover and chainload where a supported platform supplies Petitboot.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ]
+    },
+    {
+      "id": "opencore",
+      "name": "OpenCore",
+      "kind": "boot-manager",
+      "maturity": "external-chainload",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "External chainload target with platform and ownership limitations.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ]
+    },
+    {
+      "id": "clover",
+      "name": "Clover",
+      "kind": "boot-manager",
+      "maturity": "external-chainload",
+      "firmware": [
+        "uefi"
+      ],
+      "scope": "External chainload target; no assumption of Apple firmware support.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan",
+        "verify",
+        "chainload"
+      ]
+    },
+    {
+      "id": "lilo",
+      "name": "LILO",
+      "kind": "legacy-loader",
+      "maturity": "legacy-read-only",
+      "firmware": [
+        "bios"
+      ],
+      "scope": "Read-only legacy inspection and migration path.",
+      "operations": [
+        "discover",
+        "inspect",
+        "plan"
+      ],
+      "notes": "Not a new default installation target."
+    }
+  ]
+}
