@@ -52,8 +52,9 @@ export function validateEcosystem(graph,registry,workbenches,root=ROOT){
    }catch(error){add(edge.id+": "+error.message);}
   }
  }
- if(!graph?.interfaces?.some(e=>e.id==="ventusample.reaper.pack.v1"&&e.status==="specified_only"))add("VentuSample pack must remain specified_only until a consumer exists");
- if(!graph?.interfaces?.some(e=>e.id==="oplague.duckos.gpu-telemetry.v1"&&e.status==="policy_adapter_only"))add("GPU telemetry must remain policy_adapter_only until trusted ingest exists");
+ if(!graph?.interfaces?.some(e=>e.id==="ventusample.reaper.pack.v1"&&e.status==="implemented_interop"))add("VentuSample pack-v1 must have a verified Reaper consumer");
+ if(!graph?.interfaces?.some(e=>e.id==="oplague.reaper.gpu-telemetry.v1"&&e.status==="implemented_interop"))add("OPlague GPU telemetry must have a verified Reaper consumer");
+ if(!graph?.interfaces?.some(e=>e.id==="oplague.duckos.gpu-telemetry.v1"&&e.status==="policy_adapter_only"))add("OPlague GPU telemetry to DuckOS must remain policy_adapter_only until trusted native ingest and publisher provenance exist");
  const release=graph?.release_pipeline;
  if(release?.script!=="boot/build-release-iso.sh"||release?.workflow!==".github/workflows/release-iso.yml"||release?.workbench_registry!=="federation/mora-workbenches.v1.json")add("release pipeline metadata points to wrong files");
  for(const id of EXPECTED.keys())if(!release?.tested_projects?.includes(id))add("release pipeline omits "+id);

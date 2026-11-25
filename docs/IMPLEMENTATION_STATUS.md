@@ -7,12 +7,12 @@ Updated: 2026-11-25
 - [x] DuckOS pins Reaper, Pytyliki, OPlague and VentuSample as four independent Git submodules with exact commits and preserved upstream licenses.
 - [x] Release ISO pipeline builds/tests the four host workbenches and packages source, notices and checksums; host binaries are not kernel executables.
 - [x] Reaper consumes Pytyliki C ABI v1 through an explicit absolute library path and checks ABI version before calls.
-- [x] Reaper validates OPlague device snapshot v1 and DuckOS hardware inventory v1 for read-only audit workflows.
+- [x] Reaper validates OPlague device snapshot v1, GPU telemetry v1 and DuckOS hardware inventory v1 for read-only audit workflows.
 - [x] Machine-readable integration graph and Node tests verify source pins, licenses, interface artifacts and maturity labels.
-- [x] Reaper policy adapter for normalized OPlague GPU telemetry v1 validates provider/mode/bounds and preserves unknown readings as absent.
-- [ ] Implement trusted native JSON ingestion that verifies OPlague schema and canonical digest before constructing normalized Reaper records.
-- [ ] Add publisher/build provenance verification; SHA-256 is not a signature.
-- [ ] Implement a VentuSample pack-v1 Reaper consumer; the current metadata interface remains specified-only.
+- [x] Reaper exposes OPlague GPU telemetry v1 validation and normalization through read-only reference-runtime builtins; unknown sensor values remain unknown.
+- [x] Reaper consumes VentuSample pack-v1 metadata, validates exact cardinality and safe file names, derives 22 normalized descriptors and compares manifests deterministically.
+- [x] Federation graph records both Reaper consumers as implemented interoperability, backed by source, schema and tests.
+- [ ] Implement trusted native DuckOS JSON ingestion for the policy bridge and verify publisher/build provenance; SHA-256 alone is not a signature.
 - [ ] Connect peer workbenches to a native DuckOS process/package service only after scheduler, syscall, filesystem and kernel capability enforcement exist.
 
 Peer applications and host tools remain user-space programs. None is a kernel module or an executable that the Stage 1 kernel can start.

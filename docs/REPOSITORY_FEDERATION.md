@@ -80,6 +80,6 @@ npm run test:ecosystem
 npm test
 ```
 
-The graph distinguishes working Pytyliki ABI v1 and OPlague device-snapshot v1 interop, DuckOS hardware-inventory v1 read-only audit, a GPU policy adapter that still needs trusted ingest, and the specified-only VentuSample pack-v1 metadata edge.
+The graph distinguishes working Pytyliki ABI v1, OPlague device-snapshot/GPU-telemetry v1 and VentuSample pack-v1 Reaper user-space consumers, DuckOS hardware-inventory v1 read-only audit, and the separate OPlague-to-DuckOS normalized policy adapter that still needs trusted native ingestion and publisher/build provenance.
 
 Do not flatten submodules into the kernel tree. Preserve provenance, pins and licenses. Do not upgrade maturity labels until consumer code, tests and runtime boundaries are verified.
