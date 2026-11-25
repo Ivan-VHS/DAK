@@ -1,9 +1,9 @@
 {
-  "schema": "duckos.ecosystem-integration-graph.v1",
+  "schema": "dak.ecosystem-integration-graph.v1",
   "version": 1,
   "host": {
-    "id": "duckos",
-    "repository": "Ivan-VHS/DuckOS",
+    "id": "dak",
+    "repository": "Ivan-VHS/DAK",
     "role": "federation-host-and-operating-system",
     "runtime_boundary": "kernel-and-user-space-separate",
     "kernel_may_load_peer_code": false
@@ -91,36 +91,36 @@
       "boundary": "Reaper validates exact fields, read-only source mode, counters, bounds and canonical digest before comparison. Digest is integrity evidence, not a publisher signature."
     },
     {
-      "id": "duckos.reaper.hardware-inventory.v1",
-      "producer": "duckos",
+      "id": "dak.reaper.hardware-inventory.v1",
+      "producer": "dak",
       "consumer": "reaper",
-      "contract": "duckos.hardware-inventory.v1",
+      "contract": "dak.hardware-inventory.v1",
       "version": 1,
       "status": "implemented_interop",
       "transport": "bounded-read-only-json",
       "artifacts": [
-        "duckos/hardware_inventory.py",
+        "dak/hardware_inventory.py",
         "schemas/hardware-inventory.v1.schema.json",
-        "projects/reaper/schemas/duckos.hardware-inventory.v1.schema.json",
-        "projects/reaper/reaper/duckos_bridge.py",
-        "projects/reaper/tests/test_duckos_bridge.py"
+        "projects/reaper/schemas/dak.hardware-inventory.v1.schema.json",
+        "projects/reaper/reaper/dak_bridge.py",
+        "projects/reaper/tests/test_dak_bridge.py"
       ],
-      "boundary": "DuckOS host inventory redacts device instance IDs per snapshot. Reaper performs read-only audit; no device or driver mutation."
+      "boundary": "DAK host inventory redacts device instance IDs per snapshot. Reaper performs read-only audit; no device or driver mutation."
     },
     {
-      "id": "oplague.duckos.gpu-telemetry.v1",
+      "id": "oplague.dak.gpu-telemetry.v1",
       "producer": "oplague",
-      "consumer": "duckos",
+      "consumer": "dak",
       "contract": "oplage.gpu-telemetry.v1",
       "version": 1,
       "status": "policy_adapter_only",
       "transport": "trusted-ingest-normalized-record",
       "artifacts": [
-        "duckos/gpu/oplage_bridge.rpr",
-        "duckos/system/telemetry.rpr",
+        "dak/gpu/oplage_bridge.rpr",
+        "dak/system/telemetry.rpr",
         "contract_tests.rpr"
       ],
-      "boundary": "The DuckOS Reaper policy adapter and contract tests exist, but the OPlague schema/exporter/docs for this contract are only on upstream main and are absent from the OPlague commit pinned by DuckOS. This is not end-to-end producer/consumer interoperability until a reviewed upstream pin update includes those files. The adapter requires trusted JSON/schema/digest ingestion; publisher attestation and AMD/Intel providers remain pending."
+      "boundary": "The DAK Reaper policy adapter and contract tests exist, but the OPlague schema/exporter/docs for this contract are only on upstream main and are absent from the OPlague commit pinned by DAK. This is not end-to-end producer/consumer interoperability until a reviewed upstream pin update includes those files. The adapter requires trusted JSON/schema/digest ingestion; publisher attestation and AMD/Intel providers remain pending."
     },
     {
       "id": "ventusample.reaper.pack.v1",
@@ -155,7 +155,7 @@
   "shared_rules": [
     "Keep peer repositories as exact, independently versioned Git submodules; do not flatten or copy peer source trees.",
     "Validate pinned source graph, licenses, interface artifacts and schema versions before integration.",
-    "Prefer versioned JSON for data exchange and narrow C ABI for synchronous compute; use IPC only after the DuckOS process model and syscall boundary are live.",
+    "Prefer versioned JSON for data exchange and narrow C ABI for synchronous compute; use IPC only after the DAK process model and syscall boundary are live.",
     "Imported executables remain user-space programs, never kernel modules or privileged services.",
     "Do not automatically load native libraries, run imported tools, install drivers or mutate devices.",
     "OPlague and Pytyliki hardware evidence remains read-only; unknown telemetry values remain unknown.",

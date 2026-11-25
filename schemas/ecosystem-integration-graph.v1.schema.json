@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/ecosystem-integration-graph.v1.schema.json",
-  "title": "DuckOS ecosystem integration graph v1",
+  "$id": "https://github.com/Ivan-VHS/DAK/blob/main/schemas/ecosystem-integration-graph.v1.schema.json",
+  "title": "DAK ecosystem integration graph v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -15,7 +15,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.ecosystem-integration-graph.v1"
+      "const": "dak.ecosystem-integration-graph.v1"
     },
     "version": {
       "const": 1
@@ -32,10 +32,10 @@
       ],
       "properties": {
         "id": {
-          "const": "duckos"
+          "const": "dak"
         },
         "repository": {
-          "const": "Ivan-VHS/DuckOS"
+          "const": "Ivan-VHS/DAK"
         },
         "role": {
           "type": "string"
@@ -133,7 +133,7 @@
           },
           "producer": {
             "enum": [
-              "duckos",
+              "dak",
               "reaper",
               "pytyliki",
               "oplague",
@@ -142,7 +142,7 @@
           },
           "consumer": {
             "enum": [
-              "duckos",
+              "dak",
               "reaper",
               "pytyliki",
               "oplague",

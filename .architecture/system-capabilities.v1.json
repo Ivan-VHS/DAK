@@ -1,7 +1,7 @@
 {
   "schema": "ivan-vhs.system-capabilities.v1",
   "version": 1,
-  "project": "DuckOS",
+  "project": "DAK",
   "scope": "Operating-system foundation, Mora desktop shell, native services and federated source workspace.",
   "reference": {
     "id": "windows-xp-sp3-66-point-comparison",
@@ -70,7 +70,7 @@
       "evidence": [
         "docs/IMPLEMENTATION_STATUS.md",
         "docs/FOUNDATION_ARCHITECTURE.md",
-        "duckos/security/capabilities.rpr"
+        "dak/security/capabilities.rpr"
       ],
       "verification": [
         "tests"
@@ -87,7 +87,7 @@
         28
       ],
       "status": "not_assessed",
-      "assessment": "The XP reference describes Windows-specific protocol, NAP and IPsec behavior. DuckOS network-stack parity has not been established; no XP-compatible network implementation is claimed.",
+      "assessment": "The XP reference describes Windows-specific protocol, NAP and IPsec behavior. DAK network-stack parity has not been established; no XP-compatible network implementation is claimed.",
       "evidence": [],
       "verification": [],
       "limitations": [
@@ -105,7 +105,7 @@
       "assessment": "Deterministic component bundles and deployment plans exist; a bootable installer, physical-disk deployment and complete A/B boot rollback are not claimed.",
       "evidence": [
         "docs/DEPLOYMENT.md",
-        "duckos/deployment.py"
+        "dak/deployment.py"
       ],
       "verification": [
         "tests"
@@ -122,7 +122,7 @@
         54
       ],
       "status": "partial",
-      "assessment": "Mora includes a Qt 6 Widgets host-native desktop application with host-managed top-level windows, a local app catalogue, native host input/focus and bounded local panels, while retaining the older browser shell as a reference preview. It is not a DuckOS kernel compositor, privileged launcher, Windows Explorer replacement or full OS storage stack.",
+      "assessment": "Mora includes a Qt 6 Widgets host-native desktop application with host-managed top-level windows, a local app catalogue, native host input/focus and bounded local panels, while retaining the older browser shell as a reference preview. It is not a DAK kernel compositor, privileged launcher, Windows Explorer replacement or full OS storage stack.",
       "evidence": [
         "docs/MORA_INTEGRATION.md",
         "MORA_DESIGN_SYSTEM.md",
@@ -136,7 +136,7 @@
         ".github/workflows/native-mora.yml"
       ],
       "limitations": [
-        "The Qt app runs under the host OS and is not launched by the Stage 1 DuckOS kernel.",
+        "The Qt app runs under the host OS and is not launched by the Stage 1 DAK kernel.",
         "The kernel compositor, process model, VFS, app sandbox and native capability enforcement remain pending.",
         "Browser-preview behavior must not be represented as kernel-native operation."
       ]

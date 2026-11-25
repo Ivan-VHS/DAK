@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from duckos.desktop.service import StartupManager, audit_desktop, list_desktop_items, move_desktop_items_to_inbox
+from dak.desktop.service import StartupManager, audit_desktop, list_desktop_items, move_desktop_items_to_inbox
 
 
 class DesktopAuditTests(unittest.TestCase):
@@ -20,7 +20,7 @@ class DesktopAuditTests(unittest.TestCase):
         (self.desktop / "project-notes.md").write_text("notes", encoding="utf-8")
         before = sorted(item.name for item in self.desktop.iterdir())
         report = audit_desktop(self.home)
-        self.assertEqual(report["schema"], "duckos.desktop-audit.v1")
+        self.assertEqual(report["schema"], "dak.desktop-audit.v1")
         self.assertEqual(report["desktop"]["count"], 2)
         self.assertTrue(any(item["looks_temporary"] for item in report["desktop"]["items"]))
         self.assertEqual(report["operations_performed"]["files_deleted"], 0)
@@ -64,12 +64,12 @@ class StartupManagerTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.home = Path(temporary.name)
         self.startup = self.home / ".config" / "autostart"
-        self.disabled = self.home / ".config" / "duckos" / "disabled-autostart"
+        self.disabled = self.home / ".config" / "dak" / "disabled-autostart"
         self.startup.mkdir(parents=True)
         (self.startup / "backup-agent.desktop").write_text("[Desktop Entry]\nName=Backup Agent\n", encoding="utf-8")
         self.manager = StartupManager(
             self.home, platform_name="Linux", startup_dir=self.startup,
-            disabled_dir=self.disabled, backup_dir=self.home / ".config" / "duckos" / "startup-backups",
+            disabled_dir=self.disabled, backup_dir=self.home / ".config" / "dak" / "startup-backups",
         )
 
     def test_disable_and_restore_are_reversible(self):

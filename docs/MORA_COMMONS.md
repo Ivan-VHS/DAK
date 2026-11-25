@@ -1,6 +1,6 @@
-# Mora Commons — единый центр приложений DuckOS
+# Mora Commons — единый центр приложений DAK
 
-**Product ID:** ivan-vhs.duckos.mora-commons  
+**Product ID:** ivan-vhs.dak.mora-commons  
 **Catalog module:** mora/commons-catalog.js  
 **Maturity:** the Mora Commons catalogue interface is implemented in the browser shell; the fifteen listed application products are specified, not shipped native applications.
 

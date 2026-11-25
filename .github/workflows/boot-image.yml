@@ -1,4 +1,4 @@
-name: DuckOS bootable Stage 1 ISO
+name: DAK bootable Stage 1 ISO
 
 on:
   pull_request:
@@ -27,7 +27,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: duckos-boot-iso-${{ github.event.pull_request.head.ref || github.ref }}
+  group: dak-boot-iso-${{ github.event.pull_request.head.ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -52,8 +52,8 @@ jobs:
       - name: Build pinned BIOS/UEFI ISO
         run: |
           bash boot/build-iso.sh \
-            --work-dir build/duckos-boot \
-            --output build/DuckOS-Stage1-x86_64.iso
+            --work-dir build/dak-boot \
+            --output build/DAK-Stage1-x86_64.iso
 
       - name: Locate OVMF firmware
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: Verify BIOS and UEFI boot in QEMU
         run: |
           bash boot/test-qemu.sh \
-            --iso build/DuckOS-Stage1-x86_64.iso \
+            --iso build/DAK-Stage1-x86_64.iso \
             --output-dir build/qemu \
             --ovmf-code "$OVMF_CODE_PATH" \
             --ovmf-vars "$OVMF_VARS_PATH"
@@ -82,10 +82,10 @@ jobs:
       - name: Publish bootable ISO and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: DuckOS-Stage1-x86_64-ISO
+          name: DAK-Stage1-x86_64-ISO
           path: |
-            build/DuckOS-Stage1-x86_64.iso
-            build/DuckOS-Stage1-x86_64.iso.sha256
+            build/DAK-Stage1-x86_64.iso
+            build/DAK-Stage1-x86_64.iso.sha256
             build/qemu/*.log
           if-no-files-found: error
           retention-days: 30

@@ -147,7 +147,7 @@ class DesktopWindow:
         ttk.Label(
             tab,
             text=(
-                "Нативная интеграция системного языка Reaper. DuckOS использует "
+                "Нативная интеграция системного языка Reaper. DAK использует "
                 "закреплённый исходный checkout и запускает его CLI отдельным процессом."
             ),
             style="Muted.TLabel",
@@ -264,7 +264,7 @@ class DesktopWindow:
 
         threading.Thread(
             target=worker,
-            name="duckos-reaper-check",
+            name="dak-reaper-check",
             daemon=True,
         ).start()
 

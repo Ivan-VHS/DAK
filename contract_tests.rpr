@@ -1,36 +1,36 @@
-# DuckOS integration contract suite.
+# DAK integration contract suite.
 # Run with Reaper's tree-walk engine and VM.
 
-import "duckos/kernel/boot.rpr" as boot
-import "duckos/kernel/memory.rpr" as memory
-import "duckos/kernel/arena.rpr" as arena
-import "duckos/kernel/scheduler.rpr" as scheduler
-import "duckos/kernel/flock.rpr" as flock
-import "duckos/kernel/ipc.rpr" as ipc
-import "duckos/kernel/zero_copy_bus.rpr" as bus
-import "duckos/security/capabilities.rpr" as capabilities
-import "duckos/security/trust.rpr" as trust
-import "duckos/drivers/abi.rpr" as drivers
-import "duckos/drivers/orchestrator.rpr" as orchestrator
-import "duckos/services/supervisor.rpr" as supervisor
-import "duckos/storage/hypergraph.rpr" as storage
-import "duckos/storage/crdt.rpr" as crdt
-import "duckos/system/three_media.rpr" as media
-import "duckos/system/telemetry.rpr" as telemetry
-import "duckos/gpu/oplage_bridge.rpr" as oplage_gpu
-import "duckos/ui/theme.rpr" as theme
-import "duckos/ui/motion.rpr" as motion
-import "duckos/storage/history.rpr" as history
-import "duckos/ui/workspace.rpr" as workspace
-import "duckos/system/prefetch.rpr" as prefetch
-import "duckos/ui/config.rpr" as config
-import "duckos/system/recovery.rpr" as recovery
-import "duckos/ui/physics.rpr" as physics
-import "duckos/ui/command_palette.rpr" as palette
-import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
-import "duckos/ui/canvas.rpr" as canvas
-import "duckos/input/spatial.rpr" as spatial_input
-import "duckos/ui/desktop.rpr" as desktop
+import "dak/kernel/boot.rpr" as boot
+import "dak/kernel/memory.rpr" as memory
+import "dak/kernel/arena.rpr" as arena
+import "dak/kernel/scheduler.rpr" as scheduler
+import "dak/kernel/flock.rpr" as flock
+import "dak/kernel/ipc.rpr" as ipc
+import "dak/kernel/zero_copy_bus.rpr" as bus
+import "dak/security/capabilities.rpr" as capabilities
+import "dak/security/trust.rpr" as trust
+import "dak/drivers/abi.rpr" as drivers
+import "dak/drivers/orchestrator.rpr" as orchestrator
+import "dak/services/supervisor.rpr" as supervisor
+import "dak/storage/hypergraph.rpr" as storage
+import "dak/storage/crdt.rpr" as crdt
+import "dak/system/three_media.rpr" as media
+import "dak/system/telemetry.rpr" as telemetry
+import "dak/gpu/oplage_bridge.rpr" as oplage_gpu
+import "dak/ui/theme.rpr" as theme
+import "dak/ui/motion.rpr" as motion
+import "dak/storage/history.rpr" as history
+import "dak/ui/workspace.rpr" as workspace
+import "dak/system/prefetch.rpr" as prefetch
+import "dak/ui/config.rpr" as config
+import "dak/system/recovery.rpr" as recovery
+import "dak/ui/physics.rpr" as physics
+import "dak/ui/command_palette.rpr" as palette
+import "dak/security/plugin_sandbox.rpr" as plugin_sandbox
+import "dak/ui/canvas.rpr" as canvas
+import "dak/input/spatial.rpr" as spatial_input
+import "dak/ui/desktop.rpr" as desktop
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -180,7 +180,7 @@ make window_c := telemetry["append_window"](window_b[1], sample_c, 2)
 assert(window_c[1] == [sample_b, sample_c], "telemetry history remains bounded")
 assert(telemetry["sequence_valid"](window_c[1]), "telemetry sequence is monotonic")
 
-assert(theme["palette_valid"](theme["palette_ratios"]()), "DuckOS palette proportions")
+assert(theme["palette_valid"](theme["palette_ratios"]()), "DAK palette proportions")
 assert(theme["palette_color"]("navigation") == "#FFD400", "navigation uses Duck yellow")
 assert(theme["palette_color"]("alert") == "#FFD400", "alerts use Duck yellow")
 assert(theme["motion_profile"](true) == "static", "reduced-motion preference is respected")
@@ -281,4 +281,4 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
-emit "DUCKOS_REAPER_CONTRACTS_OK"
+emit "DAK_REAPER_CONTRACTS_OK"

@@ -9,7 +9,7 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from duckos.cli import main
+from dak.cli import main
 
 
 class ReaperCliTests(unittest.TestCase):
@@ -50,14 +50,14 @@ class ReaperCliTests(unittest.TestCase):
             args=[], returncode=1,
             stdout=json.dumps(payload), stderr="",
         )
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed):
+        with patch("dak.desktop.reaper.subprocess.run", return_value=completed):
             code, output = self.invoke("reaper", "--root", str(self.root), "check", str(self.source))
         self.assertEqual(code, 1)
         self.assertEqual(json.loads(output)["result"], payload)
 
     def test_reaper_studio_command_starts_the_native_app(self):
         process = type("Process", (), {"pid": 4812})()
-        with patch("duckos.desktop.reaper.subprocess.Popen", return_value=process):
+        with patch("dak.desktop.reaper.subprocess.Popen", return_value=process):
             code, output = self.invoke("reaper", "--root", str(self.root), "studio")
         payload = json.loads(output)
         self.assertEqual(code, 0)

@@ -1,7 +1,7 @@
-const DB_NAME = "duckos.mora.local.v1";
+const DB_NAME = "dak.mora.local.v1";
 const DB_VERSION = 1;
 const STORE_NAME = "documents";
-const FALLBACK_PREFIX = "duckos.mora.localdoc.v1:";
+const FALLBACK_PREFIX = "dak.mora.localdoc.v1:";
 const MAX_DOCUMENT_BYTES = 256 * 1024;
 const ID_PATTERN = /^[a-zA-Z0-9:._-]{1,96}$/;
 

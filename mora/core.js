@@ -1,5 +1,5 @@
-export const PREFERENCES_KEY = "duckos.mora.preferences.v1";
-export const RECOVERY_KEY = "duckos.mora.recovery.v1";
+export const PREFERENCES_KEY = "dak.mora.preferences.v1";
+export const RECOVERY_KEY = "dak.mora.recovery.v1";
 
 export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",

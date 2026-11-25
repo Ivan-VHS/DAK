@@ -2,22 +2,22 @@ from __future__ import annotations
 
 import unittest
 
-from duckos.module_abi import ModuleABIError, SCHEMA, resolve_load_order, validate_module
+from dak.module_abi import ModuleABIError, SCHEMA, resolve_load_order, validate_module
 
 
 class ModuleABITests(unittest.TestCase):
     def test_validates_target_abi_and_capabilities(self):
         manifest = {
             "schema": SCHEMA, "name": "nvme", "version": "0.1.0",
-            "architecture": "x86_64", "kernel_abi": "duckos-kernel-abi-1",
-            "entry_symbol": "duckos_nvme_init", "dependencies": ["pci"],
+            "architecture": "x86_64", "kernel_abi": "dak-kernel-abi-1",
+            "entry_symbol": "dak_nvme_init", "dependencies": ["pci"],
             "capabilities": ["bus.pci", "storage.block"],
         }
-        report = validate_module(manifest, architecture="x86_64", kernel_abi="duckos-kernel-abi-1")
+        report = validate_module(manifest, architecture="x86_64", kernel_abi="dak-kernel-abi-1")
         self.assertTrue(report["valid"])
         self.assertFalse(report["module_loaded"])
         with self.assertRaises(ModuleABIError):
-            validate_module(manifest, architecture="aarch64", kernel_abi="duckos-kernel-abi-1")
+            validate_module(manifest, architecture="aarch64", kernel_abi="dak-kernel-abi-1")
 
     def test_resolves_dependencies_and_detects_cycles(self):
         modules = [

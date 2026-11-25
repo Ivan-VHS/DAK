@@ -1,16 +1,16 @@
-# DuckOS core subsystem MVP contracts.
+# DAK core subsystem MVP contracts.
 # All assertions run on the Reaper reference runtime; no privileged hardware is touched.
 
-import "duckos/kernel/process.rpr" as process
-import "duckos/kernel/vm.rpr" as vm
-import "duckos/storage/vfs.rpr" as vfs
-import "duckos/network/stack.rpr" as network
-import "duckos/graphics/compositor.rpr" as graphics
-import "duckos/audio/pipeline.rpr" as audio
-import "duckos/security/mac.rpr" as mac
-import "duckos/platform/targets.rpr" as targets
-import "duckos/services/init.rpr" as init
-import "duckos/ui/accessibility.rpr" as accessibility
+import "dak/kernel/process.rpr" as process
+import "dak/kernel/vm.rpr" as vm
+import "dak/storage/vfs.rpr" as vfs
+import "dak/network/stack.rpr" as network
+import "dak/graphics/compositor.rpr" as graphics
+import "dak/audio/pipeline.rpr" as audio
+import "dak/security/mac.rpr" as mac
+import "dak/platform/targets.rpr" as targets
+import "dak/services/init.rpr" as init
+import "dak/ui/accessibility.rpr" as accessibility
 
 # Process lifecycle, spawn attenuation, accounting and graceful stop.
 make parent_process := [1, 0, 100, 1048576, 80, "running", ["fs.read", "process.spawn"]]

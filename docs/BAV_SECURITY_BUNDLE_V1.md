@@ -1,18 +1,18 @@
 # BAV Security Bundle and Service Architecture
 
-**Document ID:** DUCKOS-BAV-SEC-001  
+**Document ID:** DAK-BAV-SEC-001  
 **Version:** 1.0  
 **Status:** Specified; scanner and enforcement are planned  
-**Scope:** Beelzebub AV (BAV) for DuckOS  
+**Scope:** Beelzebub AV (BAV) for DAK  
 **Canonical bundle extension:** .bav  
 **Machine-readable contract:** ../schemas/bav-security-bundle.v1.schema.json  
 **Related standards:** ERGONOMICS_AND_INTERACTION_STANDARD.md, IMPLEMENTATION_ROADMAP.md, UNIFIED_DOCUMENTATION_STANDARD.md
 
 ## 1. Purpose and maturity boundary
 
-BAV is the planned local-first security suite for malware inspection, policy decisions, quarantine, recovery and signed detection-content updates in DuckOS.
+BAV is the planned local-first security suite for malware inspection, policy decisions, quarantine, recovery and signed detection-content updates in DAK.
 
-This document specifies the package contract and service boundaries. It does not claim that DuckOS currently contains a malware scanner, on-access filesystem filter, kernel execution blocker, quarantine engine, signature updater or cryptographic trust-store implementation.
+This document specifies the package contract and service boundaries. It does not claim that DAK currently contains a malware scanner, on-access filesystem filter, kernel execution blocker, quarantine engine, signature updater or cryptographic trust-store implementation.
 
 | Capability | Maturity | Boundary |
 |---|---|---|
@@ -60,7 +60,7 @@ Primary threats include:
 7. A compromised update source or publisher key attempting to distribute malicious or obsolete rules.
 8. An unavailable scanner being misrepresented as a successful clean scan.
 
-The trust chain MUST begin with a locally provisioned DuckOS trust root or a key explicitly approved by the device owner. A bundle MUST NOT be allowed to introduce or replace its own trusted signing key. Trust-store updates and key revocation require their own authenticated, versioned contract and approval policy.
+The trust chain MUST begin with a locally provisioned DAK trust root or a key explicitly approved by the device owner. A bundle MUST NOT be allowed to introduce or replace its own trusted signing key. Trust-store updates and key revocation require their own authenticated, versioned contract and approval policy.
 
 ### 3.1 Explicit non-goals
 
@@ -87,11 +87,11 @@ The BAV Scanner Worker MUST NOT run as an unrestricted administrator/root proces
 
 The Reaper repository already contains a Beelzebul 66-rule **repository scanner** (`tools/beelzebul.py`, `security/beelzebul.v1.json`, its regression tests and CI workflow). It audits tracked repository files, source patterns, paths and workflow metadata in read-only mode. Its `beelzebul.report.v1` output is useful for developer/repository assurance, but it is not an endpoint scanner: it does not provide general file-on-access protection, process-memory scanning, behavior monitoring or kernel enforcement. Preserve it as a distinct specialist tool; do not relabel its results as an antivirus scan of the host.
 
-Reaper also defines `duckos.bav.defense-context.v1` and `security/defense-context.v1.tsv`, a 60-term descriptive vocabulary grouped into WMD/CBRN, Chinese military-platform and air-defence context. A match means only that content discusses a listed subject. It MUST NOT raise malware confidence, create a malicious verdict, block execution/builds, trigger quarantine or revoke capabilities. Keep these context tags separate from malware evidence and the detection-rule engine.
+Reaper also defines `dak.bav.defense-context.v1` and `security/defense-context.v1.tsv`, a 60-term descriptive vocabulary grouped into WMD/CBRN, Chinese military-platform and air-defence context. A match means only that content discusses a listed subject. It MUST NOT raise malware confidence, create a malicious verdict, block execution/builds, trigger quarantine or revoke capabilities. Keep these context tags separate from malware evidence and the detection-rule engine.
 
-The Reaper defensive-security doctrine describes a Java context-classification library and self-test. The named Java source paths were not independently retrievable from the current default-branch file view during this integration audit; therefore the DuckOS integration MUST treat the TSV taxonomy as the confirmed data contract and the Java classifier implementation as requiring source/CI re-verification before it is called delivered.
+The Reaper defensive-security doctrine describes a Java context-classification library and self-test. The named Java source paths were not independently retrievable from the current default-branch file view during this integration audit; therefore the DAK integration MUST treat the TSV taxonomy as the confirmed data contract and the Java classifier implementation as requiring source/CI re-verification before it is called delivered.
 
-DuckOS may later ingest Beelzebul reports and context tags only through explicit versioned, bounded schemas. Do not import Reaper Python modules into a native DuckOS service or use a context-tag result as a privileged decision.
+DAK may later ingest Beelzebul reports and context tags only through explicit versioned, bounded schemas. Do not import Reaper Python modules into a native DAK service or use a context-tag result as a privileged decision.
 
 ### 4.2 Scan worker trust boundary
 
@@ -99,17 +99,17 @@ The scanner MUST not execute a file to inspect it. Parsers for executable format
 
 ### 4.3 Reaper integration
 
-Reaper is the primary language and contract layer for new DuckOS-owned system services. BAV policy, bundle parsing and deterministic rule evaluation SHOULD be expressed in Reaper as the native compiler and runtime gain the necessary capabilities.
+Reaper is the primary language and contract layer for new DAK-owned system services. BAV policy, bundle parsing and deterministic rule evaluation SHOULD be expressed in Reaper as the native compiler and runtime gain the necessary capabilities.
 
-The current Reaper reference runtime and partial native compiler are not a kernel service or a security boundary. A production BAV worker MUST NOT claim native isolation, hard real-time behavior or privileged enforcement until the target Reaper runtime, ABI and DuckOS process/capability services are implemented and verified.
+The current Reaper reference runtime and partial native compiler are not a kernel service or a security boundary. A production BAV worker MUST NOT claim native isolation, hard real-time behavior or privileged enforcement until the target Reaper runtime, ABI and DAK process/capability services are implemented and verified.
 
-No Python implementation is prescribed for DuckOS-owned BAV system services. Existing specialist repositories keep their own established languages and roles.
+No Python implementation is prescribed for DAK-owned BAV system services. Existing specialist repositories keep their own established languages and roles.
 
 ## 5. Canonical .bav bundle v1
 
 A .bav file is a UTF-8 JSON document validated against ../schemas/bav-security-bundle.v1.schema.json.
 
-The root schema identifier is duckos.bav.security-bundle.v1. A bundle contains:
+The root schema identifier is dak.bav.security-bundle.v1. A bundle contains:
 
 - bundle identity, monotonically increasing sequence, creation and expiry times, and release channel;
 - publisher key identifier and display label;
@@ -250,9 +250,9 @@ The .bav suffix is reserved exclusively for Beelzebub AV signed security bundles
 
 The buffer layout/allocation specification is renamed to .bufspec. Its schema and parser are separate contracts and are not implemented by this BAV document.
 
-Do not confuse the file suffix with Reaper's existing policy identifier duckos.bav.defense-context.v1 or its security/defense-context.v1.tsv catalog. Those are a policy namespace and a plain-text context vocabulary, not .bav files and not malware signatures.
+Do not confuse the file suffix with Reaper's existing policy identifier dak.bav.defense-context.v1 or its security/defense-context.v1.tsv catalog. Those are a policy namespace and a plain-text context vocabulary, not .bav files and not malware signatures.
 
-The Reaper extension registry, examples, validators, IDE syntax, content-type detection and DuckOS package registry must be updated in separate, reviewable changes before either extension is advertised as supported. Until then, .bav and .bufspec are specified formats only; no parser or runtime support is implied.
+The Reaper extension registry, examples, validators, IDE syntax, content-type detection and DAK package registry must be updated in separate, reviewable changes before either extension is advertised as supported. Until then, .bav and .bufspec are specified formats only; no parser or runtime support is implied.
 
 ## 12. Delivery stages
 

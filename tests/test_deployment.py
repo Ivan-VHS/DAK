@@ -8,14 +8,14 @@ import tarfile
 import tempfile
 import unittest
 
-from duckos.deployment import (
+from dak.deployment import (
     DeploymentError,
     build_release_bundle,
     create_deployment_plan,
     verify_release_bundle,
     _load_strict_json,
 )
-from duckos.manifest import SCHEMA
+from dak.manifest import SCHEMA
 
 
 class DeploymentTests(unittest.TestCase):
@@ -26,7 +26,7 @@ class DeploymentTests(unittest.TestCase):
         self.root.mkdir()
         components = []
         for name in ("bootloader", "kernel", "initramfs", "rootfs"):
-            payload = (name + "-duckos-fixture").encode("ascii")
+            payload = (name + "-dak-fixture").encode("ascii")
             path = self.root / f"{name}.bin"
             path.write_bytes(payload)
             components.append({
@@ -37,13 +37,13 @@ class DeploymentTests(unittest.TestCase):
             })
         self.manifest = {
             "schema": SCHEMA,
-            "name": "DuckOS",
+            "name": "DAK",
             "version": "0.2.0-test",
             "architecture": "x86_64",
-            "kernel_abi": "duckos-reaper-abi-test",
+            "kernel_abi": "dak-reaper-abi-test",
             "components": components,
         }
-        self.output = Path(self.temporary.name) / "duckos-test.tar.gz"
+        self.output = Path(self.temporary.name) / "dak-test.tar.gz"
 
     def test_release_metadata_rejects_duplicate_nested_json_keys(self):
         with self.assertRaisesRegex(DeploymentError, "duplicate object key"):
@@ -88,7 +88,7 @@ class DeploymentTests(unittest.TestCase):
 
     def test_release_archive_is_reproducible(self):
         first = build_release_bundle(self.manifest, self.root, self.output)
-        second_path = Path(self.temporary.name) / "duckos-test-copy.tar.gz"
+        second_path = Path(self.temporary.name) / "dak-test-copy.tar.gz"
         second = build_release_bundle(self.manifest, self.root, second_path)
         self.assertEqual(first["archive_sha256"], second["archive_sha256"])
 
@@ -120,10 +120,10 @@ class DeploymentTests(unittest.TestCase):
     def test_creates_https_ipxe_handoff_and_keeps_verification_boundary_explicit(self):
         plan = create_deployment_plan(
             self.manifest, self.root, target="pxe",
-            base_url="https://boot.example.test/duckos", secure_boot=True,
+            base_url="https://boot.example.test/dak", secure_boot=True,
         )
         self.assertIn("#!ipxe", plan["network"]["ipxe_script"])
-        self.assertIn("https://boot.example.test/duckos/manifest.json", plan["network"]["manifest_url"])
+        self.assertIn("https://boot.example.test/dak/manifest.json", plan["network"]["manifest_url"])
         self.assertEqual(plan["network"]["manifest_verification_owner"], "native-duck-bootloader")
         self.assertFalse(plan["network"]["signature_enforcement_configured"])
         self.assertTrue(plan["network"]["https_transport"])
@@ -144,7 +144,7 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaisesRegex(DeploymentError, "requires an HTTPS"):
             create_deployment_plan(
                 self.manifest, self.root, target="http",
-                base_url="http://boot.example.test/duckos", secure_boot=True,
+                base_url="http://boot.example.test/dak", secure_boot=True,
             )
 
     def test_rejects_unknown_target_and_unsafe_url(self):
@@ -153,7 +153,7 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaises(DeploymentError):
             create_deployment_plan(
                 self.manifest, self.root, target="pxe",
-                base_url="https://user:secret@example.test/duckos",
+                base_url="https://user:secret@example.test/dak",
             )
 
 

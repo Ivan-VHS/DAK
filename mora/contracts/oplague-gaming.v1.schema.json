@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "mora.oplague.gaming.v1",
   "title": "Mora to OPlague Gaming Capability Contract",
-  "description": "Permission-scoped messages for a future authenticated native DuckOS host bridge. This schema does not itself provide a bridge.",
+  "description": "Permission-scoped messages for a future authenticated native DAK host bridge. This schema does not itself provide a bridge.",
   "oneOf": [
     {
       "$ref": "#/$defs/request"

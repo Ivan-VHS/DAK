@@ -1,11 +1,11 @@
-# DuckOS
+# DAK
 
 **A Reaper-first operating-system project with a local-first desktop shell and a federated native-tooling ecosystem.**
 
 **Project evolution:** [10-rung ladder](docs/PROJECT_EVOLUTION_LADDER.md) · [Current rung record](.github/project-ladder.v1.json)
 
 <p align="center">
-  <img src="assets/readme/duckos-overview.svg" alt="DuckOS architecture overview: Stage 1 boot, Reaper policy contracts and the separate Mora host shell" width="100%">
+  <img src="assets/readme/dak-overview.svg" alt="DAK architecture overview: Stage 1 boot, Reaper policy contracts and the separate Mora host shell" width="100%">
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
   <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
 </p>
 
-> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
+> **Current release boundary:** DAK has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DAK_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
 
 ## System map
 
@@ -25,11 +25,11 @@ The three implementation tracks are deliberately shown separately. A policy cont
 
 ```mermaid
 flowchart TB
-  subgraph BOOT["DuckOS native boot path — QEMU verified"]
+  subgraph BOOT["DAK native boot path — QEMU verified"]
     L["Limine firmware handoff"] --> B["x86_64 Stage 1 entry"]
     B --> V["Boot Info v1 validation"]
     V --> F["Early 4 KiB frame allocation"]
-    F --> M["DUCKOS_BOOT_OK stage=1"]
+    F --> M["DAK_BOOT_OK stage=1"]
     M --> H["Kernel halts"]
   end
 
@@ -53,11 +53,11 @@ flowchart TB
 
 | Area | Present today | Boundary |
 |---|---|---|
-| **Mora desktop** | Qt 6 Widgets host-native shell, host-managed top-level windows, local app catalogue, Poi drafts, user-selected read-only file listing, plus browser reference preview | Native to the host OS; not yet launched inside a DuckOS user session or kernel compositor |
+| **Mora desktop** | Qt 6 Widgets host-native shell, host-managed top-level windows, local app catalogue, Poi drafts, user-selected read-only file listing, plus browser reference preview | Native to the host OS; not yet launched inside a DAK user session or kernel compositor |
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
 | **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
-| **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DuckOS kernel executables |
+| **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DAK kernel executables |
 | **Release pipeline** | Source-pin validation, project builds/tests, SHA-256 inventory, hybrid BIOS/UEFI ISO and QEMU boot checks | Preview source-and-tools distribution, not a complete installable OS |
 
 ## Federated workbenches
@@ -79,16 +79,16 @@ Mora's native host application uses Qt 6 Widgets. App windows are separate top-l
 
 **Linux**
 ```sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
-./build/mora-native/duckos_mora_native
+cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDAK_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --target dak_mora_native --parallel
+./build/mora-native/dak_mora_native
 ```
 
 **Windows PowerShell** (with Qt 6 Widgets and its CMake package configured)
 ```powershell
-cmake -S . -B build/mora-native -A x64 -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --config Release --target duckos_mora_native
-.\build\mora-native\Release\duckos_mora_native.exe
+cmake -S . -B build/mora-native -A x64 -DDAK_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --config Release --target dak_mora_native
+.\build\mora-native\Release\dak_mora_native.exe
 ```
 
 The optional target is skipped when Qt 6 Widgets is not found. Its native shell smoke test runs through CTest in the dedicated Mora native desktop workflow. mora/apps.json is the local catalogue source; app entries do not execute commands. Poi stores drafts in host-local application settings, Abriganza lists metadata only after a folder is selected, and the VentuSample waveform remains a visual preview until an audio engine is connected.
@@ -108,9 +108,9 @@ npm test
 The reproducible release pipeline targets Linux x86_64 and expects Git/submodules, GCC/G++, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
 
 ```sh
-git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git
-cd DuckOS
-bash boot/build-release-iso.sh --work-dir build/release --output dist/DuckOS-Release-x86_64.iso
+git clone --recurse-submodules https://github.com/Ivan-VHS/DAK.git
+cd DAK
+bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Release-x86_64.iso
 ```
 
 The pipeline validates repository pins, tests Mora, builds/tests the Reaper and Pytyliki host tools, builds/tests VentuSample, verifies OPlague source and tests, packages source and license notices, checks the SHA-256 inventory, and produces a hybrid BIOS/UEFI ISO. GitHub Actions runs the release pipeline and QEMU boot gates.
@@ -136,7 +136,7 @@ There is no claim of physical-hardware qualification, Secure Boot support, a dis
 
 ## Architecture targets
 
-DuckOS now records **x86_64 as the primary target for Intel and AMD**. The architecture policy retains **Elbrus as a compatibility-preserved track**; this recognition does not claim that an Elbrus compiler backend, boot image or physical-hardware test matrix is already available. The x86_64 target is vendor-neutral and does not split Intel and AMD into incompatible code paths.
+DAK now records **x86_64 as the primary target for Intel and AMD**. The architecture policy retains **Elbrus as a compatibility-preserved track**; this recognition does not claim that an Elbrus compiler backend, boot image or physical-hardware test matrix is already available. The x86_64 target is vendor-neutral and does not split Intel and AMD into incompatible code paths.
 
 ## Source federation and integrity
 
@@ -146,7 +146,7 @@ The active source set is defined in `federation/repositories.v1.json`. Initializ
 git submodule update --init --recursive
 ```
 
-The pre-release DuckOS repository snapshot is preserved on `archive/pre-release-snapshot-2026-11-25`. That branch preserves this repository's Git state; it does not recreate the histories of external repositories.
+The pre-release DAK repository snapshot is preserved on `archive/pre-release-snapshot-2026-11-25`. That branch preserves this repository's Git state; it does not recreate the histories of external repositories.
 
 ## Engineering rule
 

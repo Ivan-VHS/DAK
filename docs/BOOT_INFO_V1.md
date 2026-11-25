@@ -1,11 +1,11 @@
-# DuckOS Boot Handoff Contract v1
+# DAK Boot Handoff Contract v1
 
 **Author / project direction:** Ivan-VHS  
 **Implementation status:** host-testable C11 boot/allocator/IDT contracts and an experimental x86_64 Limine Stage 1 kernel with CPU exception diagnostics. The image is firmware-bootable when the BIOS/UEFI QEMU gate passes; it is not a complete kernel or usable desktop OS.
 
 ## Purpose
 
-The first foundation component defines the data boundary between a future bootloader and the DuckOS kernel. The handoff uses fixed-width integer fields and carries a version and structure size. The physical memory map is passed separately so the record contains no native pointer whose width or layout changes across targets.
+The first foundation component defines the data boundary between a future bootloader and the DAK kernel. The handoff uses fixed-width integer fields and carries a version and structure size. The physical memory map is passed separately so the record contains no native pointer whose width or layout changes across targets.
 
 Implemented files:
 
@@ -79,7 +79,7 @@ ctest --test-dir build --output-on-failure
 For a GCC/Clang host build with address and undefined-behavior sanitizers:
 
 ```sh
-cmake -S . -B build-sanitize -DDUCKOS_ENABLE_SANITIZERS=ON
+cmake -S . -B build-sanitize -DDAK_ENABLE_SANITIZERS=ON
 cmake --build build-sanitize --parallel
 ctest --test-dir build-sanitize --output-on-failure
 ```

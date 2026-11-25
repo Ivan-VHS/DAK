@@ -1,4 +1,4 @@
-# DuckOS documentation
+# DAK documentation
 
 ## Desktop and application interfaces
 
@@ -18,7 +18,7 @@
 
 ## Command-line tools
 
-[DuckOS Extended Terminal](EXTENDED_TERMINAL.md) documents the separate allowlisted user-space command environment, command registry, local configuration, bounded history, extension contract and security boundaries.
+[DAK Extended Terminal](EXTENDED_TERMINAL.md) documents the separate allowlisted user-space command environment, command registry, local configuration, bounded history, extension contract and security boundaries.
 
 ## Native workbench
 
@@ -30,7 +30,7 @@
 
 ## Product specification
 
-[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
+[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DAK application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
 
 ## Normative standards
 
@@ -38,7 +38,7 @@
 
 [Project Evolution Ladder](PROJECT_EVOLUTION_LADDER.md) defines the ten cumulative, evidence-led project-level maturity rungs; each repository maintains its own assessment record.
 
-[DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) defines motor, visual, cognitive, keyboard, window, accessibility, error-recovery, latency, privacy and measurement requirements for Mora and native applications.
+[DAK interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) defines motor, visual, cognitive, keyboard, window, accessibility, error-recovery, latency, privacy and measurement requirements for Mora and native applications.
 
 ## Security architecture
 

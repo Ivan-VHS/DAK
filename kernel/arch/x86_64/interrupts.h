@@ -1,5 +1,5 @@
-#ifndef DUCKOS_X86_64_INTERRUPTS_H
-#define DUCKOS_X86_64_INTERRUPTS_H
+#ifndef DAK_X86_64_INTERRUPTS_H
+#define DAK_X86_64_INTERRUPTS_H
 
 #include <stdint.h>
 
@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-typedef struct duckos_x86_exception_frame {
+typedef struct dak_x86_exception_frame {
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
@@ -28,12 +28,12 @@ typedef struct duckos_x86_exception_frame {
     uint64_t rip;
     uint64_t cs;
     uint64_t rflags;
-} duckos_x86_exception_frame;
+} dak_x86_exception_frame;
 
 /* Installs exception gates 0..31. CPU maskable interrupts remain disabled. */
-int duckos_x86_interrupts_init(void);
+int dak_x86_interrupts_init(void);
 
-void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame);
+void dak_x86_exception_dispatch(const dak_x86_exception_frame *frame);
 
 #ifdef __cplusplus
 }

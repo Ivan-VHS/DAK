@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from duckos.desktop.reaper import ReaperIntegrationError, ReaperWorkbench
+from dak.desktop.reaper import ReaperIntegrationError, ReaperWorkbench
 
 
 class ReaperWorkbenchTests(unittest.TestCase):
@@ -46,7 +46,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
             args=[], returncode=0,
             stdout=json.dumps(response, ensure_ascii=False), stderr="",
         )
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+        with patch("dak.desktop.reaper.subprocess.run", return_value=completed) as run:
             result = self.workbench.check(self.source)
         self.assertTrue(result["ok"])
         self.assertEqual(result["result"], response)
@@ -62,7 +62,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
             args=[], returncode=0,
             stdout=json.dumps(response, ensure_ascii=False), stderr="",
         )
-        with patch("duckos.desktop.reaper.subprocess.run", return_value=completed) as run:
+        with patch("dak.desktop.reaper.subprocess.run", return_value=completed) as run:
             result = self.workbench.typecheck(self.source)
         self.assertTrue(result["ok"])
         self.assertEqual(run.call_args.args[0][2:4], ["reaper", "typecheck"])
@@ -70,7 +70,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
 
     def test_studio_launch_uses_a_separate_process(self):
         fake_process = object()
-        with patch("duckos.desktop.reaper.subprocess.Popen", return_value=fake_process) as launch:
+        with patch("dak.desktop.reaper.subprocess.Popen", return_value=fake_process) as launch:
             result = self.workbench.open_studio()
         self.assertIs(result, fake_process)
         self.assertEqual(launch.call_args.args[0], ["python-test", "-m", "reaper.desktop"])
@@ -85,7 +85,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
             workbench.open_studio()
 
     def test_invalid_environment_override_does_not_fall_back_to_checkout(self):
-        with patch.dict("os.environ", {"DUCKOS_REAPER_ROOT": str(self.root / "not-a-repository")}):
+        with patch.dict("os.environ", {"DAK_REAPER_ROOT": str(self.root / "not-a-repository")}):
             workbench = ReaperWorkbench()
         self.assertFalse(workbench.inspect()["available"])
         self.assertEqual(workbench.inspect()["status"], "not_found")
@@ -107,7 +107,7 @@ class ReaperWorkbenchTests(unittest.TestCase):
 
     def test_timeout_is_reported_as_an_integration_error(self):
         with patch(
-            "duckos.desktop.reaper.subprocess.run",
+            "dak.desktop.reaper.subprocess.run",
             side_effect=subprocess.TimeoutExpired(cmd=["python"], timeout=1),
         ):
             with self.assertRaisesRegex(ReaperIntegrationError, "time limit"):
