@@ -1,0 +1,146 @@
+# DAK Installer v1 — deterministic installation policy.
+# This module emits plans only. A privileged disk writer is deliberately absent.
+
+import "../kernel/memory.rpr" as memory
+import "../platform/targets.rpr" as targets
+
+# Target: [disk_id, architecture, disk_bytes, logical_sector_bytes, firmware_mode, consent].
+export craft target_valid(target) {
+    when size(target) != 6 {
+        yield false
+    }
+    when target[0] == "" or not targets["architecture_known"](target[1]) {
+        yield false
+    }
+    when target[2] <= 0 or (target[3] != 512 and target[3] != 4096) {
+        yield false
+    }
+    when target[4] != "uefi" and target[4] != "bios" {
+        yield false
+    }
+    when target[5] != true and target[5] != false {
+        yield false
+    }
+    yield true
+}
+
+# Trust and recovery states are supplied by trusted platform adapters.
+export craft admission(target, source_trust, recovery_state) {
+    when not target_valid(target) {
+        yield "reject-target"
+    }
+    when not target[5] {
+        yield "reject-consent"
+    }
+    when source_trust != "verified" {
+        yield "reject-source-trust"
+    }
+    when recovery_state != "ready" {
+        yield "reject-recovery"
+    }
+    yield "admit-plan-only"
+}
+
+# Partition: [partition_id, kind, start_byte, length_bytes].
+export craft partition_valid(partition, disk_bytes) {
+    when size(partition) != 4 {
+        yield false
+    }
+    when partition[0] == "" or partition[1] == "" {
+        yield false
+    }
+    when not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
+        yield false
+    }
+    when partition[1] != "efi" and partition[1] != "system" and partition[1] != "recovery" and partition[1] != "userdata" {
+        yield false
+    }
+    yield true
+}
+
+# Layout is sorted by start offset and must contain EFI, two system slots and recovery.
+# User data is optional. Adjacent partitions are valid; overlap is not.
+export craft layout_valid(partitions, disk_bytes) {
+    when size(partitions) < 4 or size(partitions) > 5 or disk_bytes <= 0 {
+        yield false
+    }
+
+    vary previous_end := 0
+    vary efi_count := 0
+    vary system_count := 0
+    vary recovery_count := 0
+    vary userdata_count := 0
+
+    each partition in partitions {
+        when not partition_valid(partition, disk_bytes) {
+            yield false
+        }
+        when partition[2] < previous_end {
+            yield false
+        }
+
+        change previous_end := partition[2] + partition[3]
+        when partition[1] == "efi" {
+            change efi_count := efi_count + 1
+        }
+        when partition[1] == "system" {
+            change system_count := system_count + 1
+        }
+        when partition[1] == "recovery" {
+            change recovery_count := recovery_count + 1
+        }
+        when partition[1] == "userdata" {
+            change userdata_count := userdata_count + 1
+        }
+    }
+
+    yield efi_count == 1 and system_count == 2 and recovery_count == 1 and userdata_count <= 1
+}
+
+# Installation states describe a transaction; they do not execute it.
+export craft transition_valid(current, next) {
+    when current == "planned" and next == "validated" {
+        yield true
+    }
+    when current == "validated" and next == "staged" {
+        yield true
+    }
+    when current == "staged" and next == "ready_to_commit" {
+        yield true
+    }
+    when current == "ready_to_commit" and next == "committed" {
+        yield true
+    }
+    when (current == "planned" or current == "validated" or current == "staged" or current == "ready_to_commit") and next == "failed" {
+        yield true
+    }
+    when current == "staged" and next == "rolling_back" {
+        yield true
+    }
+    when current == "ready_to_commit" and next == "rolling_back" {
+        yield true
+    }
+    when current == "rolling_back" and next == "rolled_back" {
+        yield true
+    }
+    yield false
+}
+
+export craft commit_policy(state, consent, source_verified, recovery_ready, boot_verified) {
+    when state != "ready_to_commit" {
+        yield "reject-state"
+    }
+    when not consent {
+        yield "reject-consent"
+    }
+    when not source_verified {
+        yield "reject-source-trust"
+    }
+    when not recovery_ready {
+        yield "reject-recovery"
+    }
+    when not boot_verified {
+        yield "reject-boot-unverified"
+    }
+    yield "commit-plan-only"
+}
