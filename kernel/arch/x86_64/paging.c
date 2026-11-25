@@ -115,6 +115,9 @@ int duckos_x86_paging_takeover(
     duckos_frame_allocator *frames,
     uint64_t hhdm_offset
 ) {
+    uint64_t cr4 = 0u;
+    __asm__ volatile ("mov %%cr4, %0" : "=r"(cr4));
+    if ((cr4 & (UINT64_C(1) << 12u)) != 0u) return 0; /* Five-level paging is not enabled yet. */
     if (space == NULL || frames == NULL ||
         hhdm_offset > (uint64_t)UINTPTR_MAX) {
         return 0;
