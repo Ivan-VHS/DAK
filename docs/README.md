@@ -44,6 +44,10 @@
 
 [BAV Security Bundle v1](BAV_SECURITY_BUNDLE_V1.md) specifies the signed declarative .bav detection-policy format, trust boundaries, planned scanner/broker/quarantine services, anti-rollback requirements and verification gates. Its [JSON Schema](../schemas/bav-security-bundle.v1.schema.json) validates bundle structure only; it does not verify signatures or scan files.
 
+## Ecosystem integration
+
+[Cross-repository integration](ECOSYSTEM_INTEGRATION.md) and the [machine-readable graph](../federation/integration-graph.v1.json) record peer repositories, adapters and maturity.
+
 ## Documentation rules
 
 Describe current behavior from the source, build configuration and tests. Mark designs and future work as specified or planned; do not present them as implemented. Keep kernel, boot, driver, runtime, graphics and desktop claims tied to concrete source paths and reproducible verification evidence.

@@ -69,3 +69,16 @@ cmake --build build/ventusample --parallel
 ```
 
 This is a developer build of those user-space projects; it is not part of DuckOS's boot chain and is not automatically invoked by the OS build.
+
+## Cross-repository interface graph
+
+`federation/integration-graph.v1.json` is the source of truth for cross-repository artifacts, schema versions, exact pins, licenses, transports and maturity. Validate after recursive checkout:
+
+```sh
+npm run validate:ecosystem
+npm test
+```
+
+The graph distinguishes working Pytyliki ABI v1 and OPlague device-snapshot v1 interop, DuckOS hardware-inventory v1 read-only audit, a GPU policy adapter that still needs trusted ingest, and the specified-only VentuSample pack-v1 metadata edge.
+
+Do not flatten submodules into the kernel tree. Preserve provenance, pins and licenses. Do not upgrade maturity labels until consumer code, tests and runtime boundaries are verified.
