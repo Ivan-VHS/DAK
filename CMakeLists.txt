@@ -59,8 +59,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_
             --work-dir "${CMAKE_BINARY_DIR}/duckos-boot"
             --output "${CMAKE_BINARY_DIR}/DuckOS-Stage1-x86_64.iso"
         BYPRODUCTS
-            "${CMAKE_BINARY_DIR}/DuckOS-Stage0-x86_64.iso"
-            "${CMAKE_BINARY_DIR}/DuckOS-Stage0-x86_64.iso.sha256"
+            "${CMAKE_BINARY_DIR}/DuckOS-Stage1-x86_64.iso"
+            "${CMAKE_BINARY_DIR}/DuckOS-Stage1-x86_64.iso.sha256"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         USES_TERMINAL
         COMMENT "Building the DuckOS x86_64 BIOS/UEFI stage-1 ISO"
