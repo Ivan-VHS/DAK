@@ -163,11 +163,12 @@ int duckos_x86_paging_protect_range(
     uint64_t end,
     uint64_t flags
 ) {
-    if (space == NULL || start >= end ||
+    if (space == NULL || start > end ||
         (start & (DUCKOS_PAGE_TABLE_PAGE_SIZE - 1u)) != 0u ||
         (end & (DUCKOS_PAGE_TABLE_PAGE_SIZE - 1u)) != 0u) {
         return 0;
     }
+    if (start == end) return 1;
 
     for (uint64_t address = start; address < end;
          address += DUCKOS_PAGE_TABLE_PAGE_SIZE) {
