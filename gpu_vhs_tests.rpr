@@ -141,4 +141,9 @@ assert(bridged_sample[1][1] == 10000 and bridged_sample[1][2] == 430, "bridge us
 make unavailable_row := ["GPU", "driver", -1, -1, -1, -1, -1, -1, -1]
 assert(oplage["gpu_row_valid"](unavailable_row), "missing sensor values remain explicit unknowns")
 assert(not oplage["snapshot_valid"](["oplage.gpu-telemetry.v1", "nvidia-smi", true, true, true, [telemetry_row]]), "snapshot claiming hardware controls is rejected")
+make unknown_sample := oplage["to_governor_sample"](2, 11000, unavailable_row, -1, -1, -1, 0)
+assert(unknown_sample[0] == "ready", "unavailable sensor row remains representable")
+assert(unknown_sample[1][3] == -1 and unknown_sample[1][6] == -1 and unknown_sample[1][7] == -1 and unknown_sample[1][8] == -1, "unavailable utilization, power and clocks remain unknown")
+assert(governor["sample_valid"](unknown_sample[1]), "sample parser preserves explicit unknown telemetry")
+assert(governor["governor_action"](cool_previous, unknown_sample[1], governor_config, 11010)[0] == "fail-safe-hold", "unknown telemetry cannot enable GPU boost")
 

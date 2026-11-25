@@ -58,9 +58,6 @@ export craft to_governor_sample(sequence, monotonic_ms, row, memory_used_bytes, 
         change temperature := row[2] * 10
     }
     vary utilization := row[3]
-    when utilization < 0 {
-        change utilization := 0
-    }
     vary used := memory_used_bytes
     when used < 0 and row[4] >= 0 {
         change used := row[4] * 1048576
@@ -74,13 +71,7 @@ export craft to_governor_sample(sequence, monotonic_ms, row, memory_used_bytes, 
         change power := row[6] * 1000
     }
     vary graphics_clock := row[7]
-    when graphics_clock < 0 {
-        change graphics_clock := 0
-    }
     vary memory_clock := row[8]
-    when memory_clock < 0 {
-        change memory_clock := 0
-    }
     vary sensor_state := "available"
     when temperature < 0 or used < 0 or total <= 0 {
         change sensor_state := "unavailable"
