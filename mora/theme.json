@@ -1,7 +1,7 @@
 {
   "schema": "mora.theme.v1",
   "name": "DuckOS Black White Yellow",
-  "version": 3,
+  "version": 4,
   "palettes": {
     "duck": {
       "page": "#080808",
@@ -90,5 +90,32 @@
         "animateBackdropFilter": false
       }
     }
+  },
+  "ergonomics": {
+    "skipLink": true,
+    "focusVisibleOutlinePx": 3,
+    "minimumPointerTargetPx": 44,
+    "densityModes": [
+      "comfortable",
+      "compact"
+    ],
+    "defaultDensity": "comfortable",
+    "keyboardWindowMovement": {
+      "keys": [
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight"
+      ],
+      "stepPx": 16,
+      "acceleratedStepPx": 48
+    },
+    "shortcuts": {
+      "openControl": "Ctrl+,",
+      "openMoraAI": "Ctrl+K",
+      "closeTopWindow": "Escape"
+    },
+    "restoreFocusOnClose": true,
+    "avoidDragOnlyInteraction": true
   }
 }
