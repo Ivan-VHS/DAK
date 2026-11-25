@@ -33,6 +33,19 @@ export craft package_valid(package) {
     when size(package[7]) > 256 or size(package[8]) > 64 {
         yield false
     }
+    each dependency in package[7] {
+        when kind(dependency) != "text" or dependency == "" {
+            yield false
+        }
+    }
+    each capability in package[8] {
+        when kind(capability) != "text" or capability == "" {
+            yield false
+        }
+    }
+    when size(package[7]) > 256 or size(package[8]) > 64 {
+        yield false
+    }
     when package[9] == "" or package[10] == "" {
         yield false
     }
@@ -50,8 +63,14 @@ export craft dependencies_satisfied(required, installed_ids) {
         yield false
     }
     each dependency in required {
+        when kind(dependency) != "text" or dependency == "" {
+            yield false
+        }
         vary found := false
         each installed in installed_ids {
+            when kind(installed) != "text" {
+                yield false
+            }
             when dependency == installed {
                 change found := true
             }
@@ -78,7 +97,7 @@ export craft paths_valid(paths) {
 }
 
 export craft admission(package, target_arch, expected_abi, installed_ids, grants) {
-    when kind(installed_ids) != "list" or kind(grants) != "list" {
+    when kind(target_arch) != "text" or kind(expected_abi) != "number" or kind(installed_ids) != "list" or kind(grants) != "list" {
         yield "reject-manifest"
     }
     when not package_valid(package) {
@@ -134,6 +153,9 @@ export craft remove_policy(state, dependent_count, protected) {
     }
     when protected {
         yield "reject-protected"
+    }
+    when kind(dependent_count) != "number" or kind(protected) != "boolean" {
+        yield "reject-invalid-dependency-count"
     }
     when dependent_count < 0 {
         yield "reject-invalid-dependency-count"
