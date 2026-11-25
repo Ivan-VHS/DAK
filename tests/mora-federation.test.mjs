@@ -54,5 +54,7 @@ test("release metadata declares firmware and application boundaries honestly", (
   assert.equal(release.desktop.external_process_launch, false);
   assert.equal(release.projects.length, 4);
   assert.equal(release.release_policy.artificial_size_padding, false);
-  assert.ok(serviceWorker.includes("mora-shell-v9-ecosystem"));
+  assert.ok(serviceWorker.includes("mora-shell-v10-i18n"));
+  assert.ok(serviceWorker.includes("./i18n.js"));
+  assert.ok(serviceWorker.includes("./i18n.v1.json"));
 });
