@@ -72,7 +72,8 @@ export craft retain(page) {
     when not page_valid(page) or page[5] >= 2147483647 {
         yield ["invalid", page]
     }
-    yield ["retained", [page[0], page[1], page[2], page[3], page[4], page[5] + 1, page[6], page[7], page[8]]]
+    make retained_page := [page[0], page[1], page[2], page[3], page[4], page[5] + 1, page[6], page[7], page[8]]
+    yield ["retained", retained_page]
 }
 
 export craft release(page) {
@@ -80,7 +81,8 @@ export craft release(page) {
         yield ["invalid", page]
     }
     when page[5] > 1 {
-        yield ["released", [page[0], page[1], page[2], page[3], page[4], page[5] - 1, page[6], page[7], page[8]]]
+        make released_page := [page[0], page[1], page[2], page[3], page[4], page[5] - 1, page[6], page[7], page[8]]
+        yield ["released", released_page]
     }
     yield ["reclaim-page", nothing]
 }
