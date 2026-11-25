@@ -267,10 +267,11 @@ make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
 
 # Service lifecycle and readiness policy.
+make no_capabilities := []
 make bav_service := ["bav.scanner", "system", "core", 3, 250, 4000, 100, 65536, ["file.scan", "file.quarantine"]]
 assert(lifecycle["descriptor_valid"](bav_service), "service descriptor validates")
-assert(not lifecycle["descriptor_valid"](["", "system", "core", 3, 250, 4000, 100, 65536, []]), "service ID is required")
-assert(not lifecycle["descriptor_valid"](["svc", "system", "unknown", 3, 250, 4000, 100, 65536, []]), "unknown startup phase is rejected")
+assert(not lifecycle["descriptor_valid"](["", "system", "core", 3, 250, 4000, 100, 65536, no_capabilities]), "service ID is required")
+assert(not lifecycle["descriptor_valid"](["svc", "system", "unknown", 3, 250, 4000, 100, 65536, no_capabilities]), "unknown startup phase is rejected")
 assert(lifecycle["startup_action"](true, true, false, "core", false) == "start", "core service starts without a user session")
 assert(lifecycle["startup_action"](true, false, true, "core", false) == "wait-dependencies", "service waits for required dependencies")
 assert(lifecycle["startup_action"](true, true, false, "desktop", false) == "wait-session", "desktop service waits for a session")
@@ -307,7 +308,7 @@ assert(lifecycle["shutdown_action"](false, true, false) == "stop", "idle service
 # Application admission, permissions and interaction feedback.
 make po_manifest := ["po", true, "process-sandbox", 262144, 100, "adaptive", ["network.egress"], "user-selected-sync"]
 assert(app_experience["manifest_valid"](po_manifest), "application manifest has a verified sandbox and resource budget")
-assert(not app_experience["manifest_valid"](["po", false, "process-sandbox", 262144, 100, "adaptive", [], "local-first"]), "unverified application package is rejected")
+assert(not app_experience["manifest_valid"](["po", false, "process-sandbox", 262144, 100, "adaptive", no_capabilities, "local-first"]), "unverified application package is rejected")
 assert(app_experience["capabilities_subset"](["network.egress"], ["network.egress", "storage.read"]), "app grants may include declared requests")
 assert(not app_experience["capabilities_subset"](["driver.load"], ["network.egress"]), "application cannot amplify capabilities")
 assert(app_experience["capability_decision"]("device.microphone", ["device.microphone"], false, true) == "prompt", "microphone use needs a visible user decision")
