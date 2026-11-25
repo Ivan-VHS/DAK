@@ -1,44 +1,38 @@
-# Bounded telemetry sample and alert policy.
 # Sample: [sequence, metric_id, value, unit, monotonic_timestamp].
-
+# Device sample: [sequence, device_name, metric_id, value, unit, monotonic_timestamp].
 export craft sample_valid(sample) {
-    when size(sample) != 5 {
-        yield false
+    when kind(sample) != "list" { yield false }
+    when size(sample) == 5 {
+        yield kind(sample[0]) == "number" and sample[0] > 0 and
+            kind(sample[1]) == "text" and sample[1] != "" and
+            kind(sample[2]) == "number" and
+            kind(sample[3]) == "text" and sample[3] != "" and
+            kind(sample[4]) == "number" and sample[4] >= 0
     }
-    yield sample[0] > 0 and sample[1] != "" and sample[3] != "" and sample[4] >= 0
+    when size(sample) != 6 { yield false }
+    yield kind(sample[0]) == "number" and sample[0] > 0 and
+        kind(sample[1]) == "text" and sample[1] != "" and
+        kind(sample[2]) == "text" and sample[2] != "" and
+        kind(sample[3]) == "number" and
+        kind(sample[4]) == "text" and sample[4] != "" and
+        kind(sample[5]) == "number" and sample[5] >= 0
 }
-
 export craft alert_level(value, warning_threshold, critical_threshold) {
-    when critical_threshold < warning_threshold {
-        yield "invalid-thresholds"
-    }
-    when value >= critical_threshold {
-        yield "critical"
-    }
-    when value >= warning_threshold {
-        yield "warning"
-    }
+    when critical_threshold < warning_threshold { yield "invalid-thresholds" }
+    when value >= critical_threshold { yield "critical" }
+    when value >= warning_threshold { yield "warning" }
     yield "normal"
 }
-
 export craft append_window(samples, sample, capacity) {
-    when capacity <= 0 or not sample_valid(sample) {
-        yield ["invalid", samples]
-    }
-
+    when capacity <= 0 or not sample_valid(sample) { yield ["invalid", samples] }
     make updated := push(samples, sample)
-    when size(updated) > capacity {
-        yield ["appended", rest(updated)]
-    }
+    when size(updated) > capacity { yield ["appended", rest(updated)] }
     yield ["appended", updated]
 }
-
 export craft sequence_valid(samples) {
     vary previous := 0
     each sample in samples {
-        when not sample_valid(sample) or sample[0] <= previous {
-            yield false
-        }
+        when not sample_valid(sample) or sample[0] <= previous { yield false }
         change previous := sample[0]
     }
     yield true

@@ -17,6 +17,7 @@ import "duckos/storage/hypergraph.rpr" as storage
 import "duckos/storage/crdt.rpr" as crdt
 import "duckos/system/three_media.rpr" as media
 import "duckos/system/telemetry.rpr" as telemetry
+import "duckos/gpu/oplage_bridge.rpr" as oplage_gpu
 import "duckos/ui/theme.rpr" as theme
 import "duckos/ui/motion.rpr" as motion
 import "duckos/storage/history.rpr" as history
@@ -150,6 +151,25 @@ assert(media["thermal_profile"](91, 80) == "conserve", "thermal safety takes pri
 make sample_a := [1, "cpu.load", 24, "percent", 100]
 make sample_b := [2, "cpu.load", 84, "percent", 200]
 make sample_c := [3, "cpu.load", 96, "percent", 300]
+
+make empty_gpu_rows := []
+make valid_gpu := ["NVIDIA GeForce RTX", "driver-1", 65, 75, 4096, 12288, 180, 2400, 9000]
+make gpu_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-1", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", false, true, [valid_gpu]]
+make unavailable_gpu_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-2", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", false, "nvidia-smi unavailable", false, true, empty_gpu_rows]
+assert(oplage_gpu["gpu_descriptor_valid"](valid_gpu), "OPlague GPU descriptor is bounded")
+assert(oplage_gpu["gpu_snapshot_valid"](gpu_snapshot), "normalized OPlague v1 snapshot passes the policy adapter")
+assert(oplage_gpu["gpu_snapshot_valid"](unavailable_gpu_snapshot), "explicit unavailable snapshot remains valid")
+assert(not oplage_gpu["gpu_snapshot_valid"](["oplage.gpu-telemetry.v1", "snapshot-3", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", false, false, [valid_gpu]]), "unverified digest marker is rejected")
+assert(not oplage_gpu["gpu_snapshot_valid"](["oplage.gpu-telemetry.v1", "snapshot-4", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", true, true, [valid_gpu]]), "sensor export cannot claim device controls")
+make gpu_converted := oplage_gpu["gpu_snapshot_samples"](gpu_snapshot, 100, 5000000)
+assert(gpu_converted[0] == "ready" and size(gpu_converted[1]) == 7, "supported GPU readings become bounded samples")
+assert(gpu_converted[1][0] == [101, "NVIDIA GeForce RTX", "temperature_c", 65, "celsius", 5000000], "sample retains device identity and separate monotonic time")
+assert(telemetry["sequence_valid"](gpu_converted[1]), "GPU samples keep monotonic sequence")
+make gpu_unknown := ["NVIDIA GeForce RTX", "driver-1", "unknown", 75, 4096, 12288, 180, 2400, 9000]
+make gpu_unknown_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-5", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", false, true, [gpu_unknown]]
+make gpu_unknown_result := oplage_gpu["gpu_snapshot_samples"](gpu_unknown_snapshot, 200, 6000000)
+assert(gpu_unknown_result[0] == "ready" and size(gpu_unknown_result[1]) == 6, "unknown sensor values are omitted, not replaced by zero")
+assert(oplage_gpu["gpu_snapshot_samples"](unavailable_gpu_snapshot, 0, 7000000)[0] == "unavailable", "unavailable provider emits no readings")
 assert(telemetry["sample_valid"](sample_a), "telemetry sample contract")
 assert(telemetry["alert_level"](24, 70, 90) == "normal", "telemetry normal band")
 assert(telemetry["alert_level"](84, 70, 90) == "warning", "telemetry warning band")

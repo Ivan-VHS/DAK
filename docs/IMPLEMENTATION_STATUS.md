@@ -2,6 +2,21 @@
 
 Updated: 2026-11-25
 
+## Ecosystem source and interface integration — 2026-11-25
+
+- [x] DuckOS pins Reaper, Pytyliki, OPlague and VentuSample as four independent Git submodules with exact commits and preserved upstream licenses.
+- [x] Release ISO pipeline builds/tests the four host workbenches and packages source, notices and checksums; host binaries are not kernel executables.
+- [x] Reaper consumes Pytyliki C ABI v1 through an explicit absolute library path and checks ABI version before calls.
+- [x] Reaper validates OPlague device snapshot v1 and DuckOS hardware inventory v1 for read-only audit workflows.
+- [x] Machine-readable integration graph and Node tests verify source pins, licenses, interface artifacts and maturity labels.
+- [x] Reaper policy adapter for normalized OPlague GPU telemetry v1 validates provider/mode/bounds and preserves unknown readings as absent.
+- [ ] Implement trusted native JSON ingestion that verifies OPlague schema and canonical digest before constructing normalized Reaper records.
+- [ ] Add publisher/build provenance verification; SHA-256 is not a signature.
+- [ ] Implement a VentuSample pack-v1 Reaper consumer; the current metadata interface remains specified-only.
+- [ ] Connect peer workbenches to a native DuckOS process/package service only after scheduler, syscall, filesystem and kernel capability enforcement exist.
+
+Peer applications and host tools remain user-space programs. None is a kernel module or an executable that the Stage 1 kernel can start.
+
 ## Newly specified contracts — 2026-11-25
 
 - [x] DuckOS interaction and application ergonomics standard: normative requirements for motor/visual/cognitive interaction, keyboard, focus, accessibility, windowing, errors, recovery, privacy and usability evidence. This is a specification, not proof that native desktop services meet it.

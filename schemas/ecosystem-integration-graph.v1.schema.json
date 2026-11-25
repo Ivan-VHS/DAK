@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/ecosystem-integration-graph.v1.schema.json",
+  "title": "DuckOS ecosystem integration graph v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "host",
+    "projects",
+    "interfaces",
+    "release_pipeline",
+    "shared_rules"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.ecosystem-integration-graph.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "repository",
+        "role",
+        "runtime_boundary",
+        "kernel_may_load_peer_code"
+      ],
+      "properties": {
+        "id": {
+          "const": "duckos"
+        },
+        "repository": {
+          "const": "Ivan-VHS/DuckOS"
+        },
+        "role": {
+          "type": "string"
+        },
+        "runtime_boundary": {
+          "type": "string"
+        },
+        "kernel_may_load_peer_code": {
+          "const": false
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "repository",
+          "path",
+          "pinned_commit",
+          "license",
+          "license_file",
+          "runtime_boundary",
+          "purpose",
+          "auto_build",
+          "auto_execute"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "reaper",
+              "pytyliki",
+              "oplague",
+              "ventusample"
+            ]
+          },
+          "repository": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "pinned_commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "license": {
+            "enum": [
+              "MIT",
+              "Apache-2.0"
+            ]
+          },
+          "license_file": {
+            "type": "string"
+          },
+          "runtime_boundary": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "auto_build": {
+            "const": false
+          },
+          "auto_execute": {
+            "const": false
+          }
+        }
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "producer",
+          "consumer",
+          "contract",
+          "version",
+          "status",
+          "transport",
+          "artifacts",
+          "boundary"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "producer": {
+            "enum": [
+              "duckos",
+              "reaper",
+              "pytyliki",
+              "oplague",
+              "ventusample"
+            ]
+          },
+          "consumer": {
+            "enum": [
+              "duckos",
+              "reaper",
+              "pytyliki",
+              "oplague",
+              "ventusample"
+            ]
+          },
+          "contract": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "enum": [
+              "implemented_interop",
+              "policy_adapter_only",
+              "specified_only"
+            ]
+          },
+          "transport": {
+            "type": "string"
+          },
+          "artifacts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundary": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "release_pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "script",
+        "workflow",
+        "workbench_registry",
+        "tested_projects",
+        "payload_contains_source",
+        "payload_contains_license_notices",
+        "host_binaries_are_kernel_binaries",
+        "user_application_launch_from_kernel"
+      ],
+      "properties": {
+        "script": {
+          "type": "string"
+        },
+        "workflow": {
+          "type": "string"
+        },
+        "workbench_registry": {
+          "type": "string"
+        },
+        "tested_projects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "payload_contains_source": {
+          "const": true
+        },
+        "payload_contains_license_notices": {
+          "const": true
+        },
+        "host_binaries_are_kernel_binaries": {
+          "const": false
+        },
+        "user_application_launch_from_kernel": {
+          "const": false
+        }
+      }
+    },
+    "shared_rules": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
