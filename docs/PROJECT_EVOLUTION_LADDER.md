@@ -63,13 +63,13 @@ A change in source, tests, CI, target support or acceptance criteria requires re
 
 ## Initial repository baseline — 25 November 2026
 
-| Repository | Current stage | Assessment | Next stage |
-|---|---:|---|---|
-| [DAK](https://github.com/Ivan-VHS/DAK) | **03 — Evolution** | Provisional; the experimental x86-64 Stage 1 boot slice is distinct from a usable process/service OS session. | 04 — Ascension |
-| [Reaper](https://github.com/Ivan-VHS/Reaper) | **04 — Ascension** | Provisional; the reference runtime, CLI/REPL, Studio, language services and versioned project contracts are documented. Native compiler parity is not claimed. | 05 — Vanguard |
-| [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | **04 — Ascension** | Provisional; the bounded C11 core, portable CLI, Windows desktop, versioned C ABI and test/build workflows are documented. | 05 — Vanguard |
-| [OPlague](https://github.com/Ivan-VHS/OPlague) | **04 — Ascension** | Provisional; read-only device/package inspection, structured evidence and the optional versioned Reaper boundary are documented. | 05 — Vanguard |
-| [VentuSample](https://github.com/Ivan-VHS/VentuSample) | **04 — Ascension** | Provisional; the native offline renderer, DSP modules, plugin/manifest boundaries and optional Reaper integration are documented. | 05 — Vanguard |
+| Repository | Current stage | Assessment | Next stage | Local record |
+|---|---:|---|---|---|
+| [DAK](https://github.com/Ivan-VHS/DAK) | **03 — Evolution** | Provisional; the experimental x86-64 Stage 1 boot slice is distinct from a usable process/service OS session. | 04 — Ascension | [Assessment](https://github.com/Ivan-VHS/DAK/blob/main/docs/PROJECT_LADDER.md) · [Manifest](https://github.com/Ivan-VHS/DAK/blob/main/.github/project-ladder.v1.json) |
+| [Reaper](https://github.com/Ivan-VHS/Reaper) | **04 — Ascension** | Provisional; the reference runtime, CLI/REPL, Studio, language services and versioned project contracts are documented. Native compiler parity is not claimed. | 05 — Vanguard | [Assessment](https://github.com/Ivan-VHS/Reaper/blob/main/docs/PROJECT_LADDER.md) · [Manifest](https://github.com/Ivan-VHS/Reaper/blob/main/.github/project-ladder.v1.json) |
+| [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | **04 — Ascension** | Provisional; the bounded C11 core, portable CLI, Windows desktop, versioned C ABI and test/build workflows are documented. | 05 — Vanguard | [Assessment](https://github.com/Ivan-VHS/Pytyliki/blob/main/docs/PROJECT_LADDER.md) · [Manifest](https://github.com/Ivan-VHS/Pytyliki/blob/main/.github/project-ladder.v1.json) |
+| [OPlague](https://github.com/Ivan-VHS/OPlague) | **04 — Ascension** | Provisional; read-only device/package inspection, structured evidence and the optional versioned Reaper boundary are documented. | 05 — Vanguard | [Assessment](https://github.com/Ivan-VHS/OPlague/blob/main/docs/PROJECT_LADDER.md) · [Manifest](https://github.com/Ivan-VHS/OPlague/blob/main/.github/project-ladder.v1.json) |
+| [VentuSample](https://github.com/Ivan-VHS/VentuSample) | **04 — Ascension** | Provisional; the native offline renderer, DSP modules, plugin/manifest boundaries and optional Reaper integration are documented. | 05 — Vanguard | [Assessment](https://github.com/Ivan-VHS/VentuSample/blob/main/docs/PROJECT_LADDER.md) · [Manifest](https://github.com/Ivan-VHS/VentuSample/blob/main/.github/project-ladder.v1.json) |
 
 These are provisional documentation/source-path assessments. The complete product test matrices and target workflows were not re-run during ladder adoption. No repository is promoted to Vanguard or beyond by this change.
 
