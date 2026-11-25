@@ -46,9 +46,9 @@
 - Produces: `ivan-vhs.ecosystem-artifact.v1`
 - Produces: `ivan-vhs.supabase-adapter.v1`
 
-- [ ] Add SQL migration with organizations, memberships, devices, sync events, artifact metadata, RLS, private authorization helpers and private Storage bucket.
-- [ ] Add JSON Schemas and a DuckOS control-plane adapter manifest.
-- [ ] Validate JSON and SQL syntax through repository CI and local Supabase CLI.
+- [x] Add SQL migration with organizations, memberships, devices, sync events, artifact metadata, RLS, private authorization helpers and private Storage bucket.
+- [x] Add JSON Schemas and a DuckOS control-plane adapter manifest.
+- [x] Validate JSON and SQL syntax through repository CI and local Supabase CLI (local Supabase/pgTAP workflow passed; follow-up hardening revision is being re-run).
 
 ### Task 2: Database security regression suite
 
@@ -60,9 +60,9 @@
 - Consumes: Task 1 tables, policies and RPC.
 - Produces: deterministic local pgTAP evidence on every relevant PR.
 
-- [ ] Add pgTAP assertions for schema shape, RLS flags, private bucket and policy presence.
-- [ ] Add two-tenant fixtures and prove isolation, valid event insertion, cross-tenant denial, idempotency and append-only behavior.
-- [ ] Run only local Supabase CLI 3.4.0 in CI; do not link or deploy a hosted project.
+- [x] Add pgTAP assertions for schema shape, RLS flags, private bucket and policy presence.
+- [x] Add two-tenant fixtures and prove isolation, valid event insertion, cross-tenant denial, idempotency and append-only behavior.
+- [x] Run only local Supabase CLI 3.4.0 in CI; do not link or deploy a hosted project.
 
 ### Task 3: Reaper adapter contract
 
@@ -71,9 +71,9 @@
 - Create: `federation/schemas/supabase-adapter.v1.schema.json`
 - Modify: `tools/validate_project_contract.py`
 
-- [ ] Declare compiler/build summaries and diagnostic aggregates as opt-in data.
-- [ ] Exclude source text, local paths, credentials and tokens.
-- [ ] Extend the existing stdlib validator to reject invalid adapter fields and insecure defaults.
+- [x] Declare compiler/build summaries and diagnostic aggregates as opt-in data.
+- [x] Exclude source text, local paths, credentials and tokens.
+- [x] Extend the existing stdlib validator to reject invalid adapter fields and insecure defaults.
 
 ### Task 4: Pytyliki adapter contract
 
@@ -82,9 +82,9 @@
 - Create: `federation/schemas/supabase-adapter.v1.schema.json`
 - Modify: `tools/validate_project_contract.py`
 
-- [ ] Declare bounded profile and benchmark summaries as opt-in data.
-- [ ] Exclude raw hardware identifiers, serial numbers and unbounded traces.
-- [ ] Validate the adapter using the existing CI contract gate.
+- [x] Declare bounded profile and benchmark summaries as opt-in data.
+- [x] Exclude raw hardware identifiers, serial numbers and unbounded traces.
+- [x] Validate the adapter using the existing CI contract gate.
 
 ### Task 5: VentuSample adapter contract
 
@@ -93,8 +93,8 @@
 - Create: `federation/schemas/supabase-adapter.v1.schema.json`
 - Modify: `tools/validate_project_contract.py`
 
-- [ ] Declare sample-pack manifests, preset metadata and render summaries as opt-in data.
-- [ ] Keep audio payloads local unless a user explicitly selects an artifact for upload.
+- [x] Declare sample-pack manifests, preset metadata and render summaries as opt-in data.
+- [x] Keep audio payloads local unless a user explicitly selects an artifact for upload.
 - [ ] Validate the adapter using the existing VentuSample contract gate.
 
 ### Task 6: OPlague adapter contract
@@ -104,9 +104,9 @@
 - Create: `federation/schemas/supabase-adapter.v1.schema.json`
 - Modify: `tools/validate_project_contract.py`
 
-- [ ] Declare read-only inspection summaries and pseudonymous device evidence as opt-in data.
-- [ ] Exclude raw PnP IDs, driver binaries, credentials and executable content; preserve no-install/no-driver-action boundaries.
-- [ ] Validate the adapter using the existing CI contract gate.
+- [x] Declare read-only inspection summaries and pseudonymous device evidence as opt-in data.
+- [x] Exclude raw PnP IDs, driver binaries, credentials and executable content; preserve no-install/no-driver-action boundaries.
+- [x] Validate the adapter using the existing CI contract gate.
 
 ### Task 7: Documentation, verification and merge order
 
@@ -114,6 +114,6 @@
 - Create: `docs/integrations/SUPABASE_ECOSYSTEM_V1.md`
 - Modify: `README.md` only if the repository's current navigation requires a link.
 
-- [ ] Document local setup, security boundaries, status semantics and hosted rollout blockers.
+- [x] Document local setup, security boundaries, status semantics and hosted rollout blockers.
 - [ ] Run the full project test suites and inspect every changed file.
 - [ ] Request review and merge PRs sequentially only after all required checks pass.
