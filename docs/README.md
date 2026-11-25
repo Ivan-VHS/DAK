@@ -73,3 +73,4 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 - [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
 - [Implementation status](IMPLEMENTATION_STATUS.md) — current delivered/partial boundaries with source and test evidence.
+- [Cross-repository implementation-gap audit](IMPLEMENTATION_GAP_AUDIT_2026-11-25.md) — first-pass inventory of all five repositories, open PR queue, confirmed implementation gaps and evidence requirements; remaining full PR/Markdown review is tracked in the document.
