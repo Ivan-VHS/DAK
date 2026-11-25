@@ -372,14 +372,14 @@ static int prepare_boot_info(duckos_boot_info_v1 *info) {
     return 1;
 }
 
-static int initialize_early_memory(void) {
+static int initialize_early_memory(uint32_t memory_region_count) {
     struct limine_hhdm_response *hhdm = hhdm_request.response;
     if (hhdm == NULL) return 0;
 
     if (duckos_frame_allocator_init(
             &early_frame_allocator,
             boot_regions,
-            (uint32_t)memory_map_request.response->entry_count,
+            memory_region_count,
             0x00100000u
         ) != DUCKOS_FRAME_ALLOCATOR_OK) {
         return 0;
@@ -455,7 +455,7 @@ void _start(void) {
         boot_failure("boot handoff validation rejected firmware state");
     }
 
-    if (!initialize_early_memory()) {
+    if (!initialize_early_memory(info.memory_region_count)) {
         boot_failure("bootstrap physical frame allocation failed");
     }
 
