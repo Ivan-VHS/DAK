@@ -96,7 +96,8 @@ export craft layout_valid(partitions, disk_bytes, firmware_mode) {
     vary seen_ids := []
     vary efi_count := 0
     vary bios_boot_count := 0
-    vary system_count := 0
+    vary system_a_count := 0
+    vary system_b_count := 0
     vary recovery_count := 0
     vary userdata_count := 0
 
@@ -122,7 +123,13 @@ export craft layout_valid(partitions, disk_bytes, firmware_mode) {
             change bios_boot_count := bios_boot_count + 1
         }
         when partition[1] == "system" {
-            change system_count := system_count + 1
+            when partition[0] == "system_a" {
+                change system_a_count := system_a_count + 1
+            } otherwise when partition[0] == "system_b" {
+                change system_b_count := system_b_count + 1
+            } otherwise {
+                yield false
+            }
         }
         when partition[1] == "recovery" {
             change recovery_count := recovery_count + 1
@@ -132,7 +139,7 @@ export craft layout_valid(partitions, disk_bytes, firmware_mode) {
         }
     }
 
-    when system_count != 2 or recovery_count != 1 or userdata_count > 1 {
+    when system_a_count != 1 or system_b_count != 1 or recovery_count != 1 or userdata_count > 1 {
         yield false
     }
     when firmware_mode == "uefi" {
@@ -177,7 +184,10 @@ export craft commit_policy(state, consent, source, recovery_state, boot_state) {
     when not consent {
         yield "reject-consent"
     }
-    when not source_record_valid(source) or source[2] != "verified" {
+    when not source_record_valid(source) {
+        yield "reject-source-trust"
+    }
+    when source[2] != "verified" {
         yield "reject-source-trust"
     }
     when recovery_state != "ready" {
