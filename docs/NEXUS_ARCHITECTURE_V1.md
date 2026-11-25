@@ -63,6 +63,27 @@ Do not add a universal `Agent` base class or public `Worker` ABI merely to match
 
 ## 5. Engineering vocabulary
 
+The following mapping applies to architecture prose and new internal concepts only. It is not a bulk source-code rename.
+
+| Legacy concept or label | Engineering term | Migration rule |
+|---|---|---|
+| Sprite | Agent | Use for a named capability-bearing component; preserve any existing public symbol until a dedicated compatibility migration is approved |
+| Moon | Nexus | Use for the logical coordination/registry plane; do not imply one mandatory daemon |
+| Bunny | Worker | Use for one bounded execution unit |
+| Rabbits | WorkerPool | Use for a bounded set of workers and its queue/concurrency policy |
+| Reaper (as a kernel label) | Reaper language/toolchain | Keep the product name Reaper; it is not renamed to KernelCore |
+| DuckOS (as a generic shell label) | DuckOS operating system | Keep the product name DuckOS; it is not renamed to NexusOS |
+| Thunderous / genre-derived audio labels | Audio processing domain | Route audio ownership to VentuSample where applicable; do not invent an audio-driver repository |
+| Imperial / genre-derived security labels | Trust and security domain | Keep security services under their actual owner and capability boundary |
+| UK / genre-derived network labels | Network services domain | Treat as a DuckOS subsystem proposal, not a repository or dependency |
+| Luxury / genre-derived visual labels | Desktop design system | Keep Mora and DuckOS visual identity; use specific UI/asset tool names for new applications |
+| Studio / mastering studio | Developer workbench | Use for language, diagnostics and authoring environments |
+| Mixing desk / mixer | Resource and policy console | Use for resource inspection and policy configuration |
+| Production pipeline | Build and validation pipeline | Use for reproducible build, test, package and release stages |
+| Musical track / stage metaphor | Workstream / lifecycle stage | Use Stage 0.x, Stage 1.x and explicit exit criteria |
+| Rhythm / tempo (scheduler metaphor) | Scheduling policy / deadline / period | Do not imply timing guarantees without measurements |
+| Mastering (release metaphor) | Packaging, verification and release | Use evidence-backed release terminology |
+
 Use precise engineering language in new architecture documents and UI copy:
 
 | Replace this metaphor | Use this term |
