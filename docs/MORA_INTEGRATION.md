@@ -4,7 +4,7 @@
 
 DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
 
-The default Mora Amber profile uses warm vertical drapery with a repeating fold rhythm, a deep radial workspace centre, walnut/graphite panels, muted olive support surfaces and one restrained red critical marker. Material depth comes from soft light, edge highlights and tonal separation rather than neon fills. The compact dock and existing app IDs remain stable; Dark and Light remain selectable alternatives.
+Mora uses the fixed DuckOS black/white/yellow visual identity: near-black structural surfaces, white content and one duck-yellow accent. Its deep radial workspace and restrained vertical fold rhythm use tonal black and graphite with yellow edge light; they do not introduce Amber, Light or Dark palette variants. The compact dock and existing application IDs remain stable.
 
 ## Shell components
 
@@ -64,7 +64,7 @@ Proof computes SHA-256 through Web Crypto when available. A digest can identify 
 
 The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript, catalogue, policy and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
 
-The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser shell provides a persisted light/dark preference; native toolkit adapters must implement the same semantic tokens independently.
+The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). Mora has one fixed Duck palette; it does not expose palette switching. Native toolkit adapters may map the canonical semantic tokens to their own controls, but must preserve the same brand identity, semantic roles and contrast independently.
 
 ## Responsive workspace and accessibility
 
