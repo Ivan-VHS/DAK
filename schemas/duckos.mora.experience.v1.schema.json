@@ -20,7 +20,7 @@
       "const": 1
     },
     "product": {
-      "const": "DuckOS"
+      "const": "Duck"
     },
     "surface": {
       "type": "string",
