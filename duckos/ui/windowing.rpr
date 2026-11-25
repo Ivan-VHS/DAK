@@ -1,0 +1,115 @@
+# Window and workspace policy. Host Mora currently delegates placement to the host WM.
+# This contract is intended for the future kernel-owned Window Manager.
+
+export craft window_state_valid(state) {
+    when state == "floating" { yield true }
+    when state == "tiled" { yield true }
+    when state == "maximized" { yield true }
+    when state == "fullscreen" { yield true }
+    when state == "minimized" { yield true }
+    yield false
+}
+
+export craft window_descriptor_valid(window) {
+    when size(window) != 7 or window[0] <= 0 {
+        yield false
+    }
+    when not window_state_valid(window[1]) {
+        yield false
+    }
+    when window[2] < -32768 or window[2] > 32767 {
+        yield false
+    }
+    when window[3] < -32768 or window[3] > 32767 {
+        yield false
+    }
+    when window[4] < 160 or window[4] > 16384 {
+        yield false
+    }
+    when window[5] < 120 or window[5] > 16384 {
+        yield false
+    }
+    yield window[6] >= 0
+}
+
+export craft window_transition_valid(from_state, to_state) {
+    when not window_state_valid(from_state) or not window_state_valid(to_state) {
+        yield false
+    }
+    when from_state == to_state {
+        yield true
+    }
+    when to_state == "minimized" {
+        yield true
+    }
+    when from_state == "minimized" {
+        yield to_state == "floating" or to_state == "tiled" or to_state == "maximized"
+    }
+    when from_state == "fullscreen" {
+        yield to_state == "floating" or to_state == "maximized"
+    }
+    yield true
+}
+
+export craft snap_target_valid(target) {
+    when target == "left-half" { yield true }
+    when target == "right-half" { yield true }
+    when target == "top-half" { yield true }
+    when target == "bottom-half" { yield true }
+    when target == "top-left" { yield true }
+    when target == "top-right" { yield true }
+    when target == "bottom-left" { yield true }
+    when target == "bottom-right" { yield true }
+    when target == "maximize" { yield true }
+    when target == "restore" { yield true }
+    yield false
+}
+
+export craft snap_action_valid(window, target) {
+    when not window_descriptor_valid(window) {
+        yield false
+    }
+    yield snap_target_valid(target)
+}
+
+export craft workspace_descriptor_valid(workspace) {
+    when size(workspace) != 3 {
+        yield false
+    }
+    when workspace[0] <= 0 or workspace[1] == "" {
+        yield false
+    }
+    yield workspace[2] >= 0 and workspace[2] <= 31
+}
+
+export craft workspace_assignment_valid(window_id, workspace_id, workspaces) {
+    when window_id <= 0 or workspace_id <= 0 {
+        yield false
+    }
+    each workspace in workspaces {
+        when size(workspace) == 3 {
+            when workspace[0] == workspace_id {
+                yield true
+            }
+        }
+    }
+    yield false
+}
+
+export craft monitor_layout_valid(monitors) {
+    when size(monitors) == 0 or size(monitors) > 16 {
+        yield false
+    }
+    each monitor in monitors {
+        when size(monitor) != 6 {
+            yield false
+        }
+        when monitor[0] <= 0 or monitor[3] < 320 or monitor[4] < 200 {
+            yield false
+        }
+        when monitor[5] < 500 or monitor[5] > 4000 {
+            yield false
+        }
+    }
+    yield true
+}

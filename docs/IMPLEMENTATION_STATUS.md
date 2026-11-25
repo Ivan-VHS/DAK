@@ -159,3 +159,18 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Seven-subsystem Desktop integration — 2026-11-25
+
+- [x] Added seven Reaper policy modules for appearance, native shell scene/events, window/workspace behavior, system UI state, DABI64 application admission/lifecycle/IPC, adaptive input/gaming profiles and production evidence gates.
+- [x] Added desktop_shell_tests.rpr for all seven areas and CI execution through both Reaper tree-walk and VM engines.
+- [x] Extended mora/theme.json with glass/acrylic/matte materials, interaction states, iconography rules and wallpaper-selection policy.
+- [x] Imported six local Figma wallpaper representatives, one for each of the six frame series. The remaining 60 frames remain unbundled.
+- [x] Added a Qt 6 native Mora Appearance page, persistent local wallpaper selection, a host-session status page and host-window grid/column/focus arrangements.
+- [ ] Verify the new Reaper contract suite in GitHub Actions before merge.
+- [ ] Verify the updated Qt 6 build and native Mora smoke test in GitHub Actions before merge.
+- [ ] Implement the kernel-owned compositor, renderer, input service, Window Manager, virtual desktops, Greeter, notification/power services, DABI64 loader, process manager and capability broker. Reaper contracts in this change do not implement these privileged mechanisms.
+- [ ] Import and validate the remaining 60 Figma frames as separate local selections.
+
+The native wallpaper selector and host-window arrangements are real Mora host-application features. They do not imply a DuckOS kernel desktop session. The current Stage 1 kernel still halts before user-session startup.

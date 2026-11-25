@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="docs/IMPLEMENTATION_STATUS.md">Mora native shell status</a> · <a href="mora/index.html">Browser preview</a> ·
+  <a href="docs/IMPLEMENTATION_STATUS.md">Mora native shell status</a> · <a href="docs/DESKTOP_SHELL_ARCHITECTURE_V1.md">Desktop architecture v1</a> · <a href="mora/index.html">Browser preview</a> ·
   <a href="docs/RELEASE_EDITION.md">Release edition</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·

@@ -1,0 +1,54 @@
+# Production readiness and runtime measurement policy.
+# A passing gate records evidence; it does not manufacture missing telemetry.
+
+export craft metric_sample_valid(sample) {
+    when size(sample) != 4 {
+        yield false
+    }
+    when sample[0] == "" or sample[2] == "" or sample[3] < 0 {
+        yield false
+    }
+    yield sample[1] >= 0
+}
+
+export craft frame_budget_status(frame_time_us, refresh_hz) {
+    when frame_time_us < 0 or refresh_hz < 24 or refresh_hz > 360 {
+        yield "invalid"
+    }
+    when frame_time_us <= 1000000 / refresh_hz {
+        yield "within-budget"
+    }
+    yield "over-budget"
+}
+
+export craft production_gate_passed(gates) {
+    when size(gates) != 7 {
+        yield false
+    }
+    each gate in gates {
+        when gate != true {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft accessibility_gate(scale_percent, keyboard_complete, focus_visible, screen_reader_named, reduced_motion) {
+    when scale_percent < 750 or scale_percent > 2000 {
+        yield false
+    }
+    when keyboard_complete != true or focus_visible != true {
+        yield false
+    }
+    when screen_reader_named != true or reduced_motion != true {
+        yield false
+    }
+    yield true
+}
+
+export craft evidence_status(has_test, has_measurement, has_target) {
+    when not has_test or not has_measurement or not has_target {
+        yield "not-verified"
+    }
+    yield "verified"
+}

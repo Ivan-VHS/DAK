@@ -1,0 +1,62 @@
+{
+  "schema": "duckos.mora.wallpapers.v1",
+  "source": {
+    "file": "https://www.figma.com/design/RWjphsEdITgECaS8G31o9H/Untitled?node-id=0-1",
+    "framePolicy": "one locally bundled representative frame per visual series",
+    "importedFrameCount": 6,
+    "totalFrameCount": 66,
+    "remainingFrames": 60
+  },
+  "palette": "duck",
+  "selection": "local",
+  "wallpapers": [
+    {
+      "id": "folds-of-light",
+      "name": "Складки света",
+      "series": "Складки света",
+      "frame": "2:2",
+      "asset": "folds-of-light.png",
+      "description": "Тёмные складки и мягкие отражения"
+    },
+    {
+      "id": "copper-glass",
+      "name": "Медное стекло",
+      "series": "Медное стекло",
+      "frame": "2:13",
+      "asset": "copper-glass.png",
+      "description": "Полупрозрачные медные формы"
+    },
+    {
+      "id": "quiet-dunes",
+      "name": "Тихие дюны",
+      "series": "Тихие дюны",
+      "frame": "2:24",
+      "asset": "quiet-dunes.png",
+      "description": "Тёплый песок и мягкий рельеф"
+    },
+    {
+      "id": "light-fields",
+      "name": "Световые поля",
+      "series": "Световые поля",
+      "frame": "2:35",
+      "asset": "light-fields.png",
+      "description": "Глубокий чёрный и рассеянный свет"
+    },
+    {
+      "id": "shape-study",
+      "name": "Пластика форм",
+      "series": "Пластика форм",
+      "frame": "2:46",
+      "asset": "shape-study.png",
+      "description": "Терракотовая геометрия"
+    },
+    {
+      "id": "amber-night",
+      "name": "Янтарная ночь",
+      "series": "Янтарная ночь",
+      "frame": "2:57",
+      "asset": "amber-night.png",
+      "description": "Тонкая янтарная линия на тёмной поверхности"
+    }
+  ]
+}

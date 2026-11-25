@@ -1,0 +1,88 @@
+# DuckOS seven-subsystem desktop-shell contract suite.
+# These tests execute Reaper policy only; they do not claim kernel service bring-up.
+
+import "duckos/ui/appearance.rpr" as appearance
+import "duckos/ui/shell.rpr" as shell
+import "duckos/ui/windowing.rpr" as windowing
+import "duckos/ui/system.rpr" as system
+import "duckos/ui/applications.rpr" as applications
+import "duckos/ui/adaptive.rpr" as adaptive
+import "duckos/ui/quality.rpr" as quality
+
+# 1. Design Foundation
+make wallpapers := [
+    ["folds-of-light", "Складки света", "mora/wallpapers/folds-of-light.png", "material"],
+    ["copper-glass", "Медное стекло", "mora/wallpapers/copper-glass.png", "material"]
+]
+assert(appearance[ "wallpaper_descriptor_valid" ](wallpapers[0]), "wallpaper descriptor is valid")
+assert(appearance["wallpaper_selection_valid"]("copper-glass", ["folds-of-light", "copper-glass"]), "selected wallpaper exists")
+assert(not appearance["wallpaper_selection_valid"]("missing", ["folds-of-light"]), "unknown wallpaper is rejected")
+assert(appearance["shell_palette_valid"]("duck"), "system palette remains canonical")
+assert(not appearance["shell_palette_valid"]("amber"), "wallpaper artwork cannot replace the system palette")
+assert(appearance["material_effect_policy"]("industrial-glass", false, false) == "bounded-native-blur", "glass is bounded by the native renderer")
+assert(appearance["material_effect_policy"]("industrial-glass", true, false) == "blur-disabled", "reduced motion and accessibility disable effects")
+assert(appearance["icon_descriptor_valid"](["app.files", "files", "Открыть файлы", 24]), "icon descriptor includes a name and accessible label")
+
+# 2. Native Shell Core
+make scene := ["mora", 1920, 1080, 1000, 4]
+assert(shell["desktop_scene_valid"](scene), "desktop scene descriptor is valid")
+assert(shell["shell_component_valid"]("dock"), "Dock is a recognized shell component")
+assert(not shell["shell_component_valid"]("unknown-panel"), "unknown shell components are rejected")
+assert(shell["system_event_valid"](["window.focus", "window-manager", 1, 100]), "ordered local system event is valid")
+assert(shell["event_route"]("notification.push") == "notification-service", "notifications have a single event route")
+assert(shell["shell_boot_gate"]([true, true, true, true, true, true]) == "session-services-ready", "shell starts only after all required services")
+
+# 3. Window & Workspace Engine
+make floating := [1, "floating", 0, 0, 800, 600, 0]
+assert(windowing["window_descriptor_valid"](floating), "floating window descriptor is valid")
+assert(windowing["window_transition_valid"]("floating", "maximized"), "floating window can maximize")
+assert(not windowing["window_transition_valid"]("destroyed", "floating"), "unknown window state is rejected")
+assert(windowing["snap_action_valid"](floating, "left-half"), "left snap is valid")
+assert(not windowing["snap_action_valid"](floating, "freeform"), "unknown snap target is rejected")
+assert(windowing["workspace_descriptor_valid"]([1, "Main", 0]), "workspace descriptor is valid")
+assert(windowing["workspace_assignment_valid"](1, 1, [[1, "Main", 0]]), "window can join a registered workspace")
+assert(not windowing["workspace_assignment_valid"](1, 2, [[1, "Main", 0]]), "unknown workspace is rejected")
+assert(windowing["monitor_layout_valid"]([[1, 0, 0, 1920, 1080, 1000]]), "monitor topology is valid")
+
+# 4. System UI
+make notification := [1, "warning", "Low battery", "Connect power", 100, 60000]
+assert(system["notification_valid"](notification), "notification descriptor is valid")
+assert(system["notification_retention"](0, "critical") == "retain-until-dismissed", "critical notifications persist")
+assert(system["greeter_transition_valid"]("locked", "authenticating"), "locked session can begin authentication")
+assert(system["greeter_transition_valid"]("authenticating", "unlocked"), "successful authentication unlocks the session")
+assert(not system["greeter_transition_valid"]("locked", "unlocked"), "Greeter cannot bypass authentication")
+assert(system["power_confirmation_required"]("shutdown"), "shutdown requires explicit confirmation")
+assert(not system["power_action_valid"]("execute-command"), "power menu rejects arbitrary commands")
+
+# 5. Reaper-driven Applications
+make manifest := ["orgze", "1.0.0", "DABI64-v1", "orgze.main", true, true, "sha256:package"]
+assert(applications["application_manifest_valid"](manifest), "DABI64 application manifest is valid")
+assert(applications["application_admission"](manifest) == "admit-policy-only", "signed sandboxed app passes policy admission")
+assert(applications["application_admission"](["bad", "1", "other-abi", "entry", true, true, "hash"]) == "reject-invalid-manifest", "ABI mismatch is rejected")
+assert(applications["lifecycle_transition_valid"]("registered", "starting"), "registered app can start")
+assert(applications["lifecycle_transition_valid"]("running", "stopping"), "running app can stop")
+assert(not applications["lifecycle_transition_valid"]("stopped", "running"), "stopped app cannot be revived")
+assert(applications["capability_subset_valid"](["fs.read"], ["fs.read", "window.create"]), "requested capability is granted")
+assert(not applications["capability_subset_valid"](["driver.write"], ["fs.read"]), "capability escalation is rejected")
+assert(applications["ipc_message_valid"](["orgze", "duck.shell", "window.open.v1", 512, "req-1"]), "bounded IPC envelope is valid")
+assert(not applications["ipc_message_valid"](["orgze", "duck.shell", "window.open.v1", 100000, "req-2"]), "oversized IPC payload is rejected")
+
+# 6. Adaptive & Gaming Modes
+assert(adaptive["input_device_valid"]("controller"), "controller is a supported input class")
+assert(adaptive["controller_event_valid"](["pad-1", "left-trigger", 0.5, 1, 100]), "controller event is bounded")
+assert(not adaptive["controller_event_valid"](["pad-1", "left-trigger", 1.5, 1, 100]), "controller value outside range is rejected")
+assert(adaptive["touch_target_valid"](44, 44), "touch target meets minimum size")
+assert(not adaptive["touch_target_valid"](24, 24), "small touch target is rejected")
+assert(adaptive["viewport_valid"]([1920, 1080, 1000, 144]), "desktop viewport is valid")
+assert(adaptive["layout_mode"](640, 480) == "compact", "small viewport selects compact layout")
+assert(adaptive["gaming_profile_valid"]([true, true, false, true]), "gaming profile flags are explicit")
+assert(adaptive["controller_overlay_policy"](true, true) == "static-minimal-overlay", "reduced motion overrides gaming overlay animation")
+
+# 7. Production Quality
+assert(quality["metric_sample_valid"](["frame-time", 12000, "us", 100]), "measured frame sample is valid")
+assert(quality["frame_budget_status"](12000, 60) == "within-budget", "frame meets refresh budget")
+assert(quality["frame_budget_status"](25000, 60) == "over-budget", "late frame is reported")
+assert(quality["production_gate_passed"]([true, true, true, true, true, true, true]), "all release gates must pass")
+assert(not quality["production_gate_passed"]([true, true, true, false, true, true, true]), "one failed gate blocks production readiness")
+assert(quality["accessibility_gate"](2000, true, true, true, true), "accessibility evidence is explicit")
+assert(quality["evidence_status"](true, true, true) == "verified", "maturity requires test, measurement and target evidence")

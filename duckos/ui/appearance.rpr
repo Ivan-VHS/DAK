@@ -1,0 +1,86 @@
+# Visual appearance policy shared by Mora and the future DuckOS native shell.
+# Wallpaper assets are local, selected by stable IDs and never fetched at runtime.
+
+export craft wallpaper_descriptor_valid(wallpaper) {
+    when size(wallpaper) != 4 {
+        yield false
+    }
+    when wallpaper[0] == "" or wallpaper[1] == "" {
+        yield false
+    }
+    when wallpaper[2] == "" {
+        yield false
+    }
+    when wallpaper[3] == "" {
+        yield false
+    }
+    yield true
+}
+
+export craft wallpaper_selection_valid(selected_id, available_ids) {
+    when selected_id == "" or size(available_ids) == 0 {
+        yield false
+    }
+    each available_id in available_ids {
+        when selected_id == available_id {
+            yield true
+        }
+    }
+    yield false
+}
+
+export craft shell_palette_valid(palette_id) {
+    # Artwork may vary; system status and action colors stay canonical.
+    yield palette_id == "duck"
+}
+
+export craft material_valid(material) {
+    when material == "industrial-glass" { yield true }
+    when material == "matte" { yield true }
+    when material == "acrylic" { yield true }
+    when material == "metal" { yield true }
+    when material == "wallpaper" { yield true }
+    yield false
+}
+
+export craft material_effect_policy(material, reduced_motion, eco_visuals) {
+    when not material_valid(material) {
+        yield "reject-unknown-material"
+    }
+    when material == "wallpaper" or material == "matte" {
+        yield "render-static"
+    }
+    when reduced_motion or eco_visuals {
+        yield "blur-disabled"
+    }
+    yield "bounded-native-blur"
+}
+
+export craft appearance_preferences_valid(preferences) {
+    when size(preferences) != 5 {
+        yield false
+    }
+    when not shell_palette_valid(preferences[0]) {
+        yield false
+    }
+    when preferences[1] == "" {
+        yield false
+    }
+    when preferences[2] != true and preferences[2] != false {
+        yield false
+    }
+    when preferences[3] != true and preferences[3] != false {
+        yield false
+    }
+    yield preferences[4] >= 0 and preferences[4] <= 100
+}
+
+export craft icon_descriptor_valid(icon) {
+    when size(icon) != 4 {
+        yield false
+    }
+    when icon[0] == "" or icon[1] == "" or icon[2] == "" {
+        yield false
+    }
+    yield icon[3] >= 16 and icon[3] <= 256
+}

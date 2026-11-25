@@ -1,0 +1,66 @@
+# System UI policy for notifications, lock state and explicit power requests.
+
+export craft notification_valid(notification) {
+    when size(notification) != 6 {
+        yield false
+    }
+    when notification[0] <= 0 or notification[2] == "" {
+        yield false
+    }
+    when notification[1] != "info" and notification[1] != "success" and notification[1] != "warning" and notification[1] != "critical" {
+        yield false
+    }
+    when notification[4] < 0 or notification[5] < 0 {
+        yield false
+    }
+    yield notification[5] <= 86400000
+}
+
+export craft notification_retention(ttl_ms, severity) {
+    when ttl_ms < 0 or ttl_ms > 86400000 {
+        yield "reject-invalid-expiry"
+    }
+    when severity == "critical" or ttl_ms == 0 {
+        yield "retain-until-dismissed"
+    }
+    yield "expire-after-deadline"
+}
+
+export craft greeter_transition_valid(from_state, to_state) {
+    when from_state == "locked" and to_state == "authenticating" {
+        yield true
+    }
+    when from_state == "authenticating" and to_state == "unlocked" {
+        yield true
+    }
+    when from_state == "authenticating" and to_state == "locked" {
+        yield true
+    }
+    when from_state == "unlocked" and to_state == "locked" {
+        yield true
+    }
+    yield false
+}
+
+export craft power_action_valid(action) {
+    when action == "lock" { yield true }
+    when action == "sleep" { yield true }
+    when action == "restart" { yield true }
+    when action == "shutdown" { yield true }
+    when action == "cancel" { yield true }
+    yield false
+}
+
+export craft power_confirmation_required(action) {
+    yield action == "restart" or action == "shutdown"
+}
+
+export craft control_center_action_valid(action) {
+    when action == "toggle-wifi" { yield true }
+    when action == "toggle-bluetooth" { yield true }
+    when action == "toggle-focus" { yield true }
+    when action == "toggle-reduced-motion" { yield true }
+    when action == "open-settings" { yield true }
+    when action == "open-power-menu" { yield true }
+    yield false
+}
