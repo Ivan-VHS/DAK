@@ -56,6 +56,9 @@ if(BUILD_TESTING)
 
     add_executable(duckos_idt_tests tests/test_idt.c)
     target_link_libraries(duckos_idt_tests PRIVATE duckos_boot_contract)
+    target_include_directories(duckos_idt_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/arch/x86_64
+    )
     if(MSVC)
         target_compile_options(duckos_idt_tests PRIVATE /W4 /sdl)
     else()
