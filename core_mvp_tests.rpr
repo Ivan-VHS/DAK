@@ -123,3 +123,97 @@ assert(accessibility["window_state_valid"]([2, "tiled", 0, 0, 800, 600, 1]), "ti
 assert(not accessibility["window_state_valid"]([3, "unknown", 0, 0, 800, 600, 0]), "unknown window mode is rejected")
 assert(accessibility["accessibility_profile_valid"]([1000, true, false, true, false]), "accessibility profile accepts scale and boolean preferences")
 assert(not accessibility["accessibility_profile_valid"]([3000, true, false, true, false]), "unbounded accessibility scaling is rejected")
+
+
+# Reaper-VHS R0-R10 GPU contracts.
+# These assertions execute Reaper policy code only; they do not access a GPU.
+
+import "duckos/graphics/reaper_vhs.rpr" as gpu
+
+# R0: versioned stable contracts.
+assert(gpu["abi_version_supported"](1, 0), "GPU ABI v1.0 is supported")
+assert(not gpu["abi_version_supported"](2, 0), "unknown major GPU ABI is rejected")
+
+# R1: PCI discovery descriptors and adapter maturity.
+make gpu_device := [0, 1, 0, 0, 32902, 4660, 3, 6]
+assert(gpu["pci_location_valid"](gpu_device), "bounded PCI GPU descriptor is valid")
+assert(gpu["pci_device_is_gpu"](gpu_device), "PCI display class is recognized")
+assert(gpu["vendor_family"](32902) == "intel", "Intel PCI vendor is classified")
+assert(gpu["vendor_family"](4098) == "amd", "AMD PCI vendor is classified")
+assert(gpu["vendor_family"](4318) == "nvidia", "NVIDIA PCI vendor is classified")
+assert(gpu["discovery_decision"](gpu_device, "missing", true) == "gpu-found-adapter-required", "device discovery does not imply a driver exists")
+assert(gpu["bar_descriptor_valid"]([0, 4294967296, 268435456, "mmio64", true]), "aligned 64-bit MMIO BAR descriptor is valid")
+assert(not gpu["bar_descriptor_valid"]([0, 4294967297, 268435456, "mmio64", true]), "misaligned PCI BAR is rejected")
+
+# R2: GPU virtual/backing pages and physical memory budgets.
+make gpu_page := [1048576, 2097152, 4096, "rw", 7, false, "vram"]
+assert(gpu["gpu_page_valid"](gpu_page), "aligned GPU page descriptor is valid")
+assert(not gpu["gpu_page_valid"]([1048577, 2097152, 4096, "rw", 7, false, "vram"]), "unaligned GPU page is rejected")
+assert(gpu["memory_budget_valid"](8589934592, 536870912, 4294967296), "VRAM resident budget respects reserved memory")
+assert(not gpu["memory_budget_valid"](8589934592, 8589934592, 1), "fully reserved VRAM cannot admit allocations")
+
+# R3: DMA and isolated IOMMU domains.
+make dma_map := [1048576, 2097152, 4096, "bidirectional", 3, 4096, "mapped"]
+assert(gpu["dma_descriptor_valid"](dma_map), "DMA mapping descriptor is valid")
+assert(not gpu["dma_descriptor_valid"]([1048577, 2097152, 4096, "bidirectional", 3, 4096, "mapped"]), "unaligned DMA IOVA is rejected")
+assert(gpu["iommu_bind_decision"](true, true, true, true) == "attach-domain-policy-only", "isolated IOMMU attach is admitted by policy")
+assert(gpu["iommu_bind_decision"](true, false, true, true) == "deny-shared-unisolated-domain", "unisolated IOMMU domain is denied")
+assert(gpu["dma_transition_valid"]("mapped", "in-flight"), "mapped DMA buffer can enter flight")
+assert(not gpu["dma_transition_valid"]("allocated", "in-flight"), "DMA cannot skip mapping")
+
+# R4: process-owned GPU contexts and GPUVM mappings.
+make gpu_context := [11, 42, 3, 2147483648, 8, "running", ["gpu.submit", "gpu.memory"]]
+make gpu_mapping := [11, 3, 1048576, 77, 65536, "rw", 42]
+assert(gpu["gpu_context_valid"](gpu_context), "GPU context has bounded owner and resources")
+assert(gpu["gpuvm_mapping_decision"](gpu_context, gpu_mapping) == "map-policy-only", "GPUVM mapping matches context and domain")
+assert(gpu["gpuvm_mapping_decision"](gpu_context, [11, 4, 1048576, 77, 65536, "rw", 42]) == "deny-context-owner-or-domain-mismatch", "GPUVM mapping cannot cross IOMMU domains")
+assert(gpu["context_has_capability"](gpu_context[6], "gpu.submit"), "GPU context capability lookup works")
+
+# R5: residency and migration policy.
+make gpu_buffer := [77, 11, 1048576, "vram", 0, 100, "gpu-read"]
+assert(gpu["gpu_buffer_valid"](gpu_buffer), "GPU buffer descriptor is valid")
+assert(gpu["residency_decision"]("vram", true, 0, true, true, true) == "evict-to-system-policy-only", "cold unpinned VRAM may be selected for eviction")
+assert(gpu["residency_decision"]("vram", true, 1, true, true, true) == "keep-pinned-resource", "pinned buffer cannot be evicted")
+assert(gpu["residency_decision"]("system", false, 0, true, true, true) == "migrate-to-vram-policy-only", "hot system-backed resource may be migrated")
+assert(gpu["migration_valid"]("vram", "system", 4096, 0, true, true), "completed unfenced-safe migration descriptor is valid")
+assert(not gpu["migration_valid"]("vram", "system", 4096, 1, true, true), "pinned resource cannot be migrated")
+
+# R6: codec metadata, compression threshold and decompression guard.
+assert(gpu["codec_block_valid"](["lz4", 4096, 2048, 123456, 1, 4096]), "compressed LZ4 block metadata is valid")
+assert(gpu["codec_block_valid"](["zero", 4096, 0, 0, 1, 4096]), "zero block uses no payload bytes")
+assert(not gpu["codec_block_valid"](["lz4", 4096, 5000, 123456, 1, 4096]), "expanding compressed block is rejected")
+assert(gpu["codec_compression_decision"](4096, 3000, 20) == "store-compressed", "compression candidate beats minimum savings")
+assert(gpu["codec_compression_decision"](4096, 3900, 20) == "store-raw", "weak compression candidate is stored raw")
+assert(gpu["codec_decode_guard"](4096, 4096, 65536, true) == "decode-metadata-valid", "bounded checksum-valid decompression is admitted")
+assert(gpu["codec_decode_guard"](4096, 4096, 2048, true) == "deny-output-limit", "decompression output limit is enforced")
+
+# R7: HyperSwap faults and oversubscription limits.
+assert(gpu["oversubscription_decision"](8589934592, 12884901888, 8589934592, true, 1048576, 1073741824) == "allow-oversubscription-policy-only", "supported faulting and host backing admit oversubscription policy")
+assert(gpu["oversubscription_decision"](8589934592, 12884901888, 8589934592, false, 1048576, 1073741824) == "reject-transparent-oversubscription-unsupported", "transparent oversubscription needs hardware fault support")
+assert(gpu["hyperswap_fault_action"]("system", true, false, true, true, true, true) == "page-in-to-vram-policy-only", "faultable system backing may page in by policy")
+assert(gpu["hyperswap_fault_action"]("system", false, false, true, true, true, true) == "explicit-staging-required", "non-faultable resource requires explicit staging")
+assert(gpu["hyperswap_fault_action"]("system", true, false, true, true, true, false) == "device-lost-recovery-required", "device loss blocks page-in")
+
+# R8: telemetry and bounded power/frequency policy.
+make gpu_sample := [72000, 180000, 2400, 9200, 6442450944, 8589934592, 0, 1000000]
+assert(gpu["telemetry_valid"](gpu_sample), "GPU telemetry sample is within bounds")
+assert(not gpu["telemetry_valid"]([130000, 180000, 2400, 9200, 6442450944, 8589934592, 0, 1000000]), "out-of-range GPU temperature is rejected")
+assert(gpu["power_governor_action"](gpu_sample, 80000, 90000, 2600) == "request-tested-frequency-step-policy-only", "governor may request only a tested frequency step")
+assert(gpu["frequency_request_valid"](2000, 2400, 500, 2600, true, false), "frequency request stays inside qualified ceiling")
+assert(not gpu["frequency_request_valid"](2000, 2800, 500, 2600, true, false), "frequency request cannot exceed tested ceiling")
+assert(gpu["power_governor_action"]([93000, 220000, 2400, 9500, 6442450944, 8589934592, 0, 1000001], 80000, 90000, 2600) == "emergency-throttle-policy-only", "hard thermal limit selects emergency throttle policy")
+
+# R9: ownership, capability, deduplication and recovery.
+assert(gpu["gpu_access_decision"](gpu_context, 42, 3, "gpu.submit", true, true) == "allow-policy-only", "owner with matching domain and capability is admitted")
+assert(gpu["gpu_access_decision"](gpu_context, 99, 3, "gpu.submit", true, true) == "deny-owner-or-domain-mismatch", "foreign process cannot access GPU context")
+assert(gpu["dedup_share_decision"](true, false, true, true, true) == "share-read-only-object-policy-only", "immutable object may be shared within one security domain")
+assert(gpu["dedup_share_decision"](true, false, false, true, false) == "deny-cross-domain-deduplication", "cross-domain deduplication is denied")
+assert(gpu["recovery_action"]("online", 0, true, true) == "no-recovery-required", "healthy device needs no recovery")
+assert(gpu["recovery_action"]("faulted", 3, true, true) == "request-device-reset-policy-only", "quiesced device may request controlled reset")
+
+# R10: truthful dashboard snapshots and alert severity.
+make dashboard_sample := [8589934592, 6442450944, 2147483648, 536870912, 72000, 2400, 9200, 0, 2, 180000]
+assert(gpu["dashboard_snapshot_valid"](dashboard_sample), "GPU dashboard snapshot is valid")
+assert(gpu["dashboard_alert"](dashboard_sample, 80000, 90000) == "migration-in-progress", "dashboard exposes migration separately from memory capacity")
+assert(gpu["dashboard_residency_basis_points"](dashboard_sample) == 7500, "dashboard reports physical VRAM residency without inventing extra VRAM")
+assert(gpu["dashboard_alert"]([8589934592, 6442450944, 2147483648, 536870912, 93000, 2400, 9200, 0, 0, 180000], 80000, 90000) == "critical-thermal", "dashboard marks hard thermal limit critical")

@@ -106,3 +106,10 @@ This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS gua
 10. Installer, production image qualification and recovery.
 
 Each gate needs a conformance suite and target hardware or emulator evidence. Do not skip a gate by relabelling a reference-runtime test as a hardware test.
+
+
+## Reaper-VHS GPU resource policy
+
+The GPU policy boundary lives in `duckos/graphics/reaper_vhs.rpr`. It defines versioned R0–R10 contracts for PCI descriptor validation, GPU memory ranges, DMA/IOMMU admission, owner-bound GPU contexts, GPUVM mappings, resource residency, VHS-Codec metadata, HyperSwap eligibility, bounded power-governor decisions, security/recovery and dashboard telemetry. These contracts are included in the core Reaper test suite.
+
+The policy layer is not a hardware driver. The current native kernel still lacks PCI enumeration, reusable memory/page-table management, DMA/IOMMU enforcement, GPU command submission and a GPU driver runtime. The Reaper compiler's native C17 path also remains partial; these `.rpr` sources are currently verified by the Reaper reference runtime through tree-walk and VM CI. See [Reaper-VHS GPU subsystem v1](REAPER_VHS_GPU_V1.md).

@@ -1,0 +1,534 @@
+# Reaper-VHS GPU resource contracts v1.
+# All functions are deterministic policy/descriptor checks in Reaper.
+# They do not enumerate PCI hardware, map pages, submit commands, move DMA,
+# compress buffers, write clock registers, or perform privileged recovery.
+
+export craft abi_version_supported(major, minor) {
+    yield major == 1 and minor == 0
+}
+
+# R1 — PCI identity and discovery policy.
+# device = [segment, bus, slot, function, vendor_id, device_id, class_code, bar_count]
+export craft pci_location_valid(device) {
+    when size(device) != 8 {
+        yield false
+    }
+    when device[0] < 0 or device[0] > 65535 {
+        yield false
+    }
+    when device[1] < 0 or device[1] > 255 or device[2] < 0 or device[2] > 31 {
+        yield false
+    }
+    when device[3] < 0 or device[3] > 7 {
+        yield false
+    }
+    when device[4] <= 0 or device[4] > 65535 or device[5] <= 0 or device[5] > 65535 {
+        yield false
+    }
+    when device[6] < 0 or device[6] > 255 or device[7] < 0 or device[7] > 6 {
+        yield false
+    }
+    yield true
+}
+
+export craft pci_device_is_gpu(device) {
+    yield pci_location_valid(device) and device[6] == 3
+}
+
+export craft vendor_family(vendor_id) {
+    when vendor_id == 32902 {
+        yield "intel"
+    }
+    when vendor_id == 4098 {
+        yield "amd"
+    }
+    when vendor_id == 4318 {
+        yield "nvidia"
+    }
+    yield "other"
+}
+
+# BAR = [index, base, size, kind, prefetchable].
+# The platform driver still has to size and reserve the BAR from PCI config space.
+export craft bar_descriptor_valid(bar) {
+    when size(bar) != 5 {
+        yield false
+    }
+    when bar[0] < 0 or bar[0] > 5 or bar[1] < 4096 or bar[2] < 4096 {
+        yield false
+    }
+    when bar[2] > 1099511627776 or bar[1] % bar[2] != 0 {
+        yield false
+    }
+    when bar[3] != "mmio32" and bar[3] != "mmio64" {
+        yield false
+    }
+    yield bar[4] == true or bar[4] == false
+}
+
+export craft discovery_decision(device, adapter_state, bars_valid) {
+    when not pci_location_valid(device) {
+        yield "reject-invalid-pci-descriptor"
+    }
+    when not pci_device_is_gpu(device) {
+        yield "ignore-non-gpu-device"
+    }
+    when not bars_valid {
+        yield "reject-invalid-resource-window"
+    }
+    when adapter_state != "registered-tested" {
+        yield "gpu-found-adapter-required"
+    }
+    yield "gpu-found-adapter-policy-ready"
+}
+
+# R2 — GPU page and memory budget contracts.
+# page = [gpu_virtual, backing_physical, bytes, permissions, owner_context, pinned, tier].
+export craft gpu_address_range_valid(base, bytes, limit) {
+    when base < 0 or bytes <= 0 or limit <= 0 or base >= limit {
+        yield false
+    }
+    yield bytes <= limit - base
+}
+
+export craft gpu_page_valid(page) {
+    when size(page) != 7 {
+        yield false
+    }
+    when page[0] < 4096 or page[1] < 4096 or page[2] <= 0 or page[4] <= 0 {
+        yield false
+    }
+    when page[0] % 4096 != 0 or page[1] % 4096 != 0 or page[2] % 4096 != 0 {
+        yield false
+    }
+    when not gpu_address_range_valid(page[0], page[2], 281474976710656) {
+        yield false
+    }
+    when not gpu_address_range_valid(page[1], page[2], 4503599627370496) {
+        yield false
+    }
+    when page[3] != "r" and page[3] != "rw" and page[3] != "rx" {
+        yield false
+    }
+    when page[5] != true and page[5] != false {
+        yield false
+    }
+    yield page[6] == "vram" or page[6] == "system"
+}
+
+export craft memory_budget_valid(vram_bytes, reserved_bytes, resident_bytes) {
+    when vram_bytes <= 0 or reserved_bytes < 0 or resident_bytes < 0 {
+        yield false
+    }
+    when reserved_bytes >= vram_bytes {
+        yield false
+    }
+    yield resident_bytes <= vram_bytes - reserved_bytes
+}
+
+# R3 — DMA and IOMMU policy.
+# dma = [iova, physical, bytes, direction, domain_id, alignment, state].
+export craft dma_descriptor_valid(dma) {
+    when size(dma) != 7 {
+        yield false
+    }
+    when dma[0] < 4096 or dma[1] < 4096 or dma[2] <= 0 or dma[4] <= 0 {
+        yield false
+    }
+    when dma[5] < 4096 or dma[5] > 2097152 {
+        yield false
+    }
+    when dma[0] % dma[5] != 0 or dma[1] % dma[5] != 0 or dma[2] % 4096 != 0 {
+        yield false
+    }
+    when not gpu_address_range_valid(dma[0], dma[2], 281474976710656) {
+        yield false
+    }
+    when dma[3] != "to-device" and dma[3] != "from-device" and dma[3] != "bidirectional" {
+        yield false
+    }
+    yield dma[6] == "allocated" or dma[6] == "mapped" or dma[6] == "in-flight" or dma[6] == "completed" or dma[6] == "revoked"
+}
+
+export craft iommu_bind_decision(device_supported, domain_isolated, descriptor_valid, capability_granted) {
+    when not device_supported or not descriptor_valid {
+        yield "deny-invalid-device-or-mapping"
+    }
+    when not domain_isolated {
+        yield "deny-shared-unisolated-domain"
+    }
+    when not capability_granted {
+        yield "deny-iommu-capability"
+    }
+    yield "attach-domain-policy-only"
+}
+
+export craft dma_transition_valid(current, next) {
+    when current == "allocated" and next == "mapped" {
+        yield true
+    }
+    when current == "mapped" and (next == "in-flight" or next == "revoked") {
+        yield true
+    }
+    when current == "in-flight" and next == "completed" {
+        yield true
+    }
+    when current == "completed" and (next == "mapped" or next == "revoked") {
+        yield true
+    }
+    yield false
+}
+
+# R4 — GPU contexts and GPUVM.
+# context = [context_id, owner_pid, iommu_domain, vram_limit, queue_limit, state, grants].
+export craft gpu_context_valid(context) {
+    when size(context) != 7 {
+        yield false
+    }
+    when context[0] <= 0 or context[1] <= 0 or context[2] <= 0 or context[3] <= 0 {
+        yield false
+    }
+    when context[4] <= 0 or context[4] > 64 or size(context[6]) > 32 {
+        yield false
+    }
+    yield context[5] == "created" or context[5] == "running" or context[5] == "suspended" or context[5] == "lost" or context[5] == "destroyed"
+}
+
+export craft context_has_capability(grants, required) {
+    vary found := false
+    each grant in grants {
+        when grant == required {
+            change found := true
+        }
+    }
+    yield found
+}
+
+# mapping = [context_id, domain_id, gpu_virtual, object_id, bytes, permissions, owner_pid].
+export craft gpuvm_mapping_decision(context, mapping) {
+    when not gpu_context_valid(context) or size(mapping) != 7 {
+        yield "deny-invalid-context-or-mapping"
+    }
+    when context[5] == "destroyed" or context[5] == "lost" {
+        yield "deny-inactive-context"
+    }
+    when mapping[0] != context[0] or mapping[1] != context[2] or mapping[6] != context[1] {
+        yield "deny-context-owner-or-domain-mismatch"
+    }
+    when mapping[2] < 4096 or mapping[3] <= 0 or mapping[4] <= 0 {
+        yield "deny-invalid-object-range"
+    }
+    when mapping[2] % 4096 != 0 or mapping[4] % 4096 != 0 {
+        yield "deny-unaligned-gpu-virtual-range"
+    }
+    when not gpu_address_range_valid(mapping[2], mapping[4], 281474976710656) {
+        yield "deny-gpu-virtual-range-overflow"
+    }
+    when mapping[5] != "r" and mapping[5] != "rw" and mapping[5] != "rx" {
+        yield "deny-invalid-mapping-permissions"
+    }
+    yield "map-policy-only"
+}
+
+# R5 — Buffer residency and migration.
+# buffer = [object_id, context_id, bytes, tier, pin_count, priority, access].
+export craft gpu_buffer_valid(buffer) {
+    when size(buffer) != 7 {
+        yield false
+    }
+    when buffer[0] <= 0 or buffer[1] <= 0 or buffer[2] <= 0 {
+        yield false
+    }
+    when buffer[3] != "vram" and buffer[3] != "system" and buffer[3] != "compressed" {
+        yield false
+    }
+    when buffer[4] < 0 or buffer[5] < 0 or buffer[5] > 255 {
+        yield false
+    }
+    yield buffer[6] == "gpu-read" or buffer[6] == "gpu-write"
+}
+
+export craft residency_decision(tier, cold, pin_count, faultable, queue_available, backing_available) {
+    when tier != "vram" and tier != "system" and tier != "compressed" {
+        yield "reject-invalid-residency-tier"
+    }
+    when pin_count < 0 {
+        yield "reject-invalid-pin-count"
+    }
+    when pin_count > 0 {
+        yield "keep-pinned-resource"
+    }
+    when tier == "vram" and cold and queue_available and backing_available {
+        yield "evict-to-system-policy-only"
+    }
+    when tier == "vram" and cold and not backing_available {
+        yield "keep-vram-no-backing"
+    }
+    when tier == "system" and not cold and faultable and queue_available and backing_available {
+        yield "migrate-to-vram-policy-only"
+    }
+    when tier == "system" and not faultable {
+        yield "explicit-staging-required"
+    }
+    yield "keep-current-residency"
+}
+
+export craft migration_valid(source, target, bytes, pin_count, fence_complete, device_online) {
+    when (source != "vram" and source != "system" and source != "compressed") or (target != "vram" and target != "system" and target != "compressed") {
+        yield false
+    }
+    when source == target or bytes <= 0 or bytes % 4096 != 0 or pin_count != 0 {
+        yield false
+    }
+    yield fence_complete and device_online
+}
+
+# R6 — VHS-Codec block metadata and safe compression decisions.
+# block = [codec, original_bytes, encoded_bytes, checksum_u32, format_version, block_bytes].
+export craft codec_block_valid(block) {
+    when size(block) != 6 or block[1] <= 0 or block[1] > 65536 {
+        yield false
+    }
+    when block[3] < 0 or block[3] > 4294967295 or block[4] != 1 {
+        yield false
+    }
+    when block[5] != 4096 and block[5] != 16384 {
+        yield false
+    }
+    when block[1] > block[5] {
+        yield false
+    }
+    when block[0] == "zero" {
+        yield block[2] == 0
+    }
+    when block[0] == "constant" {
+        yield block[2] > 0 and block[2] <= 16
+    }
+    when block[0] == "raw" {
+        yield block[2] == block[1]
+    }
+    when block[0] == "lz4" or block[0] == "zstd" {
+        yield block[2] > 0 and block[2] < block[1]
+    }
+    yield false
+}
+
+export craft codec_compression_decision(original_bytes, candidate_bytes, minimum_saving_percent) {
+    when original_bytes <= 0 or candidate_bytes < 0 or minimum_saving_percent < 1 or minimum_saving_percent > 90 {
+        yield "reject-invalid-compression-input"
+    }
+    when candidate_bytes >= original_bytes {
+        yield "store-raw"
+    }
+    when candidate_bytes * 100 <= original_bytes * (100 - minimum_saving_percent) {
+        yield "store-compressed"
+    }
+    yield "store-raw"
+}
+
+export craft codec_decode_guard(original_bytes, decoded_bytes, output_limit, checksum_valid) {
+    when original_bytes <= 0 or output_limit <= 0 or original_bytes > output_limit {
+        yield "deny-output-limit"
+    }
+    when decoded_bytes != original_bytes {
+        yield "deny-length-mismatch"
+    }
+    when not checksum_valid {
+        yield "deny-integrity-failure"
+    }
+    yield "decode-metadata-valid"
+}
+
+# R7 — HyperSwap and oversubscription policy.
+export craft oversubscription_decision(vram_bytes, working_set_bytes, host_backing_bytes, page_faults_supported, migration_budget_bytes, pinned_bytes) {
+    when vram_bytes <= 0 or working_set_bytes <= 0 or host_backing_bytes < 0 or migration_budget_bytes < 0 or pinned_bytes < 0 {
+        yield "reject-invalid-capacity"
+    }
+    when pinned_bytes > vram_bytes {
+        yield "reject-pinned-working-set"
+    }
+    when working_set_bytes <= vram_bytes {
+        yield "no-oversubscription-needed"
+    }
+    when not page_faults_supported {
+        yield "reject-transparent-oversubscription-unsupported"
+    }
+    when host_backing_bytes < working_set_bytes - vram_bytes {
+        yield "reject-insufficient-host-backing"
+    }
+    when migration_budget_bytes == 0 {
+        yield "reject-no-migration-budget"
+    }
+    yield "allow-oversubscription-policy-only"
+}
+
+export craft hyperswap_fault_action(tier, faultable, pinned, backing_valid, queue_available, fence_complete, device_online) {
+    when not device_online {
+        yield "device-lost-recovery-required"
+    }
+    when tier != "vram" and tier != "system" and tier != "compressed" {
+        yield "deny-invalid-page-tier"
+    }
+    when pinned and tier != "vram" {
+        yield "deny-pinned-page-inconsistent"
+    }
+    when tier == "vram" {
+        yield "resident-retry-policy-only"
+    }
+    when not faultable {
+        yield "explicit-staging-required"
+    }
+    when not backing_valid or not queue_available {
+        yield "defer-fault-no-backing-or-queue"
+    }
+    when not fence_complete {
+        yield "wait-for-transfer-fence"
+    }
+    yield "page-in-to-vram-policy-only"
+}
+
+# R8 — Telemetry and frequency/power governor.
+# sample = [temperature_mC, power_mW, clock_MHz, utilization_basis_points,
+#           resident_vram_bytes, total_vram_bytes, error_count, monotonic_timestamp].
+export craft telemetry_valid(sample) {
+    when size(sample) != 8 {
+        yield false
+    }
+    when sample[0] < 0 or sample[0] > 125000 or sample[1] < 0 or sample[1] > 1000000 {
+        yield false
+    }
+    when sample[2] < 0 or sample[2] > 10000 or sample[3] < 0 or sample[3] > 10000 {
+        yield false
+    }
+    when sample[4] < 0 or sample[5] <= 0 or sample[4] > sample[5] {
+        yield false
+    }
+    yield sample[6] >= 0 and sample[7] > 0
+}
+
+export craft power_governor_action(sample, soft_limit_mC, hard_limit_mC, stable_max_clock_mhz) {
+    when not telemetry_valid(sample) or soft_limit_mC <= 0 or hard_limit_mC <= soft_limit_mC or stable_max_clock_mhz <= 0 {
+        yield "reject-invalid-governor-input"
+    }
+    when sample[6] > 0 {
+        yield "restore-last-known-good-profile-policy-only"
+    }
+    when sample[0] >= hard_limit_mC {
+        yield "emergency-throttle-policy-only"
+    }
+    when sample[0] >= soft_limit_mC or sample[2] > stable_max_clock_mhz {
+        yield "reduce-to-validated-frequency-policy-only"
+    }
+    when sample[3] < 1500 {
+        yield "request-low-power-state-policy-only"
+    }
+    when sample[3] >= 8000 and sample[2] < stable_max_clock_mhz {
+        yield "request-tested-frequency-step-policy-only"
+    }
+    yield "hold-validated-profile"
+}
+
+export craft frequency_request_valid(current_mhz, requested_mhz, minimum_mhz, stable_max_mhz, thermal_safe, errors_present) {
+    when minimum_mhz <= 0 or stable_max_mhz < minimum_mhz or current_mhz < minimum_mhz or current_mhz > stable_max_mhz {
+        yield false
+    }
+    when requested_mhz < minimum_mhz or requested_mhz > stable_max_mhz {
+        yield false
+    }
+    yield thermal_safe and not errors_present
+}
+
+# R9 — Security, isolation and recovery.
+export craft gpu_access_decision(context, caller_pid, caller_domain, required_capability, device_online, integrity_valid) {
+    when not gpu_context_valid(context) or context[5] == "destroyed" or context[5] == "lost" {
+        yield "deny-inactive-context"
+    }
+    when caller_pid != context[1] or caller_domain != context[2] {
+        yield "deny-owner-or-domain-mismatch"
+    }
+    when not context_has_capability(context[6], required_capability) {
+        yield "deny-missing-capability"
+    }
+    when not device_online {
+        yield "deny-device-offline"
+    }
+    when not integrity_valid {
+        yield "deny-integrity-failure"
+    }
+    yield "allow-policy-only"
+}
+
+export craft dedup_share_decision(immutable, writable, same_security_domain, hash_verified, same_owner_domain) {
+    when not immutable or writable or not hash_verified {
+        yield "deny-mutable-or-unverified-object"
+    }
+    when not same_security_domain or not same_owner_domain {
+        yield "deny-cross-domain-deduplication"
+    }
+    yield "share-read-only-object-policy-only"
+}
+
+export craft recovery_action(device_state, error_count, reset_supported, contexts_quiesced) {
+    when device_state == "removed" or device_state == "offline" {
+        yield "mark-device-lost-and-revoke-contexts-policy-only"
+    }
+    when error_count <= 0 and device_state == "online" {
+        yield "no-recovery-required"
+    }
+    when device_state != "online" and device_state != "faulted" {
+        yield "manual-recovery-required"
+    }
+    when not reset_supported or not contexts_quiesced {
+        yield "quiesce-and-request-manual-recovery"
+    }
+    yield "request-device-reset-policy-only"
+}
+
+# R10 — Dashboard snapshot validation and alert classification.
+# snapshot = [vram_total, vram_resident, host_backing, compressed_backing,
+#             temperature_mC, clock_MHz, utilization_basis_points, faults,
+#             pending_migrations, power_mW].
+export craft dashboard_snapshot_valid(snapshot) {
+    when size(snapshot) != 10 {
+        yield false
+    }
+    when snapshot[0] <= 0 or snapshot[1] < 0 or snapshot[1] > snapshot[0] {
+        yield false
+    }
+    when snapshot[2] < 0 or snapshot[3] < 0 or snapshot[4] < 0 or snapshot[4] > 125000 {
+        yield false
+    }
+    when snapshot[5] < 0 or snapshot[5] > 10000 or snapshot[6] < 0 or snapshot[6] > 10000 {
+        yield false
+    }
+    when snapshot[7] < 0 or snapshot[8] < 0 or snapshot[9] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft dashboard_alert(snapshot, soft_limit_mC, hard_limit_mC) {
+    when not dashboard_snapshot_valid(snapshot) {
+        yield "invalid-or-stale-snapshot"
+    }
+    when snapshot[7] > 0 {
+        yield "hardware-errors"
+    }
+    when snapshot[4] >= hard_limit_mC {
+        yield "critical-thermal"
+    }
+    when snapshot[4] >= soft_limit_mC or snapshot[1] * 100 >= snapshot[0] * 95 {
+        yield "warning-resource-pressure"
+    }
+    when snapshot[8] > 0 {
+        yield "migration-in-progress"
+    }
+    yield "healthy"
+}
+
+export craft dashboard_residency_basis_points(snapshot) {
+    when not dashboard_snapshot_valid(snapshot) {
+        yield -1
+    }
+    yield snapshot[1] * 10000 / snapshot[0]
+}
