@@ -550,6 +550,7 @@ private:
             "muted"));
         layout->addWidget(panelWidget);
         auto* unavailable = actionButton("Установка и обновление драйверов недоступны");
+        unavailable->setObjectName("hardware-driver-actions-unavailable");
         unavailable->setEnabled(false);
         layout->addWidget(unavailable);
         layout->addStretch(1);
@@ -790,13 +791,25 @@ public:
             || !windows_.value("setupup")->findChild<QComboBox*>("setupup-profile")) {
             return fail("The first-run experience profile selector is missing.");
         }
+        auto* setupSave = windows_.value("setupup")->findChild<QPushButton*>("setupup-save");
+        if (!setupSave || setupSave->isEnabled()) {
+            return fail("Saving a local experience profile must require explicit scope consent.");
+        }
         if (windows_.value("sestem").isNull()
             || !windows_.value("sestem")->findChild<QLabel*>("updates-status")) {
             return fail("The system update status boundary is missing.");
         }
+        auto* updateAction = windows_.value("sestem")->findChild<QPushButton*>("updates-check");
+        if (!updateAction || updateAction->isEnabled()) {
+            return fail("System updates must remain disabled until a native updater exists.");
+        }
         if (windows_.value("unify").isNull()
             || !windows_.value("unify")->findChild<QLabel*>("hardware-status")) {
             return fail("The hardware service status boundary is missing.");
+        }
+        auto* driverActions = windows_.value("unify")->findChild<QPushButton*>("hardware-driver-actions-unavailable");
+        if (!driverActions || driverActions->isEnabled()) {
+            return fail("Driver installation must remain disabled until a trusted native service exists.");
         }
         if (windows_.value("mora-boost").isNull()
             || !windows_.value("mora-boost")->findChild<QComboBox*>("gaming-profile")) {
