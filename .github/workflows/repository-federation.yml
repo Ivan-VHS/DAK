@@ -2,44 +2,111 @@ name: Repository federation
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     paths:
-      - '.gitmodules'
-      - 'projects/**'
-      - 'federation/**'
-      - 'schemas/repository-federation.v1.schema.json'
-      - 'tools/federate_repositories.py'
-      - 'tests/test_repository_federation.py'
-      - '.github/workflows/repository-federation.yml'
+      - ".gitmodules"
+      - "projects/**"
+      - "federation/**"
+      - "schemas/repository-federation.v1.schema.json"
+      - "schemas/vendor-sources.v1.schema.json"
+      - "scripts/vendor-ecosystem.sh"
+      - "tests/mora-vendored-sources.test.mjs"
+      - ".github/workflows/repository-federation.yml"
   push:
     branches: [main]
     paths:
-      - '.gitmodules'
-      - 'projects/**'
-      - 'federation/**'
-      - 'schemas/repository-federation.v1.schema.json'
-      - 'tools/federate_repositories.py'
-      - 'tests/test_repository_federation.py'
-      - '.github/workflows/repository-federation.yml'
+      - ".gitmodules"
+      - "projects/**"
+      - "federation/**"
+      - "schemas/repository-federation.v1.schema.json"
+      - "schemas/vendor-sources.v1.schema.json"
+      - "scripts/vendor-ecosystem.sh"
+      - "tests/mora-vendored-sources.test.mjs"
+      - ".github/workflows/repository-federation.yml"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
+
+concurrency:
+  group: duckos-repository-federation-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
-  pinned-sources:
-    name: Validate pinned project sources
-    runs-on: ubuntu-latest
+  vendor-sources:
+    name: Import exact upstream trees into the monorepo
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      changed: ${{ steps.import.outputs.changed }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the requested source branch without submodules
+        uses: actions/checkout@v4
         with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          fetch-depth: 0
           submodules: false
-      - uses: actions/setup-python@v5
+
+      - name: Install Git subtree tooling
+        run: sudo apt-get update && sudo apt-get install -y git-subtree jq
+
+      - name: Configure import identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git subtree --version
+
+      - name: Import the exact source snapshots
+        id: import
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          before="$(git rev-parse HEAD)"
+          bash scripts/vendor-ecosystem.sh --import
+          after="$(git rev-parse HEAD)"
+          if [[ "$before" != "$after" ]]; then
+            if [[ "$HEAD_REF" == "main" ]]; then
+              echo "::error::Refusing to push automatic source imports to protected main."
+              exit 1
+            fi
+            git check-ref-format --branch "$HEAD_REF"
+            git push origin "HEAD:refs/heads/$HEAD_REF"
+            gh workflow run repository-federation.yml --ref "$HEAD_REF"
+            gh workflow run release-iso.yml --ref "$HEAD_REF"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  validate-vendored-sources:
+    name: Validate source identity and provenance
+    needs: [vendor-sources]
+    if: needs.vendor-sources.outputs.changed != 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the complete monorepo
+        uses: actions/checkout@v4
         with:
-          python-version: '3.12'
-      - uses: actions/setup-node@v4
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          fetch-depth: 0
+          submodules: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Validate vendored source trees and provenance
+
+      - name: Install verification tooling
+        run: sudo apt-get update && sudo apt-get install -y git-subtree jq
+
+      - name: Verify source tree SHAs, file counts, byte counts and licenses
         run: bash scripts/vendor-ecosystem.sh --verify
-      - name: Test monorepo source boundaries
+
+      - name: Test vendored monorepo contract
         run: node --test tests/mora-vendored-sources.test.mjs

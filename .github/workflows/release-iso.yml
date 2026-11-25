@@ -3,18 +3,13 @@ name: DuckOS ecosystem release ISO
 on:
   pull_request:
     paths:
-      - "boot/**"
       - "kernel/**"
       - "foundation/**"
       - "mora/**"
-      - "federation/**"
-      - "projects/**"
-      - "scripts/run-mora.*"
-      - "tools/test_mora_browser.mjs"
-      - "docs/RELEASE_EDITION.md"
-      - "README.md"
+      - "boot/limine.conf"
+      - "boot/build-iso.sh"
+      - "boot/test-qemu.sh"
       - "CMakeLists.txt"
-      - ".github/workflows/release-iso.yml"
   push:
     branches: [main]
     paths:
@@ -24,20 +19,21 @@ on:
       - "mora/**"
       - "federation/**"
       - "projects/**"
+      - "scripts/vendor-ecosystem.sh"
       - "scripts/run-mora.*"
+      - "tests/mora-vendored-sources.test.mjs"
       - "tools/test_mora_browser.mjs"
       - "docs/RELEASE_EDITION.md"
       - "README.md"
       - "CMakeLists.txt"
-      - ".github/workflows/release-iso.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: duckos-ecosystem-release-${{ github.event.pull_request.head.ref || github.ref }}
-  cancel-in-progress: true
+  group: duckos-ecosystem-release-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -45,7 +41,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 100
     steps:
-      - name: Checkout exact pinned repositories
+      - name: Check out the complete vendored monorepo
         uses: actions/checkout@v4
         with:
           submodules: false
@@ -59,23 +55,26 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake ninja-build binutils curl tar xorriso \
+            build-essential cmake ninja-build binutils curl tar xorriso jq git-subtree \
             qemu-system-x86 ovmf qt6-base-dev python3 python3-tk
 
       - name: Show toolchain versions
         run: |
+          git --version
+          git subtree --version
           gcc --version
           cmake --version
           python3 --version
           node --version
+          jq --version
           xorriso -version
 
-      - name: Validate pinned repository graph
+      - name: Validate monorepo source provenance and tree identity
         run: |
-          python3 tools/federate_repositories.py validate --json
-          python3 tools/federate_repositories.py status --json
+          bash scripts/vendor-ecosystem.sh --verify
+          node --test tests/mora-vendored-sources.test.mjs
 
-      - name: Test Mora shell contracts
+      - name: Test Mora shell and ecosystem contracts
         run: npm test
 
       - name: Build native projects, run tests and package the ISO
