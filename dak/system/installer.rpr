@@ -84,7 +84,7 @@ export craft partition_valid(partition, disk_bytes) {
     when partition[0] == "" or partition[1] == "" {
         yield false
     }
-    when partition[2] % 1 != 0 or partition[3] % 1 != 0 or partition[2] < 1048576 {
+    when partition[2] % 1 != 0 or partition[3] % 4096 != 0 or partition[2] < 1048576 {
         yield false
     }
     when kind(disk_bytes) != "number" or disk_bytes % 1 != 0 or not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
