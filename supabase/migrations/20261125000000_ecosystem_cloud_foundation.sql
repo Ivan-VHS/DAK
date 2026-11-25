@@ -116,6 +116,80 @@ create index if not exists ecosystem_audit_events_org_time_idx
 create index if not exists ecosystem_audit_events_actor_time_idx
   on public.ecosystem_audit_events (actor_id, occurred_at desc);
 
+create or replace function private.append_ecosystem_audit_event()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  row_data jsonb;
+  v_organization_id uuid;
+  v_project_key text;
+  v_subject_type text;
+begin
+  if tg_op = 'DELETE' then
+    row_data := to_jsonb(old);
+  else
+    row_data := to_jsonb(new);
+  end if;
+
+  if tg_table_name = 'ecosystem_organizations' then
+    v_organization_id := (row_data ->> 'id')::uuid;
+    v_project_key := 'ecosystem';
+    v_subject_type := 'organization';
+  elsif tg_table_name = 'ecosystem_projects' then
+    v_organization_id := (row_data ->> 'organization_id')::uuid;
+    v_project_key := row_data ->> 'project_key';
+    v_subject_type := 'project';
+  elsif tg_table_name = 'ecosystem_artifacts' then
+    v_organization_id := (row_data ->> 'organization_id')::uuid;
+    v_project_key := row_data ->> 'project_key';
+    v_subject_type := 'artifact';
+  else
+    raise exception 'Unsupported ecosystem audit source: %', tg_table_name;
+  end if;
+
+  insert into public.ecosystem_audit_events (
+    organization_id,
+    actor_id,
+    project_key,
+    action,
+    subject_type,
+    subject_id,
+    metadata
+  )
+  values (
+    v_organization_id,
+    auth.uid(),
+    v_project_key,
+    lower(tg_table_name || '.' || tg_op),
+    v_subject_type,
+    row_data ->> 'id',
+    jsonb_build_object('source_table', tg_table_name, 'operation', tg_op)
+  );
+
+  return null;
+end;
+$$;
+
+revoke all on function private.append_ecosystem_audit_event() from public, anon, authenticated;
+
+drop trigger if exists ecosystem_organizations_audit on public.ecosystem_organizations;
+create trigger ecosystem_organizations_audit
+after insert or update or delete on public.ecosystem_organizations
+for each row execute function private.append_ecosystem_audit_event();
+
+drop trigger if exists ecosystem_projects_audit on public.ecosystem_projects;
+create trigger ecosystem_projects_audit
+after insert or update or delete on public.ecosystem_projects
+for each row execute function private.append_ecosystem_audit_event();
+
+drop trigger if exists ecosystem_artifacts_audit on public.ecosystem_artifacts;
+create trigger ecosystem_artifacts_audit
+after insert or update or delete on public.ecosystem_artifacts
+for each row execute function private.append_ecosystem_audit_event();
+
 alter table public.ecosystem_organizations enable row level security;
 alter table public.ecosystem_memberships enable row level security;
 alter table public.ecosystem_projects enable row level security;
@@ -136,6 +210,9 @@ grant select, insert, update, delete on public.ecosystem_projects to authenticat
 grant select, insert, update, delete on public.ecosystem_artifacts to authenticated;
 grant select, insert on public.ecosystem_sync_receipts to authenticated;
 grant select on public.ecosystem_audit_events to authenticated;\ngrant select, insert on public.ecosystem_audit_events to service_role;
+grant all on public.ecosystem_organizations, public.ecosystem_memberships,
+  public.ecosystem_projects, public.ecosystem_artifacts,
+  public.ecosystem_sync_receipts, public.ecosystem_audit_events to service_role;
 
 create policy ecosystem_organizations_select_member
 on public.ecosystem_organizations for select to authenticated
