@@ -35,6 +35,7 @@ import "dak/system/installer.rpr" as installer
 import "dak/drivers/runtime.rpr" as driver_runtime
 import "dak/packages/manager.rpr" as packages
 import "dak/system/updates.rpr" as updates
+import "dak/system/audit.rpr" as audit
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -382,3 +383,17 @@ assert(not updates["transition_valid"]("staged", "confirmed"), "update manager r
 assert(updates["boot_result_policy"]("healthy", 1, 3) == "confirm-plan-only", "update manager confirms only a healthy boot")
 assert(updates["boot_result_policy"]("failed", 3, 3) == "rollback-plan-only", "update manager rolls back after the bounded retry limit")
 assert(updates["boot_result_policy"]("pending", 1, 3) == "await-confirmation", "update manager waits for explicit boot confirmation")
+
+
+# Append-only audit event policy; persistence and digest authentication belong to storage.
+make audit_one := [1, "req-1", "installer", "install.plan", "disk0", "accepted", "consent-and-trust-checked"]
+make audit_two := [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "signature-and-rollback-checked"]
+assert(audit["record_valid"](audit_one), "audit accepts a complete bounded event")
+assert(not audit["record_valid"]([1, "", "installer", "install.plan", "disk0", "accepted", "reason"]), "audit requires a request identity")
+assert(audit["append_policy"]([], audit_one, 1024) == "append-plan-only", "audit plans the first journal record")
+assert(audit["append_policy"]([], [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason"], 1024) == "reject-sequence", "audit rejects a non-genesis sequence")
+assert(audit["chain_valid"]([audit_one, audit_two]), "audit accepts strictly consecutive journal records")
+assert(not audit["chain_valid"]([audit_one, [3, "req-3", "updates", "update.stage", "slot-b", "accepted", "reason"]]), "audit rejects journal sequence gaps")
+assert(audit["append_policy"]([audit_one], audit_two, 1024) == "append-plan-only", "audit appends only the next sequence")
+assert(audit["append_policy"]([audit_one], [3, "req-3", "updates", "update.stage", "slot-b", "accepted", "reason"], 1024) == "reject-sequence", "audit rejects a skipped sequence")
+assert(audit["append_policy"]([audit_one], [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason"], 1) == "reject-capacity", "audit journal is bounded")
