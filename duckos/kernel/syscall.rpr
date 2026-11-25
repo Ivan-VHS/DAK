@@ -1,0 +1,134 @@
+# System call ABI v1 admission policy.
+# Requests carry numeric handles and bounded user-buffer metadata only.
+# This module does not install an entry stub, switch privilege levels or dispatch
+# to a native kernel handler.
+
+import "duckos/kernel/process.rpr" as process
+
+export craft abi_version() {
+    yield 1
+}
+
+export craft max_arguments() {
+    yield 8
+}
+
+export craft max_payload_bytes() {
+    yield 65536
+}
+
+export craft descriptors_v1() {
+    yield [
+        [1, 1, "process.yield", "process.yield", 0, 0, false, true],
+        [2, 1, "process.exit", "process.exit", 1, 0, false, true],
+        [3, 1, "process.wait", "process.wait", 1, 0, true, true],
+        [16, 1, "ipc.send", "ipc.send", 2, 65536, true, true],
+        [17, 1, "ipc.receive", "ipc.receive", 1, 65536, true, true],
+        [32, 1, "memory.map", "memory.map", 3, 0, false, true],
+        [33, 1, "memory.unmap", "memory.unmap", 2, 0, false, true],
+        [48, 1, "storage.read", "storage.read", 2, 65536, true, true],
+        [64, 1, "desktop.window.open", "desktop.window.open", 2, 1024, false, true]
+    ]
+}
+
+export craft descriptor_valid(call) {
+    when size(call) != 8 {
+        yield false
+    }
+    when call[0] <= 0 or call[0] > 255 or call[1] != abi_version() or call[2] == "" or call[3] == "" {
+        yield false
+    }
+    when call[4] < 0 or call[4] > max_arguments() or call[5] < 0 or call[5] > max_payload_bytes() {
+        yield false
+    }
+    when call[6] != true and call[6] != false {
+        yield false
+    }
+    when call[7] != true and call[7] != false {
+        yield false
+    }
+    yield true
+}
+
+export craft table_valid(calls) {
+    when size(calls) == 0 or size(calls) > 256 {
+        yield false
+    }
+    each index in range(0, size(calls)) {
+        when not descriptor_valid(calls[index]) {
+            yield false
+        }
+        each other_index in range(index + 1, size(calls)) {
+            when calls[index][0] == calls[other_index][0] or calls[index][2] == calls[other_index][2] {
+                yield false
+            }
+        }
+    }
+    yield true
+}
+
+export craft find_descriptor(calls, syscall_id) {
+    when not table_valid(calls) {
+        yield nothing
+    }
+    vary selected := nothing
+    each call in calls {
+        when call[0] == syscall_id {
+            change selected := call
+        }
+    }
+    yield selected
+}
+
+export craft request_valid(request, calls, caller) {
+    # Request: [syscall_id, abi_version, pid, generation,
+    #           argument_count, payload_bytes, buffer_kind]
+    when size(request) != 7 or not process["descriptor_valid"](caller) {
+        yield ["reject", "invalid-request"]
+    }
+    when not table_valid(calls) {
+        yield ["reject", "invalid-syscall-table"]
+    }
+    when request[1] != abi_version() {
+        yield ["reject", "abi-version-mismatch"]
+    }
+    when request[2] != caller[0] or request[3] != caller[1] or caller[4] != "running" {
+        yield ["reject", "caller-handle-or-state"]
+    }
+    make call := find_descriptor(calls, request[0])
+    when call == nothing or not call[7] {
+        yield ["reject", "unknown-or-disabled-syscall"]
+    }
+    when request[4] < 0 or request[4] > call[4] or request[4] > max_arguments() {
+        yield ["reject", "argument-count"]
+    }
+    when request[5] < 0 or request[5] > call[5] or request[5] > max_payload_bytes() {
+        yield ["reject", "payload-size"]
+    }
+    when call[6] == true and request[5] > 0 and request[4] == 0 {
+        yield ["reject", "blocking-payload-contract"]
+    }
+    when request[5] == 0 and request[6] != "none" {
+        yield ["reject", "unexpected-buffer"]
+    }
+    when request[5] > 0 and request[6] != "user" {
+        yield ["reject", "kernel-pointer-or-invalid-buffer"]
+    }
+    when not contains(caller[8], call[3]) {
+        yield ["reject", "capability-denied"]
+    }
+    yield ["dispatch", call[0]]
+}
+
+export craft negotiation(client_version, minimum_version, maximum_version) {
+    when client_version <= 0 or minimum_version <= 0 or maximum_version < minimum_version {
+        yield ["reject", 0]
+    }
+    when client_version < minimum_version or client_version > maximum_version {
+        yield ["unsupported", 0]
+    }
+    when client_version != abi_version() {
+        yield ["unsupported", 0]
+    }
+    yield ["accepted", abi_version()]
+}
