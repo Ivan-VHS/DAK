@@ -10,7 +10,7 @@ export craft source_metadata_state(kind, license_declared, digest_verified) {
     when not source_kind_known(kind) { yield "reject-unknown-source-kind" }
     when not license_declared { yield "needs-license-review" }
     when not digest_verified { yield "integrity-unverified" }
-    yield "metadata-admissible-not-installable"
+    yield "metadata-recorded-not-installable"
 }
 
 export craft install_policy(package_service_available, approved) {
