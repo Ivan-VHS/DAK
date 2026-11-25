@@ -94,7 +94,8 @@ make sent := ipc["send"]([1, 2], 3, 3)
 assert(sent == ["sent", [1, 2, 3]], "queue accepts data below capacity")
 make full := ipc["send"]([1, 2], 2, 3)
 assert(full == ["backpressure", [1, 2]], "full queue must remain unchanged")
-assert(ipc["receive"]([]) == ["empty", [], nothing], "empty receive")
+make empty_ipc_messages := []
+assert(ipc["receive"](empty_ipc_messages) == ["empty", empty_ipc_messages, nothing], "empty receive")
 assert(ipc["receive"]([4, 5]) == ["received", [5], 4], "FIFO receive order")
 
 make shared_bus := bus["create"](1024, 75)
