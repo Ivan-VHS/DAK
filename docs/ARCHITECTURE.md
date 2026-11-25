@@ -10,6 +10,8 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 
 The four peer repositories remain independent Git submodules pinned at exact commits. The machine-readable map is [integration-graph.v1.json](../federation/integration-graph.v1.json), validated by [validate_ecosystem.mjs](../tools/validate_ecosystem.mjs) in repository-federation CI. The graph distinguishes working host interoperability, a Reaper policy adapter that still requires trusted native ingestion, and documented interfaces without a consumer. A submodule checkout or release payload is not evidence of kernel integration.
 
+See [x86-64 GDT/TSS/IST bootstrap v1](X86_64_GDT_TSS_IST_V1.md) for the owned bootstrap segmentation and exception-stack layout.
+
 ## Layer model
 
 | Layer | Responsibility | Current state |
