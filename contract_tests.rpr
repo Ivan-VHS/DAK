@@ -344,9 +344,9 @@ assert(app_sandbox["network_access_decision"](app_manifest, ["network.client"], 
 assert(app_sandbox["network_access_decision"](app_manifest, ["network.client"], true) == "allow-policy-only", "network policy requires consent and grant")
 assert(app_sandbox["permission_request_decision"]("camera.capture", [], false) == "consent-required", "permission request is not silently granted")
 assert(app_sandbox["permission_request_decision"]("camera.capture", [], true) == "consent-recorded-awaiting-persisted-grant", "consent still needs a persisted grant")
-make child_manifest := ["editor-preview", "1.0.0", "verified", "trusted", 16777216, 20, "vfs-root-app-41", ["fs.read"]]
+make child_manifest := ["editor-preview", "1.0.0", "verified", "trusted", 16777216, 20, "vfs-root-child-41", ["fs.read"]]
 assert(app_sandbox["child_manifest_valid"](app_manifest, child_manifest), "child receives narrower capability and resource budget")
-make overprivileged_child := ["editor-admin", "1.0.0", "verified", "trusted", 134217728, 80, "vfs-root-app-41", ["fs.read", "driver.write"]]
+make overprivileged_child := ["editor-admin", "1.0.0", "verified", "trusted", 134217728, 80, "vfs-root-child-admin", ["fs.read", "driver.write"]]
 assert(not app_sandbox["child_manifest_valid"](app_manifest, overprivileged_child), "child cannot amplify capability or resource budget")
 assert(app_sandbox["execution_boundary"]() == "policy-only-no-execution", "policy does not claim process isolation")
 

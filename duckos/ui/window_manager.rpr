@@ -24,7 +24,7 @@ export craft window_valid(window, surface) {
     when window[7] < 160 or window[7] > 16384 or window[8] < 24 or window[8] > 16384 { yield false }
     when window[3] != "panel" and window[3] != "notification" and window[3] != "desktop" and window[3] != "lock" and window[8] < 120 { yield false }
     when window[13] < 0 or window[13] > 65535 or window[11] <= 0 or window[12] <= 0 { yield false }
-    yield window[6] >= -32768 and window[6] <= 32767 and window[7] > 0 and window[8] > 0
+    yield window[6] >= -32768 and window[6] <= 32767 and window[9] >= -32768 and window[9] <= 32767 and window[7] > 0 and window[8] > 0
 }
 
 export craft geometry_valid(window, output) {
@@ -49,7 +49,8 @@ export craft transition_valid(current, next) {
 }
 
 export craft focus_allowed(window) {
-    when size(window) != 16 or not window[14] { yield false }
+    when size(window) != 16 { yield false }
+    when not window[14] { yield false }
     yield window[10] == "mapped" or window[10] == "unfocused" or window[10] == "focused"
 }
 
@@ -63,7 +64,10 @@ export craft stacking_allowed(window, layer) {
 
 export craft rectangles_overlap(left, right) {
     when size(left) != 4 or size(right) != 4 { yield false }
+    when left[0] < 0 or left[1] < 0 or right[0] < 0 or right[1] < 0 { yield false }
+    when left[0] > 32767 or left[1] > 32767 or right[0] > 32767 or right[1] > 32767 { yield false }
     when left[2] <= 0 or left[3] <= 0 or right[2] <= 0 or right[3] <= 0 { yield false }
+    when left[2] > 32767 or left[3] > 32767 or right[2] > 32767 or right[3] > 32767 { yield false }
     yield left[0] < right[0] + right[2] and right[0] < left[0] + left[2] and left[1] < right[1] + right[3] and right[1] < left[1] + left[3]
 }
 
@@ -95,7 +99,8 @@ export craft tile_cell_valid(window, output, row, column, rows, columns) {
 }
 
 export craft fullscreen_allowed(window, granted) {
-    when size(window) != 16 or window[10] != "fullscreen" or window[15] { yield false }
+    when size(window) != 16 { yield false }
+    when window[10] != "fullscreen" or window[15] { yield false }
     when window[3] != "normal" and window[3] != "utility" { yield false }
     vary allowed := false
     each capability in granted {

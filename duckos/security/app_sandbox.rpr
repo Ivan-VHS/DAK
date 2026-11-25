@@ -50,7 +50,7 @@ export craft permission_request_decision(requested_capability, granted, consent_
 
 export craft child_manifest_valid(parent, child) {
     when not manifest_valid(parent) or not manifest_valid(child) { yield false }
-    when parent[0] == child[0] or parent[6] != child[6] { yield false }
+    when parent[0] == child[0] or parent[6] == child[6] { yield false }
     when child[4] > parent[4] or child[5] > parent[5] { yield false }
     yield capabilities["child_is_subset"](parent[7], child[7])
 }

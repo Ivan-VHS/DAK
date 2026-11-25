@@ -2,7 +2,8 @@
 # This module returns decisions; it does not start processes or compose apps.
 
 export craft entry_valid(entry) {
-    when size(entry) != 12 or entry[0] == "" or entry[1] == "" or entry[2] == "" { yield false }
+    when size(entry) != 12 { yield false }
+    when entry[0] == "" or entry[1] == "" or entry[2] == "" { yield false }
     when entry[3] < 0 or entry[5] < 0 { yield false }
     when entry[9] != "user" and entry[9] != "system" { yield false }
     when entry[10] != "trusted" and entry[10] != "validated" and entry[10] != "untrusted" and entry[10] != "quarantined" { yield false }

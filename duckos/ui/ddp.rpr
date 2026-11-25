@@ -43,6 +43,7 @@ export craft configure_ack_valid(serial, expected_serial, now_ms, deadline_ms) {
 export craft damage_rect_valid(rect, surface) {
     when size(rect) != 4 or not surface_valid(surface) { yield false }
     when rect[0] < 0 or rect[1] < 0 or rect[2] <= 0 or rect[3] <= 0 { yield false }
+    when rect[0] > surface[3] or rect[1] > surface[4] or rect[2] > surface[3] or rect[3] > surface[4] { yield false }
     yield rect[0] + rect[2] <= surface[3] and rect[1] + rect[3] <= surface[4]
 }
 

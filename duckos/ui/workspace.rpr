@@ -63,21 +63,24 @@ export craft component_index(components, target_id) {
 }
 
 export craft workspace_component_valid(component, granted) {
-    when size(component) != 4 or component[0] == "" { yield false }
+    when size(component) != 4 { yield false }
+    when component[0] == "" { yield false }
     when component[1] != "tile" and component[1] != "float" and component[1] != "stack" { yield false }
     when component[3] != "trusted" { yield false }
     yield capabilities_subset(component[2], granted)
 }
 
 export craft workspace_edge_valid(edge, components) {
-    when size(edge) != 2 or edge[0] == edge[1] { yield false }
+    when size(edge) != 2 { yield false }
+    when edge[0] == edge[1] { yield false }
     make from_index := component_index(components, edge[0])
     make to_index := component_index(components, edge[1])
     yield from_index >= 0 and to_index > from_index
 }
 
 export craft workspace_request_valid(request, granted) {
-    when size(request) != 7 or request[0] == "" or request[1] == "" { yield false }
+    when size(request) != 7 { yield false }
+    when request[0] == "" or request[1] == "" { yield false }
     when request[2] != "floating" and request[2] != "tiling" and request[2] != "dynamic" { yield false }
     when request[3] != "latency" and request[3] != "modularity" and request[3] != "extensibility" { yield false }
     when size(request[4]) < 1 or size(request[4]) > 64 or request[6] < size(request[4]) or request[6] > 64 { yield false }
@@ -86,7 +89,9 @@ export craft workspace_request_valid(request, granted) {
     vary components_ok := true
     each component in request[4] {
         when not workspace_component_valid(component, granted) { change components_ok := false }
-        when component_index(request[4], component[0]) != index { change components_ok := false }
+        when size(component) == 4 {
+            when component_index(request[4], component[0]) != index { change components_ok := false }
+        }
         change index := index + 1
     }
     when not components_ok { yield false }

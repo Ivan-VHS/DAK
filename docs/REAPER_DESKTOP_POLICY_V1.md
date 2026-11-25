@@ -48,7 +48,7 @@ Profile changes require valid profile data, saved application state and ready ta
 
 App manifests bind a package identity to a verified signature state, trust label, resource limits, an opaque VFS root ID and requested capabilities. File access is checked against that root ID and requires separate fs.read or fs.write grants. Network access requires both explicit user consent and network.client.
 
-A permission request never silently mutates the grant set. Even after consent is recorded, the native permission broker must persist a scoped grant before access can be allowed. A child app context can receive only a subset of its parent's capabilities and resource limits.
+A permission request never silently mutates the grant set. Even after consent is recorded, the native permission broker must persist a scoped grant before access can be allowed. A child app context must receive a distinct opaque VFS root ID, and only a subset of its parent's capabilities and resource limits. The native VFS broker remains responsible for proving that the child's root is a valid derived scope.
 
 The execution-boundary contract always returns policy-only-no-execution. This is intentional: a Reaper allow value is not a kernel sandbox. Native enforcement still requires process address spaces, validated syscalls/handles, a privileged capability broker, filesystem enforcement and a real isolated application runtime.
 
