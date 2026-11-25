@@ -4,15 +4,15 @@
 
 DuckOS is a Reaper-first operating-system implementation. Reaper owns the source-language semantics and system policy. Native platform code is a narrow, auditable boundary for operations that require privilege or architecture-specific instructions.
 
-The first milestone is a contract kernel: real Reaper code defines and tests startup ordering, resource limits, scheduling decisions, trust policy and data-flow behavior that a later native backend must preserve.
+The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry bridge now provides the privileged firmware boundary needed for an experimental bootable stage-0 image; it translates Limine handoff data into the existing Boot Info v1 contract. It does not make the Reaper reference policies into a scheduler or kernel runtime.
 
 ## Layer model
 
 | Layer | Responsibility | Current state |
 |---|---|---|
 | Reaper language core | system policy, service logic, deterministic decisions | executable on reference runtime |
-| Boot contract | ordered startup phases and recovery transitions | implemented as Reaper contract |
-| Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | implemented as Reaper contract; not a physical allocator |
+| Boot contract | ordered startup phases and recovery transitions | Reaper reference contract; stage-0 firmware handoff also exists |
+| Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 range/map validation; not a physical allocator or page-table manager |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
 | Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
@@ -30,7 +30,7 @@ The required sequence is:
 
 `reset → firmware → memory → interrupts → scheduler → ipc → drivers → services → desktop`
 
-An out-of-order transition is rejected. A failed phase enters recovery policy instead of being silently treated as successful. This is a validation contract; it does not yet execute UEFI or initialise physical hardware.
+An out-of-order transition is rejected by the Reaper reference contract. The experimental native stage 0 now receives firmware data and validates the handoff, but does not yet run the full phase sequence, initialise an IDT, allocate pages, schedule tasks or start services.
 
 ## Memory habitats and SoA
 
@@ -94,15 +94,15 @@ This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS gua
 
 ## Native bring-up gates
 
-1. Reaper freestanding target specification and stable calling convention.
-2. Native code generation for the required Reaper subset.
-3. UEFI application and serial-console boot target.
+1. Experimental x86_64 firmware boot and Boot Info v1 handoff through the pinned Limine protocol (stage 0; not a complete OS).
+2. Reaper freestanding target specification and stable calling convention.
+3. Native code generation for the required Reaper subset and a supported freestanding ABI.
 4. Page allocator, interrupt descriptors and timer source.
 5. Context-switching scheduler and process address spaces.
 6. Capability-enforced IPC, shared-page transport and driver isolation.
 7. Device enumeration, signature verification and verified package store.
 8. Persistent semantic graph and crash-safe event journal.
 9. Graphics backend and compositor.
-10. Reproducible installer and bootable image.
+10. Installer, production image qualification and recovery.
 
 Each gate needs a conformance suite and target hardware or emulator evidence. Do not skip a gate by relabelling a reference-runtime test as a hardware test.
