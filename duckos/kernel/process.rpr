@@ -122,11 +122,13 @@ export craft table_valid(processes) {
         yield false
     }
     each index in range(0, size(processes)) {
-        when not descriptor_valid(processes[index]) {
+        make current_process := processes[index]
+        when not descriptor_valid(current_process) {
             yield false
         }
         each other_index in range(index + 1, size(processes)) {
-            when processes[index][0] == processes[other_index][0] {
+            make other_process := processes[other_index]
+            when current_process[0] == other_process[0] {
                 yield false
             }
         }
