@@ -43,6 +43,25 @@ static void test_issuer_and_subject_identity(void) {
         REAPER_SYSTEM_WINDOW_CREATE, 0U, 0U) == DUCKOS_CAPABILITY_DENIED);
 }
 
+static void test_domain_and_scope_validation(void) {
+    duckos_capability_broker broker;
+    uint64_t token = 0U;
+    init(&broker);
+    assert(duckos_capability_issue(&broker, &authority, &client,
+        REAPER_SYSTEM_CAP_DESKTOP_WINDOW, REAPER_SYSTEM_DOMAIN_DESKTOP_DISPLAY,
+        DUCKOS_CAPABILITY_SCOPE_GLOBAL, 0U, 0U, &token) ==
+        DUCKOS_CAPABILITY_INVALID_ARGUMENT);
+    assert(token == 0U);
+    assert(duckos_capability_issue(&broker, &authority, &client,
+        REAPER_SYSTEM_CAP_DESKTOP_WINDOW, REAPER_SYSTEM_DOMAIN_INVALID,
+        DUCKOS_CAPABILITY_SCOPE_GLOBAL, 0U, 0U, &token) ==
+        DUCKOS_CAPABILITY_INVALID_ARGUMENT);
+    assert(duckos_capability_issue(&broker, &authority, &client,
+        REAPER_SYSTEM_CAP_DESKTOP_WINDOW, REAPER_SYSTEM_DOMAIN_DESKTOP_WINDOW,
+        DUCKOS_CAPABILITY_SCOPE_OBJECT, 0U, 0U, &token) ==
+        DUCKOS_CAPABILITY_INVALID_ARGUMENT);
+}
+
 static void test_object_scope_and_generation(void) {
     duckos_capability_broker broker;
     uint64_t token = 0U;
@@ -122,6 +141,19 @@ static void test_rights_escalation_and_stale_tokens(void) {
     assert(duckos_capability_revoke(&broker, &authority, parent) == DUCKOS_CAPABILITY_OK);
     assert(duckos_capability_authorize(&broker, &compositor, parent,
         REAPER_SYSTEM_WINDOW_CREATE, 0U, 0U) == DUCKOS_CAPABILITY_STALE_TOKEN);
+    {
+        uint64_t replacement = 0U;
+        assert(duckos_capability_issue(&broker, &authority, &compositor,
+            REAPER_SYSTEM_CAP_DESKTOP_WINDOW,
+            REAPER_SYSTEM_DOMAIN_DESKTOP_WINDOW,
+            DUCKOS_CAPABILITY_SCOPE_GLOBAL, 0U, 0U, &replacement) ==
+            DUCKOS_CAPABILITY_OK);
+        assert(replacement != parent);
+        assert(duckos_capability_authorize(&broker, &compositor, parent,
+            REAPER_SYSTEM_WINDOW_CREATE, 0U, 0U) == DUCKOS_CAPABILITY_STALE_TOKEN);
+        assert(duckos_capability_authorize(&broker, &compositor, replacement,
+            REAPER_SYSTEM_WINDOW_CREATE, 0U, 0U) == DUCKOS_CAPABILITY_OK);
+    }
 }
 
 static void test_unknown_operation_and_capacity(void) {
@@ -146,6 +178,7 @@ static void test_unknown_operation_and_capacity(void) {
 
 int main(void) {
     test_issuer_and_subject_identity();
+    test_domain_and_scope_validation();
     test_object_scope_and_generation();
     test_admin_rights_are_separate();
     test_attenuation_and_parent_revocation();
