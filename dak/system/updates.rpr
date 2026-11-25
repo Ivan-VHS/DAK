@@ -15,7 +15,7 @@ export craft manifest_valid(manifest) {
     when kind(manifest[5]) != "number" or kind(manifest[6]) != "number" or kind(manifest[7]) != "text" or kind(manifest[8]) != "text" or kind(manifest[9]) != "text" {
         yield false
     }
-    when manifest[0] == "" or manifest[1] < 0 or manifest[2] < 0 or manifest[3] < 0 {
+    when manifest[0] == "" or manifest[1] % 1 != 0 or manifest[2] % 1 != 0 or manifest[3] % 1 != 0 or manifest[5] % 1 != 0 or manifest[6] % 1 != 0 or manifest[1] < 0 or manifest[2] < 0 or manifest[3] < 0 {
         yield false
     }
     when not targets["architecture_known"](manifest[4]) {
@@ -40,13 +40,13 @@ export craft version_newer(candidate, current) {
     when kind(candidate[0]) != "number" or kind(candidate[1]) != "number" or kind(candidate[2]) != "number" {
         yield false
     }
-    when candidate[0] < 0 or candidate[1] < 0 or candidate[2] < 0 {
+    when candidate[0] % 1 != 0 or candidate[1] % 1 != 0 or candidate[2] % 1 != 0 or candidate[0] < 0 or candidate[1] < 0 or candidate[2] < 0 {
         yield false
     }
     when kind(current[0]) != "number" or kind(current[1]) != "number" or kind(current[2]) != "number" {
         yield false
     }
-    when current[0] < 0 or current[1] < 0 or current[2] < 0 {
+    when current[0] % 1 != 0 or current[1] % 1 != 0 or current[2] % 1 != 0 or current[0] < 0 or current[1] < 0 or current[2] < 0 {
         yield false
     }
     when candidate[0] > current[0] {
@@ -65,7 +65,7 @@ export craft version_newer(candidate, current) {
 }
 
 export craft admission(manifest, target_arch, current_version, current_sequence) {
-    when kind(target_arch) != "text" or kind(current_sequence) != "number" {
+    when kind(target_arch) != "text" or kind(current_sequence) != "number" or current_sequence % 1 != 0 {
         yield "reject-manifest"
     }
     when not manifest_valid(manifest) {
@@ -152,7 +152,7 @@ export craft boot_result_policy(health, attempts, max_attempts) {
     when kind(health) != "text" or kind(attempts) != "number" or kind(max_attempts) != "number" {
         yield "reject-attempt-count"
     }
-    when attempts < 0 or max_attempts <= 0 or attempts > max_attempts {
+    when attempts % 1 != 0 or max_attempts % 1 != 0 or attempts < 0 or max_attempts <= 0 or attempts > max_attempts {
         yield "reject-attempt-count"
     }
     when health == "healthy" {
