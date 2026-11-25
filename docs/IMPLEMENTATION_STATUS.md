@@ -17,6 +17,15 @@ Updated: 2026-11-25
 
 Peer applications and host tools remain user-space programs. None is a kernel module or an executable that the Stage 1 kernel can start.
 
+## Kernel Runtime — x86-64 virtual-memory groundwork
+
+- [x] Four-level 48-bit canonical page-table manager for 4 KiB leaves: create intermediate tables, map, unmap and translate.
+- [x] User/kernel address split checks, bounded physical-address bits, W^X validation and optional per-page invalidation callback.
+- [x] Host C tests cover user and kernel mappings, translation offsets, duplicate-map rejection, unmap, invalid addresses/flags and allocation failure.
+- [ ] Connect the frame allocator and HHDM to a live kernel address space and preserve required Limine mappings.
+- [ ] Add page-fault recovery, page-table reclamation, active TLB invalidation/shootdown, large pages and per-process address-space activation.
+- [ ] No CR3 switch, user-mode entry, process isolation or scheduler is claimed by this groundwork.
+
 ## Newly specified contracts — 2026-11-25
 
 - [x] DuckOS interaction and application ergonomics standard: normative requirements for motor/visual/cognitive interaction, keyboard, focus, accessibility, windowing, errors, recovery, privacy and usability evidence. This is a specification, not proof that native desktop services meet it.
