@@ -237,7 +237,7 @@ public:
             QStringList prefix;
             const QString interpreter = pythonInterpreter(prefix);
             if (interpreter.isEmpty()) {
-                plan.explanation = "Reaper Studio требует установленный Python 3.10–3.12. Никакой интерпретатор автоматически не устанавливается.";
+                plan.explanation = "Python не найден в PATH. Upstream Reaper указывает Python 3.10–3.12; Mora не устанавливает интерпретатор и не проверяет его minor-версию.";
                 return plan;
             }
             plan.program = interpreter;
@@ -260,7 +260,7 @@ public:
             QStringList prefix;
             const QString interpreter = pythonInterpreter(prefix);
             if (interpreter.isEmpty()) {
-                plan.explanation = "Для OPlague требуется установленный Python 3.10–3.12 и Tk. DuckOS не устанавливает интерпретатор автоматически.";
+                plan.explanation = "Python или Tk не найдены. Upstream OPlague указывает Python 3.10–3.12; Mora не устанавливает зависимости и не проверяет minor-версию Python.";
                 return plan;
             }
             plan.program = interpreter;
