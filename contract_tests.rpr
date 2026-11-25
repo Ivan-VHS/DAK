@@ -378,7 +378,7 @@ make lost_display_window := ["w1", 42, "disconnected", 3000, 3000, 1280, 720, "n
 make restored_window := window_manager["restore_display"](lost_display_window, [primary_display])
 assert(restored_window[0] == "clamped" and restored_window[1][2] == "display0", "window moves to the remaining primary display")
 assert(restored_window[1][3] == 640 and restored_window[1][4] == 360, "restored window stays inside display work area")
-assert(window_manager["move_keyboard"](restored_window[1], primary_display, 16, 16)[1][3] == 656, "keyboard move uses deterministic bounded steps")
+assert(window_manager["move_keyboard"](restored_window[1], primary_display, -16, 16)[1][3] == 624, "keyboard move uses deterministic bounded steps")
 make second_window := ["w2", 43, "display0", 10, 10, 500, 400, "normal", true]
 make focused_windows := window_manager["focus_order"]([restored_window[1], second_window], "w1")
 assert(focused_windows[0] == "focused" and focused_windows[1][size(focused_windows[1]) - 1][0] == "w1", "focus order brings selected window to the front")
