@@ -49,7 +49,7 @@ export craft resource_admission(device, registered_devices) {
 
 # Resource reservation is part of admission, never an optional caller-side check.
 export craft admission(driver, device, registered_devices, target_arch, expected_abi, supported_buses, grants) {
-    when kind(supported_buses) != "list" or kind(grants) != "list" {
+    when kind(target_arch) != "text" or kind(expected_abi) != "number" or kind(supported_buses) != "list" or kind(grants) != "list" {
         yield "reject-descriptor"
     }
     when not descriptor_valid(driver) or not orchestrator["device_valid"](device) {
@@ -115,6 +115,9 @@ export craft transition_valid(current, next) {
 }
 
 export craft unload_policy(state, irqs_quiesced, dma_stopped, device_quiesced) {
+    when kind(irqs_quiesced) != "boolean" or kind(dma_stopped) != "boolean" or kind(device_quiesced) != "boolean" {
+        yield "reject-state"
+    }
     when state != "running" and state != "stopping" {
         yield "reject-state"
     }
