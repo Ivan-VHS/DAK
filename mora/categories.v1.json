@@ -1,0 +1,163 @@
+{
+  "schema": "duckos.mora.categories.v1",
+  "version": 1,
+  "category_count": 7,
+  "source_manifest": "./apps.json",
+  "default_filter": "all",
+  "policy": {
+    "unknown_category": "reject",
+    "duplicate_app_id": "reject",
+    "missing_manifest_entry": "reject",
+    "privileged_native_launch": "deny_without_all_required_capabilities_and_native_broker",
+    "browser_panel_is_not_native_process": true,
+    "never_infer_capabilities_from_category_visibility": true
+  },
+  "categories": [
+    {
+      "id": "system-core",
+      "order": 1,
+      "title_ru": "System Core",
+      "title_en": "System Core",
+      "description_ru": "Обзор системного состояния и конфигурации базового окружения.",
+      "description_en": "System state and base-environment configuration.",
+      "access": "privileged",
+      "required_capabilities": [
+        "duckos.system.core.inspect"
+      ],
+      "native_launch_policy": "required-capability-and-native-broker",
+      "panel_policy": "mora-local-panel-only",
+      "maturity": "partial",
+      "maturity_note": "Панели Mora не получают доступ к ядру; Stage 1 не имеет native process/capability broker.",
+      "application_ids": [
+        "sestem",
+        "setupup"
+      ]
+    },
+    {
+      "id": "security-contracts",
+      "order": 2,
+      "title_ru": "Security & Contracts",
+      "title_en": "Security & Contracts",
+      "description_ru": "Проверка доверия, происхождения и политик доступа.",
+      "description_en": "Trust, provenance and access-policy inspection.",
+      "access": "privileged",
+      "required_capabilities": [
+        "duckos.security.contracts.audit"
+      ],
+      "native_launch_policy": "required-capability-and-native-broker",
+      "panel_policy": "mora-local-panel-only",
+      "maturity": "partial",
+      "maturity_note": "Sentinel и Proof имеют ограниченную оболочечную реализацию; подписи и kernel MAC enforcement не подключены.",
+      "application_ids": [
+        "security",
+        "provenance",
+        "exedotexe"
+      ]
+    },
+    {
+      "id": "development-federation",
+      "order": 3,
+      "title_ru": "Development & Federation",
+      "title_en": "Development & Federation",
+      "description_ru": "Панели проектов Reaper, Pytyliki, OPlague и VentuSample.",
+      "description_en": "Workbench panels for Reaper, Pytyliki, OPlague and VentuSample.",
+      "access": "user",
+      "required_capabilities": [],
+      "native_launch_policy": "native-launcher-not-implemented",
+      "panel_policy": "documentation-and-build-guidance-only",
+      "maturity": "partial",
+      "application_ids": [
+        "reaper-workbench",
+        "pytyliki-workbench",
+        "oplague-workbench",
+        "ventusample-workbench"
+      ]
+    },
+    {
+      "id": "mora-shell",
+      "order": 4,
+      "title_ru": "Mora Desktop Shell",
+      "title_en": "Mora Desktop Shell",
+      "description_ru": "Рабочее пространство, параметры оболочки и организация данных.",
+      "description_en": "Workspace, shell preferences and information organization.",
+      "access": "user",
+      "required_capabilities": [],
+      "native_launch_policy": "native-launcher-not-implemented",
+      "panel_policy": "mora-local-panel-only",
+      "maturity": "partial",
+      "application_ids": [
+        "orriganize",
+        "abriganza",
+        "love-il",
+        "poi",
+        "poi-2",
+        "mora-ai",
+        "updates",
+        "workspace",
+        "desktop",
+        "mora-commons"
+      ]
+    },
+    {
+      "id": "media-processing",
+      "order": 5,
+      "title_ru": "Media & Processing",
+      "title_en": "Media & Processing",
+      "description_ru": "Звук, визуальные материалы и творческие рабочие процессы.",
+      "description_en": "Audio, visual assets and creative workflows.",
+      "access": "user",
+      "required_capabilities": [],
+      "native_launch_policy": "native-launcher-not-implemented",
+      "panel_policy": "mora-local-panel-only",
+      "maturity": "partial",
+      "application_ids": [
+        "cockos",
+        "kavun",
+        "olaab",
+        "concrete-thump",
+        "red-sparrow"
+      ]
+    },
+    {
+      "id": "network-communication",
+      "order": 6,
+      "title_ru": "Network & Communication",
+      "title_en": "Network & Communication",
+      "description_ru": "Коммуникационные и подключаемые интерфейсы.",
+      "description_en": "Communication and connectivity surfaces.",
+      "access": "user",
+      "required_capabilities": [],
+      "native_launch_policy": "native-launcher-not-implemented",
+      "panel_policy": "mora-local-panel-only",
+      "maturity": "partial",
+      "maturity_note": "Панели не создают сетевых соединений и не включают messenger/VPN/firewall services.",
+      "application_ids": [
+        "po",
+        "unify",
+        "seu-beu"
+      ]
+    },
+    {
+      "id": "utilities",
+      "order": 7,
+      "title_ru": "Utilities",
+      "title_en": "Utilities",
+      "description_ru": "Повседневные инструменты и вспомогательные панели.",
+      "description_en": "Everyday tools and supporting panels.",
+      "access": "user",
+      "required_capabilities": [],
+      "native_launch_policy": "native-launcher-not-implemented",
+      "panel_policy": "mora-local-panel-only",
+      "maturity": "partial",
+      "application_ids": [
+        "kabon",
+        "gloverty",
+        "illidia",
+        "po-2",
+        "gamecharager",
+        "runtime",
+        "mora-boost"
+      ]
+    }
+  ]
+}
