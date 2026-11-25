@@ -12,7 +12,7 @@ export craft target_valid(target) {
     when target[0] == "" or not targets["architecture_known"](target[1]) {
         yield false
     }
-    when target[2] <= 0 or (target[3] != 512 and target[3] != 4096) {
+    when target[2] <= 1048576 or (target[3] != 512 and target[3] != 4096) {
         yield false
     }
     when target[4] != "uefi" and target[4] != "bios" {
@@ -24,15 +24,35 @@ export craft target_valid(target) {
     yield true
 }
 
-# Trust and recovery states are supplied by trusted platform adapters.
-export craft admission(target, source_trust, recovery_state) {
+# Source: [publisher, digest, signature_state].
+# "verified" must be emitted by a trusted cryptographic provider, not by the image itself.
+export craft source_record_valid(source) {
+    when size(source) != 3 {
+        yield false
+    }
+    when source[0] == "" or source[1] == "" {
+        yield false
+    }
+    when source[2] != "verified" and source[2] != "unverified" and source[2] != "revoked" {
+        yield false
+    }
+    yield true
+}
+
+export craft admission(target, source, recovery_state) {
     when not target_valid(target) {
         yield "reject-target"
     }
     when not target[5] {
         yield "reject-consent"
     }
-    when source_trust != "verified" {
+    when not source_record_valid(source) {
+        yield "reject-source-record"
+    }
+    when source[2] == "revoked" {
+        yield "reject-revoked"
+    }
+    when source[2] != "verified" {
         yield "reject-source-trust"
     }
     when recovery_state != "ready" {
@@ -49,24 +69,32 @@ export craft partition_valid(partition, disk_bytes) {
     when partition[0] == "" or partition[1] == "" {
         yield false
     }
+    when partition[2] < 1048576 {
+        yield false
+    }
     when not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
         yield false
     }
-    when partition[1] != "efi" and partition[1] != "system" and partition[1] != "recovery" and partition[1] != "userdata" {
+    when partition[1] != "efi" and partition[1] != "bios_boot" and partition[1] != "system" and partition[1] != "recovery" and partition[1] != "userdata" {
         yield false
     }
     yield true
 }
 
-# Layout is sorted by start offset and must contain EFI, two system slots and recovery.
+# Layout is sorted by start byte and must contain system A/B and recovery.
+# UEFI requires one EFI partition; BIOS requires one BIOS boot partition.
 # User data is optional. Adjacent partitions are valid; overlap is not.
-export craft layout_valid(partitions, disk_bytes) {
-    when size(partitions) < 4 or size(partitions) > 5 or disk_bytes <= 0 {
+export craft layout_valid(partitions, disk_bytes, firmware_mode) {
+    when size(partitions) < 4 or size(partitions) > 5 or disk_bytes <= 1048576 {
+        yield false
+    }
+    when firmware_mode != "uefi" and firmware_mode != "bios" {
         yield false
     }
 
     vary previous_end := 0
     vary efi_count := 0
+    vary bios_boot_count := 0
     vary system_count := 0
     vary recovery_count := 0
     vary userdata_count := 0
@@ -83,6 +111,9 @@ export craft layout_valid(partitions, disk_bytes) {
         when partition[1] == "efi" {
             change efi_count := efi_count + 1
         }
+        when partition[1] == "bios_boot" {
+            change bios_boot_count := bios_boot_count + 1
+        }
         when partition[1] == "system" {
             change system_count := system_count + 1
         }
@@ -94,10 +125,16 @@ export craft layout_valid(partitions, disk_bytes) {
         }
     }
 
-    yield efi_count == 1 and system_count == 2 and recovery_count == 1 and userdata_count <= 1
+    when system_count != 2 or recovery_count != 1 or userdata_count > 1 {
+        yield false
+    }
+    when firmware_mode == "uefi" {
+        yield efi_count == 1 and bios_boot_count == 0
+    }
+    yield efi_count == 0 and bios_boot_count == 1
 }
 
-# Installation states describe a transaction; they do not execute it.
+# planned -> validated -> staged -> ready_to_commit -> committed.
 export craft transition_valid(current, next) {
     when current == "planned" and next == "validated" {
         yield true
@@ -126,20 +163,20 @@ export craft transition_valid(current, next) {
     yield false
 }
 
-export craft commit_policy(state, consent, source_verified, recovery_ready, boot_verified) {
+export craft commit_policy(state, consent, source, recovery_state, boot_state) {
     when state != "ready_to_commit" {
         yield "reject-state"
     }
     when not consent {
         yield "reject-consent"
     }
-    when not source_verified {
+    when not source_record_valid(source) or source[2] != "verified" {
         yield "reject-source-trust"
     }
-    when not recovery_ready {
+    when recovery_state != "ready" {
         yield "reject-recovery"
     }
-    when not boot_verified {
+    when boot_state != "healthy" {
         yield "reject-boot-unverified"
     }
     yield "commit-plan-only"
