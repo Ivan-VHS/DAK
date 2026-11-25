@@ -880,6 +880,13 @@ function openApp(appId) {
 
 function closeWindow(appWindow) {
   if (!appWindow || appWindow.dataset.closing === "true") return;
+  const reducedMotion = document.documentElement.classList.contains("reduce-motion") ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducedMotion) {
+    appWindow.remove();
+    updateActiveApp();
+    return;
+  }
   appWindow.dataset.closing = "true";
   appWindow.classList.add("is-closing");
   const finishClose = () => {
