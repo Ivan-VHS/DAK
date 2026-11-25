@@ -7,6 +7,7 @@ This repository owns the shared local Supabase schema and the canonical event, a
 ## Local verification
 
 Requirements: Docker-compatible container runtime and Supabase CLI 3.4.0.
+The local database major version is pinned to PostgreSQL 17 in `supabase/config.toml`; do not rely on the CLI default.
 
 ```sh
 supabase start
