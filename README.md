@@ -12,12 +12,13 @@
   <a href="mora/index.html">Open Mora</a> ·
   <a href="docs/RELEASE_EDITION.md">Release edition</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
+  <a href="docs/FULL_SYSTEM_IMPLEMENTATION_PLAN.md">Duck Full System plan</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
   <a href="docs/IMPLEMENTATION_ROADMAP.md">Roadmap</a> ·
   <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
 </p>
 
-> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora is a separate host-browser application; it is not started by this kernel.
+> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel installs fatal diagnostic handlers for CPU exceptions 0–31, validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. External interrupts remain disabled. Mora is a separate host-browser application; it is not started by this kernel.
 
 ## System map
 
