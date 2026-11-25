@@ -1,6 +1,6 @@
 begin;
 
-select plan(28);
+select plan(33);
 
 select has_table('public', 'organizations', 'organizations table exists');
 select has_table('public', 'organization_members', 'organization memberships table exists');
@@ -17,6 +17,9 @@ select ok((select relrowsecurity from pg_class where oid = 'public.organization_
 select ok((select relrowsecurity from pg_class where oid = 'public.devices'::regclass), 'devices enforce RLS');
 select ok((select relrowsecurity from pg_class where oid = 'public.sync_events'::regclass), 'sync events enforce RLS');
 select ok((select relrowsecurity from pg_class where oid = 'public.artifacts'::regclass), 'artifacts enforce RLS');
+select ok(not has_table_privilege('anon', 'public.organizations', 'SELECT'), 'anon cannot read tenant organizations');
+select ok(not has_table_privilege('anon', 'public.sync_events', 'INSERT'), 'anon cannot append sync events');
+select ok(not has_function_privilege('anon', 'private.is_org_member(uuid)', 'EXECUTE'), 'anon cannot execute private membership helpers');
 
 select is((select public from storage.buckets where id = 'ecosystem-artifacts'), false, 'artifact bucket is private');
 select ok(exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
@@ -73,7 +76,48 @@ select is((select count(*)::integer from public.organization_members), 1, 'Alice
 select is((select count(*)::integer from public.sync_events), 1, 'Alice sees only her organization events');
 
 select lives_ok(
-  $$insert into public.sync_events (
+  $insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
+    values ('20000000-0000-4000-8000-000000000001',
+            '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
+            '20000000-0000-4000-8000-000000000001/settings.json',
+            repeat('a', 64), 1)$,
+  'organization owner can register an explicitly selected artifact'
+);
+
+select throws_ok(
+  $insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
+    values ('20000000-0000-4000-8000-000000000001',
+            '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
+            '20000000-0000-4000-8000-000000000001//settings.json',
+            repeat('b', 64), 1)$,
+  '23514', null, 'artifact keys reject empty path segments'
+);
+
+select throws_ok(
+  $insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
+    values ('20000000-0000-4000-8000-000000000001',
+            '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
+            '20000000-0000-4000-8000-000000000001/settings/',
+            repeat('c', 64), 1)$,
+  '23514', null, 'artifact keys reject trailing path separators'
+);
+
+select throws_ok(
+  $insert into public.sync_events (
+      org_id, event_id, device_id, actor_id, source_project,
+      schema_id, schema_version, event_type, occurred_at, payload
+    ) values (
+      '20000000-0000-4000-8000-000000000001',
+      '50000000-0000-4000-8000-000000000004',
+      '30000000-0000-4000-8000-000000000001',
+      '10000000-0000-4000-8000-000000000001',
+      'duckos', repeat('a', 129), 1, 'workspace.invalid_schema', now(), '{}'::jsonb
+    )$,
+  '23514', null, 'event schema identifiers are bounded to 128 characters'
+);
+
+select lives_ok(
+  $insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
       schema_id, schema_version, event_type, occurred_at, payload
     ) values (
