@@ -6,7 +6,7 @@
 
 This component provides a deterministic CPU renderer for a mapped 32-bpp RGB display target. It validates output dimensions, pitch, mapped byte length, pointer alignment and non-overlapping channel masks before writing. It supports clipped rectangles, RGBA/BGRA app surfaces, source-over alpha blending, stable Z-order (ascending Z, then surface ID) and a hard limit of 32 surfaces per composition.
 
-Surface memory must already be owned or pinned by the caller and remain readable for the duration of composition. This module does not map pages, allocate surfaces, import client pointers or grant surface access. The native host must validate DABI64 object ownership/generation and surface capability before constructing a descriptor.
+Surface memory must already be owned or pinned by the caller and remain readable for the duration of composition. This module does not map pages, allocate surfaces, import client pointers or grant surface access. Visible surface buffers must not overlap the output target; aliasing is rejected before the first write so a clear operation cannot destroy source pixels. The caller must keep surface descriptors and buffers stable for the duration of a compose call. The native host must validate DABI64 object ownership/generation and surface capability before constructing a descriptor.
 
 ## Pixel formats
 
