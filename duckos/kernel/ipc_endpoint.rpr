@@ -54,9 +54,6 @@ export craft send(endpoint, caller_pid, grants, message) {
     when not capabilities["permits"](grants, endpoint[4]) {
         yield ["denied", "capability", endpoint]
     }
-    when size(endpoint[6]) >= endpoint[2] {
-        yield ["backpressure", endpoint]
-    }
     when message[0] == "" or message[1] <= 0 or message[1] > endpoint[3] {
         yield ["message-limit", endpoint]
     }
