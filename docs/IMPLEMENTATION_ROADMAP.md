@@ -157,7 +157,8 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 **Status: Planned; the .bav v1 bundle contract and JSON Schema are specified only.**
 
-- Reserve the .bav extension exclusively for Beelzebub AV signed declarative security bundles. The earlier Reaper buffer-allocation proposal must use the distinct .bufspec extension; update Reaper's registry in a separate reviewed change.
+- Reserve the .bav extension exclusively for Beelzebub AV signed declarative security bundles. The earlier OS(2).txt buffer-allocation proposal must use the distinct .bufspec extension; update Reaper's registry only in a separate reviewed change. Reaper's existing duckos.bav.defense-context.v1 identifier and defense-context.v1.tsv file are a metadata vocabulary, not .bav bundle files.
+- Preserve Reaper's existing Beelzebul 66-rule read-only repository scanner as a separate developer/supply-chain assurance tool. Its report must not be represented as a host endpoint scan. Sensitive-context tags from the TSV taxonomy must never affect malware verdicts or privileged response actions.
 - Implement a trust verifier using a device-owner-controlled trust root, Ed25519 signatures over RFC 8785 canonical JSON, signer revocation, expiry checks and monotonic per-publisher/channel sequence tracking.
 - Implement a read-only user-space scan worker with bounded file sizes, parse depth, archive expansion, time, memory and concurrency. Treat unsupported or incomplete inspection as unknown, never as clean.
 - Implement deterministic hash/static-rule matching and a separate, versioned interface for future heuristic engines. Do not execute inspected content or rules.
