@@ -10,7 +10,7 @@ DuckOS currently combines three distinct surfaces. They must never be conflated:
 
 1. **Mora browser shell:** application discovery, local preferences, local tools and UI workflows. Browser code cannot enforce kernel privileges or control host devices.
 2. **Reaper reference contracts:** executable policy models for boot sequencing, memory arithmetic, scheduling decisions, IPC admission, capabilities, service restart and telemetry classification. Passing these tests proves policy behavior on the Reaper reference runtime only.
-3. **Native foundation:** a host-buildable C11 boot-handoff validation library with CMake and CTest. It is not yet a freestanding kernel, bootloader, process runtime or bootable image.
+3. **Native foundation:** a host-buildable C11 boot-handoff validation library plus an experimental x86_64 freestanding stage-0 entry and reproducible Limine BIOS/UEFI ISO pipeline. The stage-0 target is not yet a process runtime, scheduler, driver stack or bootable desktop OS.
 
 | Maturity | Required evidence |
 |---|---|
@@ -30,7 +30,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 | Validation | Range overflow, overlap, framebuffer extent, map ordering/type and version/size checks | Validates metadata; does not allocate or map physical memory |
 | Reaper contracts | Boot phases, resource budgets, scheduling/IPC policies, capabilities and service restart decisions | Reference-runtime policy, not kernel enforcement |
 | Mora | Browser desktop shell, app catalogue, local preferences and local UI tools | Not a native compositor or privileged shell |
-| Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature and non-destructive deployment planning | Not an ISO/USB image, disk installer or verified boot chain |
+| Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature, non-destructive deployment planning and an experimental x86_64 stage-0 ISO pipeline | No disk installer, production image, verified boot chain or supported hardware matrix |
 
 ## Native implementation sequence
 
@@ -46,15 +46,15 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D1 — Freestanding target and firmware handoff
 
-**Status: Planned.**
+**Status: Partial — experimental x86_64 Limine stage 0.**
 
-- Select and document the first architecture/firmware target (initially x86_64 UEFI, unless a reviewed architecture decision changes it).
-- Define the freestanding compiler/linker profile, target ABI, entry symbol, stack alignment, image format and serial-console contract.
-- Implement an independently testable UEFI loader that validates firmware memory-map descriptors and constructs the versioned boot handoff.
-- Reserve memory and pass framebuffer, ACPI/SMBIOS and boot-volume references only through validated versioned structures.
-- Keep secure-boot claims separate: an unsigned image or HTTPS transport is not Secure Boot.
+- First target selected: x86_64 with BIOS and UEFI firmware through the pinned Limine v12.11.1 boot protocol.
+- A freestanding GNU x86_64 ELF profile, high-half linker layout, entry symbol, Limine stack request and COM1 diagnostic path are present.
+- The kernel receives Limine memory-map, HHDM, executable-address, framebuffer and firmware-type responses, translates the memory map into Boot Info v1 and rejects unsupported or inconsistent handoff data.
+- The Limine loader remains an attributed, pinned third-party component; this milestone does not implement an in-house UEFI application or bootloader.
+- Secure Boot signing/enrolment, verified boot policy, AP startup and other firmware services remain separate future work.
 
-**Exit evidence:** reproducible freestanding build; loader runs in a pinned UEFI emulator; serial log records handoff version and memory map; malformed handoff cases fail closed; build artifact hash and emulator configuration are retained.
+**Exit evidence:** reproducible freestanding kernel build, ISO checksum, and pinned QEMU BIOS plus OVMF UEFI runs whose serial logs contain the DuckOS stage-0 success marker. The GitHub Actions boot-image workflow is the acceptance gate; before it passes, the pipeline is implemented but not yet verified. Add malformed map, missing response and range-ownership fixtures to host CTest.
 
 ### D2 — Physical memory and virtual address spaces
 
@@ -142,16 +142,16 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D9 — Installer, image assembly and release qualification
 
-**Status: Planned; component bundles and dry-run deployment plans are delivered separately.**
+**Status: Partial — experimental x86_64 hybrid ISO build and emulator boot gate; installer and production qualification remain planned.**
 
-- Assemble a reproducible bootable image from verified components and a versioned system manifest.
-- Include a firmware-compatible bootloader and documented boot configuration.
+- Build a reproducible x86_64 BIOS/UEFI stage-0 ISO from the pinned Limine bootloader, DuckOS ELF entry and explicit boot configuration; attach a SHA-256 sidecar.
+- Boot-test the image in QEMU BIOS and OVMF UEFI in CI, retaining serial logs and the ISO artifact.
+- Add a native installer, disk writes and USB provisioning only behind explicit operator approval and destructive-operation preview.
 - Add verified boot only after signing identity, key custody, revocation and recovery policy are implemented.
-- Keep disk writes behind explicit operator approval and a destructive-operation preview.
 - Implement A/B slot update, boot-success confirmation and recovery only after filesystem and boot stages are qualified.
 - Keep cloud targets out of the release matrix until a real format conversion and target boot test exist.
 
-**Exit evidence:** reproducible ISO/USB image, image verification, emulator boot test, supported hardware boot matrix, installation rollback, signed provenance and recovery drill.
+**Exit evidence:** for the experimental stage-0 milestone, reproducible ISO, SHA-256 verification, BIOS and UEFI emulator boot, and stored QEMU serial logs. Production release additionally requires USB/installer qualification, supported hardware matrix, verified signing policy, installation rollback and recovery drill.
 
 ### D10 — BAV malware inspection and policy service
 
