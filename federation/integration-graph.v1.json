@@ -49,7 +49,7 @@
       "id": "ventusample",
       "repository": "Ivan-VHS/VentuSample",
       "path": "projects/ventusample",
-      "pinned_commit": "45aeba3b78359bb4a3ef82d61315c962408563e7",
+      "pinned_commit": "8363c33138027856ac6cac4821b471e990caeace",
       "license": "Apache-2.0",
       "license_file": "projects/ventusample/LICENSE",
       "runtime_boundary": "user-space-offline-by-default",
@@ -136,9 +136,11 @@
       "artifacts": [
         "projects/ventusample/schemas/ventusample.pack.v1.schema.json",
         "projects/ventusample/docs/REAPER_PACK_AUDIT.md",
-        "projects/reaper/docs/NEXUS_FEDERATION_PROFILE_V1.md"
+        "projects/reaper/docs/NEXUS_FEDERATION_PROFILE_V1.md",
+        "projects/ventusample/docs/NEXUS_AUDIO_PROFILE_V1.md",
+        "projects/ventusample/docs/NEXUS_SYSTEM_SERVICE_BOUNDARIES_V1.md"
       ],
-      "boundary": "The VentuSample pack-v1 producer schema and audit document exist in the pinned VentuSample source. The pinned Reaper checkout has no pack consumer or the newer NEXUS federation profile document; treat the edge as metadata-only and specified-only."
+      "boundary": "The pinned VentuSample source now includes the pack manifest schema, Reaper pack audit and NEXUS audio/system-service profiles. The pinned Reaper checkout still has no actual pack-v1 consumer; the exchange remains metadata-only and specified-only. No generated audio, DSP execution or real-time device stream is claimed inside DuckOS."
     }
   ],
   "release_pipeline": {

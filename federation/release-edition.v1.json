@@ -55,7 +55,7 @@
       "id": "ventusample",
       "repository": "Ivan-VHS/VentuSample",
       "path": "projects/ventusample",
-      "commit": "45aeba3b78359bb4a3ef82d61315c962408563e7",
+      "commit": "8363c33138027856ac6cac4821b471e990caeace",
       "license": "Apache-2.0",
       "build": "C++20 / C11 DSP / optional Qt 6 desktop",
       "scope": "offline-by-default audio and DSP"
