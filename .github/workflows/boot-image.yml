@@ -48,7 +48,7 @@ jobs:
 
       - name: Build pinned BIOS/UEFI ISO
         run: |
-          boot/build-iso.sh \
+          bash boot/build-iso.sh \
             --work-dir build/duckos-boot \
             --output build/DuckOS-Stage0-x86_64.iso
 
@@ -70,7 +70,7 @@ jobs:
 
       - name: Verify BIOS and UEFI boot in QEMU
         run: |
-          boot/test-qemu.sh \
+          bash boot/test-qemu.sh \
             --iso build/DuckOS-Stage0-x86_64.iso \
             --output-dir build/qemu \
             --ovmf-code "$OVMF_CODE_PATH" \
