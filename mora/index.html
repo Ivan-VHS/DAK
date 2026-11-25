@@ -13,6 +13,7 @@
   <script type="module" src="app.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#app-grid">Перейти к приложениям</a>
   <main class="desktop" id="desktop">
     <div class="wallpaper" aria-hidden="true">
       <svg id="mora-folds" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="presentation">
@@ -66,7 +67,7 @@
       </svg>
     </div>
 
-    <header class="statusbar">
+    <header class="statusbar" aria-label="Системная панель">
       <div class="brand"><span class="brand-mark">m</span><span>Mora</span></div>
       <div class="active-app" id="active-app">Рабочий стол</div>
       <div class="system-status" aria-label="Состояние системы">
@@ -89,7 +90,7 @@
         </div>
       </aside>
 
-      <section class="app-area" aria-label="Приложения">
+      <section class="app-area" id="applications" aria-label="Приложения">
         <div class="section-heading">
           <div><span class="eyebrow">ВАШЕ ПРОСТРАНСТВО</span><h1>Приложения</h1></div>
           <span class="tiny-counter">27 ПРИЛОЖЕНИЙ И ИНСТРУМЕНТОВ</span>
