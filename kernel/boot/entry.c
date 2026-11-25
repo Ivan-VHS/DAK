@@ -472,7 +472,7 @@ void _start(void) {
     if (!duckos_x86_interrupts_init()) {
         boot_failure("could not install CPU exception IDT");
     }
-    serial_write("exceptions=0..31 idt=loaded maskable_interrupts=disabled\\n");
+    serial_write("exceptions=0..31 idt=loaded maskable_interrupts=disabled\n");
     serial_write("\nDUCKOS_BOOT begin protocol=limine base_revision=6\n");
 
     if (!LIMINE_BASE_REVISION_SUPPORTED(base_revision)) {
