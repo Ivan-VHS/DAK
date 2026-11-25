@@ -88,7 +88,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .device-mini-list.muted i { background:#ffd400; }
 .device-mini-list.muted b { color:#a6a6a6; }
 .dock-wrap { position:absolute; z-index:5; left:0; right:0; bottom:22px; display:flex; justify-content:center; pointer-events:none; }
-.dock { display:flex; align-items:center; gap:9px; padding:9px 13px; border:1px solid rgba(255,255,255,.2); border-radius:22px; background:rgba(8,8,8,.47); box-shadow:0 16px 50px rgba(8,8,8,.24); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); pointer-events:auto; }
+.dock { display:flex; align-items:center; gap:9px; max-width:calc(100vw - 16px); overflow-x:auto; padding:9px 13px; border:1px solid var(--line); border-radius:22px; background:rgba(8,8,8,.88); box-shadow:0 16px 50px rgba(0,0,0,.38); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); pointer-events:auto; scrollbar-width:none; overscroll-behavior-x:contain; }
+.dock::-webkit-scrollbar { display:none; }
+.dock-item { flex:0 0 44px; }
 .dock-item { width:44px; height:44px; display:grid; place-items:center; position:relative; border:0; border-radius:14px; background:rgba(255,255,255,.1); cursor:pointer; transition:transform .18s ease,background .18s ease; }
 .dock-item:hover { transform:translateY(-5px); background:rgba(255,255,255,.2); }
 .dock-glyph { font-size:23px; color:var(--dock-color,#ffd400); font-weight:500; }
@@ -200,7 +202,7 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
   .device-mini-list b { font-size:6px; }
   .dock-wrap { position:fixed; bottom:12px; }
   .dock { gap:5px; padding:7px; border-radius:18px; }
-  .dock-item { width:39px; height:39px; border-radius:12px; }
+  .dock-item { width:44px; height:44px; border-radius:12px; }
   .app-window { top:5%; max-height:calc(100dvh - 100px); border-radius:17px; }
   .window-body { padding:17px; }
   .compass-layout { grid-template-columns:120px 1fr; gap:12px; }
@@ -213,7 +215,7 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
   .app-grid { gap:6px; }
   .app-tile { min-height:104px; padding:8px; }
   .dock { gap:3px; }
-  .dock-item { width:37px; height:37px; }
+  .dock-item { width:44px; height:44px; }
 }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
