@@ -318,6 +318,7 @@ make overlapping_layout := [
 ]
 assert(installer["layout_valid"](install_layout, 4000000, "uefi"), "installer accepts ordered non-overlapping A/B and recovery partitions")
 assert(not installer["layout_valid"](overlapping_layout, 4000000, "uefi"), "installer rejects overlapping partitions")
+assert(installer["admission"](install_target, verified_source, "ready", overlapping_layout) == "reject-layout", "installer admission cannot bypass invalid disk layout")
 assert(installer["transition_valid"]("planned", "validated"), "installer advances a validated plan")
 assert(not installer["transition_valid"]("planned", "committed"), "installer cannot skip staging and boot verification")
 assert(installer["commit_policy"]("ready_to_commit", true, verified_source, "ready", "healthy") == "commit-plan-only", "installer requires all commit gates")
