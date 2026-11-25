@@ -77,6 +77,17 @@ static int clip_rectangle(const duckos_framebuffer_target *target,
     return 1;
 }
 
+static int memory_ranges_overlap(const void *left, size_t left_size,
+                                  const void *right, size_t right_size)
+{
+    const uintptr_t left_start = (uintptr_t)left;
+    const uintptr_t right_start = (uintptr_t)right;
+    const uintptr_t left_end = left_start + (uintptr_t)left_size;
+    const uintptr_t right_end = right_start + (uintptr_t)right_size;
+
+    return left_start < right_end && right_start < left_end;
+}
+
 duckos_framebuffer_status duckos_framebuffer_validate_target(
     const duckos_framebuffer_target *target)
 {
@@ -254,6 +265,14 @@ duckos_framebuffer_status duckos_framebuffer_blit_surface(
         return DUCKOS_FRAMEBUFFER_OK;
     }
 
+    if (memory_ranges_overlap(
+            target->pixels,
+            (size_t)target->pitch_bytes * (size_t)target->height,
+            surface->pixels,
+            (size_t)surface->pitch_bytes * (size_t)surface->height)) {
+        return DUCKOS_FRAMEBUFFER_OVERLAPPING_BUFFERS;
+    }
+
     for (destination_y = top; destination_y < bottom; ++destination_y) {
         const uint32_t source_y = (uint32_t)(
             (int64_t)destination_y - (int64_t)surface->y);
@@ -353,6 +372,15 @@ duckos_framebuffer_status duckos_framebuffer_compose(
             return status;
         }
 
+        if (surfaces[index].visible != 0u &&
+            memory_ranges_overlap(
+                target->pixels,
+                (size_t)target->pitch_bytes * (size_t)target->height,
+                surfaces[index].pixels,
+                (size_t)surfaces[index].pitch_bytes * (size_t)surfaces[index].height)) {
+            return DUCKOS_FRAMEBUFFER_OVERLAPPING_BUFFERS;
+        }
+
         order[index] = (uint32_t)index;
         for (other = 0u; other < index; ++other) {
             if (surfaces[other].id == surfaces[index].id) {
@@ -411,6 +439,8 @@ const char *duckos_framebuffer_status_name(duckos_framebuffer_status status)
         return "too-many-surfaces";
     case DUCKOS_FRAMEBUFFER_DUPLICATE_SURFACE:
         return "duplicate-surface";
+    case DUCKOS_FRAMEBUFFER_OVERLAPPING_BUFFERS:
+        return "overlapping-buffers";
     }
 
     return "unknown";
