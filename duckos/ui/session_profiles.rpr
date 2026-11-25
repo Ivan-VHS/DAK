@@ -4,16 +4,16 @@
 
 export craft profile_catalog() {
     yield [
-        ["gnome", "GNOME", "desktop-environment", "either", "mutter", "catalog-only"],
+        ["gnome", "GNOME", "desktop-environment", "x11-or-wayland", "mutter", "catalog-only"],
         ["xfce", "Xfce", "desktop-environment", "x11", "xfwm4", "catalog-only"],
         ["cinnamon", "Cinnamon", "desktop-environment", "x11", "muffin", "catalog-only"],
         ["mate", "MATE", "desktop-environment", "x11", "marco", "catalog-only"],
-        ["lxqt", "LXQt", "desktop-environment", "either", "configurable-wm", "catalog-only"],
-        ["budgie", "Budgie", "desktop-environment", "x11", "mutter", "catalog-only"],
-        ["pantheon", "Pantheon", "desktop-environment", "x11", "gala", "catalog-only"],
-        ["deepin", "Deepin Desktop Environment", "desktop-environment", "either", "kwin", "catalog-only"],
+        ["lxqt", "LXQt", "desktop-environment", "x11-or-wayland", "configurable-wm", "catalog-only"],
+        ["budgie", "Budgie", "desktop-environment", "wayland", "labwc", "catalog-only"],
+        ["pantheon", "Pantheon", "desktop-environment", "wayland", "gala", "catalog-only"],
+        ["deepin", "Deepin Desktop Environment", "desktop-environment", "x11-or-wayland", "kwin", "catalog-only"],
         ["unity", "Unity", "desktop-environment", "x11", "compiz", "catalog-only"],
-        ["enlightenment", "Enlightenment", "desktop-environment", "either", "enlightenment", "catalog-only"],
+        ["enlightenment", "Enlightenment", "desktop-environment", "x11", "enlightenment", "catalog-only"],
         ["i3wm", "i3", "window-manager", "x11", "i3", "catalog-only"],
         ["sway", "Sway", "window-manager", "wayland", "sway", "catalog-only"],
         ["awesomewm", "AwesomeWM", "window-manager", "x11", "awesome", "catalog-only"],
@@ -49,7 +49,7 @@ export craft profile_valid(profile) {
     when profile[2] != "desktop-environment" and profile[2] != "window-manager" {
         yield false
     }
-    when profile[3] != "x11" and profile[3] != "wayland" and profile[3] != "either" {
+    when profile[3] != "x11" and profile[3] != "wayland" and profile[3] != "x11-or-wayland" {
         yield false
     }
     yield profile[5] == "catalog-only"
@@ -106,7 +106,7 @@ export craft session_plan(profile_id, installed_profiles, display_backends, avai
         yield ["defer", "profile-not-installed"]
     }
     vary backend := profile[3]
-    when backend == "either" {
+    when backend == "x11-or-wayland" {
         when contains(display_backends, "wayland") and contains(available_services, "wayland-host") {
             change backend := "wayland"
         } otherwise {
