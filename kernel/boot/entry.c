@@ -454,6 +454,115 @@ static int protect_kernel_sections(void) {
         );
 }
 
+static int verify_kernel_page_permissions(void) {
+    uint64_t physical = 0u;
+    uint64_t flags = 0u;
+    const uint64_t text_address = (uint64_t)(uintptr_t)__text_start;
+    const uint64_t rodata_address = (uint64_t)(uintptr_t)__rodata_start;
+    const uint64_t data_address = (uint64_t)(uintptr_t)__data_start;
+
+    if (duckos_page_table_translate(
+            &kernel_page_tables, text_address, &physical, &flags
+        ) != DUCKOS_PAGE_TABLE_OK ||
+        (flags & DUCKOS_PAGE_WRITABLE) != 0u) {
+        return 0;
+    }
+    if (duckos_x86_paging_nx_enabled() != 0 &&
+        (flags & DUCKOS_PAGE_NX) != 0u) {
+        return 0;
+    }
+
+    if (duckos_page_table_translate(
+            &kernel_page_tables, rodata_address, &physical, &flags
+        ) != DUCKOS_PAGE_TABLE_OK ||
+        (flags & DUCKOS_PAGE_WRITABLE) != 0u) {
+        return 0;
+    }
+    if (duckos_x86_paging_nx_enabled() != 0 &&
+        (flags & DUCKOS_PAGE_NX) == 0u) {
+        return 0;
+    }
+
+    if (duckos_page_table_translate(
+            &kernel_page_tables, data_address, &physical, &flags
+        ) != DUCKOS_PAGE_TABLE_OK ||
+        (flags & DUCKOS_PAGE_WRITABLE) == 0u) {
+        return 0;
+    }
+    if (duckos_x86_paging_nx_enabled() != 0 &&
+        (flags & DUCKOS_PAGE_NX) == 0u) {
+        return 0;
+    }
+    return 1;
+}
+
+static int verify_live_page_mapping(void) {
+    const uint64_t probe_virtual = UINT64_C(0x0000400000000000);
+    uint64_t probe_physical = 0u;
+    uint64_t translated = 0u;
+    uint64_t flags = 0u;
+
+    if (duckos_page_table_translate(
+            &kernel_page_tables, probe_virtual, &translated, NULL
+        ) != DUCKOS_PAGE_TABLE_NOT_MAPPED) {
+        return 0;
+    }
+    if (duckos_frame_allocator_allocate(
+            &early_frame_allocator, &probe_physical
+        ) != DUCKOS_FRAME_ALLOCATOR_OK) {
+        return 0;
+    }
+
+    if (duckos_page_table_map(
+            &kernel_page_tables,
+            probe_virtual,
+            probe_physical,
+            DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE |
+                (duckos_x86_paging_nx_enabled() ? DUCKOS_PAGE_NX : 0u)
+        ) != DUCKOS_PAGE_TABLE_OK) {
+        (void)duckos_frame_allocator_release(&early_frame_allocator, probe_physical);
+        return 0;
+    }
+
+    if (duckos_page_table_translate(
+            &kernel_page_tables, probe_virtual, &translated, &flags
+        ) != DUCKOS_PAGE_TABLE_OK ||
+        translated != probe_physical ||
+        (flags & DUCKOS_PAGE_WRITABLE) == 0u) {
+        (void)duckos_page_table_unmap(&kernel_page_tables, probe_virtual);
+        (void)duckos_frame_allocator_release(&early_frame_allocator, probe_physical);
+        return 0;
+    }
+
+    const uint64_t protected_flags = DUCKOS_PAGE_PRESENT |
+        (duckos_x86_paging_nx_enabled() ? DUCKOS_PAGE_NX : 0u);
+    if (duckos_page_table_protect(
+            &kernel_page_tables, probe_virtual, protected_flags
+        ) != DUCKOS_PAGE_TABLE_OK ||
+        duckos_page_table_translate(
+            &kernel_page_tables, probe_virtual, &translated, &flags
+        ) != DUCKOS_PAGE_TABLE_OK ||
+        (flags & DUCKOS_PAGE_WRITABLE) != 0u) {
+        (void)duckos_page_table_unmap(&kernel_page_tables, probe_virtual);
+        (void)duckos_frame_allocator_release(&early_frame_allocator, probe_physical);
+        return 0;
+    }
+
+    if (duckos_page_table_unmap(
+            &kernel_page_tables, probe_virtual
+        ) != DUCKOS_PAGE_TABLE_OK ||
+        duckos_page_table_translate(
+            &kernel_page_tables, probe_virtual, &translated, NULL
+        ) != DUCKOS_PAGE_TABLE_NOT_MAPPED) {
+        (void)duckos_frame_allocator_release(&early_frame_allocator, probe_physical);
+        return 0;
+    }
+
+    return duckos_frame_allocator_release(
+        &early_frame_allocator, probe_physical
+    ) == DUCKOS_FRAME_ALLOCATOR_OK;
+}
+
 static void boot_failure(const char *reason) __attribute__((noreturn));
 static void boot_failure(const char *reason) {
     serial_write("DUCKOS_BOOT_ERROR ");
@@ -570,6 +679,12 @@ void _start(void) {
     }
     if (!protect_kernel_sections()) {
         boot_failure("could not establish kernel section page permissions");
+    }
+    if (!verify_kernel_page_permissions()) {
+        boot_failure("kernel text, rodata or data page permissions are invalid");
+    }
+    if (!verify_live_page_mapping()) {
+        boot_failure("live page-table map/protect/unmap smoke test failed");
     }
 
     serial_write("paging=owned-cr3 root=");
