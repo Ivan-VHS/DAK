@@ -973,7 +973,7 @@ button, input[type="checkbox"], input[type="radio"], select {
 :root[data-density="compact"] .system-section-heading { margin-top: 20px; }
 
 @media (max-width: 760px) {
-  .statusbar .status-control { min-height: 40px; }
+  .statusbar .status-control { min-height: 44px; }
   .dock-item { width: 44px; height: 44px; min-width: 44px; }
   .app-window { width: min(640px, calc(100vw - 16px)); }
   .window-close { width: 44px; height: 44px; }
