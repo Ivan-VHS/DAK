@@ -114,8 +114,9 @@ export craft translate_region(region) {
 }
 
 export craft translate_map(regions) {
+    make empty_regions := []
     when size(regions) == 0 or size(regions) > 256 {
-        yield ["reject", "region-count", []]
+        yield ["reject", "region-count", empty_regions]
     }
     vary translated := []
     each index in range(0, size(regions)) {
