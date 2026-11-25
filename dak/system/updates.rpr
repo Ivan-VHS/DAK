@@ -65,7 +65,7 @@ export craft admission(manifest, target_arch, current_version, current_sequence)
     when manifest[4] != target_arch {
         yield "reject-architecture"
     }
-    when manifest[5] <= current_sequence {
+    when current_sequence < 0 or manifest[5] <= current_sequence {
         yield "reject-sequence-rollback"
     }
     when not version_newer([manifest[1], manifest[2], manifest[3]], current_version) {
@@ -84,8 +84,9 @@ export craft inactive_slot(active_slot) {
     yield ""
 }
 
-# Boot control must target only the inactive slot and require healthy evidence.
-export craft activation_policy(active_slot, target_slot, boot_health) {
+# Boot control may arm only a verified staged payload in the inactive slot.
+# Healthy boot confirmation is handled separately by boot_result_policy.
+export craft activation_policy(active_slot, target_slot, payload_state, boot_entry_state) {
     make expected_slot := inactive_slot(active_slot)
     when expected_slot == "" {
         yield "reject-active-slot"
@@ -93,10 +94,13 @@ export craft activation_policy(active_slot, target_slot, boot_health) {
     when target_slot != expected_slot {
         yield "reject-slot-target"
     }
-    when boot_health != "healthy" {
-        yield "reject-boot-unhealthy"
+    when payload_state != "staged" {
+        yield "reject-payload-state"
     }
-    yield "activate-plan-only"
+    when boot_entry_state != "verified" {
+        yield "reject-boot-entry"
+    }
+    yield "arm-plan-only"
 }
 
 # idle -> verified -> staged -> armed -> boot_pending -> confirmed.
