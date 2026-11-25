@@ -1,54 +1,79 @@
 {
   "schema": "mora.theme.v1",
-  "name": "DuckOS Black White Yellow",
-  "version": 2,
+  "name": "DuckOS Imperial Noir & Glass",
+  "version": 3,
   "palettes": {
     "duck": {
-      "page": "#080808",
-      "surface": "#151515",
-      "elevated": "#242424",
+      "canvas": "#050505",
+      "shell": "#070707",
+      "page": "#050505",
+      "surface": "#101010",
+      "elevated": "#181818",
       "text": "#FFFFFF",
-      "secondary": "#E5E5E5",
-      "muted": "#A6A6A6",
-      "brand": "#FFD400",
-      "brandHover": "#FFE45C",
-      "onBrand": "#080808",
-      "secondaryAccent": "#FFD400",
-      "onSecondaryAccent": "#080808",
-      "border": "#3A3A3A",
-      "selection": "#3A3100",
-      "danger": "#FFD400",
-      "onDanger": "#080808"
+      "secondary": "#D8D8D8",
+      "muted": "#A3A3A3",
+      "brand": "#FFD700",
+      "brandHover": "#FFE36E",
+      "onBrand": "#070707",
+      "secondaryAccent": "#FFD700",
+      "onSecondaryAccent": "#070707",
+      "border": "#343434",
+      "selection": "#3B3000",
+      "danger": "#FF7777",
+      "onDanger": "#070707",
+      "success": "#6EDAA3",
+      "warning": "#FFD700",
+      "error": "#FF7777",
+      "info": "#79B8FF",
+      "glass": "#141414CC",
+      "glassBorder": "#FFFFFF24"
     }
   },
+  "material": {
+    "style": "imperial-glass",
+    "surfaceOpacity": 0.78,
+    "elevatedOpacity": 0.88,
+    "backdropBlurPx": 18,
+    "backdropSaturationPercent": 140,
+    "borderOpacity": 0.14
+  },
   "shape": {
-    "windowRadius": 22,
+    "windowRadius": 20,
     "cardRadius": 16,
     "controlRadius": 10
   },
+  "gridPx": 8,
   "spacing": [
     4,
     8,
-    12,
     16,
     24,
-    32
+    32,
+    40,
+    48
   ],
   "interaction": {
     "minimumTargetPx": 44,
-    "focusRingPx": 2
+    "focusRingPx": 2,
+    "focusColor": "#FFD700"
   },
   "motion": {
-    "fastMs": 140,
+    "fastMs": 120,
     "standardMs": 180,
-    "spatialMs": 220,
-    "reduceMotionMaxMs": 80,
-    "ecoVisualsMaxMs": 80
+    "spatialMs": 240,
+    "reducedMotionMs": 0,
+    "ecoVisualsMaxMs": 80,
+    "spring": {
+      "stiffness": 360,
+      "damping": 30,
+      "mass": 1
+    }
   },
   "typography": {
-    "ui": "Segoe UI",
-    "display": "Unbounded",
-    "code": "Cascadia Mono"
+    "ui": "Inter",
+    "display": "Inter",
+    "code": "JetBrains Mono",
+    "fallback": "Segoe UI, SF Pro Display, system-ui"
   },
   "defaultPalette": "duck"
 }
