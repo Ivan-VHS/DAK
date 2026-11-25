@@ -85,6 +85,14 @@ test("the desktop remains self-contained and responsive", () => {
   assert.ok(css.includes("backdrop-filter"));
   assert.ok(css.includes("prefers-reduced-motion"));
   assert.ok(css.includes(".reduce-motion"));
+  assert.ok(css.includes("@media(prefers-reduced-transparency:reduce)"));
+  assert.ok(css.includes(".reduce-transparency"));
+  assert.ok(css.includes("@keyframes duck-window-in"));
+  assert.ok(css.includes("@keyframes duck-window-out"));
+  assert.ok(css.includes(".app-window.is-closing"));
+  assert.ok(js.includes("reducedTransparency"));
+  assert.ok(js.includes("loadThemeDocument"));
+  assert.ok(js.includes("prefersReducedMotion"));
 });
 
 
@@ -110,29 +118,40 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.equal(theme.defaultPalette, "duck");
   assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
   const palette = theme.palettes.duck;
-  assert.equal(palette.page, "#080808");
-  assert.equal(palette.surface, "#151515");
+  assert.equal(palette.canvas, "#050505");
+  assert.equal(palette.page, "#070707");
+  assert.equal(palette.surface, "#111111");
+  assert.equal(palette.elevated, "#1B1B1B");
   assert.equal(palette.text, "#FFFFFF");
-  assert.equal(palette.brand, "#FFD400");
-  assert.equal(palette.danger, "#FFD400");
+  assert.equal(palette.brand, "#FFD700");
+  assert.equal(palette.danger, "#D32F2F");
+  assert.equal(theme.version, 3);
+  assert.equal(theme.shape.windowRadius, 6);
+  assert.equal(theme.shape.cardRadius, 6);
+  assert.equal(theme.shape.controlRadius, 4);
+  assert.equal(theme.materials.maxNestedLayers, 2);
+  assert.equal(theme.materials.interactiveSurface.blurPx, 0);
+  assert.equal(theme.materials.fallback.blurPx, 0);
+  assert.ok(theme.materials.backgroundGlass.opacity >= 0.8);
+  assert.ok(theme.motion.maxNonessentialMs <= 300);
   assert.ok(contrastRatio(palette.text, palette.page) >= 7);
   assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
   assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5);
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
-  assert.equal(manifest.theme_color, "#FFD400");
-  assert.equal(manifest.background_color, "#080808");
-  assert.ok(html.includes('name="theme-color" content="#FFD400"'));
+  assert.equal(manifest.theme_color, "#FFD700");
+  assert.equal(manifest.background_color, "#070707");
+  assert.ok(html.includes('name="theme-color" content="#FFD700"'));
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
   assert.ok(html.includes('Единая палитра DuckOS'));
   assert.ok(html.includes('data-app="mora-commons"'));
   assert.ok(css.includes(':root[data-theme="duck"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
-  assert.ok(css.includes("#FFD400"));
+  assert.ok(css.includes("#FFD700"));
   assert.ok(css.includes(".commons-grid"));
   const allowedColors = new Set([
-    "#080808", "#151515", "#242424", "#3A3A3A", "#3A3100",
-    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C"
+    "#050505", "#070707", "#111111", "#1B1B1B", "#333333",
+    "#332800", "#FFFFFF", "#FFD700", "#FFE45C"
   ].map((color) => color.toLowerCase()));
   const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
@@ -142,9 +161,23 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v9-ecosystem"));
+  assert.ok(serviceWorker.includes("mora-shell-v10-industrial-glass"));
   assert.ok(serviceWorker.includes("./local-store.js"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
+});
+
+
+test("glass materials preserve readable layering and accessibility fallbacks", () => {
+  assert.equal(theme.materials.backgroundGlass.fill, "#070707");
+  assert.equal(theme.materials.interactiveSurface.blurPx, 0);
+  assert.equal(theme.materials.maxNestedLayers, 2);
+  assert.ok(theme.materials.backgroundGlass.blurPx >= theme.materials.contentGlass.blurPx);
+  assert.equal(theme.powerProfiles.saver.maxBlurPx, 0);
+  assert.equal(theme.accessibility.reducedTransparencySupported, true);
+  assert.equal(theme.accessibility.reducedMotionSupported, true);
+  assert.ok(contrastRatio(palette.text, palette.page) >= 7);
+  assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
+  assert.ok(contrastRatio(palette.onDanger, palette.danger) >= 4.5);
 });

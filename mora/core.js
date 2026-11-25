@@ -16,6 +16,7 @@ export function createDefaultPreferences() {
     version: 1,
     appearance: {
       reducedMotion: false,
+      reducedTransparency: false,
       density: "comfortable",
       theme: "duck"
     },
@@ -39,6 +40,7 @@ export function normalizePreferences(value) {
     version: 1,
     appearance: {
       reducedMotion: appearance.reducedMotion === true,
+      reducedTransparency: appearance.reducedTransparency === true,
       density: appearance.density === "compact" ? "compact" : defaults.appearance.density,
       theme: "duck"
     },

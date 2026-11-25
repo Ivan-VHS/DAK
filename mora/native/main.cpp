@@ -53,16 +53,16 @@
 
 namespace {
 
-QColor kPage("#080808");
-QColor kSurface("#151515");
-QColor kRaised("#242424");
+QColor kPage("#070707");
+QColor kSurface("#111111");
+QColor kRaised("#1B1B1B");
 QColor kText("#FFFFFF");
-QColor kSecondary("#E5E5E5");
-QColor kMuted("#A6A6A6");
-QColor kBrand("#FFD400");
+QColor kSecondary("#FFFFFF");
+QColor kMuted("#FFFFFF");
+QColor kBrand("#FFD700");
 QColor kBrandHover("#FFE45C");
-QColor kBorder("#3A3A3A");
-QColor kSelection("#3A3100");
+QColor kBorder("#333333");
+QColor kSelection("#332800");
 
 void loadThemeTokens()
 {
@@ -95,16 +95,16 @@ void loadThemeTokens()
 QString applyThemeTokens(QString style)
 {
     const QList<QPair<QString, QString>> replacements{
-        {"#080808", "@@MORA_PAGE@@"},
-        {"#151515", "@@MORA_SURFACE@@"},
-        {"#242424", "@@MORA_RAISED@@"},
+        {"#070707", "@@MORA_PAGE@@"},
+        {"#111111", "@@MORA_SURFACE@@"},
+        {"#1B1B1B", "@@MORA_RAISED@@"},
         {"#FFFFFF", "@@MORA_TEXT@@"},
-        {"#E5E5E5", "@@MORA_SECONDARY@@"},
-        {"#A6A6A6", "@@MORA_MUTED@@"},
-        {"#FFD400", "@@MORA_BRAND@@"},
+        {"#FFFFFF", "@@MORA_SECONDARY@@"},
+        {"#FFFFFF", "@@MORA_MUTED@@"},
+        {"#FFD700", "@@MORA_BRAND@@"},
         {"#FFE45C", "@@MORA_BRAND_HOVER@@"},
-        {"#3A3A3A", "@@MORA_BORDER@@"},
-        {"#3A3100", "@@MORA_SELECTION@@"}
+        {"#333333", "@@MORA_BORDER@@"},
+        {"#332800", "@@MORA_SELECTION@@"}
     };
     for (const auto& replacement : replacements) {
         style.replace(replacement.first, replacement.second);
@@ -227,8 +227,8 @@ protected:
 
         QRadialGradient glow(QPointF(width() * 0.51, height() * 0.38),
                              std::max(width(), height()) * 0.78);
-        glow.setColorAt(0.0, QColor("#242018"));
-        glow.setColorAt(0.46, QColor("#11100E"));
+        glow.setColorAt(0.0, QColor("#1B1B1B"));
+        glow.setColorAt(0.46, QColor("#111111"));
         glow.setColorAt(1.0, kPage);
         painter.fillRect(rect(), glow);
 
@@ -265,8 +265,8 @@ protected:
     {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.fillRect(rect(), QColor("#101010"));
-        painter.setPen(QPen(QColor("#303030"), 1));
+        painter.fillRect(rect(), QColor("#111111"));
+        painter.setPen(QPen(QColor("#333333"), 1));
         for (int i = 1; i < 4; ++i) {
             const int y = height() * i / 4;
             painter.drawLine(0, y, width(), y);
@@ -302,15 +302,15 @@ public:
         setMinimumSize(480, 340);
         resize(720, 470);
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
-            QMainWindow { background: #080808; color: #FFFFFF; }
+            QMainWindow { background: #070707; color: #FFFFFF; }
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
-            QFrame#panel { background: #151515; border: 1px solid #3A3A3A; border-radius: 16px; }
-            QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
-            QPushButton { color: #FFFFFF; background: #242424; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 14px; }
-            QPushButton:hover { border-color: #FFD400; background: #2B281A; }
-            QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; selection-background-color: #3A3100; }
-            QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 7px; }
+            QFrame#panel { background: #111111; border: 1px solid rgba(255,255,255,38); border-top-color: rgba(255,255,255,82); border-radius: 6px; }
+            QLabel[role="muted"] { color: rgba(255,255,255,122); }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QPushButton { color: #FFFFFF; background: #1B1B1B; border: 1px solid #333333; border-radius: 4px; padding: 9px 14px; }
+            QPushButton:hover { border-color: #FFD700; background: #1B1B1B; }
+            QPlainTextEdit, QTreeWidget { background: #111111; color: #FFFFFF; border: 1px solid #333333; border-radius: 4px; padding: 8px; selection-background-color: #332800; }
+            QHeaderView::section { background: #1B1B1B; color: #FFD700; border: 0; padding: 7px; }
         )")));
         buildContent();
     }
@@ -596,19 +596,19 @@ private:
     {
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
-            QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QLabel[role="muted"] { color: rgba(255,255,255,122); }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QLabel[role="title"] { color: #FFFFFF; font-size: 25pt; font-weight: 650; }
-            QLabel[role="subtitle"] { color: #E5E5E5; }
-            QFrame#panel { background: rgba(21,21,21,238); border: 1px solid #3A3A3A; border-radius: 16px; }
-            QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #3A3A3A; border-radius: 14px; }
-            QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; text-align: left; }
-            QPushButton:hover { border-color: #FFD400; background: #222016; }
-            QPushButton:checked { color: #080808; background: #FFD400; border-color: #FFD400; }
-            QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
-            QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
-            QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
-            QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
+            QLabel[role="subtitle"] { color: rgba(255,255,255,184); }
+            QFrame#panel { background: rgba(17,17,17,244); border: 1px solid rgba(255,255,255,38); border-top-color: rgba(255,255,255,82); border-radius: 6px; }
+            QFrame#softPanel { background: rgba(27,27,27,238); border: 1px solid rgba(255,255,255,30); border-top-color: rgba(255,255,255,64); border-radius: 6px; }
+            QPushButton { color: #FFFFFF; background: #1B1B1B; border: 1px solid #333333; border-radius: 4px; padding: 9px 12px; text-align: left; }
+            QPushButton:hover { border-color: #FFD700; background: #1B1B1B; }
+            QPushButton:checked { color: #070707; background: #FFD700; border-color: #FFD700; }
+            QPushButton:disabled { color: #FFFFFF; background: #1B1B1B; border-color: #333333; }
+            QPushButton#appTile { background: rgba(17,17,17,235); border-radius: 6px; min-height: 78px; }
+            QPushButton#appTile:hover { background: #1B1B1B; border-color: #FFD700; }
+            QLineEdit, QComboBox { color: #FFFFFF; background: #1B1B1B; border: 1px solid #333333; border-radius: 4px; padding: 9px 12px; min-height: 24px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
             QScrollArea { border: 0; background: transparent; }
         )")));

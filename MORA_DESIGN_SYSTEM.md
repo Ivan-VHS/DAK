@@ -1,70 +1,55 @@
-# Mora Design System
+# Mora Design System — Imperial Noir & Glass
 
-**Canonical source:** DuckOS / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.
+**Canonical source:** DuckOS / Mora · **Theme schema:** mora.theme.v1 · **Version:** 3  
+**Normative contract:** [DuckOS Industrial Glass & Digital Physics](docs/DUCKOS_INDUSTRIAL_GLASS_DIGITAL_PHYSICS.md)
 
-Mora is the shared desktop identity for the Ivan-VHS application family. The shell owns wallpaper, workspace navigation, application catalogue, status area and app presentation. Each native tool keeps its specialist layout and product indicators while sharing semantic surfaces, spacing, typography, focus, motion and a restrained material language.
+Mora is the shared desktop identity for DuckOS and the Ivan-VHS application family. Its visual language is **Imperial Noir & Glass**: architectural black surfaces, white information, semantic duck-gold light and industrial acrylic.
 
-## Visual direction
+## Identity and semantic palette
 
-Mora uses one fixed DuckOS palette: black structural surfaces, white content and duck yellow for selection, focus and primary action. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
-
-The target composition is approximately 65% black, 25% white/graphite and 10% yellow. These are visual balance targets, not a requirement to recolor imported media or user content. Application identities share the same yellow accent; application meaning comes from names, glyphs and labels rather than a rainbow of per-app colors.
-
-The standard workspace remains visually stable at the centre. Secondary content and controls are arranged symmetrically around it; decorative treatment never obscures task content.
-
-## Semantic palette
-
-| Token | Value | Role |
+| Role | Canonical value | Use |
 |---|---|---|
-| Page | `#080808` | Desktop background |
-| Surface | `#151515` | Primary panel |
-| Elevated | `#242424` | Secondary panel |
-| Text | `#FFFFFF` | Main copy |
-| Secondary | `#E5E5E5` | Supporting copy |
-| Muted | `#A6A6A6` | Quiet metadata |
-| Brand | `#FFD400` | Primary action and selection |
-| Brand hover / focus | `#FFE45C` | Hover and keyboard focus |
-| Brand text | `#080808` | Text on yellow |
-| Secondary accent | `#FFD400` | Shared application accent |
-| Border | `#3A3A3A` | Structural edge |
-| Selection | `#3A3100` | Selected surface |
-| Alert | `#FFD400` | Alert marker, accompanied by text and an icon |
+| Canvas | #050505 | Lowest desktop plane |
+| Shell / page | #070707 | Structural desktop surfaces |
+| Surface | #111111 | Matte and glass panel base |
+| Elevated | #1B1B1B | Solid interactive controls |
+| Primary text | #FFFFFF / 100% | Main information |
+| Secondary text | #FFFFFF / 72% | Supporting copy |
+| Tertiary text | #FFFFFF / 42% | Quiet metadata only |
+| Accent | #FFD700 | Active state, action, light source |
+| Accent hover | #FFE45C | Hover and keyboard focus |
+| Border | #333333 or white at 14–24% | Structural edge |
+| Selection | #332800 | Restrained warm selection surface |
+| Danger | #D32F2F | Critical meaning only, always labelled |
 
-Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone: alert, warning and critical states retain explicit labels, icons and text.
+Yellow is a semantic light source, not a background paint bucket. It belongs on focus, selected indicators, primary actions and restrained reflections. Icons on glass are white or yellow except where a critical status must use its semantic status color.
 
-`mora/theme.json` is the canonical, versioned token source. It contains exactly one palette, `duck`. Saved legacy theme preferences are normalized to this profile; the shell has no theme-cycling control.
+## Material architecture
 
-## Composition and geometry
+mora/theme.json is the canonical token source. Each material defines fill, opacity, blur, grain, specular response and border independently.
 
-- Build a central radial anchor using a stable circular field and concentric edge detail.
-- Repeat vertical folds with a consistent interval; align columns, dividers and background texture to that rhythm.
-- Balance secondary controls around the core, leaving the working surface open and legible.
-- Keep dark surfaces distinguishable through a warm rim, tonal gradient or controlled highlight.
-- Use material cues selectively: draped fabric, natural wood, brushed metal, muted glass and paper.
-- Foreground controls stay crisp; background structure may soften with distance.
-- Keep top controls compact and grouped. Put progress, discrete ticks and critical markers at the lower boundary instead of floating over work content.
+- **Background glass:** dark base, at least 80% opacity, higher blur and quiet edge light.
+- **Content glass:** medium blur and opacity; cards/widgets remain readable.
+- **Interactive surface:** dense, high-opacity, zero-backdrop-blur material.
+- **Modal glass:** highest isolation with a dark base and controlled specular edge.
+- **Fallback:** solid #070707 acrylic, no blur/grain. Reduced Transparency, Saver and unsupported renderers use this path.
 
-## Motion
+Nested backdrop-glass depth is capped at two. Text contrast is checked on the composited surface. Corner radii are architectural: windows/cards 6 px, controls 4 px.
 
-Use predictable low-amplitude transitions with `ease-in-out`: 80–140 ms for focus and direct feedback, 160–240 ms for panel changes and 260–380 ms for context changes. Avoid random movement, strobing, flashing gradients and perpetual ambient motion.
+## Digital Physics
 
-A stable centre may frame peripheral markers. Progress uses a linear track and discrete ticks with an explicit position; state must also be represented semantically.
+Mora uses shared spring/snappy/strict curves. State endpoints are deterministic; transitions are interruptible and driven by committed application state. Direct feedback is about 120 ms, panel motion 180–220 ms and emphasis at most 280 ms. Nonessential motion never exceeds 300 ms.
 
-OS reduced-motion preferences override decorative movement. Disable nonessential transitions and replace smooth scrolling with immediate navigation when reduced motion is requested. The Eco profile suppresses expensive visual effects.
+Reduced Motion removes spatial/ambient movement and commits the final pose immediately. Reduced Transparency removes backdrop filtering and grain. Saver/Eco uses solid surfaces. Essential state feedback remains immediate.
 
-## Geometry, scale and interaction
+## Native and reference surfaces
 
-- Spacing follows 4, 8, 12, 16, 24 and 32 px.
-- Window corners: 18–24 px; cards: 14–18 px; controls: 9–12 px.
-- Interactive targets are at least 44 × 44 px where the platform allows.
-- Preserve visible keyboard focus, labels, tab order, Escape handling, native DPI and text scaling.
-- Keep the centre stable as layouts reflow; at narrow widths, collapse columns instead of shrinking text or hit areas.
+- Qt 6 host-native Mora uses dense, high-opacity acrylic-style surfaces, sharp borders and shared colors. QSS alone does not provide true backdrop blur; this adapter uses the deterministic solid/acrylic fallback until a platform compositor adapter exists.
+- The browser reference preview uses local CSS backdrop-filter where supported and opaque fallbacks otherwise. It reads theme.json same-origin and keeps static CSS defaults for offline/file previews.
+- These are host surfaces, not proof of a kernel-owned compositor. Kernel display/input services, font shaping, accessibility bridge, DABI64/IPC and capability enforcement remain separate implementation gates.
 
-## Integration contract
+## Quality gates
 
-`mora/theme.json` is the canonical token source. Native adapters may expose toolkit-specific names but must preserve semantic roles and contrast. The shell may read local theme assets; it must not fetch CSS or theme data from a remote server at runtime.
+Ordinary copy targets WCAG AA contrast (4.5:1); primary copy aims for 7:1. Preserve 44 px targets where platform geometry allows, visible keyboard focus, labels, DPI/text scaling and a nonanimated Reduced Motion state. Test the most complex wallpaper, keyboard-only navigation and Reduced Transparency.
 
-The primary Mora desktop surface is a host-native Qt 6 Widgets application. Its application windows are real top-level host windows managed by the host operating system; the shell does not embed Qt WebEngine, WebView, HTML or browser-rendered application windows. The native shell reads the shared local catalogue and never executes manifest-provided command strings.
-
-The browser implementation remains available as a reference/compatibility preview, not as the native desktop. The Qt host adapter is still distinct from the DuckOS kernel desktop: Stage 1 does not launch user processes, and a kernel-owned compositor, input service, font stack, accessibility bridge and capability broker remain separate D8 work.
-
+60 FPS is a measured floor target, not a promise or ceiling. Record frame pacing, GPU time, memory, blur cache churn, thermal and battery behavior on actual hardware. Do not claim automatic thermal/battery adaptation until a trusted native service supplies those signals.
