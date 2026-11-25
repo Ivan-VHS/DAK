@@ -310,6 +310,12 @@ with check (
       and a.organization_id::text = (storage.foldername(name))[1]
       and a.project_key = (storage.foldername(name))[2]
       and a.owner_id = (select auth.uid())
+      and exists (
+        select 1 from public.ecosystem_memberships m
+        where m.organization_id = a.organization_id
+          and m.user_id = (select auth.uid())
+          and m.role in ('owner', 'admin', 'editor', 'contributor')
+      )
   )
 );
 

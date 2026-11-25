@@ -35,7 +35,7 @@ select extensions.ok(
   'storage reads follow artifact visibility metadata'
 );
 select extensions.ok(
-  (select with_check like '%ecosystem_artifacts%' and with_check like '%owner_id%'
+  (select with_check like '%ecosystem_artifacts%' and with_check like '%owner_id%' and with_check like '%ecosystem_memberships%' and with_check like '%contributor%'
    from pg_policies where schemaname = 'storage' and tablename = 'objects'
      and policyname = 'ecosystem_storage_insert_owned_artifact'),
   'storage uploads require a pre-existing artifact owned by the caller'
