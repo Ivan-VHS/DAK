@@ -4,6 +4,10 @@
 #include <QColor>
 #include <QComboBox>
 #include <QDateTime>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QProcess>
+#include <QStandardPaths>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
@@ -186,6 +190,233 @@ QString maturityText(const QString& maturity)
     if (maturity.contains("specified")) return "Спецификация";
     return "Локальная панель";
 }
+
+
+struct EcosystemLaunchPlan {
+    bool ready = false;
+    QString displayName;
+    QString program;
+    QStringList arguments;
+    QString workingDirectory;
+    QString explanation;
+};
+
+class EcosystemWorkbenchLauncher final {
+public:
+    static bool supports(const QString& id)
+    {
+        return id == "reaper-workbench"
+            || id == "pytyliki-workbench"
+            || id == "oplague-workbench"
+            || id == "ventusample-workbench";
+    }
+
+    static EcosystemLaunchPlan resolve(const QString& id)
+    {
+        EcosystemLaunchPlan plan;
+        if (!supports(id)) {
+            plan.explanation = "Этот элемент не является разрешённой рабочей станцией экосистемы.";
+            return plan;
+        }
+
+        const QString root = repositoryRoot();
+        if (root.isEmpty()) {
+            plan.explanation = "Корень DuckOS не найден. Откройте Mora из полного checkout DuckOS или из его распакованного релизного каталога.";
+            return plan;
+        }
+
+        if (id == "reaper-workbench") {
+            plan.displayName = "Reaper Studio";
+            const QString project = trustedDirectory(root, "projects/reaper");
+            if (project.isEmpty()
+                || trustedFile(root, "projects/reaper/pyproject.toml", false).isEmpty()
+                || trustedFile(root, "projects/reaper/reaper/__main__.py", false).isEmpty()) {
+                plan.explanation = "Исходник Reaper не найден в закреплённом каталоге projects/reaper.";
+                return plan;
+            }
+            QStringList prefix;
+            const QString interpreter = pythonInterpreter(prefix);
+            if (interpreter.isEmpty()) {
+                plan.explanation = "Reaper Studio требует установленный Python 3.10–3.12. Никакой интерпретатор автоматически не устанавливается.";
+                return plan;
+            }
+            plan.program = interpreter;
+            plan.arguments = prefix;
+            plan.arguments << "-m" << "reaper.desktop";
+            plan.workingDirectory = project;
+            plan.ready = true;
+            plan.explanation = "Reaper Studio найден. Запуск будет выполнен в отдельном пользовательском процессе хостовой ОС.";
+            return plan;
+        }
+
+        if (id == "oplague-workbench") {
+            plan.displayName = "OPlague";
+            const QString project = trustedDirectory(root, "projects/oplague");
+            const QString entry = trustedFile(root, "projects/oplague/oplague_app.py", false);
+            if (project.isEmpty() || entry.isEmpty()) {
+                plan.explanation = "Исходник OPlague не найден в закреплённом каталоге projects/oplague.";
+                return plan;
+            }
+            QStringList prefix;
+            const QString interpreter = pythonInterpreter(prefix);
+            if (interpreter.isEmpty()) {
+                plan.explanation = "Для OPlague требуется установленный Python 3.10–3.12 и Tk. DuckOS не устанавливает интерпретатор автоматически.";
+                return plan;
+            }
+            plan.program = interpreter;
+            plan.arguments = prefix;
+            plan.arguments << entry;
+            plan.workingDirectory = project;
+            plan.ready = true;
+            plan.explanation = "OPlague найден. Его операции остаются пользовательскими и read-only по отношению к устройствам и драйверам.";
+            return plan;
+        }
+
+        if (id == "pytyliki-workbench") {
+            plan.displayName = "Pytyliki";
+#if defined(Q_OS_WIN)
+            const QStringList candidates{
+                "release/bin/pytyliki-gui.exe",
+                "build/release/build/pytyliki/Release/pytyliki-gui.exe",
+                "build/release/build/pytyliki/pytyliki-gui.exe",
+                "projects/pytyliki/build/Release/pytyliki-gui.exe",
+                "projects/pytyliki/build/Debug/pytyliki-gui.exe",
+                "projects/pytyliki/build/pytyliki-gui.exe"
+            };
+            for (const QString& candidate : candidates) {
+                const QString executable = trustedFile(root, candidate, true);
+                if (executable.isEmpty()) continue;
+                plan.program = executable;
+                plan.workingDirectory = QFileInfo(executable).absolutePath();
+                plan.ready = true;
+                plan.explanation = "Нативная Win32-версия Pytyliki найдена. Сборка и запуск выполняются только по явному действию пользователя.";
+                return plan;
+            }
+            plan.explanation = "Исходник Pytyliki подключён, но pytyliki-gui.exe не найден. Нужна отдельная сборка Win32 GUI; CLI не выдаётся за графическое приложение.";
+#else
+            plan.explanation = "В текущем upstream Pytyliki графическая цель pytyliki-gui собирается только для Windows. C11 CLI доступен отдельно и не подменяет рабочее окно.";
+#endif
+            return plan;
+        }
+
+        if (id == "ventusample-workbench") {
+            plan.displayName = "VentuSample";
+            const QStringList candidates{
+                "release/bin/VentuSample",
+                "release/bin/VentuSample.exe",
+                "build/release/payload/duckos/release/bin/VentuSample",
+                "build/release/payload/duckos/release/bin/VentuSample.exe",
+                "build/release/build/ventusample/VentuSample",
+                "build/release/build/ventusample/VentuSample.exe",
+                "projects/ventusample/build/VentuSample",
+                "projects/ventusample/build/VentuSample.exe",
+                "projects/ventusample/build/Release/VentuSample.exe",
+                "projects/ventusample/build/Debug/VentuSample.exe"
+            };
+            for (const QString& candidate : candidates) {
+                const QString executable = trustedFile(root, candidate, true);
+                if (executable.isEmpty()) continue;
+                plan.program = executable;
+                plan.workingDirectory = QFileInfo(executable).absolutePath();
+                plan.ready = true;
+                plan.explanation = "Нативная сборка VentuSample найдена. Обработка остаётся offline-first; доступ к аудиоустройствам этой кнопкой не предоставляется.";
+                return plan;
+            }
+            plan.explanation = "Исходник VentuSample подключён, но готовый Qt 6 executable не найден. Mora не запускает сборку автоматически.";
+            return plan;
+        }
+
+        return plan;
+    }
+
+    static bool start(const EcosystemLaunchPlan& plan, qint64* processId, QString* error)
+    {
+        if (!plan.ready || plan.program.isEmpty()) {
+            if (error) *error = plan.explanation;
+            return false;
+        }
+        if (!QFileInfo(plan.program).isExecutable()) {
+            if (error) *error = "Исполняемый файл больше недоступен или не имеет права на запуск. Обновите статус рабочей станции.";
+            return false;
+        }
+        if (!QProcess::startDetached(plan.program, plan.arguments, plan.workingDirectory, processId)) {
+            if (error) *error = "Хостовая ОС не смогла создать отдельный процесс приложения.";
+            return false;
+        }
+        return true;
+    }
+
+private:
+    static QString repositoryRoot()
+    {
+        const QStringList seeds{
+            QCoreApplication::applicationDirPath(),
+            QDir::currentPath()
+        };
+        for (const QString& seed : seeds) {
+            QDir directory(seed);
+            if (!directory.exists()) continue;
+            for (int depth = 0; depth < 10; ++depth) {
+                const QString manifest = directory.filePath("federation/repositories.v1.json");
+                const QString modules = directory.filePath(".gitmodules");
+                if (QFileInfo(manifest).isFile() && QFileInfo(modules).isFile()) {
+                    return directory.canonicalPath();
+                }
+                if (!directory.cdUp()) break;
+            }
+        }
+        return {};
+    }
+
+    static bool isBelowRoot(const QString& root, const QString& candidate)
+    {
+        const QString canonicalRoot = QDir::cleanPath(QFileInfo(root).canonicalFilePath());
+        const QString canonicalCandidate = QDir::cleanPath(QFileInfo(candidate).canonicalFilePath());
+        if (canonicalRoot.isEmpty() || canonicalCandidate.isEmpty()) return false;
+
+        QString prefix = canonicalRoot;
+        if (!prefix.endsWith(QDir::separator())) prefix += QDir::separator();
+#if defined(Q_OS_WIN)
+        return canonicalCandidate.startsWith(prefix, Qt::CaseInsensitive);
+#else
+        return canonicalCandidate.startsWith(prefix, Qt::CaseSensitive);
+#endif
+    }
+
+    static QString trustedDirectory(const QString& root, const QString& relative)
+    {
+        const QFileInfo info(QDir(root).filePath(relative));
+        if (!info.isDir() || info.isSymLink()) return {};
+        const QString canonical = info.canonicalFilePath();
+        return isBelowRoot(root, canonical) ? canonical : QString{};
+    }
+
+    static QString trustedFile(const QString& root, const QString& relative, bool executable)
+    {
+        const QFileInfo info(QDir(root).filePath(relative));
+        if (!info.isFile() || info.isSymLink()) return {};
+        const QString canonical = info.canonicalFilePath();
+        if (!isBelowRoot(root, canonical)) return {};
+        if (executable && !QFileInfo(canonical).isExecutable()) return {};
+        return canonical;
+    }
+
+    static QString pythonInterpreter(QStringList& prefix)
+    {
+        QString interpreter = QStandardPaths::findExecutable("python3");
+        if (!interpreter.isEmpty()) return interpreter;
+        interpreter = QStandardPaths::findExecutable("python");
+        if (!interpreter.isEmpty()) return interpreter;
+#if defined(Q_OS_WIN)
+        interpreter = QStandardPaths::findExecutable("py");
+        if (!interpreter.isEmpty()) {
+            prefix << "-3";
+            return interpreter;
+        }
+#endif
+        return {};
+    }
+};
 
 QLabel* label(const QString& text, const QString& role = "body")
 {
@@ -454,8 +685,89 @@ private:
         layout->addStretch(1);
     }
 
+    void buildWorkbenchPanel(QVBoxLayout* layout)
+    {
+        QString description;
+        if (app_.id == "reaper-workbench") {
+            description = "Язык, компилятор и Reaper Studio. Инструмент запускается в пользовательском пространстве и не получает привилегии ядра, драйверов или администратора.";
+        } else if (app_.id == "pytyliki-workbench") {
+            description = "Системная диагностика и профиль CPU. Аппаратная информация используется только для чтения; изменение частот, напряжения и прошивки не выполняется.";
+        } else if (app_.id == "oplague-workbench") {
+            description = "Проверка устройств, пакетов и драйверов. Анализ read-only: эта интеграция не устанавливает, не включает и не обновляет драйверы.";
+        } else {
+            description = "Генерация семплов и offline DSP. Эта кнопка не включает real-time audio, аудиодрайверы или доступ к аппаратным устройствам.";
+        }
+
+        auto* summary = panel();
+        auto* summaryLayout = new QVBoxLayout(summary);
+        summaryLayout->setContentsMargins(18, 16, 18, 16);
+        summaryLayout->setSpacing(9);
+        summaryLayout->addWidget(label("РАБОЧАЯ СТАНЦИЯ ЭКОСИСТЕМЫ", "eyebrow"));
+        summaryLayout->addWidget(label(description));
+        summaryLayout->addWidget(label(
+            "Запускается отдельное приложение хостовой ОС из доверенного каталога DuckOS. "
+            "Это не запуск процесса внутри ядра DuckOS и не выдача системных разрешений.",
+            "muted"));
+        layout->addWidget(summary);
+
+        auto* status = label({}, "muted");
+        status->setWordWrap(true);
+        layout->addWidget(status);
+
+        auto* controls = new QHBoxLayout;
+        auto* launch = actionButton("Запустить приложение");
+        auto* refresh = actionButton("Проверить доступность");
+        controls->addWidget(launch);
+        controls->addWidget(refresh);
+        controls->addStretch(1);
+        layout->addLayout(controls);
+
+        const QString id = app_.id;
+        auto refreshStatus = [id, status, launch]() {
+            const EcosystemLaunchPlan plan = EcosystemWorkbenchLauncher::resolve(id);
+            status->setText(plan.explanation);
+            launch->setEnabled(plan.ready);
+            launch->setToolTip(plan.ready ? plan.program : plan.explanation);
+        };
+        refreshStatus();
+        QObject::connect(refresh, &QPushButton::clicked, this, refreshStatus);
+        QObject::connect(launch, &QPushButton::clicked, this, [this, id, status, refreshStatus]() {
+            const EcosystemLaunchPlan plan = EcosystemWorkbenchLauncher::resolve(id);
+            if (!plan.ready) {
+                status->setText(plan.explanation);
+                refreshStatus();
+                return;
+            }
+            const auto answer = QMessageBox::question(
+                this,
+                "Запуск " + plan.displayName,
+                "Открыть " + plan.displayName + " отдельным процессом хостовой ОС?\n\n"
+                "Программа запускается из проверенного каталога DuckOS. "
+                "Она не становится процессом ядра DuckOS и не получает дополнительных привилегий.",
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+            if (answer != QMessageBox::Yes) return;
+
+            qint64 processId = 0;
+            QString error;
+            if (EcosystemWorkbenchLauncher::start(plan, &processId, &error)) {
+                status->setText(processId > 0
+                    ? QString("Приложение запущено в хостовой ОС. PID: %1.").arg(processId)
+                    : "Приложение передано хостовой ОС для запуска.");
+            } else {
+                status->setText(error);
+                refreshStatus();
+            }
+        });
+        layout->addStretch(1);
+    }
+
     void buildCataloguePanel(QVBoxLayout* layout)
     {
+        if (EcosystemWorkbenchLauncher::supports(app_.id)) {
+            buildWorkbenchPanel(layout);
+            return;
+        }
         auto* info = panel();
         auto* infoLayout = new QVBoxLayout(info);
         infoLayout->setContentsMargins(18, 16, 18, 16);
@@ -509,6 +821,18 @@ public:
         };
         if (!pageStack_ || !homePage_ || !appsPage_ || !workspacePage_) {
             return fail("A required desktop page was not created.");
+        }
+        const QStringList workbenches{
+            "reaper-workbench", "pytyliki-workbench",
+            "oplague-workbench", "ventusample-workbench"
+        };
+        for (const QString& id : workbenches) {
+            if (!EcosystemWorkbenchLauncher::supports(id)) {
+                return fail("An ecosystem workbench is missing from the native launch allowlist.");
+            }
+        }
+        if (EcosystemWorkbenchLauncher::supports("untrusted-command")) {
+            return fail("The ecosystem launch allowlist accepts an unknown identifier.");
         }
         auto* appsButton = findChild<QPushButton*>("nav-apps");
         if (!appsButton) return fail("The native app navigation control is missing.");
