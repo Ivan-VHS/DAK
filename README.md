@@ -41,8 +41,8 @@ flowchart TB
     S --> P["Project workbench panels"]
   end
 
-  BOOT -. "native runtime integration pending" .- POLICY
-  HOST -. "not launched by Stage 1" .- BOOT
+  BOOT -.->|native runtime integration pending| POLICY
+  HOST -.->|not launched by Stage 1| BOOT
 ```
 
 ## What is included
