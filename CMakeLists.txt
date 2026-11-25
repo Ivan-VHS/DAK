@@ -109,6 +109,7 @@ if(DUCKOS_BUILD_NATIVE_MORA)
         target_link_libraries(duckos_mora_native PRIVATE Qt6::Widgets)
         target_compile_definitions(duckos_mora_native PRIVATE
             DUCKOS_MORA_CATALOG_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/mora/apps.json\"
+            DUCKOS_MORA_THEME_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/mora/theme.json\"
         )
         if(MSVC)
             target_compile_options(duckos_mora_native PRIVATE /W4 /permissive-)
