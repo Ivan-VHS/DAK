@@ -8,6 +8,7 @@ on:
       - "foundation/**"
       - "tests/test_boot_info.c"
       - "tests/test_frame_allocator.c"
+      - "tests/test_frame_allocator.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
   push:
@@ -17,6 +18,7 @@ on:
       - "kernel/**"
       - "foundation/**"
       - "tests/test_boot_info.c"
+      - "tests/test_frame_allocator.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
   workflow_dispatch:
