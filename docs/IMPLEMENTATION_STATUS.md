@@ -21,7 +21,18 @@ Updated: 2026-11-25
 - [ ] Launch Mora inside a DuckOS user session after the process model, syscall ABI, filesystem, service supervisor, native input path and compositor exist.
 
 The Qt application is native to the host OS. It is not a kernel-owned DuckOS compositor, window manager, system service or process launcher. The bootable Stage 1 image still halts before a user session.
-## DABI64 Desktop Host and IPC foundation — 2026-11-25
+## Kernel capability broker foundation — 2026-11-25
+
+- [x] Native C11 broker consumes Reaper's canonical 84-operation catalogue; no duplicate permission-name table is maintained.
+- [x] Opaque slot/generation tokens are bound to grantee task identity and may be scoped to a resource ID plus resource generation.
+- [x] Each authorization checks operation existence, required capability bits, task identity, resource domain and resource generation.
+- [x] Delegation requires an explicit delegate right and can only preserve or narrow parent rights and object scope.
+- [x] Revoking a parent grant invalidates descendant grants through the token ancestry chain; stale/recycled tokens fail closed.
+- [x] Separate display-admin, session-admin and GPU-admin capabilities are enforced independently from ordinary desktop rights.
+- [x] CTest covers identity spoofing, capability denial, object-scope mismatch, stale generations, attenuation, rights escalation, revocation and table exhaustion.
+- [ ] Connect the broker to the scheduler-owned task structure and syscall/IPC dispatch path; no current user-space call is enforced by this standalone primitive.
+- [ ] Add process lifecycle, resource ownership and per-service locks before exposing broker-backed window, input, session or GPU operations.
+
 
 - [x] Reaper defines the additive DABI64 Desktop Host v1 request/response headers, 84-operation system catalogue, separate desktop capability bits and local frame validators in PR #331.
 - [x] DuckOS pins the Reaper DABI64 implementation as a specialist submodule and builds the same validator/catalogue sources rather than maintaining a second wire-format copy.

@@ -15,7 +15,7 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 | Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 range/map validation; not a physical allocator or page-table manager |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | Reaper policy plus a tested C11 duplex endpoint queue with DABI64 frame validation; scheduler/syscall delivery and shared-page mapping remain pending |
-| Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
+| Capability and trust layer | explicit grants, attenuation, validation and quarantine | Reaper policy plus a native C11 token broker with object scope, attenuation, generation checks and revocation; syscall-path enforcement still pending |
 | BAV Security | signed declarative detection bundles, isolated scan worker, policy broker and reversible quarantine | bundle v1 format/schema specified; scanner, verifier, quarantine and enforcement not implemented |
 | DuckDriver boundary | driver ABI, package metadata and resource-conflict policy | descriptor policy implemented; signature verifier and device discovery pending |
 | Service supervisor | finite restart budget | policy implemented; process manager pending |
@@ -49,6 +49,8 @@ Tasks use `[id, priority, deadline, state]`. The policy chooses the highest-prio
 IPC queues have a caller-supplied capacity. A full queue returns `backpressure` and leaves state unchanged. The UDB byte-stream contract accounts capacity, occupied bytes, producer/consumer sequence and a high watermark. It models admission and release only; there is no shared-memory mapping or zero-copy transfer yet.
 
 The DABI64 desktop foundation reuses the request layout and operation catalogue from the pinned Reaper submodule. Its C11 endpoint primitive uses two bounded queues for owner-to-peer and peer-to-owner requests, task-generation identities, exact sequence progression, operation-range checks, frame validation and backpressure. Queue buffers are supplied by trusted kernel/service code and access is serialized by the owning service lock. This is not yet connected to a syscall entry or a scheduler-owned task table; callers must not construct principals from user-supplied fields.
+
+The capability broker consumes the same Reaper operation catalogue. A kernel-owned table issues opaque generation-tagged tokens, binds grants to task identities and optionally to one object-generation pair, checks the required capability for each operation, limits delegation to subsets and invalidates descendant grants when a parent is revoked. This is a native authorization primitive; syscall entry must still obtain the current task identity from the scheduler and call the broker before any privileged service action.
 
 ## Security and DuckDriver
 
