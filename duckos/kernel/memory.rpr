@@ -54,3 +54,25 @@ export craft arena_reserve(cursor, bytes, limit, alignment) {
     }
     yield [start + bytes, true]
 }
+
+export craft page_range_end(base, pages) {
+    make max_address := 9223372036854775807
+    when base < 0 or base % 4096 != 0 or pages <= 0 or pages > max_address / 4096 {
+        yield -1
+    }
+
+    make bytes := pages * 4096
+    when base > max_address - bytes {
+        yield -1
+    }
+    yield base + bytes
+}
+
+export craft range_contains(parent_base, parent_pages, child_base, child_pages) {
+    make parent_end := page_range_end(parent_base, parent_pages)
+    make child_end := page_range_end(child_base, child_pages)
+    when parent_end < 0 or child_end < 0 {
+        yield false
+    }
+    yield child_base >= parent_base and child_end <= parent_end
+}

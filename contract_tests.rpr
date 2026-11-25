@@ -47,6 +47,13 @@ assert(memory["ranges_overlap"](100, 40, 120, 10), "overlapping ranges")
 assert(not memory["ranges_overlap"](100, 20, 120, 10), "adjacent ranges do not overlap")
 assert(memory["ranges_overlap"](9223372036854775800, 10, 9223372036854775805, 1), "overlap check must avoid end-address overflow")
 assert(not memory["ranges_overlap"](-1, 5, 1, 2), "negative physical addresses must be rejected")
+
+assert(memory["page_range_end"](4096, 3) == 16384, "page range uses exclusive end")
+assert(memory["page_range_end"](4097, 3) == -1, "page range rejects unaligned physical base")
+assert(memory["page_range_end"](9223372036854771712, 2) == -1, "page range rejects overflow")
+assert(memory["range_contains"](4096, 8, 8192, 2), "page range containment")
+assert(not memory["range_contains"](4096, 8, 4096, 9), "page range containment rejects overflow")
+assert(not memory["range_contains"](4096, 8, 12288, 0), "page range containment rejects empty child")
 assert(memory["arena_reserve"](100, 20, 256, 16) == [132, true], "bounded arena reservation")
 assert(memory["arena_reserve"](240, 32, 256, 16) == [240, false], "arena must reject overflow")
 

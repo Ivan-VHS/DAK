@@ -9,7 +9,7 @@
 
 The image contains two deliberately separate layers:
 
-1. The bootable DuckOS Stage 1 firmware image: Limine handoff, Boot Info v1 validation, early physical-frame allocator and serial/framebuffer boot marker.
+1. The bootable DuckOS Stage 1 firmware image: Limine handoff, Boot Info v1 validation, a bounded physical-frame allocator with allocate/release/reallocate smoke test, IDT CPU-exception diagnostics and serial/framebuffer boot marker.
 2. The offline ecosystem payload under /duckos/: the complete DuckOS source tree, Mora shell assets and local catalogue, documentation, manifests, schemas, licenses/notices, all four currently federated source repositories, tested Linux x86_64 host tools and a SHA-256 inventory.
 
 Mora includes launcher panels for Reaper, Pytyliki, OPlague and VentuSample. These panels open descriptions and local documentation; they do not run a command or launch an external process from browser code.
@@ -68,7 +68,7 @@ A genuine multi-gigabyte install/live image needs the missing runtime layers to 
 
 ## Current kernel limits
 
-The ISO boots the Stage 1 kernel through BIOS or UEFI in QEMU. After validating the handoff and allocating/clearing an early 4 KiB frame, the kernel prints DUCKOS_BOOT_OK stage=1 and halts. The kernel does not start a browser, Mora, Reaper, the native workbenches or a service session. The Mora desktop is opened from the payload by the host operating system using a browser.
+The ISO boots the Stage 1 kernel through BIOS or UEFI in QEMU. After validating the handoff, allocating and clearing a 4 KiB frame, releasing it and verifying that it can be reallocated at the same address, the kernel prints DUCKOS_BOOT_OK stage=1 and halts. The kernel does not start a browser, Mora, Reaper, the native workbenches or a service session. The Mora desktop is opened from the payload by the host operating system using a browser.
 
 No physical hardware qualification, Secure Boot support, installer, disk partitioner, kernel-enforced sandbox, native GPU/audio stack or process execution model is claimed by this preview.
 

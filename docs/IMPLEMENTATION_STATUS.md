@@ -47,9 +47,9 @@ The Qt application is native to the host OS. It is not a kernel-owned DuckOS com
 - [ ] Owned GDT, TSS and dedicated IST stacks for double fault/NMI; the current handlers still use the active boot stack.
 - [ ] PIC/APIC setup, IRQ remapping, timer/keyboard routing and interrupt-safe scheduling.
 
-- [x] Experimental x86_64 Stage 1 boot image (QEMU BIOS/UEFI verification passed): pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native monotonic 4 KiB physical-frame allocator over validated USABLE regions. The kernel allocates and clears one frame through HHDM and emits `DUCKOS_BOOT_OK stage=1`. CI run 45527148367 passed host CTests, freestanding ISO build, BIOS and UEFI QEMU boots; both serial logs report `DUCKOS_BOOT_OK stage=1`. This is not yet a running process/service OS session.
-- [x] Host-tested frame allocator contract: alignment, reserved-range exclusion, minimum address, malformed/overlapping/overflowing map rejection and exhaustion.
-- [ ] Reusable frame allocator/free path, page tables, MMIO and DMA.
+- [x] Experimental x86_64 Stage 1 boot image (QEMU BIOS/UEFI verification passed): pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native single-core 4 KiB physical-frame extent allocator over validated USABLE regions, with aligned contiguous allocation, tracked release and adjacent-range coalescing. The kernel allocates and clears one frame through HHDM, releases it, verifies same-address reallocation and emits `DUCKOS_BOOT_OK stage=1`. CI run 45527148367 passed host CTests, freestanding ISO build, BIOS and UEFI QEMU boots; both serial logs report `DUCKOS_BOOT_OK stage=1`. This is not yet a running process/service OS session.
+- [x] Host-tested reusable frame allocator contract: alignment, reserved-range exclusion, minimum address, malformed/overlapping/overflowing map rejection, contiguous allocation, partial release, coalescing, reuse and double-free/foreign-free rejection.
+- [ ] Page tables, virtual address manager, MMIO and DMA.
 - [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
 - [ ] Shared-memory zero-copy IPC, wakeups and cancellation.
 - [ ] PCI/PCIe/USB/ACPI enumeration and driver package parsing.
@@ -58,7 +58,7 @@ The Qt application is native to the host OS. It is not a kernel-owned DuckOS com
 - [ ] BLAKE3 hashing, persistent semantic graph, structural sharing and general CRDT synchronization.
 - [ ] GPU command submission and accelerated compositor.
 - [ ] Freestanding native Reaper compiler/backend and self-hosted compiler.
-- [ ] Production boot chain and usable kernel remain incomplete: no reusable memory manager, interrupts, process model, syscall layer, driver runtime, filesystem, service supervisor or compositor is present.
+- [ ] Production boot chain and usable kernel remain incomplete: no virtual-memory manager, external interrupt controller/timer path, process model, syscall layer, driver runtime, filesystem, service supervisor or compositor is present.
 - [ ] Process model, syscall ABI and kernel-enforced capabilities.
 - [ ] Package manager, init process tree, filesystem and installer.
 - [ ] Audio engine, Wayland-compatible compositor and native settings applications.
