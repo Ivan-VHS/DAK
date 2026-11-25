@@ -83,5 +83,6 @@ jobs:
           path: |
             build/DuckOS-Stage0-x86_64.iso
             build/DuckOS-Stage0-x86_64.iso.sha256
+            build/qemu/*.log
           if-no-files-found: error
           retention-days: 30
