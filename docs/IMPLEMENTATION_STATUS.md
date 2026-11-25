@@ -169,7 +169,7 @@ This MVP expands policy coverage only. It does not promote a Reaper reference co
 - [x] Separate kernel entry consumes DuckBoot handoff v1, validates Boot Info, initializes the early frame allocator and emits a DuckBoot-specific serial marker.
 - [x] BIOS remains available through the existing pinned Limine fallback; its config now points to a separately named Limine kernel image.
 - [x] QEMU UEFI test tightened to require DUCKOS_BOOT_OK stage=1 loader=duckboot, preventing a Limine UEFI boot from being counted as DuckBoot success.
-- [ ] Run the updated hybrid ISO builder and verify the DuckBoot handoff in OVMF QEMU. The GitHub Actions boot-image workflow is the acceptance gate; cross-compilation is not sufficient evidence.
+- [x] Build the hybrid BIOS/UEFI ISO and verify both firmware paths in QEMU/OVMF. GitHub Actions run 45640060710 passed BIOS and DuckBoot UEFI; the UEFI serial log contains `DUCKOS_BOOT_OK stage=1 loader=duckboot handoff=v1 frames=1`. The bootable ISO, checksum and serial logs were uploaded as an artifact.
 - [ ] Native BIOS Stage 1/Stage 2 implementation.
 - [ ] Interactive menu, script engine, own FAT32/ext-family drivers, Multiboot2, PXE/TFTP/HTTP, Secure Boot verification, signatures and authenticated rollback.
 

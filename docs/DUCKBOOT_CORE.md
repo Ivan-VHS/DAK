@@ -1,7 +1,7 @@
 # DuckBoot Core — native UEFI loader foundation
 
 **Target:** x86-64 UEFI, four-level paging, ELF64 ET_EXEC.  
-**Project status:** the UEFI loader and kernel handoff are implemented in the feature branch; QEMU/OVMF integration is the release gate.  
+**Project status:** the UEFI loader and kernel handoff are implemented in the feature branch and passed QEMU/OVMF integration. The BIOS fallback also passed in the same run.  
 **BIOS status:** the existing Limine BIOS path remains the compatibility fallback. DuckBoot does not yet replace the BIOS boot chain.
 
 ## Boot path
@@ -68,7 +68,7 @@ Run both firmware paths:
 
 The BIOS test accepts the existing Stage 1 marker. The UEFI test specifically requires DUCKOS_BOOT_OK stage=1 loader=duckboot, so an accidental Limine UEFI boot cannot satisfy the DuckBoot test.
 
-The UEFI application and kernel compile and link independently. A successful cross-compile is not a substitute for the OVMF boot marker; the GitHub Actions boot-image workflow is the integration evidence gate.
+Verified evidence: [GitHub Actions run 45640060710](https://github.com/Ivan-VHS/DuckOS/actions/runs/45640060710) completed successfully. Its QEMU logs contain both `BIOS boot: PASS` and `UEFI DuckBoot handoff: PASS`; the UEFI serial stream contains `DUCKBOOT_HANDOFF_READY v1` followed by `DUCKOS_BOOT_OK stage=1 loader=duckboot handoff=v1 frames=1`. The workflow uploaded the bootable ISO, checksum and serial logs as the `DuckOS-Stage1-x86_64-ISO` artifact. This verifies the declared QEMU firmware paths, not physical hardware compatibility.
 
 ## Configuration
 

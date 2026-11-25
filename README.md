@@ -16,7 +16,7 @@
   <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
 </p>
 
-> **Current release boundary:** The main-branch image retains the QEMU-verified Limine Stage 1 path. This feature branch adds a first-party x86-64 UEFI application, ELF64 loading and a DuckBoot kernel handoff; the DuckBoot-specific OVMF marker test remains the acceptance gate. Legacy BIOS remains on the Limine fallback until a native DuckBoot BIOS stage exists. Mora is a separate host-browser application, not a kernel desktop.
+> **Current release boundary:** The main-branch image retains the QEMU-verified Limine Stage 1 path. This feature branch adds a first-party x86-64 UEFI application, ELF64 loading and a DuckBoot kernel handoff; both BIOS fallback and the native DuckBoot UEFI handoff now pass the GitHub Actions QEMU/OVMF gate. Legacy BIOS remains on Limine until a native DuckBoot BIOS stage exists. Mora is a separate host-browser application, not a kernel desktop.
 
 ## System map
 
@@ -59,7 +59,7 @@ flowchart TB
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
 | **x86_64 boot foundation** | BIOS Limine fallback, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
-| **DuckBoot Core** | Host-tested BootArena/config/ELF64 contracts; UEFI PE32+ loader, kernel segment mapping and versioned handoff producer/consumer | UEFI OVMF marker is the integration gate; BIOS still uses Limine |
+| **DuckBoot Core** | Host-tested BootArena/config/ELF64 contracts; UEFI PE32+ loader, kernel segment mapping and versioned handoff producer/consumer | QEMU BIOS fallback and DuckBoot UEFI/OVMF handoff verified; BIOS still uses Limine |
 | **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DuckOS kernel executables |
 | **Release pipeline** | Source-pin validation, project builds/tests, SHA-256 inventory, hybrid BIOS/UEFI ISO and QEMU boot checks | Preview source-and-tools distribution, not a complete installable OS |
 
@@ -117,7 +117,7 @@ The ISO is content-sized. It is not padded to 4 GiB: empty bytes would only incr
 | Layer | Status |
 |---|---|
 | Limine BIOS fallback and Boot Info v1 validation | Implemented and QEMU-verified |
-| DuckBoot UEFI application, ELF64 loader and handoff v1 | Implemented in feature branch; OVMF marker verification pending |
+| DuckBoot UEFI application, ELF64 loader and handoff v1 | Implemented in feature branch; QEMU/OVMF handoff verified |
 | Early physical-frame allocation | Implemented for the Stage 1 boot path |
 | Reaper core subsystem MVP (40 contracts) | Implemented on the reference runtime; native enforcement pending |
 | Reusable memory manager, page tables and address spaces | Pending |

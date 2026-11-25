@@ -1,6 +1,6 @@
 # DuckOS x86_64 bootable Stage 1 image
 
-**Status:** experimental native kernel foundation with a first-party DuckBoot UEFI path under integration verification. This is not a complete operating system.  
+**Status:** experimental native kernel foundation. The first-party DuckBoot UEFI path and Limine BIOS fallback pass their QEMU firmware checks. This is not a complete operating system.  
 **Architecture:** x86-64; UEFI starts DuckBoot Core, legacy BIOS retains the pinned Limine fallback.  
 **Kernel ownership:** DuckOS owns the DuckBoot EFI application, ELF64 inspection/loading, page-table setup, versioned handoff and kernel entry. Limine remains a separately licensed BIOS fallback.
 
@@ -63,7 +63,7 @@ Install qemu-system-x86 and OVMF firmware, then run:
 
 The script verifies the BIOS fallback marker and separately requires the DuckBoot-specific UEFI marker. GitHub Actions builds the same image and runs both firmware tests.
 
-The DuckBoot UEFI application has been cross-compiled and linked as a PE32+ EFI application; the DuckBoot kernel has been linked as a high-half ELF64 executable and accepted by the ELF inspector. These build checks are necessary but do not replace the OVMF handoff test.
+Verified evidence: [GitHub Actions run 45640060710](https://github.com/Ivan-VHS/DuckOS/actions/runs/45640060710) passed the BIOS fallback and DuckBoot UEFI/OVMF QEMU tests. The UEFI serial log contains `DUCKBOOT_HANDOFF_READY v1` and `DUCKOS_BOOT_OK stage=1 loader=duckboot handoff=v1 frames=1`. The workflow uploaded the ISO, checksum and serial logs. This is emulator evidence only; no physical hardware qualification is claimed.
 
 ## Deliberate limits
 

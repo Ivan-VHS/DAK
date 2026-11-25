@@ -97,4 +97,4 @@ The DuckBoot feature branch now contains both sides of the UEFI contract:
 - duckboot/kernel_entry.c consumes the envelope, validates Boot Info v1 and initializes the early physical-frame allocator.
 - duckboot/uefi/enter.S switches to the new CR3 and kernel stack, then enters the high-half kernel using the documented x86-64 System V entry convention.
 
-The active main-branch image remains unchanged until the feature branch passes the UEFI QEMU/OVMF gate. The image builder retains a separate Limine BIOS fallback. The UEFI handoff must be verified by the exact serial marker DUCKOS_BOOT_OK stage=1 loader=duckboot; a PE32+ link alone does not count as a successful transfer.
+The main branch remains unchanged; the feature branch now passes the UEFI QEMU/OVMF gate. GitHub Actions run 45640060710 verified both the Limine BIOS fallback and DuckBoot UEFI handoff. The UEFI serial log contains DUCKBOOT_HANDOFF_READY v1 and DUCKOS_BOOT_OK stage=1 loader=duckboot handoff=v1 frames=1. The image builder retains Limine as the BIOS fallback until a native DuckBoot BIOS implementation is completed. A PE32+ link alone is not treated as evidence of a successful transfer.
