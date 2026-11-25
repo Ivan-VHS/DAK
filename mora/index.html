@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#FFD400">
+  <meta name="theme-color" content="#FFD700">
   <meta name="description" content="Mora — единый рабочий стол DuckOS">
   <title>Mora — DuckOS</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -20,26 +20,26 @@
           <linearGradient id="mora-cloth" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stop-color="#080808"/>
             <stop offset=".07" stop-color="#3a3100"/>
-            <stop offset=".15" stop-color="#ffd400"/>
-            <stop offset=".22" stop-color="#ffd400"/>
+            <stop offset=".15" stop-color="#ffd700"/>
+            <stop offset=".22" stop-color="#ffd700"/>
             <stop offset=".31" stop-color="#080808"/>
-            <stop offset=".40" stop-color="#ffd400"/>
-            <stop offset=".48" stop-color="#ffd400"/>
+            <stop offset=".40" stop-color="#ffd700"/>
+            <stop offset=".48" stop-color="#ffd700"/>
             <stop offset=".55" stop-color="#3a3100"/>
             <stop offset=".65" stop-color="#080808"/>
-            <stop offset=".75" stop-color="#ffd400"/>
-            <stop offset=".84" stop-color="#ffd400"/>
+            <stop offset=".75" stop-color="#ffd700"/>
+            <stop offset=".84" stop-color="#ffd700"/>
             <stop offset=".92" stop-color="#3a3100"/>
             <stop offset="1" stop-color="#080808"/>
           </linearGradient>
           <pattern id="mora-fold-pattern" width="320" height="1000" patternUnits="userSpaceOnUse">
             <rect width="320" height="1000" fill="url(#mora-cloth)"/>
             <path d="M20 0 C52 250 2 650 26 1000 M77 0 C102 270 62 650 93 1000 M155 0 C131 300 187 700 160 1000 M235 0 C260 270 219 690 248 1000 M300 0 C286 260 330 650 310 1000"
-              fill="none" stroke="#ffd400" stroke-opacity=".23" stroke-width="7"/>
+              fill="none" stroke="#ffd700" stroke-opacity=".23" stroke-width="7"/>
             <path d="M42 0 C60 260 32 670 53 1000 M112 0 C88 290 132 680 115 1000 M198 0 C220 260 184 660 209 1000 M276 0 C254 290 286 680 274 1000"
               fill="none" stroke="#080808" stroke-opacity=".52" stroke-width="15"/>
             <path d="M63 0 C79 280 53 650 70 1000 M250 0 C231 290 262 670 252 1000"
-              fill="none" stroke="#ffd400" stroke-opacity=".11" stroke-width="3"/>
+              fill="none" stroke="#ffd700" stroke-opacity=".11" stroke-width="3"/>
           </pattern>
           <linearGradient id="mora-room-shade" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stop-color="#080808" stop-opacity=".12"/>
@@ -62,7 +62,7 @@
         <path d="M0 858 C310 835 570 876 800 852 C1060 828 1330 866 1600 842 V1000 H0Z"
           fill="url(#mora-floor)"/>
         <path d="M0 855 C310 832 570 873 800 849 C1060 825 1330 863 1600 839"
-          fill="none" stroke="#ffd400" stroke-opacity=".24" stroke-width="2"/>
+          fill="none" stroke="#ffd700" stroke-opacity=".24" stroke-width="2"/>
       </svg>
     </div>
 
@@ -92,26 +92,42 @@
       <section class="app-area" aria-label="Приложения">
         <div class="section-heading">
           <div><span class="eyebrow" data-i18n="yourSpace">ВАШЕ ПРОСТРАНСТВО</span><h1 data-i18n="applications">Приложения</h1></div>
-          <span class="tiny-counter" data-i18n="appsCount">34 ПРИЛОЖЕНИЯ И ИНСТРУМЕНТА</span>
+        </div>
+        <div class="catalog-toolbar">
+          <label class="catalog-search" for="app-search">
+            <span aria-hidden="true">⌕</span>
+            <input id="app-search" type="search" autocomplete="off"
+              placeholder="Найти приложение или задачу"
+              aria-label="Поиск приложений" data-i18n-placeholder="catalogSearchPlaceholder"
+              data-i18n-aria="catalogSearchLabel">
+          </label>
+          <span class="tiny-counter" id="catalog-count" aria-live="polite">34 приложения</span>
+        </div>
+        <div class="catalog-categories" role="group" aria-label="Категории приложений" data-i18n-aria="catalogCategories">
+          <button type="button" class="catalog-filter" data-catalog-filter="all" aria-pressed="true" data-i18n="allAppsFilter">Все</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="creative" aria-pressed="false" data-i18n="creativeFilter">Творчество</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="work" aria-pressed="false" data-i18n="workFilter">Работа</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="system" aria-pressed="false" data-i18n="systemFilter">Система</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="workbench" aria-pressed="false" data-i18n="workbenchesFilter">Инструменты</button>
         </div>
         <div class="app-grid" id="app-grid">
-          <button class="app-tile" data-app="cockos" style="--accent:#ffd400">
+          <button class="app-tile" data-app="cockos" style="--accent:#ffd700">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M5 25h5l4-11 7 23 7-30 7 27 4-9h4" /></svg></span>
             <span class="app-name">Cockos</span><span class="app-subtitle" data-i18n="audio">Звук и запись</span>
           </button>
-          <button class="app-tile" data-app="kavun" style="--accent:#ffd400">
+          <button class="app-tile" data-app="kavun" style="--accent:#ffd700">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M24 7c-3-5-10-5-13 0M24 7c3-5 10-5 13 0"/><path d="M24 8C12 8 5 17 7 28c2 10 10 15 17 15s15-5 17-15C43 17 36 8 24 8Z"/><path d="M24 10v31M11 18l24 16M37 18 13 34"/></svg></span>
             <span class="app-name">Kavun</span><span class="app-subtitle" data-i18n="photos">Фотографии</span>
           </button>
-          <button class="app-tile" data-app="kabon" style="--accent:#ffd400">
+          <button class="app-tile" data-app="kabon" style="--accent:#ffd700">
             <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M29 16c-1.5-2-9-3-10 2-1.1 5 12 3 11 9-.8 5-9 6-13 2M24 11v26"/></svg></span>
             <span class="app-name">Ka-bon</span><span class="app-subtitle" data-i18n="finance">Финансы</span>
           </button>
-          <button class="app-tile" data-app="gloverty" style="--accent:#ffd400">
+          <button class="app-tile" data-app="gloverty" style="--accent:#ffd700">
             <span class="app-icon"><svg viewBox="0 0 48 48"><path d="M27 4 10 27h12l-2 17 18-25H25Z"/></svg></span>
             <span class="app-name">Gloverty</span><span class="app-subtitle" data-i18n="routines">Сценарии</span>
           </button>
-          <button class="app-tile" data-app="po" style="--accent:#ffd400">
+          <button class="app-tile" data-app="po" style="--accent:#ffd700">
             <span class="app-icon"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="m30 13-4 13-13 9 4-13Z"/><circle cx="24" cy="24" r="2"/></svg></span>
             <span class="app-name">Po</span><span class="app-subtitle" data-i18n="compass">Компас</span>
           </button>
@@ -129,18 +145,18 @@
           <span class="system-section-note">14 дополнительных инструментов Mora</span>
         </div>
         <div class="extension-app-grid" id="extension-app-grid">
-          <button class="app-tile" data-app="sestem" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">♟</span></span><span class="app-name">Sestem</span><span class="app-subtitle">Статус системы</span></button>
-          <button class="app-tile" data-app="setupup" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">✳</span></span><span class="app-name">SetupUP</span><span class="app-subtitle">Первичная настройка</span></button>
-          <button class="app-tile" data-app="orriganize" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">ORGze</span><span class="app-subtitle">Задачи и проекты</span></button>
-          <button class="app-tile" data-app="abriganza" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▤</span></span><span class="app-name">Abriganza</span><span class="app-subtitle">Архивы и файлы</span></button>
-          <button class="app-tile" data-app="olaab" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">◈</span></span><span class="app-name">Olaab</span><span class="app-subtitle">Медиатека</span></button>
-          <button class="app-tile" data-app="concrete-thump" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">♫</span></span><span class="app-name">Concrete Thump</span><span class="app-subtitle">Ритм и темп</span></button>
-          <button class="app-tile" data-app="seu-beu" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Seu-Beu</span><span class="app-subtitle">Проверка обмена</span></button>
-          <button class="app-tile" data-app="love-il" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">♡</span></span><span class="app-name">Love-IL</span><span class="app-subtitle">Личный дневник</span></button>
-          <button class="app-tile" data-app="poi" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⌖</span></span><span class="app-name">Poi</span><span class="app-subtitle">Быстрые заметки</span></button>
-          <button class="app-tile" data-app="poi-2" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▧</span></span><span class="app-name">Poi-2</span><span class="app-subtitle">База знаний</span></button>
-          <button class="app-tile" data-app="po-2" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">➤</span></span><span class="app-name">Po-2</span><span class="app-subtitle">Маршруты и точки</span></button>
-          <button class="app-tile" data-app="gamecharager" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▣</span></span><span class="app-name">GameCharager</span><span class="app-subtitle">Игровая библиотека</span></button>
+          <button class="app-tile" data-app="sestem" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">♟</span></span><span class="app-name">Sestem</span><span class="app-subtitle">Статус системы</span></button>
+          <button class="app-tile" data-app="setupup" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">✳</span></span><span class="app-name">SetupUP</span><span class="app-subtitle">Первичная настройка</span></button>
+          <button class="app-tile" data-app="orriganize" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">ORGze</span><span class="app-subtitle">Задачи и проекты</span></button>
+          <button class="app-tile" data-app="abriganza" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">▤</span></span><span class="app-name">Abriganza</span><span class="app-subtitle">Архивы и файлы</span></button>
+          <button class="app-tile" data-app="olaab" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">◈</span></span><span class="app-name">Olaab</span><span class="app-subtitle">Медиатека</span></button>
+          <button class="app-tile" data-app="concrete-thump" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">♫</span></span><span class="app-name">Concrete Thump</span><span class="app-subtitle">Ритм и темп</span></button>
+          <button class="app-tile" data-app="seu-beu" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Seu-Beu</span><span class="app-subtitle">Проверка обмена</span></button>
+          <button class="app-tile" data-app="love-il" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">♡</span></span><span class="app-name">Love-IL</span><span class="app-subtitle">Личный дневник</span></button>
+          <button class="app-tile" data-app="poi" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">⌖</span></span><span class="app-name">Poi</span><span class="app-subtitle">Быстрые заметки</span></button>
+          <button class="app-tile" data-app="poi-2" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">▧</span></span><span class="app-name">Poi-2</span><span class="app-subtitle">База знаний</span></button>
+          <button class="app-tile" data-app="po-2" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">➤</span></span><span class="app-name">Po-2</span><span class="app-subtitle">Маршруты и точки</span></button>
+          <button class="app-tile" data-app="gamecharager" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">▣</span></span><span class="app-name">GameCharager</span><span class="app-subtitle">Игровая библиотека</span></button>
           <button class="app-tile" data-app="exedotexe" style="--accent:#a6a6a6"><span class="app-icon"><span class="system-glyph"><></span></span><span class="app-name">EXEdotEXE</span><span class="app-subtitle">EXE-инспектор</span></button>
           <button class="app-tile red-sparrow-tile" data-app="red-sparrow"><span class="app-icon"><span class="system-glyph">雀</span></span><span class="app-name">赤雀 · Red Sparrow</span><span class="app-subtitle">Wuxia · 场景编排</span></button>
         </div>
@@ -149,19 +165,19 @@
           <span class="system-section-note">Локальные функции и центры управления</span>
         </div>
         <div class="system-app-grid" id="system-app-grid">
-          <button class="app-tile" data-app="mora-ai" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
+          <button class="app-tile" data-app="mora-ai" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">✦</span></span><span class="app-name">Mora AI</span><span class="app-subtitle">Намерения и планы</span></button>
           <button class="app-tile" data-app="security" style="--accent:#3a3100"><span class="app-icon"><span class="system-glyph">◇</span></span><span class="app-name">Sentinel</span><span class="app-subtitle">Права и доверие</span></button>
-          <button class="app-tile" data-app="updates" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
-          <button class="app-tile" data-app="runtime" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
-          <button class="app-tile" data-app="workspace" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
+          <button class="app-tile" data-app="updates" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">↶</span></span><span class="app-name">Restore</span><span class="app-subtitle">Обновления и откат</span></button>
+          <button class="app-tile" data-app="runtime" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">⇄</span></span><span class="app-name">Bridge</span><span class="app-subtitle">PE и ELF инспектор</span></button>
+          <button class="app-tile" data-app="workspace" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">⌘</span></span><span class="app-name">Control</span><span class="app-subtitle">Среда и питание</span></button>
           <button class="app-tile" data-app="provenance" style="--accent:#3a3100"><span class="app-icon"><span class="system-glyph">⌁</span></span><span class="app-name">Proof</span><span class="app-subtitle">Файлы и SHA-256</span></button>
-          <button class="app-tile" data-app="mora-boost" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">⚡</span></span><span class="app-name">Mora Boost</span><span class="app-subtitle">Игровая производительность</span></button>
-          <button class="app-tile" data-app="desktop" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Duck Desktop</span><span class="app-subtitle">Оптимизация рабочего пространства</span></button>
-          <button class="app-tile" data-app="mora-commons" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">✣</span></span><span class="app-name">Mora Commons</span><span class="app-subtitle">Единый каталог приложений</span></button>
-          <button class="app-tile" data-app="reaper-workbench" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">R</span></span><span class="app-name">Reaper</span><span class="app-subtitle">Язык и toolchain</span></button>
-          <button class="app-tile" data-app="pytyliki-workbench" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">P</span></span><span class="app-name">Pytyliki</span><span class="app-subtitle">Вычисления и диагностика</span></button>
-          <button class="app-tile" data-app="oplague-workbench" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">O</span></span><span class="app-name">OPlague</span><span class="app-subtitle">Инспекция устройств</span></button>
-          <button class="app-tile" data-app="ventusample-workbench" style="--accent:#ffd400"><span class="app-icon"><span class="system-glyph">V</span></span><span class="app-name">VentuSample</span><span class="app-subtitle">Аудио и DSP</span></button>
+          <button class="app-tile" data-app="mora-boost" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">⚡</span></span><span class="app-name">Mora Boost</span><span class="app-subtitle">Игровая производительность</span></button>
+          <button class="app-tile" data-app="desktop" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">▦</span></span><span class="app-name">Duck Desktop</span><span class="app-subtitle">Оптимизация рабочего пространства</span></button>
+          <button class="app-tile" data-app="mora-commons" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">✣</span></span><span class="app-name">Mora Commons</span><span class="app-subtitle">Единый каталог приложений</span></button>
+          <button class="app-tile" data-app="reaper-workbench" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">R</span></span><span class="app-name">Reaper</span><span class="app-subtitle">Язык и toolchain</span></button>
+          <button class="app-tile" data-app="pytyliki-workbench" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">P</span></span><span class="app-name">Pytyliki</span><span class="app-subtitle">Вычисления и диагностика</span></button>
+          <button class="app-tile" data-app="oplague-workbench" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">O</span></span><span class="app-name">OPlague</span><span class="app-subtitle">Инспекция устройств</span></button>
+          <button class="app-tile" data-app="ventusample-workbench" style="--accent:#ffd700"><span class="app-icon"><span class="system-glyph">V</span></span><span class="app-name">VentuSample</span><span class="app-subtitle">Аудио и DSP</span></button>
         </div>
       </section>
 

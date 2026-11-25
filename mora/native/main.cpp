@@ -59,7 +59,7 @@ QColor kRaised("#242424");
 QColor kText("#FFFFFF");
 QColor kSecondary("#E5E5E5");
 QColor kMuted("#A6A6A6");
-QColor kBrand("#FFD400");
+QColor kBrand("#FFD700");
 QColor kBrandHover("#FFE45C");
 QColor kBorder("#3A3A3A");
 QColor kSelection("#3A3100");
@@ -101,7 +101,7 @@ QString applyThemeTokens(QString style)
         {"#FFFFFF", "@@MORA_TEXT@@"},
         {"#E5E5E5", "@@MORA_SECONDARY@@"},
         {"#A6A6A6", "@@MORA_MUTED@@"},
-        {"#FFD400", "@@MORA_BRAND@@"},
+        {"#FFD700", "@@MORA_BRAND@@"},
         {"#FFE45C", "@@MORA_BRAND_HOVER@@"},
         {"#3A3A3A", "@@MORA_BORDER@@"},
         {"#3A3100", "@@MORA_SELECTION@@"}
@@ -285,7 +285,7 @@ protected:
         }
         painter.setPen(QPen(kBrand, 1.35));
         painter.drawPath(waveform);
-        painter.setPen(QPen(QColor(255, 212, 0, 55), 5));
+        painter.setPen(QPen(QColor(255, 215, 0, 55), 5));
         painter.drawLine(width() * 0.42, 8, width() * 0.42, height() - 8);
     }
 };
@@ -306,11 +306,11 @@ public:
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QFrame#panel { background: #151515; border: 1px solid #3A3A3A; border-radius: 16px; }
             QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QPushButton { color: #FFFFFF; background: #242424; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 14px; }
-            QPushButton:hover { border-color: #FFD400; background: #2B281A; }
+            QPushButton:hover { border-color: #FFD700; background: #2B281A; }
             QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; selection-background-color: #3A3100; }
-            QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 7px; }
+            QHeaderView::section { background: #242424; color: #FFD700; border: 0; padding: 7px; }
         )")));
         buildContent();
     }
@@ -512,10 +512,24 @@ public:
         }
         auto* appsButton = findChild<QPushButton*>("nav-apps");
         if (!appsButton) return fail("The native app navigation control is missing.");
+        if (!appsSearch_ || !categoryFilter_ || !appGrid_ || !appsCount_) {
+            return fail("The app discovery controls were not created.");
+        }
         appsButton->click();
         if (pageStack_->currentWidget() != appsPage_) {
             return fail("The Applications navigation action did not change pages.");
         }
+        appsSearch_->setText("Reaper");
+        QApplication::processEvents();
+        if (appGrid_->count() != 1 || !appGrid_->itemAt(0)->widget()
+            || appGrid_->itemAt(0)->widget()->property("moraAppId").toString() != "reaper-workbench") {
+            return fail("The catalog search did not isolate the Reaper workbench.");
+        }
+        if (appsCount_->text().isEmpty()) {
+            return fail("The catalog result count was not updated.");
+        }
+        appsSearch_->clear();
+        QApplication::processEvents();
         openDesignWorkspace();
         QApplication::processEvents();
         int nativeWindows = 0;
@@ -539,6 +553,15 @@ public:
         showPage(2);
     }
 
+protected:
+    void resizeEvent(QResizeEvent* event) override
+    {
+        QMainWindow::resizeEvent(event);
+        if (appsPage_ && pageStack_ && pageStack_->currentWidget() == appsPage_) {
+            rebuildAppsGrid();
+        }
+    }
+
 private:
     QVector<AppInfo> apps_;
     QHash<QString, QPointer<AppWindow>> windows_;
@@ -550,6 +573,7 @@ private:
     QLineEdit* appsSearch_ = nullptr;
     QComboBox* categoryFilter_ = nullptr;
     QGridLayout* appGrid_ = nullptr;
+    QLabel* appsCount_ = nullptr;
     QLabel* dateLabel_ = nullptr;
     QLabel* timeLabel_ = nullptr;
     QButtonGroup* navigationGroup_ = nullptr;
@@ -597,17 +621,65 @@ private:
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QLabel[role="title"] { color: #FFFFFF; font-size: 25pt; font-weight: 650; }
             QLabel[role="subtitle"] { color: #E5E5E5; }
             QFrame#panel { background: rgba(21,21,21,238); border: 1px solid #3A3A3A; border-radius: 16px; }
             QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #3A3A3A; border-radius: 14px; }
             QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; text-align: left; }
-            QPushButton:hover { border-color: #FFD400; background: #222016; }
-            QPushButton:checked { color: #080808; background: #FFD400; border-color: #FFD400; }
+            QPushButton:hover { border-color: #FFD700; background: #222016; }
+            QPushButton:checked { color: #080808; background: #FFD700; border-color: #FFD700; }
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
-            QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
-            QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
+            QPushButton#appTile {
+                background: rgba(21,21,21,242);
+                border: 1px solid #3A3A3A;
+                border-radius: 17px;
+                min-height: 164px;
+                padding: 0;
+                text-align: left;
+            }
+            QPushButton#appTile:hover {
+                background: #201E16;
+                border-color: #FFD700;
+            }
+            QPushButton#appTile:focus {
+                border: 2px solid #FFE45C;
+            }
+            QLabel[role="tileIcon"] {
+                color: #FFD700;
+                background: #28230D;
+                border: 1px solid #49400F;
+                border-radius: 13px;
+                min-width: 48px;
+                max-width: 48px;
+                min-height: 48px;
+                max-height: 48px;
+                font-size: 22pt;
+                font-weight: 700;
+                qproperty-alignment: AlignCenter;
+            }
+            QLabel[role="tileName"] {
+                color: #FFFFFF;
+                font-size: 12pt;
+                font-weight: 700;
+            }
+            QLabel[role="tileCategory"] {
+                color: #A6A6A6;
+                font-size: 8pt;
+            }
+            QLabel[role="tileMeta"] {
+                color: #FFD700;
+                background: #28230D;
+                border: 1px solid #49400F;
+                border-radius: 8px;
+                padding: 4px 7px;
+                font-size: 8pt;
+            }
+            QLabel[role="tileAction"] {
+                color: #FFD700;
+                font-size: 9pt;
+                font-weight: 650;
+            }
             QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
             QScrollArea { border: 0; background: transparent; }
@@ -876,6 +948,13 @@ private:
         filters->addWidget(categoryFilter_, 1);
         layout->addLayout(filters);
 
+        auto* catalogueMeta = new QHBoxLayout;
+        appsCount_ = label({}, "muted");
+        catalogueMeta->addWidget(appsCount_);
+        catalogueMeta->addStretch(1);
+        catalogueMeta->addWidget(label("ЛОКАЛЬНЫЕ ПРИЛОЖЕНИЯ · БЕЗ СКРЫТЫХ ЗАПУСКОВ", "eyebrow"));
+        layout->addLayout(catalogueMeta);
+
         auto* scroll = new QScrollArea;
         scroll->setWidgetResizable(true);
         auto* gridHost = new QWidget;
@@ -932,29 +1011,36 @@ private:
     {
         auto* tile = new QPushButton;
         tile->setObjectName("appTile");
-        tile->setMinimumHeight(86);
+        tile->setProperty("moraAppId", app.id);
+        tile->setAccessibleName(app.name + " — " + categoryName(app.category) + " — открыть");
+        tile->setMinimumHeight(164);
         tile->setCursor(Qt::PointingHandCursor);
-        auto* row = new QHBoxLayout(tile);
-        row->setContentsMargins(14, 10, 14, 10);
-        row->setSpacing(12);
-        auto* glyph = label(categoryGlyph(app.category), "eyebrow");
-        QFont glyphFont = glyph->font();
-        glyphFont.setPointSize(22);
-        glyph->setFont(glyphFont);
-        glyph->setAlignment(Qt::AlignCenter);
-        glyph->setFixedWidth(38);
-        row->addWidget(glyph);
 
-        auto* textColumn = new QVBoxLayout;
-        textColumn->setSpacing(4);
-        auto* name = label(app.name);
-        QFont nameFont = name->font();
-        nameFont.setWeight(QFont::DemiBold);
-        name->setFont(nameFont);
-        textColumn->addWidget(name);
-        textColumn->addWidget(label(subtitle.isEmpty() ? categoryName(app.category) : subtitle, "muted"));
-        row->addLayout(textColumn, 1);
-        row->addWidget(label("↗", "muted"));
+        auto* column = new QVBoxLayout(tile);
+        column->setContentsMargins(16, 15, 16, 14);
+        column->setSpacing(9);
+
+        auto* top = new QHBoxLayout;
+        auto* glyph = label(categoryGlyph(app.category), "tileIcon");
+        glyph->setAlignment(Qt::AlignCenter);
+        top->addWidget(glyph);
+        top->addStretch(1);
+        top->addWidget(label(maturityText(app.maturity), "tileMeta"));
+        column->addLayout(top);
+
+        auto* name = label(app.name, "tileName");
+        column->addWidget(name);
+        column->addWidget(label(
+            subtitle.isEmpty() ? categoryName(app.category) : subtitle,
+            "tileCategory"
+        ));
+
+        auto* footer = new QHBoxLayout;
+        footer->addWidget(label(categoryName(app.category), "muted"));
+        footer->addStretch(1);
+        footer->addWidget(label("Открыть  ↗", "tileAction"));
+        column->addLayout(footer);
+
         QObject::connect(tile, &QPushButton::clicked, this, [this, id = app.id]() { openAppWindow(id); });
         return tile;
     }
@@ -981,13 +1067,19 @@ private:
 
         const QString query = appsSearch_ ? appsSearch_->text().trimmed().toCaseFolded() : QString{};
         const QString category = categoryFilter_ ? categoryFilter_->currentData().toString() : "all";
+        const int availableWidth = appGrid_->parentWidget()
+            ? appGrid_->parentWidget()->width()
+            : 900;
+        const int columns = std::max(1, std::min(4, availableWidth / 270));
         int position = 0;
+
         for (const AppInfo& app : apps_) {
-            if (!query.isEmpty()
-                && !app.name.toCaseFolded().contains(query)
-                && !categoryName(app.category).toCaseFolded().contains(query)) {
-                continue;
-            }
+            const QString searchable = (
+                app.name + " " + app.id + " " + categoryName(app.category) + " "
+                + maturityText(app.maturity)
+            ).toCaseFolded();
+            if (!query.isEmpty() && !searchable.contains(query)) continue;
+
             if (category == "creative" && app.category != "creative"
                 && app.category != "audio" && app.category != "photos") continue;
             if (category == "work" && app.category != "productivity"
@@ -997,15 +1089,19 @@ private:
                 && app.category != "security" && app.category != "recovery"
                 && app.category != "workspace") continue;
 
-            auto* tile = makeAppTile(app, categoryName(app.category) + " · " + maturityText(app.maturity));
-            appGrid_->addWidget(tile, position / 3, position % 3);
+            auto* tile = makeAppTile(app, categoryName(app.category));
+            appGrid_->addWidget(tile, position / columns, position % columns);
             ++position;
+        }
+
+        if (appsCount_) {
+            appsCount_->setText(QString("Показано %1 из %2").arg(position).arg(apps_.size()));
         }
         if (position == 0) {
             auto* empty = label("Ничего не найдено. Измените запрос или категорию.", "muted");
-            appGrid_->addWidget(empty, 0, 0, 1, 3);
+            appGrid_->addWidget(empty, 0, 0, 1, columns);
         }
-        appGrid_->setRowStretch((position + 2) / 3, 1);
+        appGrid_->setRowStretch((position + columns - 1) / columns, 1);
     }
 
     void openAppWindow(const QString& id)
