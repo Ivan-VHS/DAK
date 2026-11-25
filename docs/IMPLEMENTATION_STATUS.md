@@ -32,9 +32,9 @@ Updated: 2026-11-25
 
 ## Partial or external boundaries
 
-- [x] Experimental x86_64 stage-0 boot image built and verified: pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 memory-map/framebuffer handoff; BIOS and UEFI QEMU runs both emitted `DUCKOS_BOOT_OK stage=0`. [Verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). This is a bootable stage-0 kernel handoff, not yet a running process/service OS session.
-
-- [ ] Real frame/page allocator, page tables, MMIO and DMA.
+- [x] Experimental x86_64 Stage 1 boot image: pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native monotonic 4 KiB physical-frame allocator over validated USABLE regions. The kernel allocates and clears one frame through HHDM and emits `DUCKOS_BOOT_OK stage=1`. This is not yet a running process/service OS session.
+- [x] Host-tested frame allocator contract: alignment, reserved-range exclusion, minimum address, malformed/overlapping/overflowing map rejection and exhaustion.
+- [ ] Reusable frame allocator/free path, page tables, MMIO and DMA.
 - [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
 - [ ] Shared-memory zero-copy IPC, wakeups and cancellation.
 - [ ] PCI/PCIe/USB/ACPI enumeration and driver package parsing.
@@ -43,7 +43,7 @@ Updated: 2026-11-25
 - [ ] BLAKE3 hashing, persistent semantic graph, structural sharing and general CRDT synchronization.
 - [ ] GPU command submission and accelerated compositor.
 - [ ] Freestanding native Reaper compiler/backend and self-hosted compiler.
-- [ ] Production boot chain and usable kernel remain incomplete: no native allocator, interrupts, process model, syscall layer, driver runtime, filesystem, service supervisor or compositor is present.
+- [ ] Production boot chain and usable kernel remain incomplete: no reusable memory manager, interrupts, process model, syscall layer, driver runtime, filesystem, service supervisor or compositor is present.
 - [ ] Process model, syscall ABI and kernel-enforced capabilities.
 - [ ] Package manager, init process tree, filesystem and installer.
 - [ ] Audio engine, Wayland-compatible compositor and native settings applications.
