@@ -36,7 +36,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: duckos-ecosystem-release-${__{ github.event.pull_request.head.ref || github.ref }}
+  group: duckos-ecosystem-release-${{ github.event.pull_request.head.ref || github.ref }}
   cancel-in-progress: true
 
 jobs:

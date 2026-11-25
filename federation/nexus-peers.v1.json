@@ -1,0 +1,217 @@
+{
+  "schema": "duckos.nexus-peer-registry.v1",
+  "version": 1,
+  "integration_host": "DuckOS",
+  "source_of_revision": "federation/repositories.v1.json",
+  "topology": "direct-versioned-peer-contracts",
+  "policy": {
+    "default_exchange": [
+      "versioned JSON reports",
+      "immutable file artifacts"
+    ],
+    "native_library_loading": "explicit trusted path, ABI/version validation and caller-owned buffers",
+    "desktop_wire_transport": "DABI64 Desktop Host v1 defines frames; DuckOS kernel IPC and caller authentication remain pending",
+    "peer_optional": true,
+    "central_runtime_required": false,
+    "automatic_discovery": false,
+    "automatic_execution": false,
+    "kernel_privilege_from_peer_contracts": false,
+    "device_access_default": "read-only",
+    "audio_processing_default": "offline",
+    "unavailable_peer_behavior": "typed unavailable state; no partial privileged action"
+  },
+  "peers": [
+    {
+      "id": "reaper",
+      "repository": "Ivan-VHS/Reaper",
+      "path": "projects/reaper",
+      "role": "primary language, compiler/toolchain and deterministic policy layer",
+      "workbench_maturity": "host-native-toolchain; native DuckOS kernel integration pending",
+      "contracts": [
+        {
+          "id": "reaper.dabi64.desktop-host.v1",
+          "kind": "binary-request-response-wire-format",
+          "source": "projects/reaper/docs/DABI64_DESKTOP_HOST_V1.md",
+          "maturity": "frame-validators-implemented; kernel-transport-pending",
+          "purpose": "Pointer-free fixed-width desktop request/response frames with bounded payloads and opaque host-issued handles.",
+          "consumer_rules": [
+            "The kernel derives sender identity and capabilities; client frames cannot provide either.",
+            "The receiver validates ownership, sequence freshness, quotas, session and operation payloads.",
+            "No kernel IPC, desktop service dispatch or privilege is implied by frame validation."
+          ]
+        },
+        {
+          "id": "reaper.nexus-federation-profile.v1",
+          "kind": "peer-integration-profile",
+          "source": "projects/reaper/docs/NEXUS_FEDERATION_PROFILE_V1.md",
+          "maturity": "profile-specified",
+          "purpose": "Defines Reaper's additive federation role and the existing peer contract ownership.",
+          "consumer_rules": [
+            "Reaper remains a user-space language and toolchain, not the DuckOS kernel.",
+            "Peer absence or malformed data produces a typed error and no partial privileged action.",
+            "Do not introduce a second message bus or mandatory central runtime."
+          ]
+        }
+      ],
+      "prohibited_effects": [
+        "kernel or driver privileges",
+        "unbounded native FFI",
+        "implicit shell, filesystem, process or network effects",
+        "treating policy models as kernel enforcement"
+      ]
+    },
+    {
+      "id": "pytyliki",
+      "repository": "Ivan-VHS/Pytyliki",
+      "path": "projects/pytyliki",
+      "role": "read-only processor, memory and diagnostics evidence provider",
+      "workbench_maturity": "native C11 host workbench; DuckOS service integration pending",
+      "contracts": [
+        {
+          "id": "pytyliki.c-abi.v1",
+          "kind": "native-library-abi",
+          "source": "projects/pytyliki/docs/NEXUS_DIAGNOSTICS_PROFILE_V1.md",
+          "maturity": "existing-versioned-abi-referenced",
+          "purpose": "Reuses the existing C11 ABI for bounded processor and metric functions.",
+          "consumer_rules": [
+            "Load only from an explicit trusted local path and validate ABI compatibility.",
+            "Use caller-owned buffers and preserve units, workload, duration and provenance.",
+            "Do not create a second ABI solely for NEXUS integration."
+          ]
+        },
+        {
+          "id": "pytyliki.nexus-diagnostics.v1",
+          "kind": "evidence-profile",
+          "source": "projects/pytyliki/docs/NEXUS_DIAGNOSTICS_PROFILE_V1.md",
+          "maturity": "profile-specified",
+          "purpose": "Defines CPU topology, ISA, bounded measurement and profile evidence.",
+          "consumer_rules": [
+            "Keep hardware discovery and measurement read-only.",
+            "Unavailable counters remain unavailable; do not invent estimates.",
+            "A benchmark does not authorize scheduler, affinity, clock or voltage changes."
+          ]
+        },
+        {
+          "id": "pytyliki.nexus-system-boundaries.v1",
+          "kind": "service-boundary-profile",
+          "source": "projects/pytyliki/docs/NEXUS_SYSTEM_SERVICE_BOUNDARIES_V1.md",
+          "maturity": "profile-specified",
+          "purpose": "Defines allowed evidence use by future DuckOS service and application consumers.",
+          "consumer_rules": [
+            "Reports are advisory evidence, not a page allocator or kernel memory manager.",
+            "Validate provider, timestamp, workload, units, bounds and freshness.",
+            "The Reaper policy example remains optional CI validation, not a runtime dependency."
+          ]
+        }
+      ],
+      "prohibited_effects": [
+        "clock, voltage or affinity writes",
+        "firmware or MMIO mutation",
+        "scheduler or page-table control",
+        "fabricated hardware readings"
+      ]
+    },
+    {
+      "id": "oplague",
+      "repository": "Ivan-VHS/OPlague",
+      "path": "projects/oplague",
+      "role": "read-only device, driver-package, signature and GPU evidence provider",
+      "workbench_maturity": "read-only user-space workbench; DuckOS device service integration pending",
+      "contracts": [
+        {
+          "id": "oplage.device-snapshot.v1",
+          "kind": "versioned-device-evidence",
+          "source": "projects/oplague/docs/NEXUS_DEVICE_PROFILE_V1.md",
+          "maturity": "existing-report-contract-referenced",
+          "purpose": "Publishes device inventory and pseudonymous fingerprints with source mode, bounds and digest.",
+          "consumer_rules": [
+            "Validate schema, source mode, bounds and digest.",
+            "Keep unsupported or missing fields explicit; preserve provider and capture time.",
+            "Do not interpret device matching as driver installation permission."
+          ]
+        },
+        {
+          "id": "oplage.gpu-telemetry.v1",
+          "kind": "versioned-gpu-evidence",
+          "source": "projects/oplague/docs/NEXUS_DEVICE_PROFILE_V1.md",
+          "maturity": "existing-telemetry-contract-referenced",
+          "purpose": "Exports read-only GPU telemetry with provider and validity metadata.",
+          "consumer_rules": [
+            "Unsupported readings remain null or unavailable.",
+            "Do not infer direct VRAM mapping, GPU bypass or device-control permission.",
+            "Do not turn hashes or signatures alone into a trust verdict."
+          ]
+        },
+        {
+          "id": "oplage.nexus-device-profile.v1",
+          "kind": "peer-integration-profile",
+          "source": "projects/oplague/docs/NEXUS_DEVICE_PROFILE_V1.md",
+          "maturity": "profile-specified",
+          "purpose": "Defines NEXUS device-evidence ownership and allowed consumers.",
+          "consumer_rules": [
+            "Inspect package data only; never extract or execute untrusted payloads.",
+            "Driver installation, firmware flashing and device mutation remain out of scope.",
+            "Compatibility candidates are evidence, not certification."
+          ]
+        }
+      ],
+      "prohibited_effects": [
+        "automatic driver install, enable, unload or replacement",
+        "firmware flashing or device mutation",
+        "untrusted package extraction or execution",
+        "invented AMD/Intel sensor values"
+      ]
+    },
+    {
+      "id": "ventusample",
+      "repository": "Ivan-VHS/VentuSample",
+      "path": "projects/ventusample",
+      "role": "procedural audio, asset metadata and offline DSP provider",
+      "workbench_maturity": "native C++20 host workbench; DuckOS audio service integration pending",
+      "contracts": [
+        {
+          "id": "ventusample.pack.v1",
+          "kind": "versioned-audio-pack-manifest",
+          "source": "projects/ventusample/docs/NEXUS_AUDIO_PROFILE_V1.md",
+          "maturity": "existing-pack-contract-referenced",
+          "purpose": "Exchanges generated audio assets and pack metadata without treating them as executable plugins.",
+          "consumer_rules": [
+            "Preserve seed, variation, render settings, sample rate, channel layout and provenance.",
+            "Treat imported packs and plugins as data until a separate trust model exists.",
+            "Reaper may validate supported metadata but must not rewrite audio payloads."
+          ]
+        },
+        {
+          "id": "ventusample.preset.v1",
+          "kind": "versioned-audio-preset",
+          "source": "projects/ventusample/docs/NEXUS_AUDIO_PROFILE_V1.md",
+          "maturity": "existing-preset-schema-referenced",
+          "purpose": "Carries deterministic preset and render configuration metadata.",
+          "consumer_rules": [
+            "Validate the preset schema and enforce file/size bounds.",
+            "A fixed configuration and seed must retain the project's declared deterministic behavior.",
+            "Offline render metadata does not grant audio-device or microphone access."
+          ]
+        },
+        {
+          "id": "ventusample.nexus-audio.v1",
+          "kind": "peer-integration-profile",
+          "source": "projects/ventusample/docs/NEXUS_SYSTEM_SERVICE_BOUNDARIES_V1.md",
+          "maturity": "profile-specified",
+          "purpose": "Defines offline audio provider boundaries and the separate future AudioSubsys relationship.",
+          "consumer_rules": [
+            "Keep processing offline by default.",
+            "Do not route offline DSP into a real-time callback by implication.",
+            "Real-time audio requires a separate DuckOS-owned device, scheduling and recovery contract."
+          ]
+        }
+      ],
+      "prohibited_effects": [
+        "kernel audio driver or device ownership",
+        "background recording or hidden microphone access",
+        "unbounded real-time callback work",
+        "automatic plugin execution"
+      ]
+    }
+  ]
+}

@@ -140,6 +140,8 @@ DuckOS now records **x86_64 as the primary target for Intel and AMD**. The archi
 
 ## Source federation and integrity
 
+The [NEXUS ecosystem integration map](docs/ECOSYSTEM_NEXUS_INTEGRATION.md) records the direct peer contracts, data boundaries and native implementation gates. The machine-readable peer registry is `federation/nexus-peers.v1.json`.
+
 The active source set is defined in `federation/repositories.v1.json`. Initialize the exact pinned sources with:
 
 ```sh

@@ -65,6 +65,10 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 [x86_64 CPU exception handling](X86_64_EXCEPTION_HANDLING.md) documents the IDT gate contract, CPU exception stubs, fatal diagnostics, QEMU marker and the remaining GDT/TSS/IST and interrupt-controller work.
 
+## Repository federation and peer contracts
+
+[NEXUS ecosystem integration](ECOSYSTEM_NEXUS_INTEGRATION.md) records the versioned peer interfaces, permitted data flows, security boundaries and remaining native DuckOS integration gates.
+
 ## Native implementation planning
 
 - [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
