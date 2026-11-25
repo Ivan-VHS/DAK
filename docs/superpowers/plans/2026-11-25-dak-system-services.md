@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add the first Reaper-native policy layer for the DAK installer, driver runtime, package manager and update system.
+**Goal:** Add the first Reaper-native policy layer for the DAK installer, driver runtime, package manager, update system and shared audit journal.
 
-**Architecture:** Four focused `.rpr` modules share existing Reaper memory, architecture, capability, driver-descriptor and VFS contracts. A single Reaper contract suite exercises their public APIs under both the tree-walk engine and VM; all decisions remain plan-only until privileged DAK providers exist.
+**Architecture:** Five focused `.rpr` policy modules (four system services plus an audit journal) reuse existing Reaper memory, architecture, capability, driver-descriptor and VFS contracts. A single Reaper contract suite exercises their public APIs under both the tree-walk engine and VM; all decisions remain plan-only until privileged DAK providers exist.
 
 **Tech Stack:** Reaper `.rpr`, existing DAK Reaper reference runtime, GitHub Actions contract workflow, Markdown architecture documentation.
 
@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- All four subsystem policies are implemented in Reaper source, not Python.
+- All four subsystem policies and the shared audit journal are implemented in Reaper source, not Python.
 - x86-64 is the primary Intel/AMD target; Elbrus remains a compatibility-preserved target.
 - Fail closed on missing trust, identity, signature, capability, bounds or recovery evidence.
 - Never conflate hash integrity with publisher authentication.
@@ -39,7 +39,7 @@
 - Consumes: `dak/kernel/memory.rpr::region_fits`, `dak/platform/targets.rpr::architecture_known`.
 - Produces: `target_valid`, `admission`, `partition_valid`, `layout_valid`, `transition_valid`, `commit_policy`.
 
-- [x] Write tests for explicit consent, source trust, recovery readiness, partition overlap, skipped states and unverified boot.
+- [x] Write tests for explicit consent, publisher/digest/signature evidence, recovery readiness, BIOS/UEFI layout, partition overlap, skipped states and unverified boot.
 - [x] Implement policy module; all results are plan-only and never write storage.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -53,7 +53,7 @@
 - Consumes: `dak/drivers/abi.rpr`, `dak/drivers/orchestrator.rpr`, `dak/platform/targets.rpr`.
 - Produces: `descriptor_valid`, `admission`, `transition_valid`, `unload_policy`.
 
-- [x] Test publisher/signature, device-bus and architecture gates, lifecycle skips and active DMA.
+- [x] Test publisher, digest and signature state; device-bus and architecture gates; lifecycle skips and active DMA.
 - [x] Implement admission and safe-unload decision policy; no driver is loaded or mapped.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -67,7 +67,7 @@
 - Consumes: `dak/platform/targets.rpr`, `dak/security/capabilities.rpr`, `dak/storage/vfs.rpr`.
 - Produces: `package_valid`, `dependencies_satisfied`, `paths_valid`, `admission`, `transition_valid`, `remove_policy`.
 
-- [x] Test malformed manifests, dependency absence, path traversal, capability denial and protected/dependent removal.
+- [x] Test malformed manifests, publisher/digest fields, dependency absence, path traversal, capability denial and protected/dependent removal.
 - [x] Implement bounded manifest and transaction policy; no payload is extracted or executed.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -85,7 +85,20 @@
 - [x] Implement A/B update and boot-confirmation policy; no slot is written or switched.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
-### Task 5: Documentation and cross-repository integration
+### Task 5: Append-only audit journal
+
+**Files:**
+- Create: `dak/system/audit.rpr`
+- Modify: `contract_tests.rpr`
+
+**Interfaces:**
+- Produces: `record_valid`, `chain_valid`, `append_policy`.
+
+- [x] Test valid event records, missing request identity, sequence gaps, bounded capacity and append-only ordering.
+- [x] Implement append-intent validation; durable storage and tamper-evident signing remain provider responsibilities.
+- [ ] Verify tree-walk and VM contract results in GitHub Actions.
+
+### Task 6: Documentation and cross-repository integration
 
 **Files:**
 - Create: `docs/DAK_SYSTEM_SERVICES_V1.md`
