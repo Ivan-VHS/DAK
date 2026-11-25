@@ -1,0 +1,162 @@
+# DuckOS service lifecycle policy.
+# Reference contract only: the native supervisor must enforce these decisions.
+
+export craft descriptor_valid(service) {
+    when size(service) != 9 {
+        yield false
+    }
+    when service[0] == "" {
+        yield false
+    }
+    when service[1] != "system" and service[1] != "session" and service[1] != "user" {
+        yield false
+    }
+    when service[2] != "boot" and service[2] != "core" and service[2] != "session" and service[2] != "desktop" and service[2] != "on-demand" {
+        yield false
+    }
+    when service[3] < 0 or service[3] > 10 {
+        yield false
+    }
+    when service[4] < 0 or service[5] < service[4] or service[5] > 60000 {
+        yield false
+    }
+    when service[6] <= 0 or service[7] <= 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft startup_action(enabled, dependencies_ready, session_ready, phase, user_requested) {
+    when phase != "boot" and phase != "core" and phase != "session" and phase != "desktop" and phase != "on-demand" {
+        yield "invalid"
+    }
+    when not enabled {
+        yield "disabled"
+    }
+    when not dependencies_ready {
+        yield "wait-dependencies"
+    }
+    when (phase == "session" or phase == "desktop") and not session_ready {
+        yield "wait-session"
+    }
+    when phase == "on-demand" and not user_requested {
+        yield "dormant"
+    }
+    yield "start"
+}
+
+export craft state_transition_allowed(current, next) {
+    when current == "inactive" and next == "starting" {
+        yield true
+    }
+    when current == "starting" and (next == "ready" or next == "degraded" or next == "failed") {
+        yield true
+    }
+    when current == "ready" and (next == "degraded" or next == "stopping" or next == "failed") {
+        yield true
+    }
+    when current == "degraded" and (next == "ready" or next == "stopping" or next == "failed") {
+        yield true
+    }
+    when current == "stopping" and (next == "stopped" or next == "failed") {
+        yield true
+    }
+    when current == "failed" and next == "starting" {
+        yield true
+    }
+    yield false
+}
+
+export craft restart_action(exit_code, retries, retry_limit) {
+    when retries < 0 or retry_limit < 0 or retries > retry_limit {
+        yield "invalid"
+    }
+    when exit_code == 0 {
+        yield "stopped"
+    }
+    when retries >= retry_limit {
+        yield "failed"
+    }
+    yield "restart"
+}
+
+export craft restart_delay(retries, base_ms, cap_ms) {
+    when retries < 0 or base_ms <= 0 or cap_ms < base_ms or cap_ms > 60000 {
+        yield -1
+    }
+    when retries == 0 {
+        yield base_ms
+    }
+    when retries == 1 {
+        when base_ms * 2 > cap_ms {
+            yield cap_ms
+        }
+        yield base_ms * 2
+    }
+    when retries == 2 {
+        when base_ms * 4 > cap_ms {
+            yield cap_ms
+        }
+        yield base_ms * 4
+    }
+    yield cap_ms
+}
+
+export craft health_state(ready, heartbeat_age_ms, heartbeat_limit_ms, error_count, error_limit) {
+    when heartbeat_age_ms < 0 or heartbeat_limit_ms <= 0 or error_count < 0 or error_limit <= 0 {
+        yield "invalid"
+    }
+    when not ready {
+        yield "starting"
+    }
+    when heartbeat_age_ms > heartbeat_limit_ms {
+        yield "unresponsive"
+    }
+    when error_count >= error_limit {
+        yield "degraded"
+    }
+    yield "healthy"
+}
+
+export craft network_listen_allowed(service_enabled, capability_granted, operator_opt_in) {
+    yield service_enabled and capability_granted and operator_opt_in
+}
+
+export craft config_commit_action(valid, staged, rollback_available) {
+    when not valid {
+        yield "reject-invalid"
+    }
+    when not staged {
+        yield "stage-required"
+    }
+    when not rollback_available {
+        yield "reject-no-rollback"
+    }
+    yield "commit-atomically"
+}
+
+export craft update_action(signature_valid, digest_valid, schema_valid, staged, health_ok) {
+    when not signature_valid or not digest_valid or not schema_valid {
+        yield "reject"
+    }
+    when not staged {
+        yield "stage"
+    }
+    when not health_ok {
+        yield "rollback"
+    }
+    yield "commit"
+}
+
+export craft shutdown_action(work_pending, deadline_elapsed, checkpoint_available) {
+    when work_pending and not deadline_elapsed {
+        yield "drain-or-cancel"
+    }
+    when work_pending and deadline_elapsed and checkpoint_available {
+        yield "checkpoint-then-stop"
+    }
+    when work_pending and deadline_elapsed {
+        yield "report-uncommitted-state"
+    }
+    yield "stop"
+}
