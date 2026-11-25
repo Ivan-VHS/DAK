@@ -221,7 +221,7 @@ duckos_page_table_status duckos_page_table_clone(
 }
 
 void duckos_page_table_destroy(duckos_page_table_space *space) {
-    if (space == NULL || space->root_physical == 0u) return;
+    if (space == NULL || space->root_physical == 0u || space->active != 0u) return;
     destroy_tree(space, space->root_physical, 4u);
     space->root_physical = 0u;
     space->active = 0u;
