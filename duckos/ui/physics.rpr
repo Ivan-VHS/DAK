@@ -23,6 +23,17 @@ export craft spring_step(position, velocity, target, stiffness, damping, mass, d
     yield ["stepped", next_position, next_velocity]
 }
 
+export craft spring_step_allowed(delta_seconds) {
+    yield delta_seconds > 0 and delta_seconds <= 0.032
+}
+
+export craft spring_settled(position, velocity, target, position_epsilon, velocity_epsilon) {
+    when position_epsilon <= 0 or velocity_epsilon <= 0 {
+        yield false
+    }
+    yield position - target <= position_epsilon and target - position <= position_epsilon and velocity <= velocity_epsilon and velocity >= -velocity_epsilon
+}
+
 export craft motion_allowed(reduced_motion, eco_visuals) {
     yield not reduced_motion and not eco_visuals
 }
