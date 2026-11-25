@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
     safe.id = QStringLiteral("safe");
     safe.name = QStringLiteral("Safe launcher");
     safe.target = QStringLiteral("release/bin/sample.exe");
+    safe.launchKind = QStringLiteral("python-script");
     safe.launchable = true;
     ApplicationLauncher safeLauncher(packageRoot.path());
     if (safeLauncher.resolveTarget(safe, &error).isEmpty()) {
