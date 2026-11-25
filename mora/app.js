@@ -121,6 +121,14 @@ function applyThemeDocument(themeDocument) {
   };
   const bounded = (value, min, max, fallback) =>
     Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+  const materialColor = (material, fallback) => {
+    const color = typeof material?.fill === "string" ? material.fill : fallback;
+    const alpha = bounded(material?.opacity, 0, 1, 0.9);
+    const match = /^#([0-9a-f]{6})$/i.exec(color);
+    if (!match) return color;
+    const value = Number.parseInt(match[1], 16);
+    return "rgba(" + ((value >> 16) & 255) + "," + ((value >> 8) & 255) + "," + (value & 255) + "," + alpha + ")";
+  };
   set("--mora-canvas", palette.canvas);
   set("--mora-page", palette.page);
   set("--mora-surface", palette.surface);
@@ -133,9 +141,9 @@ function applyThemeDocument(themeDocument) {
   set("--mora-danger", palette.danger);
   set("--mora-secondary", "rgba(255,255,255," + bounded(themeDocument.textOpacity?.secondary, 0, 1, 0.72) + ")");
   set("--mora-muted", "rgba(255,255,255," + bounded(themeDocument.textOpacity?.tertiary, 0, 1, 0.42) + ")");
-  set("--mora-glass-background", materials.backgroundGlass.fill);
-  set("--mora-glass-content", materials.contentGlass.fill);
-  set("--mora-glass-modal", materials.modalGlass.fill);
+  set("--mora-glass-background", materialColor(materials.backgroundGlass, "rgba(7,7,7,.88)"));
+  set("--mora-glass-content", materialColor(materials.contentGlass, "rgba(17,17,17,.88)"));
+  set("--mora-glass-modal", materialColor(materials.modalGlass, "rgba(17,17,17,.94)"));
   set("--mora-background-blur", bounded(materials.backgroundGlass.blurPx, 0, 36, 28) + "px");
   set("--mora-content-blur", bounded(materials.contentGlass.blurPx, 0, 36, 18) + "px");
   set("--mora-modal-blur", bounded(materials.modalGlass.blurPx, 0, 36, 32) + "px");
