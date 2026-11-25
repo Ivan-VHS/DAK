@@ -32,6 +32,8 @@ Updated: 2026-11-25
 
 ## Partial or external boundaries
 
+- [ ] Experimental x86_64 stage-0 boot image pipeline is implemented in the current boot-image change: Limine v12.11.1 is pinned; the DuckOS-owned freestanding entry validates firmware memory-map and framebuffer handoff, reports to COM1, and has BIOS/UEFI ISO build plus QEMU test scripts. It remains unverified until the BIOS and UEFI CI boots both pass; it is not yet a running OS session.
+
 - [ ] Real frame/page allocator, page tables, MMIO and DMA.
 - [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
 - [ ] Shared-memory zero-copy IPC, wakeups and cancellation.
@@ -41,7 +43,7 @@ Updated: 2026-11-25
 - [ ] BLAKE3 hashing, persistent semantic graph, structural sharing and general CRDT synchronization.
 - [ ] GPU command submission and accelerated compositor.
 - [ ] Freestanding native Reaper compiler/backend and self-hosted compiler.
-- [ ] UEFI/BIOS bootloader, kernel entry point and bootable ISO/USB image.
+- [ ] Production boot chain and usable kernel remain incomplete: no native allocator, interrupts, process model, syscall layer, driver runtime, filesystem, service supervisor or compositor is present.
 - [ ] Process model, syscall ABI and kernel-enforced capabilities.
 - [ ] Package manager, init process tree, filesystem and installer.
 - [ ] Audio engine, Wayland-compatible compositor and native settings applications.
@@ -90,7 +92,7 @@ The runtime inventory and plan generator do not invoke a discovered runtime or t
 - [x] USB, PXE, UEFI HTTP Boot/iPXE and cloud deployment plan targets.
 - [x] CLI entry points: `build-release`, `verify-release` and `deployment-plan`.
 - [x] JSON schemas for release metadata and deployment plans.
-- [ ] Real ISO and hybrid USB image assembly, including an actual firmware-compatible EFI bootloader.
+- [ ] Production installer and hybrid USB deployment. The experimental ISO pipeline is documented separately in [BOOTABLE_IMAGE.md](BOOTABLE_IMAGE.md); it does not imply a disk installer or supported hardware matrix.
 - [ ] PXE/HTTP boot server provisioning, DHCP/TFTP configuration, native boot handoff and boot-chain signature enforcement.
 - [ ] Physical disk installer and safe destructive-write workflow.
 - [ ] Native A/B slot selection, boot-success confirmation and automatic rollback.

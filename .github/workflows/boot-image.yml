@@ -1,0 +1,88 @@
+name: DuckOS bootable stage-0 ISO
+
+on:
+  pull_request:
+    paths:
+      - "boot/**"
+      - "kernel/**"
+      - "foundation/**"
+      - "tests/test_boot_info.c"
+      - "CMakeLists.txt"
+      - ".github/workflows/boot-image.yml"
+  push:
+    branches: [main]
+    paths:
+      - "boot/**"
+      - "kernel/**"
+      - "foundation/**"
+      - "tests/test_boot_info.c"
+      - "CMakeLists.txt"
+      - ".github/workflows/boot-image.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: duckos-boot-iso-${{ github.event.pull_request.head.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootable-iso:
+    name: Build and boot-test x86_64 ISO
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native image and emulator tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils curl xorriso qemu-system-x86 ovmf
+
+      - name: Build host boot contract tests
+        run: |
+          cmake -S . -B build/host -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build/host --parallel 2
+          ctest --test-dir build/host --output-on-failure
+
+      - name: Build pinned BIOS/UEFI ISO
+        run: |
+          bash boot/build-iso.sh \
+            --work-dir build/duckos-boot \
+            --output build/DuckOS-Stage0-x86_64.iso
+
+      - name: Locate OVMF firmware
+        run: |
+          if [[ -f /usr/share/OVMF/OVMF_CODE.fd && -f /usr/share/OVMF/OVMF_VARS.fd ]]; then
+            code=/usr/share/OVMF/OVMF_CODE.fd
+            vars=/usr/share/OVMF/OVMF_VARS.fd
+          elif [[ -f /usr/share/OVMF/OVMF_CODE_4M.fd && -f /usr/share/OVMF/OVMF_VARS_4M.fd ]]; then
+            code=/usr/share/OVMF/OVMF_CODE_4M.fd
+            vars=/usr/share/OVMF/OVMF_VARS_4M.fd
+          else
+            echo "No matching OVMF CODE/VARS firmware pair was found" >&2
+            find /usr/share -iname '*OVMF*' -type f -print
+            exit 1
+          fi
+          echo "OVMF_CODE_PATH=$code" >> "$GITHUB_ENV"
+          echo "OVMF_VARS_PATH=$vars" >> "$GITHUB_ENV"
+
+      - name: Verify BIOS and UEFI boot in QEMU
+        run: |
+          bash boot/test-qemu.sh \
+            --iso build/DuckOS-Stage0-x86_64.iso \
+            --output-dir build/qemu \
+            --ovmf-code "$OVMF_CODE_PATH" \
+            --ovmf-vars "$OVMF_VARS_PATH"
+
+      - name: Publish bootable ISO and checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckOS-Stage0-x86_64-ISO
+          path: |
+            build/DuckOS-Stage0-x86_64.iso
+            build/DuckOS-Stage0-x86_64.iso.sha256
+            build/qemu/*.log
+          if-no-files-found: error
+          retention-days: 30

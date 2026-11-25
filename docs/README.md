@@ -57,6 +57,10 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
 
+## Native boot image
+
+[Bootable stage-0 image](BOOTABLE_IMAGE.md) documents the pinned Limine BIOS/UEFI boot path, freestanding x86_64 ELF, reproducible ISO assembly, QEMU boot checks, third-party notices and current kernel limitations.
+
 ## Native implementation planning
 
 - [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
