@@ -1,0 +1,57 @@
+# DAK System Audit v1 — bounded append-only journal policy.
+# This module validates records and append intent; durable storage and
+# cryptographic journal authentication are supplied by a trusted provider.
+
+export craft record_valid(record) {
+    when size(record) != 7 {
+        yield false
+    }
+    when record[0] <= 0 {
+        yield false
+    }
+    when record[1] == "" or record[2] == "" or record[3] == "" {
+        yield false
+    }
+    when record[4] == "" or record[5] == "" or record[6] == "" {
+        yield false
+    }
+    yield true
+}
+
+export craft chain_valid(records) {
+    vary expected_sequence := 1
+    each record in records {
+        when not record_valid(record) {
+            yield false
+        }
+        when record[0] != expected_sequence {
+            yield false
+        }
+        change expected_sequence := expected_sequence + 1
+    }
+    yield true
+}
+
+export craft append_policy(records, record, max_records) {
+    when max_records <= 0 or size(records) > max_records {
+        yield "reject-capacity"
+    }
+    when size(records) >= max_records {
+        yield "reject-capacity"
+    }
+    when not chain_valid(records) or not record_valid(record) {
+        yield "reject-invalid-record"
+    }
+    when size(records) == 0 {
+        when record[0] != 1 {
+            yield "reject-sequence"
+        }
+        yield "append-plan-only"
+    }
+
+    make previous := records[size(records) - 1]
+    when record[0] != previous[0] + 1 {
+        yield "reject-sequence"
+    }
+    yield "append-plan-only"
+}
