@@ -162,7 +162,7 @@ export craft remove_policy(state, dependent_count, protected) {
     when kind(dependent_count) != "number" or kind(protected) != "boolean" {
         yield "reject-invalid-dependency-count"
     }
-    when dependent_count < 0 {
+    when dependent_count % 1 != 0 or dependent_count < 0 {
         yield "reject-invalid-dependency-count"
     }
     when dependent_count > 0 {
