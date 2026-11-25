@@ -15,7 +15,7 @@ const ids = ["reaper-workbench", "pytyliki-workbench", "oplague-workbench", "ven
 const repoIds = ["pytyliki", "reaper", "oplague", "ventusample"];
 
 test("Mora launcher exposes every pinned ecosystem workbench", () => {
-  assert.equal(registry.schema, "duckos.mora-workbenches.v1");
+  assert.equal(registry.schema, "dak.mora-workbenches.v1");
   assert.equal(registry.policy.browser_launch, "panel-only");
   assert.equal(registry.policy.external_process_launch, false);
   assert.equal(registry.policy.auto_execute, false);
@@ -48,7 +48,7 @@ test("federation pins exactly the four active user-space repositories", () => {
 });
 
 test("release metadata declares firmware and application boundaries honestly", () => {
-  assert.equal(release.schema, "duckos.release-edition.v1");
+  assert.equal(release.schema, "dak.release-edition.v1");
   assert.equal(release.boot.kernel_stage, 1);
   assert.equal(release.boot.desktop_session_from_kernel, false);
   assert.equal(release.desktop.external_process_launch, false);

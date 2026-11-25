@@ -1,6 +1,6 @@
-# DuckOS release and deployment tooling
+# DAK release and deployment tooling
 
-This document describes the release-packaging and deployment-planning tools added to the DuckOS repository.
+This document describes the release-packaging and deployment-planning tools added to the DAK repository.
 
 ## What is implemented
 
@@ -23,13 +23,13 @@ The toolchain does **not** currently write raw disks, install an operating syste
 Validate a system manifest and all referenced component files:
 
 ```sh
-python -m duckos validate-manifest system-manifest.json build/rootfs
+python -m dak validate-manifest system-manifest.json build/rootfs
 ```
 
 Build an unsigned component bundle:
 
 ```sh
-python -m duckos build-release system-manifest.json build/rootfs DuckOS-0.2.0.tar.gz
+python -m dak build-release system-manifest.json build/rootfs DAK-0.2.0.tar.gz
 ```
 
 Create an Ed25519 key pair for release signing. Keep the private key offline or in the release secret store; publish only the public key:
@@ -42,21 +42,21 @@ openssl pkey -in release-private.pem -pubout -out release-public.pem
 Build and verify a signed release:
 
 ```sh
-python -m duckos build-release system-manifest.json build/rootfs DuckOS-0.2.0.tar.gz --signing-key release-private.pem
-python -m duckos verify-release DuckOS-0.2.0.tar.gz --public-key release-public.pem
+python -m dak build-release system-manifest.json build/rootfs DAK-0.2.0.tar.gz --signing-key release-private.pem
+python -m dak verify-release DAK-0.2.0.tar.gz --public-key release-public.pem
 ```
 
 Generate a USB partition layout without touching a drive:
 
 ```sh
-python -m duckos deployment-plan system-manifest.json build/rootfs --target usb --output usb-layout.json
+python -m dak deployment-plan system-manifest.json build/rootfs --target usb --output usb-layout.json
 ```
 
 Generate a network-boot handoff plan:
 
 ```sh
-python -m duckos deployment-plan system-manifest.json build/rootfs \
-  --target pxe --base-url https://boot.example.test/duckos --secure-boot \
+python -m dak deployment-plan system-manifest.json build/rootfs \
+  --target pxe --base-url https://boot.example.test/dak --secure-boot \
   --output pxe-plan.json
 ```
 
@@ -65,7 +65,7 @@ Generate a UEFI HTTP Boot/iPXE handoff plan by selecting `--target http`. Genera
 ## Release bundle structure
 
 ```text
-duckos-release/
+dak-release/
 ├── manifest.json
 ├── release.json
 ├── release.json.sig       # only when --signing-key is supplied
@@ -107,4 +107,4 @@ The deployment tests cover reproducible bundles, payload tampering, Ed25519 sign
 
 ## Remaining native OS work
 
-A bootable production DuckOS still requires a freestanding Reaper compiler/backend or another explicitly selected native kernel toolchain, a native kernel entry point, firmware-facing bootloader, physical memory and interrupt setup, process/runtime enforcement, filesystem and init, compositor, signed driver loading, installer, image assembly and real UEFI/BIOS/VM/hardware testing. The release tools intentionally report these as unimplemented instead of producing misleading ISO/USB/Cloud artifacts.
+A bootable production DAK still requires a freestanding Reaper compiler/backend or another explicitly selected native kernel toolchain, a native kernel entry point, firmware-facing bootloader, physical memory and interrupt setup, process/runtime enforcement, filesystem and init, compositor, signed driver loading, installer, image assembly and real UEFI/BIOS/VM/hardware testing. The release tools intentionally report these as unimplemented instead of producing misleading ISO/USB/Cloud artifacts.

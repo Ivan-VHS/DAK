@@ -1,12 +1,12 @@
 # Defensive security doctrine and BAV context taxonomy
 
-**Policy:** `duckos.bav.defense-context.v1`  
+**Policy:** `dak.bav.defense-context.v1`  
 **Catalog:** [`security/defense-context.v1.tsv`](../security/defense-context.v1.tsv)  
 **Status:** context taxonomy is defined; full antivirus coverage is not implied.
 
 ## Purpose
 
-This policy carries three groups of user-supplied Russian-language terms into repository security governance and DuckOS BAV design:
+This policy carries three groups of user-supplied Russian-language terms into repository security governance and DAK BAV design:
 
 | Category ID | Context family | Terms |
 |---|---|---:|
@@ -41,7 +41,7 @@ A context match MUST NOT increase the malware risk score, set `blocked`, trigger
 9. **Fail safely.** Parser errors, timeouts, missing trust roots and unsupported formats produce `review` or `unknown`, never a fabricated `clear`.
 10. **Supply-chain integrity.** Pin dependencies and CI actions, generate an SBOM, review transitive dependencies, sign release artifacts and verify the signature before installation.
 
-## BAV integration boundary in DuckOS
+## BAV integration boundary in DAK
 
 The first BAV increment is a small Java context-classification library. It loads the TSV catalog, applies Unicode NFKC normalization, uses whole-phrase boundaries, rejects oversized input and returns category/term IDs only. It does not scan binaries, inspect process memory, verify signatures or detect malware.
 
@@ -54,11 +54,11 @@ The full BAV architecture must keep these components separate:
 - **Policy engine:** combines evidence without allowing context tags to become malware verdicts.
 - **Native response broker:** explicit, capability-scoped and auditable actions; no browser-shell privilege.
 
-Mora/Sentinel preferences are not OS enforcement. Native process isolation, file access control, driver trust and quarantine require a real DuckOS service and kernel/broker enforcement.
+Mora/Sentinel preferences are not OS enforcement. Native process isolation, file access control, driver trust and quarantine require a real DAK service and kernel/broker enforcement.
 
 ## Repository-specific application
 
-- **DuckOS:** BAV context tags are local metadata; Sentinel and the native security broker remain separate enforcement layers.
+- **DAK:** BAV context tags are local metadata; Sentinel and the native security broker remain separate enforcement layers.
 - **Reaper:** keep the 66-rule repository baseline intact; treat the catalog as text data and validate it as part of policy governance.
 - **OPlague:** driver/INF/ZIP/PE metadata is evidence, not an authorization to install or load a driver. The project remains read-only.
 - **Pytyliki:** hardware and source inspection stays advisory and bounded; no firmware flashing, device writes or privileged operations are added.
@@ -71,9 +71,9 @@ The Java context module has a dependency-free self-test for all three categories
 ```sh
 mkdir -p build/bav-context
 javac --release 17 -d build/bav-context \
-  bav/java/duckos/bav/context/ContextClassifier.java \
-  bav/java/duckos/bav/context/ContextClassifierSelfTest.java
-java -ea -cp build/bav-context duckos.bav.context.ContextClassifierSelfTest \
+  bav/java/dak/bav/context/ContextClassifier.java \
+  bav/java/dak/bav/context/ContextClassifierSelfTest.java
+java -ea -cp build/bav-context dak.bav.context.ContextClassifierSelfTest \
   security/defense-context.v1.tsv
 ```
 
@@ -82,4 +82,4 @@ This test validates the context classifier only. It is not a malware-detection b
 
 ## Canonical location
 
-The shared context catalogue is maintained in DuckOS. Product repositories may keep local copies for their scanner workflow, but must preserve the same meaning: context terms are descriptive metadata, never malware signatures or standalone blocking evidence.
+The shared context catalogue is maintained in DAK. Product repositories may keep local copies for their scanner workflow, but must preserve the same meaning: context terms are descriptive metadata, never malware signatures or standalone blocking evidence.

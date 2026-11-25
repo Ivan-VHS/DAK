@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/deployment-plan.v1.schema.json",
-  "title": "DuckOS non-destructive deployment plan v1",
+  "$id": "https://github.com/Ivan-VHS/DAK/blob/main/schemas/deployment-plan.v1.schema.json",
+  "title": "DAK non-destructive deployment plan v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -18,7 +18,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.deployment-plan.v1"
+      "const": "dak.deployment-plan.v1"
     },
     "system": {
       "type": "object",

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.4.0",
   "shell": {
-    "id": "ivan-vhs.duckos.mora",
+    "id": "ivan-vhs.dak.mora",
     "name": "Mora",
     "data_policy": "fictional_demo_data"
   },
@@ -202,7 +202,7 @@
     },
     {
       "id": "desktop",
-      "name": "Duck Desktop",
+      "name": "DAK Desktop",
       "category": "workspace",
       "panel": "mora/app.js#desktop",
       "maturity": "partial_native_userland_tool"

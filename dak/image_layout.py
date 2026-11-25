@@ -5,7 +5,7 @@ import math
 import re
 from typing import Any
 
-SCHEMA = "duckos.image-layout.v1"
+SCHEMA = "dak.image-layout.v1"
 MAX_PARTITIONS = 64
 MAX_IMAGE_BYTES = 64 * 1024 * 1024 * 1024
 

@@ -35,7 +35,7 @@ test("local document store rejects invalid identifiers and oversized payloads", 
   await assert.rejects(() => store.put("large", { text: "x".repeat(270 * 1024) }), RangeError);
 });
 
-test("Red Sparrow and locale are registered without changing DuckOS's shared theme", async () => {
+test("Red Sparrow and locale are registered without changing DAK's shared theme", async () => {
   const [catalogText, appText, htmlText, policyText, coreText, themeText] = await Promise.all([
     readFile(new URL("../mora/apps.json", import.meta.url), "utf8"),
     readFile(new URL("../mora/app.js", import.meta.url), "utf8"),

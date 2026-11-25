@@ -1,4 +1,4 @@
-name: DuckOS CI
+name: DAK CI
 
 on:
   pull_request:
@@ -76,5 +76,5 @@ jobs:
             echo "::error::Native source exists but no CMakeLists.txt build contract is defined."
             exit 1
           else
-            echo "::notice::No native C/C++ source tree or build target exists in this DuckOS repository revision; native compilation is not applicable yet."
+            echo "::notice::No native C/C++ source tree or build target exists in this DAK repository revision; native compilation is not applicable yet."
           fi

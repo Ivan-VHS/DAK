@@ -1,5 +1,6 @@
-export const PREFERENCES_KEY = "duckos.mora.preferences.v1";
-export const RECOVERY_KEY = "duckos.mora.recovery.v1";
+export const PREFERENCES_KEY = "dak.mora.preferences.v1";
+export const RECOVERY_KEY = "dak.mora.recovery.v1";
+const LEGACY_PREFERENCES_KEY = "duckos.mora.preferences.v1";
 
 export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
@@ -17,7 +18,7 @@ export function createDefaultPreferences() {
     appearance: {
       reducedMotion: false,
       density: "comfortable",
-      theme: "duck"
+      theme: "dak"
     },
     focusMode: false,
     powerProfile: "balanced",
@@ -40,7 +41,7 @@ export function normalizePreferences(value) {
     appearance: {
       reducedMotion: appearance.reducedMotion === true,
       density: appearance.density === "compact" ? "compact" : defaults.appearance.density,
-      theme: "duck"
+      theme: "dak"
     },
     focusMode: source.focusMode === true,
     powerProfile: POWER_PROFILES.includes(source.powerProfile)
@@ -67,7 +68,14 @@ export function loadPreferences(storage) {
 
   try {
     const saved = target.getItem(PREFERENCES_KEY);
-    return saved ? normalizePreferences(JSON.parse(saved)) : createDefaultPreferences();
+    if (saved) return normalizePreferences(JSON.parse(saved));
+
+    const legacySaved = target.getItem(LEGACY_PREFERENCES_KEY);
+    if (!legacySaved) return createDefaultPreferences();
+
+    const migrated = normalizePreferences(JSON.parse(legacySaved));
+    target.setItem(PREFERENCES_KEY, JSON.stringify(migrated));
+    return migrated;
   } catch {
     return createDefaultPreferences();
   }

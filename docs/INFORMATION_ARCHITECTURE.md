@@ -1,8 +1,8 @@
-# DuckOS documentation information architecture
+# DAK documentation information architecture
 
 [Project README](../README.md) · [Documentation index](README.md) · [Project overview](clusters/project-overview.md)
 
-This map is the canonical navigation graph for DuckOS. It describes the documentation currently present in the repository and keeps browser prototypes, product specifications and native OS work at separate maturity levels.
+This map is the canonical navigation graph for DAK. It describes the documentation currently present in the repository and keeps browser prototypes, product specifications and native OS work at separate maturity levels.
 
 ## Entry points
 
@@ -46,7 +46,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 
 ## Dependency and cross-repository boundaries
 
-DuckOS may link to specialist repositories, but a link is not evidence of shared source, ABI compatibility, native launchability or feature parity. Cross-repository integration must name the interface, version and verification evidence.
+DAK may link to specialist repositories, but a link is not evidence of shared source, ABI compatibility, native launchability or feature parity. Cross-repository integration must name the interface, version and verification evidence.
 
 ## Growth rules
 

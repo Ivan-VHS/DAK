@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the DuckOS application catalog and its versioned transfer contract."""
+"""Validate the DAK application catalog and its versioned transfer contract."""
 from __future__ import annotations
 
 import json

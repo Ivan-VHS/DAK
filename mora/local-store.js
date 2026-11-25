@@ -1,7 +1,12 @@
-const DB_NAME = "duckos.mora.local.v1";
+const DB_NAME = "dak.mora.local.v1";
+const LEGACY_DB_NAME = "duckos.mora.local.v1";
 const DB_VERSION = 1;
 const STORE_NAME = "documents";
-const FALLBACK_PREFIX = "duckos.mora.localdoc.v1:";
+const FALLBACK_PREFIX = "dak.mora.localdoc.v1:";
+const LEGACY_FALLBACK_PREFIX = "duckos.mora.localdoc.v1:";
+const LEGACY_ID_ALIASES = new Map([
+  ["dak.mora.recovery.v1", "duckos.mora.recovery.v1"]
+]);
 const MAX_DOCUMENT_BYTES = 256 * 1024;
 const ID_PATTERN = /^[a-zA-Z0-9:._-]{1,96}$/;
 
@@ -28,7 +33,7 @@ export function createLocalDocumentStore(options = {}) {
   const indexedDBApi = Object.hasOwn(options, "indexedDB") ? options.indexedDB : globalThis.indexedDB;
   const storage = Object.hasOwn(options, "storage") ? options.storage : defaultStorage();
   const now = typeof options.now === "function" ? options.now : () => new Date().toISOString();
-  let databasePromise = null;
+  const databasePromises = new Map();
 
   function validateId(id) {
     if (typeof id !== "string" || !ID_PATTERN.test(id)) throw new TypeError("Invalid local document id.");
@@ -43,12 +48,13 @@ export function createLocalDocumentStore(options = {}) {
     return json;
   }
 
-  function openDatabase() {
+  function openDatabase(name = DB_NAME) {
     if (!indexedDBApi) return Promise.resolve(null);
-    if (databasePromise) return databasePromise;
-    databasePromise = new Promise((resolve, reject) => {
+    if (databasePromises.has(name)) return databasePromises.get(name);
+
+    const pending = new Promise((resolve, reject) => {
       let request;
-      try { request = indexedDBApi.open(DB_NAME, DB_VERSION); }
+      try { request = indexedDBApi.open(name, DB_VERSION); }
       catch (error) { reject(error); return; }
       request.onupgradeneeded = () => {
         const db = request.result;
@@ -61,46 +67,113 @@ export function createLocalDocumentStore(options = {}) {
       request.onerror = () => reject(request.error || new Error("Unable to open local database."));
       request.onblocked = () => reject(new Error("Local database upgrade is blocked."));
     }).catch(() => null);
-    return databasePromise;
+
+    databasePromises.set(name, pending);
+    return pending;
   }
 
-  function fallbackKey(id) { return FALLBACK_PREFIX + id; }
-  function fallbackRead(id) {
+  async function legacyDatabaseExists() {
+    if (!indexedDBApi) return false;
+    if (typeof indexedDBApi.databases !== "function") return true;
+    try {
+      const databases = await indexedDBApi.databases();
+      return databases.some((database) => database.name === LEGACY_DB_NAME);
+    } catch {
+      return true;
+    }
+  }
+
+  async function readDatabase(name, id) {
+    const db = await openDatabase(name);
+    if (!db) return null;
+    try {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      return await requestResult(tx.objectStore(STORE_NAME).get(id));
+    } catch {
+      return null;
+    }
+  }
+
+  async function writeDatabase(name, record) {
+    const db = await openDatabase(name);
+    if (!db) return false;
+    try {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const completed = transactionResult(tx);
+      tx.objectStore(STORE_NAME).put(record);
+      await completed;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function deleteDatabaseRecord(name, id) {
+    const db = await openDatabase(name);
+    if (!db) return false;
+    try {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const completed = transactionResult(tx);
+      tx.objectStore(STORE_NAME).delete(id);
+      await completed;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function fallbackKey(id, prefix = FALLBACK_PREFIX) { return prefix + id; }
+
+  function fallbackRead(id, prefix = FALLBACK_PREFIX) {
     if (!storage) return null;
     try {
-      const raw = storage.getItem(fallbackKey(id));
+      const raw = storage.getItem(fallbackKey(id, prefix));
       if (!raw || raw.length > MAX_DOCUMENT_BYTES * 1.4) return null;
       const record = JSON.parse(raw);
       return record && record.id === id ? record : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
+  }
+
+  function migrateFallbackRecord(record, id) {
+    if (!storage || !record) return;
+    const migrated = { ...record, id };
+    try { storage.setItem(fallbackKey(id), JSON.stringify(migrated)); } catch { /* Keep the legacy copy intact. */ }
   }
 
   async function get(id) {
     id = validateId(id);
-    const db = await openDatabase();
-    if (db) {
-      try {
-        const tx = db.transaction(STORE_NAME, "readonly");
-        const record = await requestResult(tx.objectStore(STORE_NAME).get(id));
-        if (record && Object.hasOwn(record, "data")) return record.data;
-      } catch { /* Fall back to the bounded browser store. */ }
+    const legacyId = LEGACY_ID_ALIASES.get(id) || id;
+
+    let record = await readDatabase(DB_NAME, id);
+    if (record && Object.hasOwn(record, "data")) return record.data;
+
+    if (await legacyDatabaseExists()) {
+      record = await readDatabase(LEGACY_DB_NAME, legacyId);
+      if (record && Object.hasOwn(record, "data")) {
+        await writeDatabase(DB_NAME, { ...record, id });
+        return record.data;
+      }
     }
-    const record = fallbackRead(id);
-    return record && Object.hasOwn(record, "data") ? record.data : null;
+
+    record = fallbackRead(id);
+    if (record && Object.hasOwn(record, "data")) return record.data;
+
+    record = fallbackRead(legacyId, LEGACY_FALLBACK_PREFIX);
+    if (record && Object.hasOwn(record, "data")) {
+      migrateFallbackRecord(record, id);
+      return record.data;
+    }
+
+    return null;
   }
 
   async function put(id, data) {
     id = validateId(id);
     const record = { id, data: JSON.parse(serialize(data)), updatedAt: now() };
-    const db = await openDatabase();
-    if (db) {
-      try {
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        const completed = transactionResult(tx);
-        tx.objectStore(STORE_NAME).put(record);
-        await completed;
-        return { ok: true, backend: "indexeddb", updatedAt: record.updatedAt };
-      } catch { /* Use fallback if IndexedDB is unavailable or quota-limited. */ }
+    if (await writeDatabase(DB_NAME, record)) {
+      return { ok: true, backend: "indexeddb", updatedAt: record.updatedAt };
     }
     if (!storage) throw new Error("No local document storage is available.");
     storage.setItem(fallbackKey(id), JSON.stringify(record));
@@ -109,19 +182,17 @@ export function createLocalDocumentStore(options = {}) {
 
   async function remove(id) {
     id = validateId(id);
-    let removed = false;
-    const db = await openDatabase();
-    if (db) {
-      try {
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        const completed = transactionResult(tx);
-        tx.objectStore(STORE_NAME).delete(id);
-        await completed;
-        removed = true;
-      } catch { /* Try the fallback store. */ }
+    const legacyId = LEGACY_ID_ALIASES.get(id) || id;
+    let removed = await deleteDatabaseRecord(DB_NAME, id);
+    if (await legacyDatabaseExists()) {
+      removed = (await deleteDatabaseRecord(LEGACY_DB_NAME, legacyId)) || removed;
     }
     if (storage) {
-      try { storage.removeItem(fallbackKey(id)); removed = true; } catch { /* No write access. */ }
+      try {
+        storage.removeItem(fallbackKey(id));
+        storage.removeItem(fallbackKey(legacyId, LEGACY_FALLBACK_PREFIX));
+        removed = true;
+      } catch { /* No write access. */ }
     }
     return removed;
   }

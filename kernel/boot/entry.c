@@ -8,7 +8,7 @@
 #include "interrupts.h"
 
 #define SERIAL_PORT 0x3f8u
-#define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
+#define MAX_BOOT_REGIONS DAK_BOOT_MAX_MEMORY_REGIONS
 
 extern unsigned char __kernel_start[];
 extern unsigned char __kernel_end[];
@@ -65,9 +65,9 @@ static volatile struct limine_stack_size_request stack_size_request = {
 __attribute__((used, section(".limine_requests_end"), aligned(8)))
 static volatile uint64_t requests_end[2] = LIMINE_REQUESTS_END_MARKER;
 
-static duckos_memory_region boot_regions[MAX_BOOT_REGIONS];
+static dak_memory_region boot_regions[MAX_BOOT_REGIONS];
 static struct limine_framebuffer *active_framebuffer;
-static duckos_frame_allocator early_frame_allocator;
+static dak_frame_allocator early_frame_allocator;
 static uint64_t first_frame_phys;
 
 static inline void port_out8(uint16_t port, uint8_t value) {
@@ -256,7 +256,7 @@ static void draw_boot_screen(void) {
 
     draw_rect(0u, 0u, fb->width, fb->height, 7u, 7u, 7u);
     draw_rect(0u, 0u, fb->width, 92u, 255u, 212u, 0u);
-    draw_text(28u, 29u, "DUCK OS", 4u, 7u, 7u, 7u);
+    draw_text(28u, 29u, "DAK", 4u, 7u, 7u, 7u);
 
     const uint64_t body_y = fb->height > 140u ? fb->height / 2u - 70u : 8u;
     draw_centered(body_y, "NATIVE MEMORY READY", 3u, 255u, 212u, 0u);
@@ -271,47 +271,47 @@ static int memory_type_from_limine(uint64_t source, uint32_t *destination) {
     if (destination == NULL) return 0;
     switch (source) {
         case LIMINE_MEMMAP_USABLE:
-            *destination = DUCKOS_MEMORY_USABLE;
+            *destination = DAK_MEMORY_USABLE;
             return 1;
         case LIMINE_MEMMAP_RESERVED:
         case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
         case LIMINE_MEMMAP_EXECUTABLE_AND_MODULES:
         case LIMINE_MEMMAP_RESERVED_MAPPED:
-            *destination = DUCKOS_MEMORY_RESERVED;
+            *destination = DAK_MEMORY_RESERVED;
             return 1;
         case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
-            *destination = DUCKOS_MEMORY_ACPI_RECLAIMABLE;
+            *destination = DAK_MEMORY_ACPI_RECLAIMABLE;
             return 1;
         case LIMINE_MEMMAP_ACPI_NVS:
-            *destination = DUCKOS_MEMORY_ACPI_NVS;
+            *destination = DAK_MEMORY_ACPI_NVS;
             return 1;
         case LIMINE_MEMMAP_BAD_MEMORY:
-            *destination = DUCKOS_MEMORY_BAD;
+            *destination = DAK_MEMORY_BAD;
             return 1;
         case LIMINE_MEMMAP_FRAMEBUFFER:
-            *destination = DUCKOS_MEMORY_MMIO;
+            *destination = DAK_MEMORY_MMIO;
             return 1;
         default:
             return 0;
     }
 }
 
-static int prepare_boot_info(duckos_boot_info_v1 *info) {
+static int prepare_boot_info(dak_boot_info_v1 *info) {
     struct limine_memmap_response *map = memory_map_request.response;
     struct limine_executable_address_response *image = executable_address_request.response;
     struct limine_hhdm_response *hhdm = hhdm_request.response;
 
     if (info == NULL || map == NULL || image == NULL || hhdm == NULL) {
-        serial_write("DUCKOS_BOOT_ERROR missing required Limine response\n");
+        serial_write("DAK_BOOT_ERROR missing required Limine response\n");
         return 0;
     }
     if (map->entry_count == 0u || map->entry_count > MAX_BOOT_REGIONS ||
         map->entries == NULL) {
-        serial_write("DUCKOS_BOOT_ERROR memory map exceeds v1 capacity\n");
+        serial_write("DAK_BOOT_ERROR memory map exceeds v1 capacity\n");
         return 0;
     }
     if (image->virtual_base != (uint64_t)(uintptr_t)__kernel_start) {
-        serial_write("DUCKOS_BOOT_ERROR kernel virtual base mismatch\n");
+        serial_write("DAK_BOOT_ERROR kernel virtual base mismatch\n");
         return 0;
     }
 
@@ -319,7 +319,7 @@ static int prepare_boot_info(duckos_boot_info_v1 *info) {
         const struct limine_memmap_entry *source = map->entries[index];
         if (source == NULL ||
             !memory_type_from_limine(source->type, &boot_regions[index].type)) {
-            serial_write("DUCKOS_BOOT_ERROR unsupported memory-map entry\n");
+            serial_write("DAK_BOOT_ERROR unsupported memory-map entry\n");
             return 0;
         }
         boot_regions[index].base = source->base;
@@ -328,7 +328,7 @@ static int prepare_boot_info(duckos_boot_info_v1 *info) {
     }
 
     info->struct_size = (uint32_t)sizeof(*info);
-    info->version = DUCKOS_BOOT_INFO_VERSION;
+    info->version = DAK_BOOT_INFO_VERSION;
     info->flags = 0u;
     info->kernel_phys_base = image->physical_base;
     info->kernel_size =
@@ -359,7 +359,7 @@ static int prepare_boot_info(duckos_boot_info_v1 *info) {
             (fb->bpp != 16u && fb->bpp != 24u && fb->bpp != 32u) ||
             fb->memory_model != LIMINE_FRAMEBUFFER_RGB ||
             fb->height > UINT64_MAX / fb->pitch) {
-            serial_write("DUCKOS_BOOT_ERROR invalid framebuffer response\n");
+            serial_write("DAK_BOOT_ERROR invalid framebuffer response\n");
             return 0;
         }
 
@@ -378,19 +378,19 @@ static int initialize_early_memory(uint32_t memory_region_count) {
     struct limine_hhdm_response *hhdm = hhdm_request.response;
     if (hhdm == NULL) return 0;
 
-    if (duckos_frame_allocator_init(
+    if (dak_frame_allocator_init(
             &early_frame_allocator,
             boot_regions,
             memory_region_count,
             0x00100000u
-        ) != DUCKOS_FRAME_ALLOCATOR_OK) {
+        ) != DAK_FRAME_ALLOCATOR_OK) {
         return 0;
     }
 
-    if (duckos_frame_allocator_allocate(
+    if (dak_frame_allocator_allocate(
             &early_frame_allocator,
             &first_frame_phys
-        ) != DUCKOS_FRAME_ALLOCATOR_OK) {
+        ) != DAK_FRAME_ALLOCATOR_OK) {
         return 0;
     }
 
@@ -403,7 +403,7 @@ static int initialize_early_memory(uint32_t memory_region_count) {
         (uintptr_t)(hhdm->offset + first_frame_phys);
     volatile uint64_t *page = (volatile uint64_t *)mapped_address;
     for (size_t index = 0u;
-         index < (size_t)(DUCKOS_FRAME_PAGE_SIZE / sizeof(uint64_t));
+         index < (size_t)(DAK_FRAME_PAGE_SIZE / sizeof(uint64_t));
          ++index) {
         page[index] = 0u;
     }
@@ -412,7 +412,7 @@ static int initialize_early_memory(uint32_t memory_region_count) {
 
 static void boot_failure(const char *reason) __attribute__((noreturn));
 static void boot_failure(const char *reason) {
-    serial_write("DUCKOS_BOOT_ERROR ");
+    serial_write("DAK_BOOT_ERROR ");
     serial_write(reason);
     serial_write("\n");
     if (active_framebuffer != NULL && active_framebuffer->bpp == 32u) {
@@ -423,7 +423,7 @@ static void boot_failure(const char *reason) {
 
 
 static const char *exception_name(uint64_t vector) {
-    static const char *const names[DUCKOS_X86_EXCEPTION_COUNT] = {
+    static const char *const names[DAK_X86_EXCEPTION_COUNT] = {
         "DIVIDE ERROR", "DEBUG", "NON-MASKABLE INTERRUPT", "BREAKPOINT",
         "OVERFLOW", "BOUND RANGE", "INVALID OPCODE", "DEVICE NOT AVAILABLE",
         "DOUBLE FAULT", "COPROCESSOR OVERRUN", "INVALID TSS",
@@ -434,12 +434,12 @@ static const char *exception_name(uint64_t vector) {
         "RESERVED", "RESERVED", "RESERVED", "HYPERVISOR INJECTION",
         "VMM COMMUNICATION", "SECURITY EXCEPTION", "RESERVED"
     };
-    return vector < DUCKOS_X86_EXCEPTION_COUNT ? names[vector] : "UNKNOWN";
+    return vector < DAK_X86_EXCEPTION_COUNT ? names[vector] : "UNKNOWN";
 }
 
-void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame) {
+void dak_x86_exception_dispatch(const dak_x86_exception_frame *frame) {
     __asm__ volatile ("cli");
-    serial_write("\nDUCKOS_EXCEPTION ");
+    serial_write("\nDAK_EXCEPTION ");
     if (frame == NULL) {
         serial_write("frame=null\n");
     } else {
@@ -476,11 +476,11 @@ void _start(void) __attribute__((noreturn));
 void _start(void) {
     __asm__ volatile ("cli");
     serial_init();
-    if (!duckos_x86_interrupts_init()) {
+    if (!dak_x86_interrupts_init()) {
         boot_failure("could not install CPU exception IDT");
     }
     serial_write("exceptions=0..31 idt=loaded maskable_interrupts=disabled\n");
-    serial_write("\nDUCKOS_BOOT begin protocol=limine base_revision=6\n");
+    serial_write("\nDAK_BOOT begin protocol=limine base_revision=6\n");
 
     if (!LIMINE_BASE_REVISION_SUPPORTED(base_revision)) {
         boot_failure("bootloader does not support required Limine base revision 6");
@@ -495,20 +495,20 @@ void _start(void) {
         serial_write("\n");
     }
 
-    duckos_boot_info_v1 info;
+    dak_boot_info_v1 info;
     if (!prepare_boot_info(&info)) {
         boot_failure("could not construct the v1 boot handoff");
     }
 
-    const duckos_boot_info_status validation =
-        duckos_boot_info_validate(
+    const dak_boot_info_status validation =
+        dak_boot_info_validate(
             &info,
             boot_regions,
             (size_t)info.memory_region_count
         );
-    if (validation != DUCKOS_BOOT_INFO_OK) {
+    if (validation != DAK_BOOT_INFO_OK) {
         serial_write("boot-info status=");
-        serial_write(duckos_boot_info_status_name(validation));
+        serial_write(dak_boot_info_status_name(validation));
         serial_write("\n");
         boot_failure("boot handoff validation rejected firmware state");
     }
@@ -548,6 +548,6 @@ void _start(void) {
         serial_write("framebuffer=unavailable; serial console remains active\n");
     }
 
-    serial_write("DUCKOS_BOOT_OK stage=1 handoff=v1 frames=1 reaper_policy=reference-only\n");
+    serial_write("DAK_BOOT_OK stage=1 handoff=v1 frames=1 reaper_policy=reference-only\n");
     halt_forever();
 }

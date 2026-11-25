@@ -74,7 +74,22 @@ test("preferences are validated and saved without trusting arbitrary values", ()
   assert.equal(normalized.focusMode, false);
 });
 
-test("recovery snapshots preserve only normalized shell preferences", () => {
+
+test("saved preferences migrate from the previous storage key without losing settings", () => {
+  const storage = new MemoryStorage();
+  storage.setItem("duckos.mora.preferences.v1", JSON.stringify({
+    powerProfile: "performance",
+    focusMode: true,
+    appearance: { reducedMotion: true }
+  }));
+
+  const loaded = loadPreferences(storage);
+  assert.equal(loaded.powerProfile, "performance");
+  assert.equal(loaded.focusMode, true);
+  assert.equal(loaded.appearance.reducedMotion, true);
+  assert.ok(storage.getItem("dak.mora.preferences.v1"));
+});
+\ntest("recovery snapshots preserve only normalized shell preferences", () => {
   const snapshot = createRecoverySnapshot({
     focusMode: true,
     powerProfile: "saver",
@@ -105,10 +120,10 @@ test("PE inspection recognises a 64-bit image without attempting to launch it", 
 });
 
 
-test("legacy appearance settings migrate to the fixed DuckOS palette", () => {
+test("legacy appearance settings migrate to the fixed DAK palette", () => {
   const defaults = createDefaultPreferences();
-  assert.equal(defaults.appearance.theme, "duck");
+  assert.equal(defaults.appearance.theme, "dak");
   for (const theme of ["amber", "dark", "light", "system", "custom", null]) {
-    assert.equal(normalizePreferences({ appearance: { theme } }).appearance.theme, "duck");
+    assert.equal(normalizePreferences({ appearance: { theme } }).appearance.theme, "dak");
   }
 });

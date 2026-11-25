@@ -8,8 +8,8 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from duckos.cli import main
-from duckos.compat.bridge import (
+from dak.cli import main
+from dak.compat.bridge import (
     DuckBridgeError, build_launch_plan, detect_runtimes, inspect_binary,
 )
 
@@ -290,7 +290,7 @@ class DuckBridgeTests(unittest.TestCase):
             status = main(["bridge", "runtimes"])
         self.assertEqual(status, 0)
         report = json.loads(output.getvalue())
-        self.assertEqual(report["schema"], "duckos.duckbridge-runtimes.v1")
+        self.assertEqual(report["schema"], "dak.duckbridge-runtimes.v1")
 
 
 if __name__ == "__main__":

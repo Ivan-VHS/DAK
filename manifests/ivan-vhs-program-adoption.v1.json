@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "owner": "Ivan-VHS",
   "catalogue_size": 1000,
-  "integration_host": "DuckOS",
+  "integration_host": "DAK",
   "projects": [
     {
       "id": "pytyliki",
@@ -83,8 +83,8 @@
       "policy": "Deterministic offline processing by default; real-time audio and device access require a separately reviewed OS service."
     },
     {
-      "id": "duckos",
-      "repository": "Ivan-VHS/DuckOS",
+      "id": "dak",
+      "repository": "Ivan-VHS/DAK",
       "catalogue_ranges": [],
       "entry_count": 0,
       "responsibility": "Future operating-system integration host and system-service boundary",

@@ -1,6 +1,6 @@
 # DuckBridge
 
-DuckBridge is the runtime discovery and launch-planning front end for DuckOS Windows compatibility. It builds on the existing PE32/PE32+ inspection, prefix metadata and compatibility diagnostics instead of maintaining a second PE parser.
+DuckBridge is the runtime discovery and launch-planning front end for DAK Windows compatibility. It builds on the existing PE32/PE32+ inspection, prefix metadata and compatibility diagnostics instead of maintaining a second PE parser.
 
 ## Commands
 
@@ -13,39 +13,39 @@ python -m pip install -e .
 List installed compatibility and CPU-translation entry points:
 
 ~~~sh
-duckos bridge runtimes
+dak bridge runtimes
 ~~~
 
 Inspect a PE or ELF file without running it:
 
 ~~~sh
-duckos bridge inspect ./game.exe
-duckos bridge inspect ./bin/tool
+dak bridge inspect ./game.exe
+dak bridge inspect ./bin/tool
 ~~~
 
 Prepare a dry-run application plan using Wine:
 
 ~~~sh
-duckos bridge plan ./setup.exe --purpose application --backend wine
+dak bridge plan ./setup.exe --purpose application --backend wine
 ~~~
 
 Prepare a Steam game plan using Proton and a chosen compatibility-data path:
 
 ~~~sh
-duckos bridge plan ./game.exe --purpose game --compat-data "$HOME/.local/share/duckos/proton/game-id"
+dak bridge plan ./game.exe --purpose game --compat-data "$HOME/.local/share/dak/proton/game-id"
 ~~~
 
 Select an existing Bottles or CrossOver bottle:
 
 ~~~sh
-duckos bridge plan ./setup.exe --backend bottles --bottle "Work tools"
-duckos bridge plan ./setup.exe --backend crossover --bottle "Office"
+dak bridge plan ./setup.exe --backend bottles --bottle "Work tools"
+dak bridge plan ./setup.exe --backend crossover --bottle "Office"
 ~~~
 
 Append target arguments as separate values:
 
 ~~~sh
-duckos bridge plan ./setup.exe --backend wine --arg /quiet --arg "path with spaces"
+dak bridge plan ./setup.exe --backend wine --arg /quiet --arg "path with spaces"
 ~~~
 
 All commands return machine-readable JSON. The versioned launch-plan contract is defined in schemas/duckbridge-plan.v1.schema.json.
@@ -64,7 +64,7 @@ Detection only checks whether a known path exists and is executable. DuckBridge 
 
 ## Architecture and backend policy
 
-PE inspection delegates to the shared duckos.compat.pe parser. The report includes PE32/PE32+ format, machine architecture, sections, imported DLL names and a local SHA-256 digest. Existing compatibility diagnostics and isolated prefix scaffolding remain available through compat-diagnose, prefix-create, prefix-info and compat-plan.
+PE inspection delegates to the shared dak.compat.pe parser. The report includes PE32/PE32+ format, machine architecture, sections, imported DLL names and a local SHA-256 digest. Existing compatibility diagnostics and isolated prefix scaffolding remain available through compat-diagnose, prefix-create, prefix-info and compat-plan.
 
 PE runtime planning is currently scoped to x86-64 Linux hosts. Automatic backend preference is Proton then Wine for games, and Wine then CrossOver/Bottles for applications. CrossOver and Bottles require an existing named bottle. Proton requires a caller-selected compatibility-data directory. The planner does not create that directory.
 
@@ -80,7 +80,7 @@ Arguments are represented as a structured argv array; the planner never builds o
 - The tool does not install packages, drivers, DLLs or graphics components.
 - No anti-cheat bypass, DRM circumvention, malware verdict or signer trust is claimed.
 - Runtime discovery does not prove ABI, graphics, audio, DRM or per-game compatibility.
-- Mora is a browser shell and cannot inspect installed host programs directly; use the native DuckOS CLI.
+- Mora is a browser shell and cannot inspect installed host programs directly; use the native DAK CLI.
 
 DuckBridge is an orchestration and planning tool, not a PE loader, NT process manager, Win32 subsystem, Wine replacement, DirectX/Vulkan translation layer, sandbox or production launcher. Those native execution layers remain explicitly unimplemented in the Windows compatibility status report.
 

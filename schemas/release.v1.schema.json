@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/release.v1.schema.json",
-  "title": "DuckOS component release metadata v1",
+  "$id": "https://github.com/Ivan-VHS/DAK/blob/main/schemas/release.v1.schema.json",
+  "title": "DAK component release metadata v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -18,7 +18,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.release.v1"
+      "const": "dak.release.v1"
     },
     "name": {
       "type": "string",
