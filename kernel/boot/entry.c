@@ -691,7 +691,7 @@ void _start(void) {
     serial_hex(kernel_page_tables.root_physical);
     serial_write(" nx=");
     serial_write(duckos_x86_paging_nx_enabled() ? "enabled" : "unavailable");
-    serial_write(" write_protect=enabled\n");
+    serial_write(" write_protect=enabled vm=map-protect-unmap-verified\n");
 
     serial_write("firmware=");
     serial_decimal(info.flags);
