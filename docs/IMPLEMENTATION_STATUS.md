@@ -21,6 +21,19 @@ Updated: 2026-11-25
 - [ ] Launch Mora inside a DuckOS user session after the process model, syscall ABI, filesystem, service supervisor, native input path and compositor exist.
 
 The Qt application is native to the host OS. It is not a kernel-owned DuckOS compositor, window manager, system service or process launcher. The bootable Stage 1 image still halts before a user session.
+## DABI64 Desktop Host and IPC foundation — 2026-11-25
+
+- [x] Reaper defines the additive DABI64 Desktop Host v1 request/response headers, 84-operation system catalogue, separate desktop capability bits and local frame validators in PR #331.
+- [x] DuckOS pins the Reaper DABI64 implementation as a specialist submodule and builds the same validator/catalogue sources rather than maintaining a second wire-format copy.
+- [x] DuckOS adds a C11 duplex endpoint queue with owner/peer task-generation checks, request-ID metadata, strict per-side sequence progression, bounded kernel-provided slot storage, backpressure and frame validation.
+- [x] CTest covers endpoint initialization, identity mismatch, bidirectional delivery, sequence replay, full/empty queues, small receive buffers, invalid frames and owner-only close.
+- [ ] Reaper PR #331 must merge and remain the pinned upstream ABI source before this dependent DuckOS PR can merge.
+- [ ] Bind endpoint principals to the scheduler's kernel-owned task objects; do not accept PID, generation or capability claims from user payloads.
+- [ ] Add syscall entry, user-memory copy/validation, endpoint registry, locking, wakeups, cancellation and native service dispatch before claiming application-visible IPC.
+- [ ] Add kernel capability broker and per-object handle ownership before allowing privileged desktop operations.
+
+The endpoint is an isolated kernel-foundation library tested with host CTest. It is not yet wired into the booted kernel, a syscall handler, process scheduler or user-mode application.
+
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.
