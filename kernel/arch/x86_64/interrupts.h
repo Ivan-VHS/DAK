@@ -30,6 +30,9 @@ typedef struct duckos_x86_exception_frame {
     uint64_t rflags;
 } duckos_x86_exception_frame;
 
+/* Bootstrap IST assignment: #DF=1, NMI=2, #PF=3, all others use current stack. */
+uint8_t duckos_x86_exception_ist(uint32_t vector);
+
 /* Installs exception gates 0..31. CPU maskable interrupts remain disabled. */
 int duckos_x86_interrupts_init(void);
 
