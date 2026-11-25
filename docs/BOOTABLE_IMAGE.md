@@ -41,6 +41,10 @@ The build pins Limine v12.11.1 binary archive by SHA-256 in boot/limine-toolchai
 
 Upstream references: https://github.com/Limine-Bootloader/limine-protocol/blob/trunk/PROTOCOL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/INSTALL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/USAGE.md
 
+## Verified build result
+
+The first pinned build completed successfully in [GitHub Actions run 45525450728](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). Host Boot Info v1 CTest passed; QEMU BIOS and OVMF UEFI both reached `DUCKOS_BOOT_OK stage=0`; the workflow uploaded the ISO, checksum and serial logs. The built ISO is 4,372,480 bytes with SHA-256 `f65d05cc7878d6dd15f418cf9fb4f35bf65e773f01fbd1ba74ccd520cf02e369`.
+
 ## Deliberate stage-0 limits
 
 This image does not yet provide a physical/virtual page allocator, page-table manager or kernel heap; IDT, APIC/PIC, interrupt handlers, timer or preemptive context switching; processes, threads, syscalls, user mode, scheduler execution or IPC runtime; ACPI/PCI/USB drivers, DMA or production driver manager; filesystem, init/service supervisor, package manager or persistence; native Mora compositor, window manager, GPU acceleration, audio stack or user applications; Secure Boot signing/enrolment, authenticated updates, rollback, installer or production recovery.
