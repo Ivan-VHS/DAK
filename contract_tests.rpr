@@ -299,9 +299,9 @@ assert(not installer["target_valid"](["", "x86_64", 1000000, 512, "uefi", true])
 make verified_source := ["DAK Release", "sha256:installer-image", "verified"]
 make unverified_source := ["DAK Release", "sha256:installer-image", "unverified"]
 assert(installer["admission"](install_target, verified_source, "ready") == "admit-plan-only", "installer admits only a verified, recoverable plan")
-assert(installer["admission"](install_target_no_consent, "verified", "ready") == "reject-consent", "installer requires explicit destructive-operation consent")
+assert(installer["admission"](install_target_no_consent, verified_source, "ready") == "reject-consent", "installer requires explicit destructive-operation consent")
 assert(installer["admission"](install_target, unverified_source, "ready") == "reject-source-trust", "installer rejects an unverified source")
-assert(installer["admission"](install_target, "verified", "missing") == "reject-recovery", "installer requires a recovery path")
+assert(installer["admission"](install_target, verified_source, "missing") == "reject-recovery", "installer requires a recovery path")
 
 make install_layout := [
     ["efi", "efi", 1048576, 262144],
@@ -329,20 +329,28 @@ make bios_layout := [
     ["recovery", "recovery", 3145728, 262144]
 ]
 assert(installer["layout_valid"](bios_layout, 4000000, "bios"), "installer accepts a BIOS boot layout without an EFI partition")
+make invalid_ab_layout := [
+    ["efi", "efi", 1048576, 262144],
+    ["system_left", "system", 1310720, 524288],
+    ["system_right", "system", 1835008, 524288],
+    ["recovery", "recovery", 2359296, 262144]
+]
+assert(not installer["layout_valid"](invalid_ab_layout, 4000000, "uefi"), "installer requires canonical A/B system slot identities")
 
 make driver_device := ["nvme0", "pci", 4096, 256, 11, true]
 make verified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]
 make unverified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "unverified", 65536]
 make wrong_bus_driver := ["nvme.sample", 1, "usb", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]
 make driver_grants := ["read.device"]
-assert(driver_runtime["admission"](verified_driver, driver_device, "x86_64", 1, ["pci", "usb"], driver_grants) == "admit-isolated-plan-only", "driver admission requires verified provenance and least authority")
-assert(driver_runtime["admission"](unverified_driver, driver_device, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-signature", "driver runtime rejects unverified signatures")
-assert(driver_runtime["admission"](wrong_bus_driver, driver_device, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-device-match", "driver runtime rejects a bus mismatch")
+assert(driver_runtime["admission"](verified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "admit-isolated-plan-only", "driver admission requires verified provenance and least authority")
+assert(driver_runtime["admission"](unverified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-signature", "driver runtime rejects unverified signatures")
+assert(driver_runtime["admission"](wrong_bus_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-device-match", "driver runtime rejects a bus mismatch")
 make conflicting_devices := [["gpu0", "pci", 4200, 128, 11, false]]
 assert(driver_runtime["resource_admission"](driver_device, conflicting_devices) == "reject-resource-conflict", "driver runtime rejects overlapping MMIO or exclusive IRQ ownership")
+assert(driver_runtime["admission"](verified_driver, driver_device, conflicting_devices, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-resource-conflict", "driver admission cannot bypass resource conflict checks")
 assert(driver_runtime["resource_admission"](driver_device, [device_c]) == "resource-plan-only", "driver runtime admits non-conflicting resource plans")
 assert(driver_runtime["descriptor_valid"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "", "verified", 65536]) == false, "driver runtime requires a payload digest")
-assert(driver_runtime["admission"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "revoked", 65536], driver_device, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-revoked", "driver runtime rejects revoked publisher evidence")
+assert(driver_runtime["admission"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "revoked", 65536], driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-revoked", "driver runtime rejects revoked publisher evidence")
 assert(driver_runtime["transition_valid"]("verified", "admitted"), "driver runtime advances verified metadata")
 assert(not driver_runtime["transition_valid"]("candidate", "running"), "driver runtime cannot jump directly to execution")
 assert(driver_runtime["unload_policy"]("running", true, true, true) == "unload-plan-only", "driver unload requires quiesced IRQ and DMA")
@@ -381,6 +389,9 @@ assert(updates["admission"](wrong_arch_update, "x86_64", [1, 0, 0], 1) == "rejec
 assert(updates["inactive_slot"]("A") == "B", "A/B update targets the inactive B slot")
 assert(updates["inactive_slot"]("B") == "A", "A/B update targets the inactive A slot")
 assert(updates["inactive_slot"]("unknown") == "", "A/B update rejects an unknown active slot")
+assert(updates["activation_policy"]("A", "B", "healthy") == "activate-plan-only", "A/B activation targets the inactive slot after healthy boot")
+assert(updates["activation_policy"]("A", "A", "healthy") == "reject-slot-target", "A/B activation cannot overwrite the active slot")
+assert(updates["activation_policy"]("A", "B", "pending") == "reject-boot-unhealthy", "A/B activation requires healthy boot evidence")
 assert(updates["transition_valid"]("staged", "armed"), "update manager arms only a staged payload")
 assert(not updates["transition_valid"]("staged", "confirmed"), "update manager requires a successful boot before confirmation")
 assert(updates["boot_result_policy"]("healthy", 1, 3) == "confirm-plan-only", "update manager confirms only a healthy boot")
@@ -399,5 +410,8 @@ assert(audit["append_policy"]([], [2, "req-2", "updates", "update.stage", "slot-
 assert(audit["chain_valid"]([audit_one, audit_two]), "audit accepts strictly consecutive journal records")
 assert(not audit["chain_valid"]([audit_one, [3, "req-3", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-3"]]), "audit rejects journal sequence gaps")
 assert(audit["append_policy"]([audit_one], audit_two, 1024) == "append-plan-only", "audit appends only the next sequence")
+make broken_audit_link := [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:other", "sha256:audit-2"]
+assert(not audit["chain_valid"]([audit_one, broken_audit_link]), "audit rejects a broken digest link")
+assert(audit["append_policy"]([audit_one], broken_audit_link, 1024) == "reject-chain-link", "audit append rejects a broken digest link")
 assert(audit["append_policy"]([audit_one], [3, "req-3", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-3"], 1024) == "reject-sequence", "audit rejects a skipped sequence")
 assert(audit["append_policy"]([audit_one], [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-2"], 1) == "reject-capacity", "audit journal is bounded")
