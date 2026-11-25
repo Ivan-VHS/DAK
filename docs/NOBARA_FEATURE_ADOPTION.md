@@ -1,4 +1,4 @@
-# Nobara-inspired DuckOS experience adoption
+# Nobara-inspired Duck experience adoption
 
 **Review date:** 2026-11-25  
 **Target:** DuckOS / Mora  
