@@ -183,7 +183,7 @@ function updateWorkspacePanel() {
       ? preferences.focusMode
       : button.dataset.setting === "reducedMotion"
         ? preferences.appearance.reducedMotion
-        : button.dataset.setting === "reducedTransparency"
+        : button.dataset.setting === "reduceTransparency"
       ? preferences.appearance.reduceTransparency
       : false;
     button.setAttribute("aria-pressed", String(enabled));
