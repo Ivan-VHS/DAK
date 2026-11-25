@@ -7,6 +7,8 @@ Updated: 2026-11-25
 - [x] DuckOS interaction and application ergonomics standard: normative requirements for motor/visual/cognitive interaction, keyboard, focus, accessibility, windowing, errors, recovery, privacy and usability evidence. This is a specification, not proof that native desktop services meet it.
 - [x] BAV Security Bundle v1 JSON contract and schema: the .bav namespace is reserved for signed declarative antivirus policy bundles; signature verification, scanner execution, quarantine and enforcement are not implemented by the schema.
 - [x] .bav / .bufspec namespace collision recorded for separate Reaper registry migration; no extension parser support is claimed.
+- [x] Reaper Beelzebul 66-rule repository scanner and defense-context TSV inspected as separate specialist inputs; neither is represented as DuckOS endpoint protection.
+- [ ] Re-verify the Java context-classifier source/test paths named in Reaper documentation before claiming that classifier is implemented or using it as a shipped DuckOS dependency.
 
 ## Implemented in Reaper source
 
