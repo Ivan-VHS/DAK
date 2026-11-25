@@ -249,7 +249,8 @@ static void draw_boot_screen(void) {
     if (fb == NULL || fb->address == NULL || fb->bpp != 32u ||
         fb->width == 0u || fb->height == 0u ||
         fb->width > UINT32_MAX || fb->height > UINT32_MAX ||
-        fb->pitch > UINT32_MAX || fb->height > UINT64_MAX / fb->pitch) {
+        fb->pitch == 0u || fb->pitch > UINT32_MAX ||
+        fb->height > UINT64_MAX / fb->pitch) {
         return;
     }
 

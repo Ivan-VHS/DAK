@@ -14,6 +14,7 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 | Boot contract | ordered startup phases and recovery transitions | Reaper reference contract; stage-0 firmware handoff also exists |
 | Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 range/map validation; not a physical allocator or page-table manager |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
+| Graphics and compositor | validated 32-bpp scanout, bounded ARGB surfaces, alpha blending, clipping and stable z-order | software compositor linked into Stage 1 boot path; application-window lifecycle and GPU backend remain pending |
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | Reaper policy plus a tested C11 duplex endpoint queue with DABI64 frame validation; scheduler/syscall delivery and shared-page mapping remain pending |
 | Capability and trust layer | explicit grants, attenuation, validation and quarantine | Reaper policy plus a native C11 token broker with object scope, attenuation, generation checks and revocation; syscall-path enforcement still pending |
 | BAV Security | signed declarative detection bundles, isolated scan worker, policy broker and reversible quarantine | bundle v1 format/schema specified; scanner, verifier, quarantine and enforcement not implemented |
