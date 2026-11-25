@@ -58,7 +58,13 @@ DuckDriver device descriptors record a device identity, bus, resource range, IRQ
 
 ## BAV Security boundary
 
-The .bav suffix is reserved for Beelzebub AV declarative detection bundles. Version 1 is specified in [BAV_SECURITY_BUNDLE_V1.md](BAV_SECURITY_BUNDLE_V1.md) and structurally described by [bav-security-bundle.v1.schema.json](../schemas/bav-security-bundle.v1.schema.json). The signature is intended to cover the RFC 8785 canonical JSON document with the signature property removed; actual verification requires a pinned local trust store and native Ed25519 verifier.
+Keep three security capabilities distinct:
+
+1. **Beelzebul repository assurance in Reaper:** the 66-rule read-only repository scanner and CI workflow inspect tracked source/configuration, paths and repository metadata. This is developer/supply-chain assurance, not endpoint malware protection or process-memory scanning.
+2. **BAV defense-context taxonomy:** Reaper's duckos.bav.defense-context.v1 policy and security/defense-context.v1.tsv catalog return descriptive topic tags only. A context match MUST NOT increase malware confidence, create a malicious verdict, block a build or execution, quarantine/delete content or revoke a capability. The Java classifier described by Reaper documentation still requires source-path and CI evidence confirmation before it can be marked delivered.
+3. **DuckOS endpoint BAV:** the signed .bav security-bundle format is specified below; the scanner, cryptographic verifier, quarantine store and enforcement broker remain planned.
+
+The .bav suffix is reserved for Beelzebul AV declarative detection bundles. Version 1 is specified in [BAV_SECURITY_BUNDLE_V1.md](BAV_SECURITY_BUNDLE_V1.md) and structurally described by [bav-security-bundle.v1.schema.json](../schemas/bav-security-bundle.v1.schema.json). The signature is intended to cover the RFC 8785 canonical JSON document with the signature property removed; actual verification requires a pinned local trust store and native Ed25519 verifier.
 
 The planned scanner is a restricted user-space worker. It will inspect file handles using bounded parsers and deterministic declarative rules. It will not execute content or rules. A separate broker will own quarantine, execution/install denial and any on-access enforcement. These actions require kernel-enforced capabilities and real filesystem/process hooks; a Mora panel, Reaper reference policy or JSON schema cannot provide that enforcement. No current malware scanner, signature verifier, quarantine engine or real-time protection is claimed.
 
