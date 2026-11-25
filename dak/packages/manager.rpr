@@ -93,7 +93,7 @@ export craft paths_valid(paths) {
     yield true
 }
 
-export craft admission(package, target_arch, expected_abi, installed_ids, grants) {
+export craft admission(package, payload_paths, target_arch, expected_abi, installed_ids, grants) {
     when kind(target_arch) != "text" or kind(expected_abi) != "number" or kind(installed_ids) != "list" or kind(grants) != "list" {
         yield "reject-manifest"
     }
@@ -104,6 +104,9 @@ export craft admission(package, target_arch, expected_abi, installed_ids, grants
     }
     when not package_valid(package) {
         yield "reject-manifest"
+    }
+    when not paths_valid(payload_paths) {
+        yield "reject-paths"
     }
     when package[11] == "revoked" {
         yield "reject-revoked"
