@@ -537,10 +537,10 @@ export craft dashboard_residency_basis_points(snapshot) {
         yield -1
     }
     # Normalize to MiB first so the intermediate product remains bounded.
-    make total_mib := snapshot[0] / 1048576
-    make resident_mib := snapshot[1] / 1048576
+    make total_mib := snapshot[0] // 1048576
+    make resident_mib := snapshot[1] // 1048576
     when total_mib <= 0 {
         yield -1
     }
-    yield resident_mib * 10000 / total_mib
+    yield resident_mib * 10000 // total_mib
 }
