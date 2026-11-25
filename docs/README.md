@@ -34,6 +34,8 @@
 
 ## Normative standards
 
+[Reaper 666 category integration](REAPER_666_CATEGORIES.md) maps the canonical Reaper function taxonomy to DuckOS subsystem owners and maturity boundaries.
+
 [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
 
 [DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) defines motor, visual, cognitive, keyboard, window, accessibility, error-recovery, latency, privacy and measurement requirements for Mora and native applications.
@@ -63,5 +65,5 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 ## Native implementation planning
 
-- [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
+- [Reaper 666 category integration](REAPER_666_CATEGORIES.md) · [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
 - [Implementation status](IMPLEMENTATION_STATUS.md) — current delivered/partial boundaries with source and test evidence.
