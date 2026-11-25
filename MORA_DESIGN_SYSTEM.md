@@ -6,7 +6,7 @@ Mora is the shared desktop identity for the Ivan-VHS application family. The she
 
 ## Visual direction
 
-Mora uses one fixed DuckOS palette: black structural surfaces, white content and duck yellow for selection, focus and primary action. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
+Mora uses one fixed Imperial Noir & Glass palette: near-black structural surfaces, crisp white content, graphite hierarchy and imperial gold for selection, focus and primary action. Glass is a material treatment over opaque fallback surfaces, never a dependency on remote assets. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
 
 The target composition is approximately 65% black, 25% white/graphite and 10% yellow. These are visual balance targets, not a requirement to recolor imported media or user content. Application identities share the same yellow accent; application meaning comes from names, glyphs and labels rather than a rainbow of per-app colors.
 
@@ -16,19 +16,19 @@ The standard workspace remains visually stable at the centre. Secondary content 
 
 | Token | Value | Role |
 |---|---|---|
-| Page | `#080808` | Desktop background |
-| Surface | `#151515` | Primary panel |
-| Elevated | `#242424` | Secondary panel |
+| Page | `#050505` | Desktop background |
+| Surface | `#101010` | Primary panel |
+| Elevated | `#181818` | Secondary panel |
 | Text | `#FFFFFF` | Main copy |
-| Secondary | `#E5E5E5` | Supporting copy |
-| Muted | `#A6A6A6` | Quiet metadata |
-| Brand | `#FFD400` | Primary action and selection |
-| Brand hover / focus | `#FFE45C` | Hover and keyboard focus |
-| Brand text | `#080808` | Text on yellow |
-| Secondary accent | `#FFD400` | Shared application accent |
-| Border | `#3A3A3A` | Structural edge |
-| Selection | `#3A3100` | Selected surface |
-| Alert | `#FFD400` | Alert marker, accompanied by text and an icon |
+| Secondary | `#D8D8D8` | Supporting copy |
+| Muted | `#A3A3A3` | Quiet metadata |
+| Brand | `#FFD700` | Primary action and selection |
+| Brand hover / focus | `#FFE36E` | Hover and keyboard focus |
+| Brand text | `#050505` | Text on yellow |
+| Secondary accent | `#FFD700` | Shared application accent |
+| Border | `#343434` | Structural edge |
+| Selection | `#3B3000` | Selected surface |
+| Alert | `#FFD700` | Alert marker, accompanied by text and an icon |
 
 Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone: alert, warning and critical states retain explicit labels, icons and text.
 
@@ -43,6 +43,13 @@ Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targ
 - Use material cues selectively: draped fabric, natural wood, brushed metal, muted glass and paper.
 - Foreground controls stay crisp; background structure may soften with distance.
 - Keep top controls compact and grouped. Put progress, discrete ticks and critical markers at the lower boundary instead of floating over work content.
+
+## Glass and depth
+
+- Canvas: `#050505`; shell: `#070707`; primary panels use translucent graphite over a stable dark fallback.
+- Apply adaptive blur (12–20 px) and restrained saturation only where backdrop filtering is supported.
+- Use fine light borders (`rgba(255,255,255,.14)`), soft inset highlights and low-contrast shadows; never turn gold into a large-area background.
+- Keep text and critical controls opaque and crisp above glass layers.
 
 ## Motion
 
