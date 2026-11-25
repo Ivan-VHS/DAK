@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
+  <meta name="description" content="DuckOS Mora — интерактивная демонстрация рабочего стола DuckOS">
+  <title>DuckOS · Mora Desktop</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <div class="desktop-shell" id="desktopShell">
+    <div class="wallpaper" aria-hidden="true">
+      <div class="wallpaper-grid"></div>
+      <div class="wallpaper-orb orb-one"></div>
+      <div class="wallpaper-orb orb-two"></div>
+      <div class="wallpaper-fold fold-one"></div>
+      <div class="wallpaper-fold fold-two"></div>
+      <div class="wallpaper-vignette"></div>
+    </div>
+
+    <header class="topbar">
+      <button class="brand-button" id="brandButton" aria-label="Открыть меню DuckOS">
+        <span class="duck-mark"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 27.5c0-7.8 5.2-15.4 13.1-15.4 4.3 0 7.8 2.1 9.6 5.8l5.1 1.6-5.3 2.8c-.4 5.9-4.7 10.4-11 10.4H8Z"/><path d="M22.5 17.1c.8-.2 1.6-.2 2.3.1"/><circle cx="25.2" cy="18.1" r=".9"/></svg></span>
+        <span class="brand-copy"><strong>DuckOS</strong><small>MORA DESKTOP</small></span>
+      </button>
+      <div class="topbar-center"><span class="topbar-rule"></span><span id="workspaceLabel">РАБОЧЕЕ ПРОСТРАНСТВО 01</span><span class="topbar-rule"></span></div>
+      <div class="topbar-actions">
+        <span class="preview-pill"><i></i><span data-i18n="preview">ПРЕДПРОСМОТР</span></span>
+        <button class="top-icon" id="searchTop" title="Поиск" aria-label="Поиск"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m16 16 4.2 4.2"/></svg></button>
+        <button class="top-icon" id="notifyTop" title="Уведомления" aria-label="Уведомления"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-2.5 7.5-2.5 9h17C20.5 16.5 18 16 18 9ZM10 21h4"/></svg><b class="notification-dot"></b></button>
+        <button class="system-tray" id="systemTray" aria-label="Быстрые настройки"><span class="tray-signal"><i></i><i></i><i></i></span><svg viewBox="0 0 24 24"><path d="M5 8.5 12 3l7 5.5M7 10v9h10v-9M10 19v-5h4v5"/></svg><span class="tray-battery"><i></i></span></button>
+        <div class="top-clock"><strong id="topTime">22:22</strong><small id="topDate">25.11.2026</small></div>
+      </div>
+    </header>
+
+    <div class="workspace-layout">
+      <aside class="sidebar glass-panel">
+        <div class="profile-block">
+          <div class="profile-avatar">D<span></span></div>
+          <div class="profile-copy"><strong>Основное пространство</strong><small>Локальный профиль</small></div>
+          <button class="more-button" aria-label="Дополнительно">···</button>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="nav-caption" data-i18n="navigation">НАВИГАЦИЯ</div>
+        <nav class="side-nav" aria-label="Основная навигация">
+          <button class="nav-item active" data-view="home"><span class="nav-symbol"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3Z"/><path d="M9 20v-6h6v6"/></svg></span><span data-i18n="overview">Обзор</span><kbd>⌘ 1</kbd></button>
+          <button class="nav-item" data-view="apps"><span class="nav-symbol"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span data-i18n="applications">Приложения</span><span class="nav-count">34</span></button>
+          <button class="nav-item" data-app="abriganza"><span class="nav-symbol"><svg viewBox="0 0 24 24"><path d="M3 7.5h7l2 2H21v10H3Z"/><path d="M3 7V5h7l2 2"/></svg></span><span>Файлы</span></button>
+          <button class="nav-item" data-app="workspace"><span class="nav-symbol"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v3M20.5 12h-3M12 20.5v-3M3.5 12h3"/><circle cx="12" cy="12" r="2.5"/></svg></span><span>Параметры</span></button>
+        </nav>
+        <div class="sidebar-divider"></div>
+        <div class="nav-caption">ЗАКРЕПЛЕНО <button class="tiny-plus" id="pinAdd" aria-label="Добавить">+</button></div>
+        <div class="pinned-list">
+          <button class="pinned-item" data-app="reaper"><span class="pin-icon reaper-pin">R</span><span>Reaper</span><small>LANG</small></button>
+          <button class="pinned-item" data-app="pytyliki"><span class="pin-icon pytyliki-pin">P</span><span>Pytyliki</span><small>CPU</small></button>
+          <button class="pinned-item" data-app="oplague"><span class="pin-icon oplague-pin">O</span><span>OPlague</span><small>DEV</small></button>
+          <button class="pinned-item" data-app="ventusample"><span class="pin-icon ventu-pin">V</span><span>VentuSample</span><small>AUD</small></button>
+        </div>
+        <div class="sidebar-spacer"></div>
+        <div class="sidebar-bottom">
+          <div class="sidebar-status"><span class="status-ring"></span><div><strong>Локальный режим</strong><small>Сеть не требуется</small></div></div>
+          <button class="user-row" data-app="workspace"><span class="user-mini">IV</span><span><strong>Пользователь</strong><small>Настройки профиля</small></span><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+      </aside>
+
+      <main class="main-content" id="mainContent">
+        <section class="welcome-row">
+          <div><div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="today">СРЕДА · 25 НОЯБРЯ 2026</span></div><h1><span data-i18n="goodEvening">Добрый вечер</span><em>.</em></h1><p data-i18n="welcomeText">Всё важное — на своих местах. Пространство готово к работе.</p></div>
+          <div class="welcome-tools"><button class="search-field" id="searchField"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m16 16 4.2 4.2"/></svg><span data-i18n="search">Найти приложение или файл</span><kbd>Ctrl K</kbd></button><button class="square-action" id="focusMode" title="Режим фокуса" aria-label="Режим фокуса"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        </section>
+
+        <section class="hero-card">
+          <div class="hero-noise"></div><div class="hero-glow"></div><div class="hero-emblem" aria-hidden="true"><div class="emblem-ring ring-a"></div><div class="emblem-ring ring-b"></div><div class="emblem-ring ring-c"></div><div class="emblem-core"><svg viewBox="0 0 100 100"><path d="M16 63c0-20 13-38 33-38 11 0 20 5 25 15l13 4-14 8c-1 15-12 27-29 27H16Z"/><circle cx="63" cy="43" r="2.8"/></svg></div></div>
+          <div class="hero-content"><div class="hero-overline"><span class="gold-dash"></span> DUCKOS / MORA 01 <span class="hero-separator">—</span> LOCAL WORKSPACE</div><h2>Рабочее<br><span>пространство.</span></h2><p>Спокойная среда для инструментов, проектов и повседневных задач. Без лишнего шума.</p><div class="hero-tags"><span><i></i> x86_64 READY</span><span>LOCAL FIRST</span><span>DEMO BUILD</span></div><button class="hero-cta" id="openApps"><span>Открыть приложения</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></button></div>
+          <div class="hero-index"><span>01</span><i></i><small>WORKSPACE</small></div>
+        </section>
+
+        <section class="quick-stats" aria-label="Сводка рабочего пространства">
+          <article class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div><div><small>ПРИЛОЖЕНИЯ</small><strong>34 <span>в каталоге</span></strong></div><div class="stat-arrow">↗</div></article>
+          <article class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="m4 7 8-4 8 4v10l-8 4-8-4Z"/><path d="m4 7 8 4 8-4M12 11v10"/></svg></div><div><small>WORKBENCHES</small><strong>04 <span>проекта</span></strong></div><div class="stat-arrow">↗</div></article>
+          <article class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 7v5.5c0 4.1 3 7 7.5 8.5 4.5-1.5 7.5-4.4 7.5-8.5V7Z"/><path d="m9 12 2 2 4-4"/></svg></div><div><small>РЕЖИМ РАБОТЫ</small><strong>Local-first <span>offline</span></strong></div><div class="stat-arrow">↗</div></article>
+          <article class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 18V6M4 18h16M8 15l3-4 3 2 5-7"/></svg></div><div><small>ЯДРО ОС</small><strong>Stage 1 <span>boot track</span></strong></div><div class="stat-arrow">↗</div></article>
+        </section>
+
+        <section class="content-columns">
+          <div class="apps-section">
+            <div class="section-head"><div><div class="eyebrow"><span class="eyebrow-line"></span> В БЫСТРОМ ДОСТУПЕ</div><h2>Мои приложения</h2></div><button class="text-action" data-view="apps">Все приложения <svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></button></div>
+            <div class="featured-apps" id="featuredApps"></div>
+          </div>
+          <aside class="right-rail">
+            <div class="rail-card status-card"><div class="rail-head"><span>СОСТОЯНИЕ СРЕДЫ</span><span class="live-mark"><i></i> DEMO</span></div><div class="status-main"><div class="status-emblem"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 7v5.5c0 4.1 3 7 7.5 8.5 4.5-1.5 7.5-4.4 7.5-8.5V7Z"/><path d="m9 12 2 2 4-4"/></svg></div><div><strong>Среда готова</strong><small>Показательная конфигурация</small></div></div><div class="status-line"><span>Подключение к ядру</span><b>НЕ ПОДКЛЮЧЕНО</b></div><div class="status-line"><span>Синхронизация</span><b>ЛОКАЛЬНО</b></div><div class="status-line"><span>Телеметрия</span><b>НЕ ИСПОЛЬЗУЕТСЯ</b></div></div>
+            <div class="rail-card ecosystem-card"><div class="rail-head"><span>ЭКОСИСТЕМА</span><button class="dots-action" id="ecosystemMore">···</button></div><div class="ecosystem-list"><button data-app="reaper"><span class="eco-letter eco-r">R</span><span><strong>Reaper</strong><small>Язык и toolchain</small></span><i>↗</i></button><button data-app="pytyliki"><span class="eco-letter eco-p">P</span><span><strong>Pytyliki</strong><small>CPU analysis</small></span><i>↗</i></button><button data-app="oplague"><span class="eco-letter eco-o">O</span><span><strong>OPlague</strong><small>Driver evidence</small></span><i>↗</i></button><button data-app="ventusample"><span class="eco-letter eco-v">V</span><span><strong>VentuSample</strong><small>Audio / DSP</small></span><i>↗</i></button></div><div class="ecosystem-foot">4 независимых проекта · pinned source</div></div>
+          </aside>
+        </section>
+
+        <section class="bottom-strip"><div class="bottom-note"><span class="note-mark">✳</span><span><strong>Создано для сосредоточенной работы</strong><small>Один визуальный язык. Локальные данные. Предсказуемые действия.</small></span></div><div class="bottom-meta"><span>DUCKOS DESIGN SYSTEM</span><i></i><span>BLACK / WHITE / GOLD</span></div></section>
+      </main>
+    </div>
+
+    <footer class="dock-wrap"><div class="dock" id="dock"><button class="dock-launcher" id="dockLauncher" aria-label="Все приложения"><span class="duck-mark small-mark"><svg viewBox="0 0 40 40"><path d="M8 27.5c0-7.8 5.2-15.4 13.1-15.4 4.3 0 7.8 2.1 9.6 5.8l5.1 1.6-5.3 2.8c-.4 5.9-4.7 10.4-11 10.4H8Z"/><circle cx="25.2" cy="18.1" r=".9"/></svg></span></button><span class="dock-separator"></span><div id="dockApps" class="dock-apps"></div><span class="dock-separator"></span><button class="dock-tool" id="dockFiles" title="Файлы" aria-label="Файлы"><svg viewBox="0 0 24 24"><path d="M3 7.5h7l2 2H21v10H3Z"/><path d="M3 7V5h7l2 2"/></svg></button><button class="dock-tool" id="dockSettings" title="Настройки" aria-label="Настройки"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.5 2.6-1.7-.7a7.7 7.7 0 0 1-1.4.8l-.3 1.9h-3l-.3-1.9a7.7 7.7 0 0 1-1.4-.8l-1.7.7-1.5-2.6 1.5-1.1a7.2 7.2 0 0 1 0-1.7l-1.5-1.1 1.5-2.6 1.7.7a7.7 7.7 0 0 1 1.4-.8l.3-1.9h3l.3 1.9a7.7 7.7 0 0 1 1.4.8l1.7-.7 1.5 2.6-1.5 1.1a7.2 7.2 0 0 1 0 1.6Z"/></svg></button></div></footer>
+    <div class="workspace-switcher"><button class="workspace-dot active" data-workspace="1" aria-label="Рабочий стол 1"></button><button class="workspace-dot" data-workspace="2" aria-label="Рабочий стол 2"></button><button class="workspace-dot" data-workspace="3" aria-label="Рабочий стол 3"></button></div>
+  </div>
+
+  <div class="overlay-backdrop" id="overlayBackdrop"></div>
+  <section class="launcher-panel glass-panel" id="launcherPanel" aria-label="Меню приложений" aria-hidden="true"><div class="launcher-top"><div><div class="eyebrow"><span class="eyebrow-line"></span> DUCKOS LAUNCHER</div><h2>Все приложения</h2></div><button class="close-plain" data-close="launcher" aria-label="Закрыть">×</button></div><label class="launcher-search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m16 16 4.2 4.2"/></svg><input id="launcherSearch" type="search" placeholder="Введите название приложения…" autocomplete="off"><kbd>ESC</kbd></label><div class="launcher-tabs" id="launcherTabs"><button class="selected" data-category="all">Все</button><button data-category="system">Система</button><button data-category="creative">Творчество</button><button data-category="tools">Инструменты</button><button data-category="ecosystem">Экосистема</button></div><div class="launcher-grid" id="launcherGrid"></div><div class="launcher-foot"><span>Локальный каталог Mora</span><span>34 APP ENTRIES</span></div></section>
+
+  <section class="quick-panel glass-panel" id="quickPanel" aria-label="Быстрые настройки" aria-hidden="true"><div class="panel-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> SYSTEM TRAY</div><h2>Быстрые настройки</h2></div><button class="close-plain" data-close="quick">×</button></div><div class="quick-grid"><button class="quick-tile" data-toggle="wifi"><span class="quick-symbol">⌁</span><span><strong>Сеть</strong><small>Отключена</small></span><i></i></button><button class="quick-tile selected" data-toggle="focus"><span class="quick-symbol">◉</span><span><strong>Фокус</strong><small>Не беспокоить</small></span><i></i></button><button class="quick-tile" data-toggle="bluetooth"><span class="quick-symbol">ᛒ</span><span><strong>Bluetooth</strong><small>Выключен</small></span><i></i></button><button class="quick-tile selected" data-toggle="battery"><span class="quick-symbol">▰</span><span><strong>Энергия</strong><small>Сбалансировано</small></span><i></i></button></div><div class="quick-divider"></div><div class="quick-row"><span>Яркость интерфейса</span><strong id="brightnessValue">80%</strong></div><input class="range-control" type="range" min="30" max="100" value="80" id="brightnessRange"><div class="quick-row"><span>Звуковая схема</span><strong>Без звука</strong></div><div class="quick-note">Демонстрационные переключатели меняют только состояние интерфейса.</div><button class="quick-settings-link" data-app="workspace">Все параметры <span>→</span></button></section>
+
+  <section class="notification-panel glass-panel" id="notificationPanel" aria-hidden="true"><div class="panel-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> ACTIVITY</div><h2>Уведомления</h2></div><button class="close-plain" data-close="notifications">×</button></div><div class="notification-empty"><span class="notification-bell">✳</span><strong>Пока тихо</strong><p>Здесь появятся системные сообщения и события приложений.</p><button id="demoNotification">Показать пример</button></div><div class="notification-foot">Состояние уведомлений хранится в этой демонстрации.</div></section>
+
+  <section class="search-panel glass-panel" id="searchPanel" aria-hidden="true"><div class="search-large"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m16 16 4.2 4.2"/></svg><input id="globalSearch" type="search" placeholder="Поиск по DuckOS…" autocomplete="off"><kbd>ESC</kbd></div><div class="search-results" id="searchResults"><div class="search-hint">Введите название приложения или проекта</div></div></section>
+
+  <section class="app-window glass-panel" id="appWindow" aria-hidden="true"><header class="window-titlebar" id="windowDrag"><div class="window-app-icon" id="windowIcon">D</div><div class="window-heading"><strong id="windowTitle">Приложение</strong><small id="windowSubtitle">Mora workspace</small></div><div class="window-controls"><button id="windowMin" title="Свернуть" aria-label="Свернуть">−</button><button id="windowMax" title="Развернуть" aria-label="Развернуть">□</button><button id="windowClose" title="Закрыть" aria-label="Закрыть">×</button></div></header><div class="window-content" id="windowContent"></div><footer class="window-status"><span><i></i> LOCAL SESSION</span><span id="windowStatusText">DEMO SURFACE</span></footer></section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="demo.js" defer></script>
+</body>
+</html>

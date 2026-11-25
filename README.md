@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="docs/IMPLEMENTATION_STATUS.md">Mora native shell status</a> · <a href="mora/index.html">Browser preview</a> ·
+  <a href="docs/IMPLEMENTATION_STATUS.md">Mora native shell status</a> · <a href="mora/demo.html">HTML desktop demo</a> · <a href="mora/index.html">Legacy browser preview</a> ·
   <a href="docs/RELEASE_EDITION.md">Release edition</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
@@ -17,7 +17,7 @@
   <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
 </p>
 
-> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
+> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora has a host-native Qt 6 Widgets desktop application and a standalone HTML desktop demonstration for browser-based design review; neither is started by this Stage 1 kernel. The HTML demonstration is not a kernel compositor or the native shell.
 
 ## System map
 
@@ -53,7 +53,7 @@ flowchart TB
 
 | Area | Present today | Boundary |
 |---|---|---|
-| **Mora desktop** | Qt 6 Widgets host-native shell, host-managed top-level windows, local app catalogue, Poi drafts, user-selected read-only file listing, plus browser reference preview | Native to the host OS; not yet launched inside a DuckOS user session or kernel compositor |
+| **Mora desktop** | Qt 6 Widgets host-native shell, plus a separate 34-entry HTML/CSS/JS desktop demonstration with local windows, launcher, search, tray and screenshot documentation | Qt shell is native to the host OS; HTML demonstration is a browser preview only. Neither is started inside the Stage 1 kernel |
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
 | **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
@@ -71,7 +71,7 @@ The four repositories below are pinned by exact Git commits in `federation/repos
 | [OPlague](https://github.com/Ivan-VHS/OPlague) | Read-only device/driver evidence and compatibility workbench | Local user-space inspection tools |
 | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | Procedural samples and offline audio processing | C++20 core and optional Qt 6 desktop |
 
-Mora workbench panels provide local documentation, descriptions and build/test guidance. The native shell does not execute manifest command strings or grant hardware privileges. The browser version is retained only as a reference preview.
+Mora workbench panels provide local documentation, descriptions and build/test guidance. The native shell and HTML demonstration do not execute manifest command strings or grant hardware privileges. The browser demonstration is a separate review surface, not an OS session.
 
 ## Build and run native Mora
 
@@ -93,11 +93,40 @@ cmake --build build/mora-native --config Release --target duckos_mora_native
 
 The optional target is skipped when Qt 6 Widgets is not found. Its native shell smoke test runs through CTest in the dedicated Mora native desktop workflow. mora/apps.json is the local catalogue source; app entries do not execute commands. Poi stores drafts in host-local application settings, Abriganza lists metadata only after a folder is selected, and the VentuSample waveform remains a visual preview until an audio engine is connected.
 
-## Browser reference preview
+## Interactive HTML desktop demo
 
-The previous browser shell is retained for reference only. To open it, run ./scripts/run-mora.sh on Linux or .\scripts\run-mora.ps1 on Windows. The local server binds to 127.0.0.1.
+The standalone Mora desktop demonstration lives in `mora/demo.html`, with its own `demo.css` and `demo.js`. It is intended for browser-based design review and does not replace the Qt host-native shell, the kernel compositor or a DuckOS user session.
 
-Run the browser-shell contract suite with Node.js 22+:
+<p align="center">
+  <img src="assets/readme/duckos-desktop.webp" alt="DuckOS Mora desktop with navigation sidebar, workspace overview, app cards and dock" width="100%">
+</p>
+<p align="center">
+  <img src="assets/readme/duckos-launcher.webp" alt="DuckOS Mora application launcher with searchable app catalogue" width="49%">
+  <img src="assets/readme/duckos-app-window.webp" alt="DuckOS Mora Reaper workbench preview window" width="49%">
+</p>
+<p align="center">
+  <img src="assets/readme/duckos-quick-settings.webp" alt="DuckOS Mora quick settings panel" width="49%">
+</p>
+
+### Run locally
+
+Node.js 18 or newer is sufficient; no package installation, CDN or external service is required.
+
+```sh
+node scripts/mora-demo-server.mjs
+```
+
+Open [http://127.0.0.1:8766/](http://127.0.0.1:8766/) in a browser. Keep the terminal open while viewing the demo and press `Ctrl+C` to stop the local server. Set `DUCKOS_DEMO_PORT` to use another local port.
+
+The server binds only to `127.0.0.1` and serves only the demo HTML, CSS and JavaScript files. It does not expose the rest of the repository.
+
+### Included interactions and limits
+
+The preview includes 34 catalogue entries, app search and category filters, movable/minimizable/maximizable app windows, dock actions, three workspace selectors, quick settings, notification examples, a local Poi note draft and a user-selected Abriganza file metadata display. The Abriganza preview reads only the selected file's name and size; it does not read or execute file contents.
+
+Status labels and workspace summary figures are demonstration content, not live CPU, memory, battery, network or kernel telemetry. Workbench cards describe the separate Reaper, Pytyliki, OPlague and VentuSample projects but do not launch their binaries, load drivers or request system privileges.
+
+Run the repository test suite with Node.js:
 
 ```sh
 npm test
