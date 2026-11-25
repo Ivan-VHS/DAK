@@ -40,6 +40,9 @@ jobs:
       - name: Apply all migrations from a clean database
         run: supabase db reset
 
+      - name: Lint local database functions and policies
+        run: supabase db lint --level error
+
       - name: Run pgTAP database tests
         run: supabase test db
 
