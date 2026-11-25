@@ -34,6 +34,11 @@
 
 ## Normative standards
 
+[Product stage naming standard](STAGE_NAMING_STANDARD.md) defines the shared Stage 0.1–1.0 lifecycle labels and distinguishes public milestones from technical identifiers.
+
+[Duck UI/UX Foundation — Stage 0.1](UI_UX_STAGE_0_1.md) is the shared interaction, accessibility, theme and behavior contract.
+
+
 [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
 
 [DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) defines motor, visual, cognitive, keyboard, window, accessibility, error-recovery, latency, privacy and measurement requirements for Mora and native applications.
