@@ -42,7 +42,7 @@ flowchart TB
     Q["Qt 6 Widgets"] --> S["Mora native shell"]
     S --> A["Host-managed top-level windows"]
     S --> P["Local app catalogue and panels"]
-    W["Browser reference preview"] -.-> S
+    W["Browser reference preview — separate reference surface"]
   end
 
   BOOT -.->|kernel desktop integration pending| HOST
