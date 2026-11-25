@@ -17,7 +17,7 @@ try {
 
   const response = await page.goto(new URL("/mora/", baseUrl).href, { waitUntil: "networkidle" });
   assert.equal(response?.status(), 200, "Mora desktop HTML must load");
-  assert.equal(await page.title(), "Mora — DuckOS Desktop");
+  assert.equal(await page.title(), "Mora — DuckOS");
 
   for (const project of projects) {
     await page.locator('[data-app="' + project.id + '"]').click();
