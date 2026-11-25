@@ -43,6 +43,15 @@ static void test_issuer_and_subject_identity(void) {
         REAPER_SYSTEM_WINDOW_CREATE, 0U, 0U) == DUCKOS_CAPABILITY_DENIED);
 }
 
+static void test_broker_capacity_validation(void) {
+    duckos_capability_broker broker;
+    duckos_capability_slot local_slots[1];
+    assert(duckos_capability_broker_init(&broker, local_slots, 0U, authority,
+        REAPER_SYSTEM_CAP_DESKTOP_WINDOW) == DUCKOS_CAPABILITY_INVALID_ARGUMENT);
+    assert(duckos_capability_broker_init(&broker, local_slots, 1U, authority,
+        0U) == DUCKOS_CAPABILITY_INVALID_ARGUMENT);
+}
+
 static void test_domain_and_scope_validation(void) {
     duckos_capability_broker broker;
     uint64_t token = 0U;
@@ -179,6 +188,7 @@ static void test_unknown_operation_and_capacity(void) {
 int main(void) {
     test_issuer_and_subject_identity();
     test_domain_and_scope_validation();
+    test_broker_capacity_validation();
     test_object_scope_and_generation();
     test_admin_rights_are_separate();
     test_attenuation_and_parent_revocation();

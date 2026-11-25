@@ -52,7 +52,7 @@ add_library(duckos_capability_broker STATIC
     foundation/capability_broker.h
 )
 target_include_directories(duckos_capability_broker PUBLIC
-    \${CMAKE_CURRENT_SOURCE_DIR}/foundation
+    ${CMAKE_CURRENT_SOURCE_DIR}/foundation
 )
 target_link_libraries(duckos_capability_broker PUBLIC duckos_desktop_ipc)
 if(MSVC)
