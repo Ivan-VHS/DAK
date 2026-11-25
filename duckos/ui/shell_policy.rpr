@@ -3,37 +3,22 @@
 # This module validates user-session requests; it is not a kernel window manager.
 
 export craft workspace_id_valid(workspace_id) {
-    yield workspace_id == "main"
-        or workspace_id == "engineering"
-        or workspace_id == "creative"
-        or workspace_id == "gaming"
+    yield workspace_id == "main" or workspace_id == "engineering" or workspace_id == "creative" or workspace_id == "gaming"
 }
 
 export craft density_profile_valid(profile) {
-    yield profile == "comfortable"
-        or profile == "standard"
-        or profile == "compact"
+    yield profile == "comfortable" or profile == "standard" or profile == "compact"
 }
 
 export craft window_mode_valid(mode) {
-    yield mode == "floating"
-        or mode == "tiled"
-        or mode == "maximized"
-        or mode == "fullscreen"
+    yield mode == "floating" or mode == "tiled" or mode == "maximized" or mode == "fullscreen"
 }
 
 export craft window_action_valid(action, scope) {
     when scope != "user_session" {
         yield false
     }
-    yield action == "inspect"
-        or action == "focus"
-        or action == "minimize"
-        or action == "maximize"
-        or action == "restore"
-        or action == "move"
-        or action == "resize"
-        or action == "close"
+    yield action == "inspect" or action == "focus" or action == "minimize" or action == "maximize" or action == "restore" or action == "move" or action == "resize" or action == "close"
 }
 
 export craft window_placement_valid(x, y, width, height, screen_width, screen_height) {
@@ -82,8 +67,7 @@ export craft session_snapshot_valid(snapshot) {
     when snapshot[4] != "" and snapshot[3] == 0 {
         yield false
     }
-    yield (snapshot[5] == true or snapshot[5] == false)
-        and (snapshot[6] == true or snapshot[6] == false)
+    yield (snapshot[5] == true or snapshot[5] == false) and (snapshot[6] == true or snapshot[6] == false)
 }
 
 export craft layout_for(context) {
