@@ -1,3 +1,4 @@
+import { initializeMoraCategories } from "./category-shell.js";
 import { MORA_COMMONS_APPS, MORA_COMMONS_CATEGORIES, filterCommonsApps } from "./commons-catalog.js";
 import { readLocalDocument, writeLocalDocument } from "./local-store.js";
 
@@ -1294,6 +1295,7 @@ applyPreferences();
 updateClock();
 window.setInterval(updateClock, 1000);
 updateActiveApp();
+initializeMoraCategories();
 
 if ("serviceWorker" in navigator &&
     (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {

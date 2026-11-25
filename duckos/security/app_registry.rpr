@@ -1,0 +1,40 @@
+# Native app admission policy. A result is a reference-runtime decision only.
+import "capabilities.rpr" as capabilities
+
+export craft category_valid(category) {
+    when category == "system-core" or category == "security-contracts" or category == "development-federation" or category == "mora-shell" or category == "media-processing" or category == "network-communication" or category == "utilities" {
+        yield true
+    }
+    yield false
+}
+
+export craft category_capability(category) {
+    when category == "system-core" {
+        yield "duckos.system.core.inspect"
+    }
+    when category == "security-contracts" {
+        yield "duckos.security.contracts.audit"
+    }
+    yield ""
+}
+
+export craft native_launch_decision(app_id, category, manifest_valid, requested_capabilities, granted_capabilities) {
+    when app_id == "" or not manifest_valid {
+        yield "deny-invalid-manifest"
+    }
+    when not category_valid(category) {
+        yield "deny-unknown-category"
+    }
+
+    vary required := category_capability(category)
+    when required != "" and not capabilities["permits"](granted_capabilities, required) {
+        yield "deny-missing-category-capability"
+    }
+
+    each requested in requested_capabilities {
+        when not capabilities["permits"](granted_capabilities, requested) {
+            yield "deny-missing-app-capability"
+        }
+    }
+    yield "allow-policy-only"
+}

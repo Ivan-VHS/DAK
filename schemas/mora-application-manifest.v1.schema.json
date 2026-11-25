@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/mora-application-manifest.v1.schema.json",
+  "title": "DuckOS Mora application manifest v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "category_registry",
+    "built_in_apps",
+    "ecosystem_workbenches"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.5.0"
+    },
+    "category_registry": {
+      "const": "mora/categories.v1.json"
+    },
+    "application_manifest_schema": {
+      "const": "schemas/mora-application-manifest.v1.schema.json"
+    },
+    "built_in_apps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/application"
+      }
+    },
+    "ecosystem_workbenches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/workbench"
+      }
+    }
+  },
+  "$defs": {
+    "category": {
+      "enum": [
+        "system-core",
+        "security-contracts",
+        "development-federation",
+        "mora-shell",
+        "media-processing",
+        "network-communication",
+        "utilities"
+      ]
+    },
+    "capability": {
+      "enum": [
+        "duckos.system.core.inspect",
+        "duckos.security.contracts.audit"
+      ]
+    },
+    "application": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "category",
+        "domain",
+        "panel",
+        "required_capabilities",
+        "execution_surface",
+        "native_process_launch"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "$ref": "#/$defs/category"
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "panel": {
+          "type": "string",
+          "pattern": "^mora/app\\.js#"
+        },
+        "maturity": {
+          "type": "string"
+        },
+        "required_capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/capability"
+          }
+        },
+        "execution_surface": {
+          "const": "mora-panel"
+        },
+        "native_process_launch": {
+          "enum": [
+            "denied-until-native-capability-broker",
+            "not-implemented"
+          ]
+        },
+        "data_policy": {
+          "type": "string"
+        },
+        "locale_profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "workbench": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "project",
+        "path",
+        "panel",
+        "documentation",
+        "license",
+        "runtime_boundary",
+        "external_launch",
+        "auto_execute",
+        "category",
+        "domain",
+        "required_capabilities",
+        "execution_surface",
+        "native_process_launch"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "project": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "panel": {
+          "type": "string",
+          "pattern": "^mora/app\\.js#"
+        },
+        "documentation": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "runtime_boundary": {
+          "type": "string"
+        },
+        "external_launch": {
+          "const": "user_managed_not_enabled"
+        },
+        "auto_execute": {
+          "const": false
+        },
+        "category": {
+          "$ref": "#/$defs/category"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "required_capabilities": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "execution_surface": {
+          "const": "mora-panel"
+        },
+        "native_process_launch": {
+          "const": "not-implemented"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

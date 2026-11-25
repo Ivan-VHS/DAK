@@ -11,6 +11,7 @@ import "duckos/security/mac.rpr" as mac
 import "duckos/platform/targets.rpr" as targets
 import "duckos/services/init.rpr" as init
 import "duckos/ui/accessibility.rpr" as accessibility
+import "duckos/security/app_registry.rpr" as app_registry
 
 # Process lifecycle, spawn attenuation, accounting and graceful stop.
 make parent_process := [1, 0, 100, 1048576, 80, "running", ["fs.read", "process.spawn"]]
@@ -123,3 +124,18 @@ assert(accessibility["window_state_valid"]([2, "tiled", 0, 0, 800, 600, 1]), "ti
 assert(not accessibility["window_state_valid"]([3, "unknown", 0, 0, 800, 600, 0]), "unknown window mode is rejected")
 assert(accessibility["accessibility_profile_valid"]([1000, true, false, true, false]), "accessibility profile accepts scale and boolean preferences")
 assert(not accessibility["accessibility_profile_valid"]([3000, true, false, true, false]), "unbounded accessibility scaling is rejected")
+
+
+# Mora application categories and fail-closed native launch authorization.
+assert(app_registry["category_valid"]("system-core"), "System Core is a registered category")
+assert(app_registry["category_valid"]("security-contracts"), "Security & Contracts is a registered category")
+assert(not app_registry["category_valid"]("unknown-category"), "unregistered application categories are rejected")
+assert(app_registry["category_capability"]("system-core") == "duckos.system.core.inspect", "System Core declares its capability")
+assert(app_registry["category_capability"]("security-contracts") == "duckos.security.contracts.audit", "Security category declares its capability")
+assert(app_registry["native_launch_decision"]("sestem", "system-core", true, [], []) == "deny-missing-category-capability", "privileged app launch denies missing System Core grant")
+assert(app_registry["native_launch_decision"]("sestem", "system-core", true, [], ["duckos.system.core.inspect"]) == "allow-policy-only", "System Core grant permits policy admission only")
+assert(app_registry["native_launch_decision"]("sentinel", "security-contracts", true, [], []) == "deny-missing-category-capability", "security app launch denies missing audit grant")
+assert(app_registry["native_launch_decision"]("sentinel", "security-contracts", true, [], ["duckos.security.contracts.audit"]) == "allow-policy-only", "security grant permits policy admission only")
+assert(app_registry["native_launch_decision"]("cockos", "media-processing", true, ["audio.output"], []) == "deny-missing-app-capability", "app-specific capability is required")
+assert(app_registry["native_launch_decision"]("cockos", "media-processing", true, ["audio.output"], ["audio.output"]) == "allow-policy-only", "ordinary category still checks requested app capabilities")
+assert(app_registry["native_launch_decision"]("sestem", "system-core", false, [], ["duckos.system.core.inspect"]) == "deny-invalid-manifest", "invalid manifests cannot launch")

@@ -10,6 +10,14 @@ Updated: 2026-11-25
 - [x] Reaper Beelzebul 66-rule repository scanner and defense-context TSV inspected as separate specialist inputs; neither is represented as DuckOS endpoint protection.
 - [ ] Re-verify the Java context-classifier source/test paths named in Reaper documentation before claiming that classifier is implemented or using it as a shipped DuckOS dependency.
 
+## Mora application architecture — 2026-11-25
+
+- [x] Seven versioned architectural categories are registered for all 34 existing Mora applications and federated workbench panels.
+- [x] Mora category groups and filters are generated from local JSON manifests; unknown/mismatched registrations fail closed and the original static launcher remains a fallback.
+- [x] The v1 application/category schemas preserve each app's original product domain while defining one canonical architectural category.
+- [x] Reaper native-launch admission policy requires explicit category and app capability grants and rejects invalid manifests or unknown categories.
+- [ ] Native capability-token issuer/broker, process launcher and kernel enforcement remain unimplemented; privileged categories therefore have no native launch path in Stage 1. Browser panels are not native applications.
+
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.
