@@ -225,14 +225,14 @@ protected:
         painter.setRenderHint(QPainter::Antialiasing, true);
         painter.fillRect(rect(), kPage);
 
-        QRadialGradient glow(QPointF(width() * 0.51, height() * 0.38),
-                             std::max(width(), height()) * 0.78);
-        glow.setColorAt(0.0, QColor("#242018"));
-        glow.setColorAt(0.46, QColor("#11100E"));
+        QRadialGradient glow(QPointF(width() * 0.5, height() * 0.42),
+                             std::max(width(), height()) * 0.82);
+        glow.setColorAt(0.0, kRaised);
+        glow.setColorAt(0.44, kSurface);
         glow.setColorAt(1.0, kPage);
         painter.fillRect(rect(), glow);
 
-        const int foldCount = 15;
+        const int foldCount = 17;
         for (int i = 0; i < foldCount; ++i) {
             const qreal x = (static_cast<qreal>(i) / (foldCount - 1)) * width();
             QPainterPath path;
@@ -240,10 +240,33 @@ protected:
             path.cubicTo(x - width() * 0.025, height() * 0.29,
                          x + width() * 0.035, height() * 0.63,
                          x + width() * 0.008, height());
-            QPen pen(QColor(255, 255, 255, i % 3 == 0 ? 15 : 7));
-            pen.setWidthF(i % 3 == 0 ? 1.3 : 0.8);
-            painter.setPen(pen);
+
+            QPen shade(QColor(0, 0, 0, i % 3 == 0 ? 28 : 13));
+            shade.setWidthF(i % 3 == 0 ? 3.0 : 1.5);
+            painter.setPen(shade);
             painter.drawPath(path);
+
+            QPen highlight(QColor(255, 255, 255, i % 3 == 0 ? 14 : 6));
+            highlight.setWidthF(i % 3 == 0 ? 1.2 : 0.7);
+            painter.setPen(highlight);
+            painter.drawPath(path);
+
+            if (i % 4 == 1) {
+                QPen warmEdge(QColor(255, 212, 0, 18));
+                warmEdge.setWidthF(0.9);
+                painter.setPen(warmEdge);
+                painter.drawPath(path);
+            }
+        }
+
+        const QPointF centre(width() * 0.5, height() * 0.43);
+        const qreal radius = std::min(width(), height());
+        for (int ring = 0; ring < 3; ++ring) {
+            const qreal scale = 0.24 + ring * 0.105;
+            QPen rim(QColor(255, 212, 0, 10 - ring * 2));
+            rim.setWidthF(0.8);
+            painter.setPen(rim);
+            painter.drawEllipse(centre, radius * scale, radius * scale * 0.64);
         }
         QLinearGradient lower(0, height() * 0.72, 0, height());
         lower.setColorAt(0.0, QColor(0, 0, 0, 0));
@@ -600,17 +623,22 @@ private:
             QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QLabel[role="title"] { color: #FFFFFF; font-size: 25pt; font-weight: 650; }
             QLabel[role="subtitle"] { color: #E5E5E5; }
-            QFrame#panel { background: rgba(21,21,21,238); border: 1px solid #3A3A3A; border-radius: 16px; }
-            QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #3A3A3A; border-radius: 14px; }
-            QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; text-align: left; }
-            QPushButton:hover { border-color: #FFD400; background: #222016; }
+            QFrame#panel { background: rgba(21,21,21,238); border: 1px solid rgba(255,212,0,34); border-radius: 16px; }
+            QFrame#softPanel { background: rgba(36,36,36,224); border: 1px solid #3A3A3A; border-radius: 16px; }
+            QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 44px; text-align: left; }
+            QPushButton:hover { border-color: #FFD400; background: #242424; }
+            QPushButton:focus { border: 2px solid #FFE45C; }
             QPushButton:checked { color: #080808; background: #FFD400; border-color: #FFD400; }
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
-            QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
-            QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
-            QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
+            QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 16px; min-height: 88px; }
+            QPushButton#appTile:hover { background: #242424; border-color: #FFD400; }
+            QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 32px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
+            QToolTip { color: #FFFFFF; background: #151515; border: 1px solid #FFD400; padding: 6px 8px; }
             QScrollArea { border: 0; background: transparent; }
+            QScrollBar:vertical { width: 8px; margin: 4px 0; background: transparent; }
+            QScrollBar::handle:vertical { min-height: 28px; border-radius: 4px; background: #3A3A3A; }
+            QScrollBar::handle:vertical:hover { background: #FFD400; }
         )")));
 
         auto* background = new Backdrop;
@@ -672,7 +700,9 @@ private:
         globalSearch_ = new QLineEdit;
         globalSearch_->setObjectName("global-search");
         globalSearch_->setPlaceholderText("Найти в Mora   Ctrl+K");
-        globalSearch_->setMaximumWidth(270);
+        globalSearch_->setAccessibleName("Поиск по приложениям и задачам");
+        globalSearch_->setMinimumHeight(44);
+        globalSearch_->setMaximumWidth(320);
         globalSearch_->setClearButtonEnabled(true);
         layout->addWidget(globalSearch_);
 
@@ -690,7 +720,7 @@ private:
     QWidget* buildNavigationRail()
     {
         auto* rail = new QWidget;
-        rail->setFixedWidth(64);
+        rail->setFixedWidth(72);
         auto* layout = new QVBoxLayout(rail);
         layout->setContentsMargins(0, 4, 0, 4);
         layout->setSpacing(9);
@@ -708,7 +738,7 @@ private:
             button->setAccessibleName(items[i].second);
             button->setToolTip(items[i].second);
             button->setCheckable(true);
-            button->setFixedSize(48, 48);
+            button->setFixedSize(52, 52);
             QFont iconFont = button->font();
             iconFont.setPointSize(17);
             button->setFont(iconFont);
@@ -722,14 +752,14 @@ private:
         auto* settings = new QPushButton("⚙");
         settings->setAccessibleName("Настройки Mora");
         settings->setToolTip("Настройки Mora");
-        settings->setFixedSize(48, 48);
+        settings->setFixedSize(52, 52);
         layout->addWidget(settings);
         QObject::connect(settings, &QPushButton::clicked, this, [this]() { openAppWindow("workspace"); });
 
         auto* power = new QPushButton("⏻");
         power->setAccessibleName("Закрыть Mora");
         power->setToolTip("Закрыть Mora");
-        power->setFixedSize(48, 48);
+        power->setFixedSize(52, 52);
         layout->addWidget(power);
         QObject::connect(power, &QPushButton::clicked, this, &QWidget::close);
         return rail;
@@ -753,8 +783,10 @@ private:
         };
         for (const auto& item : items) {
             auto* button = new QPushButton(item.first);
-            button->setFixedSize(42, 40);
-            button->setToolTip(item.second);
+            button->setFixedSize(44, 44);
+            const AppInfo dockApp = findApp(item.second);
+            button->setAccessibleName(dockApp.name);
+            button->setToolTip(dockApp.name);
             QFont font = button->font();
             font.setPointSize(15);
             button->setFont(font);
