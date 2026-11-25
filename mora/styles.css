@@ -49,7 +49,7 @@ button:focus-visible { outline: 2px solid #ffd400; outline-offset: 4px; }
 .hero-date { margin:18px 0 0; color:rgba(255,255,255,.9); font-size:clamp(16px,1.6vw,20px); font-weight:400; }
 .welcome-note { margin-top:62px; max-width:210px; display:flex; align-items:flex-start; gap:11px; color:rgba(255,255,255,.7); font-size:12px; line-height:1.65; }
 .sun-glyph { color:#ffd400; font-size:21px; line-height:1; }
-.app-area { min-width:0; }
+.app-area { min-width:0; max-height:calc(100vh - 158px); overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; padding-right:4px; align-self:stretch; }
 .section-heading { display:flex; align-items:end; justify-content:space-between; margin-bottom:23px; }
 .section-heading .eyebrow { margin-bottom:8px; }
 .section-heading h1 { margin:0; font-size:25px; font-weight:500; letter-spacing:-.04em; }
@@ -843,3 +843,21 @@ input[type="range"] { accent-color: #FFD400; }
 .red-sparrow-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .red-sparrow-actions [data-red-sparrow-status]{font-size:10px;color:var(--mora-muted)}
 @media(max-width:720px){.red-sparrow-grid{grid-template-columns:1fr}}
+
+
+/* Manifest-driven Mora application categories. */
+.mora-category-browser{display:grid;gap:14px}
+.mora-category-filters{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 2px}
+.mora-category-filter{padding:7px 10px;border:1px solid var(--mora-border);border-radius:999px;background:var(--mora-surface);color:var(--mora-text);font:600 9px/1.2 inherit;cursor:pointer}
+.mora-category-filter[aria-pressed="true"]{border-color:var(--mora-brand);background:var(--mora-elevated);color:var(--mora-brand)}
+.mora-category-section{display:grid;gap:9px}
+.mora-category-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.mora-category-heading h2{margin:0;color:var(--mora-text);font-size:14px;font-weight:650}
+.mora-category-heading span{color:var(--mora-muted);font-size:9px}
+.mora-category-description{margin:0;color:var(--mora-muted);font-size:10px;line-height:1.5}
+.mora-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mora-category-grid .app-tile{min-height:116px;padding:13px}
+.mora-category-access-note{margin:0;padding:9px 11px;border:1px solid var(--mora-border);border-radius:10px;background:var(--mora-surface);color:var(--mora-muted);font-size:10px;line-height:1.55}
+.mora-category-status{margin:0;color:var(--mora-muted);font-size:9px;line-height:1.5}
+.mora-category-browser[hidden]{display:none}
+@media(max-width:760px){.app-area{max-height:none;overflow:visible;width:100%;padding-right:0}.mora-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mora-category-filters{gap:6px}.mora-category-filter{padding:7px 8px}}
