@@ -1,0 +1,83 @@
+name: C11 CI
+
+on:
+  push:
+    branches: [main, "feat/**", "integration/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pytyliki-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ubuntu:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate localized README links
+        run: python .github/scripts/check_readme_links.py
+      - name: Validate every tracked Markdown document and local anchor
+        run: python tools/validate_markdown_inventory.py
+      - name: Test Markdown integrity validator
+        run: python -m unittest discover -s tests -p "test_markdown_inventory.py" -v
+      - name: Configure
+        run: cmake -S . -B build -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Validate APSIA evolution-lock schema JSON
+        run: python -c "import json; json.load(open('apsia/evolution-lock.schema.json', encoding='utf-8'))"
+      - name: Verify architecture contract
+        run: python scripts/check_architecture_contract.py
+      - name: Validate 66-language systems matrix
+        run: python tools/systems_languages.py --verify
+      - name: Verify 100-proverb engineering crosswalk
+        run: python scripts/check_chinese_proverbs_profile.py
+      - name: Validate roadmap governance and bounded CI scale
+        run: python tools/validate_delivery_contracts.py --self-test
+      - name: Validate engineering evolution contract
+        run: python tools/validate_engineering_evolution.py
+      - name: Test engineering evolution contract
+        run: python -m unittest discover -s tests -p "test_engineering_evolution.py" -v
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure
+        run: cmake -S . -B build -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Validate APSIA evolution-lock schema JSON
+        run: python -c "import json; json.load(open('apsia/evolution-lock.schema.json', encoding='utf-8'))"
+      - name: Verify architecture contract
+        run: python scripts/check_architecture_contract.py
+      - name: Verify 100-proverb engineering crosswalk
+        run: python scripts/check_chinese_proverbs_profile.py
+
+  sanitizer-linux:
+    name: Linux Sanitizer
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure with ASan and UBSan
+        run: cmake -S . -B build-sanitized -DBUILD_TESTING=ON -DPYTYLIKI_ENABLE_SANITIZERS=ON -DCMAKE_BUILD_TYPE=Debug
+      - name: Build sanitized binaries
+        run: cmake --build build-sanitized --parallel
+      - name: Run tests under sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: ctest --test-dir build-sanitized --output-on-failure
