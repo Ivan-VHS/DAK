@@ -106,3 +106,9 @@ This is not a window manager, Wayland compositor, Vulkan renderer or 240-FPS gua
 10. Installer, production image qualification and recovery.
 
 Each gate needs a conformance suite and target hardware or emulator evidence. Do not skip a gate by relabelling a reference-runtime test as a hardware test.
+
+## Desktop session and boot target selection
+
+The desktop session catalog separates full desktop environments from window managers and records their X11/Wayland host requirements. Reaper owns the versioned profile/readiness policy and the prepare/start/health-check/commit-or-rollback transition model. The current 20 external profiles are catalog-only: the Stage 1 kernel does not yet provide the process/session manager, Linux ABI, VFS, input services or X11/Wayland compositor required to launch them. Mora remains the existing shell surface; it is not replaced by a third-party profile.
+
+The boot target catalog distinguishes external UEFI firmware entries and legacy BIOS chainload targets from firmware stacks, PXE loaders, helper modules and kernel handoff mechanisms. The ISO build may append operator-supplied targets to the existing Limine menu. Limine remains pinned and active, the default DuckOS entry remains first, and the renderer never installs loaders or modifies firmware images. This build-time selection does not imply a running native desktop or automatic hardware inventory.
