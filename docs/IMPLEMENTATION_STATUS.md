@@ -144,3 +144,17 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Native desktop host shell — 2026-11-25
+
+- [x] Added standalone C++20 / Qt 6 Widgets desktop target under desktop-native; real host OS windows and controls, no browser engine or WebView.
+- [x] Imported all 30 Mora application identities and four federated workbenches into the native searchable app catalogue.
+- [x] Added native Files, Notes, Calculator, Clock, Settings, file metadata, SHA-256, system status and rhythm-profile windows.
+- [x] Added bounded per-user local collections for tasks, journals, quick capture, knowledge cards, manual route notes, album/media labels, expense text records, game-library metadata, sharing checklists and automation drafts.
+- [x] Added versioned QProcess allowlist for Reaper, Pytyliki, OPlague and VentuSample. Launch requires direct user action, fixed argv, canonical package-contained program and working-directory paths; no shell, elevation or driver installation.
+- [ ] Native ports for all remaining historical application capabilities. A name, specification or browser prototype is not a completed native app.
+- [ ] DuckOS kernel userspace process ABI, ELF loader, filesystem, service supervisor and native compositor integration. The current Stage 1 kernel still halts after DUCKOS_BOOT_OK; the desktop is currently a host-native executable, not a kernel-started session.
+- [ ] Physical DuckOS hardware, input, GPU and audio qualification.
+
+See [Native Desktop](NATIVE_DESKTOP.md), [Mora integration](MORA_INTEGRATION.md) and the D8 section of [the native roadmap](IMPLEMENTATION_ROADMAP.md).

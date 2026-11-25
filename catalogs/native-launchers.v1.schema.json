@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/native-launchers.v1.schema.json",
+  "title": "DuckOS native launcher registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "execution_policy",
+    "applications"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.native-launchers.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "execution_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "process_api",
+        "shell_interpreter",
+        "require_user_initiated_launch",
+        "fixed_manifest_arguments",
+        "executable_must_resolve_inside_package",
+        "working_directory_must_resolve_inside_package",
+        "driver_installation",
+        "elevated_execution"
+      ],
+      "properties": {
+        "process_api": {
+          "const": "QProcess"
+        },
+        "shell_interpreter": {
+          "const": false
+        },
+        "require_user_initiated_launch": {
+          "const": true
+        },
+        "fixed_manifest_arguments": {
+          "const": true
+        },
+        "executable_must_resolve_inside_package": {
+          "const": true
+        },
+        "working_directory_must_resolve_inside_package": {
+          "const": true
+        },
+        "driver_installation": {
+          "const": false
+        },
+        "elevated_execution": {
+          "const": false
+        }
+      }
+    },
+    "applications": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "platforms"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "kind": {
+            "enum": [
+              "process",
+              "python-script"
+            ]
+          },
+          "platforms": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "unix",
+              "windows",
+              "macos"
+            ],
+            "properties": {
+              "unix": {
+                "$ref": "#/$defs/target"
+              },
+              "windows": {
+                "$ref": "#/$defs/target"
+              },
+              "macos": {
+                "$ref": "#/$defs/target"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "program",
+        "working_directory"
+      ],
+      "properties": {
+        "program": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(^|[\\\\/])\\\\.\\\\.([\\\\/]|$)).+$"
+        },
+        "working_directory": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(^|[\\\\/])\\\\.\\\\.([\\\\/]|$)).+$"
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "maxItems": 32
+        },
+        "python_arguments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "maxItems": 32
+        }
+      }
+    }
+  }
+}

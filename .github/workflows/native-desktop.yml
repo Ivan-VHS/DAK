@@ -1,0 +1,130 @@
+name: DuckOS native desktop
+
+on:
+  pull_request:
+    paths: [ "desktop-native/**", "catalogs/**", "federation/**", "mora/apps.json", "projects/**", "scripts/run-duck-desktop.*", "docs/NATIVE_DESKTOP.md", ".github/workflows/native-desktop.yml" ]
+  push:
+    branches: [main]
+    paths: [ "desktop-native/**", "catalogs/**", "federation/**", "mora/apps.json", "projects/**", "scripts/run-duck-desktop.*", "docs/NATIVE_DESKTOP.md", ".github/workflows/native-desktop.yml" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: duckos-native-desktop-${{ github.event.pull_request.head.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux native desktop build and UI smoke test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout pinned source graph
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install native Qt toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build qt6-base-dev qt6-qpa-plugins
+      - name: Configure, build and test
+        run: |
+          cmake -S desktop-native -B build/desktop -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build/desktop --parallel 2
+          QT_QPA_PLATFORM=offscreen ctest --test-dir build/desktop --output-on-failure
+          build/desktop/duckos-desktop --validate-catalog --root "$PWD"
+      - name: Publish Linux native desktop
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckOS-Native-Desktop-Linux-x64
+          path: build/desktop/duckos-desktop
+          if-no-files-found: error
+          retention-days: 90
+
+  windows:
+    name: Windows 11 native desktop bundle
+    runs-on: windows-2022
+    timeout-minutes: 75
+    steps:
+      - name: Checkout pinned source graph
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Set up Python for OPlague and its tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Qt 6 for MSVC 2022
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+      - name: Test OPlague read-only workbench
+        shell: pwsh
+        run: |
+          Push-Location projects/oplague
+          python -m compileall -q .
+          python -m unittest discover -s tests -v
+          Pop-Location
+
+      - name: Build Reaper native C17 CLI
+        shell: pwsh
+        run: |
+          cmake -S projects/reaper -B build/reaper -A x64 -DREAPER_BUILD_TESTS=OFF
+          cmake --build build/reaper --config Release --target reaper-c --parallel 2
+      - name: Build Pytyliki C11 CLI and Win32 GUI
+        shell: pwsh
+        run: |
+          cmake -S projects/pytyliki -B build/pytyliki -A x64 -DBUILD_TESTING=OFF
+          cmake --build build/pytyliki --config Release --target pytyliki pytyliki-gui --parallel 2
+      - name: Build VentuSample C++20 and Qt desktop
+        shell: pwsh
+        run: |
+          cmake -S projects/ventusample -B build/ventusample -A x64 -DVENTU_BUILD_DESKTOP=ON -DVENTU_BUILD_TESTS=OFF -DREAPER_SOURCE_DIR="$PWD/projects/reaper"
+          cmake --build build/ventusample --config Release --target VentuSample --parallel 2
+      - name: Build DuckOS native desktop
+        shell: pwsh
+        run: |
+          cmake -S desktop-native -B build/desktop -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" -DBUILD_TESTING=ON
+          cmake --build build/desktop --config Release --parallel 2
+          build/desktop/Release/duckos-desktop.exe --validate-catalog --root "$PWD"
+      - name: Assemble portable DuckOS native desktop tree
+        shell: pwsh
+        run: |
+          $package = Join-Path $PWD "dist\DuckOS"
+          $bin = Join-Path $package "release\bin"
+          New-Item -ItemType Directory -Force -Path $bin, "$package\projects", "$package\mora", "$package\catalogs", "$package\federation", "$package\scripts" | Out-Null
+          Copy-Item "build\desktop\Release\duckos-desktop.exe" "$bin\duckos-desktop.exe"
+          Copy-Item "build\reaper\Release\reaper-c.exe" "$bin\reaper-c.exe"
+          Copy-Item "build\pytyliki\Release\pytyliki.exe" "$bin\pytyliki.exe"
+          Copy-Item "build\pytyliki\Release\pytyliki-gui.exe" "$bin\pytyliki-gui.exe"
+          Copy-Item "build\ventusample\Release\VentuSample.exe" "$bin\VentuSample.exe"
+          foreach ($project in @("reaper", "pytyliki", "oplague", "ventusample")) { Copy-Item "projects\$project" "$package\projects\$project" -Recurse -Force }
+          Copy-Item "mora\apps.json" "$package\mora\apps.json"
+          Copy-Item "catalogs\preinstalled-applications.v1.json" "$package\catalogs\preinstalled-applications.v1.json"
+          Copy-Item "catalogs\native-launchers.v1.json" "$package\catalogs\native-launchers.v1.json"
+          Copy-Item "federation\mora-workbenches.v1.json" "$package\federation\mora-workbenches.v1.json"
+          Copy-Item "scripts\run-duck-desktop.ps1" "$package\scripts\run-duck-desktop.ps1"
+          Copy-Item "docs\NATIVE_DESKTOP.md" "$package\NATIVE_DESKTOP.md"
+          $windeployqt = Get-Command windeployqt.exe -ErrorAction Stop
+          & $windeployqt.Source --release --no-translations "$bin\duckos-desktop.exe"
+          & $windeployqt.Source --release --no-translations "$bin\VentuSample.exe"
+          $catalogReport = & "$bin\duckos-desktop.exe" --validate-catalog --root "$package" 2>&1
+          $catalogText = $catalogReport -join "`n"
+          Write-Output $catalogText
+          if ($catalogText -notmatch "4 external launchers") { throw "Native launcher catalog did not resolve all four bundled workbenches." }
+          "DuckOS Native Desktop. Run scripts\run-duck-desktop.ps1. Python 3 with Tcl/Tk is required for OPlague." | Set-Content -Encoding utf8 "$package\README-NATIVE.txt"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path "$package\*" -DestinationPath "dist\DuckOS-Native-Desktop-Windows-x64.zip" -Force
+      - name: Publish portable Windows desktop bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckOS-Native-Desktop-Windows-x64
+          path: dist/DuckOS-Native-Desktop-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 90
