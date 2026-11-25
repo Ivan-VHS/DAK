@@ -1,0 +1,69 @@
+# Virtual filesystem namespace and operation policy.
+# FAT32/ext4/NTFS names are recognised; filesystem drivers are not implemented here.
+
+export craft components_valid(components) {
+    when size(components) == 0 or size(components) > 64 {
+        yield false
+    }
+    each component in components {
+        when component == "" or component == "." or component == ".." or component == "/" {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft mount_valid(mount) {
+    when size(mount) != 5 or mount[0] <= 0 or mount[2] == "" {
+        yield false
+    }
+    when mount[1] != "fat32" and mount[1] != "ntfs" and mount[1] != "ext4" {
+        yield false
+    }
+    # NTFS writes remain disabled until a native, journal-safe driver is qualified.
+    when mount[1] == "ntfs" and mount[3] {
+        yield false
+    }
+    yield true
+}
+
+export craft access_policy(mount, operation, grants) {
+    when not mount_valid(mount) {
+        yield "deny-invalid-mount"
+    }
+    vary granted := false
+    each capability in grants {
+        when operation == "read" and capability == "fs.read" {
+            change granted := true
+        }
+        when operation == "write" and capability == "fs.write" {
+            change granted := true
+        }
+        when operation == "snapshot" and capability == "fs.snapshot" {
+            change granted := true
+        }
+    }
+    when not granted {
+        yield "deny-capability"
+    }
+    when operation == "write" and not mount[3] {
+        yield "deny-read-only"
+    }
+    when operation != "read" and operation != "write" and operation != "snapshot" {
+        yield "deny-operation"
+    }
+    yield "allow-policy-only"
+}
+
+export craft snapshot_record_valid(record) {
+    when size(record) != 4 {
+        yield false
+    }
+    when record[0] <= 0 or record[1] < 0 or record[1] >= record[0] {
+        yield false
+    }
+    when record[2] < 0 or record[3] == "" {
+        yield false
+    }
+    yield true
+}

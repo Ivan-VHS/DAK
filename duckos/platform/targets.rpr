@@ -1,0 +1,37 @@
+# Architecture policy for DuckOS release and build selection.
+# x86_64 is the primary Intel/AMD path; Elbrus remains a named compatibility track.
+# Recognition here is not evidence of a completed Elbrus compiler or boot backend.
+
+export craft architecture_known(architecture) {
+    yield architecture == "x86_64" or architecture == "elbrus"
+}
+
+export craft target_track(architecture) {
+    when architecture == "x86_64" {
+        yield "primary"
+    }
+    when architecture == "elbrus" {
+        yield "compatibility-preserved"
+    }
+    yield "unsupported"
+}
+
+export craft package_target_decision(package_architecture, running_architecture) {
+    when not architecture_known(package_architecture) or not architecture_known(running_architecture) {
+        yield "reject-unknown-architecture"
+    }
+    when package_architecture == running_architecture {
+        yield "native-architecture-match"
+    }
+    yield "reject-requires-explicit-translation"
+}
+
+export craft device_class_known(device_class) {
+    when device_class == "pci" or device_class == "usb" or device_class == "usb-type-c" {
+        yield true
+    }
+    when device_class == "bluetooth" or device_class == "wifi" or device_class == "nvme" {
+        yield true
+    }
+    yield device_class == "gpu" or device_class == "audio"
+}

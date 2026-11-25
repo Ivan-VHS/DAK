@@ -1,0 +1,61 @@
+# Virtual-memory admission policy for the first x86_64 user address range.
+# Page-table edits, TLB invalidation and physical allocation remain native work.
+
+export craft user_address_valid(address) {
+    yield address >= 0 and address < 140737488355328
+}
+
+export craft mapping_valid(virtual_base, physical_base, bytes, permissions) {
+    when not user_address_valid(virtual_base) or physical_base < 4096 {
+        yield false
+    }
+    when virtual_base % 4096 != 0 or physical_base % 4096 != 0 {
+        yield false
+    }
+    when bytes <= 0 or bytes % 4096 != 0 {
+        yield false
+    }
+    when permissions != "r" and permissions != "rw" and permissions != "rx" {
+        yield false
+    }
+    yield true
+}
+
+export craft page_fault_action(present, writable, user, backing, within_limit) {
+    when not user {
+        yield "kernel-fault"
+    }
+    when not within_limit {
+        yield "deny-address-range"
+    }
+    when present and not writable {
+        yield "deny-write-protection"
+    }
+    when present {
+        yield "retry-instruction"
+    }
+    when backing == "zero" {
+        yield "demand-zero-page"
+    }
+    when backing == "file" {
+        yield "demand-file-page"
+    }
+    when backing == "swap" {
+        yield "swap-in-page"
+    }
+    yield "deny-missing-backing"
+}
+
+export craft swap_slot_valid(slot_id, page_bytes, state) {
+    when slot_id <= 0 or page_bytes != 4096 {
+        yield false
+    }
+    yield state == "free" or state == "occupied"
+}
+
+export craft dedup_eligible(page_bytes, private_page, writable, pinned, content_hash) {
+    when page_bytes != 4096 or not private_page or writable or pinned or content_hash == "" {
+        yield false
+    }
+    yield true
+}

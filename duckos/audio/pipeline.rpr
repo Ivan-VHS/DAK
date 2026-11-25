@@ -1,0 +1,44 @@
+# Audio and MIDI admission contracts.
+# ALSA/PulseAudio adapters and real-time device scheduling remain native work.
+
+export craft pipeline_valid(pipeline) {
+    when size(pipeline) != 5 {
+        yield false
+    }
+    when pipeline[0] != 44100 and pipeline[0] != 48000 and pipeline[0] != 96000 {
+        yield false
+    }
+    when pipeline[1] <= 0 or pipeline[1] > 16 {
+        yield false
+    }
+    when pipeline[2] != 16 and pipeline[2] != 24 and pipeline[2] != 32 {
+        yield false
+    }
+    when pipeline[3] < 16 or pipeline[3] > 8192 {
+        yield false
+    }
+    when pipeline[4] < pipeline[3] * 2 or pipeline[4] > 65536 or pipeline[4] % pipeline[3] != 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft midi_event_valid(event) {
+    when size(event) != 3 {
+        yield false
+    }
+    when event[0] < 128 or event[0] > 239 {
+        yield false
+    }
+    yield event[1] >= 0 and event[1] <= 127 and event[2] >= 0 and event[2] <= 127
+}
+
+export craft spatial_mix_valid(layout) {
+    when size(layout) != 3 {
+        yield false
+    }
+    when layout[0] < 0 or layout[0] > 256 or layout[1] < 1 or layout[1] > 16 or layout[2] <= 0 {
+        yield false
+    }
+    yield layout[0] * layout[1] <= layout[2]
+}

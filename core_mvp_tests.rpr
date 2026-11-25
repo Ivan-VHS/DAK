@@ -1,0 +1,125 @@
+# DuckOS core subsystem MVP contracts.
+# All assertions run on the Reaper reference runtime; no privileged hardware is touched.
+
+import "duckos/kernel/process.rpr" as process
+import "duckos/kernel/vm.rpr" as vm
+import "duckos/storage/vfs.rpr" as vfs
+import "duckos/network/stack.rpr" as network
+import "duckos/graphics/compositor.rpr" as graphics
+import "duckos/audio/pipeline.rpr" as audio
+import "duckos/security/mac.rpr" as mac
+import "duckos/platform/targets.rpr" as targets
+import "duckos/services/init.rpr" as init
+import "duckos/ui/accessibility.rpr" as accessibility
+
+# Process lifecycle, spawn attenuation, accounting and graceful stop.
+make parent_process := [1, 0, 100, 1048576, 80, "running", ["fs.read", "process.spawn"]]
+make child_process := [2, 1, 20, 65536, 20, "created", ["fs.read"]]
+assert(process["descriptor_valid"](parent_process), "valid process descriptor")
+assert(not process["descriptor_valid"]([2, 1]), "short process descriptor is rejected")
+assert(process["spawn_policy"](parent_process, child_process) == "admit-policy-only", "child inherits only a subset of grants")
+assert(process["spawn_policy"](parent_process, [3, 1, 20, 65536, 20, "created", ["driver.write"]]) == "reject-capability-amplification", "child cannot amplify capabilities")
+assert(process["transition_valid"]("ready", "running"), "ready process can be scheduled")
+assert(not process["transition_valid"]("terminated", "running"), "terminated process cannot be revived")
+assert(process["usage_valid"](50, 4096, 80, 8192), "process usage is inside declared limits")
+assert(not process["usage_valid"](90, 9000, 80, 8192), "process resource overrun is rejected")
+assert(process["shutdown_action"]("running", false) == "request-graceful-stop", "process shutdown starts gracefully")
+assert(process["shutdown_action"]("running", true) == "force-exit-after-grace-period", "forced exit is only considered after the grace deadline")
+
+# User virtual-memory boundaries and page lifecycle policy.
+assert(vm["user_address_valid"](4096), "lower canonical user address is accepted")
+assert(not vm["user_address_valid"](140737488355328), "non-user canonical boundary is rejected")
+assert(vm["mapping_valid"](4096, 8192, 8192, "rw"), "aligned read-write mapping is accepted")
+assert(not vm["mapping_valid"](4097, 8192, 4096, "rwx"), "unaligned and W+X mappings are rejected")
+assert(vm["page_fault_action"](false, true, true, "zero", true) == "demand-zero-page", "anonymous page fault is demand-zero mapped")
+assert(vm["page_fault_action"](false, true, true, "file", true) == "demand-file-page", "file-backed page fault requests a bounded page-in")
+assert(vm["page_fault_action"](true, false, true, "zero", true) == "deny-write-protection", "write protection fault is denied")
+assert(vm["swap_slot_valid"](1, 4096, "free"), "swap slot has the expected page size")
+assert(not vm["swap_slot_valid"](0, 4096, "free"), "reserved swap slot zero is rejected")
+assert(vm["dedup_eligible"](4096, true, false, false, "sha256:page-a"), "private read-only unpinned page may be deduplication candidate")
+assert(not vm["dedup_eligible"](4096, true, true, false, "sha256:page-a"), "writable page is not deduplication candidate")
+
+# VFS path, mount, capability and snapshot contracts.
+assert(vfs["components_valid"](["home", "user", "docs"]), "normal path components are accepted")
+assert(not vfs["components_valid"](["home", "..", "system"]), "parent traversal is rejected")
+make fat_mount := [1, "fat32", "disk0", true, false]
+make ntfs_mount := [2, "ntfs", "disk1", false, true]
+assert(vfs["mount_valid"](fat_mount), "FAT32 mount descriptor is accepted")
+assert(vfs["mount_valid"](ntfs_mount), "read-only NTFS mount descriptor is accepted")
+assert(not vfs["mount_valid"]([3, "ntfs", "disk2", true, false]), "NTFS writes remain disabled by policy")
+assert(vfs["access_policy"](fat_mount, "write", ["fs.read", "fs.write"]) == "allow-policy-only", "write requires a writable mount and fs.write grant")
+assert(vfs["access_policy"](ntfs_mount, "write", ["fs.write"]) == "deny-read-only", "read-only filesystem denies writes")
+assert(vfs["snapshot_record_valid"]([2, 1, 1700000000, "sha256:snapshot-a"]), "snapshot revision metadata is valid")
+assert(not vfs["snapshot_record_valid"]([1, 3, 0, "sha256:bad-parent"]), "snapshot cannot point to a future parent")
+
+# Network endpoint, firewall, DNS and VPN profile validation.
+assert(network["endpoint_valid"](["tcp", 0, 443, "new"]), "TCP endpoint descriptor is valid")
+assert(not network["endpoint_valid"](["icmp", 0, 0, "new"]), "unsupported transport endpoint is rejected")
+make firewall_rules := [["ingress", "tcp", 443, 443, "allow"], ["ingress", "tcp", 1, 65535, "deny"]]
+assert(network["firewall_decision"](firewall_rules, "ingress", "tcp", 443) == "allow", "first matching firewall rule decides")
+assert(network["firewall_decision"]([], "egress", "udp", 53) == "deny-default", "firewall is deny by default")
+assert(network["dns_query_valid"]([7, 14, "AAAA", 64]), "bounded DNS query metadata is accepted")
+assert(not network["dns_query_valid"]([7, 300, "A", 64]), "oversized DNS name is rejected")
+assert(network["vpn_profile_valid"](["wireguard", 51820, "public-key", 2, "provisioned"]), "provisioned VPN profile passes admission")
+assert(not network["vpn_profile_valid"](["wireguard", 51820, "public-key", 2, "missing-key"]), "VPN without a provisioned key is rejected")
+
+# Framebuffer, multi-monitor, renderer preference and frame budget.
+assert(graphics["framebuffer_valid"]([1920, 1080, 7680, 32, 8294400]), "valid 32-bit framebuffer geometry is accepted")
+assert(not graphics["framebuffer_valid"]([1920, 1080, 100, 32, 8294400]), "framebuffer pitch underflow is rejected")
+assert(graphics["monitor_valid"]([1, 0, 0, 1920, 1080, 1000]), "monitor geometry and scale are accepted")
+assert(not graphics["monitor_valid"]([1, 0, 0, 1920, 1080, 5000]), "out-of-range monitor scaling is rejected")
+assert(graphics["backend_select"](["framebuffer", "opengl", "vulkan"]) == "vulkan", "renderer selection prefers Vulkan when exposed")
+assert(graphics["backend_select"](["framebuffer"]) == "framebuffer", "framebuffer fallback remains available")
+assert(graphics["frame_budget_state"](12000, 60, false) == "within-budget", "frame meets 60 Hz budget")
+assert(graphics["frame_budget_state"](20000, 60, false) == "late", "late frame is observable")
+assert(graphics["frame_budget_state"](20000, 60, true) == "static", "reduced motion suppresses animated frame policy")
+
+# Audio pipeline, MIDI and spatial mix bounds.
+assert(audio["pipeline_valid"]([48000, 2, 24, 128, 512]), "low-latency audio pipeline shape is accepted")
+assert(not audio["pipeline_valid"]([48000, 2, 24, 128, 128]), "audio buffer must cover at least two periods")
+assert(audio["midi_event_valid"]([144, 60, 100]), "MIDI channel event is accepted")
+assert(not audio["midi_event_valid"]([240, 60, 100]), "system-exclusive status is outside the channel-event contract")
+assert(audio["spatial_mix_valid"]([12, 8, 128]), "spatial mix fits its declared processing budget")
+assert(not audio["spatial_mix_valid"]([32, 8, 128]), "spatial mix over budget is rejected")
+
+# MAC, trust labels, secure-boot evidence and encryption profile.
+make mac_rules := [["user", "home", "read", "allow"], ["user", "system", "write", "deny"]]
+assert(mac["authorize"]("user", "home", "read", mac_rules) == "allow", "matching MAC allow rule is applied")
+assert(mac["authorize"]("user", "system", "read", mac_rules) == "deny-default", "missing MAC rule denies access")
+assert(mac["label_transition"]("untrusted", "validated", true, false) == "allow", "validated input may gain validated label")
+assert(mac["label_transition"]("untrusted", "validated", false, false) == "deny", "failed validation cannot elevate trust")
+assert(mac["label_transition"]("quarantined", "validated", true, true) == "recovery-required", "quarantined content requires recovery flow")
+assert(mac["secure_boot_decision"](true, true, true, true) == "continue-policy-only", "complete secure-boot evidence passes the policy gate")
+assert(mac["secure_boot_decision"](true, false, true, true) == "recovery", "missing bootloader evidence fails closed")
+assert(mac["tpm_evidence_valid"](["quote", 2, 32, true]), "verified TPM quote metadata is accepted")
+assert(not mac["tpm_evidence_valid"](["quote", 2, 8, true]), "short TPM nonce is rejected")
+assert(mac["encryption_profile_valid"](["aes-256", 256, "keyring:disk0", "ready"]), "AES-256 key reference profile is accepted")
+assert(not mac["encryption_profile_valid"](["aes-128", 128, "keyring:disk0", "ready"]), "non-AES-256 profile is rejected")
+
+# Architecture priority and preserved compatibility profile.
+assert(targets["architecture_known"]("x86_64"), "x86_64 architecture is recognised")
+assert(targets["architecture_known"]("elbrus"), "Elbrus remains recognised")
+assert(not targets["architecture_known"]("unknown-cpu"), "unknown architecture is not silently accepted")
+assert(targets["target_track"]("x86_64") == "primary", "Intel and AMD x86_64 is the primary target track")
+assert(targets["target_track"]("elbrus") == "compatibility-preserved", "Elbrus compatibility track is retained")
+assert(targets["package_target_decision"]("x86_64", "x86_64") == "native-architecture-match", "native package target matches")
+assert(targets["package_target_decision"]("x86_64", "elbrus") == "reject-requires-explicit-translation", "cross-architecture package is not silently executed")
+assert(targets["device_class_known"]("usb-type-c") and targets["device_class_known"]("wifi") and targets["device_class_known"]("nvme"), "device taxonomy covers USB-C, Wi-Fi and NVMe classes")
+
+# Service dependencies, finite shutdown and timer schedule validation.
+make network_unit := ["network", "/sbin/network", ["storage"], 3, 30000]
+assert(init["unit_valid"](network_unit), "service unit metadata is bounded")
+assert(not init["unit_valid"](["network", "/sbin/network", [], 99, 30000]), "service restart budget is bounded")
+assert(init["start_decision"](true, true, false, false) == "start-policy-only", "enabled service with ready dependencies may start")
+assert(init["start_decision"](true, false, false, false) == "wait-for-dependencies", "service waits for dependencies")
+assert(init["shutdown_decision"]("running", false) == "request-stop", "service shutdown requests graceful stop")
+assert(init["shutdown_decision"]("stopping", true) == "terminate-after-timeout", "service timeout is finite")
+assert(init["cron_valid"]([15, 3, -1, -1, 1]), "bounded cron fields accept wildcard values")
+assert(not init["cron_valid"]([60, 3, -1, -1, 1]), "invalid cron minute is rejected")
+
+# Window geometry, tiling/floating modes and accessibility settings.
+assert(accessibility["window_state_valid"]([1, "floating", 100, 100, 1280, 720, 0]), "floating window descriptor is valid")
+assert(accessibility["window_state_valid"]([2, "tiled", 0, 0, 800, 600, 1]), "tiling window descriptor is valid")
+assert(not accessibility["window_state_valid"]([3, "unknown", 0, 0, 800, 600, 0]), "unknown window mode is rejected")
+assert(accessibility["accessibility_profile_valid"]([1000, true, false, true, false]), "accessibility profile accepts scale and boolean preferences")
+assert(not accessibility["accessibility_profile_valid"]([3000, true, false, true, false]), "unbounded accessibility scaling is rejected")

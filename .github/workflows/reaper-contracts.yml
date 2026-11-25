@@ -32,8 +32,16 @@ jobs:
             PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$source"
           done < <(find "$GITHUB_WORKSPACE/DuckOS/duckos" -type f -name '*.rpr' -print0)
 
-      - name: Run contract suite with tree-walk engine
+      - name: Run system contract suite with tree-walk engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
 
-      - name: Run contract suite with VM engine
+      - name: Run core MVP contract suite with tree-walk engine
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
+          PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
+
+      - name: Run system contract suite with VM engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+
+      - name: Run core MVP contract suite with VM engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"

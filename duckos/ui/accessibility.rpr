@@ -1,0 +1,28 @@
+# Native window and accessibility-profile contracts.
+# A valid descriptor does not create a native window or assistive-technology bridge.
+
+export craft window_state_valid(window) {
+    when size(window) != 7 or window[0] <= 0 {
+        yield false
+    }
+    when window[1] != "tiled" and window[1] != "floating" and window[1] != "maximized" and window[1] != "fullscreen" {
+        yield false
+    }
+    when window[2] < -32768 or window[2] > 32767 or window[3] < -32768 or window[3] > 32767 {
+        yield false
+    }
+    when window[4] < 160 or window[4] > 16384 or window[5] < 120 or window[5] > 16384 {
+        yield false
+    }
+    yield window[6] >= 0
+}
+
+export craft accessibility_profile_valid(profile) {
+    when size(profile) != 5 {
+        yield false
+    }
+    when profile[0] < 750 or profile[0] > 2000 {
+        yield false
+    }
+    yield (profile[1] == true or profile[1] == false) and (profile[2] == true or profile[2] == false) and (profile[3] == true or profile[3] == false) and (profile[4] == true or profile[4] == false)
+}
