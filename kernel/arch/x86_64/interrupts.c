@@ -7,6 +7,13 @@
 
 typedef void (*duckos_exception_stub)(void);
 
+_Static_assert(sizeof(duckos_x86_exception_frame) == 160u,
+               "x86_64 exception frame must match the assembly stack layout");
+_Static_assert(offsetof(duckos_x86_exception_frame, vector) == 120u,
+               "x86_64 exception vector offset mismatch");
+_Static_assert(offsetof(duckos_x86_exception_frame, rip) == 136u,
+               "x86_64 exception RIP offset mismatch");
+
 #define DECLARE_STUB(number) extern void duckos_x86_isr_##number(void)
 DECLARE_STUB(0);  DECLARE_STUB(1);  DECLARE_STUB(2);  DECLARE_STUB(3);
 DECLARE_STUB(4);  DECLARE_STUB(5);  DECLARE_STUB(6);  DECLARE_STUB(7);
