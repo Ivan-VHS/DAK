@@ -10,8 +10,8 @@ import unittest
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
-from duckos.deployment import build_release_bundle, create_deployment_plan
-from duckos.manifest import SCHEMA
+from dak.deployment import build_release_bundle, create_deployment_plan
+from dak.manifest import SCHEMA
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,17 +35,17 @@ class DeploymentSchemaTests(unittest.TestCase):
                 })
             manifest = {
                 "schema": SCHEMA,
-                "name": "DuckOS",
+                "name": "DAK",
                 "version": "schema-test",
                 "architecture": "x86_64",
-                "kernel_abi": "duckos-reaper-abi-test",
+                "kernel_abi": "dak-reaper-abi-test",
                 "components": components,
             }
             archive_path = base / "release.tar.gz"
             build_release_bundle(manifest, root, archive_path)
 
             with tarfile.open(archive_path, "r:gz") as archive:
-                release = json.load(archive.extractfile("duckos-release/release.json"))
+                release = json.load(archive.extractfile("dak-release/release.json"))
 
             schema = json.loads((ROOT / "schemas/release.v1.schema.json").read_text(encoding="utf-8"))
             Draft202012Validator.check_schema(schema)
@@ -69,15 +69,15 @@ class DeploymentSchemaTests(unittest.TestCase):
                 })
             manifest = {
                 "schema": SCHEMA,
-                "name": "DuckOS",
+                "name": "DAK",
                 "version": "schema-test",
                 "architecture": "x86_64",
-                "kernel_abi": "duckos-reaper-abi-test",
+                "kernel_abi": "dak-reaper-abi-test",
                 "components": components,
             }
             plan = create_deployment_plan(
                 manifest, root, target="pxe",
-                base_url="https://boot.example.test/duckos",
+                base_url="https://boot.example.test/dak",
             )
 
             layout_schema = json.loads((ROOT / "schemas/image-layout.v1.schema.json").read_text(encoding="utf-8"))
@@ -85,7 +85,7 @@ class DeploymentSchemaTests(unittest.TestCase):
             Draft202012Validator.check_schema(layout_schema)
             Draft202012Validator.check_schema(schema)
             registry = Registry().with_resource(
-                "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/image-layout.v1.schema.json",
+                "https://github.com/Ivan-VHS/DAK/blob/main/schemas/image-layout.v1.schema.json",
                 Resource.from_contents(layout_schema),
             )
             Draft202012Validator(schema, registry=registry).validate(plan)

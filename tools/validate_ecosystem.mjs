@@ -16,8 +16,8 @@ function safeFile(root,path){
 }
 export function validateEcosystem(graph,registry,workbenches,root=ROOT){
  const errors=[],add=m=>errors.push(m);
- if(graph?.schema!=="duckos.ecosystem-integration-graph.v1"||graph?.version!==1)add("unsupported graph schema/version");
- if(graph?.host?.id!=="duckos"||graph?.host?.kernel_may_load_peer_code!==false)add("peer code must remain outside the kernel");
+ if(graph?.schema!=="dak.ecosystem-integration-graph.v1"||graph?.version!==1)add("unsupported graph schema/version");
+ if(graph?.host?.id!=="dak"||graph?.host?.kernel_may_load_peer_code!==false)add("peer code must remain outside the kernel");
  const registered=new Map((registry?.repositories??[]).map(x=>[x.id,x]));
  const nodes=new Map((graph?.projects??[]).map(x=>[x.id,x]));
  if(registered.size!==EXPECTED.size||nodes.size!==EXPECTED.size)add("graph and registry must contain four unique peers");
@@ -39,7 +39,7 @@ export function validateEcosystem(graph,registry,workbenches,root=ROOT){
  const edgeIds=new Set();
  for(const edge of graph?.interfaces??[]){
   if(edgeIds.has(edge.id))add("duplicate interface id: "+edge.id);edgeIds.add(edge.id);
-  if((!EXPECTED.has(edge.producer)&&edge.producer!=="duckos")||(!EXPECTED.has(edge.consumer)&&edge.consumer!=="duckos")||edge.producer===edge.consumer)add(edge.id+": invalid endpoints");
+  if((!EXPECTED.has(edge.producer)&&edge.producer!=="dak")||(!EXPECTED.has(edge.consumer)&&edge.consumer!=="dak")||edge.producer===edge.consumer)add(edge.id+": invalid endpoints");
   if(!["implemented_interop","policy_adapter_only","specified_only"].includes(edge.status))add(edge.id+": invalid maturity label");
   if(!Array.isArray(edge.artifacts)||edge.artifacts.length===0)add(edge.id+": no evidence artifacts");
   else for(const artifact of edge.artifacts){
@@ -53,7 +53,7 @@ export function validateEcosystem(graph,registry,workbenches,root=ROOT){
   }
  }
  if(!graph?.interfaces?.some(e=>e.id==="ventusample.reaper.pack.v1"&&e.status==="specified_only"))add("VentuSample pack must remain specified_only until a consumer exists");
- if(!graph?.interfaces?.some(e=>e.id==="oplague.duckos.gpu-telemetry.v1"&&e.status==="policy_adapter_only"))add("GPU telemetry must remain policy_adapter_only until trusted ingest exists");
+ if(!graph?.interfaces?.some(e=>e.id==="oplague.dak.gpu-telemetry.v1"&&e.status==="policy_adapter_only"))add("GPU telemetry must remain policy_adapter_only until trusted ingest exists");
  const release=graph?.release_pipeline;
  if(release?.script!=="boot/build-release-iso.sh"||release?.workflow!==".github/workflows/release-iso.yml"||release?.workbench_registry!=="federation/mora-workbenches.v1.json")add("release pipeline metadata points to wrong files");
  for(const id of EXPECTED.keys())if(!release?.tested_projects?.includes(id))add("release pipeline omits "+id);
@@ -74,5 +74,5 @@ export function validateRepository(root=ROOT){
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const errors=validateRepository();
  if(errors.length){for(const error of errors)process.stderr.write("ERROR: "+error+"\\n");process.exitCode=1;}
- else process.stdout.write("DuckOS ecosystem integration graph: validated\\n");
+ else process.stdout.write("DAK ecosystem integration graph: validated\\n");
 }

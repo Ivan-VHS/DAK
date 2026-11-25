@@ -33,10 +33,10 @@ jobs:
           cmake -S . -B build/native-mora -G Ninja
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_TESTING=ON
-          -DDUCKOS_BUILD_NATIVE_MORA=ON
+          -DDAK_BUILD_NATIVE_MORA=ON
       - name: Build
-        run: cmake --build build/native-mora --target duckos_mora_native --parallel 2
+        run: cmake --build build/native-mora --target dak_mora_native --parallel 2
       - name: Native window and navigation smoke test
         env:
           QT_QPA_PLATFORM: offscreen
-        run: ctest --test-dir build/native-mora --output-on-failure -R duckos-mora-native-smoke
+        run: ctest --test-dir build/native-mora --output-on-failure -R dak-mora-native-smoke

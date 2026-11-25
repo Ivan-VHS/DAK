@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/bav-security-bundle.v1.schema.json",
-  "title": "DuckOS BAV Security Bundle v1",
+  "$id": "https://github.com/Ivan-VHS/DAK/blob/main/schemas/bav-security-bundle.v1.schema.json",
+  "title": "DAK BAV Security Bundle v1",
   "description": "Declarative, signed BAV detection policy bundle. Schema validation does not verify cryptographic signatures.",
   "type": "object",
   "additionalProperties": false,
@@ -16,7 +16,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.bav.security-bundle.v1"
+      "const": "dak.bav.security-bundle.v1"
     },
     "bundle": {
       "type": "object",
@@ -87,7 +87,7 @@
       ],
       "properties": {
         "os": {
-          "const": "duckos"
+          "const": "dak"
         },
         "architectures": {
           "type": "array",

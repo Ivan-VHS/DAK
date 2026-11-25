@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/repository-federation.v1.schema.json",
-  "title": "DuckOS repository federation manifest",
+  "$id": "https://github.com/Ivan-VHS/DAK/blob/main/schemas/repository-federation.v1.schema.json",
+  "title": "DAK repository federation manifest",
   "type": "object",
   "required": [
     "schema",
@@ -15,7 +15,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.repository-federation.v1"
+      "const": "dak.repository-federation.v1"
     },
     "version": {
       "const": 1
@@ -24,7 +24,7 @@
       "const": "Ivan-VHS"
     },
     "integration_host": {
-      "const": "DuckOS"
+      "const": "DAK"
     },
     "checkout_strategy": {
       "const": "git-submodules"

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from duckos.image_layout import LayoutError, plan_image, validate_layout
+from dak.image_layout import LayoutError, plan_image, validate_layout
 
 
 class ImageLayoutTests(unittest.TestCase):

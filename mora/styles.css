@@ -778,7 +778,7 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
 @media (max-width:760px) { .commons-grid { grid-template-columns: 1fr; } }
 
 
-/* DuckOS single palette: black structure, white content and yellow action. */
+/* DAK single palette: black structure, white content and yellow action. */
 :root {
   color-scheme: dark;
   --mora-page: #080808;
@@ -823,7 +823,7 @@ input[type="range"] { accent-color: #FFD400; }
 .extension-theme-options { display: none; }
 
 
-/* Red Sparrow is scoped to its own Mora app window and uses DuckOS semantic tokens. */
+/* Red Sparrow is scoped to its own Mora app window and uses DAK semantic tokens. */
 .locale-select{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--mora-border);border-radius:10px;background:var(--mora-surface);color:var(--mora-text);font:inherit}
 .red-sparrow-tile{border-color:var(--mora-brand)!important}
 .red-sparrow-tile .app-icon{color:var(--mora-brand);background:linear-gradient(145deg,var(--mora-surface),var(--mora-elevated));border:1px solid var(--mora-border)}

@@ -1,12 +1,12 @@
 # Mora Design System
 
-**Canonical source:** DuckOS / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.
+**Canonical source:** DAK / Mora · **Schema:** `mora.theme.v1` · **Maintainer:** Ivan-VHS.
 
 Mora is the shared desktop identity for the Ivan-VHS application family. The shell owns wallpaper, workspace navigation, application catalogue, status area and app presentation. Each native tool keeps its specialist layout and product indicators while sharing semantic surfaces, spacing, typography, focus, motion and a restrained material language.
 
 ## Visual direction
 
-Mora uses one fixed DuckOS palette: black structural surfaces, white content and duck yellow for selection, focus and primary action. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
+Mora uses one fixed DAK palette: black structural surfaces, white content and duck yellow for selection, focus and primary action. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
 
 The target composition is approximately 65% black, 25% white/graphite and 10% yellow. These are visual balance targets, not a requirement to recolor imported media or user content. Application identities share the same yellow accent; application meaning comes from names, glyphs and labels rather than a rainbow of per-app colors.
 
@@ -66,5 +66,5 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 The primary Mora desktop surface is a host-native Qt 6 Widgets application. Its application windows are real top-level host windows managed by the host operating system; the shell does not embed Qt WebEngine, WebView, HTML or browser-rendered application windows. The native shell reads the shared local catalogue and never executes manifest-provided command strings.
 
-The browser implementation remains available as a reference/compatibility preview, not as the native desktop. The Qt host adapter is still distinct from the DuckOS kernel desktop: Stage 1 does not launch user processes, and a kernel-owned compositor, input service, font stack, accessibility bridge and capability broker remain separate D8 work.
+The browser implementation remains available as a reference/compatibility preview, not as the native desktop. The Qt host adapter is still distinct from the DAK kernel desktop: Stage 1 does not launch user processes, and a kernel-owned compositor, input service, font stack, accessibility bridge and capability broker remain separate D8 work.
 

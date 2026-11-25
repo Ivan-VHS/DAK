@@ -61,7 +61,7 @@ test("system panels expose approvals, permissions, recovery and local file inspe
     "data-capability", "save-recovery", "restore-recovery", "preview-update",
     "data-executable-file", "data-provenance-file", "data-power-profile",
     "data-setting", "data-extension-form", "data-archive-file", "data-beat-range",
-    "Единая палитра DuckOS", "data-share-check"
+    "Единая палитра DAK", "data-share-check"
   ]) {
     assert.ok(js.includes(marker), "missing system control: " + marker);
   }
@@ -71,7 +71,7 @@ test("system panels expose approvals, permissions, recovery and local file inspe
 
 test("shell policy keeps prototype and native-service maturity separate", () => {
   assert.equal(policy.desktop, "Mora");
-  assert.equal(policy.product, "DuckOS");
+  assert.equal(policy.product, "DAK");
   assert.equal(policy.capabilities.local_ai_and_npu.maturity, "planned");
   assert.equal(policy.capabilities.immutable_updates.maturity, "planned");
   assert.equal(policy.capabilities.compatibility.maturity, "partial");
@@ -105,7 +105,7 @@ function contrastRatio(foreground, background) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
+test("Mora uses one accessible black, white and yellow DAK palette", () => {
   assert.equal(theme.schema, "mora.theme.v1");
   assert.equal(theme.defaultPalette, "duck");
   assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
@@ -118,13 +118,13 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(contrastRatio(palette.text, palette.page) >= 7);
   assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
   assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5);
-  assert.equal(manifest.name, "Mora — DuckOS Desktop");
+  assert.equal(manifest.name, "Mora — DAK Desktop");
   assert.equal(manifest.theme_color, "#FFD400");
   assert.equal(manifest.background_color, "#080808");
   assert.ok(html.includes('name="theme-color" content="#FFD400"'));
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
-  assert.ok(html.includes('Единая палитра DuckOS'));
+  assert.ok(html.includes('Единая палитра DAK'));
   assert.ok(html.includes('data-app="mora-commons"'));
   assert.ok(css.includes(':root[data-theme="duck"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));

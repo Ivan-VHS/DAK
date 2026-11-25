@@ -1,6 +1,6 @@
-"""Runtime discovery and dry-run orchestration for DuckOS compatibility tools.
+"""Runtime discovery and dry-run orchestration for DAK compatibility tools.
 
-DuckBridge reuses the bounded PE parser in duckos.compat.pe. It can inspect
+DuckBridge reuses the bounded PE parser in dak.compat.pe. It can inspect
 ELF headers and prepare argument-vector launch plans, but it never executes
 an inspected program or starts a compatibility runtime.
 """
@@ -16,8 +16,8 @@ from typing import Any, Iterable
 from .pe import PEFormatError, inspect_pe_file
 from .runtime import host_architecture
 
-SCHEMA_PLAN = "duckos.duckbridge-plan.v1"
-SCHEMA_RUNTIMES = "duckos.duckbridge-runtimes.v1"
+SCHEMA_PLAN = "dak.duckbridge-plan.v1"
+SCHEMA_RUNTIMES = "dak.duckbridge-runtimes.v1"
 MAX_ELF_HEADER_BYTES = 4096
 
 _ELF_MACHINES = {

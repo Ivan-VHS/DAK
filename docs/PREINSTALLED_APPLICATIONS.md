@@ -1,11 +1,11 @@
-# DuckOS preinstalled application suite
+# DAK preinstalled application suite
 
-**Catalog ID:** `duckos.preinstalled-applications.v1`  
+**Catalog ID:** `dak.preinstalled-applications.v1`  
 **Catalog version:** 1.0  
 **Maturity:** `specified`  
-**Distribution intent:** seven default applications in the DuckOS product design
+**Distribution intent:** seven default applications in the DAK product design
 
-This document defines the intended roles, first-scope capabilities and cross-application workflows for 20 DuckOS first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
+This document defines the intended roles, first-scope capabilities and cross-application workflows for 20 DAK first-party application concepts. The original seven remain the core suite; 13 additions expand the product catalog and Mora desktop. The names of the additions were provided without functional descriptions, so their initial roles are explicit working interpretations. This is a product specification, not evidence that the applications, services, cloud backends or operating-system integrations have been implemented or shipped.
 
 The machine-readable inventory is maintained in [`preinstalled-applications.v1.json`](../catalogs/preinstalled-applications.v1.json). The separate DAK package-design catalog is [`dak-base-applications.v1.yaml`](../catalogs/dak-base-applications.v1.yaml). Shared terminology and maturity rules come from the [Ivan-VHS Unified Documentation and Semantics Standard](UNIFIED_DOCUMENTATION_STANDARD.md).
 
@@ -256,7 +256,7 @@ Names in this catalog are working product names. Cockos requires an explicit nam
 ## 7. Related documents
 
 - [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md)
-- [DuckOS documentation index](README.md)
+- [DAK documentation index](README.md)
 - [Machine-readable application catalog](../catalogs/preinstalled-applications.v1.json)
 
 ## 8. Interactive browser prototype
@@ -265,12 +265,12 @@ A runnable browser prototype is maintained at [`prototype/mora-home.html`](../pr
 
 The catalogue deliberately keeps two maturity values separate:
 
-- `maturity_status: specified` describes the intended native DuckOS applications. This repository does not yet contain seven native application packages, OS services, package manifests or a bootable distribution.
+- `maturity_status: specified` describes the intended native DAK applications. This repository does not yet contain seven native application packages, OS services, package manifests or a bootable distribution.
 - `prototype_status: partial` describes the interactive browser implementation. It is useful for exercising local workflows, but it is not equivalent to a native OS application.
 
 ### Implemented in the browser prototype
 
-| Application | Working local behavior | Still requires native DuckOS services or external providers |
+| Application | Working local behavior | Still requires native DAK services or external providers |
 |---|---|---|
 | Cockos | Microphone recording when permitted, local audio-file import, track playback and offline WAV mixdown | System-wide per-process volume control and integration with other applications' audio sessions |
 | Kavun | Local image/video import, event slices, metadata search, non-destructive image filters and PNG export | Automatic visual recognition, semantic image search and automatic location intelligence |

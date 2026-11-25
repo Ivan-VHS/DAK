@@ -1,10 +1,10 @@
-"""Static validation and dependency ordering for DuckOS driver-module manifests."""
+"""Static validation and dependency ordering for DAK driver-module manifests."""
 from __future__ import annotations
 
 import re
 from typing import Any
 
-SCHEMA = "duckos.driver-module.v1"
+SCHEMA = "dak.driver-module.v1"
 MAX_MODULES = 1024
 MAX_DEPENDENCIES = 4096
 _ARCHITECTURES = {"x86_64", "aarch64", "riscv64", "i686"}
@@ -51,7 +51,7 @@ def validate_module(manifest: Any, *, architecture: str, kernel_abi: str) -> dic
     if len(set(capabilities)) != len(capabilities):
         raise ModuleABIError("capabilities must be unique identifiers")
     return {
-        "schema": "duckos.driver-module-validation.v1",
+        "schema": "dak.driver-module-validation.v1",
         "valid": True,
         "name": name,
         "version": version,

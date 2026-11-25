@@ -1,4 +1,4 @@
-"""DuckOS offline build-contract, hardware-inventory and compatibility tools."""
+"""DAK offline build-contract, hardware-inventory and compatibility tools."""
 from __future__ import annotations
 
 import argparse
@@ -40,7 +40,7 @@ def _print_result(value: Any) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="duckos", description="DuckOS build, ABI, hardware-inventory and compatibility tools.")
+    parser = argparse.ArgumentParser(prog="dak", description="DAK build, ABI, hardware-inventory and compatibility tools.")
     commands = parser.add_subparsers(dest="command", required=True)
 
     validate = commands.add_parser("validate-manifest", help="verify a system manifest and component hashes")
@@ -96,7 +96,7 @@ def main(argv: list[str] | None = None) -> int:
     startup_restore.add_argument("entry_id")
 
     terminal = commands.add_parser(
-        "terminal", help="open the separate DuckOS extended terminal"
+        "terminal", help="open the separate DAK extended terminal"
     )
     terminal_actions = terminal.add_subparsers(dest="terminal_action")
     terminal_run = terminal_actions.add_parser(
@@ -223,7 +223,7 @@ def main(argv: list[str] | None = None) -> int:
             payload = _load(args.modules)
             items = payload.get("modules") if isinstance(payload, dict) else payload
             result = {
-                "schema": "duckos.module-order.v1",
+                "schema": "dak.module-order.v1",
                 "load_order": resolve_load_order(items),
                 "modules_loaded": False,
             }
@@ -262,7 +262,7 @@ def main(argv: list[str] | None = None) -> int:
             result = audit_desktop(item_limit=args.item_limit)
         elif args.command == "desktop" and args.desktop_command == "startup" and args.startup_command == "list":
             result = {
-                "schema": "duckos.startup-list.v1",
+                "schema": "dak.startup-list.v1",
                 "scope": "current_user",
                 "entries": DesktopService().startup.list_entries(),
                 "machine_wide_entries_included": False,
@@ -282,7 +282,7 @@ def main(argv: list[str] | None = None) -> int:
             elif args.reaper_command == "studio":
                 process = workbench.open_studio()
                 result = {
-                    "schema": "duckos.reaper-studio-launch.v1",
+                    "schema": "dak.reaper-studio-launch.v1",
                     "started": True,
                     "pid": process.pid,
                     "repository": str(workbench.repository_root),
@@ -303,7 +303,7 @@ def main(argv: list[str] | None = None) -> int:
         _print_result(result)
         return 0
     except (OSError, TypeError, ValueError, RuntimeError, ImportError) as error:
-        parser.exit(2, f"DuckOS check failed: {error}\n")
+        parser.exit(2, f"DAK check failed: {error}\n")
 
 
 if __name__ == "__main__":
