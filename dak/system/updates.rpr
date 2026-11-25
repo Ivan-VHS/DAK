@@ -84,6 +84,21 @@ export craft inactive_slot(active_slot) {
     yield ""
 }
 
+# Boot control must target only the inactive slot and require healthy evidence.
+export craft activation_policy(active_slot, target_slot, boot_health) {
+    make expected_slot := inactive_slot(active_slot)
+    when expected_slot == "" {
+        yield "reject-active-slot"
+    }
+    when target_slot != expected_slot {
+        yield "reject-slot-target"
+    }
+    when boot_health != "healthy" {
+        yield "reject-boot-unhealthy"
+    }
+    yield "activate-plan-only"
+}
+
 # idle -> verified -> staged -> armed -> boot_pending -> confirmed.
 # boot_pending can only return to a previous slot through rollback.
 export craft transition_valid(current, next) {
