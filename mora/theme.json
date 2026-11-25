@@ -77,5 +77,10 @@
     "reducedTransparency": "opaque",
     "animateBackdrop": false,
     "noiseAsset": "./glass-noise.svg"
+  },
+  "textOpacity": {
+    "primary": 1,
+    "secondary": 0.7,
+    "tertiary": 0.4
   }
 }
