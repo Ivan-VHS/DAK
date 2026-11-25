@@ -31,6 +31,7 @@ The UEFI application is a first-party PE32+ EFI application. It does not chain t
 - Identity mapping for the transition trampoline, a direct HHDM mapping, and per-segment kernel mappings honoring read-only, writable, executable and NX permissions.
 - CPU NX capability check and explicit rejection of five-level paging mode.
 - EFI memory-map normalization to DuckOS memory types, Boot Info v1 validation and ExitBootServices with the exact memory-map key (one bounded retry).
+- GOP framebuffer identity and HHDM aliases use uncached PCD/PWT attributes. Existing non-MMIO EFI descriptors overlapping the framebuffer are rejected; only uncovered framebuffer gaps are synthesized as MMIO.
 - An assembly transition that loads the new CR3 and kernel stack, then passes the handoff pointer using the x86-64 System V kernel entry convention.
 - A separate freestanding kernel entry that validates the handoff and Boot Info, initializes the existing physical-frame allocator, clears one 4 KiB frame through HHDM, paints a basic GOP framebuffer status screen and emits DUCKOS_BOOT_OK stage=1 loader=duckboot.
 
