@@ -32,7 +32,7 @@ Updated: 2026-11-25
 
 ## Partial or external boundaries
 
-- [ ] Experimental x86_64 stage-0 boot image: Limine v12.11.1 is pinned; the DuckOS-owned freestanding entry validates firmware memory-map and framebuffer handoff, reports to COM1, and has a BIOS/UEFI ISO build plus QEMU test workflow. This proves only that the kernel entry can be loaded and its Boot Info v1 handoff accepted; it is not yet a running OS session.
+- [ ] Experimental x86_64 stage-0 boot image pipeline is implemented in the current boot-image change: Limine v12.11.1 is pinned; the DuckOS-owned freestanding entry validates firmware memory-map and framebuffer handoff, reports to COM1, and has BIOS/UEFI ISO build plus QEMU test scripts. It remains unverified until the BIOS and UEFI CI boots both pass; it is not yet a running OS session.
 
 - [ ] Real frame/page allocator, page tables, MMIO and DMA.
 - [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
@@ -43,7 +43,7 @@ Updated: 2026-11-25
 - [ ] BLAKE3 hashing, persistent semantic graph, structural sharing and general CRDT synchronization.
 - [ ] GPU command submission and accelerated compositor.
 - [ ] Freestanding native Reaper compiler/backend and self-hosted compiler.
-- [ ] Production boot chain and usable kernel remain incomplete. An experimental x86_64 Limine BIOS/UEFI stage-0 entry, Boot Info v1 handoff adapter and reproducible hybrid ISO pipeline now exist in the boot-image change; mark the image validated only after both QEMU firmware tests pass.
+- [ ] Production boot chain and usable kernel remain incomplete: no native allocator, interrupts, process model, syscall layer, driver runtime, filesystem, service supervisor or compositor is present.
 - [ ] Process model, syscall ABI and kernel-enforced capabilities.
 - [ ] Package manager, init process tree, filesystem and installer.
 - [ ] Audio engine, Wayland-compatible compositor and native settings applications.
