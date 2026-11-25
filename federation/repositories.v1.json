@@ -62,14 +62,15 @@
       "url": "https://github.com/Ivan-VHS/OPlague.git",
       "path": "projects/oplague",
       "default_branch": "main",
-      "pinned_commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "pinned_commit": "ef63eed05a0235b94136630bcecc476353104586",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "device-and-driver-evidence",
-      "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes and SBOM metadata.",
+      "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes, SBOM metadata, and bounded NVIDIA GPU telemetry export.",
       "integration_mode": [
         "read-only user-space service",
-        "versioned JSON evidence reports"
+        "versioned JSON evidence reports",
+        "versioned oplage.gpu-telemetry.v1 JSON snapshot"
       ],
       "runtime_boundary": "user-space-read-only",
       "build_system": "Python 3.10+ / Tkinter; Windows live inventory",
