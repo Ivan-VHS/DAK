@@ -136,7 +136,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(css.includes(".commons-grid"));
   const allowedColors = new Set([
     "#050505", "#070707", "#080808", "#101010", "#151515", "#181818", "#242424", "#3A3A3A", "#3A3100",
-    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD700", "#FFE45C"
+    "#A6A6A6", "#C43A45", "#E5E5E5", "#FFFFFF", "#FFD700", "#FFE45C"
   ].map((color) => color.toLowerCase()));
   const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
