@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
-project(DuckOSFoundation VERSION 0.1.0 LANGUAGES C CXX)
+project(DuckOSFoundation VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(DUCKOS_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
@@ -101,32 +98,43 @@ endif()
 
 option(DUCKOS_BUILD_NATIVE_MORA "Build the host-native Mora desktop shell when Qt 6 Widgets is available" ON)
 if(DUCKOS_BUILD_NATIVE_MORA)
-    find_package(Qt6 6.4 COMPONENTS Widgets QUIET)
-    if(Qt6_FOUND)
-        add_executable(duckos_mora_native
-            mora/native/main.cpp
-        )
-        target_link_libraries(duckos_mora_native PRIVATE Qt6::Widgets)
-        target_compile_definitions(duckos_mora_native PRIVATE
-            DUCKOS_MORA_CATALOG_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/mora/apps.json\"
-            DUCKOS_MORA_THEME_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/mora/theme.json\"
-        )
-        if(MSVC)
-            target_compile_options(duckos_mora_native PRIVATE /W4 /permissive-)
-        else()
-            target_compile_options(duckos_mora_native PRIVATE -Wall -Wextra -Wpedantic)
-        endif()
+    include(CheckLanguage)
+    check_language(CXX)
+    if(CMAKE_CXX_COMPILER)
+        enable_language(CXX)
+        set(CMAKE_CXX_STANDARD 17)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        set(CMAKE_CXX_EXTENSIONS OFF)
 
-        if(BUILD_TESTING)
-            add_test(
-                NAME duckos-mora-native-smoke
-                COMMAND duckos_mora_native --self-test
+        find_package(Qt6 6.4 COMPONENTS Widgets QUIET)
+        if(Qt6_FOUND)
+            add_executable(duckos_mora_native
+                mora/native/main.cpp
             )
-            set_tests_properties(duckos-mora-native-smoke PROPERTIES
-                ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+            target_link_libraries(duckos_mora_native PRIVATE Qt6::Widgets)
+            target_compile_definitions(duckos_mora_native PRIVATE
+                DUCKOS_MORA_CATALOG_PATH=\\"${CMAKE_CURRENT_SOURCE_DIR}/mora/apps.json\\"
+                DUCKOS_MORA_THEME_PATH=\\"${CMAKE_CURRENT_SOURCE_DIR}/mora/theme.json\\"
             )
+            if(MSVC)
+                target_compile_options(duckos_mora_native PRIVATE /W4 /permissive-)
+            else()
+                target_compile_options(duckos_mora_native PRIVATE -Wall -Wextra -Wpedantic)
+            endif()
+
+            if(BUILD_TESTING)
+                add_test(
+                    NAME duckos-mora-native-smoke
+                    COMMAND duckos_mora_native --self-test
+                )
+                set_tests_properties(duckos-mora-native-smoke PROPERTIES
+                    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+                )
+            endif()
+        else()
+            message(STATUS "Qt 6 Widgets was not found; the optional native Mora target is skipped.")
         endif()
     else()
-        message(STATUS "Qt 6 Widgets was not found; the optional native Mora target is skipped.")
+        message(STATUS "No C++ compiler was found; the optional native Mora target is skipped.")
     endif()
 endif()
