@@ -31,6 +31,7 @@ import "duckos/ui/canvas.rpr" as canvas
 import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
 import "duckos/kernel/process.rpr" as process
+import "duckos/kernel/process_scheduler.rpr" as process_scheduler
 import "duckos/kernel/syscall.rpr" as syscall
 import "duckos/kernel/interrupts.rpr" as interrupts
 import "duckos/kernel/vm.rpr" as vm
@@ -309,6 +310,20 @@ assert(process["lookup"](process_table, [42, 3]) == init_process, "process table
 make spawned := process["spawn"](process_table, [42, 3], child_process)
 assert(spawned[0] == "created" and size(spawned[1]) == 2, "child process is admitted with attenuated capabilities")
 assert(process["spawn"](process_table, [42, 2], child_process)[0] == "parent-or-authority-denied", "stale parent handle cannot spawn a process")
+make ready_init_result := process["transition"](init_process, "ready", nothing)
+make ready_child_result := process["transition"](child_process, "ready", nothing)
+make ready_init := ready_init_result[1]
+make ready_child := ready_child_result[1]
+make third_process := [44, 1, 42, 3, "ready", 28672, 8192, 19, ["storage.read"], nothing]
+make ready_processes := [ready_init, ready_child, third_process]
+make scheduling_records := [[42, 3, 10, 100], [43, 1, 10, 50], [44, 1, 20, 200]]
+make scheduled := process_scheduler["pick"](ready_processes, scheduling_records)
+assert(scheduled[0] == "selected" and scheduled[1] == [44, 1], "process adapter selects the highest-priority ready task")
+make deadline_records := [[42, 3, 10, 100], [43, 1, 10, 50]]
+make deadline_selected := process_scheduler["pick"]([ready_init, ready_child], deadline_records)
+assert(deadline_selected[0] == "selected" and deadline_selected[1] == [43, 1], "existing scheduler uses earliest deadline for equal priority")
+assert(process_scheduler["pick"](ready_processes, [])[0] == "idle", "process scheduler reports idle when no ready work is supplied")
+assert(process_scheduler["pick"](ready_processes, [[43, 2, 10, 50]])[0] == "reject", "stale scheduling generation is rejected")
 
 # Syscall requests use stable IDs, exact ABI versions, numeric handles and user buffers.
 make syscall_table := syscall["descriptors_v1"]()
@@ -352,12 +367,17 @@ make endpoint_created := ipc_endpoint["create"](7, 42, 2, 256, "ipc.send")
 assert(endpoint_created[0] == "ready", "valid IPC endpoint can be created")
 make endpoint_sent := ipc_endpoint["send"](endpoint_created[1], 43, ["ipc.send"], ["log", 5, "hello"])
 assert(endpoint_sent[0] == "sent" and endpoint_sent[2] == 1, "IPC send allocates a sequence number")
+make endpoint_sent_twice := ipc_endpoint["send"](endpoint_sent[1], 44, ["ipc.send"], ["metric", 8, "42"])
+assert(endpoint_sent_twice[0] == "sent", "endpoint reuses the shared bounded FIFO channel")
+assert(ipc_endpoint["send"](endpoint_sent_twice[1], 45, ["ipc.send"], ["full", 4, "x"])[0] == "backpressure", "full endpoint reuses canonical FIFO backpressure")
 assert(ipc_endpoint["send"](endpoint_sent[1], 43, ["ipc.send"], ["large", 512, "x"])[0] == "message-limit", "IPC rejects oversized messages")
-make endpoint_received := ipc_endpoint["receive"](endpoint_sent[1], 42, ["ipc.receive"])
+make endpoint_received := ipc_endpoint["receive"](endpoint_sent_twice[1], 42, ["ipc.receive"])
 make received_envelope := endpoint_received[2]
 assert(endpoint_received[0] == "received" and received_envelope[0] == 1, "endpoint owner receives FIFO message")
-assert(ipc_endpoint["receive"](endpoint_received[1], 42, ["ipc.receive"])[0] == "empty", "empty endpoint reports a stable state")
-assert(ipc_endpoint["receive"](endpoint_sent[1], 99, ["ipc.receive"])[0] == "denied", "foreign process cannot receive endpoint messages")
+make second_received := ipc_endpoint["receive"](endpoint_received[1], 42, ["ipc.receive"])
+assert(second_received[0] == "received" and second_received[2][0] == 2, "endpoint sequence remains monotonic after FIFO dequeue")
+assert(ipc_endpoint["receive"](second_received[1], 42, ["ipc.receive"])[0] == "empty", "empty endpoint reports a stable state")
+assert(ipc_endpoint["receive"](endpoint_sent_twice[1], 99, ["ipc.receive"])[0] == "denied", "foreign process cannot receive endpoint messages")
 
 # BAV is deny-by-default and produces payload-free, sequence-checked audit records.
 make bav_rules := [["storage.read", "user/documents", "read", 1024, true], ["sanitize", "*", "sanitize", 4096, true]]
