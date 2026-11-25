@@ -150,7 +150,7 @@ rm -rf "$iso_root"
 mkdir -p "$iso_root/boot" "$iso_root/EFI/BOOT" "$iso_root/third_party"
 cp "$WORK_DIR/duckos.elf" "$iso_root/boot/duckos.elf"
 cp "$ROOT/boot/limine.conf" "$iso_root/limine.conf"
-if (("${#LOADER_MENU_ARGS[@]}" > 0)); then
+if ((${#LOADER_MENU_ARGS[@]} > 0)); then
     bash "$ROOT/boot/render-loader-menu.sh" --output "$iso_root/limine.conf" "${LOADER_MENU_ARGS[@]}"
 fi
 cp "$LIMINE_BIOS_SYS" "$iso_root/boot/limine-bios.sys"
