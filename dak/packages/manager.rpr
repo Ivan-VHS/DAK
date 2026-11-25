@@ -21,7 +21,7 @@ export craft package_valid(package) {
     when kind(package[7]) != "list" or kind(package[8]) != "list" or kind(package[9]) != "text" or kind(package[10]) != "text" or kind(package[11]) != "text" or kind(package[12]) != "number" {
         yield false
     }
-    when package[0] == "" or package[1] < 0 or package[2] < 0 or package[3] < 0 {
+    when package[0] == "" or package[1] % 1 != 0 or package[2] % 1 != 0 or package[3] % 1 != 0 or package[5] % 1 != 0 or package[12] % 1 != 0 or package[1] < 0 or package[2] < 0 or package[3] < 0 {
         yield false
     }
     when not targets["architecture_known"](package[4]) or package[5] <= 0 {
