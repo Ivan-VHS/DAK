@@ -12,7 +12,7 @@ DuckOS is the operating-system project. **Mora** is its unified desktop shell an
 - **Hardware and compatibility:** bounded read-only PCI/USB or Windows PnP inventory, PE inspection and dry-run runtime discovery.
 - **Deployment tooling:** verified component bundles and non-destructive disk-layout plans.
 
-These capabilities do not constitute a bootable OS image, production kernel, privileged device broker, signed driver installation, native compositor or complete Win32 runtime. The [implementation status](docs/IMPLEMENTATION_STATUS.md) and [roadmap](docs/IMPLEMENTATION_ROADMAP.md) separate delivered, partial and planned work.
+An experimental x86_64 firmware-bootable stage-0 image is now defined in [Bootable image](docs/BOOTABLE_IMAGE.md): pinned Limine BIOS/UEFI media, a DuckOS-owned kernel entry, Boot Info v1 handoff validation and QEMU serial boot checks. This is not yet a complete OS. Processes, scheduler execution, syscalls, page allocator, drivers, filesystem, service runtime and native Mora compositor remain unimplemented. The [implementation status](docs/IMPLEMENTATION_STATUS.md) and [roadmap](docs/IMPLEMENTATION_ROADMAP.md) separate delivered, partial and planned work.
 
 ## Workspace
 
@@ -30,6 +30,14 @@ duckos reaper status
 duckos reaper studio
 duckos reaper check ./examples/program.rpr
 ```
+
+## Build the experimental boot image
+
+On Linux x86_64, install GCC, binutils, curl, tar, xorriso and sha256sum, then run:
+
+    boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage0-x86_64.iso
+
+The pinned Limine binary archive is SHA-256 checked before use. The ISO is intended for BIOS and UEFI x86_64 boot. QEMU verification with OVMF is documented in [Bootable image](docs/BOOTABLE_IMAGE.md); a successful build alone is not evidence that every physical machine is supported.
 
 ## Run and verify
 
