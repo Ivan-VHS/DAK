@@ -17,10 +17,10 @@ export craft descriptor_valid(service) {
     when service[3] < 0 or service[3] > 10 {
         yield false
     }
-    when service[4] < 0 or service[5] < service[4] or service[5] > 60000 {
+    when service[4] <= 0 or service[5] < service[4] or service[5] > 60000 {
         yield false
     }
-    when service[6] <= 0 or service[7] <= 0 {
+    when service[6] <= 0 or service[7] <= 0 or size(service[8]) > 64 {
         yield false
     }
     yield true
