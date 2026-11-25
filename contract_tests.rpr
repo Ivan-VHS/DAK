@@ -319,7 +319,7 @@ assert(update_transactions["boot_failure_action"](false) == "recovery-required",
 
 assert(software_sources["source_kind_known"]("duck-first-party"), "Duck first-party source is recognized")
 assert(software_sources["source_kind_known"]("federated-project"), "federated project source is recognized")
-assert(software_sources["source_metadata_state"]("third-party-explicit", true, true) == "metadata-admissible-not-installable", "source metadata is not installation authority")
+assert(software_sources["source_metadata_state"]("third-party-explicit", true, true) == "metadata-recorded-not-installable", "source metadata is not installation authority")
 assert(software_sources["source_metadata_state"]("third-party-explicit", false, true) == "needs-license-review", "missing license declaration requires review")
 assert(software_sources["source_metadata_state"]("federated-project", true, false) == "integrity-unverified", "missing digest verification is not trusted")
 assert(software_sources["source_action_policy"]("inspect") == "metadata-only", "source inspection remains metadata-only")
