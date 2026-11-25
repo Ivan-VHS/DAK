@@ -38,6 +38,8 @@
 
 [DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) defines motor, visual, cognitive, keyboard, window, accessibility, error-recovery, latency, privacy and measurement requirements for Mora and native applications.
 
+[Psychoporter Code Style](PSYCHOPORTER_CODE_STYLE.md) defines the shared reader-centred code style for naming, control flow, architecture, errors, tests, comments and refactoring. It is an engineering heuristic standard, not a psychological diagnosis or a substitute for language, ABI and safety contracts.
+
 ## Security architecture
 
 [BAV Security Bundle v1](BAV_SECURITY_BUNDLE_V1.md) specifies the signed declarative .bav detection-policy format, trust boundaries, planned scanner/broker/quarantine services, anti-rollback requirements and verification gates. Its [JSON Schema](../schemas/bav-security-bundle.v1.schema.json) validates bundle structure only; it does not verify signatures or scan files.

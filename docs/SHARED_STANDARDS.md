@@ -9,6 +9,11 @@ DuckOS hosts the canonical shared standards for the Ivan-VHS project ecosystem. 
 - [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) — cross-project execution and adoption model.
 - [Language and editorial quality](LANGUAGE_QUALITY.md) — clear, accurate multilingual writing.
 
+## Code quality and reading ergonomics
+
+- [Psychoporter Code Style](PSYCHOPORTER_CODE_STYLE.md) — reader-centred naming, linear control flow, visual rhythm, domain boundaries, explicit failures, behavior tests and focused refactoring. It extends Ivan-VHS Code Style without imposing one language syntax or formatter on every repository.
+- [Reaper Psychoporter 666 Code](https://github.com/Ivan-VHS/Reaper/blob/main/docs/PSYCHOPORTER_666.md) — Reaper-specific language constitution; its CURRENT/TARGET/HOST labels keep the shared cognitive-ergonomics profile aligned with actual compiler and platform maturity.
+
 ## Architecture and shared contracts
 
 - [Backend engineering](BACKEND_ENGINEERING_STANDARD.md) — service boundaries, contracts, resource limits, failure handling and observability.
