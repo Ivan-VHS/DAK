@@ -65,3 +65,7 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 - [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
 - [Implementation status](IMPLEMENTATION_STATUS.md) — current delivered/partial boundaries with source and test evidence.
+
+## Desktop and boot profiles
+
+[Desktop session and boot target profiles](PLATFORM_PROFILES.md) lists the 20 DE/WM compatibility profiles, 20 classified boot entries, the Reaper switching policy and optional Limine UEFI/BIOS chainload menu configuration.

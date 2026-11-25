@@ -1,0 +1,35 @@
+{
+  "schema": "duckos.boot-loader-catalog/v1",
+  "catalog_version": 1,
+  "active_loader": "limine",
+  "boot_loaders": [
+    {"id":"systemd-boot","name":"systemd-boot","kind":"boot-manager","firmware":"uefi","selection_method":"uefi-entry","switch_state":"conditional","notes":"UEFI-only boot manager; select an existing firmware Boot#### entry."},
+    {"id":"refind","name":"rEFInd","kind":"boot-manager","firmware":"uefi","selection_method":"uefi-entry","switch_state":"conditional","notes":"UEFI boot manager; select an existing firmware Boot#### entry."},
+    {"id":"lilo","name":"LILO","kind":"bootloader","firmware":"bios","selection_method":"bios-chainload","switch_state":"conditional-legacy","notes":"Legacy BIOS loader; target disk and partition must already contain a valid installation."},
+    {"id":"syslinux","name":"SYSLINUX","kind":"bootloader","firmware":"bios","selection_method":"bios-chainload","switch_state":"conditional-legacy","notes":"Legacy BIOS bootloader family; not a UEFI boot manager."},
+    {"id":"extlinux","name":"EXTLINUX","kind":"bootloader","firmware":"bios","selection_method":"bios-chainload","switch_state":"conditional-legacy","notes":"Legacy BIOS loader for supported filesystem layouts."},
+    {"id":"pxelinux","name":"PXELINUX","kind":"network-loader","firmware":"network","selection_method":"pxe-network","switch_state":"not-a-local-target","notes":"PXE network boot component; requires external DHCP/TFTP or compatible network boot infrastructure."},
+    {"id":"memdisk","name":"MEMDISK","kind":"boot-helper","firmware":"bios","selection_method":"module-only","switch_state":"not-standalone","notes":"SYSLINUX helper for disk images; not an independent boot manager."},
+    {"id":"chainloading","name":"Chainloading","kind":"boot-technique","firmware":"either","selection_method":"generic-chainload","switch_state":"target-dependent","notes":"A boot technique, not a separately installable loader; a concrete firmware target is required."},
+    {"id":"uboot","name":"U-Boot","kind":"embedded-loader","firmware":"embedded","selection_method":"firmware-owned","switch_state":"platform-specific","notes":"Embedded-platform bootloader; not a PC UEFI/BIOS drop-in replacement."},
+    {"id":"barebox","name":"Barebox","kind":"embedded-loader","firmware":"embedded","selection_method":"firmware-owned","switch_state":"platform-specific","notes":"Embedded-platform bootloader; requires a supported board boot chain."},
+    {"id":"coreboot-seabios","name":"Coreboot + SeaBIOS","kind":"firmware","firmware":"bios","selection_method":"firmware-replacement","switch_state":"not-an-os-boot-option","notes":"Firmware stack, not an OS-level bootloader choice; firmware flashing is excluded."},
+    {"id":"edk2","name":"TianoCore EDK II","kind":"firmware","firmware":"uefi","selection_method":"firmware-replacement","switch_state":"not-an-os-boot-option","notes":"UEFI firmware development platform, not an installed OS bootloader entry."},
+    {"id":"limine","name":"Limine","kind":"bootloader","firmware":"bios-uefi","selection_method":"current","switch_state":"active","notes":"Current DuckOS bootloader; remains the safe default and external chainload menu host."},
+    {"id":"grub-legacy","name":"GRUB Legacy","kind":"bootloader","firmware":"bios","selection_method":"bios-chainload","switch_state":"conditional-legacy","notes":"Historical BIOS-only GRUB generation; do not confuse with current GRUB 2."},
+    {"id":"burg","name":"BURG","kind":"bootloader","firmware":"bios","selection_method":"bios-chainload","switch_state":"historical","notes":"Historical GRUB-derived project; retained for classification, not recommended for new installs."},
+    {"id":"kexec","name":"kexec","kind":"kernel-handoff","firmware":"runtime","selection_method":"kernel-handoff","switch_state":"not-a-bootloader","notes":"Kernel-to-kernel handoff mechanism; requires a running privileged OS and a separate kernel loader."},
+    {"id":"plop","name":"Plop Boot Manager","kind":"boot-manager","firmware":"bios","selection_method":"bios-chainload","switch_state":"conditional-legacy","notes":"Legacy boot manager; target must already exist and be readable by firmware."},
+    {"id":"smart-boot-manager","name":"Smart Boot Manager","kind":"boot-manager","firmware":"bios","selection_method":"bios-chainload","switch_state":"historical","notes":"Historical BIOS boot manager; availability and compatibility are not guaranteed."},
+    {"id":"xosl","name":"XOSL","kind":"boot-manager","firmware":"bios","selection_method":"bios-chainload","switch_state":"historical","notes":"Historical graphical BIOS boot manager; not a modern UEFI alternative."},
+    {"id":"bootit-ng","name":"BootIt NG","kind":"boot-manager","firmware":"bios","selection_method":"bios-chainload","switch_state":"conditional-legacy","notes":"Legacy commercial boot and partition manager; verify licensing and target compatibility."}
+  ],
+  "switching_contract": {
+    "active_loader_is_immutable_by_default": true,
+    "requires_explicit_confirmation": true,
+    "uefi_selection": "existing-firmware-entry-only",
+    "bios_selection": "explicit-existing-disk-and-partition-only",
+    "firmware_updates": "never-performed-by-loader-selector",
+    "secure_boot_claim": false
+  }
+}

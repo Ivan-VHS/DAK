@@ -1,0 +1,148 @@
+# Boot target catalogue v1.
+# Entries classify 20 names from the ecosystem survey. Several are firmware,
+# helpers, network mechanisms or historical tools rather than alternatives.
+
+export craft loader_catalog() {
+    yield [
+        ["systemd-boot", "systemd-boot", "boot-manager", "uefi", "uefi-entry", "external-uefi"],
+        ["refind", "rEFInd", "boot-manager", "uefi", "uefi-entry", "external-uefi"],
+        ["lilo", "LILO", "bootloader", "bios", "bios-chainload", "legacy"],
+        ["syslinux", "SYSLINUX", "bootloader", "bios", "bios-chainload", "legacy"],
+        ["extlinux", "EXTLINUX", "bootloader", "bios", "bios-chainload", "legacy"],
+        ["pxelinux", "PXELINUX", "network-loader", "network", "pxe-network", "network-only"],
+        ["memdisk", "MEMDISK", "boot-helper", "bios", "module-only", "helper-only"],
+        ["chainloading", "Chainloading", "boot-technique", "either", "generic-chainload", "technique-only"],
+        ["uboot", "U-Boot", "embedded-loader", "embedded", "firmware-owned", "embedded-only"],
+        ["barebox", "Barebox", "embedded-loader", "embedded", "firmware-owned", "embedded-only"],
+        ["coreboot-seabios", "Coreboot + SeaBIOS", "firmware", "bios", "firmware-replacement", "firmware-only"],
+        ["edk2", "TianoCore EDK II", "firmware", "uefi", "firmware-replacement", "firmware-only"],
+        ["limine", "Limine", "bootloader", "bios-uefi", "current", "already-active"],
+        ["grub-legacy", "GRUB Legacy", "bootloader", "bios", "bios-chainload", "legacy"],
+        ["burg", "BURG", "bootloader", "bios", "bios-chainload", "historical"],
+        ["kexec", "kexec", "kernel-handoff", "runtime", "kernel-handoff", "mechanism-only"],
+        ["plop", "Plop Boot Manager", "boot-manager", "bios", "bios-chainload", "legacy"],
+        ["smart-boot-manager", "Smart Boot Manager", "boot-manager", "bios", "bios-chainload", "historical"],
+        ["xosl", "XOSL", "boot-manager", "bios", "bios-chainload", "historical"],
+        ["bootit-ng", "BootIt NG", "boot-manager", "bios", "bios-chainload", "proprietary-legacy"]
+    ]
+}
+
+export craft contains(items, value) {
+    when size(items) > 256 {
+        yield false
+    }
+    each item in items {
+        when item == value {
+            yield true
+        }
+    }
+    yield false
+}
+
+export craft loader_valid(loader) {
+    when size(loader) != 6 {
+        yield false
+    }
+    when loader[0] == "" or loader[1] == "" {
+        yield false
+    }
+    when loader[2] != "boot-manager" and loader[2] != "bootloader" and loader[2] != "network-loader" and loader[2] != "boot-helper" and loader[2] != "boot-technique" and loader[2] != "embedded-loader" and loader[2] != "firmware" and loader[2] != "kernel-handoff" {
+        yield false
+    }
+    when loader[3] == "" or loader[4] == "" or loader[5] == "" {
+        yield false
+    }
+    yield true
+}
+
+export craft catalog_valid() {
+    make items := loader_catalog()
+    when size(items) != 20 {
+        yield false
+    }
+    vary seen_ids := []
+    each loader in items {
+        when not loader_valid(loader) {
+            yield false
+        }
+        when contains(seen_ids, loader[0]) {
+            yield false
+        }
+        change seen_ids := push(seen_ids, loader[0])
+    }
+    yield true
+}
+
+export craft find_loader(loader_id) {
+    each loader in loader_catalog() {
+        when loader[0] == loader_id {
+            yield loader
+        }
+    }
+    yield []
+}
+
+export craft switch_decision(loader_id, firmware_mode, uefi_targets, bios_targets, confirmed) {
+    make loader := find_loader(loader_id)
+    when size(loader) != 6 {
+        yield ["reject", "unknown-loader"]
+    }
+    when loader[4] == "current" {
+        yield ["no-op", "limine-is-current"]
+    }
+    when loader[4] == "uefi-entry" {
+        when firmware_mode != "uefi" {
+            yield ["deny", "uefi-entry-requires-uefi"]
+        }
+        when not contains(uefi_targets, loader_id) {
+            yield ["defer", "uefi-entry-not-detected"]
+        }
+        when not confirmed {
+            yield ["confirm", "firmware-boot-entry"]
+        }
+        yield ["reboot-to-uefi-entry", loader_id]
+    }
+    when loader[4] == "bios-chainload" {
+        when firmware_mode != "bios" {
+            yield ["deny", "bios-chainload-requires-bios"]
+        }
+        when not contains(bios_targets, loader_id) {
+            yield ["defer", "bios-target-not-detected"]
+        }
+        when not confirmed {
+            yield ["confirm", "bios-chainload-target"]
+        }
+        yield ["reboot-to-bios-target", loader_id]
+    }
+    when loader[4] == "generic-chainload" {
+        when firmware_mode == "uefi" and contains(uefi_targets, loader_id) {
+            when not confirmed {
+                yield ["confirm", "uefi-chainload-target"]
+            }
+            yield ["reboot-to-uefi-entry", loader_id]
+        }
+        when firmware_mode == "bios" and contains(bios_targets, loader_id) {
+            when not confirmed {
+                yield ["confirm", "bios-chainload-target"]
+            }
+            yield ["reboot-to-bios-target", loader_id]
+        }
+        yield ["defer", "no-compatible-chainload-target"]
+    }
+    when loader[4] == "pxe-network" {
+        yield ["unsupported", "network-boot-needs-pxe-stack"]
+    }
+    when loader[4] == "module-only" {
+        yield ["unsupported", "helper-is-not-a-standalone-loader"]
+    }
+    when loader[4] == "firmware-owned" {
+        yield ["unsupported", "embedded-platform-firmware-required"]
+    }
+    when loader[4] == "firmware-replacement" {
+        yield ["unsupported", "firmware-flashing-is-outside-os-switching"]
+    }
+    when loader[4] == "kernel-handoff" {
+        yield ["unsupported", "kernel-handoff-is-not-a-bootloader"]
+    }
+    yield ["unsupported", "not-a-switchable-boot-target"]
+}

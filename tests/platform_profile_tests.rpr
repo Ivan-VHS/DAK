@@ -1,0 +1,61 @@
+# Platform profile and boot-target policy tests.
+# All tested operations are deterministic policy decisions, not host effects.
+
+import "duckos/ui/session_profiles.rpr" as sessions
+import "duckos/boot/loader_profiles.rpr" as loaders
+
+assert(sessions["catalog_valid"](), "desktop catalogue must contain 20 unique valid entries")
+make desktop_profiles := sessions["profile_catalog"]()
+assert(size(desktop_profiles) == 20, "all 20 desktop alternatives are catalogued")
+assert(sessions["find_profile"]("gnome")[0] == "gnome", "GNOME lookup")
+assert(sessions["find_profile"]("sway")[3] == "wayland", "Sway is a Wayland profile")
+assert(sessions["find_profile"]("i3wm")[3] == "x11", "i3 is an X11 profile")
+assert(sessions["find_profile"]("missing") == [], "unknown desktop profile is not fabricated")
+
+make no_services := []
+make no_backends := []
+make none_installed := []
+assert(sessions["session_plan"]("gnome", none_installed, no_backends, no_services)[1] == "profile-not-installed", "uninstalled profile cannot start")
+make installed := ["gnome", "sway", "xfce"]
+make x11_only := ["x11"]
+make wayland_only := ["wayland"]
+make common_services := ["process-manager", "session-manager", "window-manager", "input-service", "vfs", "capability-broker", "linux-abi"]
+make x11_services := push(common_services, "x11-host")
+make wayland_services := push(common_services, "wayland-host")
+assert(sessions["session_plan"]("sway", installed, x11_only, wayland_services)[1] == "wayland-backend-unavailable", "Wayland sessions reject X11-only hosts")
+assert(sessions["session_plan"]("xfce", installed, wayland_only, wayland_services)[1] == "x11-backend-unavailable", "X11 sessions reject Wayland-only hosts")
+assert(sessions["session_plan"]("sway", installed, wayland_only, common_services)[1] == "service-unavailable", "missing Wayland service blocks session")
+assert(sessions["session_plan"]("sway", installed, wayland_only, wayland_services)[0] == "ready-to-launch", "complete Wayland dependencies admit the session plan")
+assert(sessions["session_plan"]("gnome", installed, wayland_only, wayland_services)[2] == "wayland", "either profile prefers a ready Wayland host")
+assert(sessions["session_plan"]("xfce", installed, x11_only, x11_services)[0] == "ready-to-launch", "complete X11 dependencies admit the session plan")
+
+make grants := ["desktop.session.switch"]
+make checkpoint := true
+assert(sessions["switch_decision"]("mora", "sway", installed, wayland_only, wayland_services, [], checkpoint)[1] == "capability-required", "session switching requires a capability")
+assert(sessions["switch_decision"]("mora", "sway", installed, wayland_only, wayland_services, grants, false)[1] == "recovery-checkpoint-required", "session switching requires a recovery checkpoint")
+assert(sessions["switch_decision"]("mora", "sway", installed, wayland_only, wayland_services, grants, checkpoint)[0] == "prepare-switch", "valid session switch prepares transactionally")
+assert(sessions["switch_decision"]("mora", "sway", installed, x11_only, x11_services, grants, checkpoint)[0] == "keep-current", "unsupported target leaves current session intact")
+assert(sessions["switch_decision"]("sway", "sway", installed, wayland_only, wayland_services, grants, checkpoint)[0] == "no-op", "switching to current session is a no-op")
+assert(sessions["switch_transition"]("prepared", false, true)[0] == "start-candidate", "prepared session enters start phase")
+assert(sessions["switch_transition"]("starting", true, true)[0] == "commit-candidate", "healthy candidate can be committed")
+assert(sessions["switch_transition"]("starting", false, true)[0] == "rollback-previous", "failed candidate restores previous session")
+assert(sessions["switch_transition"]("starting", false, false)[0] == "safe-console", "failed candidate without previous session falls back safely")
+assert(sessions["switch_transition"]("rollback", true, true)[0] == "restored-previous", "rollback restores live previous session")
+
+assert(loaders["catalog_valid"](), "boot catalogue must contain 20 unique valid entries")
+make boot_profiles := loaders["loader_catalog"]()
+assert(size(boot_profiles) == 20, "all 20 boot ecosystem entries are classified")
+assert(loaders["switch_decision"]("limine", "uefi", [], [], false)[0] == "no-op", "Limine remains the active loader")
+assert(loaders["switch_decision"]("refind", "uefi", [], [], true)[1] == "uefi-entry-not-detected", "UEFI target must be detected")
+make uefi_entries := ["refind", "systemd-boot"]
+make bios_targets := ["lilo", "syslinux", "grub-legacy"]
+assert(loaders["switch_decision"]("refind", "uefi", uefi_entries, [], false)[0] == "confirm", "UEFI entry requires explicit confirmation")
+assert(loaders["switch_decision"]("refind", "uefi", uefi_entries, [], true)[0] == "reboot-to-uefi-entry", "detected UEFI entry can be selected")
+assert(loaders["switch_decision"]("systemd-boot", "bios", uefi_entries, bios_targets, true)[1] == "uefi-entry-requires-uefi", "UEFI boot manager cannot be selected from BIOS")
+assert(loaders["switch_decision"]("lilo", "uefi", uefi_entries, bios_targets, true)[1] == "bios-chainload-requires-bios", "BIOS-only loader cannot be selected from UEFI")
+assert(loaders["switch_decision"]("lilo", "bios", uefi_entries, bios_targets, false)[0] == "confirm", "BIOS chainload requires confirmation")
+assert(loaders["switch_decision"]("lilo", "bios", uefi_entries, bios_targets, true)[0] == "reboot-to-bios-target", "detected BIOS target can be selected")
+assert(loaders["switch_decision"]("kexec", "uefi", uefi_entries, bios_targets, true)[0] == "unsupported", "kexec is not a bootloader")
+assert(loaders["switch_decision"]("edk2", "uefi", uefi_entries, bios_targets, true)[0] == "unsupported", "firmware replacement is not an OS boot-menu option")
+assert(loaders["switch_decision"]("memdisk", "bios", uefi_entries, bios_targets, true)[0] == "unsupported", "MEMDISK is a helper rather than a standalone loader")
+assert(loaders["switch_decision"]("pxelinux", "uefi", uefi_entries, bios_targets, true)[0] == "unsupported", "PXELINUX requires a PXE network path")

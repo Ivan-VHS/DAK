@@ -10,6 +10,7 @@ if [[ -n "$TMP_ROOT" ]]; then WORK_DIR="$TMP_ROOT/duckos-boot-build"; fi
 OUTPUT="$ROOT/dist/DuckOS-Stage1-x86_64.iso"
 PAYLOAD_DIR=""
 VOLUME_ID="DUCKOS_STAGE1"
+declare -a LOADER_MENU_ARGS=()
 
 while (($#)); do
     case "$1" in
@@ -25,8 +26,14 @@ while (($#)); do
         --volume-id)
             [[ $# -ge 2 ]] || { echo "missing value for --volume-id" >&2; exit 2; }
             VOLUME_ID="$2"; shift 2 ;;
+        --efi-entry)
+            [[ $# -ge 2 ]] || { echo "missing value for --efi-entry" >&2; exit 2; }
+            LOADER_MENU_ARGS+=(--efi-entry "$2"); shift 2 ;;
+        --bios-target)
+            [[ $# -ge 2 ]] || { echo "missing value for --bios-target" >&2; exit 2; }
+            LOADER_MENU_ARGS+=(--bios-target "$2"); shift 2 ;;
         -h|--help)
-            echo "Usage: boot/build-iso.sh [--work-dir DIR] [--output FILE] [--payload-dir DIR] [--volume-id LABEL]"
+            echo "Usage: boot/build-iso.sh [--work-dir DIR] [--output FILE] [--payload-dir DIR] [--volume-id LABEL] [--efi-entry NAME]... [--bios-target DRIVE:PARTITION]..."
             exit 0 ;;
         *)
             echo "unknown argument: $1" >&2
@@ -143,6 +150,9 @@ rm -rf "$iso_root"
 mkdir -p "$iso_root/boot" "$iso_root/EFI/BOOT" "$iso_root/third_party"
 cp "$WORK_DIR/duckos.elf" "$iso_root/boot/duckos.elf"
 cp "$ROOT/boot/limine.conf" "$iso_root/limine.conf"
+if ((${#LOADER_MENU_ARGS[@]} > 0)); then
+    bash "$ROOT/boot/render-loader-menu.sh" --output "$iso_root/limine.conf" "${LOADER_MENU_ARGS[@]}"
+fi
 cp "$LIMINE_BIOS_SYS" "$iso_root/boot/limine-bios.sys"
 cp "$LIMINE_BIOS_CD" "$iso_root/boot/limine-bios-cd.bin"
 cp "$LIMINE_UEFI_CD" "$iso_root/boot/limine-uefi-cd.bin"

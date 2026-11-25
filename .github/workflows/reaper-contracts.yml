@@ -45,3 +45,9 @@ jobs:
 
       - name: Run core MVP contract suite with VM engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
+
+      - name: Run platform profile policy tests with tree-walk engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/tests/platform_profile_tests.rpr"
+
+      - name: Run platform profile policy tests with VM engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/tests/platform_profile_tests.rpr"
