@@ -59,6 +59,7 @@ let pendingIntentPlan = null;
 function applyPreferences() {
   document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
   document.documentElement.classList.toggle("reduce-transparency", preferences.appearance.reduceTransparency);
+  document.documentElement.dataset.density = preferences.appearance.density;
   document.documentElement.dataset.theme = "duck";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
@@ -172,12 +173,19 @@ function updateWorkspacePanel() {
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
   });
+  panel.querySelectorAll("[data-density]").forEach((button) => {
+    const active = button.dataset.density === preferences.appearance.density;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
   panel.querySelectorAll("[data-setting]").forEach((button) => {
     const enabled = button.dataset.setting === "focusMode"
       ? preferences.focusMode
       : button.dataset.setting === "reducedMotion"
         ? preferences.appearance.reducedMotion
-        : preferences.appearance.reduceTransparency;
+        : button.dataset.setting === "reducedTransparency"
+      ? preferences.appearance.reduceTransparency
+      : false;
     button.setAttribute("aria-pressed", String(enabled));
     button.textContent = enabled ? "Включено" : "Выключено";
   });
@@ -634,6 +642,7 @@ function panelMarkup(appId) {
         '<div class="permission-row"><div class="permission-copy"><strong>Режим фокуса</strong><span>Приглушить второстепенные элементы оболочки</span></div><button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' + (preferences.focusMode ? "Включено" : "Выключено") + '</button></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>Снижение движения</strong><span>Убрать декоративные переходы и перемещения</span></div><button class="permission-toggle" data-setting="reducedMotion" aria-pressed="' + String(preferences.appearance.reducedMotion) + '">' + (preferences.appearance.reducedMotion ? "Включено" : "Выключено") + '</button></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>Снижение прозрачности</strong><span>Заменить стекло непрозрачными поверхностями и отключить размытие</span></div><button class="permission-toggle" data-setting="reduceTransparency" aria-pressed="' + String(preferences.appearance.reduceTransparency) + '">' + (preferences.appearance.reduceTransparency ? "Включено" : "Выключено") + '</button></div>' +
+        '<div class="setting-block"><strong>Плотность интерфейса</strong><span>Компактный режим сокращает вертикальные интервалы, сохраняя удобные зоны нажатия</span><div class="profile-options"><button class="profile-choice" data-density="comfortable" aria-pressed="' + String(preferences.appearance.density === "comfortable") + '">Комфортная</button><button class="profile-choice" data-density="compact" aria-pressed="' + String(preferences.appearance.density === "compact") + '">Компактная</button></div></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>Адаптивная сетка и настройки доступности работают в оболочке. Аппаратные профили, VRR и NPU-планирование требуют native services.</span></div>' +
         '<p class="window-copy">Настройки хранятся локально в профиле браузера и могут быть сброшены очисткой данных сайта.</p>';
     case "provenance":
@@ -691,7 +700,9 @@ function openApp(appId) {
     return;
   }
 
+  const launchTarget = document.activeElement;
   appWindow = document.createElement("section");
+  appWindow._launchTarget = launchTarget;
   appWindow.className = "app-window";
   appWindow.dataset.window = appId;
   appWindow.setAttribute("role", "dialog");
@@ -700,7 +711,7 @@ function openApp(appId) {
   appWindow.style.setProperty("--accent", definition.color);
   appWindow.style.zIndex = String(++nextZIndex);
   appWindow.innerHTML =
-    '<header class="window-titlebar"><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
+    '<header class="window-titlebar" tabindex="0" aria-label="Панель окна. Стрелки перемещают окно; Shift ускоряет шаг."><span class="window-app-icon">' + definition.glyph + '</span><span class="window-title">' + definition.name + '</span><button class="window-close" data-action="close" aria-label="Закрыть окно">×</button></header>' +
     '<div class="window-body">' + panelMarkup(appId) + '</div>';
   windowLayer.appendChild(appWindow);
   renderExtensionEntries(appWindow);
@@ -718,8 +729,16 @@ function openApp(appId) {
 
 function closeWindow(appWindow) {
   if (!appWindow) return;
+  const returnFocus = appWindow._launchTarget;
   appWindow.remove();
   updateActiveApp();
+  if (returnFocus && returnFocus.isConnected && typeof returnFocus.focus === "function") {
+    returnFocus.focus();
+    return;
+  }
+  const remaining = Array.from(windowLayer.querySelectorAll(".app-window"))
+    .sort((left, right) => Number(right.style.zIndex) - Number(left.style.zIndex))[0];
+  if (remaining) remaining.querySelector(".window-titlebar")?.focus();
 }
 
 function closeTopWindow() {
@@ -913,10 +932,36 @@ windowLayer.addEventListener("pointerdown", (event) => {
   if (header && event.button === 0) startWindowDrag(appWindow, header, event);
 });
 
+windowLayer.addEventListener("keydown", (event) => {
+  const header = event.target.closest(".window-titlebar");
+  if (!header || event.target !== header) return;
+  const directions = {
+    ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+    ArrowUp: [0, -1], ArrowDown: [0, 1]
+  };
+  const direction = directions[event.key];
+  if (!direction) return;
+  const appWindow = header.closest(".app-window");
+  const step = event.shiftKey ? 48 : 16;
+  const width = appWindow.offsetWidth;
+  const height = appWindow.offsetHeight;
+  const currentLeft = Number.parseFloat(appWindow.style.left) || appWindow.offsetLeft;
+  const currentTop = Number.parseFloat(appWindow.style.top) || appWindow.offsetTop;
+  const maxLeft = Math.max(8, window.innerWidth - width - 8);
+  const maxTop = Math.max(56, window.innerHeight - height - 72);
+  appWindow.style.left = Math.min(maxLeft, Math.max(8, currentLeft + direction[0] * step)) + "px";
+  appWindow.style.top = Math.min(maxTop, Math.max(56, currentTop + direction[1] * step)) + "px";
+  focusWindow(appWindow);
+  event.preventDefault();
+});
+
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeTopWindow();
+  if ((event.ctrlKey || event.metaKey) && event.key === ",") {
+    event.preventDefault();
+    openApp("workspace");
+    return;
   }
+  if (event.key === "Escape") closeTopWindow();
 });
 
 
@@ -993,6 +1038,17 @@ document.addEventListener("click", (event) => {
     persistPreferences();
     updateWorkspacePanel();
     showToast("Профиль оболочки: " + value);
+    return;
+  }
+
+  const density = event.target.closest("[data-density]");
+  if (density) {
+    const nextDensity = density.dataset.density;
+    if (nextDensity !== "comfortable" && nextDensity !== "compact") return;
+    preferences.appearance.density = nextDensity;
+    persistPreferences();
+    updateWorkspacePanel();
+    showToast(nextDensity === "compact" ? "Компактная плотность включена" : "Комфортная плотность включена");
     return;
   }
 
