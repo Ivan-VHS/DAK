@@ -1,34 +1,137 @@
 {
-  "schema": "ivan-vhs.project-ladder.v1",
+  "schema": "dak.project-maturity.v1",
   "version": 1,
-  "project": "DuckOS",
-  "repository": "Ivan-VHS/DuckOS",
-  "current_rung": 3,
+  "project": "DAK",
+  "repository": "Ivan-VHS/DAK",
+  "current_stage": 3,
   "current_name": "Evolution",
   "assessment": "provisional",
   "assessment_date": "2026-11-25",
-  "assessment_basis": "Static review of the repository README and linked feature, architecture or roadmap documentation. Source-level deep audit and CI/test rerun were not performed for this adoption.",
-  "evidence": [
+  "assessment_basis": "Repository documentation, build entry points and workflow definitions were reviewed. The underlying target tests were not re-run as part of this maturity adoption; this record is not a new CI certification.",
+  "stages": [
     {
-      "path": "docs/IMPLEMENTATION_STATUS.md",
-      "claim": "Experimental x86_64 Stage 1 boot and Reaper policy contracts are distinguished from missing process, syscall, driver, storage and compositor services.",
-      "verification": "documentation_only"
+      "number": 1,
+      "name": "Genesis",
+      "status": "met",
+      "evidence": [
+        {
+          "kind": "scope",
+          "path": "README.md",
+          "claim": "Defines the DAK product purpose, supported x86-64 boot target, project boundaries and current non-goals.",
+          "verification": "documentation_only"
+        }
+      ]
     },
     {
-      "path": "docs/IMPLEMENTATION_ROADMAP.md",
-      "claim": "The native implementation sequence records delivered, partial and planned boundaries with boot/CI evidence links.",
-      "verification": "documentation_only"
+      "number": 2,
+      "name": "Foundation",
+      "status": "met",
+      "evidence": [
+        {
+          "kind": "architecture",
+          "path": "docs/ARCHITECTURE.md",
+          "claim": "Documents the system architecture, separation of kernel, policy and host-native shell.",
+          "verification": "documentation_only"
+        },
+        {
+          "kind": "policy",
+          "path": "README.md",
+          "claim": "States safety, privilege and host-versus-kernel execution boundaries.",
+          "verification": "documentation_only"
+        },
+        {
+          "kind": "build",
+          "path": "boot/build-release-iso.sh",
+          "claim": "Provides the reproducible release-image build and source synchronization entry point.",
+          "verification": "documentation_only"
+        },
+        {
+          "kind": "ci",
+          "path": ".github/workflows/ci.yml",
+          "claim": "Defines baseline repository checks, host tests and native build checks.",
+          "verification": "documentation_only"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Evolution",
+      "status": "met",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "boot/build-release-iso.sh",
+          "claim": "Repository-owned boot/release implementation is the entry point for the bounded Stage 1 image path.",
+          "verification": "source_reviewed"
+        },
+        {
+          "kind": "tests",
+          "path": "tests",
+          "claim": "Contains regression tests for host contracts and the implemented boot-support slice.",
+          "verification": "documentation_only"
+        },
+        {
+          "kind": "runtime",
+          "path": ".github/workflows/release-iso.yml",
+          "claim": "The release workflow records BIOS and UEFI QEMU boot verification for the experimental Stage 1 image.",
+          "verification": "documentation_only"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Ascension",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "number": 5,
+      "name": "Vanguard",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "number": 6,
+      "name": "Frontier",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "number": 7,
+      "name": "Dominion",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "number": 8,
+      "name": "Apex",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "number": 9,
+      "name": "Zenith",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "number": 10,
+      "name": "Singularity",
+      "status": "pending",
+      "evidence": []
     }
   ],
-  "limitations": [
-    "The experimental Stage 1 kernel is not a usable process/service OS session.",
-    "No test or CI workflow was re-run during ladder adoption."
-  ],
-  "next_rung": 4,
+  "next_stage": 4,
   "next_gate": [
-    "Deliver and test additional native kernel/runtime primitives beyond the Stage 1 boot slice.",
-    "Define and test a versioned native Reaper-to-kernel boundary; reference-runtime policy is not kernel enforcement.",
-    "Update implementation status with exact source, test and CI evidence."
+    "Implement and test additional native kernel/runtime primitives beyond the Stage 1 boot slice.",
+    "Define and exercise a versioned native boundary between Reaper and the DAK kernel.",
+    "Attach exact source, regression-test and target-CI evidence to each promoted gate."
   ],
-  "semver_independent": true
+  "semver_independent": true,
+  "limitations": [
+    "The experimental x86-64 Stage 1 kernel image halts after early boot validation and frame allocation; it is not a usable process/service OS session.",
+    "A complete process model, syscall layer, filesystem, service supervisor, driver runtime and kernel compositor are not implemented.",
+    "The release and QEMU boot workflows were reviewed as evidence references but were not re-run during this maturity adoption.",
+    "Mora is a host-native desktop application and is not yet launched inside a DAK kernel-owned user session."
+  ]
 }
