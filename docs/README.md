@@ -24,6 +24,8 @@
 
 [Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
 
+[Reaper System Runtime policy module](../duckos/services/system_runtime.rpr) defines capability mapping, request-envelope admission, lifecycle and retry policy, bounded log/device-event descriptors, and policy gates for firmware, packages and containers. It does not issue syscalls or replace kernel/HAL providers.
+
 ## Desktop optimization
 
 [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.
@@ -51,7 +53,6 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Windows application compatibility
 
 [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
-
 
 ## Capability completeness standard
 

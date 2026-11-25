@@ -100,3 +100,10 @@ python -m unittest tests.test_reaper_integration tests.test_reaper_cli -v
 ```
 
 The tests use temporary fake Reaper checkouts and mocked subprocess boundaries. They verify discovery, capability detection, argument-vector construction, JSON result handling, timeouts, source validation and the native Studio launch handoff. They do not run Reaper source or claim kernel-level process isolation.
+
+
+## Reaper System Runtime policy module
+
+DuckOS now has an additive Reaper policy module at [`duckos/services/system_runtime.rpr`](../duckos/services/system_runtime.rpr). It maps the proposed system-service operation IDs 111–130 to stable capability names and validates bounded request envelopes, lifecycle transitions, restart delays, log records and device-event descriptors. Firmware, package and container helpers are admission decisions only.
+
+The module does not issue syscalls, map physical memory, load firmware, install packages, spawn containers or implement a privileged provider. Those effects remain owned by the DuckOS kernel, HAL and dedicated user-mode services. The operation registry and Reaper source policy are not a substitute for the separate System Runtime ABI and end-to-end implementation gates. Contract assertions are included in `contract_tests.rpr` and run through the existing Reaper tree-walk and VM contract workflow.

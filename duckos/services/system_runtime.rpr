@@ -1,0 +1,117 @@
+# DuckOS System Runtime policy, implemented in the current Reaper source grammar.
+# This module decides whether a request is admissible; kernel, HAL and service
+# providers still own every real process, device, firmware and power transition.
+# Request layout: [operation_id, abi_major, abi_minor, request_id,
+#                 deadline_ms, input_bytes, output_bytes].
+
+export craft operation_capability(operation_id) {
+    when operation_id == 111 { yield "process.detach" }
+    when operation_id == 112 { yield "service.registry" }
+    when operation_id == 113 { yield "scheduler.calendar" }
+    when operation_id == 114 { yield "log.append" }
+    when operation_id == 115 { yield "service.start" }
+    when operation_id == 116 { yield "system.shutdown" }
+    when operation_id == 117 { yield "system.recovery" }
+    when operation_id == 118 { yield "device.events" }
+    when operation_id == 119 { yield "firmware.stage" }
+    when operation_id == 120 { yield "acpi.read" }
+    when operation_id == 121 { yield "compute.npu" }
+    when operation_id == 122 { yield "compute.tensor" }
+    when operation_id == 123 { yield "model.infer" }
+    when operation_id == 124 { yield "model.load" }
+    when operation_id == 125 { yield "model.secure-infer" }
+    when operation_id == 126 { yield "container.spawn" }
+    when operation_id == 127 { yield "hypervisor.vm" }
+    when operation_id == 128 { yield "package.import" }
+    when operation_id == 129 { yield "package.install" }
+    when operation_id == 130 { yield "toolchain.cross-build" }
+    yield ""
+}
+
+export craft service_request_valid(request) {
+    when size(request) != 7 { yield false }
+    when request[0] < 111 or request[0] > 130 { yield false }
+    when request[1] != 1 or request[2] < 0 or request[2] > 255 { yield false }
+    when request[3] <= 0 { yield false }
+    when request[4] <= 0 or request[4] > 30000 { yield false }
+    when request[5] < 0 or request[5] > 1048576 { yield false }
+    when request[6] < 0 or request[6] > 1048576 { yield false }
+    yield operation_capability(request[0]) != ""
+}
+
+export craft capability_set_contains(granted, required) {
+    vary found := false
+    each capability in granted {
+        when capability == required {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft service_request_decision(request, granted) {
+    when not service_request_valid(request) { yield "reject-invalid-request" }
+    make required := operation_capability(request[0])
+    when not capability_set_contains(granted, required) {
+        yield "reject-capability-denied"
+    }
+    yield "admit-to-owning-provider"
+}
+
+export craft service_transition_valid(current, next) {
+    when current == "registered" and next == "starting" { yield true }
+    when current == "stopped" and next == "starting" { yield true }
+    when current == "starting" and (next == "active" or next == "failed") { yield true }
+    when current == "active" and (next == "stopping" or next == "failed") { yield true }
+    when current == "stopping" and (next == "stopped" or next == "failed") { yield true }
+    when current == "failed" and next == "stopped" { yield true }
+    yield false
+}
+
+export craft restart_delay_ms(attempt, base_ms, ceiling_ms) {
+    when attempt < 0 or attempt > 100 { yield 0 }
+    when base_ms <= 0 or base_ms > 60000 { yield 0 }
+    when ceiling_ms < base_ms or ceiling_ms > 60000 { yield 0 }
+    make delay := base_ms * (attempt + 1)
+    when delay > ceiling_ms { yield ceiling_ms }
+    yield delay
+}
+
+export craft log_record_valid(record) {
+    # [severity 0..7, payload_bytes, request_id, monotonic_timestamp_ms]
+    when size(record) != 4 { yield false }
+    when record[0] < 0 or record[0] > 7 { yield false }
+    when record[1] < 0 or record[1] > 4096 { yield false }
+    when record[2] <= 0 or record[3] <= 0 { yield false }
+    yield true
+}
+
+export craft device_event_valid(event) {
+    # [action, device_id, generation, payload_bytes]
+    when size(event) != 4 { yield false }
+    when event[0] != "add" and event[0] != "remove" and event[0] != "change" {
+        yield false
+    }
+    when event[1] == "" or event[2] <= 0 { yield false }
+    when event[3] < 0 or event[3] > 65536 { yield false }
+    yield true
+}
+
+export craft firmware_stage_decision(signature_valid, device_match, capability_granted, user_approved, payload_bytes) {
+    when payload_bytes <= 0 or payload_bytes > 16777216 { yield "reject-size" }
+    when not signature_valid { yield "reject-signature" }
+    when not device_match { yield "reject-device-mismatch" }
+    when not capability_granted { yield "reject-capability" }
+    when not user_approved { yield "require-explicit-approval" }
+    yield "eligible-for-firmware-broker"
+}
+
+export craft package_transaction_valid(package_bytes, signature_valid, dependency_graph_valid, rollback_available) {
+    when package_bytes <= 0 or package_bytes > 268435456 { yield false }
+    yield signature_valid and dependency_graph_valid and rollback_available
+}
+
+export craft container_isolation_valid(namespaces_ready, mount_policy_ready, network_policy_ready, memory_limit, process_limit) {
+    when memory_limit <= 0 or process_limit <= 0 { yield false }
+    yield namespaces_ready and mount_policy_ready and network_policy_ready
+}
