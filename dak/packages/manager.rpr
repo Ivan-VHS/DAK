@@ -43,9 +43,6 @@ export craft package_valid(package) {
             yield false
         }
     }
-    when size(package[7]) > 256 or size(package[8]) > 64 {
-        yield false
-    }
     when package[9] == "" or package[10] == "" {
         yield false
     }
@@ -99,6 +96,11 @@ export craft paths_valid(paths) {
 export craft admission(package, target_arch, expected_abi, installed_ids, grants) {
     when kind(target_arch) != "text" or kind(expected_abi) != "number" or kind(installed_ids) != "list" or kind(grants) != "list" {
         yield "reject-manifest"
+    }
+    each grant in grants {
+        when kind(grant) != "text" or grant == "" {
+            yield "reject-capability"
+        }
     }
     when not package_valid(package) {
         yield "reject-manifest"
