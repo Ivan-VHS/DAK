@@ -10,6 +10,8 @@ option(DUCKOS_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSa
 add_library(duckos_boot_contract STATIC
     foundation/boot_info.c
     foundation/boot_info.h
+    foundation/frame_allocator.c
+    foundation/frame_allocator.h
 )
 target_include_directories(duckos_boot_contract PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/foundation
@@ -40,18 +42,27 @@ if(BUILD_TESTING)
         target_compile_options(duckos_boot_info_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-boot-info-contract COMMAND duckos_boot_info_tests)
+
+    add_executable(duckos_frame_allocator_tests tests/test_frame_allocator.c)
+    target_link_libraries(duckos_frame_allocator_tests PRIVATE duckos_boot_contract)
+    if(MSVC)
+        target_compile_options(duckos_frame_allocator_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_frame_allocator_tests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME duckos-frame-allocator COMMAND duckos_frame_allocator_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
     add_custom_target(duckos-boot-iso
         COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/boot/build-iso.sh"
             --work-dir "${CMAKE_BINARY_DIR}/duckos-boot"
-            --output "${CMAKE_BINARY_DIR}/DuckOS-Stage0-x86_64.iso"
+            --output "${CMAKE_BINARY_DIR}/DuckOS-Stage1-x86_64.iso"
         BYPRODUCTS
             "${CMAKE_BINARY_DIR}/DuckOS-Stage0-x86_64.iso"
             "${CMAKE_BINARY_DIR}/DuckOS-Stage0-x86_64.iso.sha256"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         USES_TERMINAL
-        COMMENT "Building the DuckOS x86_64 BIOS/UEFI stage-0 ISO"
+        COMMENT "Building the DuckOS x86_64 BIOS/UEFI stage-1 ISO"
     )
 endif()
