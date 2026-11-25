@@ -200,6 +200,7 @@ test("Mora exposes ergonomic density, focus, target sizing and keyboard alternat
   assert.ok(css.includes(':root[data-density="compact"]'));
   assert.ok(css.includes(".window-close"));
   assert.ok(css.includes("min-height: 44px"));
+  assert.match(css, /\.statusbar\\s+\\.status-control\\s*\\{\\s*min-height:\\s*44px;/);
   assert.ok(js.includes('data-density="comfortable"'));
   assert.ok(js.includes('data-density="compact"'));
   assert.ok(js.includes('dataset.density = preferences.appearance.density'));
