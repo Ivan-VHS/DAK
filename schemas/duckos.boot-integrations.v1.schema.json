@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/duckos.boot-integrations.v1.schema.json",
+  "title": "DuckOS boot integration catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "targets"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.boot-integrations.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 20,
+      "items": {
+        "$ref": "#/$defs/target"
+      }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "maturity",
+        "firmware",
+        "scope",
+        "operations"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 48
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "kind": {
+          "enum": [
+            "bootloader",
+            "boot-manager",
+            "network-loader",
+            "embedded-loader",
+            "firmware-kernel-path",
+            "artifact-format",
+            "chainload-target",
+            "secure-boot-stage",
+            "legacy-loader"
+          ]
+        },
+        "maturity": {
+          "enum": [
+            "current-bootstrap",
+            "planned",
+            "legacy-read-only",
+            "external-chainload",
+            "format-only",
+            "platform-specific"
+          ]
+        },
+        "firmware": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "bios",
+              "uefi",
+              "pxe",
+              "board-firmware",
+              "n/a"
+            ]
+          }
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "operations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "discover",
+              "inspect",
+              "plan",
+              "verify",
+              "chainload",
+              "install",
+              "set-default",
+              "set-once",
+              "rollback",
+              "remove"
+            ]
+          }
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 240
+        }
+      }
+    }
+  }
+}
