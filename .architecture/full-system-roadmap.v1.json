@@ -1,0 +1,353 @@
+{
+  "schema": "ivan-vhs.duckos-full-system-roadmap.v1",
+  "version": 1,
+  "project": "DuckOS",
+  "updated": "2026-11-25",
+  "baseline": {
+    "branch": "main",
+    "commit": "e2fb3d1c3862da012552cb73055e1b8947c3cbaf",
+    "architecture": {
+      "primary": "x86_64",
+      "primary_vendors": [
+        "Intel",
+        "AMD"
+      ],
+      "preserved_compatibility": [
+        "Elbrus"
+      ]
+    },
+    "boot": "Limine hybrid BIOS/UEFI; Stage 1 kernel",
+    "evidence_rule": "A specification, policy file, host application or host test does not prove native kernel behavior."
+  },
+  "maturity_values": [
+    "native_partially_verified",
+    "policy_only",
+    "host_only",
+    "planned"
+  ],
+  "domains": [
+    {
+      "id": "memory-management",
+      "number": 1,
+      "title": "Physical and virtual memory",
+      "maturity": "native_partially_verified",
+      "current_boundary": "Boot Info v1 memory-map validation and a monotonic 4 KiB frame allocator allocate and clear one early frame. No reusable free path, page tables, heap or process address spaces.",
+      "current_evidence": [
+        "foundation/boot_info.c",
+        "foundation/frame_allocator.c",
+        "kernel/boot/entry.c"
+      ],
+      "verification": [
+        "tests/test_boot_info.c",
+        "tests/test_frame_allocator.c",
+        "boot/test-qemu.sh"
+      ],
+      "depends_on": [],
+      "next_gate": "Reusable physical allocator and owned x86_64 page-table manager with permissions, address spaces and TLB invalidation.",
+      "acceptance": [
+        "Allocation/free/coalescing and exhaustion tests",
+        "Map/unmap/protect and canonical-address tests",
+        "W^X and user/supervisor isolation tests",
+        "QEMU page-fault and multi-CPU TLB shootdown tests"
+      ]
+    },
+    {
+      "id": "interrupts-time-scheduler",
+      "number": 2,
+      "title": "GDT, TSS, IDT, interrupt controllers, timers and scheduler",
+      "maturity": "native_partially_verified",
+      "current_boundary": "Main has a 256-entry IDT and fatal handlers for CPU exceptions 0–31. External IRQs are disabled; owned GDT/TSS/IST, APIC/IOAPIC, timer routing and context-switch scheduler are not implemented.",
+      "current_evidence": [
+        "foundation/idt.c",
+        "kernel/arch/x86_64/interrupts.c",
+        "kernel/arch/x86_64/exceptions.S"
+      ],
+      "verification": [
+        "tests/test_idt.c",
+        "boot/test-qemu.sh"
+      ],
+      "depends_on": [
+        "memory-management"
+      ],
+      "next_gate": "Owned GDT/TSS/IST, ACPI MADT, Local APIC/IOAPIC, timer source, SMP startup and preemptive scheduler.",
+      "acceptance": [
+        "IST and exception-frame tests",
+        "APIC routing and EOI tests",
+        "Monotonic timer and preemption tests",
+        "QEMU one-CPU and SMP interrupt/wakeup tests"
+      ]
+    },
+    {
+      "id": "processes-ring3-dabi64",
+      "number": 3,
+      "title": "Processes, threads, Ring 3 and DABI64",
+      "maturity": "policy_only",
+      "current_boundary": "Reaper process, VM, IPC and scheduler policy modules exist; no native process creation, address-space switch, user-mode transition or syscall dispatcher is claimed.",
+      "current_evidence": [
+        "duckos/kernel/process.rpr",
+        "duckos/kernel/scheduler.rpr",
+        "duckos/kernel/vm.rpr",
+        "duckos/kernel/ipc.rpr"
+      ],
+      "verification": [
+        "contract_tests.rpr",
+        "core_mvp_tests.rpr"
+      ],
+      "depends_on": [
+        "memory-management",
+        "interrupts-time-scheduler"
+      ],
+      "next_gate": "ELF64 loader, per-process address spaces, Ring 3 entry, syscall entry and tested DABI64 v1 dispatcher.",
+      "acceptance": [
+        "Reaper-built Ring 3 program launch",
+        "Syscall allow/deny and safe user-copy tests",
+        "Thread create/join/context-switch tests",
+        "Invalid-pointer, stale-handle and privilege-escalation tests"
+      ]
+    },
+    {
+      "id": "filesystem-user-profiles",
+      "number": 4,
+      "title": "VFS, persistent filesystem and user profiles",
+      "maturity": "policy_only",
+      "current_boundary": "VFS/history/CRDT policy modules exist; there is no kernel-mounted persistent disk filesystem or reboot-persistent user session.",
+      "current_evidence": [
+        "duckos/storage/vfs.rpr",
+        "duckos/storage/history.rpr",
+        "duckos/storage/crdt.rpr",
+        "docs/IMPLEMENTATION_STATUS.md"
+      ],
+      "verification": [
+        "contract_tests.rpr",
+        "core_mvp_tests.rpr"
+      ],
+      "depends_on": [
+        "memory-management",
+        "processes-ring3-dabi64"
+      ],
+      "next_gate": "VFS and initramfs/tmpfs/devfs/procfs, then an ADR-selected crash-consistent persistent filesystem and profile service.",
+      "acceptance": [
+        "Mount/read/write/rename across reboot",
+        "Power-loss transaction fault injection",
+        "Metadata corruption detection and repair",
+        "Cross-user profile isolation tests"
+      ]
+    },
+    {
+      "id": "acpi-pci-usb-drivers",
+      "number": 5,
+      "title": "ACPI, PCI/PCIe, USB and driver architecture",
+      "maturity": "policy_only",
+      "current_boundary": "Driver ABI and resource-conflict policies exist; no native ACPI/PCI/USB enumeration, DMA isolation or driver loading is claimed.",
+      "current_evidence": [
+        "duckos/drivers/abi.rpr",
+        "duckos/drivers/orchestrator.rpr",
+        "docs/ARCHITECTURE.md"
+      ],
+      "verification": [
+        "contract_tests.rpr",
+        "core_mvp_tests.rpr"
+      ],
+      "depends_on": [
+        "memory-management",
+        "interrupts-time-scheduler"
+      ],
+      "next_gate": "Bounded ACPI table parsing, PCIe enumeration, virtio device support and a capability-scoped driver lifecycle.",
+      "acceptance": [
+        "Malformed ACPI/PCI table rejection",
+        "QEMU virtio device enumeration",
+        "BAR/IRQ/DMA range isolation tests",
+        "Driver timeout/reset containment tests"
+      ]
+    },
+    {
+      "id": "reaper-runtime-services",
+      "number": 6,
+      "title": "Freestanding Reaper Runtime and native services",
+      "maturity": "host_only",
+      "current_boundary": "Reaper reference and partial native host tooling are federated separately; DuckOS Reaper policy contracts are not a freestanding runtime or kernel syscall dispatcher.",
+      "current_evidence": [
+        "docs/REAPER_INTEGRATION.md",
+        "duckos/kernel/boot.rpr",
+        "contract_tests.rpr"
+      ],
+      "verification": [
+        "contract_tests.rpr",
+        "core_mvp_tests.rpr"
+      ],
+      "depends_on": [
+        "processes-ring3-dabi64",
+        "filesystem-user-profiles"
+      ],
+      "next_gate": "Freestanding Reaper target, native ELF64/DABI64 output, kernel syscall adapter, PID 1 and supervised user services.",
+      "acceptance": [
+        "Reaper service builds without hosted runtime",
+        "ELF/relocation validation",
+        "Capability-gated syscall dispatch tests",
+        "Service restart/readiness and crash-recovery tests"
+      ]
+    },
+    {
+      "id": "native-duck-desktop",
+      "number": 7,
+      "title": "Native Duck Desktop, compositor and window system",
+      "maturity": "host_only",
+      "current_boundary": "Mora is a host-browser shell. Reaper desktop policies and host-native UI prototypes do not provide a kernel-launched compositor or native DuckOS session.",
+      "current_evidence": [
+        "mora/index.html",
+        "docs/MORA_INTEGRATION.md",
+        "duckos/ui/desktop.rpr",
+        "duckos/graphics/compositor.rpr"
+      ],
+      "verification": [
+        "tests/test_desktop.py",
+        "tools/test_mora_browser.mjs"
+      ],
+      "depends_on": [
+        "reaper-runtime-services",
+        "filesystem-user-profiles",
+        "device-platform-services"
+      ],
+      "next_gate": "User-space framebuffer compositor, input service, window manager and native Reaper login/session.",
+      "acceptance": [
+        "Boot-to-native-session in QEMU",
+        "Window/input/focus/multi-client tests",
+        "Compositor crash recovery",
+        "Accessibility and reduced-motion tests"
+      ]
+    },
+    {
+      "id": "device-platform-services",
+      "number": 8,
+      "title": "GPU, audio, network and power services",
+      "maturity": "policy_only",
+      "current_boundary": "Graphics/audio/network/platform Reaper modules are policy contracts, not GPU/audio/network drivers or power-management services.",
+      "current_evidence": [
+        "duckos/graphics/compositor.rpr",
+        "duckos/audio/pipeline.rpr",
+        "duckos/network/stack.rpr",
+        "duckos/platform/targets.rpr"
+      ],
+      "verification": [
+        "contract_tests.rpr",
+        "core_mvp_tests.rpr"
+      ],
+      "depends_on": [
+        "memory-management",
+        "interrupts-time-scheduler",
+        "acpi-pci-usb-drivers"
+      ],
+      "next_gate": "Virtualized baseline drivers/services for virtio-gpu, virtio-snd, virtio-net, display input and ACPI power states.",
+      "acceptance": [
+        "GPU reset and buffer ownership tests",
+        "Audio clock/underrun tests",
+        "Network disconnect/reconnect and malformed packet tests",
+        "Shutdown/reboot/sleep state tests"
+      ]
+    },
+    {
+      "id": "jora-duckbridge-bav",
+      "number": 9,
+      "title": "Jora Store, DuckBridge and BAV",
+      "maturity": "host_only",
+      "current_boundary": "Package/catalogue, PE/ELF inspection, compatibility planning and BAV declarative contracts exist as host/policy foundations; no kernel-enforced package sandbox or endpoint scanner is claimed.",
+      "current_evidence": [
+        "duckos/manifest.py",
+        "duckos/compat/bridge.py",
+        "docs/BAV_SECURITY_BUNDLE_V1.md",
+        "catalogs/preinstalled-applications.v1.json"
+      ],
+      "verification": [
+        "tests/test_manifest.py",
+        "tests/test_windows_compat.py",
+        "contract_tests.rpr"
+      ],
+      "depends_on": [
+        "reaper-runtime-services",
+        "filesystem-user-profiles",
+        "device-platform-services"
+      ],
+      "next_gate": "Signed offline package repository, transactional installer, isolated DuckBridge execution and sandboxed BAV scanning.",
+      "acceptance": [
+        "Signed package install/upgrade/remove/rollback tests",
+        "Manifest/archive/parser fuzzing",
+        "No-ambient-capability package execution tests",
+        "BAV scan without executing inspected content"
+      ]
+    },
+    {
+      "id": "installer-secure-boot-updates-recovery",
+      "number": 10,
+      "title": "Installer, Secure Boot, updates, recovery and rollback",
+      "maturity": "host_only",
+      "current_boundary": "Release/deployment plans and archive/signature helpers exist, but the current ISO is not a disk installer, authenticated boot chain or A/B update system.",
+      "current_evidence": [
+        "duckos/deployment.py",
+        "docs/DEPLOYMENT.md",
+        "docs/BOOTABLE_IMAGE.md",
+        "schemas/deployment-plan.v1.schema.json"
+      ],
+      "verification": [
+        "tests/test_deployment.py",
+        "tests/test_deployment_cli.py",
+        "tests/test_deployment_schema.py",
+        "boot/test-qemu.sh"
+      ],
+      "depends_on": [
+        "filesystem-user-profiles",
+        "acpi-pci-usb-drivers",
+        "reaper-runtime-services"
+      ],
+      "next_gate": "Explicit UEFI installer, signed boot artifacts, A/B slots, recovery image and boot-success rollback.",
+      "acceptance": [
+        "BIOS/UEFI install into disposable QEMU disks",
+        "Tamper/downgrade rejection tests",
+        "Power-loss injection throughout updates",
+        "Boot rollback and user-data-preserving recovery tests",
+        "OVMF Secure Boot with controlled enrolled keys"
+      ]
+    }
+  ],
+  "delivery_waves": [
+    {
+      "id": "A",
+      "title": "Kernel base",
+      "domains": [
+        "memory-management",
+        "interrupts-time-scheduler"
+      ]
+    },
+    {
+      "id": "B",
+      "title": "Execution and persistence",
+      "domains": [
+        "processes-ring3-dabi64",
+        "filesystem-user-profiles",
+        "acpi-pci-usb-drivers"
+      ]
+    },
+    {
+      "id": "C",
+      "title": "Reaper runtime and services",
+      "domains": [
+        "reaper-runtime-services"
+      ]
+    },
+    {
+      "id": "D",
+      "title": "Hardware services and native desktop",
+      "domains": [
+        "device-platform-services",
+        "native-duck-desktop"
+      ]
+    },
+    {
+      "id": "E",
+      "title": "Product and trustworthy release",
+      "domains": [
+        "jora-duckbridge-bav",
+        "installer-secure-boot-updates-recovery"
+      ]
+    }
+  ]
+}

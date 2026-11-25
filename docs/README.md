@@ -1,5 +1,9 @@
 # DuckOS documentation
 
+## Full system implementation
+
+[Duck Full System implementation plan](FULL_SYSTEM_IMPLEMENTATION_PLAN.md) defines the ten native OS domains, their dependency order, evidence maturity and ISO release gates. The machine-readable register is [full-system-roadmap.v1.json](../.architecture/full-system-roadmap.v1.json); it is checked by the dedicated CI validator.
+
 ## Desktop and application interfaces
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.

@@ -2,6 +2,18 @@
 
 Updated: 2026-11-25
 
+## Duck Full System target
+
+The ten required domains and their implementation dependencies are now tracked in [Duck Full System plan](FULL_SYSTEM_IMPLEMENTATION_PLAN.md) and [.architecture/full-system-roadmap.v1.json](../.architecture/full-system-roadmap.v1.json). Current maturity is evidence-based:
+
+- [x] Native partial: Boot Info v1 and the early physical-frame allocator; only one early frame is allocated and cleared. General page tables, free/reclaim and address spaces remain pending.
+- [x] Native partial: 256-entry x86_64 IDT with fatal CPU exception handlers for vectors 0–31, merged to main in commit e2fb3d1. Maskable IRQs/APIC/timers/preemption remain pending.
+- [ ] Policy only: process/thread, Ring 3, DABI64, VFS, persistent profiles, driver discovery and hardware policy contracts; no corresponding full native runtime is claimed.
+- [ ] Host/policy only: Reaper tooling, Mora host shell, Jora/DuckBridge/BAV foundations and deployment planning; these do not yet form a freestanding Reaper service OS, native compositor, package sandbox, installer or Secure Boot chain.
+- [ ] Planned: complete GPU/audio/network/power drivers, signed A/B updates, recovery and hardware qualification.
+
+A full-system ISO gate requires a native user session, persistent storage, Reaper services and verified device/runtime paths. A larger payload or a catalogue entry does not satisfy the gate.
+
 ## Newly specified contracts — 2026-11-25
 
 - [x] DuckOS interaction and application ergonomics standard: normative requirements for motor/visual/cognitive interaction, keyboard, focus, accessibility, windowing, errors, recovery, privacy and usability evidence. This is a specification, not proof that native desktop services meet it.

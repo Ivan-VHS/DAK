@@ -1,0 +1,43 @@
+name: DuckOS Full System roadmap
+
+on:
+  pull_request:
+    paths:
+      - ".architecture/full-system-roadmap.v1.json"
+      - "docs/FULL_SYSTEM_IMPLEMENTATION_PLAN.md"
+      - "tools/validate_full_system_roadmap.mjs"
+      - ".github/workflows/full-system-roadmap.yml"
+      - "foundation/**"
+      - "kernel/**"
+      - "duckos/**"
+      - "mora/**"
+      - "tests/**"
+  push:
+    branches: [main]
+    paths:
+      - ".architecture/full-system-roadmap.v1.json"
+      - "docs/FULL_SYSTEM_IMPLEMENTATION_PLAN.md"
+      - "tools/validate_full_system_roadmap.mjs"
+      - ".github/workflows/full-system-roadmap.yml"
+      - "foundation/**"
+      - "kernel/**"
+      - "duckos/**"
+      - "mora/**"
+      - "tests/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate system domains, dependencies and evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate maturity, evidence paths and dependency graph
+        run: node tools/validate_full_system_roadmap.mjs --self-test
