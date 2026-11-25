@@ -86,11 +86,49 @@ static int test_rejects_invalid_allocate_arguments(void) {
     return 1;
 }
 
+
+static int test_release_reuses_frames_and_rejects_double_free(void) {
+    const duckos_memory_region regions[] = {
+        {0x00100000u, 0x00004000u, DUCKOS_MEMORY_USABLE, 0u}
+    };
+    duckos_frame_allocator allocator;
+    uint64_t first = 0u;
+    uint64_t second = 0u;
+    uint64_t third = 0u;
+    uint64_t reused = 0u;
+
+    CHECK(duckos_frame_allocator_init(&allocator, regions, 1u, 0x00100000u) ==
+        DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(duckos_frame_allocator_allocate(&allocator, &first) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(duckos_frame_allocator_allocate(&allocator, &second) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(duckos_frame_allocator_allocate(&allocator, &third) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(first == 0x00100000u && second == 0x00101000u && third == 0x00102000u);
+    CHECK(allocator.allocated_pages == 3u);
+
+    CHECK(duckos_frame_allocator_release(&allocator, second) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(allocator.allocated_pages == 2u);
+    CHECK(duckos_frame_allocator_release(&allocator, second) ==
+        DUCKOS_FRAME_ALLOCATOR_INVALID_FREE);
+    CHECK(duckos_frame_allocator_release(&allocator, 0x00200000u) ==
+        DUCKOS_FRAME_ALLOCATOR_INVALID_FREE);
+    CHECK(duckos_frame_allocator_release(&allocator, 0x00100001u) ==
+        DUCKOS_FRAME_ALLOCATOR_INVALID_ARGUMENT);
+
+    CHECK(duckos_frame_allocator_allocate(&allocator, &reused) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(reused == second);
+    CHECK(allocator.allocated_pages == 3u);
+    CHECK(duckos_frame_allocator_release(&allocator, reused) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(duckos_frame_allocator_release(NULL, reused) ==
+        DUCKOS_FRAME_ALLOCATOR_INVALID_ARGUMENT);
+    return 1;
+}
+
 int main(void) {
     if (!test_allocates_only_usable_aligned_pages() ||
         !test_minimum_address_and_partial_pages() ||
         !test_rejects_bad_maps() ||
-        !test_rejects_invalid_allocate_arguments()) {
+        !test_rejects_invalid_allocate_arguments() ||
+        !test_release_reuses_frames_and_rejects_double_free()) {
         return 1;
     }
     puts("DuckOS frame allocator tests passed");
