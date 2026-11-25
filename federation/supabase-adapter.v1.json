@@ -1,0 +1,34 @@
+{
+  "schema": "ivan-vhs.supabase-adapter.v1",
+  "version": 1,
+  "project": "duckos",
+  "role": "Optional user-space account and preference synchronization control plane for DuckOS and its four federated projects.",
+  "data_policy": {
+    "personal_preferences": "opt-in-sync-candidate",
+    "application_catalog": "opt-in-sync-candidate",
+    "kernel_and_boot_state": "local-only",
+    "device_identifiers": "local-only",
+    "diagnostics": "local-only"
+  },
+  "capabilities": {
+    "auth": "planned-opt-in",
+    "sync": "schema-foundation",
+    "storage": "not-enabled",
+    "realtime": "not-enabled",
+    "edge_functions": "not-enabled"
+  },
+  "network_policy": {
+    "default_network_access": "disabled",
+    "explicit_user_consent": true,
+    "kernel_network_dependency": false,
+    "realtime_audio_path": false,
+    "remote_execution": false
+  },
+  "security": {
+    "service_role_in_client": false,
+    "secrets_in_repository": false,
+    "sensitive_payload_logging": false,
+    "owner_scoped_rls_required": true
+  },
+  "integration_status": "schema-foundation"
+}
