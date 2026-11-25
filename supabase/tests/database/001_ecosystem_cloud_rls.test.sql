@@ -68,29 +68,45 @@ values
   ('10000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'cloud-a@example.invalid', '', now(), now(), now()),
   ('20000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'cloud-b@example.invalid', '', now(), now(), now());
 
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
+select set_config('request.jwt.claims', '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
+
 insert into public.ecosystem_organizations (id, slug, display_name, created_by)
-values
-  ('10000000-0000-4000-8000-000000000010', 'cloud-a', 'Cloud A', '10000000-0000-4000-8000-000000000001'),
-  ('20000000-0000-4000-8000-000000000020', 'cloud-b', 'Cloud B', '20000000-0000-4000-8000-000000000002');
+values ('10000000-0000-4000-8000-000000000010', 'cloud-a', 'Cloud A', '10000000-0000-4000-8000-000000000001');
 
 insert into public.ecosystem_projects (id, organization_id, project_key, display_name, created_by)
-values
-  ('10000000-0000-4000-8000-000000000011', '10000000-0000-4000-8000-000000000010', 'reaper', 'Reaper A', '10000000-0000-4000-8000-000000000001'),
-  ('20000000-0000-4000-8000-000000000021', '20000000-0000-4000-8000-000000000020', 'oplague', 'OPlague B', '20000000-0000-4000-8000-000000000002');
+values ('10000000-0000-4000-8000-000000000011', '10000000-0000-4000-8000-000000000010', 'reaper', 'Reaper A', '10000000-0000-4000-8000-000000000001');
 
 insert into public.ecosystem_artifacts (
   id, organization_id, project_id, project_key, owner_id,
   artifact_kind, visibility, content_type, sha256, size_bytes
 )
-values
-  ('10000000-0000-4000-8000-000000000012', '10000000-0000-4000-8000-000000000010',
-   '10000000-0000-4000-8000-000000000011', 'reaper',
-   '10000000-0000-4000-8000-000000000001', 'report', 'organization',
-   'application/json', repeat('a', 64), 128),
-  ('20000000-0000-4000-8000-000000000022', '20000000-0000-4000-8000-000000000020',
-   '20000000-0000-4000-8000-000000000021', 'oplague',
-   '20000000-0000-4000-8000-000000000002', 'report', 'organization',
-   'application/json', repeat('b', 64), 256);
+values (
+  '10000000-0000-4000-8000-000000000012', '10000000-0000-4000-8000-000000000010',
+  '10000000-0000-4000-8000-000000000011', 'reaper',
+  '10000000-0000-4000-8000-000000000001', 'report', 'organization',
+  'application/json', repeat('a', 64), 128
+);
+
+select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000002', true);
+select set_config('request.jwt.claims', '{"sub":"20000000-0000-4000-8000-000000000002","role":"authenticated"}', true);
+
+insert into public.ecosystem_organizations (id, slug, display_name, created_by)
+values ('20000000-0000-4000-8000-000000000020', 'cloud-b', 'Cloud B', '20000000-0000-4000-8000-000000000002');
+
+insert into public.ecosystem_projects (id, organization_id, project_key, display_name, created_by)
+values ('20000000-0000-4000-8000-000000000021', '20000000-0000-4000-8000-000000000020', 'oplague', 'OPlague B', '20000000-0000-4000-8000-000000000002');
+
+insert into public.ecosystem_artifacts (
+  id, organization_id, project_id, project_key, owner_id,
+  artifact_kind, visibility, content_type, sha256, size_bytes
+)
+values (
+  '20000000-0000-4000-8000-000000000022', '20000000-0000-4000-8000-000000000020',
+  '20000000-0000-4000-8000-000000000021', 'oplague',
+  '20000000-0000-4000-8000-000000000002', 'report', 'organization',
+  'application/json', repeat('b', 64), 256
+);
 
 set local role authenticated;
 
