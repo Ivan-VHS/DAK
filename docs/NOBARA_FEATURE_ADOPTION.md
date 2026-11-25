@@ -80,6 +80,8 @@ This adoption does **not** add:
 - Secure Boot keys, EAC kernel, vendor kernel patches, TPM enrollment or verified-boot claims;
 - GPU telemetry providers, sensor readers, live benchmarking or frame-time capture inside Mora.
 - OBS, GPU Screen Recorder, MangoHUD/MangoJuice, DaVinci Resolve or other third-party creator software bundles or installers.
+- secure-boot enrollment, EAC-specific kernels, vendor certificate reuse or upstream kernel patch bundles;
+- OBS, GPU Screen Recorder, MangoHUD/MangoJuice, DaVinci Resolve or other third-party creator software bundles or installers.
 
 The Reaper modules are executable policy examples on the reference runtime. Passing their checks does not prove kernel enforcement, package installation, hardware access or rollback.
 
