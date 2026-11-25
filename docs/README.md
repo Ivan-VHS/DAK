@@ -32,9 +32,15 @@
 
 [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
 
-## Normative standard
+## Normative standards
 
 [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
+
+[DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) defines motor, visual, cognitive, keyboard, window, accessibility, error-recovery, latency, privacy and measurement requirements for Mora and native applications.
+
+## Security architecture
+
+[BAV Security Bundle v1](BAV_SECURITY_BUNDLE_V1.md) specifies the signed declarative .bav detection-policy format, trust boundaries, planned scanner/broker/quarantine services, anti-rollback requirements and verification gates. Its [JSON Schema](../schemas/bav-security-bundle.v1.schema.json) validates bundle structure only; it does not verify signatures or scan files.
 
 ## Documentation rules
 

@@ -1,0 +1,357 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/bav-security-bundle.v1.schema.json",
+  "title": "DuckOS BAV Security Bundle v1",
+  "description": "Declarative, signed BAV detection policy bundle. Schema validation does not verify cryptographic signatures.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "bundle",
+    "publisher",
+    "targets",
+    "policy",
+    "rules",
+    "signature"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.bav.security-bundle.v1"
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sequence",
+        "created_utc",
+        "expires_utc",
+        "channel"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "created_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "channel": {
+          "enum": [
+            "stable",
+            "preview"
+          ]
+        }
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "display_name"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "os",
+        "architectures",
+        "minimum_engine_version"
+      ],
+      "properties": {
+        "os": {
+          "const": "duckos"
+        },
+        "architectures": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "x86_64",
+              "aarch64"
+            ]
+          }
+        },
+        "minimum_engine_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "scan_triggers",
+        "max_scan_bytes",
+        "max_scan_time_ms",
+        "unknown_execution_action"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "audit",
+            "protect"
+          ]
+        },
+        "scan_triggers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "manual",
+              "open",
+              "write",
+              "execute",
+              "install"
+            ]
+          }
+        },
+        "max_scan_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1073741824
+        },
+        "max_scan_time_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "unknown_execution_action": {
+          "enum": [
+            "allow_with_warning",
+            "deny_execution"
+          ]
+        },
+        "archive_depth_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "archive_expanded_bytes_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967296
+        },
+        "archive_expansion_ratio_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "enabled",
+          "kind",
+          "severity",
+          "confidence",
+          "verdict",
+          "action",
+          "description",
+          "match"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^BAV-[A-Z0-9][A-Z0-9._-]{0,63}$"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "sha256",
+              "byte_pattern"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "confidence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "verdict": {
+            "enum": [
+              "suspicious",
+              "malicious"
+            ]
+          },
+          "action": {
+            "enum": [
+              "alert",
+              "quarantine",
+              "deny_execution"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "match": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sha256"
+                ],
+                "properties": {
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "byte_pattern_hex"
+                ],
+                "properties": {
+                  "byte_pattern_hex": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 512,
+                    "pattern": "^(?:[0-9a-fA-F]{2})+$"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1073741824
+                  },
+                  "max_scan_bytes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1073741824
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "sha256"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "properties": {
+                "match": {
+                  "required": [
+                    "sha256"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "byte_pattern"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "properties": {
+                "match": {
+                  "required": [
+                    "byte_pattern_hex"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "key_id",
+        "value_base64"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519"
+        },
+        "canonicalization": {
+          "const": "RFC8785"
+        },
+        "key_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "value_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      }
+    }
+  }
+}
