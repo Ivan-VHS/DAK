@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/mora-categories.v1.schema.json",
+  "title": "DuckOS Mora category registry v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "category_count",
+    "source_manifest",
+    "policy",
+    "categories"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.mora.categories.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "category_count": {
+      "const": 7
+    },
+    "source_manifest": {
+      "const": "./apps.json"
+    },
+    "default_filter": {
+      "const": "all"
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "unknown_category",
+        "duplicate_app_id",
+        "missing_manifest_entry",
+        "privileged_native_launch",
+        "browser_panel_is_not_native_process",
+        "never_infer_capabilities_from_category_visibility"
+      ],
+      "properties": {
+        "unknown_category": {
+          "const": "reject"
+        },
+        "duplicate_app_id": {
+          "const": "reject"
+        },
+        "missing_manifest_entry": {
+          "const": "reject"
+        },
+        "privileged_native_launch": {
+          "const": "deny_without_all_required_capabilities_and_native_broker"
+        },
+        "browser_panel_is_not_native_process": {
+          "const": true
+        },
+        "never_infer_capabilities_from_category_visibility": {
+          "const": true
+        }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "order",
+          "title_ru",
+          "title_en",
+          "description_ru",
+          "description_en",
+          "access",
+          "required_capabilities",
+          "native_launch_policy",
+          "panel_policy",
+          "maturity",
+          "application_ids"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "system-core",
+              "security-contracts",
+              "development-federation",
+              "mora-shell",
+              "media-processing",
+              "network-communication",
+              "utilities"
+            ]
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "title_ru": {
+            "type": "string"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "description_ru": {
+            "type": "string"
+          },
+          "description_en": {
+            "type": "string"
+          },
+          "access": {
+            "enum": [
+              "user",
+              "privileged"
+            ]
+          },
+          "required_capabilities": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "duckos.system.core.inspect",
+                "duckos.security.contracts.audit"
+              ]
+            }
+          },
+          "native_launch_policy": {
+            "enum": [
+              "required-capability-and-native-broker",
+              "native-launcher-not-implemented"
+            ]
+          },
+          "panel_policy": {
+            "type": "string"
+          },
+          "maturity": {
+            "enum": [
+              "partial",
+              "specified",
+              "implemented"
+            ]
+          },
+          "maturity_note": {
+            "type": "string"
+          },
+          "application_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
