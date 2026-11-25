@@ -1,6 +1,9 @@
 #include "idt.h"
 #include "interrupts.h"
 
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
