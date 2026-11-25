@@ -62,7 +62,7 @@ flowchart TB
 
 ## Federated workbenches
 
-The four repositories below are pinned by exact Git commits in `federation/repositories.v1.json`. Their source trees and license notices remain attributable to their own projects.
+The four specialist projects below are vendored as complete source trees at exact upstream commits. Their project boundaries and licenses remain preserved; `federation/vendor-sources.v1.json` records commit and tree provenance.
 
 | Project | Role in the ecosystem | Native foundation |
 |---|---|---|
@@ -105,7 +105,7 @@ npm test
 
 ## Build the release ISO
 
-The reproducible release pipeline targets Linux x86_64 and expects Git with subtree support, GCC/G++, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
+The reproducible release pipeline targets Linux x86_64 and expects Git, jq and, GCC/G++, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
 
 ```sh
 git clone https://github.com/Ivan-VHS/DuckOS.git
