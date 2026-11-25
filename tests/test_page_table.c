@@ -170,6 +170,11 @@ static void test_splits_two_megabyte_mapping_before_modifying_one_page(void) {
     assert(duckos_page_table_map(
         &space, 0x401000u, 0x900000u,
         DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE | DUCKOS_PAGE_NX
+    ) == DUCKOS_PAGE_TABLE_ALREADY_MAPPED);
+    assert(duckos_page_table_unmap(&space, 0x401000u) == DUCKOS_PAGE_TABLE_OK);
+    assert(duckos_page_table_map(
+        &space, 0x401000u, 0x900000u,
+        DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE | DUCKOS_PAGE_NX
     ) == DUCKOS_PAGE_TABLE_OK);
     assert(duckos_page_table_translate(
         &space, 0x401000u, &physical, NULL
@@ -228,6 +233,10 @@ static void test_rejects_writable_executable_and_unsupported_nx(void) {
     assert(duckos_page_table_map(
         &no_nx, 0x1000u, 0x5000u,
         DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE
+    ) == DUCKOS_PAGE_TABLE_OK);
+    assert(duckos_page_table_map(
+        &no_nx, 0x2000u, 0x6000u,
+        DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_NX
     ) == DUCKOS_PAGE_TABLE_INVALID_FLAGS);
     duckos_page_table_destroy(&no_nx);
     assert(count_used(&pool) == 0u);
