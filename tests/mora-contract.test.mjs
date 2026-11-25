@@ -190,3 +190,21 @@ test("glass materials use bounded progressive enhancement and accessible fallbac
   assert.ok(css.includes("backdrop-filter: none"));
   assert.ok(css.includes("--mora-glass-fallback"));
 });
+
+
+test("Mora exposes ergonomic density, focus, target sizing and keyboard alternatives", () => {
+  assert.ok(html.includes('class="skip-link" href="#app-grid"'));
+  assert.ok(html.includes('aria-label="Системная панель"'));
+  assert.ok(css.includes(":focus-visible"));
+  assert.ok(css.includes("outline: 3px solid"));
+  assert.ok(css.includes(':root[data-density="compact"]'));
+  assert.ok(css.includes(".window-close"));
+  assert.ok(css.includes("min-height: 44px"));
+  assert.ok(js.includes('data-density="comfortable"'));
+  assert.ok(js.includes('data-density="compact"'));
+  assert.ok(js.includes('dataset.density = preferences.appearance.density'));
+  assert.ok(js.includes('tabindex="0" aria-label="Панель окна.'));
+  assert.ok(js.includes("windowLayer.addEventListener(\"keydown\""));
+  assert.ok(js.includes("returnFocus.focus()"));
+  assert.ok(js.includes('event.key === ","'));
+});
