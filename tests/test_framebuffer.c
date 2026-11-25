@@ -202,6 +202,28 @@ static void test_duplicate_surfaces_are_rejected_before_drawing(void)
     assert(pixel_at(memory, 0u, 0u) == 0x33333333u);
 }
 
+static void test_aliasing_is_rejected_before_drawing(void)
+{
+    uint8_t memory[TEST_WIDTH * TEST_HEIGHT * 4u];
+    duckos_framebuffer_target target = make_target(memory, sizeof(memory));
+    duckos_framebuffer_surface surface = {
+        .id = 4u, .generation = 1u, .x = 0, .y = 0,
+        .width = 1u, .height = 1u, .pitch_bytes = 4u,
+        .buffer_size = 4u, .z_index = 1u,
+        .visible = 1u, .format = DUCKOS_SURFACE_RGBA8888,
+        .pixels = memory
+    };
+
+    memset(memory, 0x7cu, sizeof(memory));
+    assert(duckos_framebuffer_compose(
+        &target, 0u, 0u, 0u, &surface, 1u) ==
+        DUCKOS_FRAMEBUFFER_OVERLAPPING_BUFFERS);
+    assert(pixel_at(memory, 0u, 0u) == 0x7c7c7c7cu);
+    assert(duckos_framebuffer_blit_surface(
+        &target, &surface) == DUCKOS_FRAMEBUFFER_OVERLAPPING_BUFFERS);
+    assert(pixel_at(memory, 0u, 0u) == 0x7c7c7c7cu);
+}
+
 int main(void)
 {
     test_target_and_rectangle_bounds();
@@ -209,6 +231,7 @@ int main(void)
     test_bgra_and_invisible_surfaces();
     test_surface_validation_and_atomic_rejection();
     test_duplicate_surfaces_are_rejected_before_drawing();
+    test_aliasing_is_rejected_before_drawing();
     puts("DuckOS framebuffer tests passed");
     return 0;
 }
