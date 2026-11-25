@@ -792,7 +792,7 @@ input[type="range"] { width:160px; accent-color:#ffd700; cursor:pointer; }
   --mora-secondary-accent: #FFD700;
   --mora-border: #3A3A3A;
   --mora-selection: #3A3100;
-  --mora-danger: #FFD700;
+  --mora-danger: #D45F5F;
   --mora-focus: #FFE45C;
   --ink: #FFFFFF;
   --muted: #A6A6A6;
@@ -975,3 +975,5 @@ input[type="range"] { accent-color: #FFD700; }
     transition-duration: .01ms !important;
   }
 }
+
+html[lang="zh-CN"] .app-tile::after { content: "打开  ↗"; }
