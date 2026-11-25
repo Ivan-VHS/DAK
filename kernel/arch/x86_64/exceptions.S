@@ -18,7 +18,7 @@ duckos_x86_isr_\number:
     jmp duckos_x86_exception_common
 .endm
 
-DUCKOS_ISR_NO_ERROR 0
+# CPU-supplied error-code vectors: 8, 10-14, 17, 21, 29 and 30.\nDUCKOS_ISR_NO_ERROR 0
 DUCKOS_ISR_NO_ERROR 1
 DUCKOS_ISR_NO_ERROR 2
 DUCKOS_ISR_NO_ERROR 3
