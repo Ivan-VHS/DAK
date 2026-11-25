@@ -230,7 +230,8 @@ void duckos_page_table_destroy(duckos_page_table_space *space) {
 static int flags_valid(const duckos_page_table_space *space, uint64_t flags) {
     const uint64_t allowed = ENTRY_SOFTWARE_FLAGS;
     if ((flags & ~allowed) != 0u || (flags & DUCKOS_PAGE_PRESENT) == 0u) return 0;
-    if ((flags & DUCKOS_PAGE_WRITABLE) != 0u &&
+    if (space->supports_nx != 0u &&
+        (flags & DUCKOS_PAGE_WRITABLE) != 0u &&
         (flags & DUCKOS_PAGE_NX) == 0u) return 0;
     if ((flags & DUCKOS_PAGE_NX) != 0u && space->supports_nx == 0u) return 0;
     return 1;
