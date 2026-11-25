@@ -1,0 +1,88 @@
+# Reaper-VHS GPU page deduplication.
+# Page: [page_id, security_domain, resource_kind, sha256_digest, bytes,
+#        reference_count, writable, pinned, state]
+#
+# A hash match is only an index hint. Sharing requires byte-for-byte equality
+# and the same security domain. Writable, pinned and secret resources are excluded.
+
+export craft page_valid(page) {
+    when size(page) != 9 {
+        yield false
+    }
+    when page[0] <= 0 or page[1] == "" or page[2] == "" or size(page[3]) != 64 {
+        yield false
+    }
+    when size(page[4]) == 0 or size(page[4]) > 4096 or page[5] <= 0 {
+        yield false
+    }
+    when page[6] != true and page[6] != false {
+        yield false
+    }
+    when page[7] != true and page[7] != false {
+        yield false
+    }
+    yield page[8] == "resident-vram" or page[8] == "host-raw" or page[8] == "host-compressed"
+}
+
+export craft share_eligible(candidate, existing) {
+    when not page_valid(candidate) or not page_valid(existing) {
+        yield false
+    }
+    when candidate[1] != existing[1] or candidate[2] != existing[2] {
+        yield false
+    }
+    when candidate[3] != existing[3] or candidate[4] != existing[4] {
+        yield false
+    }
+    when candidate[6] or existing[6] or candidate[7] or existing[7] {
+        yield false
+    }
+    yield true
+}
+
+export craft find_share(pages, candidate) {
+    when not page_valid(candidate) {
+        yield ["invalid", -1]
+    }
+    vary found_index := -1
+    vary index := 0
+    each existing in pages {
+        when share_eligible(candidate, existing) {
+            change found_index := index
+        }
+        change index := index + 1
+    }
+    when found_index >= 0 {
+        yield ["shared", found_index]
+    }
+    yield ["unique", -1]
+}
+
+export craft cow_action(page) {
+    when not page_valid(page) {
+        yield "reject-invalid-page"
+    }
+    when page[5] > 1 {
+        yield "allocate-private-copy-before-write"
+    }
+    yield "write-exclusive-page"
+}
+
+export craft retain(page) {
+    when not page_valid(page) or page[5] >= 2147483647 {
+        yield ["invalid", page]
+    }
+    make retained_page := [page[0], page[1], page[2], page[3], page[4], page[5] + 1, page[6], page[7], page[8]]
+    yield ["retained", retained_page]
+}
+
+export craft release(page) {
+    when not page_valid(page) {
+        yield ["invalid", page]
+    }
+    when page[5] > 1 {
+        make released_page := [page[0], page[1], page[2], page[3], page[4], page[5] - 1, page[6], page[7], page[8]]
+        yield ["released", released_page]
+    }
+    yield ["reclaim-page", nothing]
+}

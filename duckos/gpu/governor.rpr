@@ -1,0 +1,134 @@
+# Reaper-VHS frequency and thermal governor v1.
+# Sample:
+# [sequence, monotonic_ms, temperature_tenths_c, utilization_pct,
+#  vram_used_bytes, vram_total_bytes, power_mw, graphics_clock_mhz,
+#  memory_clock_mhz, error_count, sensor_state]
+# Config: [soft_limit_tenths_c, critical_limit_tenths_c,
+#          recovery_limit_tenths_c, max_sample_age_ms, forecast_horizon_ms]
+# The governor requests states only inside the vendor driver's declared envelope.
+# No voltage writes, clock-register writes, undervolting or automatic overclocking.
+
+export craft sample_valid(sample) {
+    when size(sample) != 11 {
+        yield false
+    }
+    when sample[0] <= 0 or sample[1] < 0 {
+        yield false
+    }
+    when sample[2] < -200 or sample[2] > 1500 {
+        yield false
+    }
+    when sample[3] != -1 and (sample[3] < 0 or sample[3] > 100) {
+        yield false
+    }
+    when sample[4] < -1 or sample[5] < -1 {
+        yield false
+    }
+    when sample[4] >= 0 and sample[5] >= 0 and sample[4] > sample[5] {
+        yield false
+    }
+    when sample[6] < -1 or sample[7] < -1 or sample[8] < -1 or sample[9] < 0 {
+        yield false
+    }
+    when sample[10] == "available" and (sample[4] < 0 or sample[5] <= 0) {
+        yield false
+    }
+    yield sample[10] == "available" or sample[10] == "unavailable"
+}
+
+export craft config_valid(config) {
+    when size(config) != 5 {
+        yield false
+    }
+    when config[0] <= config[2] or config[1] <= config[0] {
+        yield false
+    }
+    when config[3] <= 0 or config[4] < 0 or config[4] > 30000 {
+        yield false
+    }
+    yield true
+}
+
+export craft predicted_temperature(previous, current, config) {
+    when not sample_valid(previous) or not sample_valid(current) or not config_valid(config) {
+        yield -1
+    }
+    when current[1] <= previous[1] or current[0] <= previous[0] {
+        yield current[2]
+    }
+    make elapsed_ms := current[1] - previous[1]
+    make temperature_delta := current[2] - previous[2]
+    when temperature_delta <= 0 {
+        yield current[2]
+    }
+    yield current[2] + (temperature_delta * config[4]) / elapsed_ms
+}
+
+export craft governor_action(previous, current, config, now_ms) {
+    when not sample_valid(previous) or not sample_valid(current) or not config_valid(config) or now_ms < current[1] {
+        yield ["fail-safe-hold", "invalid-or-regressed-telemetry"]
+    }
+    when previous[10] != "available" {
+        yield ["fail-safe-hold", "previous-sensor-unavailable"]
+    }
+    when current[10] != "available" {
+        yield ["fail-safe-hold", "sensor-unavailable"]
+    }
+    when now_ms - current[1] > config[3] {
+        yield ["fail-safe-hold", "stale-telemetry"]
+    }
+    when current[9] > 0 {
+        yield ["request-oem-safe-state", "driver-or-device-errors"]
+    }
+    make predicted := predicted_temperature(previous, current, config)
+    when predicted < 0 {
+        yield ["fail-safe-hold", "prediction-unavailable"]
+    }
+    when current[2] >= config[1] or predicted >= config[1] {
+        yield ["request-oem-emergency-state", "thermal-limit-predicted"]
+    }
+    when current[2] >= config[0] or predicted >= config[0] {
+        yield ["request-oem-balanced-state", "thermal-headroom-low"]
+    }
+    when current[2] <= config[2] and predicted < config[0] {
+        yield ["allow-oem-default-boost", "within-vendor-default-envelope"]
+    }
+    yield ["hold-oem-state", "preserve-current-vendor-state"]
+}
+
+export craft profile_valid(profile, vendor_limits) {
+    # Profile: [quiet|balanced|performance, requested_max_clock_mhz, requested_power_mw]
+    # Vendor limits: [max_clock_mhz, max_power_mw, verified_profile_count]
+    when size(profile) != 3 or size(vendor_limits) != 3 {
+        yield false
+    }
+    when profile[0] != "quiet" and profile[0] != "balanced" and profile[0] != "performance" {
+        yield false
+    }
+    when profile[1] <= 0 or profile[2] <= 0 {
+        yield false
+    }
+    when vendor_limits[0] <= 0 or vendor_limits[1] <= 0 or vendor_limits[2] <= 0 {
+        yield false
+    }
+    yield profile[1] <= vendor_limits[0] and profile[2] <= vendor_limits[1]
+}
+
+export craft profile_action(profile, vendor_limits, telemetry_fresh, errors_present, operator_approved) {
+    when not profile_valid(profile, vendor_limits) {
+        yield "reject-outside-vendor-envelope"
+    }
+    when not telemetry_fresh or errors_present {
+        yield "safe-balanced-oem-default"
+    }
+    when profile[0] == "quiet" {
+        yield "request-oem-quiet-profile"
+    }
+    when profile[0] == "balanced" {
+        yield "request-oem-balanced-profile"
+    }
+    when not operator_approved {
+        yield "require-operator-approval"
+    }
+    yield "request-oem-performance-profile-within-driver-limits"
+}

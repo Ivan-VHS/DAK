@@ -10,6 +10,22 @@ Updated: 2026-11-25
 - [x] Reaper Beelzebul 66-rule repository scanner and defense-context TSV inspected as separate specialist inputs; neither is represented as DuckOS endpoint protection.
 - [ ] Re-verify the Java context-classifier source/test paths named in Reaper documentation before claiming that classifier is implemented or using it as a shipped DuckOS dependency.
 
+## Reaper-VHS GPU protocol — 2026-11-25
+
+- [x] Reaper GPU ABI and explicit per-process GPU context/capability contract.
+- [x] Four-tier GPU memory admission: physical VRAM, raw host RAM, compressed host RAM and swap; virtual commitment remains bounded by declared backing.
+- [x] VHS Codec v1 lossless zero/constant/RLE/raw policy with a 4096-byte block limit and trusted SHA-256 handoff.
+- [x] Same-security-domain deduplication with exact-byte confirmation, immutable-page restriction, reference counts and copy-on-write decisions.
+- [x] HyperSwap cold-page eviction/reload decisions, dirty/pinned/render-critical protection, transfer budget and IOMMU-gated DMA admission.
+- [x] Read-only thermal governor with stale-sensor/error fallback, board-specific limits and OEM-driver-bounded profile requests.
+- [x] OPlague -> Reaper v1 telemetry bridge and dedicated GPU contract suite for tree-walk and VM.
+- [ ] Native GPU driver adapters for NVIDIA/AMD/Intel, physical VRAM page tables, IOMMU programming, pinned-page DMA and context fault/replay.
+- [ ] Native verified crypto, shader-IR verifier, kernel-enforced per-context isolation and device-reset/quiescence path.
+- [ ] LZ4/Zstd and hardware texture codecs; the initial VHS codec is RLE/zero/constant/raw and is not advertised as LZ4.
+- [ ] Physical hardware measurements and per-board thermal qualification; no voltage or forced overclock controls are enabled.
+
+The Reaper modules are policy contracts executed by the reference runtime. They do not hook CUDA/OpenCL allocations, load a kernel module, write GPU registers, double physical VRAM, or guarantee unchanged frame rate. OPlague v1 currently exports read-only NVIDIA `nvidia-smi` telemetry only; unavailable sensors remain null.
+
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.

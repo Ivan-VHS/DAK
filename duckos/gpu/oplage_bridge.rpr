@@ -1,0 +1,80 @@
+# OPlague -> DuckOS -> Reaper read-only GPU telemetry bridge.
+# Input rows are parsed from oplage.gpu-telemetry.v1 by a trusted file reader.
+# Null temperature maps to -32768; null numeric sensors map to -1. The file reader validates schema and digest.
+
+export craft gpu_row_valid(row) {
+    # [name, driver_version, temperature_c, utilization_pct,
+    #  memory_used_mib, memory_total_mib, power_w,
+    #  graphics_clock_mhz, memory_clock_mhz]
+    when size(row) != 9 or row[0] == "" or row[1] == "" {
+        yield false
+    }
+    when row[2] != -32768 and (row[2] < -20 or row[2] > 150) {
+        yield false
+    }
+    when row[3] != -1 and (row[3] < 0 or row[3] > 100) {
+        yield false
+    }
+    when row[4] < -1 or row[5] < -1 or (row[4] >= 0 and row[5] >= 0 and row[4] > row[5]) {
+        yield false
+    }
+    when row[6] != -1 and row[6] < 0 {
+        yield false
+    }
+    when row[7] < -1 or row[8] < -1 {
+        yield false
+    }
+    yield true
+}
+
+export craft snapshot_valid(snapshot) {
+    # [schema, source, read_only, controls_performed, available, gpu_rows]
+    when size(snapshot) != 6 or snapshot[0] != "oplage.gpu-telemetry.v1" {
+        yield false
+    }
+    when snapshot[1] != "nvidia-smi" or snapshot[2] != true or snapshot[3] != false {
+        yield false
+    }
+    when snapshot[4] != true and snapshot[4] != false {
+        yield false
+    }
+    when size(snapshot[5]) > 16 {
+        yield false
+    }
+    each row in snapshot[5] {
+        when not gpu_row_valid(row) {
+            yield false
+        }
+    }
+    yield snapshot[4] == (size(snapshot[5]) > 0)
+}
+
+export craft to_governor_sample(sequence, monotonic_ms, row, memory_used_bytes, memory_total_bytes, power_mw, errors) {
+    when not gpu_row_valid(row) or sequence <= 0 or monotonic_ms < 0 or errors < 0 {
+        yield ["invalid", nothing]
+    }
+    vary temperature := -1
+    when row[2] != -32768 {
+        change temperature := row[2] * 10
+    }
+    vary utilization := row[3]
+    vary used := memory_used_bytes
+    when used < 0 and row[4] >= 0 {
+        change used := row[4] * 1048576
+    }
+    vary total := memory_total_bytes
+    when total < 0 and row[5] >= 0 {
+        change total := row[5] * 1048576
+    }
+    vary power := power_mw
+    when power < 0 and row[6] >= 0 {
+        change power := row[6] * 1000
+    }
+    vary graphics_clock := row[7]
+    vary memory_clock := row[8]
+    vary sensor_state := "available"
+    when temperature == -1 or used < 0 or total <= 0 {
+        change sensor_state := "unavailable"
+    }
+    yield ["ready", [sequence, monotonic_ms, temperature, utilization, used, total, power, graphics_clock, memory_clock, errors, sensor_state]]
+}

@@ -1,0 +1,155 @@
+# Reaper-VHS virtual GPU memory pool v1.
+# Pool:
+# [vram_total, vram_reserved, vram_used,
+#  host_raw_limit, host_raw_used,
+#  host_compressed_limit, host_compressed_used,
+#  swap_limit, swap_used, virtual_commit_limit]
+#
+# Virtual capacity is backed by actual VRAM, host RAM, compressed host RAM and swap.
+# Oversubscription changes latency; it does not create physical VRAM.
+
+export craft pool_valid(pool) {
+    when size(pool) != 10 {
+        yield false
+    }
+    each value in pool {
+        when value < 0 {
+            yield false
+        }
+    }
+    when pool[0] <= pool[1] or pool[2] > pool[0] - pool[1] {
+        yield false
+    }
+    when pool[4] > pool[3] or pool[6] > pool[5] or pool[8] > pool[7] {
+        yield false
+    }
+    make backing_capacity := pool[0] - pool[1] + pool[3] + pool[5] + pool[7]
+    when pool[9] <= 0 or pool[9] > backing_capacity {
+        yield false
+    }
+    make committed := pool[2] + pool[4] + pool[6] + pool[8]
+    yield committed <= pool[9]
+}
+
+export craft committed_bytes(pool) {
+    when not pool_valid(pool) {
+        yield -1
+    }
+    yield pool[2] + pool[4] + pool[6] + pool[8]
+}
+
+export craft backing_capacity(pool) {
+    when size(pool) != 10 or pool[0] < pool[1] {
+        yield -1
+    }
+    yield pool[0] - pool[1] + pool[3] + pool[5] + pool[7]
+}
+
+export craft capacity_report(pool) {
+    when not pool_valid(pool) {
+        yield ["invalid", 0, 0, 0, false]
+    }
+    make usable_vram := pool[0] - pool[1]
+    make committed := committed_bytes(pool)
+    make available := pool[9] - committed
+    yield ["ready", usable_vram, committed, available, committed > usable_vram]
+}
+
+export craft choose_tier(pool, bytes, prefer_vram) {
+    when not pool_valid(pool) or bytes <= 0 {
+        yield "invalid"
+    }
+    when bytes > pool[9] - committed_bytes(pool) {
+        yield "out-of-virtual-budget"
+    }
+    when prefer_vram and bytes <= pool[0] - pool[1] - pool[2] {
+        yield "vram"
+    }
+    when bytes <= pool[3] - pool[4] {
+        yield "host-ram"
+    }
+    when bytes <= pool[5] - pool[6] {
+        yield "compressed-host-ram"
+    }
+    when bytes <= pool[7] - pool[8] {
+        yield "swap"
+    }
+    when bytes <= pool[0] - pool[1] - pool[2] {
+        yield "vram"
+    }
+    yield "out-of-backing-capacity"
+}
+
+export craft reserve(pool, bytes, tier) {
+    when not pool_valid(pool) or bytes <= 0 {
+        yield ["invalid", pool]
+    }
+    when bytes > pool[9] - committed_bytes(pool) {
+        yield ["out-of-virtual-budget", pool]
+    }
+
+    when tier == "vram" {
+        when bytes > pool[0] - pool[1] - pool[2] {
+            yield ["out-of-tier-capacity", pool]
+        }
+        make reserved_vram_pool := [pool[0], pool[1], pool[2] + bytes, pool[3], pool[4], pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["reserved", reserved_vram_pool]
+    }
+    when tier == "host-ram" {
+        when bytes > pool[3] - pool[4] {
+            yield ["out-of-tier-capacity", pool]
+        }
+        make reserved_host_pool := [pool[0], pool[1], pool[2], pool[3], pool[4] + bytes, pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["reserved", reserved_host_pool]
+    }
+    when tier == "compressed-host-ram" {
+        when bytes > pool[5] - pool[6] {
+            yield ["out-of-tier-capacity", pool]
+        }
+        make reserved_compressed_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6] + bytes, pool[7], pool[8], pool[9] ]
+        yield ["reserved", reserved_compressed_pool]
+    }
+    when tier == "swap" {
+        when bytes > pool[7] - pool[8] {
+            yield ["out-of-tier-capacity", pool]
+        }
+        make reserved_swap_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6], pool[7], pool[8] + bytes, pool[9] ]
+        yield ["reserved", reserved_swap_pool]
+    }
+    yield ["invalid-tier", pool]
+}
+
+export craft release(pool, bytes, tier) {
+    when not pool_valid(pool) or bytes <= 0 {
+        yield ["invalid", pool]
+    }
+    when tier == "vram" {
+        when bytes > pool[2] {
+            yield ["underflow", pool]
+        }
+        make released_vram_pool := [pool[0], pool[1], pool[2] - bytes, pool[3], pool[4], pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["released", released_vram_pool]
+    }
+    when tier == "host-ram" {
+        when bytes > pool[4] {
+            yield ["underflow", pool]
+        }
+        make released_host_pool := [pool[0], pool[1], pool[2], pool[3], pool[4] - bytes, pool[5], pool[6], pool[7], pool[8], pool[9] ]
+        yield ["released", released_host_pool]
+    }
+    when tier == "compressed-host-ram" {
+        when bytes > pool[6] {
+            yield ["underflow", pool]
+        }
+        make released_compressed_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6] - bytes, pool[7], pool[8], pool[9] ]
+        yield ["released", released_compressed_pool]
+    }
+    when tier == "swap" {
+        when bytes > pool[8] {
+            yield ["underflow", pool]
+        }
+        make released_swap_pool := [pool[0], pool[1], pool[2], pool[3], pool[4], pool[5], pool[6], pool[7], pool[8] - bytes, pool[9] ]
+        yield ["released", released_swap_pool]
+    }
+    yield ["invalid-tier", pool]
+}

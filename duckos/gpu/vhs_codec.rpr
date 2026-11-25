@@ -1,0 +1,185 @@
+# VHS Codec v1 — bounded, lossless block encoding.
+# Codec modes: zero, constant, rle, raw.
+# This first version uses byte-run encoding; it is not LZ4/Zstd or a GPU hardware codec.
+#
+# Encoded block: [codec, original_size, compressed_size, sha256_digest, payload]
+# The SHA-256 digest is computed and verified by the trusted native crypto provider.
+
+export craft byte_array_valid(data) {
+    when size(data) == 0 or size(data) > 4096 {
+        yield false
+    }
+    each value in data {
+        when value < 0 or value > 255 {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft classify(data) {
+    when not byte_array_valid(data) {
+        yield "invalid"
+    }
+    make first := data[0]
+    vary all_zero := true
+    vary all_same := true
+    each value in data {
+        when value != 0 {
+            change all_zero := false
+        }
+        when value != first {
+            change all_same := false
+        }
+    }
+    when all_zero {
+        yield "zero"
+    }
+    when all_same {
+        yield "constant"
+    }
+    yield "mixed"
+}
+
+export craft rle_encode(data) {
+    when not byte_array_valid(data) {
+        make empty_payload := []
+        yield ["invalid", empty_payload]
+    }
+    vary pairs := []
+    make first := data[0]
+    vary current := first
+    vary count := 0
+    each value in data {
+        when value == current and count < 255 {
+            change count := count + 1
+        } otherwise {
+            change pairs := push(pairs, count)
+            change pairs := push(pairs, current)
+            change current := value
+            change count := 1
+        }
+    }
+    change pairs := push(pairs, count)
+    change pairs := push(pairs, current)
+    yield ["encoded", pairs]
+}
+
+export craft rle_payload_valid(payload, expected_size) {
+    when size(payload) == 0 or size(payload) % 2 != 0 or expected_size <= 0 or expected_size > 4096 {
+        yield false
+    }
+    vary decoded_size := 0
+    each index in range(0, size(payload)) {
+        when index % 2 == 0 {
+            make run_length := payload[index]
+            when run_length <= 0 or run_length > 255 {
+                yield false
+            }
+            when payload[index + 1] < 0 or payload[index + 1] > 255 {
+                yield false
+            }
+            change decoded_size := decoded_size + run_length
+        }
+    }
+    yield decoded_size == expected_size
+}
+
+export craft block_valid(block) {
+    when size(block) != 5 or block[1] <= 0 or block[1] > 4096 or block[2] < 0 {
+        yield false
+    }
+    when size(block[3]) != 64 {
+        yield false
+    }
+    when block[0] == "zero" {
+        yield block[2] == 0 and size(block[4]) == 0
+    }
+    when block[0] == "constant" {
+        yield block[2] == 1 and size(block[4]) == 1 and block[4][0] >= 0 and block[4][0] <= 255
+    }
+    when block[0] == "rle" {
+        yield block[2] == size(block[4]) and rle_payload_valid(block[4], block[1]) and block[2] < block[1]
+    }
+    when block[0] == "raw" {
+        yield block[2] == block[1] and size(block[4]) == block[1] and byte_array_valid(block[4])
+    }
+    yield false
+}
+
+export craft compress(data, sha256_digest) {
+    when not byte_array_valid(data) or size(sha256_digest) != 64 {
+        yield ["invalid", nothing]
+    }
+    make kind := classify(data)
+    when kind == "zero" {
+        make empty_payload := []
+        make encoded_block := ["zero", size(data), 0, sha256_digest, empty_payload]
+        yield ["compressed", encoded_block]
+    }
+    when kind == "constant" {
+        make constant_payload := [data[0]]
+        make encoded_block := ["constant", size(data), 1, sha256_digest, constant_payload]
+        yield ["compressed", encoded_block]
+    }
+    make encoded := rle_encode(data)
+    make encoded_bytes := size(encoded[1])
+    when encoded_bytes * 100 < size(data) * 80 {
+        make rle_block := ["rle", size(data), encoded_bytes, sha256_digest, encoded[1]]
+        yield ["compressed", rle_block]
+    }
+    make raw_block := ["raw", size(data), size(data), sha256_digest, data]
+    yield ["compressed", raw_block]
+}
+
+export craft repeat_byte(value, count) {
+    when value < 0 or value > 255 or count < 0 or count > 4096 {
+        make empty_result := []
+        yield ["invalid", empty_result]
+    }
+    vary result := []
+    each ignored in range(0, count) {
+        change result := push(result, value)
+    }
+    yield ["ready", result]
+}
+
+export craft decompress(block) {
+    when not block_valid(block) {
+        make empty_result := []
+        yield ["invalid", empty_result, ""]
+    }
+    when block[0] == "zero" {
+        make output := repeat_byte(0, block[1])
+        yield ["decoded", output[1], block[3]]
+    }
+    when block[0] == "constant" {
+        make output := repeat_byte(block[4][0], block[1])
+        yield ["decoded", output[1], block[3]]
+    }
+    when block[0] == "raw" {
+        yield ["decoded", block[4], block[3]]
+    }
+    vary output := []
+    each index in range(0, size(block[4])) {
+        when index % 2 == 0 {
+            make run_length := block[4][index]
+            make expanded := repeat_byte(block[4][index + 1], run_length)
+            each value in expanded[1] {
+                change output := push(output, value)
+            }
+        }
+    }
+    when size(output) != block[1] {
+        make empty_result := []
+        yield ["invalid", empty_result, ""]
+    }
+    yield ["decoded", output, block[3]]
+}
+
+export craft digest_matches(expected_digest, observed_digest) {
+    when size(expected_digest) != 64 or size(observed_digest) != 64 {
+        yield false
+    }
+    yield expected_digest == observed_digest
+}

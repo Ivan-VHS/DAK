@@ -1,0 +1,116 @@
+# Reaper-VHS HyperSwap policy.
+# Page: [page_id, context_id, bytes, state, pinned, render_critical,
+#        dirty, last_access_frame, security_domain]
+#
+# Transfers are issued only by a trusted driver with DMA/IOMMU support.
+# The policy never suspends a GPU shader or writes page tables itself.
+
+export craft page_valid(page) {
+    when size(page) != 9 or page[0] <= 0 or page[1] <= 0 or page[2] <= 0 {
+        yield false
+    }
+    when page[3] != "vram-resident" and page[3] != "host-raw" and page[3] != "host-compressed" and page[3] != "swap" and page[3] != "transfer-pending" {
+        yield false
+    }
+    when page[4] != true and page[4] != false {
+        yield false
+    }
+    when page[5] != true and page[5] != false {
+        yield false
+    }
+    when page[6] != true and page[6] != false {
+        yield false
+    }
+    yield page[7] >= 0 and page[8] != ""
+}
+
+export craft eviction_decision(page, current_frame, cold_frames) {
+    when not page_valid(page) or cold_frames <= 0 or current_frame < 0 {
+        yield "reject-invalid-page"
+    }
+    when page[3] != "vram-resident" {
+        yield "not-vram-resident"
+    }
+    when page[4] or page[5] {
+        yield "keep-resident"
+    }
+    when current_frame < page[7] {
+        yield "clock-regression-keep-resident"
+    }
+    when current_frame - page[7] < cold_frames {
+        yield "warm-keep-resident"
+    }
+    when page[6] {
+        yield "writeback-before-eviction"
+    }
+    yield "eligible-for-host-migration"
+}
+
+export craft fault_action(page) {
+    when not page_valid(page) {
+        yield "reject-invalid-page"
+    }
+    when page[3] == "vram-resident" {
+        yield "already-resident"
+    }
+    when page[3] == "host-raw" {
+        yield "upload-from-host-ram"
+    }
+    when page[3] == "host-compressed" {
+        yield "decompress-then-upload"
+    }
+    when page[3] == "swap" {
+        yield "read-swap-decompress-then-upload"
+    }
+    yield "wait-for-pending-transfer"
+}
+
+export craft migration_allowed(page, target_tier, dma_pinned, iommu_isolated, transfer_bytes, transfer_budget) {
+    when not page_valid(page) or transfer_bytes <= 0 or transfer_budget <= 0 or transfer_bytes > transfer_budget {
+        yield false
+    }
+    when not dma_pinned or not iommu_isolated {
+        yield false
+    }
+    when page[4] or page[5] or page[6] {
+        yield false
+    }
+    when target_tier != "host-raw" and target_tier != "host-compressed" and target_tier != "swap" {
+        yield false
+    }
+    yield page[3] == "vram-resident"
+}
+
+export craft prefetch_decision(page, current_frame, predicted_frame, warm_frames, byte_budget, remaining_budget) {
+    when not page_valid(page) or current_frame < 0 or predicted_frame < current_frame {
+        yield "reject-invalid-input"
+    }
+    when page[3] == "vram-resident" {
+        yield "already-resident"
+    }
+    when page[4] or page[5] {
+        yield "priority-resident-required"
+    }
+    when predicted_frame - current_frame > warm_frames {
+        yield "skip-too-early"
+    }
+    when page[2] > byte_budget or page[2] > remaining_budget {
+        yield "defer-budget"
+    }
+    yield "prefetch-advisory"
+}
+
+export craft transfer_completion(page, new_state, digest_matches) {
+    when not page_valid(page) {
+        yield ["reject", page]
+    }
+    when not digest_matches {
+        make failed_page := [page[0], page[1], page[2], "transfer-pending", page[4], page[5], page[6], page[7], page[8]]
+        yield ["integrity-failure-quarantine", failed_page]
+    }
+    when new_state != "vram-resident" and new_state != "host-raw" and new_state != "host-compressed" and new_state != "swap" {
+        yield ["reject-state", page]
+    }
+    make committed_page := [page[0], page[1], page[2], new_state, page[4], page[5], false, page[7], page[8]]
+    yield ["committed", committed_page]
+}

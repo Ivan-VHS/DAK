@@ -1,0 +1,150 @@
+# Reaper-VHS GPU memory and frequency protocol tests.
+# Reaper reference-runtime tests only; no privileged hardware operations occur.
+
+import "duckos/gpu/abi.rpr" as gpu_abi
+import "duckos/gpu/memory.rpr" as gpu_memory
+import "duckos/gpu/vhs_codec.rpr" as vhs
+import "duckos/gpu/dedup.rpr" as dedup
+import "duckos/gpu/hyperswap.rpr" as hyperswap
+import "duckos/gpu/governor.rpr" as governor
+import "duckos/gpu/security.rpr" as gpu_security
+import "duckos/gpu/oplage_bridge.rpr" as oplage
+
+make device := [
+    "gpu0",
+    "nvidia",
+    "0000:01:00.0",
+    "vulkan",
+    1,
+    "x86_64",
+    "kernel-verified",
+    ["gpu.memory.allocate", "gpu.memory.dma", "gpu.telemetry.read", "gpu.queue.submit"]
+]
+make gpu_context := [7, 42, "user-domain-a", "interactive", 67108864, true, ["gpu.memory.allocate", "gpu.memory.dma"]]
+
+# Driver ABI and contexts are explicit and vendor/architecture bounded.
+assert(gpu_abi["device_valid"](device, 1, "x86_64"), "verified GPU descriptor is accepted")
+assert(not gpu_abi["device_valid"](["gpu0"], 1, "x86_64"), "malformed GPU descriptor is rejected")
+assert(gpu_abi["context_valid"](gpu_context, device), "context grants are a subset of trusted device capabilities")
+assert(not gpu_abi["capability_allowed"](device, "gpu.voltage.write"), "raw voltage control is denied")
+assert(not gpu_abi["capability_allowed"](device, "gpu.clock.force"), "forced clock writes are denied")
+assert(gpu_abi["qos_rank"]("critical") > gpu_abi["qos_rank"]("background"), "render-critical QoS ranks above background")
+
+# Physical VRAM, host RAM, compressed RAM and swap are independently accounted.
+make initial_pool := [16384, 1024, 4096, 12288, 4096, 8192, 0, 16384, 0, 40960]
+assert(gpu_memory["pool_valid"](initial_pool), "valid multi-tier GPU memory pool")
+assert(gpu_memory["committed_bytes"](initial_pool) == 8192, "pool accounting includes resident and host bytes")
+assert(gpu_memory["capacity_report"](initial_pool) == ["ready", 15360, 8192, 32768, false], "capacity reports actual backed tiers")
+assert(gpu_memory["choose_tier"](initial_pool, 4096, true) == "vram", "VRAM is preferred when available")
+make vram_reservation := gpu_memory["reserve"](initial_pool, 4096, "vram")
+assert(vram_reservation[0] == "reserved", "VRAM page reservation succeeds")
+make host_reservation := gpu_memory["reserve"](vram_reservation[1], 8192, "host-ram")
+assert(host_reservation[0] == "reserved", "host RAM provides an overflow tier")
+assert(gpu_memory["capacity_report"](host_reservation[1])[4], "host-backed pages can exceed physical VRAM capacity")
+assert(gpu_memory["reserve"](host_reservation[1], 999999, "swap")[0] == "out-of-virtual-budget", "virtual commit cannot exceed actual backing")
+assert(gpu_memory["release"](host_reservation[1], 8192, "host-ram")[0] == "released", "host RAM reservation can be released")
+assert(not gpu_memory["pool_valid"]([16384, 1024, 16384, 8192, 0, 8192, 0, 0, 0, 40960]), "VRAM usage cannot exceed usable physical capacity")
+
+# VHS Codec encodes zero, constant, RLE and raw blocks without data loss.
+make digest := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+make zeros := [0, 0, 0, 0]
+make constants := [7, 7, 7, 7]
+make runs := [10, 10, 10, 10, 20, 20, 20, 20]
+make raw_data := [0, 1, 2, 3]
+assert(vhs["classify"](zeros) == "zero", "zero block classification")
+assert(vhs["classify"](constants) == "constant", "constant block classification")
+assert(vhs["classify"](runs) == "mixed", "mixed block classification")
+make zero_block := vhs["compress"](zeros, digest)
+make constant_block := vhs["compress"](constants, digest)
+make rle_block := vhs["compress"](runs, digest)
+make raw_block := vhs["compress"](raw_data, digest)
+assert(zero_block[1][0] == "zero", "zero blocks store metadata only")
+assert(constant_block[1][0] == "constant", "constant blocks store one byte")
+assert(rle_block[1][0] == "rle", "repeated runs choose lossless RLE")
+assert(raw_block[1][0] == "raw", "incompressible blocks remain raw")
+assert(vhs["block_valid"](rle_block[1]), "RLE block metadata is valid")
+assert(vhs["decompress"](zero_block[1])[1] == zeros, "zero block round trip")
+assert(vhs["decompress"](constant_block[1])[1] == constants, "constant block round trip")
+assert(vhs["decompress"](rle_block[1])[1] == runs, "RLE block round trip")
+assert(vhs["decompress"](raw_block[1])[1] == raw_data, "raw block round trip")
+assert(vhs["digest_matches"](digest, vhs["decompress"](rle_block[1])[2]), "decoded block retains its expected SHA-256 digest")
+assert(not vhs["digest_matches"](digest, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"), "digest mismatch is detectable")
+assert(not vhs["block_valid"](["rle", 8, 2, digest, [9, 10]]), "malformed RLE run length is rejected")
+
+# Deduplication requires exact bytes and the same security domain.
+make page_a := [1, "user-domain-a", "texture", digest, [1, 2, 3, 4], 1, false, false, "resident-vram"]
+make page_b := [2, "user-domain-a", "texture", digest, [1, 2, 3, 4], 1, false, false, "resident-vram"]
+make collision_page := [3, "user-domain-a", "texture", digest, [1, 2, 3, 5], 1, false, false, "resident-vram"]
+make other_domain_page := [4, "user-domain-b", "texture", digest, [1, 2, 3, 4], 1, false, false, "resident-vram"]
+assert(dedup["share_eligible"](page_b, page_a), "identical immutable pages within a security domain may be shared")
+assert(not dedup["share_eligible"](collision_page, page_a), "hash collision is rejected by byte comparison")
+assert(not dedup["share_eligible"](other_domain_page, page_a), "cross-domain cache sharing is denied")
+assert(dedup["find_share"]([page_a], page_b) == ["shared", 0], "dedup table finds an exact reusable page")
+make retained_page := dedup["retain"](page_a)
+assert(retained_page[1][5] == 2, "shared page reference count increments")
+assert(dedup["cow_action"](retained_page[1]) == "allocate-private-copy-before-write", "shared write requires copy-on-write")
+assert(dedup["release"](retained_page[1])[0] == "released", "release decrements reference count")
+
+# HyperSwap makes cold-page decisions; DMA is allowed only with pinning and IOMMU.
+make cold_page := [8, 42, 4096, "vram-resident", false, false, false, 10, "user-domain-a"]
+make dirty_page := [9, 42, 4096, "vram-resident", false, false, true, 10, "user-domain-a"]
+make pinned_page := [10, 42, 4096, "vram-resident", true, false, false, 10, "user-domain-a"]
+assert(hyperswap["eviction_decision"](cold_page, 100, 30) == "eligible-for-host-migration", "cold unpinned page can migrate")
+assert(hyperswap["eviction_decision"](cold_page, 20, 30) == "warm-keep-resident", "recently accessed page stays resident")
+assert(hyperswap["eviction_decision"](dirty_page, 100, 30) == "writeback-before-eviction", "dirty page must be written back")
+assert(hyperswap["eviction_decision"](pinned_page, 100, 30) == "keep-resident", "pinned page cannot be evicted")
+make compressed_page := [11, 42, 4096, "host-compressed", false, false, false, 10, "user-domain-a"]
+assert(hyperswap["fault_action"](compressed_page) == "decompress-then-upload", "fault reloads compressed host page")
+assert(hyperswap["migration_allowed"](cold_page, "host-compressed", true, true, 4096, 8192), "DMA migration requires pinned pages and IOMMU isolation")
+assert(not hyperswap["migration_allowed"](cold_page, "host-compressed", false, true, 4096, 8192), "unpinned DMA transfer is denied")
+assert(hyperswap["prefetch_decision"](compressed_page, 100, 105, 10, 8192, 8192) == "prefetch-advisory", "near-term prefetch stays within byte budget")
+assert(hyperswap["transfer_completion"](cold_page, "host-raw", false)[0] == "integrity-failure-quarantine", "failed transfer integrity enters quarantine")
+
+# Thermal governor is read-only and requests only OEM driver-managed states.
+make cool_previous := [1, 1000, 590, 70, 1000, 2048, 120000, 1500, 7000, 0, "available"]
+make cool_current := [2, 2000, 600, 75, 1100, 2048, 125000, 1550, 7000, 0, "available"]
+make governor_config := [800, 900, 650, 1500, 2000]
+assert(governor["sample_valid"](cool_current), "GPU telemetry sample shape is valid")
+assert(governor["predicted_temperature"](cool_previous, cool_current, governor_config) == 620, "thermal predictor uses observed slope")
+assert(governor["governor_action"](cool_previous, cool_current, governor_config, 2200)[0] == "allow-oem-default-boost", "cool GPU may use OEM default boost only")
+make warm_current := [2, 2000, 790, 95, 1100, 2048, 180000, 1800, 7200, 0, "available"]
+make warm_previous := [1, 1000, 770, 90, 1000, 2048, 170000, 1750, 7200, 0, "available"]
+assert(governor["governor_action"](warm_previous, warm_current, governor_config, 2200)[0] == "request-oem-balanced-state", "predicted soft thermal limit requests balanced OEM state")
+make critical_current := [2, 2000, 890, 98, 1200, 2048, 220000, 1900, 7500, 0, "available"]
+make critical_previous := [1, 1000, 880, 95, 1150, 2048, 210000, 1850, 7500, 0, "available"]
+assert(governor["governor_action"](critical_previous, critical_current, governor_config, 2200)[0] == "request-oem-emergency-state", "critical thermal prediction requests OEM safe state")
+assert(governor["governor_action"](cool_previous, cool_current, governor_config, 5000)[0] == "fail-safe-hold", "stale telemetry blocks boost decisions")
+make error_current := [2, 2000, 600, 75, 1100, 2048, 125000, 1550, 7000, 1, "available"]
+assert(governor["governor_action"](cool_previous, error_current, governor_config, 2200)[0] == "request-oem-safe-state", "device errors override performance policy")
+assert(governor["profile_action"](["performance", 2800, 300000], [3000, 350000, 1], true, false, false) == "require-operator-approval", "performance profile requires explicit approval")
+assert(governor["profile_action"](["performance", 3200, 300000], [3000, 350000, 1], true, false, true) == "reject-outside-vendor-envelope", "requested profile cannot exceed OEM limits")
+
+# GPU context security, shader metadata and device recovery.
+assert(gpu_security["dma_mapping_allowed"](gpu_context, device, 4096, 4096, true, true), "DMA requires explicit grant, pinning and IOMMU")
+assert(not gpu_security["dma_mapping_allowed"](gpu_context, device, 4096, 4096, true, false), "DMA without IOMMU isolation is denied")
+make shader := ["shader-a", digest, 1200, 64000, 1048576, "bounded-control-flow", ["gpu.queue.submit"]]
+assert(gpu_security["shader_valid"](shader, 4194304, 10000), "bounded shader IR metadata is accepted")
+make no_shader_effects := []
+assert(not gpu_security["shader_valid"](["shader-a", digest, 1200, 64000, 1048576, "unknown", no_shader_effects], 4194304, 10000), "shader without bounded control flow proof is rejected")
+assert(gpu_security["integrity_result"](digest, digest, 4096) == "integrity-ok", "matching trusted digest passes")
+assert(gpu_security["integrity_result"](digest, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", 4096) == "quarantine-resource", "digest mismatch quarantines resource")
+assert(gpu_security["recovery_action"]("hung", true, 0) == "request-driver-reset-after-quiesce", "device reset requires quiesced transfers")
+assert(gpu_security["recovery_action"]("hung", true, 2) == "quarantine-device-and-drain-transfers", "pending DMA blocks immediate reset")
+
+# OPlague snapshot bridge preserves unknown fields and stamps monotonic time at ingestion.
+make telemetry_row := ["NVIDIA GeForce RTX 5070", "572.16", 43, 24, 4096, 12282, 93.5, 2505, 9001]
+make telemetry_snapshot := ["oplage.gpu-telemetry.v1", "nvidia-smi", true, false, true, [telemetry_row]]
+assert(oplage["gpu_row_valid"](telemetry_row), "OPlague GPU sensor row is valid")
+assert(oplage["snapshot_valid"](telemetry_snapshot), "OPlague read-only snapshot is valid")
+make bridged_sample := oplage["to_governor_sample"](1, 10000, telemetry_row, -1, -1, -1, 0)
+assert(bridged_sample[0] == "ready", "OPlague sample maps into Reaper telemetry")
+assert(bridged_sample[1][1] == 10000 and bridged_sample[1][2] == 430, "bridge uses monotonic ingestion time and tenths-C")
+make unavailable_row := ["GPU", "driver", -1, -1, -1, -1, -1, -1, -1]
+assert(oplage["gpu_row_valid"](unavailable_row), "missing sensor values remain explicit unknowns")
+assert(not oplage["snapshot_valid"](["oplage.gpu-telemetry.v1", "nvidia-smi", true, true, true, [telemetry_row]]), "snapshot claiming hardware controls is rejected")
+make unknown_sample := oplage["to_governor_sample"](2, 11000, unavailable_row, -1, -1, -1, 0)
+assert(unknown_sample[0] == "ready", "unavailable sensor row remains representable")
+assert(unknown_sample[1][3] == -1 and unknown_sample[1][6] == -1 and unknown_sample[1][7] == -1 and unknown_sample[1][8] == -1, "unavailable utilization, power and clocks remain unknown")
+assert(governor["sample_valid"](unknown_sample[1]), "sample parser preserves explicit unknown telemetry")
+assert(governor["governor_action"](cool_previous, unknown_sample[1], governor_config, 11010)[0] == "fail-safe-hold", "unknown telemetry cannot enable GPU boost")
+
