@@ -16,6 +16,7 @@ export function createDefaultPreferences() {
     version: 1,
     appearance: {
       reducedMotion: false,
+      reduceTransparency: false,
       density: "comfortable",
       theme: "duck"
     },
@@ -39,6 +40,7 @@ export function normalizePreferences(value) {
     version: 1,
     appearance: {
       reducedMotion: appearance.reducedMotion === true,
+      reduceTransparency: appearance.reduceTransparency === true,
       density: appearance.density === "compact" ? "compact" : defaults.appearance.density,
       theme: "duck"
     },
@@ -167,6 +169,22 @@ export function buildIntentPlan(rawInput) {
       setting: "reducedMotion",
       value: false,
       label: "Вернуть обычную анимацию"
+    });
+  }
+
+  if (/(уменьш|сниз|отключ|без).{0,24}(прозрачност|стекл|размыт)/u.test(text)) {
+    actions.push({
+      type: "set",
+      setting: "reduceTransparency",
+      value: true,
+      label: "Отключить прозрачность и размытие"
+    });
+  } else if (/(обычн|включ|верни).{0,24}(прозрачност|стекл|размыт)/u.test(text)) {
+    actions.push({
+      type: "set",
+      setting: "reduceTransparency",
+      value: false,
+      label: "Вернуть стеклянные поверхности"
     });
   }
 
