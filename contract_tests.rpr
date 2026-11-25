@@ -274,6 +274,8 @@ assert(system_runtime["service_request_decision"]([114, 1, 0, 0, 1500, 256, 0], 
 assert(system_runtime["service_transition_valid"]("starting", "active"), "service lifecycle accepts a valid transition")
 assert(not system_runtime["service_transition_valid"]("active", "registered"), "service lifecycle rejects an invalid transition")
 assert(system_runtime["restart_delay_ms"](2, 100, 250) == 250, "restart backoff is bounded")
+assert(system_runtime["restart_delay_ms"](101, 100, 250) == 0, "restart attempt count is bounded")
+assert(system_runtime["restart_delay_ms"](2, 9223372036854775807, 250) == 0, "restart delay inputs cannot overflow")
 assert(system_runtime["log_record_valid"]([3, 256, 9001, 12000]), "structured logs have bounded payloads and identity")
 assert(not system_runtime["log_record_valid"]([9, 256, 9001, 12000]), "invalid log severity is rejected")
 assert(system_runtime["device_event_valid"](["remove", "gpu0", 2, 32]), "versioned device event is accepted")
