@@ -122,17 +122,23 @@
         54
       ],
       "status": "partial",
-      "assessment": "Mora provides a responsive desktop shell and local preferences; it is not a native compositor, Windows Explorer replacement or full OS storage stack.",
+      "assessment": "Mora includes a Qt 6 Widgets host-native desktop application with host-managed top-level windows, a local app catalogue, native host input/focus and bounded local panels, while retaining the older browser shell as a reference preview. It is not a DuckOS kernel compositor, privileged launcher, Windows Explorer replacement or full OS storage stack.",
       "evidence": [
         "docs/MORA_INTEGRATION.md",
         "MORA_DESIGN_SYSTEM.md",
-        "mora/index.html"
+        "mora/native/main.cpp",
+        "mora/apps.json",
+        "CMakeLists.txt",
+        "docs/IMPLEMENTATION_STATUS.md"
       ],
       "verification": [
-        "tests"
+        "tests",
+        ".github/workflows/native-mora.yml"
       ],
       "limitations": [
-        "Browser UI behavior must not be represented as native OS enforcement."
+        "The Qt app runs under the host OS and is not launched by the Stage 1 DuckOS kernel.",
+        "The kernel compositor, process model, VFS, app sandbox and native capability enforcement remain pending.",
+        "Browser-preview behavior must not be represented as kernel-native operation."
       ]
     },
     {
