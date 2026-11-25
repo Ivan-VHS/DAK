@@ -1328,12 +1328,12 @@ function initializeAppCatalog() {
     ]),
     work: new Set([
       "kabon", "gloverty", "orriganize", "abriganza", "love-il",
-      "poi", "poi-2", "po-2", "reaper-workbench", "pytyliki-workbench"
+      "po", "poi", "poi-2", "po-2", "mora-commons", "reaper-workbench", "pytyliki-workbench"
     ]),
     system: new Set([
       "sestem", "setupup", "seu-beu", "exedotexe", "mora-ai",
       "security", "updates", "runtime", "workspace", "provenance", "desktop",
-      "unify", "oplague-workbench"
+      "unify", "mora-commons", "oplague-workbench"
     ]),
     workbench: new Set([
       "reaper-workbench", "pytyliki-workbench",
