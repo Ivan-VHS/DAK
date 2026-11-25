@@ -1,0 +1,138 @@
+name: Publish exact-size DuckOS ISO
+
+on:
+  push:
+    branches:
+      - "download/duckos-4gib-release-2026-11-25"
+    paths:
+      - ".github/workflows/publish-4gib-iso.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: duckos-4gib-release
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - name: Checkout pinned ecosystem sources
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install build and QEMU tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build binutils curl tar xorriso \
+            qemu-system-x86 ovmf qt6-base-dev python3 python3-tk zstd
+
+      - name: Validate source federation and Mora
+        run: |
+          python3 tools/federate_repositories.py validate --json
+          python3 tools/federate_repositories.py status --json
+          npm test
+
+      - name: Build the content-bearing BIOS/UEFI ecosystem ISO
+        run: |
+          bash boot/build-release-iso.sh \
+            --work-dir build/release \
+            --output build/DuckOS-Release-x86_64.iso
+
+      - name: Expand ISO to exactly 4 GiB and verify BIOS/UEFI boot
+        run: |
+          ISO="$PWD/build/DuckOS-Release-x86_64.iso"
+          truncate -s 4294967296 "$ISO"
+          actual="$(stat -c '%s' "$ISO")"
+          test "$actual" = "4294967296"
+          mkdir -p build/release/qemu
+          if [[ -f /usr/share/OVMF/OVMF_CODE.fd && -f /usr/share/OVMF/OVMF_VARS.fd ]]; then
+            code=/usr/share/OVMF/OVMF_CODE.fd
+            vars=/usr/share/OVMF/OVMF_VARS.fd
+          elif [[ -f /usr/share/OVMF/OVMF_CODE_4M.fd && -f /usr/share/OVMF/OVMF_VARS_4M.fd ]]; then
+            code=/usr/share/OVMF/OVMF_CODE_4M.fd
+            vars=/usr/share/OVMF/OVMF_VARS_4M.fd
+          else
+            echo "OVMF firmware pair not found" >&2
+            find /usr/share -iname '*OVMF*' -type f -print
+            exit 1
+          fi
+          bash boot/test-qemu.sh \
+            --iso "$ISO" \
+            --output-dir build/release/qemu \
+            --ovmf-code "$code" \
+            --ovmf-vars "$vars"
+
+      - name: Compress the exact 4 GiB image for a manageable download
+        run: |
+          set -euo pipefail
+          ISO="$PWD/build/DuckOS-Release-x86_64.iso"
+          ASSET_DIR="$PWD/build/publish"
+          mkdir -p "$ASSET_DIR"
+          cp "$ISO" "$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso"
+          ISO="$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso"
+          zstd -T0 -3 -f "$ISO" -o "$ISO.zst"
+          test "$(stat -c '%s' "$ISO")" = "4294967296"
+          zstd -t "$ISO.zst"
+          sha256sum "$ISO" > "$ISO.sha256"
+          sha256sum "$ISO.zst" > "$ISO.zst.sha256"
+          cat > "$ASSET_DIR/manifest.txt" <<EOF
+          DuckOS exact-size x86_64 release image
+          Exact decompressed ISO size: 4294967296 bytes (4 GiB)
+          Compression: Zstandard
+          Source revision: $GITHUB_SHA
+          BIOS and UEFI QEMU checks: completed in this workflow before publication
+          Padding: trailing zero bytes; the bootable and payload content is at the start of the ISO
+          EOF
+          rm "$ISO"
+          echo "ASSET_DIR=$ASSET_DIR" >> "$GITHUB_ENV"
+
+      - name: Publish public GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="duckos-4gib-2026-11-25"
+          NOTES="$RUNNER_TEMP/release-notes.md"
+          cat > "$NOTES" <<'EOF'
+          DuckOS x86_64 ecosystem preview. The Zstandard asset decompresses to an ISO of exactly 4,294,967,296 bytes (4 GiB). It includes the BIOS/UEFI bootable Stage 1 image and the offline ecosystem payload. The kernel currently validates the Limine handoff, initializes one early physical frame, emits the Stage 1 serial marker, and halts; Mora is included as an offline browser shell and is not launched by the kernel.
+          EOF
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" \
+              "$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso.zst" \
+              "$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso.zst.sha256" \
+              "$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso.sha256" \
+              "$ASSET_DIR/manifest.txt" --clobber
+          else
+            gh release create "$TAG" \
+              "$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso.zst" \
+              "$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso.zst.sha256" \
+              "$ASSET_DIR/DuckOS-4GiB-2026-11-25-x86_64.iso.sha256" \
+              "$ASSET_DIR/manifest.txt" \
+              --title "DuckOS 4 GiB x86_64 Preview" \
+              --notes-file "$NOTES" \
+              --target "$GITHUB_SHA"
+          fi
+
+      - name: Keep a backup artifact and boot logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckOS-4GiB-x86_64-compressed
+          path: |
+            build/publish/DuckOS-4GiB-2026-11-25-x86_64.iso.zst
+            build/publish/DuckOS-4GiB-2026-11-25-x86_64.iso.zst.sha256
+            build/publish/DuckOS-4GiB-2026-11-25-x86_64.iso.sha256
+            build/publish/manifest.txt
+            build/release/qemu/*.log
+          if-no-files-found: error
+          retention-days: 90
