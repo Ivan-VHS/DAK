@@ -152,9 +152,10 @@ make sample_a := [1, "cpu.load", 24, "percent", 100]
 make sample_b := [2, "cpu.load", 84, "percent", 200]
 make sample_c := [3, "cpu.load", 96, "percent", 300]
 
+make empty_gpu_rows := []
 make valid_gpu := ["NVIDIA GeForce RTX", "driver-1", 65, 75, 4096, 12288, 180, 2400, 9000]
 make gpu_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-1", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", false, true, [valid_gpu]]
-make unavailable_gpu_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-2", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", false, "nvidia-smi unavailable", false, true, []]
+make unavailable_gpu_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-2", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", false, "nvidia-smi unavailable", false, true, empty_gpu_rows]
 assert(oplage_gpu["gpu_descriptor_valid"](valid_gpu), "OPlague GPU descriptor is bounded")
 assert(oplage_gpu["gpu_snapshot_valid"](gpu_snapshot), "normalized OPlague v1 snapshot passes the policy adapter")
 assert(oplage_gpu["gpu_snapshot_valid"](unavailable_gpu_snapshot), "explicit unavailable snapshot remains valid")
