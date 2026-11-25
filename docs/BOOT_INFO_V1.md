@@ -63,7 +63,7 @@ This v1 handoff and stage-0 entry do not yet:
 - provide a production framebuffer console, compositor or display driver;
 - probe and initialise PCI/USB/ACPI devices or load drivers.
 
-Those steps require a selected boot protocol and CPU target, recorded as architecture decisions before the kernel entry implementation.
+The boot protocol and initial CPU target are now selected for stage 0. The listed runtime, allocator, interrupt, process and device subsystems remain subsequent native implementation gates.
 
 ## Build and test
 
