@@ -294,22 +294,22 @@ assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone int
 
 make install_target := ["disk0", "x86_64", 4000000, 512, "uefi", true]
 make install_target_no_consent := ["disk0", "x86_64", 4000000, 512, "uefi", false]
-assert(installer["target_valid"](install_target), "installer accepts a bounded x86_64 UEFI target")
-assert(not installer["target_valid"](["", "x86_64", 1000000, 512, "uefi", true]), "installer rejects an unnamed disk")
-assert(not installer["target_valid"]("malformed-target"), "installer rejects a non-list target record")
-make verified_source := ["DAK Release", "sha256:installer-image", "verified"]
-make unverified_source := ["DAK Release", "sha256:installer-image", "unverified"]
-assert(installer["admission"](install_target, verified_source, "ready") == "admit-plan-only", "installer admits only a verified, recoverable plan")
-assert(installer["admission"](install_target_no_consent, verified_source, "ready") == "reject-consent", "installer requires explicit destructive-operation consent")
-assert(installer["admission"](install_target, unverified_source, "ready") == "reject-source-trust", "installer rejects an unverified source")
-assert(installer["admission"](install_target, verified_source, "missing") == "reject-recovery", "installer requires a recovery path")
-
 make install_layout := [
     ["efi", "efi", 1048576, 262144],
     ["system_a", "system", 1310720, 524288],
     ["system_b", "system", 1835008, 524288],
     ["recovery", "recovery", 2359296, 262144]
 ]
+assert(installer["target_valid"](install_target), "installer accepts a bounded x86_64 UEFI target")
+assert(not installer["target_valid"](["", "x86_64", 1000000, 512, "uefi", true]), "installer rejects an unnamed disk")
+assert(not installer["target_valid"]("malformed-target"), "installer rejects a non-list target record")
+make verified_source := ["DAK Release", "sha256:installer-image", "verified"]
+make unverified_source := ["DAK Release", "sha256:installer-image", "unverified"]
+assert(installer["admission"](install_target, verified_source, "ready", install_layout) == "admit-plan-only", "installer admits only a verified, recoverable plan")
+assert(installer["admission"](install_target_no_consent, verified_source, "ready", install_layout) == "reject-consent", "installer requires explicit destructive-operation consent")
+assert(installer["admission"](install_target, unverified_source, "ready", install_layout) == "reject-source-trust", "installer rejects an unverified source")
+assert(installer["admission"](install_target, verified_source, "missing", install_layout) == "reject-recovery", "installer requires a recovery path")
+
 make overlapping_layout := [
     ["efi", "efi", 1048576, 262144],
     ["system_a", "system", 1310720, 524288],
