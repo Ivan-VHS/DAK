@@ -29,9 +29,25 @@ export craft descriptor_valid(driver) {
 }
 
 # Device follows DuckDriver's six-field resource descriptor.
-export craft admission(driver, device, target_arch, expected_abi, supported_buses, grants) {
+export craft resource_admission(device, registered_devices) {
+    when not orchestrator["device_valid"](device) {
+        yield "reject-invalid-device"
+    }
+    each registered in registered_devices {
+        when orchestrator["resources_conflict"](device, registered) {
+            yield "reject-resource-conflict"
+        }
+    }
+    yield "resource-plan-only"
+}
+
+# Resource reservation is part of admission, never an optional caller-side check.
+export craft admission(driver, device, registered_devices, target_arch, expected_abi, supported_buses, grants) {
     when not descriptor_valid(driver) or not orchestrator["device_valid"](device) {
         yield "reject-descriptor"
+    }
+    when resource_admission(device, registered_devices) != "resource-plan-only" {
+        yield "reject-resource-conflict"
     }
     when driver[7] == "revoked" {
         yield "reject-revoked"
@@ -54,18 +70,6 @@ export craft admission(driver, device, target_arch, expected_abi, supported_buse
         yield "reject-capability-or-abi"
     }
     yield "admit-isolated-plan-only"
-}
-
-export craft resource_admission(device, registered_devices) {
-    when not orchestrator["device_valid"](device) {
-        yield "reject-invalid-device"
-    }
-    each registered in registered_devices {
-        when orchestrator["resources_conflict"](device, registered) {
-            yield "reject-resource-conflict"
-        }
-    }
-    yield "resource-plan-only"
 }
 
 # candidate -> verified -> admitted -> mapped -> initialized -> running.
