@@ -33,15 +33,13 @@ export craft chain_valid(records) {
 }
 
 export craft append_policy(records, record, max_records) {
-    when max_records <= 0 or size(records) > max_records {
-        yield "reject-capacity"
-    }
-    when size(records) >= max_records {
+    when max_records <= 0 or size(records) >= max_records {
         yield "reject-capacity"
     }
     when not chain_valid(records) or not record_valid(record) {
         yield "reject-invalid-record"
     }
+
     when size(records) == 0 {
         when record[0] != 1 {
             yield "reject-sequence"
@@ -49,8 +47,11 @@ export craft append_policy(records, record, max_records) {
         yield "append-plan-only"
     }
 
-    make previous := records[size(records) - 1]
-    when record[0] != previous[0] + 1 {
+    vary previous_sequence := 0
+    each previous in records {
+        change previous_sequence := previous[0]
+    }
+    when record[0] != previous_sequence + 1 {
         yield "reject-sequence"
     }
     yield "append-plan-only"
