@@ -25,6 +25,13 @@ export craft descriptor_valid(driver) {
     when size(driver[4]) > 64 or driver[5] == "" or driver[6] == "" {
         yield false
     }
+    each requested in driver[4] {
+        when kind(requested) != "text" or requested == "" {
+            yield false
+        }
+    }
+        yield false
+    }
     when driver[7] != "verified" and driver[7] != "unverified" and driver[7] != "revoked" {
         yield false
     }
@@ -51,6 +58,16 @@ export craft resource_admission(device, registered_devices) {
 export craft admission(driver, device, registered_devices, target_arch, expected_abi, supported_buses, grants) {
     when kind(target_arch) != "text" or kind(expected_abi) != "number" or kind(supported_buses) != "list" or kind(grants) != "list" {
         yield "reject-descriptor"
+    }
+    each bus in supported_buses {
+        when kind(bus) != "text" or bus == "" {
+            yield "reject-descriptor"
+        }
+    }
+    each grant in grants {
+        when kind(grant) != "text" or grant == "" {
+            yield "reject-descriptor"
+        }
     }
     when not descriptor_valid(driver) or not orchestrator["device_valid"](device) {
         yield "reject-descriptor"
