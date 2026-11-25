@@ -11,9 +11,7 @@ craft valid_ipc_message(message) {
 }
 
 craft mailbox_admits(queue_depth, queue_capacity, payload_bytes, payload_limit, total_bytes, total_limit) {
-    yield queue_depth >= 0 and queue_capacity > 0 and queue_depth < queue_capacity
-        and payload_bytes >= 0 and payload_bytes <= payload_limit
-        and total_bytes >= 0 and total_bytes + payload_bytes <= total_limit
+    yield queue_depth >= 0 and queue_capacity > 0 and queue_depth < queue_capacity and payload_bytes >= 0 and payload_bytes <= payload_limit and total_bytes >= 0 and total_bytes + payload_bytes <= total_limit
 }
 
 make valid_message := ["desktop", "compositor", 4096, 3, 0]
