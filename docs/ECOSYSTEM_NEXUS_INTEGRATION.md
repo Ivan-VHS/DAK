@@ -37,7 +37,7 @@ The release CI job repeats the build and QEMU boot checks on pull requests that 
 
 ## Native integration stages
 
-1. **Monorepo source import — implemented in the vendor workflow.** Four upstream source snapshots are copied into ordinary tracked directories using exact `git subtree --squash` imports. The upstream commit and tree SHA, file count, content bytes and licenses are locked and verified. Full historical development remains in the upstream repositories.
+1. **Monorepo source import — implemented in the vendor workflow.** Four upstream source snapshots are copied into ordinary tracked directories using exact upstream Git commits and `git read-tree --prefix`. The upstream commit and tree SHA, file count, content bytes and licenses are locked and verified. Full historical development remains in the upstream repositories.
 2. **Host workbenches — partial.** The release build compiles and tests the declared host tools. Mora discovers project metadata and build guidance; launch remains panel-only and does not execute imported commands.
 3. **User-space peer adapters — next.** Implement narrow Reaper-owned adapters that validate peer schema versions, bounds, provenance, freshness and typed unavailable/error states. Keep hardware and filesystem actions read-only unless a separate reviewed capability contract exists.
 4. **DABI64 transport — pending.** Implement kernel-derived sender identity, handle ownership, sequence tracking, quotas and capability checks only after the process, syscall and IPC foundations exist.

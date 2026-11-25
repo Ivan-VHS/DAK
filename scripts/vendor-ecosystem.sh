@@ -27,7 +27,7 @@ jq -e '
 
 jq -e '
     .schema == "duckos.vendor-sources.v1"
-    and .strategy == "git-subtree-squash"
+    and .strategy == "git-fetch-read-tree"
     and .projects_root == "projects"
     and (.sources | length == 4)
 ' "$SOURCES" >/dev/null || fail "vendor source lock is invalid"
@@ -86,29 +86,26 @@ if [[ -n "$(git -C "$ROOT" status --porcelain --untracked-files=all)" ]]; then
     fail "working tree is not clean; refusing to overwrite local changes"
 fi
 
-removed_gitlinks=0
+changed=0
 while IFS=$'\t' read -r id path; do
     line="$(git -C "$ROOT" ls-tree HEAD -- "$path")"
     [[ -n "$line" ]] || continue
-    read -r mode object_type _ _ <<<"$line"
+    read -r mode object_type actual_tree _ <<<"$line"
 
     if [[ "$mode" == "160000" && "$object_type" == "commit" ]]; then
-        git -C "$ROOT" rm -f -- "$path"
-        removed_gitlinks=1
+        git -C "$ROOT" update-index --force-remove -- "$path"
+        changed=1
     elif [[ "$mode" == "040000" && "$object_type" == "tree" ]]; then
-        :
+        expected="$(jq -r --arg id "$id" '.sources[] | select(.id == $id) | .upstream_tree_sha' "$SOURCES")"
+        [[ "$actual_tree" == "$expected" ]] || fail "$path already exists with a different tree; refusing overwrite"
     else
         fail "$path has unexpected Git entry mode $mode"
     fi
 done < <(jq -r '.sources[] | [.id, .path] | @tsv' "$SOURCES")
 
-if [[ -f "$ROOT/.gitmodules" ]]; then
+if git -C "$ROOT" ls-files --error-unmatch .gitmodules >/dev/null 2>&1; then
     git -C "$ROOT" rm -f -- .gitmodules
-    removed_gitlinks=1
-fi
-
-if [[ "$removed_gitlinks" -eq 1 ]]; then
-    git -C "$ROOT" commit -m "build(monorepo): replace ecosystem gitlinks with source directories"
+    changed=1
 fi
 
 while IFS=$'\t' read -r id path url commit expected_tree; do
@@ -116,15 +113,35 @@ while IFS=$'\t' read -r id path url commit expected_tree; do
     if [[ -n "$line" ]]; then
         read -r mode object_type actual_tree _ <<<"$line"
         if [[ "$mode" == "040000" && "$object_type" == "tree" ]]; then
-            [[ "$actual_tree" == "$expected_tree" ]] || fail "$path already exists with a different tree; refusing overwrite"
+            [[ "$actual_tree" == "$expected_tree" ]] || fail "$path tree mismatch; refusing overwrite"
             continue
         fi
-        fail "$path is occupied by an unexpected Git object"
+        [[ "$mode" == "160000" && "$object_type" == "commit" ]] || fail "$path is occupied by an unexpected Git object"
     fi
 
-    echo "Importing $id at $commit"
-    git -C "$ROOT" subtree add --prefix="$path" "$url" "$commit" --squash
+    echo "Fetching $id at exact commit $commit"
+    git -C "$ROOT" fetch --no-tags "$url" "$commit"
+    fetched="$(git -C "$ROOT" rev-parse FETCH_HEAD)"
+    [[ "$fetched" == "$commit" ]] || fail "$id fetch resolved to $fetched instead of $commit"
+
+    actual_tree="$(git -C "$ROOT" rev-parse "$commit^{tree}")"
+    [[ "$actual_tree" == "$expected_tree" ]] || fail "$id upstream tree SHA mismatch"
+
+    git -C "$ROOT" read-tree --prefix="$path/" -u "$commit^{tree}"
+    changed=1
 done < <(jq -r '.sources[] | [.id, .path, .upstream_url, .upstream_commit, .upstream_tree_sha] | @tsv' "$SOURCES")
+
+if [[ "$changed" -eq 1 ]]; then
+    {
+        echo "Vendor exact upstream source trees"
+        echo
+        echo "Imported from the source pins recorded in federation/vendor-sources.v1.json."
+        jq -r '.sources[] | "- \\(.id): \\(.upstream_commit) (tree \\(.upstream_tree_sha))"' "$SOURCES"
+    } > "$ROOT/.vendor-commit-message"
+    git -C "$ROOT" add -A -- projects
+    git -C "$ROOT" commit -F "$ROOT/.vendor-commit-message"
+    rm -f "$ROOT/.vendor-commit-message"
+fi
 
 verify_sources
 echo "DuckOS monorepo import: complete"

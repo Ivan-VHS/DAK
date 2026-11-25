@@ -61,7 +61,6 @@ jobs:
       - name: Show toolchain versions
         run: |
           git --version
-          git subtree --version
           gcc --version
           cmake --version
           python3 --version

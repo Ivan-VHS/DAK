@@ -38,13 +38,13 @@ The source importer is `scripts/vendor-ecosystem.sh`. Its `--import` mode:
 
 1. Refuses to run on a dirty worktree.
 2. Removes only the four expected Git submodule entries and the obsolete `.gitmodules` file.
-3. Imports each exact upstream commit with `git subtree add --squash`.
+3. Imports each exact upstream commit with Git fetch and `git read-tree --prefix`.
 4. Preserves each upstream repository's root tree below its existing `projects/<id>` path.
 5. Verifies tree SHA, file count, source byte count and license file after import.
 
 The importer never selects a floating branch head and never overwrites an already-vendored directory with a different tree. A new upstream revision requires a reviewed change to both provenance manifests and a successful import/verification run.
 
-The Git subtree squash commit records the upstream split commit in Git metadata. Full source history remains authoritative in the original upstream repository; the vendored snapshot and its provenance are part of DuckOS history. This keeps DuckOS's mainline history reviewable instead of replaying every historical upstream commit into the OS repository.
+The source lock preserves upstream commit and tree identities. Full development history remains authoritative in the original upstream repository; the vendored snapshot and its provenance are part of DuckOS history. This keeps DuckOS's mainline history reviewable without replaying every historical upstream commit.
 
 ## Build and verification
 

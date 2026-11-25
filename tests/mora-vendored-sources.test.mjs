@@ -13,7 +13,7 @@ function git(...args) {
 
 test("DuckOS is a self-contained monorepo with no submodule checkout requirement", () => {
   assert.equal(federation.checkout_strategy, "vendored-monorepo");
-  assert.equal(vendor.strategy, "git-subtree-squash");
+  assert.equal(vendor.strategy, "git-fetch-read-tree");
   assert.equal(vendor.sources.length, 4);
   assert.throws(() => git("cat-file", "-e", "HEAD:.gitmodules"));
 });

@@ -50,14 +50,14 @@ jobs:
           fetch-depth: 0
           submodules: false
 
-      - name: Install Git subtree tooling
-        run: jq --version && git subtree --version
+      - name: Check Git and JSON tooling
+        run: jq --version && git --version
 
       - name: Configure import identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git subtree --version
+          git --version
 
       - name: Import the exact source snapshots
         id: import
@@ -103,7 +103,7 @@ jobs:
           node-version: "22"
 
       - name: Install verification tooling
-        run: jq --version && git subtree --version
+        run: jq --version && git --version
 
       - name: Verify source tree SHAs, file counts, byte counts and licenses
         run: bash scripts/vendor-ecosystem.sh --verify

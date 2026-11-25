@@ -21,7 +21,7 @@
       "const": 1
     },
     "strategy": {
-      "const": "git-subtree-squash"
+      "const": "git-fetch-read-tree"
     },
     "projects_root": {
       "const": "projects"
