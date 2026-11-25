@@ -107,7 +107,7 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
     -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
     -mgeneral-regs-only \
-    -I "$ROOT/foundation" -I "$ROOT/third_party/limine-protocol" \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" -I "$ROOT/third_party/limine-protocol" \
     -c "$ROOT/kernel/boot/entry.c" -o "$WORK_DIR/objects/duckos-entry.o"
 
 gcc -std=c11 -O2 -Wall -Wextra -Werror \
