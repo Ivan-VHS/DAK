@@ -135,9 +135,10 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 - Implement graphics buffer ownership, input event routing, focus, accessibility and display-mode failure recovery.
 - Add font shaping and text input only with a defined Unicode and fallback policy.
 - Treat audio engine/device scheduling as a separate bounded subsystem.
+- Apply [DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) to Mora and native apps: keyboard-complete primary workflows, visible focus, semantic accessibility tree, text scaling, reduced motion, recoverable dialogs, saved workspace geometry and safe display migration.
 - Keep the Mora visual system as a design reference, not as proof of compositor or GPU implementation.
 
-**Exit evidence:** emulator screenshot capture, input/accessibility conformance tests, display-loss recovery, frame-time measurements and supported hardware matrix.
+**Exit evidence:** emulator screenshot capture; keyboard and assistive-technology conformance tests; display-loss and DPI-change recovery; touch/pointer target tests; reduced-motion and text-scaling tests; P50/P95/P99 input-to-feedback and frame-time measurements on named targets; supported hardware matrix.
 
 ### D9 — Installer, image assembly and release qualification
 
@@ -151,6 +152,22 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 - Keep cloud targets out of the release matrix until a real format conversion and target boot test exist.
 
 **Exit evidence:** reproducible ISO/USB image, image verification, emulator boot test, supported hardware boot matrix, installation rollback, signed provenance and recovery drill.
+
+### D10 — BAV malware inspection and policy service
+
+**Status: Planned; the .bav v1 bundle contract and JSON Schema are specified only.**
+
+- Reserve the .bav extension exclusively for Beelzebub AV signed declarative security bundles. The earlier Reaper buffer-allocation proposal must use the distinct .bufspec extension; update Reaper's registry in a separate reviewed change.
+- Implement a trust verifier using a device-owner-controlled trust root, Ed25519 signatures over RFC 8785 canonical JSON, signer revocation, expiry checks and monotonic per-publisher/channel sequence tracking.
+- Implement a read-only user-space scan worker with bounded file sizes, parse depth, archive expansion, time, memory and concurrency. Treat unsupported or incomplete inspection as unknown, never as clean.
+- Implement deterministic hash/static-rule matching and a separate, versioned interface for future heuristic engines. Do not execute inspected content or rules.
+- Add reversible quarantine with object identity, content hash, atomic transaction, ACLs, restore collision handling and explicit user approval.
+- Add a policy broker only after D4 capability enforcement, D5 process/IPC supervision and D7 persistent storage provide verified native primitives. On-access scanning and execution/install blocking remain unavailable until that broker and filesystem/process hooks are real.
+- Integrate Mora as a status and approval surface only. Do not present a shell control as protection when the scanner, trusted bundle or native enforcement broker is absent.
+
+**Exit evidence:** positive and negative Ed25519 fixtures; invalid/unknown/revoked signer tests; expiry and clock-uncertainty tests; anti-rollback and explicit recovery tests; malformed/oversized bundle fuzzing; deterministic rule fixtures; archive-bomb and parser-timeout tests; path/symlink/TOCTOU tests; quarantine interruption/integrity/restore tests; capability-denial and worker-isolation tests; queue/memory-pressure recovery; and proof of no network egress by default.
+
+D10 depends on the native process, capability, IPC, storage and recovery gates. Shipping the schema alone does not make BAV a working antivirus.
 
 ## Cross-cutting engineering gates
 
