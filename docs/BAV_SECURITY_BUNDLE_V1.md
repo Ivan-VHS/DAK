@@ -97,7 +97,7 @@ DuckOS may later ingest Beelzebul reports and context tags only through explicit
 
 The scanner MUST not execute a file to inspect it. Parsers for executable formats and archives must be memory-safe where possible, bounded, fuzzed and isolated. Unsupported or truncated formats produce an explicit unsupported/incomplete result.
 
-### 4.1 Reaper integration
+### 4.3 Reaper integration
 
 Reaper is the primary language and contract layer for new DuckOS-owned system services. BAV policy, bundle parsing and deterministic rule evaluation SHOULD be expressed in Reaper as the native compiler and runtime gain the necessary capabilities.
 
