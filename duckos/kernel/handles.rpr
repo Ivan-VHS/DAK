@@ -1,0 +1,50 @@
+# Process-owned opaque handle contract.
+# A native table supplies generation counters and validates every lookup.
+
+export craft descriptor_valid(handle) {
+    when size(handle) != 6 {
+        yield false
+    }
+    when handle[0] <= 0 or handle[1] <= 0 or handle[2] <= 0 {
+        yield false
+    }
+    when handle[3] == "" or size(handle[4]) == 0 {
+        yield false
+    }
+    yield handle[5] == "open" or handle[5] == "closing" or handle[5] == "closed"
+}
+
+export craft resolve_decision(handle, caller_pid, expected_kind, required_right) {
+    when not descriptor_valid(handle) {
+        yield "deny-invalid-handle"
+    }
+    when handle[5] != "open" {
+        yield "deny-stale-handle"
+    }
+    when handle[2] != caller_pid {
+        yield "deny-cross-process-handle"
+    }
+    when handle[3] != expected_kind {
+        yield "deny-handle-kind"
+    }
+    vary granted := false
+    each right in handle[4] {
+        when right == required_right {
+            change granted := true
+        }
+    }
+    when not granted {
+        yield "deny-handle-right"
+    }
+    yield "resolve-host-table-entry"
+}
+
+export craft close_transition(state) {
+    when state == "open" {
+        yield "closing"
+    }
+    when state == "closing" {
+        yield "closed"
+    }
+    yield "reject"
+}

@@ -1,0 +1,99 @@
+# TCP connection state machine and bounded sequence-window policy.
+# Sequence comparisons here use a non-wrapping interval; wrap-aware serial arithmetic
+# must be implemented by the native transport backend before production use.
+
+export craft state_valid(state) {
+    yield state == "closed" or state == "listen" or state == "syn-sent" or state == "syn-received" or state == "established" or state == "fin-wait-1" or state == "fin-wait-2" or state == "close-wait" or state == "closing" or state == "last-ack" or state == "time-wait"
+}
+
+export craft transition_valid(current, event, next) {
+    when not state_valid(current) or not state_valid(next) {
+        yield false
+    }
+    when current == "closed" and event == "listen" and next == "listen" {
+        yield true
+    }
+    when current == "closed" and event == "connect" and next == "syn-sent" {
+        yield true
+    }
+    when current == "listen" and event == "syn" and next == "syn-received" {
+        yield true
+    }
+    when current == "syn-sent" and event == "syn-ack" and next == "established" {
+        yield true
+    }
+    when current == "syn-received" and event == "ack" and next == "established" {
+        yield true
+    }
+    when current == "established" and event == "close-local" and next == "fin-wait-1" {
+        yield true
+    }
+    when current == "established" and event == "close-remote" and next == "close-wait" {
+        yield true
+    }
+    when current == "fin-wait-1" and event == "ack" and next == "fin-wait-2" {
+        yield true
+    }
+    when current == "fin-wait-1" and event == "fin-ack" and next == "time-wait" {
+        yield true
+    }
+    when current == "fin-wait-2" and event == "fin" and next == "time-wait" {
+        yield true
+    }
+    when current == "close-wait" and event == "close-local" and next == "last-ack" {
+        yield true
+    }
+    when current == "last-ack" and event == "ack" and next == "closed" {
+        yield true
+    }
+    when current == "closing" and event == "ack" and next == "time-wait" {
+        yield true
+    }
+    when current == "time-wait" and event == "timeout" and next == "closed" {
+        yield true
+    }
+    yield false
+}
+
+export craft sequence_in_window(sequence, left, right) {
+    when sequence < 0 or left < 0 or right <= left or right > 4294967295 {
+        yield false
+    }
+    yield sequence >= left and sequence < right
+}
+
+export craft segment_valid(segment) {
+    # [source_port, destination_port, sequence, acknowledgement, header_bytes, window, payload_bytes].
+    when size(segment) != 7 {
+        yield false
+    }
+    when segment[0] <= 0 or segment[0] > 65535 or segment[1] <= 0 or segment[1] > 65535 {
+        yield false
+    }
+    when segment[2] < 0 or segment[2] > 4294967295 or segment[3] < 0 or segment[3] > 4294967295 {
+        yield false
+    }
+    when segment[4] < 20 or segment[4] > 60 or segment[4] % 4 != 0 {
+        yield false
+    }
+    when segment[5] < 0 or segment[5] > 65535 or segment[6] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft receive_decision(segment, state, expected_sequence, window_end, receive_limit) {
+    when not segment_valid(segment) or not state_valid(state) {
+        yield "drop-invalid-segment"
+    }
+    when state != "established" and state != "close-wait" and state != "fin-wait-1" and state != "fin-wait-2" {
+        yield "drop-no-established-stream"
+    }
+    when not sequence_in_window(segment[2], expected_sequence, window_end) {
+        yield "ack-current-window"
+    }
+    when segment[6] > receive_limit {
+        yield "drop-receive-limit"
+    }
+    yield "accept-and-advance"
+}

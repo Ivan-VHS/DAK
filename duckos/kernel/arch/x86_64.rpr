@@ -1,0 +1,89 @@
+# x86-64 architectural admission contracts.
+# Intel and AMD share the baseline; vendor-specific extensions stay optional.
+
+export craft cpu_profile_valid(profile) {
+    # [vendor, max_basic_leaf, long_mode, pae, nx, apic, sse2, invariant_tsc].
+    when size(profile) != 8 {
+        yield false
+    }
+    when profile[0] != "intel" and profile[0] != "amd" and profile[0] != "generic" {
+        yield false
+    }
+    when profile[1] < 1 {
+        yield false
+    }
+    each feature in range(2, 8) {
+        when profile[feature] != true and profile[feature] != false {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft boot_requirements_met(profile) {
+    when not cpu_profile_valid(profile) {
+        yield false
+    }
+    yield profile[2] and profile[3] and profile[5]
+}
+
+export craft user_address_valid(address) {
+    yield address >= 4096 and address < 140737488355328
+}
+
+export craft page_mapping_valid(virtual_base, physical_base, bytes, flags) {
+    when not user_address_valid(virtual_base) or physical_base < 4096 {
+        yield false
+    }
+    when virtual_base % 4096 != 0 or physical_base % 4096 != 0 or bytes <= 0 or bytes % 4096 != 0 {
+        yield false
+    }
+    when flags != "r" and flags != "rw" and flags != "rx" and flags != "kernel-rw" {
+        yield false
+    }
+    yield true
+}
+
+export craft idt_gate_valid(gate) {
+    # [vector, selector, type, dpl, ist, present, handler_nonzero].
+    when size(gate) != 7 {
+        yield false
+    }
+    when gate[0] < 0 or gate[0] > 255 or gate[1] <= 0 {
+        yield false
+    }
+    when gate[2] != 14 and gate[2] != 15 {
+        yield false
+    }
+    when gate[3] != 0 and gate[3] != 3 {
+        yield false
+    }
+    when gate[4] < 0 or gate[4] > 7 {
+        yield false
+    }
+    yield gate[5] == true and gate[6] == true
+}
+
+export craft context_frame_valid(frame) {
+    # [rip, rsp, rflags, cs, ss, cr3].
+    when size(frame) != 6 {
+        yield false
+    }
+    when not user_address_valid(frame[0]) or not user_address_valid(frame[1]) {
+        yield false
+    }
+    when frame[2] < 2 or frame[3] <= 0 or frame[4] <= 0 {
+        yield false
+    }
+    yield frame[5] >= 4096 and frame[5] % 4096 == 0
+}
+
+export craft port_io_policy(cpl, granted) {
+    when cpl < 0 or cpl > 3 {
+        yield "deny-invalid-privilege"
+    }
+    when cpl == 0 and granted {
+        yield "kernel-port-io"
+    }
+    yield "deny-user-port-io"
+}

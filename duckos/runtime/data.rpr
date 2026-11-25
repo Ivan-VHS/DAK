@@ -1,0 +1,42 @@
+# Bounded byte-data and slice primitives.
+
+export craft bytes_valid(bytes) {
+    each value in bytes {
+        when value < 0 or value > 255 {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft slice_valid(data, start, length) {
+    when not bytes_valid(data) or start < 0 or length < 0 or start > size(data) {
+        yield false
+    }
+    yield length <= size(data) - start
+}
+
+export craft slice_copy(data, start, length) {
+    when not slice_valid(data, start, length) {
+        yield ["invalid", []]
+    }
+    vary result := []
+    each index in range(start, start + length) {
+        change result := push(result, data[index])
+    }
+    yield ["ok", result]
+}
+
+export craft append_bounded(left, right, capacity) {
+    when not bytes_valid(left) or not bytes_valid(right) or capacity < 0 {
+        yield ["invalid", []]
+    }
+    when size(left) > capacity or size(right) > capacity - size(left) {
+        yield ["full", left]
+    }
+    vary result := left
+    each value in right {
+        change result := push(result, value)
+    }
+    yield ["ok", result]
+}

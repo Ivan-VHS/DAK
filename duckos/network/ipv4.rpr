@@ -1,0 +1,65 @@
+# IPv4 packet validation and header checksum.
+# This is a packet parser/validator, not a NIC driver or socket service.
+
+export craft byte_array_valid(packet) {
+    when size(packet) < 20 or size(packet) > 65535 {
+        yield false
+    }
+    each octet in packet {
+        when octet < 0 or octet > 255 {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft header_checksum_valid(packet, header_bytes) {
+    when not byte_array_valid(packet) or header_bytes < 20 or header_bytes > 60 or header_bytes % 4 != 0 or header_bytes > size(packet) {
+        yield false
+    }
+    vary sum := 0
+    each index in range(0, header_bytes // 2) {
+        make word := packet[index * 2] * 256 + packet[index * 2 + 1]
+        change sum := sum + word
+        change sum := (sum % 65536) + (sum // 65536)
+    }
+    yield sum == 65535
+}
+
+export craft packet_valid(packet, verify_checksum) {
+    when not byte_array_valid(packet) {
+        yield false
+    }
+    when packet[0] < 64 or packet[0] >= 80 {
+        yield false
+    }
+    make header_bytes := (packet[0] % 16) * 4
+    when header_bytes < 20 or header_bytes > 60 or header_bytes > size(packet) {
+        yield false
+    }
+    make total_bytes := packet[2] * 256 + packet[3]
+    when total_bytes < header_bytes or total_bytes > size(packet) {
+        yield false
+    }
+    when packet[8] == 0 {
+        yield false
+    }
+    when packet[9] != 1 and packet[9] != 6 and packet[9] != 17 and packet[9] != 58 {
+        yield false
+    }
+    when verify_checksum and not header_checksum_valid(packet, header_bytes) {
+        yield false
+    }
+    yield true
+}
+
+export craft fragment_policy(packet) {
+    when not packet_valid(packet, false) {
+        yield "drop-invalid-packet"
+    }
+    make fragment_field := packet[6] * 256 + packet[7]
+    when fragment_field % 8192 >= 1 {
+        yield "reassemble-before-transport"
+    }
+    yield "deliver-to-transport"
+}

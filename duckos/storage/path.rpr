@@ -1,0 +1,34 @@
+# Canonical path component validation.
+# Parent traversal is rejected at the boundary; callers never resolve it implicitly.
+
+export craft components_valid(components) {
+    when size(components) == 0 or size(components) > 64 {
+        yield false
+    }
+    each component in components {
+        when component == "" or component == "." or component == ".." or component == "/" or size(component) > 255 {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft path_policy(components, operation) {
+    when not components_valid(components) {
+        yield "deny-invalid-path"
+    }
+    when operation != "read" and operation != "write" and operation != "create" and operation != "remove" and operation != "rename" and operation != "stat" {
+        yield "deny-invalid-operation"
+    }
+    yield "resolve-under-authorized-root"
+}
+
+export craft symlink_policy(root_id, target_root_id, allow_escape) {
+    when root_id <= 0 or target_root_id <= 0 {
+        yield "deny-invalid-root"
+    }
+    when root_id != target_root_id and not allow_escape {
+        yield "deny-symlink-escape"
+    }
+    yield "resolve-authorized-target"
+}

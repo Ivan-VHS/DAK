@@ -1,0 +1,63 @@
+# Typed MMIO access contract.
+# Only a trusted kernel driver maps the region and supplies the bus operation.
+
+# Region: [base, bytes, width, access, endian, capability, mapped].
+export craft region_valid(region) {
+    when size(region) != 7 or region[0] < 4096 or region[1] <= 0 {
+        yield false
+    }
+    when region[2] != 1 and region[2] != 2 and region[2] != 4 and region[2] != 8 {
+        yield false
+    }
+    when region[0] % region[2] != 0 or region[1] % region[2] != 0 {
+        yield false
+    }
+    when region[3] != "ro" and region[3] != "wo" and region[3] != "rw" and region[3] != "w1c" and region[3] != "w1s" {
+        yield false
+    }
+    when region[4] != "little" and region[4] != "big" {
+        yield false
+    }
+    when region[5] == "" {
+        yield false
+    }
+    yield region[6] == true or region[6] == false
+}
+
+export craft access_valid(region, offset, width, operation, grants) {
+    when not region_valid(region) {
+        yield "deny-invalid-region"
+    }
+    when not region[6] {
+        yield "deny-unmapped"
+    }
+    when offset < 0 or width != region[2] or offset % width != 0 or offset > region[1] - width {
+        yield "deny-bounds-or-alignment"
+    }
+    when operation != "read" and operation != "write" {
+        yield "deny-operation"
+    }
+    when operation == "read" and (region[3] == "wo" or region[3] == "w1c" or region[3] == "w1s") {
+        yield "deny-read-policy"
+    }
+    when operation == "write" and region[3] == "ro" {
+        yield "deny-write-policy"
+    }
+    vary granted := false
+    each capability in grants {
+        when capability == region[5] {
+            change granted := true
+        }
+    }
+    when not granted {
+        yield "deny-capability"
+    }
+    yield "call-trusted-mmio-adapter"
+}
+
+export craft write_pattern_valid(access, pattern) {
+    when access == "w1c" or access == "w1s" {
+        yield pattern == "direct-mask"
+    }
+    yield pattern == "direct" or pattern == "read-modify-write"
+}

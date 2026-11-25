@@ -1,0 +1,51 @@
+# DNS question and name-label validation.
+
+export craft labels_valid(labels) {
+    when size(labels) == 0 or size(labels) > 127 {
+        yield false
+    }
+    vary total := 0
+    each label in labels {
+        when size(label) == 0 or size(label) > 63 {
+            yield false
+        }
+        when label == "." or label == ".." {
+            yield false
+        }
+        change total := total + size(label) + 1
+    }
+    yield total <= 254
+}
+
+export craft question_valid(question) {
+    # [transaction_id, labels, qtype, qclass, recursion_desired, udp_limit].
+    when size(question) != 6 {
+        yield false
+    }
+    when question[0] < 0 or question[0] > 65535 {
+        yield false
+    }
+    when not labels_valid(question[1]) {
+        yield false
+    }
+    when question[2] != "A" and question[2] != "AAAA" and question[2] != "CNAME" and question[2] != "MX" and question[2] != "TXT" and question[2] != "NS" {
+        yield false
+    }
+    when question[3] != "IN" {
+        yield false
+    }
+    when question[5] < 512 or question[5] > 4096 {
+        yield false
+    }
+    yield question[4] == true or question[4] == false
+}
+
+export craft response_decision(question, answer_count, response_bytes, truncated) {
+    when not question_valid(question) or answer_count < 0 or response_bytes < 12 {
+        yield "drop-invalid-dns-message"
+    }
+    when truncated or response_bytes > question[5] {
+        yield "retry-over-tcp"
+    }
+    yield "deliver-dns-response"
+}
