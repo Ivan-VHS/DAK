@@ -92,7 +92,23 @@
       <section class="app-area" aria-label="Приложения">
         <div class="section-heading">
           <div><span class="eyebrow" data-i18n="yourSpace">ВАШЕ ПРОСТРАНСТВО</span><h1 data-i18n="applications">Приложения</h1></div>
-          <span class="tiny-counter" data-i18n="appsCount">34 ПРИЛОЖЕНИЯ И ИНСТРУМЕНТА</span>
+        </div>
+        <div class="catalog-toolbar">
+          <label class="catalog-search" for="app-search">
+            <span aria-hidden="true">⌕</span>
+            <input id="app-search" type="search" autocomplete="off"
+              placeholder="Найти приложение или задачу"
+              aria-label="Поиск приложений" data-i18n-placeholder="catalogSearchPlaceholder"
+              data-i18n-aria="catalogSearchLabel">
+          </label>
+          <span class="tiny-counter" id="catalog-count" aria-live="polite">34 приложения</span>
+        </div>
+        <div class="catalog-categories" role="group" aria-label="Категории приложений">
+          <button type="button" class="catalog-filter" data-catalog-filter="all" aria-pressed="true" data-i18n="allAppsFilter">Все</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="creative" aria-pressed="false" data-i18n="creativeFilter">Творчество</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="work" aria-pressed="false" data-i18n="workFilter">Работа</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="system" aria-pressed="false" data-i18n="systemFilter">Система</button>
+          <button type="button" class="catalog-filter" data-catalog-filter="workbench" aria-pressed="false" data-i18n="workbenchesFilter">Инструменты</button>
         </div>
         <div class="app-grid" id="app-grid">
           <button class="app-tile" data-app="cockos" style="--accent:#ffd400">
