@@ -10,6 +10,17 @@ Updated: 2026-11-25
 - [x] Reaper Beelzebul 66-rule repository scanner and defense-context TSV inspected as separate specialist inputs; neither is represented as DuckOS endpoint protection.
 - [ ] Re-verify the Java context-classifier source/test paths named in Reaper documentation before claiming that classifier is implemented or using it as a shipped DuckOS dependency.
 
+## Mora host-native shell — 2026-11-25
+
+- [x] Added a Qt 6 Widgets desktop executable as a host-native Mora surface; its windows are real top-level host windows, not HTML elements or WebView content.
+- [x] Reused `mora/apps.json` for built-in apps and ecosystem workbench discovery; the native launcher does not execute manifest command strings.
+- [x] Added local Poi draft persistence through `QSettings` and a user-selected, read-only folder listing in Abriganza.
+- [x] Added an explicitly visual-only VentuSample waveform panel that states audio playback and DSP integration are unavailable.
+- [x] Added a CMake target, headless native-window/navigation smoke test and dedicated Qt 6 CI workflow.
+- [ ] Obtain a passing Qt 6 build and smoke-test run before marking the host-native shell build gate verified.
+- [ ] Launch Mora inside a DuckOS user session after the process model, syscall ABI, filesystem, service supervisor, native input path and compositor exist.
+
+The Qt application is native to the host OS. It is not a kernel-owned DuckOS compositor, window manager, system service or process launcher. The bootable Stage 1 image still halts before a user session.
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.
