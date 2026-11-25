@@ -1,5 +1,8 @@
 #include "page_table.h"
 
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,12 +11,21 @@
 #define TEST_PAGE_BASE 0x1000u
 
 typedef struct test_page_pool {
-    uint64_t pages[TEST_PAGE_COUNT][DUCKOS_PAGE_TABLE_ENTRIES]
-        __attribute__((aligned(DUCKOS_PAGE_TABLE_PAGE_SIZE)));
+    uint64_t pages[TEST_PAGE_COUNT][DUCKOS_PAGE_TABLE_ENTRIES];
     uint8_t used[TEST_PAGE_COUNT];
     uint32_t next_page;
     uint32_t invalidations;
 } test_page_pool;
+
+static test_page_pool pool;
+
+static void reset_pool(void) {
+    for (uint32_t index = 0u; index < TEST_PAGE_COUNT; ++index) {
+        pool.used[index] = 0u;
+    }
+    pool.next_page = 0u;
+    pool.invalidations = 0u;
+}
 
 static uint64_t test_allocate(void *context) {
     test_page_pool *pool = (test_page_pool *)context;
@@ -21,6 +33,9 @@ static uint64_t test_allocate(void *context) {
         if (pool->used[index] == 0u) {
             pool->used[index] = 1u;
             pool->next_page = index + 1u;
+            for (uint32_t word = 0u; word < DUCKOS_PAGE_TABLE_ENTRIES; ++word) {
+                pool->pages[index][word] = 0u;
+            }
             return TEST_PAGE_BASE + (uint64_t)index * DUCKOS_PAGE_TABLE_PAGE_SIZE;
         }
     }
@@ -83,7 +98,7 @@ static void test_canonical_addresses(void) {
 }
 
 static void test_map_translate_protect_and_unmap(void) {
-    test_page_pool pool = {0};
+    reset_pool();
     const duckos_page_table_ops ops = test_ops(&pool);
     duckos_page_table_space space = {0};
     uint64_t physical = 0u;
