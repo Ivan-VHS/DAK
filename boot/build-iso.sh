@@ -7,7 +7,7 @@ source "$ROOT/boot/limine-toolchain.lock"
 WORK_DIR="/tmp/duckos-boot-build"
 TMP_ROOT="$(printenv TMPDIR || true)"
 if [[ -n "$TMP_ROOT" ]]; then WORK_DIR="$TMP_ROOT/duckos-boot-build"; fi
-OUTPUT="$ROOT/dist/DuckOS-Stage0-x86_64.iso"
+OUTPUT="$ROOT/dist/DuckOS-Stage1-x86_64.iso"
 
 while (($#)); do
     case "$1" in
@@ -37,7 +37,7 @@ for tool in gcc ld readelf curl tar sha256sum xorriso find make; do require_tool
 target="$(gcc -dumpmachine)"
 case "$target" in
     x86_64-*|amd64-*) ;;
-    *) echo "DuckOS stage-0 targets x86_64; compiler target is: $target" >&2; exit 1 ;;
+    *) echo "DuckOS stage-1 targets x86_64; compiler target is: $target" >&2; exit 1 ;;
 esac
 
 mkdir -p "$WORK_DIR/download" "$WORK_DIR/toolchain" "$WORK_DIR/objects" "$WORK_DIR/iso-root"
@@ -104,10 +104,19 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -I "$ROOT/foundation" \
     -c "$ROOT/foundation/boot_info.c" -o "$WORK_DIR/objects/boot-info.o"
 
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
+    -I "$ROOT/foundation" \
+    -c "$ROOT/foundation/frame_allocator.c" -o "$WORK_DIR/objects/frame-allocator.o"
+
 ld -nostdlib -static -z max-page-size=0x1000 \
     -T "$ROOT/kernel/linker.ld" \
     "$WORK_DIR/objects/duckos-entry.o" \
     "$WORK_DIR/objects/boot-info.o" \
+    "$WORK_DIR/objects/frame-allocator.o" \
     -o "$WORK_DIR/duckos.elf"
 
 readelf -h "$WORK_DIR/duckos.elf" | grep -q 'Class:.*ELF64'
