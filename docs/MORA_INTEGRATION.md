@@ -113,3 +113,15 @@ Control supports a persistent `ru-RU` / `zh-CN` locale selection under `duckos.m
 ## Local-first document storage
 
 `mora/local-store.js` provides an IndexedDB-first document API with bounded identifiers and 256 KiB JSON payloads, plus a localStorage fallback for restricted browser contexts. It is a local document store, not a sync engine. CRDT replication, multi-device conflict resolution, native SQLite integration and background synchronization remain unimplemented until a concrete multi-writer requirement and versioned conflict contract exist.
+
+
+## Federated native workbenches
+
+The release edition adds four first-party workbench panels to the Mora system-app grid:
+
+- **Reaper** — native C17 CLI/FFI tools and the language toolchain.
+- **Pytyliki** — C11 compute and host-inspection utilities.
+- **OPlague** — read-only device/driver evidence workbench.
+- **VentuSample** — C++20 audio/DSP workbench, with Qt 6 desktop when built.
+
+Each panel links to its local source README and lists reproducible build/test commands. These are host user-space applications. Mora does not invoke their commands, load binaries or grant them device access. See [the release edition](RELEASE_EDITION.md) and [the workbench manifest](../federation/mora-workbenches.v1.json).

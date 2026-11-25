@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -297,6 +297,56 @@
       "id": "desktop-optimizer",
       "maturity": "partial_native_userland",
       "scope": "read-only local desktop/process audit, reversible current-user startup controls, confirmed move-to-Inbox operation and native Tk maintenance window; no compositor or kernel enforcement"
+    }
+  ],
+  "ecosystem_workbenches": [
+    {
+      "id": "reaper-workbench",
+      "name": "Reaper",
+      "project": "reaper",
+      "path": "projects/reaper",
+      "panel": "mora/app.js#reaper-workbench",
+      "documentation": "projects/reaper/README.md",
+      "license": "Apache-2.0",
+      "runtime_boundary": "user-space toolchain",
+      "external_launch": "user_managed_not_enabled",
+      "auto_execute": false
+    },
+    {
+      "id": "pytyliki-workbench",
+      "name": "Pytyliki",
+      "project": "pytyliki",
+      "path": "projects/pytyliki",
+      "panel": "mora/app.js#pytyliki-workbench",
+      "documentation": "projects/pytyliki/README.md",
+      "license": "MIT",
+      "runtime_boundary": "user-space compute and read-only host inspection",
+      "external_launch": "user_managed_not_enabled",
+      "auto_execute": false
+    },
+    {
+      "id": "oplague-workbench",
+      "name": "OPlague",
+      "project": "oplague",
+      "path": "projects/oplague",
+      "panel": "mora/app.js#oplague-workbench",
+      "documentation": "projects/oplague/README.md",
+      "license": "Apache-2.0",
+      "runtime_boundary": "read-only user-space device and driver evidence",
+      "external_launch": "user_managed_not_enabled",
+      "auto_execute": false
+    },
+    {
+      "id": "ventusample-workbench",
+      "name": "VentuSample",
+      "project": "ventusample",
+      "path": "projects/ventusample",
+      "panel": "mora/app.js#ventusample-workbench",
+      "documentation": "projects/ventusample/README.md",
+      "license": "Apache-2.0",
+      "runtime_boundary": "offline-by-default user-space audio and DSP",
+      "external_launch": "user_managed_not_enabled",
+      "auto_execute": false
     }
   ]
 }
