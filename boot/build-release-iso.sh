@@ -75,7 +75,13 @@ echo "[6/8] Verify OPlague read-only user-space workbench"
     python3 -m unittest discover -s tests -v
 )
 
-echo "[7/8] Assemble offline source, licenses, host tools and Mora"
+echo "[7/9] Build and test the native Qt desktop shell"
+cmake -S "$ROOT/desktop-native" -B "$BUILD_DIR/desktop-native" \
+    -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+cmake --build "$BUILD_DIR/desktop-native" --parallel 2
+QT_QPA_PLATFORM=offscreen ctest --test-dir "$BUILD_DIR/desktop-native" --output-on-failure
+
+echo "[8/9] Assemble offline source, licenses, host tools and native desktop"
 rm -rf "$PAYLOAD"
 mkdir -p "$PAYLOAD/duckos/release/bin" "$PAYLOAD/duckos/release/lib" "$PAYLOAD/duckos/release/evidence"
 
@@ -103,7 +109,8 @@ for required in \
     "$BUILD_DIR/pytyliki/pytyliki-metrics" \
     "$BUILD_DIR/pytyliki/pytyliki-benchstats" \
     "$BUILD_DIR/pytyliki/pytyliki-qcs" \
-    "$BUILD_DIR/ventusample/VentuSample"; do
+    "$BUILD_DIR/ventusample/VentuSample" \
+    "$BUILD_DIR/desktop-native/duckos-desktop"; do
     [[ -x "$required" ]] || {
         echo "expected host build output is missing: $required" >&2
         exit 1
@@ -116,6 +123,12 @@ copy_binary "$BUILD_DIR/pytyliki/pytyliki-metrics" "pytyliki-metrics"
 copy_binary "$BUILD_DIR/pytyliki/pytyliki-benchstats" "pytyliki-benchstats"
 copy_binary "$BUILD_DIR/pytyliki/pytyliki-qcs" "pytyliki-qcs"
 copy_binary "$BUILD_DIR/ventusample/VentuSample" "VentuSample"
+copy_binary "$BUILD_DIR/desktop-native/duckos-desktop" "duckos-desktop"
+
+echo "Validate the installed native catalog and all four external workbench launchers"
+catalog_report="$(QT_QPA_PLATFORM=offscreen "$PAYLOAD/duckos/release/bin/duckos-desktop" --validate-catalog --root "$PAYLOAD/duckos")"
+printf '%s\n' "$catalog_report"
+grep -q "4 external launchers" <<< "$catalog_report"
 
 copy_library() {
     local source="$1" destination="$2"
@@ -139,10 +152,11 @@ Pytyliki: $(git -C "$ROOT/projects/pytyliki" rev-parse HEAD)
 OPlague: $(git -C "$ROOT/projects/oplague" rev-parse HEAD)
 VentuSample: $(git -C "$ROOT/projects/ventusample" rev-parse HEAD)
 
-Mora: offline browser desktop shell with local application state.
-Host tools: Linux x86_64 builds, not DuckOS kernel executables.
+Desktop: native C++20/Qt 6 Widgets shell at release/bin/duckos-desktop; no browser engine or WebView.
+Mora browser app: retained as a prototype/reference surface, not the default desktop launcher.
+Host tools: Linux x86_64 user-space builds, not DuckOS kernel executables.
+Launch policy: explicit user click, fixed native-launchers.v1.json argv, QProcess without a shell; executable and working paths must remain inside the package.
 Kernel: experimental Stage 1; validates Boot Info v1, allocates and clears one early physical frame, prints DUCKOS_BOOT_OK and halts.
-External application execution: disabled by default.
 EOF
 
 (
@@ -151,7 +165,7 @@ EOF
     sha256sum --check SHA256SUMS >/dev/null
 )
 
-echo "[8/8] Build hybrid BIOS/UEFI release ISO"
+echo "[9/9] Build hybrid BIOS/UEFI release ISO"
 bash "$ROOT/boot/build-iso.sh" \
     --work-dir "$BUILD_DIR/boot" \
     --payload-dir "$PAYLOAD/duckos" \

@@ -81,3 +81,17 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_
         COMMENT "Building the DuckOS ecosystem release ISO and testing federated projects"
     )
 endif()
+
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+    add_custom_target(duckos-native-desktop
+        COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_CURRENT_SOURCE_DIR}/desktop-native"
+            -B "${CMAKE_BINARY_DIR}/duckos-native-desktop"
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+        COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}/duckos-native-desktop" --parallel 2
+        COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${CMAKE_BINARY_DIR}/duckos-native-desktop" --output-on-failure
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        USES_TERMINAL
+        COMMENT "Building and testing the native Qt DuckOS desktop shell"
+    )
+endif()

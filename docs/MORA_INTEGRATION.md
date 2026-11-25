@@ -2,7 +2,7 @@
 
 ## Role in DuckOS
 
-DuckOS is the operating-system project; Mora is its unified desktop shell. All first-party applications and system tools use the same visual tokens, window behaviour, dock and workspace preferences. Mora is not a separate operating system and the HTML shell is not a native compositor.
+DuckOS is the operating-system project. Mora is the visual identity and application catalogue. The default supported host desktop is now the standalone C++20/Qt 6 Widgets target in desktop-native/: real operating-system windows and controls, with no browser engine or WebView. The older HTML/CSS/JavaScript Mora shell remains available as a prototype/reference and regression surface; it is not the native desktop and is no longer the default native launch path.
 
 The default Mora Amber profile uses warm vertical drapery with a repeating fold rhythm, a deep radial workspace centre, walnut/graphite panels, muted olive support surfaces and one restrained red critical marker. Material depth comes from soft light, edge highlights and tonal separation rather than neon fills. The compact dock and existing app IDs remain stable; Dark and Light remain selectable alternatives.
 
@@ -26,9 +26,16 @@ Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriga
 
 ## Run and validate
 
-Open **mora/index.html** directly in a modern browser. The desktop itself requires no network request. Some browser APIs such as Web Crypto may require a secure context.
+Build and run the native desktop with CMake 3.21+, a C++20 compiler and Qt 6.4+ Widgets:
 
-Run **npm test** with Node.js 18 or newer. Contract tests check the static shell, registry and local policy helpers. They do not certify native OS operation or interaction with actual hardware.
+    cmake -S desktop-native -B build/desktop -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+    cmake --build build/desktop --parallel 2
+    ctest --test-dir build/desktop --output-on-failure
+    ./build/desktop/duckos-desktop --root "$PWD"
+
+The portable Linux release includes scripts/run-duck-desktop.sh. Windows users can use the DuckOS-Native-Desktop-Windows-x64 workflow artifact and start it with scripts/run-duck-desktop.ps1.
+
+The legacy browser shell is still tested separately with npm test (Node.js 18+). Those tests validate the browser reference surface only; the native desktop has its own CMake/CTest and Windows/Linux build gates.
 
 ## Intent actions and approval
 
@@ -80,7 +87,7 @@ The local browser profile can be removed by clearing site data. The snapshot is 
 
 External projects may publish **integrations/mora/manifest.json** using **mora/app-manifest.schema.json**. The manifest describes an entry point; it does not install the app, confer trust or grant capabilities.
 
-A native launcher must discover manifests only in trusted installation roots, validate the full schema, resolve paths without traversal, launch with an argument vector rather than a shell, show publisher and requested capabilities, require first-run approval and log failures. The current shell does not launch external processes.
+The legacy browser shell does not launch external processes. The native desktop uses catalogs/native-launchers.v1.json as a narrow allowlist for the four current first-party workbenches. A user click starts a fixed program and argument vector with QProcess, without a shell. Executable and working-directory paths must resolve inside the DuckOS package. No elevation, driver installation or ambient shell access is granted. The projects remain host user-space processes; this is not yet the DuckOS kernel process model.
 
 ## Maturity vocabulary
 
@@ -125,3 +132,12 @@ The release edition adds four first-party workbench panels to the Mora system-ap
 - **VentuSample** — C++20 audio/DSP workbench, with Qt 6 desktop when built.
 
 Each panel links to its local source README and lists reproducible build/test commands. These are host user-space applications. Mora does not invoke their commands, load binaries or grant them device access. See [the release edition](RELEASE_EDITION.md) and [the workbench manifest](../federation/mora-workbenches.v1.json).
+
+
+## Native application coverage — first host port
+
+The native catalog loads all 30 Mora application identities and the four current federated workbenches. Native Qt modules now provide common local functions for Files, Settings, Calculator, Clock, Notes, SHA-256 file verification, basic file metadata, rhythm profiles, task lists, journals, quick capture, knowledge cards, manual route lists, album/media labels, expense text records, game-library metadata, sharing checklists and automation-rule drafts.
+
+The collection-style modules use a per-user app-data directory, bounded JSON lists (500 entries, 2,000 characters per entry, 1 MiB per stored collection) and atomic save. They do not secretly execute rules, send money, pair devices, locate users, launch games or access microphones.
+
+Larger products remain separate ports: Cockos recording/audio sessions, Kavun media indexing/retouch, Po browser engine, Illidia game runtime, Unify authenticated device sync, real Gloverty automation execution, GameCharager game process orchestration, EXEdotEXE compatibility runtime, Mora AI and BAV enforcement. A catalogue entry is not evidence those services exist.

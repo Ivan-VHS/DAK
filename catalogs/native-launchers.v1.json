@@ -1,0 +1,112 @@
+{
+  "schema": "duckos.native-launchers.v1",
+  "version": 1,
+  "execution_policy": {
+    "process_api": "QProcess",
+    "shell_interpreter": false,
+    "require_user_initiated_launch": true,
+    "fixed_manifest_arguments": true,
+    "executable_must_resolve_inside_package": true,
+    "working_directory_must_resolve_inside_package": true,
+    "driver_installation": false,
+    "elevated_execution": false
+  },
+  "applications": [
+    {
+      "id": "reaper-workbench",
+      "kind": "process",
+      "platforms": {
+        "unix": {
+          "program": "release/bin/reaper-c",
+          "arguments": [
+            "--capabilities"
+          ],
+          "working_directory": "projects/reaper"
+        },
+        "windows": {
+          "program": "release/bin/reaper-c.exe",
+          "arguments": [
+            "--capabilities"
+          ],
+          "working_directory": "projects/reaper"
+        },
+        "macos": {
+          "program": "release/bin/reaper-c",
+          "arguments": [
+            "--capabilities"
+          ],
+          "working_directory": "projects/reaper"
+        }
+      }
+    },
+    {
+      "id": "pytyliki-workbench",
+      "kind": "process",
+      "platforms": {
+        "unix": {
+          "program": "release/bin/pytyliki",
+          "arguments": [
+            "--profile",
+            "--json"
+          ],
+          "working_directory": "projects/pytyliki"
+        },
+        "windows": {
+          "program": "release/bin/pytyliki-gui.exe",
+          "arguments": [],
+          "working_directory": "projects/pytyliki"
+        },
+        "macos": {
+          "program": "release/bin/pytyliki",
+          "arguments": [
+            "--profile",
+            "--json"
+          ],
+          "working_directory": "projects/pytyliki"
+        }
+      }
+    },
+    {
+      "id": "oplague-workbench",
+      "kind": "python-script",
+      "platforms": {
+        "unix": {
+          "program": "projects/oplague/oplague_app.py",
+          "python_arguments": [],
+          "working_directory": "projects/oplague"
+        },
+        "windows": {
+          "program": "projects/oplague/oplague_app.py",
+          "python_arguments": [],
+          "working_directory": "projects/oplague"
+        },
+        "macos": {
+          "program": "projects/oplague/oplague_app.py",
+          "python_arguments": [],
+          "working_directory": "projects/oplague"
+        }
+      }
+    },
+    {
+      "id": "ventusample-workbench",
+      "kind": "process",
+      "platforms": {
+        "unix": {
+          "program": "release/bin/VentuSample",
+          "arguments": [],
+          "working_directory": "projects/ventusample"
+        },
+        "windows": {
+          "program": "release/bin/VentuSample.exe",
+          "arguments": [],
+          "working_directory": "projects/ventusample"
+        },
+        "macos": {
+          "program": "release/bin/VentuSample",
+          "arguments": [],
+          "working_directory": "projects/ventusample"
+        }
+      }
+    }
+  ]
+}

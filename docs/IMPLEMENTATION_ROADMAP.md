@@ -130,16 +130,19 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D8 — Native desktop, input, graphics and audio
 
-**Status: Planned; Mora browser UI is not the native desktop.**
+**Status: Partial — native host desktop delivered; DuckOS kernel desktop session remains planned.**
 
-- Choose a native display and windowing architecture for the initial hardware target.
-- Implement graphics buffer ownership, input event routing, focus, accessibility and display-mode failure recovery.
-- Add font shaping and text input only with a defined Unicode and fallback policy.
-- Treat audio engine/device scheduling as a separate bounded subsystem.
-- Apply [DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) to Mora and native apps: keyboard-complete primary workflows, visible focus, semantic accessibility tree, text scaling, reduced motion, recoverable dialogs, saved workspace geometry and safe display migration.
-- Keep the Mora visual system as a design reference, not as proof of compositor or GPU implementation.
+- [x] Native C++20 / Qt 6 Widgets desktop target with real host OS windows and controls; no browser engine or WebView.
+- [x] Native catalog imports all 30 Mora identities and the four federated workbenches, while explicitly marking unported products instead of inventing launchable executables.
+- [x] Native Files, Notes, Calculator, Clock, Settings, file metadata and SHA-256 tools, system status and rhythm profiles.
+- [x] Bounded per-user JSON collections for tasks, journals, quick capture, knowledge cards, manual route notes, album/media labels, expense text records, game-library metadata, sharing checklists and automation drafts. Limits: 500 records, 2,000 characters per record and 1 MiB per collection; atomic save.
+- [x] Explicit QProcess allowlist for Reaper, Pytyliki, OPlague and VentuSample; fixed argv, no shell, package-contained canonical path checks, no elevation or driver installation.
+- [ ] Complete native ports of Cockos recording, Kavun image indexing/retouch, Po browser, Illidia game runtime, Unify authenticated device sync, Gloverty rule execution, GameCharager game process launch, EXEdotEXE compatibility, Mora AI and BAV enforcement.
+- [ ] Native DuckOS kernel process model, ELF loader, user address spaces, syscall ABI and service supervisor; the current kernel still halts after Stage 1 boot.
+- [ ] Kernel display/input services, compositor/window manager, focus/virtual workspace protocol and per-process accessibility boundary.
+- [ ] GPU command submission, accelerated compositor, native audio graph, microphone permissions and supported hardware matrix.
 
-**Exit evidence:** emulator screenshot capture; keyboard and assistive-technology conformance tests; display-loss and DPI-change recovery; touch/pointer target tests; reduced-motion and text-scaling tests; P50/P95/P99 input-to-feedback and frame-time measurements on named targets; supported hardware matrix.
+**Host-shell exit evidence:** Qt 6 C++20 Linux and Windows builds, native catalog validation, offscreen UI smoke test, no WebEngine/WebView dependency, QProcess argv/path policy and portable Windows bundle. This does not satisfy the kernel-desktop exit gate until D2-D7 provide a real userspace runtime.
 
 ### D9 — Installer, image assembly and release qualification
 
