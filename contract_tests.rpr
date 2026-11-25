@@ -375,7 +375,8 @@ make endpoint_received := ipc_endpoint["receive"](endpoint_sent_twice[1], 42, ["
 make received_envelope := endpoint_received[2]
 assert(endpoint_received[0] == "received" and received_envelope[0] == 1, "endpoint owner receives FIFO message")
 make second_received := ipc_endpoint["receive"](endpoint_received[1], 42, ["ipc.receive"])
-assert(second_received[0] == "received" and second_received[2][0] == 2, "endpoint sequence remains monotonic after FIFO dequeue")
+make second_received_envelope := second_received[2]
+assert(second_received[0] == "received" and second_received_envelope[0] == 2, "endpoint sequence remains monotonic after FIFO dequeue")
 assert(ipc_endpoint["receive"](second_received[1], 42, ["ipc.receive"])[0] == "empty", "empty endpoint reports a stable state")
 assert(ipc_endpoint["receive"](endpoint_sent_twice[1], 99, ["ipc.receive"])[0] == "denied", "foreign process cannot receive endpoint messages")
 
