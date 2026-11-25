@@ -75,6 +75,12 @@ int main(int argc, char *argv[])
         QTextStream output(stdout);
         output << QStringLiteral("DuckOS native catalog: %1 apps, %2 built-in modules, %3 external launchers.")
             .arg(catalog.applications().size()).arg(catalog.nativeCount()).arg(catalog.launchableCount()) << Qt::endl;
+        for (const ApplicationInfo &entry : catalog.applications()) {
+            if (entry.launchKind == QStringLiteral("process") || entry.launchKind == QStringLiteral("python-script")) {
+                output << entry.id << " = " << (entry.launchable ? QStringLiteral("READY") : QStringLiteral("NOT_READY"))
+                       << " (" << entry.target << ")" << Qt::endl;
+            }
+        }
         return 0;
     }
 

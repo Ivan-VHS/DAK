@@ -30,16 +30,15 @@ bool readObject(const QString &path, QJsonObject *object, QString *error)
 
 bool isInsideRoot(const QString &root, const QString &candidate)
 {
-    const QString canonicalRoot = QDir::cleanPath(QFileInfo(root).canonicalFilePath());
-    const QString canonicalCandidate = QDir::cleanPath(QFileInfo(candidate).canonicalFilePath());
+    const QString canonicalRoot = QFileInfo(root).canonicalFilePath();
+    const QString canonicalCandidate = QFileInfo(candidate).canonicalFilePath();
     if (canonicalRoot.isEmpty() || canonicalCandidate.isEmpty()) return false;
-    const QString prefix = canonicalRoot.endsWith(QDir::separator()) ? canonicalRoot : canonicalRoot + QDir::separator();
-#ifdef Q_OS_WIN
-    return canonicalCandidate.compare(canonicalRoot, Qt::CaseInsensitive) == 0
-        || canonicalCandidate.startsWith(prefix, Qt::CaseInsensitive);
-#else
-    return canonicalCandidate == canonicalRoot || canonicalCandidate.startsWith(prefix);
-#endif
+    const QString relative = QDir::fromNativeSeparators(
+        QDir::cleanPath(QDir(canonicalRoot).relativeFilePath(canonicalCandidate)));
+    return relative == QStringLiteral(".")
+        || (relative != QStringLiteral("..")
+            && !relative.startsWith(QStringLiteral("../"))
+            && !QDir::isAbsolutePath(relative));
 }
 
 QString nativeActionFor(const QString &id)

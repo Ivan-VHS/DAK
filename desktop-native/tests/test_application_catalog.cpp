@@ -2,6 +2,8 @@
 #include "application_launcher.hpp"
 
 #include <QCoreApplication>
+#include <QDir>
+#include <QFile>
 #include <QTemporaryDir>
 #include <iostream>
 
@@ -62,8 +64,26 @@ int main(int argc, char *argv[])
         }
     }
 
+    QTemporaryDir packageRoot;
+    if (!packageRoot.isValid()) return 5;
+    const QString safeFolder = QDir(packageRoot.path()).filePath(QStringLiteral("release/bin"));
+    if (!QDir().mkpath(safeFolder)) return 6;
+    QFile safeFile(QDir(safeFolder).filePath(QStringLiteral("sample.exe")));
+    if (!safeFile.open(QIODevice::WriteOnly) || safeFile.write("stub") != 4) return 7;
+    safeFile.close();
+    ApplicationInfo safe;
+    safe.id = QStringLiteral("safe");
+    safe.name = QStringLiteral("Safe launcher");
+    safe.target = QStringLiteral("release/bin/sample.exe");
+    safe.launchable = true;
+    ApplicationLauncher safeLauncher(packageRoot.path());
+    if (safeLauncher.resolveTarget(safe, &error).isEmpty()) {
+        std::cerr << "Package-contained path was incorrectly rejected: " << error.toStdString() << '\\n';
+        return 10;
+    }
+
     QTemporaryDir unsafeRoot;
-    if (!unsafeRoot.isValid()) return 5;
+    if (!unsafeRoot.isValid()) return 11;
     ApplicationInfo bad;
     bad.id = QStringLiteral("bad");
     bad.name = QStringLiteral("Bad launcher");

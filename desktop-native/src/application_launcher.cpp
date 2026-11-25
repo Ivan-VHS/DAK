@@ -4,6 +4,20 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 
+namespace {
+bool isInsidePackage(const QString &root, const QString &candidate)
+{
+    const QString canonicalRoot = QFileInfo(root).canonicalFilePath();
+    const QString canonicalCandidate = QFileInfo(candidate).canonicalFilePath();
+    if (canonicalRoot.isEmpty() || canonicalCandidate.isEmpty()) return false;
+    const QString relative = QDir::fromNativeSeparators(
+        QDir::cleanPath(QDir(canonicalRoot).relativeFilePath(canonicalCandidate)));
+    return relative == QStringLiteral(".")
+        || (relative != QStringLiteral("..") && !relative.startsWith(QStringLiteral("../"))
+            && !QDir::isAbsolutePath(relative));
+}
+}
+
 ApplicationLauncher::ApplicationLauncher(QString rootPath, QObject *parent)
     : QObject(parent), rootPath_(std::move(rootPath))
 {
@@ -17,10 +31,8 @@ QString ApplicationLauncher::resolveTarget(const ApplicationInfo &application, Q
     }
 
     const QFileInfo info(QDir(rootPath_).filePath(application.target));
-    const QString canonicalRoot = QFileInfo(rootPath_).canonicalFilePath();
     const QString canonicalTarget = info.canonicalFilePath();
-    const QString prefix = canonicalRoot.endsWith(QDir::separator()) ? canonicalRoot : canonicalRoot + QDir::separator();
-    if (!info.isFile() || canonicalTarget.isEmpty() || !canonicalTarget.startsWith(prefix)) {
+    if (!info.isFile() || canonicalTarget.isEmpty() || !isInsidePackage(rootPath_, canonicalTarget)) {
         if (error) *error = QStringLiteral("The configured executable is missing or resolves outside the DuckOS package.");
         return {};
     }
@@ -68,10 +80,9 @@ QProcess *ApplicationLauncher::start(const ApplicationInfo &application, QString
         ? rootPath_
         : QDir(rootPath_).filePath(application.workingDirectory);
     const QFileInfo workingInfo(workingDirectory);
-    const QString canonicalRoot = QFileInfo(rootPath_).canonicalFilePath();
     const QString canonicalWorking = workingInfo.canonicalFilePath();
-    const QString prefix = canonicalRoot.endsWith(QDir::separator()) ? canonicalRoot : canonicalRoot + QDir::separator();
-    if (!workingInfo.isDir() || canonicalWorking.isEmpty() || !canonicalWorking.startsWith(prefix)) {
+    if (!workingInfo.isDir() || canonicalWorking.isEmpty() || !isInsidePackage(rootPath_, canonicalWorking)
+        || canonicalWorking == QFileInfo(rootPath_).canonicalFilePath()) {
         if (error) *error = QStringLiteral("The configured working directory is outside the DuckOS package.");
         process->deleteLater();
         return nullptr;
