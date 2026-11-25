@@ -37,10 +37,13 @@ export craft accessibility_gate(scale_percent, keyboard_complete, focus_visible,
     when scale_percent < 750 or scale_percent > 2000 {
         yield false
     }
-    yield keyboard_complete == true
-        and focus_visible == true
-        and screen_reader_named == true
-        and reduced_motion == true
+    when keyboard_complete != true or focus_visible != true {
+        yield false
+    }
+    when screen_reader_named != true or reduced_motion != true {
+        yield false
+    }
+    yield true
 }
 
 export craft evidence_status(has_test, has_measurement, has_target) {
