@@ -16,7 +16,7 @@ export craft descriptor_valid(driver) {
     when kind(driver[4]) != "list" or kind(driver[5]) != "text" or kind(driver[6]) != "text" or kind(driver[7]) != "text" or kind(driver[8]) != "number" {
         yield false
     }
-    when driver[0] == "" or driver[1] <= 0 or driver[2] == "" {
+    when driver[0] == "" or driver[1] % 1 != 0 or driver[8] % 1 != 0 or driver[1] <= 0 or driver[2] == "" {
         yield false
     }
     when not targets["architecture_known"](driver[3]) {
