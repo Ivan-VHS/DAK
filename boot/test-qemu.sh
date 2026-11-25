@@ -46,7 +46,12 @@ run_bios() {
         cat "$log" >&2 || true
         return 1
     fi
-    if ! grep -Fq "DUCKOS_BOOT_OK stage=1" "$log"; then
+    if ! grep -Fq "paging=owned-cr3 root=" "$log"; then
+        echo "BIOS QEMU did not confirm ownership of the active page tables:" >&2
+        cat "$log" >&2 || true
+        return 1
+    fi
+    if ! grep -Fq "DUCKOS_BOOT_OK stage=2" "$log"; then
         echo "BIOS QEMU did not reach the DuckOS boot handoff:" >&2
         cat "$log" >&2 || true
         return 1
