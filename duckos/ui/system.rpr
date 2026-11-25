@@ -7,10 +7,7 @@ export craft notification_valid(notification) {
     when notification[0] <= 0 or notification[2] == "" {
         yield false
     }
-    when notification[1] != "info"
-        and notification[1] != "success"
-        and notification[1] != "warning"
-        and notification[1] != "critical" {
+    when notification[1] != "info" and notification[1] != "success" and notification[1] != "warning" and notification[1] != "critical" {
         yield false
     }
     when notification[4] < 0 or notification[5] < 0 {
