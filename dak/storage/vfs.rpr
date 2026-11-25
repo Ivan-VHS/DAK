@@ -6,7 +6,10 @@ export craft components_valid(components) {
         yield false
     }
     each component in components {
-        when component == "" or component == "." or component == ".." or component == "/" {
+        when component == "" or component == "." or component == ".." {
+            yield false
+        }
+        when contains(component, "/") or contains(component, "\\") {
             yield false
         }
     }
