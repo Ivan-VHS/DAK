@@ -48,7 +48,7 @@ export craft source_record_valid(source) {
     yield true
 }
 
-export craft admission(target, source, recovery_state) {
+export craft admission(target, source, recovery_state, partitions) {
     when not target_valid(target) {
         yield "reject-target"
     }
@@ -66,6 +66,9 @@ export craft admission(target, source, recovery_state) {
     }
     when recovery_state != "ready" {
         yield "reject-recovery"
+    }
+    when not layout_valid(partitions, target[2], target[4]) {
+        yield "reject-layout"
     }
     yield "admit-plan-only"
 }
