@@ -13,7 +13,7 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
-const DUCK_ACCENT = "#FFD400";
+const DUCK_ACCENT = "#FFD700";
 
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
@@ -64,8 +64,28 @@ let pendingIntentPlan = null;
 
 const LOCALE_KEY = "duckos.mora.locale.v1";
 const LOCALE_TEXT = {
-  "ru-RU": { desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы", dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.", yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"34 ПРИЛОЖЕНИЯ И ИНСТРУМЕНТА", dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы", routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства", expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН" },
-  "zh-CN": { desktop:"桌面", system:"系统", systemStatus:"系统状态", dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。", yourSpace:"您的空间", applications:"应用程序", appsCount:"34 个应用与工具", dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务", routines:"场景", compass:"指南针", games:"游戏", devices:"设备", expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线" }
+  "ru-RU": {
+    desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы",
+    dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.",
+    yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"Приложения и инструменты",
+    dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы",
+    routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства",
+    expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН",
+    catalogSearchPlaceholder:"Найти приложение или задачу", catalogSearchLabel:"Поиск приложений",
+    allAppsFilter:"Все", creativeFilter:"Творчество", workFilter:"Работа",
+    systemFilter:"Система", workbenchesFilter:"Инструменты"
+  },
+  "zh-CN": {
+    desktop:"桌面", system:"系统", systemStatus:"系统状态",
+    dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。",
+    yourSpace:"您的空间", applications:"应用程序", appsCount:"应用与工具",
+    dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务",
+    routines:"场景", compass:"指南针", games:"游戏", devices:"设备",
+    expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线",
+    catalogSearchPlaceholder:"搜索应用或任务", catalogSearchLabel:"搜索应用",
+    allAppsFilter:"全部", creativeFilter:"创作", workFilter:"工作",
+    systemFilter:"系统", workbenchesFilter:"开发工具"
+  }
 };
 function readLocale() {
   try { const value = localStorage.getItem(LOCALE_KEY); return value === "zh-CN" || value === "ru-RU" ? value : "ru-RU"; }
@@ -82,6 +102,10 @@ function applyChromeLocale() {
   document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
     const value = dictionary[element.dataset.i18nAria];
     if (typeof value === "string") element.setAttribute("aria-label", value);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    const value = dictionary[element.dataset.i18nPlaceholder];
+    if (typeof value === "string") element.setAttribute("placeholder", value);
   });
   if (windowLayer.querySelectorAll(".app-window").length === 0) activeAppLabel.textContent = dictionary.desktop;
 }
@@ -1288,8 +1312,79 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+function initializeAppCatalog() {
+  const search = document.getElementById("app-search");
+  const count = document.getElementById("catalog-count");
+  const filters = Array.from(document.querySelectorAll("[data-catalog-filter]"));
+  const tiles = Array.from(document.querySelectorAll(
+    "#app-grid .app-tile, #extension-app-grid .app-tile, #system-app-grid .app-tile"
+  ));
+  if (!search || !count || !tiles.length) return;
+
+  const categories = {
+    creative: new Set([
+      "cockos", "kavun", "illidia", "olaab", "concrete-thump",
+      "gamecharager", "red-sparrow", "mora-boost", "ventusample-workbench"
+    ]),
+    work: new Set([
+      "kabon", "gloverty", "orriganize", "abriganza", "love-il",
+      "poi", "poi-2", "po-2", "reaper-workbench", "pytyliki-workbench"
+    ]),
+    system: new Set([
+      "sestem", "setupup", "seu-beu", "exedotexe", "mora-ai",
+      "security", "updates", "runtime", "workspace", "provenance", "desktop",
+      "unify", "oplague-workbench"
+    ]),
+    workbench: new Set([
+      "reaper-workbench", "pytyliki-workbench",
+      "oplague-workbench", "ventusample-workbench"
+    ])
+  };
+  let activeCategory = "all";
+
+  function applyFilter() {
+    const query = search.value.trim().toLocaleLowerCase(currentLocale);
+    let visible = 0;
+    for (const tile of tiles) {
+      const id = tile.dataset.app || "";
+      const categoryMatches = activeCategory === "all"
+        || Boolean(categories[activeCategory] && categories[activeCategory].has(id));
+      const textMatches = !query
+        || (id + " " + tile.textContent).toLocaleLowerCase(currentLocale).includes(query);
+      const shown = categoryMatches && textMatches;
+      tile.hidden = !shown;
+      if (shown) visible += 1;
+    }
+
+    count.textContent = currentLocale === "zh-CN"
+      ? `显示 ${visible} / ${tiles.length}`
+      : `Показано ${visible} из ${tiles.length}`;
+
+    filters.forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.catalogFilter === activeCategory));
+    });
+
+    document.querySelectorAll(".extension-section-heading, .system-section-heading").forEach((heading) => {
+      const grid = heading.nextElementSibling;
+      const hasVisibleItems = grid && grid.querySelector(".app-tile:not([hidden])");
+      heading.hidden = !hasVisibleItems;
+      if (grid) grid.hidden = !hasVisibleItems;
+    });
+  }
+
+  search.addEventListener("input", applyFilter);
+  filters.forEach((button) => {
+    button.addEventListener("click", () => {
+      activeCategory = button.dataset.catalogFilter || "all";
+      applyFilter();
+    });
+  });
+  applyFilter();
+}
+
 document.documentElement.lang = currentLocale;
 applyChromeLocale();
+initializeAppCatalog();
 applyPreferences();
 updateClock();
 window.setInterval(updateClock, 1000);
