@@ -76,6 +76,7 @@ This is a developer build of those user-space projects; it is not part of DuckOS
 
 ```sh
 npm run validate:ecosystem
+npm run test:ecosystem
 npm test
 ```
 

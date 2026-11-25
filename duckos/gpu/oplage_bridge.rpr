@@ -62,12 +62,13 @@ export craft append_metric(samples, sequence, device_name, metric) {
 }
 
 export craft gpu_snapshot_samples(snapshot, first_sequence, monotonic_timestamp) {
+    make empty_samples := []
     when not gpu_snapshot_valid(snapshot) or kind(first_sequence) != "number" or
          kind(monotonic_timestamp) != "number" or first_sequence < 0 or
-         first_sequence >= 9223372036854770000 or monotonic_timestamp < 0 { yield ["invalid", []] }
-    when snapshot[5] == false { yield ["unavailable", []] }
+         first_sequence >= 9223372036854770000 or monotonic_timestamp < 0 { yield ["invalid", empty_samples] }
+    when snapshot[5] == false { yield ["unavailable", empty_samples] }
 
-    vary samples := []
+    vary samples := empty_samples
     vary sequence := first_sequence + 1
     each gpu in snapshot[9] {
         make metrics := [
@@ -81,7 +82,7 @@ export craft gpu_snapshot_samples(snapshot, first_sequence, monotonic_timestamp)
         ]
         each metric in metrics {
             make result := append_metric(samples, sequence, gpu[0], metric)
-            when result[0] == "invalid" { yield ["invalid", []] }
+            when result[0] == "invalid" { yield ["invalid", empty_samples] }
             change samples := result[1]
             change sequence := result[2]
         }

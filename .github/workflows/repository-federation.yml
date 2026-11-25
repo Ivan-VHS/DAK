@@ -55,3 +55,4 @@ jobs:
         run: |
           python -m unittest tests.test_repository_federation -v
           npm test
+          npm run test:ecosystem

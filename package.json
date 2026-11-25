@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/mora-*.test.mjs tests/ecosystem-federation.test.mjs",
-    "validate:ecosystem": "node tools/validate_ecosystem.mjs"
+    "test": "node --test tests/mora-*.test.mjs",
+    "validate:ecosystem": "node tools/validate_ecosystem.mjs",
+    "test:ecosystem": "node --test tests/ecosystem-federation.test.mjs"
   },
   "engines": {
     "node": ">=18"
