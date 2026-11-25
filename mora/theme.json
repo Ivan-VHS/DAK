@@ -1,30 +1,36 @@
 {
   "schema": "mora.theme.v1",
-  "name": "DuckOS Black White Yellow",
-  "version": 2,
+  "name": "DuckOS Imperial Noir & Glass",
+  "version": 3,
   "palettes": {
     "duck": {
-      "page": "#080808",
-      "surface": "#151515",
-      "elevated": "#242424",
+      "canvas": "#050505",
+      "page": "#070707",
+      "surface": "#111111",
+      "elevated": "#1B1B1B",
       "text": "#FFFFFF",
-      "secondary": "#E5E5E5",
-      "muted": "#A6A6A6",
-      "brand": "#FFD400",
+      "secondary": "#FFFFFF",
+      "muted": "#FFFFFF",
+      "brand": "#FFD700",
       "brandHover": "#FFE45C",
-      "onBrand": "#080808",
-      "secondaryAccent": "#FFD400",
-      "onSecondaryAccent": "#080808",
-      "border": "#3A3A3A",
-      "selection": "#3A3100",
-      "danger": "#FFD400",
-      "onDanger": "#080808"
+      "onBrand": "#050505",
+      "secondaryAccent": "#FFD700",
+      "onSecondaryAccent": "#050505",
+      "border": "#333333",
+      "selection": "#332800",
+      "danger": "#D32F2F",
+      "onDanger": "#FFFFFF"
     }
   },
+  "textOpacity": {
+    "primary": 1,
+    "secondary": 0.72,
+    "tertiary": 0.42
+  },
   "shape": {
-    "windowRadius": 22,
-    "cardRadius": 16,
-    "controlRadius": 10
+    "windowRadius": 6,
+    "cardRadius": 6,
+    "controlRadius": 4
   },
   "spacing": [
     4,
@@ -38,12 +44,91 @@
     "minimumTargetPx": 44,
     "focusRingPx": 2
   },
+  "materials": {
+    "maxNestedLayers": 2,
+    "backgroundGlass": {
+      "fill": "#070707",
+      "opacity": 0.88,
+      "blurPx": 28,
+      "grainOpacity": 0.03,
+      "specularOpacity": 0.08,
+      "borderOpacity": 0.14
+    },
+    "contentGlass": {
+      "fill": "#111111",
+      "opacity": 0.88,
+      "blurPx": 18,
+      "grainOpacity": 0.025,
+      "specularOpacity": 0.12,
+      "borderOpacity": 0.18
+    },
+    "interactiveSurface": {
+      "fill": "#1B1B1B",
+      "opacity": 0.96,
+      "blurPx": 0,
+      "grainOpacity": 0,
+      "specularOpacity": 0.06,
+      "borderOpacity": 0.22
+    },
+    "modalGlass": {
+      "fill": "#111111",
+      "opacity": 0.94,
+      "blurPx": 32,
+      "grainOpacity": 0.035,
+      "specularOpacity": 0.16,
+      "borderOpacity": 0.24
+    },
+    "fallback": {
+      "fill": "#070707",
+      "opacity": 0.98,
+      "blurPx": 0,
+      "grainOpacity": 0
+    }
+  },
   "motion": {
-    "fastMs": 140,
+    "instantMs": 0,
+    "fastMs": 120,
     "standardMs": 180,
     "spatialMs": 220,
+    "emphasisMs": 280,
     "reduceMotionMaxMs": 80,
-    "ecoVisualsMaxMs": 80
+    "ecoVisualsMaxMs": 80,
+    "maxNonessentialMs": 300,
+    "motionScaleMin": 0.4,
+    "motionScaleMax": 2.2,
+    "easing": {
+      "spring": "cubic-bezier(0.22, 1.18, 0.36, 1)",
+      "snappy": "cubic-bezier(0.20, 0.80, 0.20, 1)",
+      "strict": "cubic-bezier(0.65, 0, 0.35, 1)"
+    },
+    "spring": {
+      "stiffness": 1,
+      "dampingRatio": 1,
+      "settleEpsilon": 0.001
+    }
+  },
+  "accessibility": {
+    "minimumTextContrast": 4.5,
+    "primaryTextContrast": 7,
+    "reducedMotionSupported": true,
+    "reducedTransparencySupported": true
+  },
+  "powerProfiles": {
+    "saver": {
+      "maxBlurPx": 0,
+      "grainOpacity": 0,
+      "animationScale": 0.65
+    },
+    "balanced": {
+      "maxBlurPx": 28,
+      "grainOpacity": 0.03,
+      "animationScale": 1
+    },
+    "performance": {
+      "maxBlurPx": 32,
+      "grainOpacity": 0.035,
+      "animationScale": 1
+    }
   },
   "typography": {
     "ui": "Segoe UI",
