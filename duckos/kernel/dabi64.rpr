@@ -1,0 +1,45 @@
+# DABI64 process boundary contracts, implemented in Reaper.
+# This module validates descriptors only; it does not enter user mode or issue syscalls.
+
+craft valid_call_frame(frame) {
+    when size(frame) != 4 {
+        yield false
+    }
+    when frame[0] < 0 or frame[0] > 511 {
+        yield false
+    }
+    when frame[1] < 0 or frame[1] > 6 {
+        yield false
+    }
+    when frame[2] < 0 or frame[2] > 15 {
+        yield false
+    }
+    when frame[3] < 0 {
+        yield false
+    }
+    yield true
+}
+
+craft valid_process_transition(previous, next) {
+    when previous == "NEW" and next == "READY" { yield true }
+    when previous == "READY" and next == "RUNNING" { yield true }
+    when previous == "RUNNING" and (next == "READY" or next == "BLOCKED" or next == "ZOMBIE") { yield true }
+    when previous == "BLOCKED" and (next == "READY" or next == "ZOMBIE") { yield true }
+    when previous == "ZOMBIE" and next == "DEAD" { yield true }
+    yield false
+}
+
+make read_frame := [1, 3, 0, 1]
+make invalid_call := [512, 1, 0, 0]
+make oversized_frame := [2, 7, 0, 0]
+
+assert(valid_call_frame(read_frame), "valid DABI64 frame must pass")
+assert(not valid_call_frame(invalid_call), "unknown syscall number must fail")
+assert(not valid_call_frame(oversized_frame), "more than six syscall arguments must fail")
+assert(valid_process_transition("NEW", "READY"), "new process must be schedulable")
+assert(valid_process_transition("RUNNING", "BLOCKED"), "running process may block")
+assert(valid_process_transition("ZOMBIE", "DEAD"), "zombie may be reaped")
+assert(not valid_process_transition("NEW", "RUNNING"), "new process cannot skip ready state")
+assert(not valid_process_transition("DEAD", "READY"), "dead process cannot be revived")
+
+emit "DAK_REAPER_DABI64_CONTRACT:PASS"
