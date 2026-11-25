@@ -40,7 +40,7 @@ Source evidence: `[publisher, digest, signature_state]`.
 
 Partition: `[partition_id, kind, start_byte, length_bytes]`, where kind is `efi`, `bios_boot`, `system`, `recovery` or `userdata`.
 
-A valid layout is sorted by start byte, starts after the first 1 MiB of disk metadata, contains two system partitions (A/B), exactly one recovery partition and at most one user-data partition. UEFI requires exactly one EFI partition and no BIOS boot partition; BIOS requires exactly one BIOS boot partition and no EFI partition. Every partition is 4 KiB aligned, in bounds and non-overlapping.
+A valid layout is sorted by start byte, starts after the first 1 MiB of disk metadata, contains exactly one `system_a` and one `system_b` partition, exactly one recovery partition and at most one user-data partition. The EFI or BIOS boot partition starts at the 1 MiB boundary. Partition IDs are unique. UEFI requires exactly one EFI partition and no BIOS boot partition; BIOS requires exactly one BIOS boot partition and no EFI partition. Every partition is 4 KiB aligned, in bounds and non-overlapping.
 
 ### API
 
@@ -56,7 +56,7 @@ Transaction path: `planned → validated → staged → ready_to_commit → comm
 
 ## 4. Driver runtime contract
 
-Driver descriptor: `[id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes]`. Device descriptors reuse the existing six-field DuckDriver resource record. Resource admission rejects conflicts with already registered device ranges or exclusive IRQ ownership.
+Driver descriptor: `[id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes]`. Device descriptors reuse the existing six-field DuckDriver resource record. Resource admission is mandatory inside driver admission and rejects conflicts with already registered device ranges or exclusive IRQ ownership.
 
 Admission requires a verified, non-revoked signature state, a non-empty publisher, matching architecture and bus, a supported ABI and a capability set contained by the grants. Payload size is bounded to 256 MiB.
 
@@ -67,7 +67,8 @@ Unload requires a running/stopping driver and affirmative evidence that IRQs are
 ### API
 
 - `descriptor_valid(driver) -> bool`
-- `admission(driver, device, target_arch, expected_abi, supported_buses, grants) -> decision`
+- `resource_admission(device, registered_devices) -> decision`
+- `admission(driver, device, registered_devices, target_arch, expected_abi, supported_buses, grants) -> decision`
 - `resource_admission(device, registered_devices) -> decision`
 - `transition_valid(current, next) -> bool`
 - `unload_policy(state, irqs_quiesced, dma_stopped, device_quiesced) -> decision`
@@ -76,7 +77,7 @@ Unload requires a running/stopping driver and affirmative evidence that IRQs are
 
 Package record: `[id, major, minor, patch, architecture, abi, kind, dependencies, requested_capabilities, digest, publisher, signature_state, payload_bytes]`.
 
-Supported kinds are application, system, driver and library. Payloads are bounded to 2 GiB. Every payload path is passed as normalized path components, and traversal components are rejected by the shared VFS contract. All dependencies must be present before staging; requested capabilities must be a subset of the package manager's explicit grants.
+Supported kinds are application, system, driver and library. Payloads are bounded to 2 GiB. Every payload path is passed as normalized path components. The shared VFS contract rejects empty, dot, parent, embedded slash and embedded backslash components. All dependencies must be present before staging; requested capabilities must be a subset of the package manager's explicit grants.
 
 Transaction path: `planned → verified → resolved → staged → committed`, with rollback from verified/resolved/staged states. Protected system packages and packages with dependents cannot be removed by the plan.
 
@@ -99,7 +100,8 @@ Audit record: `[sequence, request_id, actor, action, resource, outcome, reason, 
 - `chain_valid(records) -> bool`
 - `append_policy(records, record, max_records) -> decision`
 
-This Reaper module validates append intent only. Durable append-only storage, tamper-evident hashing/signing, access control and retention policy belong to the trusted storage/security provider.
+This Reaper module validates append intent and digest-link ordering only. It does not recompute or authenticate digests. Durable append-only storage, tamper-evident hashing/signing, access control and retention policy belong to the trusted storage/security provider.
+
 ## 7. Update system contract
 
 Update manifest: `[channel, major, minor, patch, architecture, sequence, payload_bytes, digest, publisher, signature_state]`.
@@ -114,6 +116,7 @@ Transaction path: `idle → verified → staged → armed → boot_pending → c
 - `version_newer(candidate, current) -> bool`
 - `admission(manifest, target_arch, current_version, current_sequence) -> decision`
 - `inactive_slot(active_slot) -> slot`
+- `activation_policy(active_slot, target_slot, payload_state, boot_entry_state) -> decision`
 - `transition_valid(current, next) -> bool`
 - `boot_result_policy(health, attempts, max_attempts) -> decision`
 
@@ -121,7 +124,7 @@ Transaction path: `idle → verified → staged → armed → boot_pending → c
 
 The DAK Reaper contract workflow must validate every `.rpr` file under `dak/`, then execute `contract_tests.rpr` under both the tree-walk engine and VM.
 
-Audit coverage includes malformed request identities, non-consecutive sequences, corrupted prior journals and append-capacity exhaustion. Required negative coverage includes: missing consent, unverified/revoked provenance, missing recovery, malformed and overlapping partitions, driver bus/architecture/ABI/capability mismatch, active DMA/IRQ during unload, missing dependencies, path traversal, protected package removal, version and sequence rollback, invalid A/B slot, skipped state transitions and unhealthy boot confirmation.
+Audit coverage includes malformed request identities, non-consecutive sequences, broken prior-digest links and append-capacity exhaustion. Package-path coverage includes embedded POSIX and Windows separators inside components. Required negative coverage includes: missing consent, unverified/revoked provenance, missing recovery, malformed and overlapping partitions, driver bus/architecture/ABI/capability/resource mismatch, active DMA/IRQ during unload, missing dependencies, path traversal, protected package removal, version and sequence rollback, invalid A/B slot, skipped state transitions and unhealthy boot confirmation.
 
 ## 9. Native implementation gates
 
