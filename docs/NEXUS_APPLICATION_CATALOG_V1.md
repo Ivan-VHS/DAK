@@ -6,7 +6,7 @@
 
 ## 1. Product compatibility
 
-The existing Mora applications remain intact, including Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia, Unify, Sestem, SetupUP, ORGze, Abriganza, Olaab, Concrete Thump, Seu-Beu, Sentinel, Restore, Bridge, Control, Proof, Mora Boost, Duck Desktop, Mora Commons and the existing Reaper, Pytyliki, OPlague and VentuSample workbenches.
+The existing Mora applications remain intact: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia, Unify, Sestem, SetupUP, ORGze, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager, EXEdotEXE, Mora AI, Sentinel, Restore, Bridge, Control, Proof, Mora Boost, Duck Desktop, Red Sparrow and Mora Commons. The existing Reaper, Pytyliki, OPlague and VentuSample workbenches also remain unchanged.
 
 The NEXUS suite is an additional layer of specialist tools. In particular:
 
