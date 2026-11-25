@@ -127,6 +127,7 @@ declare
   v_organization_id uuid;
   v_project_key text;
   v_subject_type text;
+  v_subject_id text;
 begin
   if tg_op = 'DELETE' then
     row_data := to_jsonb(old);
@@ -138,14 +139,22 @@ begin
     v_organization_id := (row_data ->> 'id')::uuid;
     v_project_key := 'ecosystem';
     v_subject_type := 'organization';
+    v_subject_id := row_data ->> 'id';
+  elsif tg_table_name = 'ecosystem_memberships' then
+    v_organization_id := (row_data ->> 'organization_id')::uuid;
+    v_project_key := 'ecosystem';
+    v_subject_type := 'membership';
+    v_subject_id := row_data ->> 'user_id';
   elsif tg_table_name = 'ecosystem_projects' then
     v_organization_id := (row_data ->> 'organization_id')::uuid;
     v_project_key := row_data ->> 'project_key';
     v_subject_type := 'project';
+    v_subject_id := row_data ->> 'id';
   elsif tg_table_name = 'ecosystem_artifacts' then
     v_organization_id := (row_data ->> 'organization_id')::uuid;
     v_project_key := row_data ->> 'project_key';
     v_subject_type := 'artifact';
+    v_subject_id := row_data ->> 'id';
   else
     raise exception 'Unsupported ecosystem audit source: %', tg_table_name;
   end if;
@@ -165,7 +174,7 @@ begin
     v_project_key,
     lower(tg_table_name || '.' || tg_op),
     v_subject_type,
-    row_data ->> 'id',
+    v_subject_id,
     jsonb_build_object('source_table', tg_table_name, 'operation', tg_op)
   );
 
@@ -178,6 +187,11 @@ revoke all on function private.append_ecosystem_audit_event() from public, anon,
 drop trigger if exists ecosystem_organizations_audit on public.ecosystem_organizations;
 create trigger ecosystem_organizations_audit
 after insert or update or delete on public.ecosystem_organizations
+for each row execute function private.append_ecosystem_audit_event();
+
+drop trigger if exists ecosystem_memberships_audit on public.ecosystem_memberships;
+create trigger ecosystem_memberships_audit
+after insert or update or delete on public.ecosystem_memberships
 for each row execute function private.append_ecosystem_audit_event();
 
 drop trigger if exists ecosystem_projects_audit on public.ecosystem_projects;

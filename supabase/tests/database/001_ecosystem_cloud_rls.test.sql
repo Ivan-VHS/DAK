@@ -58,8 +58,8 @@ select extensions.is(
   (select count(*)::integer
    from pg_trigger
    where not tgisinternal
-     and tgname in ('ecosystem_organizations_audit', 'ecosystem_projects_audit', 'ecosystem_artifacts_audit')),
-  3,
+     and tgname in ('ecosystem_organizations_audit', 'ecosystem_memberships_audit', 'ecosystem_projects_audit', 'ecosystem_artifacts_audit')),
+  4,
   'organization, project and artifact mutations have audit triggers'
 );
 
