@@ -71,7 +71,7 @@ const LOCALE_TEXT = {
     dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы",
     routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства",
     expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН",
-    catalogSearchPlaceholder:"Найти приложение или задачу", catalogSearchLabel:"Поиск приложений",
+    catalogSearchPlaceholder:"Найти приложение или задачу", catalogSearchLabel:"Поиск приложений", catalogCategories:"Категории приложений",
     allAppsFilter:"Все", creativeFilter:"Творчество", workFilter:"Работа",
     systemFilter:"Система", workbenchesFilter:"Инструменты"
   },
@@ -82,7 +82,7 @@ const LOCALE_TEXT = {
     dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务",
     routines:"场景", compass:"指南针", games:"游戏", devices:"设备",
     expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线",
-    catalogSearchPlaceholder:"搜索应用或任务", catalogSearchLabel:"搜索应用",
+    catalogSearchPlaceholder:"搜索应用或任务", catalogSearchLabel:"搜索应用", catalogCategories:"应用分类",
     allAppsFilter:"全部", creativeFilter:"创作", workFilter:"工作",
     systemFilter:"系统", workbenchesFilter:"开发工具"
   }
