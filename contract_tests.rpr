@@ -18,7 +18,9 @@ import "duckos/storage/crdt.rpr" as crdt
 import "duckos/system/three_media.rpr" as media
 import "duckos/system/telemetry.rpr" as telemetry
 import "duckos/ui/theme.rpr" as theme
+import "duckos/ui/glass.rpr" as glass
 import "duckos/ui/motion.rpr" as motion
+import "duckos/ui/motion_language.rpr" as motion_language
 import "duckos/storage/history.rpr" as history
 import "duckos/ui/workspace.rpr" as workspace
 import "duckos/system/prefetch.rpr" as prefetch
@@ -391,5 +393,61 @@ assert(not native_bridge["event_valid"](bridge_oversized), "native bridge reject
 
 make bridge_unknown := [1, 4, 9004, 77, 0, "shell.execute", 8, 1700000003]
 assert(not native_bridge["event_valid"](bridge_unknown), "native bridge rejects unknown operations")
+
+
+# Industrial Glass material roles, layer limits and accessibility fallbacks.
+assert(glass["material_role_valid"]("background"), "background is a supported glass role")
+assert(glass["material_role_valid"]("interactive"), "interactive is a supported material role")
+assert(not glass["material_role_valid"]("liquid-metal"), "unknown material role is rejected")
+assert(glass["material_fill"]("background") == "#070707", "background glass uses the shell black")
+assert(glass["material_fill"]("content") == "#111111", "content glass uses the surface black")
+assert(glass["material_fill"]("interactive") == "#1B1B1B", "interactive controls use a solid raised surface")
+assert(glass["material_opacity"]("background") == 0.88, "background glass retains a dark high-opacity base")
+assert(glass["material_opacity"]("modal") == 0.94, "modal glass isolates foreground content")
+assert(glass["material_blur_px"]("interactive") == 0, "interactive controls must not blur their backdrop")
+assert(glass["material_blur_px"]("background") == 28, "background blur has its own token")
+assert(glass["material_blur_px"]("content") == 18, "content blur is distinct from background blur")
+assert(glass["material_blur_px"]("modal") == 32, "modal blur has its own token")
+assert(glass["glass_depth_valid"](0), "root glass layer is valid")
+assert(glass["glass_depth_valid"](2), "two nested glass layers are allowed")
+assert(not glass["glass_depth_valid"](3), "glass nesting is capped at two")
+assert(glass["nested_glass_valid"](1, "modal"), "a second glass layer is allowed")
+assert(not glass["nested_glass_valid"](2, "modal"), "a third glass layer is rejected")
+assert(glass["nested_glass_valid"](2, "interactive"), "solid controls do not consume a backdrop layer")
+assert(glass["material_policy"]("modal", false, false) == ["modal", "#111111", 0.94, 32, 0.035], "modal material resolves to its declared profile")
+assert(glass["material_policy"]("modal", true, false) == ["solid-fallback", "#070707", 0.98, 0, 0], "Reduced Transparency disables blur and grain")
+assert(glass["material_policy"]("content", false, true) == ["solid-fallback", "#070707", 0.98, 0, 0], "Eco visuals use the solid fallback")
+assert(glass["active_edge_color"](true) == "#FFD700", "focused glass uses a crisp gold edge")
+assert(glass["active_edge_color"](false) == "#333333", "inactive glass uses its structural border")
+assert(glass["text_opacity"]("primary") == 1, "primary text opacity is full white")
+assert(glass["text_opacity"]("secondary") == 0.72, "secondary text has a separate opacity token")
+assert(glass["text_opacity"]("tertiary") == 0.42, "tertiary text has a separate opacity token")
+assert(glass["text_opacity"]("unknown") == -1, "unknown text roles fail closed")
+
+# Digital Physics motion, deterministic poses and frame budgets.
+assert(motion_language["motion_mode"](false, false) == "digital-physics", "full motion uses Digital Physics")
+assert(motion_language["motion_mode"](true, false) == "static", "Reduced Motion selects static poses")
+assert(motion_language["motion_mode"](false, true) == "static", "Eco visuals select static poses")
+assert(motion_language["duration_ms"]("feedback", false, false) == 120, "direct feedback uses the fast motion token")
+assert(motion_language["duration_ms"]("panel", false, false) == 180, "panel movement uses the standard motion token")
+assert(motion_language["duration_ms"]("spatial", false, false) == 220, "spatial movement uses the spatial token")
+assert(motion_language["duration_ms"]("emphasis", false, false) == 280, "emphasis stays below the 300 ms limit")
+assert(motion_language["duration_ms"]("panel", true, false) == 0, "Reduced Motion commits the final pose immediately")
+assert(motion_language["duration_ms"]("panel", false, true) == 0, "Eco mode commits nonessential transitions immediately")
+assert(not motion_language["duration_valid"](301, false), "nonessential motion may not exceed 300 ms")
+assert(motion_language["duration_valid"](100, true), "essential feedback can be immediate")
+assert(not motion_language["duration_valid"](101, true), "essential action feedback is tightly bounded")
+assert(motion_language["curve_valid"]("linear", "progress"), "linear interpolation is valid for factual progress")
+assert(not motion_language["curve_valid"]("linear", "spatial"), "spatial motion must use an approved easing curve")
+assert(motion_language["curve_valid"]("spring", "spatial"), "spring easing is valid for spatial motion")
+assert(motion_language["transition_policy"]("closed", "open", false, false) == "pose-to-pose", "normal state transitions use canonical poses")
+assert(motion_language["transition_policy"]("opening", "closed", true, false) == "retarget-from-current", "interrupted transitions retarget from current geometry")
+assert(motion_language["transition_policy"]("opening", "closed", false, true) == "commit-target", "Reduced Motion resolves directly to its target pose")
+assert(motion_language["transition_policy"]("open", "open", false, false) == "no-op", "identical poses do not animate")
+assert(motion_language["spring_profile_valid"](1, 1, 0.001), "bounded spring profile is accepted")
+assert(not motion_language["spring_profile_valid"](0, 1, 0.001), "nonpositive spring stiffness is rejected")
+assert(motion_language["refresh_budget_valid"](144, 6944), "144 Hz frame interval is within budget")
+assert(not motion_language["refresh_budget_valid"](144, 7000), "late frame is outside the 144 Hz budget")
+assert(not motion_language["refresh_budget_valid"](30, 33333), "desktop motion profile rejects refresh below 60 Hz")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"
