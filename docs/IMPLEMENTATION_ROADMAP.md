@@ -10,7 +10,7 @@ DuckOS currently combines three distinct surfaces. They must never be conflated:
 
 1. **Mora browser shell:** application discovery, local preferences, local tools and UI workflows. Browser code cannot enforce kernel privileges or control host devices.
 2. **Reaper reference contracts:** executable policy models for boot sequencing, memory arithmetic, scheduling decisions, IPC admission, capabilities, service restart and telemetry classification. Passing these tests proves policy behavior on the Reaper reference runtime only.
-3. **Native foundation:** a host-buildable C11 boot-handoff validation library plus an experimental x86_64 freestanding stage-0 entry and reproducible Limine BIOS/UEFI ISO pipeline. The stage-0 target is not yet a process runtime, scheduler, driver stack or bootable desktop OS.
+3. **Native foundation:** a host-buildable C11 boot-handoff validation library plus an experimental x86_64 freestanding Stage 1 kernel and reproducible Limine BIOS/UEFI ISO pipeline. The Stage 1 target is not yet a process runtime, scheduler, driver stack or bootable desktop OS.
 
 | Maturity | Required evidence |
 |---|---|
@@ -46,7 +46,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D1 — Freestanding target and firmware handoff
 
-**Status: Partial — experimental x86_64 Limine stage 0.**
+**Status: Partial — experimental x86_64 Limine Stage 1.**
 
 - First target selected: x86_64 with BIOS and UEFI firmware through the pinned Limine v12.11.1 boot protocol.
 - A freestanding GNU x86_64 ELF profile, high-half linker layout, entry symbol, Limine stack request and COM1 diagnostic path are present.
@@ -54,7 +54,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 - The Limine loader remains an attributed, pinned third-party component; this milestone does not implement an in-house UEFI application or bootloader.
 - Secure Boot signing/enrolment, verified boot policy, AP startup and other firmware services remain separate future work.
 
-**Stage-0 exit evidence: passed.** The reproducible freestanding kernel and ISO build, ISO checksum, host Boot Info v1 CTest, and pinned QEMU BIOS plus OVMF UEFI runs succeeded. Both serial logs contain `DUCKOS_BOOT_OK stage=1`; see [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). The wider D1 milestone remains partial until allocator, page tables, interrupt/timer setup and a supported freestanding Reaper target are implemented and verified.
+**Stage-1 boot evidence: passed.** The reproducible freestanding kernel and ISO build, ISO checksum, host Boot Info v1 CTest, and pinned QEMU BIOS plus OVMF UEFI runs succeeded. Both serial logs contain `DUCKOS_BOOT_OK stage=1`; see [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). The wider D1 milestone remains partial until reusable memory management, page tables, interrupt/timer setup and a supported freestanding Reaper target are implemented and verified.
 
 ### D2 — Physical memory and virtual address spaces
 
