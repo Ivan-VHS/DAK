@@ -39,7 +39,7 @@
 - Consumes: `dak/kernel/memory.rpr::region_fits`, `dak/platform/targets.rpr::architecture_known`.
 - Produces: `target_valid`, `admission`, `partition_valid`, `layout_valid`, `transition_valid`, `commit_policy`.
 
-- [x] Write tests for explicit consent, publisher/digest/signature evidence, recovery readiness, BIOS/UEFI layout, partition overlap, skipped states and unverified boot.
+- [x] Write tests for explicit consent, publisher/digest/signature evidence, recovery readiness, canonical A/B slot IDs, BIOS/UEFI layout, partition overlap, skipped states and unverified boot.
 - [x] Implement policy module; all results are plan-only and never write storage.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -67,7 +67,7 @@
 - Consumes: `dak/platform/targets.rpr`, `dak/security/capabilities.rpr`, `dak/storage/vfs.rpr`.
 - Produces: `package_valid`, `dependencies_satisfied`, `paths_valid`, `admission`, `transition_valid`, `remove_policy`.
 
-- [x] Test malformed manifests, publisher/digest fields, dependency absence, path traversal, capability denial and protected/dependent removal.
+- [x] Test malformed manifests, publisher/digest fields, dependency absence, dot traversal, embedded POSIX/Windows separators, capability denial and protected/dependent removal.
 - [x] Implement bounded manifest and transaction policy; no payload is extracted or executed.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -79,9 +79,9 @@
 
 **Interfaces:**
 - Consumes: `dak/platform/targets.rpr`.
-- Produces: `manifest_valid`, `version_newer`, `admission`, `inactive_slot`, `transition_valid`, `boot_result_policy`.
+- Produces: `manifest_valid`, `version_newer`, `admission`, `inactive_slot`, `activation_policy`, `transition_valid`, `boot_result_policy`.
 
-- [x] Test signature state, architecture, version/sequence rollback, inactive slot, skipped states and failed boot.
+- [x] Test signature state, architecture, version/sequence rollback, inactive-slot arming, boot-entry validation, skipped states and failed boot.
 - [x] Implement A/B update and boot-confirmation policy; no slot is written or switched.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -95,6 +95,7 @@
 - Produces: `record_valid`, `chain_valid`, `append_policy`.
 
 - [x] Test valid hash-linked events, missing request identity, sequence gaps, broken digest links, bounded capacity and append-only ordering.
+- [x] Test duplicate device-resource conflicts as a mandatory driver-admission gate.
 - [x] Implement append-intent validation; durable storage and tamper-evident signing remain provider responsibilities.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
