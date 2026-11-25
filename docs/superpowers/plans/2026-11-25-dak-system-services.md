@@ -51,9 +51,9 @@
 
 **Interfaces:**
 - Consumes: `dak/drivers/abi.rpr`, `dak/drivers/orchestrator.rpr`, `dak/platform/targets.rpr`.
-- Produces: `descriptor_valid`, `admission`, `transition_valid`, `unload_policy`.
+- Produces: `descriptor_valid`, `admission`, `resource_admission`, `transition_valid`, `unload_policy`.
 
-- [x] Test publisher, digest and signature state; device-bus and architecture gates; lifecycle skips and active DMA.
+- [x] Test publisher, digest and signature state; device-bus and architecture gates; resource conflicts; lifecycle skips and active DMA.
 - [x] Implement admission and safe-unload decision policy; no driver is loaded or mapped.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -94,7 +94,7 @@
 **Interfaces:**
 - Produces: `record_valid`, `chain_valid`, `append_policy`.
 
-- [x] Test valid event records, missing request identity, sequence gaps, bounded capacity and append-only ordering.
+- [x] Test valid hash-linked events, missing request identity, sequence gaps, broken digest links, bounded capacity and append-only ordering.
 - [x] Implement append-intent validation; durable storage and tamper-evident signing remain provider responsibilities.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
