@@ -1,0 +1,60 @@
+# Per-application admission and capability policy.
+# A policy decision is not a kernel-enforced process sandbox.
+
+import "capabilities.rpr" as capabilities
+
+export craft manifest_valid(manifest) {
+    when size(manifest) != 8 { yield false }
+    when manifest[0] == "" or manifest[1] == "" or manifest[6] == "" { yield false }
+    when manifest[2] != "verified" or (manifest[3] != "trusted" and manifest[3] != "validated") { yield false }
+    when manifest[4] < 1048576 or manifest[4] > 2147483648 { yield false }
+    when manifest[5] < 1 or manifest[5] > 100 { yield false }
+    yield true
+}
+
+export craft admission_decision(manifest, granted, resource_budget) {
+    when size(resource_budget) != 2 or not manifest_valid(manifest) { yield "reject-invalid-manifest" }
+    when resource_budget[0] <= 0 or resource_budget[1] <= 0 or resource_budget[1] > 100 { yield "reject-invalid-budget" }
+    when manifest[4] > resource_budget[0] or manifest[5] > resource_budget[1] { yield "reject-resource-budget" }
+    when not capabilities["child_is_subset"](granted, manifest[7]) { yield "reject-capability-amplification" }
+    yield "admit-policy-only"
+}
+
+export craft filesystem_access_decision(manifest, requested_root_id, action, granted) {
+    when not manifest_valid(manifest) or requested_root_id == "" { yield "deny-invalid-sandbox" }
+    when requested_root_id != manifest[6] { yield "deny-outside-sandbox-root" }
+    when action == "read" {
+        when capabilities["permits"](granted, "fs.read") { yield "allow-policy-only" }
+        yield "deny-capability"
+    }
+    when action == "write" {
+        when capabilities["permits"](granted, "fs.write") { yield "allow-policy-only" }
+        yield "deny-capability"
+    }
+    yield "deny-unsupported-action"
+}
+
+export craft network_access_decision(manifest, granted, user_consent) {
+    when not manifest_valid(manifest) { yield "deny-invalid-manifest" }
+    when not user_consent { yield "consent-required" }
+    when not capabilities["permits"](granted, "network.client") { yield "deny-capability" }
+    yield "allow-policy-only"
+}
+
+export craft permission_request_decision(requested_capability, granted, consent_recorded) {
+    when requested_capability == "" { yield "reject-invalid-permission" }
+    when capabilities["permits"](granted, requested_capability) { yield "already-granted" }
+    when consent_recorded { yield "consent-recorded-awaiting-persisted-grant" }
+    yield "consent-required"
+}
+
+export craft child_manifest_valid(parent, child) {
+    when not manifest_valid(parent) or not manifest_valid(child) { yield false }
+    when parent[0] == child[0] or parent[6] != child[6] { yield false }
+    when child[4] > parent[4] or child[5] > parent[5] { yield false }
+    yield capabilities["child_is_subset"](parent[7], child[7])
+}
+
+export craft execution_boundary() {
+    yield "policy-only-no-execution"
+}

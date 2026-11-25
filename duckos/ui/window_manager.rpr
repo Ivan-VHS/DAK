@@ -1,0 +1,105 @@
+# DuckWindow policy for the native Duck Desktop.
+# Geometry and stacking are admission decisions, not compositor commands.
+
+import "ddp.rpr" as ddp
+
+export craft role_valid(role) {
+    yield role == "normal" or role == "dialog" or role == "utility" or role == "desktop" or role == "panel" or role == "notification" or role == "lock"
+}
+
+export craft state_valid(state) {
+    yield state == "created" or state == "configured" or state == "mapped" or state == "focused" or state == "unfocused" or state == "minimized" or state == "maximized" or state == "tiled" or state == "fullscreen" or state == "closing" or state == "destroyed"
+}
+
+export craft system_role(role) {
+    yield role == "desktop" or role == "panel" or role == "notification" or role == "lock"
+}
+
+export craft window_valid(window, surface) {
+    when size(window) != 16 or not ddp["surface_valid"](surface) { yield false }
+    when window[0] <= 0 or window[1] <= 0 or window[2] == "" or window[4] == "" { yield false }
+    when window[2] != surface[0] or window[1] != surface[1] { yield false }
+    when not role_valid(window[3]) or not state_valid(window[10]) { yield false }
+    when system_role(window[3]) and not window[15] { yield false }
+    when window[7] < 160 or window[7] > 16384 or window[8] < 24 or window[8] > 16384 { yield false }
+    when window[3] != "panel" and window[3] != "notification" and window[3] != "desktop" and window[3] != "lock" and window[8] < 120 { yield false }
+    when window[13] < 0 or window[13] > 65535 or window[11] <= 0 or window[12] <= 0 { yield false }
+    yield window[6] >= -32768 and window[6] <= 32767 and window[7] > 0 and window[8] > 0
+}
+
+export craft geometry_valid(window, output) {
+    when size(window) != 16 or size(output) != 3 { yield false }
+    when window[12] != output[0] or output[1] < 320 or output[2] < 200 { yield false }
+    when window[6] < 0 or window[9] < 0 { yield false }
+    yield window[6] + window[7] <= output[1] and window[9] + window[8] <= output[2]
+}
+
+export craft transition_valid(current, next) {
+    when current == "created" and next == "configured" { yield true }
+    when current == "configured" and next == "mapped" { yield true }
+    when current == "mapped" and (next == "focused" or next == "unfocused" or next == "minimized" or next == "maximized" or next == "tiled" or next == "fullscreen" or next == "closing") { yield true }
+    when current == "focused" and (next == "unfocused" or next == "minimized" or next == "maximized" or next == "tiled" or next == "fullscreen" or next == "closing") { yield true }
+    when current == "unfocused" and (next == "focused" or next == "minimized" or next == "maximized" or next == "tiled" or next == "fullscreen" or next == "closing") { yield true }
+    when current == "minimized" and (next == "mapped" or next == "closing") { yield true }
+    when current == "maximized" or current == "tiled" or current == "fullscreen" {
+        when next == "focused" or next == "unfocused" or next == "closing" { yield true }
+    }
+    when current == "closing" and next == "destroyed" { yield true }
+    yield false
+}
+
+export craft focus_allowed(window) {
+    when size(window) != 16 or not window[14] { yield false }
+    yield window[10] == "mapped" or window[10] == "unfocused" or window[10] == "focused"
+}
+
+export craft stacking_allowed(window, layer) {
+    when size(window) != 16 { yield false }
+    when layer == "normal" { yield not system_role(window[3]) }
+    when layer == "system" { yield window[15] and system_role(window[3]) }
+    when layer == "notification" { yield window[15] and window[3] == "notification" }
+    yield false
+}
+
+export craft rectangles_overlap(left, right) {
+    when size(left) != 4 or size(right) != 4 { yield false }
+    when left[2] <= 0 or left[3] <= 0 or right[2] <= 0 or right[3] <= 0 { yield false }
+    yield left[0] < right[0] + right[2] and right[0] < left[0] + left[2] and left[1] < right[1] + right[3] and right[1] < left[1] + left[3]
+}
+
+export craft notification_overlay_allowed(window, reserved_area) {
+    when size(window) != 16 or size(reserved_area) != 4 { yield false }
+    when window[3] != "dialog" or window[15] { yield true }
+    yield not rectangles_overlap([window[6], window[9], window[7], window[8]], reserved_area)
+}
+
+export craft resize_allowed(layout, override_token_present) {
+    when layout == "tiling" { yield override_token_present }
+    yield layout == "floating" or layout == "dynamic"
+}
+
+export craft tile_cell_valid(window, output, row, column, rows, columns) {
+    when size(window) != 16 or size(output) != 3 { yield false }
+    when rows < 1 or rows > 4 or columns < 1 or columns > 4 { yield false }
+    when row < 0 or row >= rows or column < 0 or column >= columns { yield false }
+    when window[12] != output[0] { yield false }
+    make cell_width := output[1] / columns
+    make cell_height := output[2] / rows
+    make expected_x := column * cell_width
+    make expected_y := row * cell_height
+    make expected_width := cell_width
+    make expected_height := cell_height
+    when column == columns - 1 { change expected_width := output[1] - expected_x }
+    when row == rows - 1 { change expected_height := output[2] - expected_y }
+    yield window[6] == expected_x and window[9] == expected_y and window[7] == expected_width and window[8] == expected_height and window[10] == "tiled"
+}
+
+export craft fullscreen_allowed(window, granted) {
+    when size(window) != 16 or window[10] != "fullscreen" or window[15] { yield false }
+    when window[3] != "normal" and window[3] != "utility" { yield false }
+    vary allowed := false
+    each capability in granted {
+        when capability == "window.fullscreen" { change allowed := true }
+    }
+    yield allowed
+}

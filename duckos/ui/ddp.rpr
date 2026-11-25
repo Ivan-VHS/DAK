@@ -1,0 +1,60 @@
+# Duck Display Protocol v1 admission policy.
+# Validation only: native providers own buffers, fences and presentation.
+
+export craft pixel_bytes(format) {
+    when format == "xrgb8888" or format == "argb8888" { yield 4 }
+    when format == "rgb565" { yield 2 }
+    yield 0
+}
+
+export craft surface_valid(surface) {
+    when size(surface) != 9 { yield false }
+    when surface[0] == "" or surface[1] <= 0 or surface[2] <= 0 { yield false }
+    when surface[3] < 1 or surface[3] > 16384 or surface[4] < 1 or surface[4] > 16384 { yield false }
+    make bytes_per_pixel := pixel_bytes(surface[6])
+    when bytes_per_pixel == 0 or surface[5] < surface[3] * bytes_per_pixel or surface[5] > 65536 { yield false }
+    when surface[5] % bytes_per_pixel != 0 { yield false }
+    when surface[7] < surface[5] * surface[4] or surface[7] > 268435456 { yield false }
+    yield surface[8] == "created" or surface[8] == "configured" or surface[8] == "acknowledged" or surface[8] == "attached" or surface[8] == "committed" or surface[8] == "presented" or surface[8] == "released" or surface[8] == "destroyed"
+}
+
+export craft surface_owned_by(surface, surface_id, owner_pid) {
+    when not surface_valid(surface) { yield false }
+    yield surface[0] == surface_id and surface[1] == owner_pid
+}
+
+export craft transition_valid(current, next) {
+    when current == "created" and next == "configured" { yield true }
+    when current == "configured" and next == "acknowledged" { yield true }
+    when current == "acknowledged" and next == "attached" { yield true }
+    when current == "attached" and next == "committed" { yield true }
+    when current == "committed" and next == "presented" { yield true }
+    when current == "presented" and next == "released" { yield true }
+    when current == "released" and next == "attached" { yield true }
+    when current != "destroyed" and next == "destroyed" { yield true }
+    yield false
+}
+
+export craft configure_ack_valid(serial, expected_serial, now_ms, deadline_ms) {
+    when serial <= 0 or expected_serial <= 0 or deadline_ms < 0 or now_ms < 0 { yield false }
+    yield serial == expected_serial and now_ms <= deadline_ms
+}
+
+export craft damage_rect_valid(rect, surface) {
+    when size(rect) != 4 or not surface_valid(surface) { yield false }
+    when rect[0] < 0 or rect[1] < 0 or rect[2] <= 0 or rect[3] <= 0 { yield false }
+    yield rect[0] + rect[2] <= surface[3] and rect[1] + rect[3] <= surface[4]
+}
+
+export craft input_route_allowed(target_pid, focused_pid, route, system_gesture, accessibility_grant) {
+    when target_pid <= 0 { yield false }
+    when route == "focused-client" { yield focused_pid > 0 and target_pid == focused_pid }
+    when route == "system-gesture" { yield system_gesture }
+    when route == "accessibility" { yield accessibility_grant == "input.route.accessibility" }
+    yield false
+}
+
+export craft portal_payload_valid(byte_count, maximum_bytes, consent_recorded) {
+    when byte_count < 0 or maximum_bytes <= 0 or byte_count > maximum_bytes { yield false }
+    yield consent_recorded
+}
