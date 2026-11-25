@@ -132,9 +132,7 @@ duckos_framebuffer_status duckos_framebuffer_clear(
     duckos_framebuffer_target *target, uint8_t red, uint8_t green, uint8_t blue)
 {
     duckos_framebuffer_status status;
-    const uint32_t color = target == NULL
-        ? 0u
-        : encode_rgb(target, red, green, blue);
+    uint32_t color;
     uint32_t y;
 
     status = duckos_framebuffer_validate_target(target);
@@ -142,6 +140,7 @@ duckos_framebuffer_status duckos_framebuffer_clear(
         return status;
     }
 
+    color = encode_rgb(target, red, green, blue);
     for (y = 0u; y < target->height; ++y) {
         volatile uint32_t *row = (volatile uint32_t *)(void *)(
             target->pixels + (size_t)y * (size_t)target->pitch_bytes);
