@@ -1,9 +1,11 @@
-const CACHE = "mora-shell-v9-ecosystem";
+const CACHE = "mora-shell-v10-i18n";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./i18n.js",
+  "./i18n.v1.json",
   "./commons-catalog.js",
   "./core.js",
   "./local-store.js",
