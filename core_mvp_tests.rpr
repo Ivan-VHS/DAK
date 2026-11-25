@@ -11,6 +11,7 @@ import "duckos/security/mac.rpr" as mac
 import "duckos/platform/targets.rpr" as targets
 import "duckos/services/init.rpr" as init
 import "duckos/ui/accessibility.rpr" as accessibility
+import "duckos/nexus/services.rpr" as nexus
 
 # Process lifecycle, spawn attenuation, accounting and graceful stop.
 make parent_process := [1, 0, 100, 1048576, 80, "running", ["fs.read", "process.spawn"]]
@@ -123,3 +124,24 @@ assert(accessibility["window_state_valid"]([2, "tiled", 0, 0, 800, 600, 1]), "ti
 assert(not accessibility["window_state_valid"]([3, "unknown", 0, 0, 800, 600, 0]), "unknown window mode is rejected")
 assert(accessibility["accessibility_profile_valid"]([1000, true, false, true, false]), "accessibility profile accepts scale and boolean preferences")
 assert(not accessibility["accessibility_profile_valid"]([3000, true, false, true, false]), "unbounded accessibility scaling is rejected")
+
+# NEXUS component and internal-service registry contracts.
+make sentinel_descriptor := ["kernel_sentinel", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["kernel_core", "security_module"], 32768, 30000]
+make invalid_service_descriptor := ["kernel_sentinel", "Ivan-VHS/DuckOS", "specified", "running", ["kernel_core", "security_module"], 32768, 30000]
+assert(nexus["component_known"]("kernel_core"), "NEXUS component ID is recognised")
+assert(not nexus["component_known"]("KernelCore"), "component IDs remain canonical and case-sensitive")
+assert(nexus["service_known"]("kernel_sentinel"), "KERNEL_SENTINEL service ID is recognised")
+assert(not nexus["service_known"]("unknown_service"), "unknown service ID is rejected")
+assert(nexus["service_owner"]("memory_forge") == "Ivan-VHS/DuckOS", "DuckOS owns internal system-service lifecycle")
+assert(nexus["service_runtime_state"]("vector_gateway") == "not_implemented", "service descriptors do not claim a runnable daemon")
+assert(nexus["service_dependency_allowed"]("vector_gateway", "network_stack"), "VECTOR_GATEWAY may depend on NetworkStack")
+assert(not nexus["service_dependency_allowed"]("vector_gateway", "graphics_engine"), "service dependency outside its contract is rejected")
+assert(nexus["service_descriptor_valid"](sentinel_descriptor), "bounded KERNEL_SENTINEL descriptor is valid")
+assert(not nexus["service_descriptor_valid"](invalid_service_descriptor), "descriptor cannot promote a specified service to running")
+assert(not nexus["service_descriptor_valid"](["memory_forge", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["network_stack"], 32768, 30000]), "descriptor cannot invent a dependency")
+assert(nexus["activation_gate"](false, true, true, true, true) == "blocked-process-model", "service activation requires a process model")
+assert(nexus["activation_gate"](true, false, true, true, true) == "blocked-service-supervisor", "service activation requires lifecycle supervision")
+assert(nexus["activation_gate"](true, true, false, true, true) == "blocked-authenticated-ipc", "service activation requires authenticated IPC")
+assert(nexus["activation_gate"](true, true, true, false, true) == "blocked-kernel-capabilities", "service activation requires kernel-enforced capabilities")
+assert(nexus["activation_gate"](true, true, true, true, false) == "blocked-implementation-evidence", "service activation requires implementation tests")
+assert(nexus["activation_gate"](true, true, true, true, true) == "eligible-for-separate-review", "complete prerequisites permit review but never automatic launch")
