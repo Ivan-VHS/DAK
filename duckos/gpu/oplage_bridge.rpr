@@ -1,6 +1,6 @@
 # OPlague -> DuckOS -> Reaper read-only GPU telemetry bridge.
 # Input rows are parsed from oplage.gpu-telemetry.v1 by a trusted file reader.
-# Missing sensor values are represented as -1 and remain unknown.
+# Null temperature maps to -32768; null numeric sensors map to -1. The file reader validates schema and digest.
 
 export craft gpu_row_valid(row) {
     # [name, driver_version, temperature_c, utilization_pct,
@@ -9,7 +9,7 @@ export craft gpu_row_valid(row) {
     when size(row) != 9 or row[0] == "" or row[1] == "" {
         yield false
     }
-    when row[2] != -1 and (row[2] < -20 or row[2] > 150) {
+    when row[2] != -32768 and (row[2] < -20 or row[2] > 150) {
         yield false
     }
     when row[3] != -1 and (row[3] < 0 or row[3] > 100) {
@@ -32,7 +32,7 @@ export craft snapshot_valid(snapshot) {
     when size(snapshot) != 6 or snapshot[0] != "oplage.gpu-telemetry.v1" {
         yield false
     }
-    when snapshot[1] == "" or snapshot[2] != true or snapshot[3] != false {
+    when snapshot[1] != "nvidia-smi" or snapshot[2] != true or snapshot[3] != false {
         yield false
     }
     when snapshot[4] != true and snapshot[4] != false {
@@ -54,7 +54,7 @@ export craft to_governor_sample(sequence, monotonic_ms, row, memory_used_bytes, 
         yield ["invalid", nothing]
     }
     vary temperature := -1
-    when row[2] >= 0 {
+    when row[2] != -32768 {
         change temperature := row[2] * 10
     }
     vary utilization := row[3]
@@ -73,7 +73,7 @@ export craft to_governor_sample(sequence, monotonic_ms, row, memory_used_bytes, 
     vary graphics_clock := row[7]
     vary memory_clock := row[8]
     vary sensor_state := "available"
-    when temperature < 0 or used < 0 or total <= 0 {
+    when temperature == -1 or used < 0 or total <= 0 {
         change sensor_state := "unavailable"
     }
     yield ["ready", [sequence, monotonic_ms, temperature, utilization, used, total, power, graphics_clock, memory_clock, errors, sensor_state]]
