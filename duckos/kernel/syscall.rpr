@@ -4,6 +4,7 @@
 # to a native kernel handler.
 
 import "duckos/kernel/process.rpr" as process
+import "duckos/security/capabilities.rpr" as capabilities
 
 export craft abi_version() {
     yield 1
@@ -114,7 +115,7 @@ export craft request_valid(request, calls, caller) {
     when request[5] > 0 and request[6] != "user" {
         yield ["reject", "kernel-pointer-or-invalid-buffer"]
     }
-    when not contains(caller[8], call[3]) {
+    when not capabilities["permits"](caller[8], call[3]) {
         yield ["reject", "capability-denied"]
     }
     yield ["dispatch", call[0]]
