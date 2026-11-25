@@ -32,7 +32,10 @@ export craft pci_location_valid(device) {
 }
 
 export craft pci_device_is_gpu(device) {
-    yield pci_location_valid(device) and device[6] == 3
+    when not pci_location_valid(device) {
+        yield false
+    }
+    yield device[6] == 3
 }
 
 export craft vendor_family(vendor_id) {
@@ -410,11 +413,11 @@ export craft power_governor_action(sample, soft_limit_mC, hard_limit_mC, stable_
     when not telemetry_valid(sample) or soft_limit_mC <= 0 or hard_limit_mC <= soft_limit_mC or stable_max_clock_mhz <= 0 {
         yield "reject-invalid-governor-input"
     }
-    when sample[6] > 0 {
-        yield "restore-last-known-good-profile-policy-only"
-    }
     when sample[0] >= hard_limit_mC {
         yield "emergency-throttle-policy-only"
+    }
+    when sample[6] > 0 {
+        yield "restore-last-known-good-profile-policy-only"
     }
     when sample[0] >= soft_limit_mC or sample[2] > stable_max_clock_mhz {
         yield "reduce-to-validated-frequency-policy-only"
@@ -441,6 +444,9 @@ export craft frequency_request_valid(current_mhz, requested_mhz, minimum_mhz, st
 # R9 — Security, isolation and recovery.
 export craft gpu_access_decision(context, caller_pid, caller_domain, required_capability, device_online, integrity_valid) {
     when not gpu_context_valid(context) or context[5] == "destroyed" or context[5] == "lost" {
+        yield "deny-inactive-context"
+    }
+    when context[5] != "running" {
         yield "deny-inactive-context"
     }
     when caller_pid != context[1] or caller_domain != context[2] {
@@ -511,11 +517,11 @@ export craft dashboard_alert(snapshot, soft_limit_mC, hard_limit_mC) {
     when not dashboard_snapshot_valid(snapshot) {
         yield "invalid-or-stale-snapshot"
     }
-    when snapshot[7] > 0 {
-        yield "hardware-errors"
-    }
     when snapshot[4] >= hard_limit_mC {
         yield "critical-thermal"
+    }
+    when snapshot[7] > 0 {
+        yield "hardware-errors"
     }
     when snapshot[4] >= soft_limit_mC or snapshot[1] * 100 >= snapshot[0] * 95 {
         yield "warning-resource-pressure"
@@ -530,5 +536,11 @@ export craft dashboard_residency_basis_points(snapshot) {
     when not dashboard_snapshot_valid(snapshot) {
         yield -1
     }
-    yield (snapshot[1] / snapshot[0]) * 10000
+    # Normalize to MiB first so the intermediate product remains bounded.
+    make total_mib := snapshot[0] / 1048576
+    make resident_mib := snapshot[1] / 1048576
+    when total_mib <= 0 {
+        yield -1
+    }
+    yield resident_mib * 10000 / total_mib
 }
