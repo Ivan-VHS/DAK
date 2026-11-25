@@ -33,7 +33,7 @@ try {
     await window.waitFor({ state: "hidden" });
   }
 
-  await page.locator('[data-app="workspace"]').click();
+  await page.locator('.app-tile[data-app="workspace"]').click();
   await page.locator('.app-window[data-window="workspace"]').waitFor({ state: "visible" });
   assert.equal(pageErrors.length, 0, "Mora must not produce uncaught browser errors: " + pageErrors.join("; "));
   console.log("Mora browser smoke test passed: desktop loaded, four native workbench panels opened, source links resolved, windows closed.");
