@@ -46,7 +46,7 @@
       "id": "oplague",
       "repository": "Ivan-VHS/OPlague",
       "path": "projects/oplague",
-      "commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "commit": "ef63eed05a0235b94136630bcecc476353104586",
       "license": "Apache-2.0",
       "build": "Python 3.12 / Tk user-space application and tests",
       "scope": "read-only host device and driver evidence"
