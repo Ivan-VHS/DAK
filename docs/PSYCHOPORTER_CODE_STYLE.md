@@ -28,7 +28,7 @@
 - подробный там, где скрытая цена, инвариант или риск требуют объяснения;
 - честный о состоянии реализации и границах гарантий.
 
-Психопортер дополняет [Ivan-VHS Code Style](https://github.com/Ivan-VHS/Reaper/blob/main/docs/IVAN_VHS_CODE_STYLE.md), а не создаёт конкурирующие правила форматирования или новый язык программирования.
+Психопортер дополняет [Ivan-VHS Code Style](https://github.com/Ivan-VHS/Reaper/blob/main/docs/IVAN_VHS_CODE_STYLE.md), а не создаёт конкурирующие правила форматирования или новый язык программирования. Для Reaper этот общий профиль конкретизируется языковым [Кодексом Psychoporter 666](https://github.com/Ivan-VHS/Reaper/blob/main/docs/PSYCHOPORTER_666.md), который отдельно фиксирует текущую грамматику, целевые возможности и host/platform boundaries.
 
 ## 3. Именование: точность без многословия
 
