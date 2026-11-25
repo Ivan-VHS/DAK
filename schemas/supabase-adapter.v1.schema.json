@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/supabase-adapter.v1.schema.json",
+  "title": "Ivan-VHS Supabase adapter contract",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "project",
+    "role",
+    "data_policy",
+    "capabilities",
+    "network_policy",
+    "security",
+    "integration_status"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ivan-vhs.supabase-adapter.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "project": {
+      "enum": ["duckos", "reaper", "pytyliki", "ventusample", "oplague"]
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "data_policy": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "enum": [
+          "local-only",
+          "opt-in-sync-candidate",
+          "opt-in-share-candidate",
+          "explicit-redacted-export-only",
+          "never-upload"
+        ]
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["auth", "sync", "storage", "realtime", "edge_functions"],
+      "properties": {
+        "auth": { "$ref": "#/$defs/capability_state" },
+        "sync": { "$ref": "#/$defs/capability_state" },
+        "storage": { "$ref": "#/$defs/capability_state" },
+        "realtime": { "$ref": "#/$defs/capability_state" },
+        "edge_functions": { "$ref": "#/$defs/capability_state" }
+      },
+      "additionalProperties": false
+    },
+    "network_policy": {
+      "type": "object",
+      "required": [
+        "default_network_access",
+        "explicit_user_consent",
+        "kernel_network_dependency",
+        "realtime_audio_path",
+        "remote_execution"
+      ],
+      "properties": {
+        "default_network_access": { "const": "disabled" },
+        "explicit_user_consent": { "const": true },
+        "kernel_network_dependency": { "const": false },
+        "realtime_audio_path": { "const": false },
+        "remote_execution": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "security": {
+      "type": "object",
+      "required": [
+        "service_role_in_client",
+        "secrets_in_repository",
+        "sensitive_payload_logging",
+        "owner_scoped_rls_required"
+      ],
+      "properties": {
+        "service_role_in_client": { "const": false },
+        "secrets_in_repository": { "const": false },
+        "sensitive_payload_logging": { "const": false },
+        "owner_scoped_rls_required": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "integration_status": {
+      "enum": ["contract-only", "schema-foundation", "implemented", "deployed"]
+    }
+  },
+  "$defs": {
+    "capability_state": {
+      "enum": ["not-enabled", "planned-opt-in", "contract-only", "schema-foundation", "implemented", "deployed"]
+    }
+  },
+  "additionalProperties": false
+}
