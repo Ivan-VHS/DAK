@@ -197,13 +197,13 @@ Do not claim DAK is a complete or usable desktop operating system until D1 throu
 
 ## D8 — First-party system-service policy layer
 
-**Status: Reaper reference-runtime contracts added; native providers pending.**
+**Status: Reaper reference-runtime policy contracts added; native providers pending.**
 
-- **Installer:** validates target identity/architecture, consent, verified source and recovery readiness; validates an aligned, ordered, non-overlapping EFI + system A/B + recovery layout.
-- **Driver Runtime:** validates descriptor/provenance state, architecture, bus, ABI, requested capabilities, lifecycle transitions and IRQ/DMA/device quiescence before a future unload.
-- **Package Manager:** validates bounded manifests, exact architecture/ABI, dependency availability, capability subsets, path components and protected-package removal.
+- **Installer:** validates target identity/architecture, consent, publisher/digest/signature evidence and recovery readiness; validates aligned, ordered BIOS/UEFI + system A/B + recovery layouts.
+- **Driver Runtime:** validates publisher/digest/signature evidence, architecture, bus, ABI, requested capabilities, lifecycle transitions and IRQ/DMA/device quiescence before a future unload.
+- **Package Manager:** validates bounded manifests with publisher/digest evidence, exact architecture/ABI, dependency availability, capability subsets, path components and protected-package removal.
 - **Update System:** validates signed-manifest state, strictly increasing version and monotonic sequence, inactive A/B slot selection, bounded boot health and rollback.
 
-The implementation is in Reaper modules under `dak/system/`, `dak/drivers/` and `dak/packages/`, with contract coverage in `contract_tests.rpr`. The current modules return plan-only decisions and do not have authority to mutate disks, extract or execute packages, map drivers, perform MMIO/DMA or change boot slots.
+The implementation is in Reaper modules under `dak/system/`, `dak/drivers/` and `dak/packages/`, including a shared audit-journal policy, with contract coverage in `contract_tests.rpr`. The current modules return plan-only decisions and do not have authority to mutate disks, extract or execute packages, map drivers, perform MMIO/DMA or change boot slots.
 
 **Next native dependencies:** trusted-key verifier and revocation, DABI64 syscall provider, kernel capabilities/address-space isolation, crash-safe filesystem and transaction journal, device/IRQ/DMA ownership, native boot-success/rollback path. Completion requires tree-walk/VM parity, QEMU fault/power-loss coverage and supported-target hardware evidence; contracts alone do not promote the native maturity stage.
