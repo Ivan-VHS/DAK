@@ -55,8 +55,30 @@ export craft overlaps(left, right) {
     yield memory["ranges_overlap"](left[0], left[2], right[0], right[2])
 }
 
+export craft page_map_valid(mappings) {
+    when size(mappings) > 65536 {
+        yield false
+    }
+    each index in range(0, size(mappings)) {
+        make current_mapping := mappings[index]
+        when not mapping_valid(current_mapping) {
+            yield false
+        }
+        each other_index in range(index + 1, size(mappings)) {
+            make other_mapping := mappings[other_index]
+            when overlaps(current_mapping, other_mapping) {
+                yield false
+            }
+        }
+    }
+    yield true
+}
+
 export craft map(mappings, candidate) {
-    when size(mappings) > 65536 or not mapping_valid(candidate) {
+    when not page_map_valid(mappings) {
+        yield ["reject", "corrupt-page-map", mappings]
+    }
+    when size(mappings) >= 65536 or not mapping_valid(candidate) {
         yield ["reject", "invalid-mapping", mappings]
     }
     each existing in mappings {
@@ -73,6 +95,9 @@ export craft map(mappings, candidate) {
 export craft unmap(mappings, address_space_id, owner_pid, virtual_base) {
     when address_space_id <= 0 or owner_pid <= 0 or virtual_base < page_size() {
         yield ["invalid", mappings]
+    }
+    when not page_map_valid(mappings) {
+        yield ["corrupt-page-map", mappings]
     }
     vary removed := false
     vary remaining := []
@@ -111,6 +136,9 @@ export craft access_allowed(mapping, operation) {
 export craft translate(mappings, address_space_id, owner_pid, virtual_address, operation) {
     when address_space_id <= 0 or owner_pid <= 0 or virtual_address < page_size() {
         yield ["fault", "invalid-address"]
+    }
+    when not page_map_valid(mappings) {
+        yield ["fault", "corrupt-page-map"]
     }
     vary result := nothing
     each entry in mappings {
