@@ -46,21 +46,22 @@
       "id": "unify",
       "name": "Unify",
       "category": "devices",
-      "panel": "mora/app.js#unify"
+      "panel": "mora/app.js#unify",
+      "maturity": "policy_only_no_live_device_service"
     },
     {
       "id": "sestem",
       "name": "Sestem",
       "category": "system",
       "panel": "mora/app.js#sestem",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_host_shell_status_center"
     },
     {
       "id": "setupup",
       "name": "SetupUP",
       "category": "system",
       "panel": "mora/app.js#setupup",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_host_shell_preferences"
     },
     {
       "id": "orriganize",
@@ -130,7 +131,7 @@
       "name": "GameCharager",
       "category": "gaming",
       "panel": "mora/app.js#gamecharager",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_game_preferences"
     },
     {
       "id": "exedotexe",
@@ -198,7 +199,7 @@
       "name": "Mora Boost",
       "category": "gaming",
       "panel": "mora/app.js#mora-boost",
-      "maturity": "external_native_workbench"
+      "maturity": "partial_local_game_preferences"
     },
     {
       "id": "desktop",

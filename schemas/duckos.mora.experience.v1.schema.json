@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "duckos.mora.experience.v1.schema.json",
+  "title": "DuckOS Mora Experience Profile",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "product",
+    "surface",
+    "persistence",
+    "profiles",
+    "feature_boundaries"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.mora.experience.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "product": {
+      "const": "DuckOS"
+    },
+    "surface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "persistence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "summary",
+          "density",
+          "input_mode",
+          "catalogue_columns",
+          "large_targets"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "workstation",
+              "creator",
+              "living-room",
+              "handheld"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "density": {
+            "enum": [
+              "comfortable",
+              "standard",
+              "compact"
+            ]
+          },
+          "input_mode": {
+            "enum": [
+              "keyboard-pointer",
+              "controller-first-preference",
+              "controller-touch-preference"
+            ]
+          },
+          "catalogue_columns": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 4
+          },
+          "large_targets": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "feature_boundaries": {
+      "type": "object",
+      "required": [
+        "shell_profiles",
+        "updates",
+        "software_sources",
+        "devices",
+        "gaming"
+      ],
+      "properties": {
+        "shell_profiles": {
+          "$ref": "#/$defs/boundary"
+        },
+        "updates": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/boundary"
+            },
+            {
+              "type": "object",
+              "required": [
+                "native_service",
+                "policy_groups",
+                "automatic_rollback"
+              ],
+              "properties": {
+                "native_service": {
+                  "type": "boolean"
+                },
+                "policy_groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "automatic_rollback": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "software_sources": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/boundary"
+            },
+            {
+              "type": "object",
+              "required": [
+                "native_install",
+                "source_types"
+              ],
+              "properties": {
+                "native_install": {
+                  "type": "boolean"
+                },
+                "source_types": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "devices": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/boundary"
+            },
+            {
+              "type": "object",
+              "required": [
+                "live_enumeration",
+                "driver_install",
+                "driver_update"
+              ],
+              "properties": {
+                "live_enumeration": {
+                  "type": "boolean"
+                },
+                "driver_install": {
+                  "type": "boolean"
+                },
+                "driver_update": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "gaming": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/boundary"
+            },
+            {
+              "type": "object",
+              "required": [
+                "local_preferences_only",
+                "power_tuning",
+                "controller_enumeration"
+              ],
+              "properties": {
+                "local_preferences_only": {
+                  "type": "boolean"
+                },
+                "power_tuning": {
+                  "type": "boolean"
+                },
+                "controller_enumeration": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "boundary": {
+      "type": "object",
+      "required": [
+        "maturity",
+        "scope"
+      ],
+      "properties": {
+        "maturity": {
+          "enum": [
+            "implemented",
+            "partial",
+            "planned",
+            "not_applicable"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

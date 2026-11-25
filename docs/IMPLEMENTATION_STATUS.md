@@ -2,6 +2,19 @@
 
 Updated: 2026-11-25
 
+## Nobara-informed Mora experience — 2026-11-25
+
+- [x] Added a versioned Duck-owned experience profile contract for workstation, creator, living-room and handheld presentation preferences.
+- [x] SetupUP stores an explicitly approved Mora host-shell profile in current-user QSettings; it does not change OS power, kernel, display or device settings.
+- [x] Sestem exposes the intended staged update order while explicitly reporting that the native updater, package manager and rollback service are not connected.
+- [x] Unify exposes the current device-service boundary; live PCI/USB enumeration and driver installation/update remain unavailable.
+- [x] Mora Boost stores a local gaming preference only; no process, TDP, clock, voltage, driver, controller or GPU telemetry operation is performed.
+- [x] Added Reaper reference contracts for host-profile scope, staged update sequencing/rollback preconditions and software-source admission.
+- [ ] Native package repository, signed package manager, image updater, transactional rollback and installer remain planned.
+- [ ] Native hardware enumeration, driver verification/loading, Gamescope session, controller routing and graphics/audio services remain planned.
+
+These features are inspired by general Nobara experience patterns and are implemented independently in Mora/Reaper. Reaper contract success proves reference-policy behavior only; the Stage 1 kernel still halts before a user session.
+
 ## Ecosystem source and interface integration — 2026-11-25
 
 - [x] DuckOS pins Reaper, Pytyliki, OPlague and VentuSample as four independent Git submodules with exact commits and preserved upstream licenses.

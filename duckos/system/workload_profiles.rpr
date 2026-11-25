@@ -1,0 +1,38 @@
+# DuckOS workload and presentation profiles.
+# These policies authorize Mora host-shell preferences only; they do not tune hardware.
+
+export craft profile_known(profile_id) {
+    yield profile_id == "workstation" or profile_id == "creator" or
+        profile_id == "living-room" or profile_id == "handheld"
+}
+
+export craft profile_policy(profile_id, scope, approved) {
+    when not profile_known(profile_id) {
+        yield ["reject", "unknown-profile"]
+    }
+    when scope != "mora.host-shell" {
+        yield ["deny", "scope-outside-host-shell"]
+    }
+    when not approved {
+        yield ["deny", "user-approval-required"]
+    }
+    yield ["allow", "presentation-preference-only"]
+}
+
+export craft game_profile_known(profile_id) {
+    yield profile_id == "balanced" or profile_id == "low-latency" or
+        profile_id == "quality"
+}
+
+export craft game_profile_policy(profile_id, scope, approved) {
+    when not game_profile_known(profile_id) {
+        yield ["reject", "unknown-game-profile"]
+    }
+    when scope != "mora.local-preference" {
+        yield ["deny", "scope-outside-local-preference"]
+    }
+    when not approved {
+        yield ["deny", "user-approval-required"]
+    }
+    yield ["allow", "stored-preference-only"]
+}

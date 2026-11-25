@@ -1,0 +1,33 @@
+# Software-source admission policy.
+# Catalogue visibility is not install permission; no native package service is connected.
+
+export craft source_kind_known(kind) {
+    yield kind == "duck-first-party" or kind == "federated-project" or
+        kind == "third-party-explicit"
+}
+
+export craft source_metadata_state(kind, license_declared, publisher_trusted, digest_verified) {
+    when not source_kind_known(kind) { yield "reject-unknown-source-kind" }
+    when not license_declared { yield "needs-license-review" }
+    when not digest_verified { yield "integrity-unverified" }
+    when kind == "third-party-explicit" and not publisher_trusted {
+        yield "untrusted-third-party-metadata"
+    }
+    yield "metadata-admissible-not-installable"
+}
+
+export craft install_policy(package_service_available, approved) {
+    when not package_service_available { yield ["deny", "package-service-unavailable"] }
+    when not approved { yield ["deny", "user-approval-required"] }
+    yield ["deny", "native-signature-and-dependency-gates-not-implemented"]
+}
+
+export craft source_action_policy(action) {
+    when action == "list" or action == "inspect" or action == "read-documentation" {
+        yield "metadata-only"
+    }
+    when action == "install" or action == "remove" or action == "update" or action == "execute" {
+        yield "deny-no-native-package-or-process-service"
+    }
+    yield "reject-unknown-action"
+}
