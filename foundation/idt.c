@@ -1,5 +1,11 @@
 #include "idt.h"
 
+#include <stddef.h>
+
+_Static_assert(sizeof(duckos_idt_gate) == 16u, "x86_64 IDT gates must be 16 bytes");
+_Static_assert(offsetof(duckos_idt_gate, offset_high) == 8u, "IDT offset-high layout mismatch");
+_Static_assert(offsetof(duckos_idt_gate, reserved) == 12u, "IDT reserved-field layout mismatch");
+
 duckos_idt_status duckos_idt_gate_set(
     duckos_idt_gate *gate,
     uint64_t handler,
