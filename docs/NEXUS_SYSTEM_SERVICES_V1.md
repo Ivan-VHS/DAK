@@ -104,3 +104,9 @@ Existing GitHub Actions workflows remain the actual CI execution mechanism until
 | Release | Reproducible build, provenance, license inventory, artifact digest and CI evidence |
 
 All six service descriptors and their prerequisites are recorded in this batch. Their executable runtime implementations are not claimed.
+## 6. Executable Reaper policy contract
+
+DuckOS now carries the policy-only Reaper module `duckos/nexus/services.rpr`. It recognizes the canonical component and service IDs, validates the declared service owner/state/dependency set, bounds descriptor payload/deadline values and rejects dependency mismatches. Its activation gate remains closed until process model, service supervisor, authenticated IPC, kernel-enforced capabilities and implementation tests are all present.
+
+The assertions are integrated into `core_mvp_tests.rpr`, which is already exercised by the repository's Reaper contract workflow on its reference engines. This code validates metadata and admission policy only: it does not create a process, start a service or grant a capability.
+
