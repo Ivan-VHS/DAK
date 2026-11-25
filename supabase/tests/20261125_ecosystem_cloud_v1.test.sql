@@ -1,6 +1,6 @@
 begin;
 
-select plan(36);
+select plan(38);
 
 select has_table('public', 'organizations', 'organizations table exists');
 select has_table('public', 'organization_members', 'organization memberships table exists');
@@ -116,6 +116,22 @@ select throws_ok(
   '23514', null, 'event schema identifiers are bounded to 128 characters'
 );
 
+select throws_ok(
+  $$insert into public.sync_events (
+      org_id, event_id, device_id, actor_id, source_project,
+      schema_id, schema_version, event_type, occurred_at, payload
+    ) values (
+      '20000000-0000-4000-8000-000000000001',
+      '50000000-0000-4000-8000-000000000005',
+      '30000000-0000-4000-8000-000000000001',
+      '10000000-0000-4000-8000-000000000001',
+      'duckos', 'ivan-vhs.ecosystem-event.v1', 1,
+      'workspace.oversized_payload', now(),
+      jsonb_build_object('data', repeat('x', 65537))
+    )$$,
+  '23514', null, 'event payloads are bounded by uncompressed serialized size'
+);
+
 select lives_ok(
   $$insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
@@ -208,6 +224,15 @@ select throws_ok(
             '20000000-0000-4000-8000-000000000001/file name.json',
             repeat('d', 64), 1)$$,
   '23514', null, 'artifact keys reject spaces and non-canonical characters'
+);
+
+select throws_ok(
+  $$insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size, metadata)
+    values ('20000000-0000-4000-8000-000000000001',
+            '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
+            '20000000-0000-4000-8000-000000000001/oversized-metadata.json',
+            repeat('e', 64), 1, jsonb_build_object('note', repeat('x', 16385)))$$,
+  '23514', null, 'artifact metadata is bounded by uncompressed serialized size'
 );
 
 select * from finish();
