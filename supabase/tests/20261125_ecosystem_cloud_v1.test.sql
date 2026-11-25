@@ -1,6 +1,6 @@
 begin;
 
-select plan(35);
+select plan(36);
 
 select has_table('public', 'organizations', 'organizations table exists');
 select has_table('public', 'organization_members', 'organization memberships table exists');
@@ -76,34 +76,34 @@ select is((select count(*)::integer from public.organization_members), 1, 'Alice
 select is((select count(*)::integer from public.sync_events), 1, 'Alice sees only her organization events');
 
 select lives_ok(
-  $insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
+  $$insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
     values ('20000000-0000-4000-8000-000000000001',
             '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
             '20000000-0000-4000-8000-000000000001/settings.json',
-            repeat('a', 64), 1)$,
+            repeat('a', 64), 1)$$,
   'organization owner can register an explicitly selected artifact'
 );
 
 select throws_ok(
-  $insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
+  $$insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
     values ('20000000-0000-4000-8000-000000000001',
             '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
             '20000000-0000-4000-8000-000000000001//settings.json',
-            repeat('b', 64), 1)$,
+            repeat('b', 64), 1)$$,
   '23514', null, 'artifact keys reject empty path segments'
 );
 
 select throws_ok(
-  $insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
+  $$insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
     values ('20000000-0000-4000-8000-000000000001',
             '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
             '20000000-0000-4000-8000-000000000001/settings/',
-            repeat('c', 64), 1)$,
+            repeat('c', 64), 1)$$,
   '23514', null, 'artifact keys reject trailing path separators'
 );
 
 select throws_ok(
-  $insert into public.sync_events (
+  $$insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
       schema_id, schema_version, event_type, occurred_at, payload
     ) values (
@@ -112,12 +112,12 @@ select throws_ok(
       '30000000-0000-4000-8000-000000000001',
       '10000000-0000-4000-8000-000000000001',
       'duckos', repeat('a', 129), 1, 'workspace.invalid_schema', now(), '{}'::jsonb
-    )$,
+    )$$,
   '23514', null, 'event schema identifiers are bounded to 128 characters'
 );
 
 select lives_ok(
-  $insert into public.sync_events (
+  $$insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
       schema_id, schema_version, event_type, occurred_at, payload
     ) values (
@@ -132,7 +132,7 @@ select lives_ok(
 );
 
 select throws_ok(
-  $$insert into public.sync_events (
+  $$$insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
       schema_id, schema_version, event_type, occurred_at, payload
     ) values (
@@ -149,7 +149,7 @@ select throws_ok(
 );
 
 select throws_ok(
-  $$insert into public.sync_events (
+  $$$insert into public.sync_events (
       org_id, event_id, device_id, actor_id, source_project,
       schema_id, schema_version, event_type, occurred_at, payload
     ) values (
@@ -199,6 +199,15 @@ select throws_ok(
   '22023',
   null,
   'organization RPC rejects malformed slugs'
+);
+
+select throws_ok(
+  $$insert into public.artifacts (org_id, created_by, source_project, artifact_kind, storage_key, sha256, byte_size)
+    values ('20000000-0000-4000-8000-000000000001',
+            '10000000-0000-4000-8000-000000000001', 'duckos', 'user_preferences',
+            '20000000-0000-4000-8000-000000000001/file name.json',
+            repeat('d', 64), 1)$$,
+  '23514', null, 'artifact keys reject spaces and non-canonical characters'
 );
 
 select * from finish();
