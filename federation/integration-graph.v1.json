@@ -37,7 +37,7 @@
       "id": "oplague",
       "repository": "Ivan-VHS/OPlague",
       "path": "projects/oplague",
-      "pinned_commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "pinned_commit": "a7b9d6bca778cd0556fd7c0f621e7715ad282063",
       "license": "Apache-2.0",
       "license_file": "projects/oplague/LICENSE",
       "runtime_boundary": "user-space-read-only",
@@ -116,11 +116,14 @@
       "status": "policy_adapter_only",
       "transport": "trusted-ingest-normalized-record",
       "artifacts": [
+        "projects/oplague/schemas/oplage.gpu-telemetry.v1.schema.json",
+        "projects/oplague/tools/gpu_telemetry_export.py",
+        "projects/oplague/docs/GPU_TELEMETRY_BRIDGE_V1.md",
         "duckos/gpu/oplage_bridge.rpr",
         "duckos/system/telemetry.rpr",
         "contract_tests.rpr"
       ],
-      "boundary": "The DuckOS Reaper policy adapter and contract tests exist, but the OPlague schema/exporter/docs for this contract are only on upstream main and are absent from the OPlague commit pinned by DuckOS. This is not end-to-end producer/consumer interoperability until a reviewed upstream pin update includes those files. The adapter requires trusted JSON/schema/digest ingestion; publisher attestation and AMD/Intel providers remain pending."
+      "boundary": "The schema, exporter and bridge contract are now present in the exact OPlague commit pinned by DuckOS. DuckOS still consumes only a normalized record through Reaper policy; trusted native JSON/schema/digest ingestion, publisher/build provenance verification and AMD/Intel providers remain pending. Telemetry grants no hardware capabilities."
     },
     {
       "id": "ventusample.reaper.pack.v1",
@@ -132,7 +135,8 @@
       "transport": "offline-json-manifest",
       "artifacts": [
         "projects/ventusample/schemas/ventusample.pack.v1.schema.json",
-        "projects/ventusample/docs/REAPER_PACK_AUDIT.md"
+        "projects/ventusample/docs/REAPER_PACK_AUDIT.md",
+        "projects/reaper/docs/NEXUS_FEDERATION_PROFILE_V1.md"
       ],
       "boundary": "The VentuSample pack-v1 producer schema and audit document exist in the pinned VentuSample source. The pinned Reaper checkout has no pack consumer or the newer NEXUS federation profile document; treat the edge as metadata-only and specified-only."
     }
