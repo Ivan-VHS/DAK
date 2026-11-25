@@ -1,14 +1,14 @@
 # DuckOS native implementation roadmap
 
 **Reviewed:** 2026-11-25  
-**Product:** DuckOS operating-system foundation; Mora is the desktop/browser shell.  
+**Product:** DuckOS operating-system foundation; Mora has a browser reference preview and a host-native Qt 6 Widgets desktop application.  
 **Source of truth:** native source, Reaper contracts, tests, CMake targets, CI and the versioned system-capability profile.
 
 ## Product maturity contract
 
 DuckOS currently combines three distinct surfaces. They must never be conflated:
 
-1. **Mora browser shell:** application discovery, local preferences, local tools and UI workflows. Browser code cannot enforce kernel privileges or control host devices.
+1. **Mora host surfaces:** a Qt 6 Widgets host-native application plus a retained browser reference preview. The native app uses host OS top-level windows but cannot enforce DuckOS kernel privileges or start DuckOS processes.
 2. **Reaper reference contracts:** executable policy models for boot sequencing, memory arithmetic, scheduling decisions, IPC admission, capabilities, service restart and telemetry classification. Passing these tests proves policy behavior on the Reaper reference runtime only.
 3. **Native foundation:** a host-buildable C11 boot-handoff validation library plus an experimental x86_64 freestanding Stage 1 kernel and reproducible Limine BIOS/UEFI ISO pipeline. The Stage 1 target is not yet a process runtime, scheduler, driver stack or bootable desktop OS.
 
@@ -29,7 +29,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 | Boot handoff | Versioned Boot Info v1, Limine BIOS/UEFI handoff and native kernel entry | Limine is a pinned third-party bootloader; no in-house UEFI loader or Secure Boot policy |
 | Validation and early memory | Boot Info and memory-map validation; monotonic 4 KiB allocator over validated USABLE regions, allocating and clearing one HHDM-mapped frame | No free/reclaim, page tables, heap or virtual-memory manager |
 | Reaper contracts | Boot phases, resource budgets, scheduling/IPC policies, capabilities and service restart decisions | Reference-runtime policy, not kernel enforcement |
-| Mora | Browser desktop shell, app catalogue, local preferences and local UI tools | Not a native compositor or privileged shell |
+| Mora | Qt 6 Widgets host-native shell, local app catalogue, native host windows and a retained browser reference preview | Not yet a kernel-launched DuckOS desktop or privileged shell |
 | Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature, non-destructive deployment planning and an experimental x86_64 Stage 1 ISO pipeline | No disk installer, production image, verified boot chain or supported hardware matrix |
 
 ## Native implementation sequence
@@ -130,8 +130,11 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D8 — Native desktop, input, graphics and audio
 
-**Status: Planned; Mora browser UI is not the native desktop.**
+**Status: Planned for the DuckOS kernel session. A separate host-native Qt 6 Widgets Mora application now exists; its build gate is pending CI evidence.**
 
+- Keep the host-native Mora application as a separate delivery surface while the kernel session is unavailable. It uses host OS top-level windows and must not be packaged or described as a kernel service.
+- Preserve the Figma composition: compact system top bar, left navigation rail, black radial/folded workspace, restrained yellow selection, application catalogue and bottom dock. Application windows remain independently movable and focusable host windows.
+- Do not route shell launch actions through manifest command strings. A later DuckOS launcher must resolve installed trusted binaries and obtain capabilities through the native broker.
 - Choose a native display and windowing architecture for the initial hardware target.
 - Implement graphics buffer ownership, input event routing, focus, accessibility and display-mode failure recovery.
 - Add font shaping and text input only with a defined Unicode and fallback policy.
