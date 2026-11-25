@@ -52,6 +52,16 @@ A stable centre may frame peripheral markers. Progress uses a linear track and d
 
 OS reduced-motion preferences override decorative movement. Disable nonessential transitions and replace smooth scrolling with immediate navigation when reduced motion is requested. The Eco profile suppresses expensive visual effects.
 
+## Shell material and control contract
+
+The shell uses neutral graphite for ordinary surfaces and the Duck yellow accent for focus, selection, primary actions and occasional edge light. Yellow-tinted panels are reserved for selected or hovered states; default cards, docks and window chrome remain neutral so application content stays visually dominant.
+
+Glass surfaces must retain a readable solid fallback when backdrop blur is unavailable. Separate depth through surface tone, a restrained border and shadow rather than increasing saturation. Keep status text neutral; use a gold marker alongside a readable label for active or selected state.
+
+The top status area, navigation rail, application catalogue and dock form one consistent shell hierarchy. Dock shortcuts and frequent controls target at least 44 × 44 px where the viewport allows. Narrow layouts keep those targets intact and permit horizontal dock scrolling instead of compressing controls. Keyboard focus uses the brand-hover token and remains visibly distinct from hover and selection.
+
+The native Qt host and browser preview share this material contract. The browser preview remains a compatibility surface; it must not be presented as the kernel-owned DuckOS compositor or as a substitute for native application windows.
+
 ## Geometry, scale and interaction
 
 - Spacing follows 4, 8, 12, 16, 24 and 32 px.
