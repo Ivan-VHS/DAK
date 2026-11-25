@@ -4,6 +4,7 @@
 # address spaces. The kernel transport must provide those operations.
 
 import "duckos/security/capabilities.rpr" as capabilities
+import "duckos/kernel/ipc.rpr" as fifo
 
 export craft endpoint_valid(endpoint) {
     # [endpoint_id, owner_pid, capacity, max_message_bytes,
@@ -60,8 +61,11 @@ export craft send(endpoint, caller_pid, grants, message) {
         yield ["message-limit", endpoint]
     }
     make envelope := [endpoint[5], caller_pid, message[0], message[1], message[2]]
-    make updated_queue := push(endpoint[6], envelope)
-    make updated := [endpoint[0], endpoint[1], endpoint[2], endpoint[3], endpoint[4], endpoint[5] + 1, updated_queue]
+    make queued := fifo["send"](endpoint[6], endpoint[2], envelope)
+    when queued[0] != "sent" {
+        yield [queued[0], endpoint]
+    }
+    make updated := [endpoint[0], endpoint[1], endpoint[2], endpoint[3], endpoint[4], endpoint[5] + 1, queued[1]]
     yield ["sent", updated, endpoint[5]]
 }
 
@@ -78,14 +82,12 @@ export craft receive(endpoint, caller_pid, grants) {
     when size(endpoint[6]) == 0 {
         yield ["empty", endpoint, nothing]
     }
-    make queue := endpoint[6]
-    vary remaining := []
-    each index in range(1, size(queue)) {
-        change remaining := push(remaining, queue[index])
+    make dequeued := fifo["receive"](endpoint[6])
+    when dequeued[0] != "received" {
+        yield [dequeued[0], endpoint, nothing]
     }
-    make updated := [endpoint[0], endpoint[1], endpoint[2], endpoint[3], endpoint[4], endpoint[5], remaining]
-    make first_message := queue[0]
-    yield ["received", updated, first_message]
+    make updated := [endpoint[0], endpoint[1], endpoint[2], endpoint[3], endpoint[4], endpoint[5], dequeued[1]]
+    yield ["received", updated, dequeued[2]]
 }
 
 export craft close(endpoint, caller_pid, grants) {
