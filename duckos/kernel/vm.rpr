@@ -1,0 +1,131 @@
+# User virtual-memory mapping policy v1.
+# A backing_state of "allocated" must be issued by the native frame allocator.
+# This module validates mapping metadata; it does not write page tables,
+# change CR3, invalidate a TLB or access physical memory.
+
+import "duckos/kernel/memory.rpr" as memory
+
+export craft page_size() {
+    yield 4096
+}
+
+export craft user_address_limit() {
+    yield 140737488355328
+}
+
+export craft permissions_valid(permissions) {
+    # Writable+executable mappings are deliberately not representable.
+    yield permissions == "r" or permissions == "rw" or permissions == "rx"
+}
+
+export craft mapping_valid(mapping) {
+    # [virtual_base, physical_base, byte_length, permissions,
+    #  owner_pid, address_space_id, backing_state]
+    when size(mapping) != 7 {
+        yield false
+    }
+    when mapping[0] < page_size() or mapping[1] < page_size() or mapping[2] <= 0 {
+        yield false
+    }
+    when mapping[0] % page_size() != 0 or mapping[1] % page_size() != 0 or mapping[2] % page_size() != 0 {
+        yield false
+    }
+    when mapping[0] > user_address_limit() or mapping[2] > user_address_limit() - mapping[0] {
+        yield false
+    }
+    when mapping[1] > 9223372036854775807 or mapping[2] > 9223372036854775807 - mapping[1] {
+        yield false
+    }
+    when not permissions_valid(mapping[3]) or mapping[4] <= 0 or mapping[5] <= 0 {
+        yield false
+    }
+    when mapping[6] != "allocated" {
+        yield false
+    }
+    yield true
+}
+
+export craft overlaps(left, right) {
+    when not mapping_valid(left) or not mapping_valid(right) {
+        yield false
+    }
+    when left[5] != right[5] {
+        yield false
+    }
+    yield memory["ranges_overlap"](left[0], left[2], right[0], right[2])
+}
+
+export craft map(mappings, candidate) {
+    when size(mappings) > 65536 or not mapping_valid(candidate) {
+        yield ["reject", "invalid-mapping", mappings]
+    }
+    each existing in mappings {
+        when not mapping_valid(existing) {
+            yield ["reject", "corrupt-page-map", mappings]
+        }
+        when overlaps(existing, candidate) {
+            yield ["reject", "virtual-overlap", mappings]
+        }
+    }
+    yield ["mapped", push(mappings, candidate)]
+}
+
+export craft unmap(mappings, address_space_id, owner_pid, virtual_base) {
+    when address_space_id <= 0 or owner_pid <= 0 or virtual_base < page_size() {
+        yield ["invalid", mappings]
+    }
+    vary removed := false
+    vary remaining := []
+    each entry in mappings {
+        when not mapping_valid(entry) {
+            yield ["corrupt-page-map", mappings]
+        }
+        when entry[5] == address_space_id and entry[4] == owner_pid and entry[0] == virtual_base {
+            change removed := true
+        } otherwise {
+            change remaining := push(remaining, entry)
+        }
+    }
+    when not removed {
+        yield ["not-mapped", mappings]
+    }
+    yield ["unmapped", remaining]
+}
+
+export craft access_allowed(mapping, operation) {
+    when not mapping_valid(mapping) {
+        yield false
+    }
+    when operation == "read" {
+        yield mapping[3] == "r" or mapping[3] == "rw" or mapping[3] == "rx"
+    }
+    when operation == "write" {
+        yield mapping[3] == "rw"
+    }
+    when operation == "execute" {
+        yield mapping[3] == "rx"
+    }
+    yield false
+}
+
+export craft translate(mappings, address_space_id, owner_pid, virtual_address, operation) {
+    when address_space_id <= 0 or owner_pid <= 0 or virtual_address < page_size() {
+        yield ["fault", "invalid-address"]
+    }
+    vary result := nothing
+    each entry in mappings {
+        when not mapping_valid(entry) {
+            yield ["fault", "corrupt-page-map"]
+        }
+        when entry[5] == address_space_id and entry[4] == owner_pid and virtual_address >= entry[0] and virtual_address - entry[0] < entry[2] {
+            when not access_allowed(entry, operation) {
+                yield ["fault", "permission-denied"]
+            }
+            change result := entry[1] + virtual_address - entry[0]
+        }
+    }
+    when result == nothing {
+        yield ["fault", "not-mapped"]
+    }
+    yield ["translated", result]
+}
