@@ -39,7 +39,7 @@ export craft capabilities_subset(requested, granted) {
     yield valid
 }
 
-export craft capability_decision(capability, granted, user_approved, foreground) {
+export craft capability_decision(capability, granted, user_approved, active_session) {
     when capability == "kernel.write" or capability == "firmware.write" or capability == "driver.load" or capability == "system.modify" {
         yield "deny"
     }
@@ -47,7 +47,7 @@ export craft capability_decision(capability, granted, user_approved, foreground)
         when not capabilities_subset([capability], granted) {
             yield "deny"
         }
-        when not user_approved or not foreground {
+        when not user_approved or not active_session {
             yield "prompt"
         }
         yield "allow"
