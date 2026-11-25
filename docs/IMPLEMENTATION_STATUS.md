@@ -10,6 +10,15 @@ Updated: 2026-11-25
 - [x] Reaper Beelzebul 66-rule repository scanner and defense-context TSV inspected as separate specialist inputs; neither is represented as DuckOS endpoint protection.
 - [ ] Re-verify the Java context-classifier source/test paths named in Reaper documentation before claiming that classifier is implemented or using it as a shipped DuckOS dependency.
 
+## Kernel Runtime — x86-64 virtual-memory groundwork
+
+- [x] Four-level 48-bit canonical page-table manager for 4 KiB leaves: create intermediate tables, map, unmap and translate.
+- [x] User/kernel address split checks, bounded physical-address bits, W^X validation and optional per-page invalidation callback.
+- [x] Host C tests cover user and kernel mappings, translation offsets, duplicate-map rejection, unmap, invalid addresses/flags and allocation failure.
+- [ ] Connect the frame allocator and HHDM to a live kernel address space and preserve required Limine mappings.
+- [ ] Add page-fault recovery, page-table reclamation, active TLB invalidation/shootdown, large pages and per-process address-space activation.
+- [ ] No CR3 switch, user-mode entry, process isolation or scheduler is claimed by this groundwork.
+
 ## Mora host-native shell — 2026-11-25
 
 - [x] Added a Qt 6 Widgets desktop executable as a host-native Mora surface; its windows are real top-level host windows, not HTML elements or WebView content.
