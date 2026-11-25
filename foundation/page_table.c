@@ -279,6 +279,7 @@ duckos_x86_page_table_status duckos_x86_page_table_protect_4k(
         duckos_x86_page_table_status status = split_2m(page_table, pd, pd_index);
         if (status != DUCKOS_X86_PAGE_TABLE_OK) return status;
     }
+    if ((flags & DUCKOS_X86_PTE_USER) != 0u) pd[pd_index] |= DUCKOS_X86_PTE_USER;
     pt = table_at(page_table, pd[pd_index] & DUCKOS_X86_PTE_ADDRESS_MASK);
     if (pt == NULL) return DUCKOS_X86_PAGE_TABLE_ADDRESS_ERROR;
     uint64_t *slot = &pt[(virtual_address >> 12u) & 0x1ffu];

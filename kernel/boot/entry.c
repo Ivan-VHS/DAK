@@ -536,7 +536,7 @@ void _start(void) {
     serial_hex(kernel_page_tables.root_phys);
     serial_write(" table_pages=");
     serial_decimal(kernel_page_tables.table_pages);
-    serial_write("\\n");
+    serial_write("\n");
 
     serial_write("firmware=");
     serial_decimal(info.flags);
