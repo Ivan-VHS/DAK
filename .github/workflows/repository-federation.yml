@@ -77,7 +77,6 @@ jobs:
             git check-ref-format --branch "$HEAD_REF"
             git push origin "HEAD:refs/heads/$HEAD_REF"
             gh workflow run repository-federation.yml --ref "$HEAD_REF"
-            gh workflow run release-iso.yml --ref "$HEAD_REF"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -110,3 +109,10 @@ jobs:
 
       - name: Test vendored monorepo contract
         run: node --test tests/mora-vendored-sources.test.mjs
+      - name: Dispatch the full ecosystem build after source validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh workflow run release-iso.yml --ref "$HEAD_REF"
