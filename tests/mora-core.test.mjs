@@ -132,3 +132,14 @@ test("local intent plans can switch between frosted and opaque surfaces", () => 
   assert.equal(on.ok, true);
   assert.deepEqual(on.actions.map((action) => [action.setting, action.value]), [["reduceTransparency", false]]);
 });
+
+
+test("compact density is a validated, persistent appearance preference", () => {
+  const storage = new MemoryStorage();
+  const settings = createDefaultPreferences();
+  assert.equal(settings.appearance.density, "comfortable");
+  settings.appearance.density = "compact";
+  assert.equal(savePreferences(settings, storage), true);
+  assert.equal(loadPreferences(storage).appearance.density, "compact");
+  assert.equal(normalizePreferences({ appearance: { density: "dense" } }).appearance.density, "comfortable");
+});
