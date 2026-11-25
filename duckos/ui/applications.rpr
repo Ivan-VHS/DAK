@@ -1,0 +1,91 @@
+# Application manifest, lifecycle, capability and DABI64 message policies.
+# Admission is a policy decision; no process is spawned by this module.
+
+export craft application_manifest_valid(manifest) {
+    when size(manifest) != 7 {
+        yield false
+    }
+    when manifest[0] == "" or manifest[1] == "" or manifest[3] == "" {
+        yield false
+    }
+    when manifest[2] != "DABI64-v1" {
+        yield false
+    }
+    when manifest[4] != true and manifest[4] != false {
+        yield false
+    }
+    when manifest[5] != true and manifest[5] != false {
+        yield false
+    }
+    yield manifest[6] != ""
+}
+
+export craft application_admission(manifest) {
+    when not application_manifest_valid(manifest) {
+        yield "reject-invalid-manifest"
+    }
+    when manifest[4] != true {
+        yield "reject-unsigned-package"
+    }
+    when manifest[5] != true {
+        yield "reject-unsandboxed-package"
+    }
+    yield "admit-policy-only"
+}
+
+export craft lifecycle_state_valid(state) {
+    yield state == "registered"
+        or state == "starting"
+        or state == "running"
+        or state == "stopping"
+        or state == "stopped"
+        or state == "failed"
+}
+
+export craft lifecycle_transition_valid(from_state, to_state) {
+    when not lifecycle_state_valid(from_state) or not lifecycle_state_valid(to_state) {
+        yield false
+    }
+    when from_state == "registered" {
+        yield to_state == "starting" or to_state == "failed"
+    }
+    when from_state == "starting" {
+        yield to_state == "running" or to_state == "failed"
+    }
+    when from_state == "running" {
+        yield to_state == "stopping" or to_state == "failed"
+    }
+    when from_state == "stopping" {
+        yield to_state == "stopped" or to_state == "failed"
+    }
+    yield false
+}
+
+export craft capability_subset_valid(requested, granted) {
+    each capability in requested {
+        vary found := false
+        each grant in granted {
+            when capability == grant {
+                change found := true
+            }
+        }
+        when not found {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft ipc_message_valid(message) {
+    when size(message) != 5 {
+        yield false
+    }
+    when message[0] == "" or message[1] == "" or message[2] == "" or message[4] == "" {
+        yield false
+    }
+    yield message[3] >= 0 and message[3] <= 65536
+}
+
+export craft abi_compatible(abi) {
+    yield abi == "DABI64-v1"
+}

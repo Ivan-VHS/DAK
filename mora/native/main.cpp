@@ -35,6 +35,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QPaintEvent>
+#include <QPixmap>
 #include <QResizeEvent>
 #include <QStatusBar>
 #include <QStyle>
@@ -49,6 +50,9 @@
 #endif
 #ifndef DUCKOS_MORA_THEME_PATH
 #define DUCKOS_MORA_THEME_PATH "mora/theme.json"
+#endif
+#ifndef DUCKOS_MORA_WALLPAPER_DIR
+#define DUCKOS_MORA_WALLPAPER_DIR "mora/wallpapers"
 #endif
 
 namespace {
@@ -128,6 +132,31 @@ struct AppInfo {
     QString category;
     QString maturity;
 };
+
+struct WallpaperPreset {
+    QString id;
+    QString name;
+    QString description;
+    QString fileName;
+};
+
+const QList<WallpaperPreset>& wallpaperPresets()
+{
+    static const QList<WallpaperPreset> presets{
+        {"folds-of-light", "Складки света", "Тёмные складки и мягкие отражения", "folds-of-light.png"},
+        {"copper-glass", "Медное стекло", "Полупрозрачные медные формы", "copper-glass.png"},
+        {"quiet-dunes", "Тихие дюны", "Тёплый песок и мягкий рельеф", "quiet-dunes.png"},
+        {"light-fields", "Световые поля", "Глубокий чёрный и рассеянный свет", "light-fields.png"},
+        {"shape-study", "Пластика форм", "Терракотовая геометрия", "shape-study.png"},
+        {"amber-night", "Янтарная ночь", "Тонкая янтарная линия на тёмной поверхности", "amber-night.png"}
+    };
+    return presets;
+}
+
+QString wallpaperAssetPath(const WallpaperPreset& preset)
+{
+    return QDir(QString::fromUtf8(DUCKOS_MORA_WALLPAPER_DIR)).filePath(preset.fileName);
+}
 
 QString categoryName(const QString& category)
 {
@@ -218,38 +247,47 @@ public:
         setAttribute(Qt::WA_StyledBackground, false);
     }
 
+    void setWallpaper(const QPixmap& wallpaper)
+    {
+        wallpaper_ = wallpaper;
+        update();
+    }
+
 protected:
     void paintEvent(QPaintEvent*) override
     {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.fillRect(rect(), kPage);
 
+        if (!wallpaper_.isNull() && width() > 0 && height() > 0) {
+            const QPixmap scaled = wallpaper_.scaled(
+                size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+            const QRect source(
+                std::max(0, (scaled.width() - width()) / 2),
+                std::max(0, (scaled.height() - height()) / 2),
+                width(), height());
+            painter.drawPixmap(rect(), scaled, source);
+
+            // Keep foreground controls legible without recoloring the source artwork.
+            painter.fillRect(rect(), QColor(0, 0, 0, 76));
+            QLinearGradient shade(0, 0, 0, height());
+            shade.setColorAt(0.0, QColor(0, 0, 0, 38));
+            shade.setColorAt(1.0, QColor(0, 0, 0, 112));
+            painter.fillRect(rect(), shade);
+            return;
+        }
+
+        painter.fillRect(rect(), kPage);
         QRadialGradient glow(QPointF(width() * 0.51, height() * 0.38),
                              std::max(width(), height()) * 0.78);
         glow.setColorAt(0.0, QColor("#242018"));
         glow.setColorAt(0.46, QColor("#11100E"));
         glow.setColorAt(1.0, kPage);
         painter.fillRect(rect(), glow);
-
-        const int foldCount = 15;
-        for (int i = 0; i < foldCount; ++i) {
-            const qreal x = (static_cast<qreal>(i) / (foldCount - 1)) * width();
-            QPainterPath path;
-            path.moveTo(x, 0);
-            path.cubicTo(x - width() * 0.025, height() * 0.29,
-                         x + width() * 0.035, height() * 0.63,
-                         x + width() * 0.008, height());
-            QPen pen(QColor(255, 255, 255, i % 3 == 0 ? 15 : 7));
-            pen.setWidthF(i % 3 == 0 ? 1.3 : 0.8);
-            painter.setPen(pen);
-            painter.drawPath(path);
-        }
-        QLinearGradient lower(0, height() * 0.72, 0, height());
-        lower.setColorAt(0.0, QColor(0, 0, 0, 0));
-        lower.setColorAt(1.0, QColor(0, 0, 0, 105));
-        painter.fillRect(rect(), lower);
     }
+
+private:
+    QPixmap wallpaper_;
 };
 
 class WaveformView final : public QWidget {
@@ -487,6 +525,8 @@ public:
         QSettings settings("DuckOS", "Mora");
         const QByteArray geometry = settings.value("shell/geometry").toByteArray();
         if (!geometry.isEmpty()) restoreGeometry(geometry);
+        const QString wallpaperId = settings.value("appearance/wallpaperId", "folds-of-light").toString();
+        applyWallpaperId(wallpaperId, false);
 
         auto* clock = new QTimer(this);
         QObject::connect(clock, &QTimer::timeout, this, [this]() { updateClock(); });
@@ -507,7 +547,7 @@ public:
             if (failure) *failure = reason;
             return false;
         };
-        if (!pageStack_ || !homePage_ || !appsPage_ || !workspacePage_) {
+        if (!pageStack_ || !homePage_ || !appsPage_ || !workspacePage_ || !appearancePage_ || !systemPage_) {
             return fail("A required desktop page was not created.");
         }
         auto* appsButton = findChild<QPushButton*>("nav-apps");
@@ -525,6 +565,24 @@ public:
         if (nativeWindows < 3) {
             return fail("The three-window workspace did not create three native top-level windows.");
         }
+
+        const QString previousWallpaper = selectedWallpaperId_;
+        auto* appearanceButton = findChild<QPushButton*>("nav-appearance");
+        auto* copperButton = findChild<QPushButton*>("wallpaper-copper-glass");
+        if (!appearanceButton || !copperButton) {
+            return fail("The native appearance selector is missing.");
+        }
+        appearanceButton->click();
+        QApplication::processEvents();
+        if (pageStack_->currentWidget() != appearancePage_) {
+            return fail("The Appearance navigation action did not change pages.");
+        }
+        copperButton->click();
+        if (selectedWallpaperId_ != "copper-glass") {
+            return fail("Selecting a Figma wallpaper did not update the active appearance.");
+        }
+        applyWallpaperId(previousWallpaper);
+
         for (QWidget* widget : QApplication::topLevelWidgets()) {
             if (widget->property("moraAppId").isValid()) widget->close();
         }
@@ -536,6 +594,7 @@ public:
         openAppWindow("abriganza");
         openAppWindow("poi");
         openAppWindow("ventusample-workbench");
+        arrangeWindows("columns");
         showPage(2);
     }
 
@@ -543,9 +602,13 @@ private:
     QVector<AppInfo> apps_;
     QHash<QString, QPointer<AppWindow>> windows_;
     QStackedWidget* pageStack_ = nullptr;
+    Backdrop* backdrop_ = nullptr;
     QWidget* homePage_ = nullptr;
     QWidget* appsPage_ = nullptr;
     QWidget* workspacePage_ = nullptr;
+    QWidget* appearancePage_ = nullptr;
+    QWidget* systemPage_ = nullptr;
+    QString selectedWallpaperId_ = "folds-of-light";
     QLineEdit* globalSearch_ = nullptr;
     QLineEdit* appsSearch_ = nullptr;
     QComboBox* categoryFilter_ = nullptr;
@@ -611,9 +674,12 @@ private:
             QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
             QScrollArea { border: 0; background: transparent; }
+            QPushButton[wallpaperCard="true"] { padding: 8px; text-align: left; }
+            QPushButton[wallpaperCard="true"]:checked { border: 2px solid #FFD400; background: #3A3100; }
         )")));
 
-        auto* background = new Backdrop;
+        backdrop_ = new Backdrop;
+        auto* background = backdrop_;
         auto* outer = new QVBoxLayout(background);
         outer->setContentsMargins(0, 0, 0, 0);
         outer->setSpacing(0);
@@ -630,9 +696,13 @@ private:
         homePage_ = buildHomePage();
         appsPage_ = buildAppsPage();
         workspacePage_ = buildWorkspacePage();
+        appearancePage_ = buildAppearancePage();
+        systemPage_ = buildSystemPage();
         pageStack_->addWidget(homePage_);
         pageStack_->addWidget(appsPage_);
         pageStack_->addWidget(workspacePage_);
+        pageStack_->addWidget(appearancePage_);
+        pageStack_->addWidget(systemPage_);
         bodyLayout->addWidget(pageStack_, 1);
         outer->addWidget(body, 1);
         outer->addWidget(buildDock());
@@ -699,9 +769,9 @@ private:
         navigationGroup_->setExclusive(true);
 
         const QList<QPair<QString, QString>> items{
-            {"⌂", "Домой"}, {"▦", "Приложения"}, {"▱", "Рабочее пространство"}
+            {"⌂", "Домой"}, {"▦", "Приложения"}, {"▱", "Рабочее пространство"}, {"◈", "Оформление"}
         };
-        const QStringList ids{"nav-home", "nav-apps", "nav-workspace"};
+        const QStringList ids{"nav-home", "nav-apps", "nav-workspace", "nav-appearance"};
         for (int i = 0; i < items.size(); ++i) {
             auto* button = new QPushButton(items[i].first);
             button->setObjectName(ids[i]);
@@ -724,7 +794,7 @@ private:
         settings->setToolTip("Настройки Mora");
         settings->setFixedSize(48, 48);
         layout->addWidget(settings);
-        QObject::connect(settings, &QPushButton::clicked, this, [this]() { openAppWindow("workspace"); });
+        QObject::connect(settings, &QPushButton::clicked, this, [this]() { showPage(4); });
 
         auto* power = new QPushButton("⏻");
         power->setAccessibleName("Закрыть Mora");
@@ -921,9 +991,146 @@ private:
             cards->addWidget(tile, 0, i);
         }
         layout->addLayout(cards);
+
+        auto* arrangements = new QHBoxLayout;
+        auto* gridLayout = actionButton("Сетка 2×2");
+        gridLayout->setObjectName("window-layout-grid");
+        auto* columns = actionButton("Три колонки");
+        columns->setObjectName("window-layout-columns");
+        auto* focus = actionButton("Фокусное окно");
+        focus->setObjectName("window-layout-focus");
+        arrangements->addWidget(gridLayout);
+        arrangements->addWidget(columns);
+        arrangements->addWidget(focus);
+        layout->addLayout(arrangements);
+        QObject::connect(gridLayout, &QPushButton::clicked, this, [this]() { arrangeWindows("grid"); });
+        QObject::connect(columns, &QPushButton::clicked, this, [this]() { arrangeWindows("columns"); });
+        QObject::connect(focus, &QPushButton::clicked, this, [this]() { arrangeWindows("focus"); });
+
         layout->addWidget(label(
-            "Окна не являются HTML-элементами внутри рабочего стола: каждое окно создаётся как отдельный top-level QWidget с системной рамкой, фокусом и перемещением средствами оконной системы хоста.",
+            "Mora создаёт отдельные top-level окна и задаёт им начальную геометрию. Финальное размещение и ограничения окон остаются за host window manager до появления DuckOS Window Manager.",
             "muted"));
+        layout->addStretch(1);
+        return page;
+    }
+
+    bool applyWallpaperId(const QString& id, bool persist = true)
+    {
+        const auto it = std::find_if(wallpaperPresets().cbegin(), wallpaperPresets().cend(),
+            [&id](const WallpaperPreset& preset) { return preset.id == id; });
+        if (it == wallpaperPresets().cend() || !backdrop_) return false;
+
+        const QPixmap wallpaper(wallpaperAssetPath(*it));
+        if (wallpaper.isNull()) return false;
+
+        backdrop_->setWallpaper(wallpaper);
+        selectedWallpaperId_ = it->id;
+        if (persist) {
+            QSettings settings("DuckOS", "Mora");
+            settings.setValue("appearance/wallpaperId", selectedWallpaperId_);
+            settings.sync();
+        }
+
+        for (QPushButton* button : findChildren<QPushButton*>()) {
+            if (button->objectName().startsWith("wallpaper-")) {
+                button->setChecked(button->objectName() == "wallpaper-" + selectedWallpaperId_);
+            }
+        }
+        return true;
+    }
+
+    QWidget* buildAppearancePage()
+    {
+        auto* page = new QWidget;
+        auto* layout = new QVBoxLayout(page);
+        layout->setContentsMargins(18, 12, 18, 14);
+        layout->setSpacing(12);
+        layout->addWidget(label("DESIGN FOUNDATION", "eyebrow"));
+        layout->addWidget(label("Оформление рабочего стола", "title"));
+        layout->addWidget(label(
+            "Шесть направлений из Figma. Изображения хранятся локально; системные цвета DuckOS остаются чёрными, белыми и жёлтыми.",
+            "subtitle"));
+
+        auto* scroll = new QScrollArea;
+        scroll->setWidgetResizable(true);
+        auto* content = new QWidget;
+        auto* grid = new QGridLayout(content);
+        grid->setContentsMargins(0, 8, 8, 8);
+        grid->setHorizontalSpacing(12);
+        grid->setVerticalSpacing(12);
+
+        int index = 0;
+        for (const WallpaperPreset& preset : wallpaperPresets()) {
+            const QString path = wallpaperAssetPath(preset);
+            auto* card = new QPushButton;
+            card->setObjectName("wallpaper-" + preset.id);
+            card->setProperty("wallpaperCard", true);
+            card->setCheckable(true);
+            card->setAccessibleName("Выбрать оформление: " + preset.name);
+            card->setMinimumSize(300, 190);
+
+            auto* cardLayout = new QVBoxLayout(card);
+            cardLayout->setContentsMargins(8, 8, 8, 8);
+            cardLayout->setSpacing(6);
+            auto* preview = new QLabel;
+            preview->setAlignment(Qt::AlignCenter);
+            preview->setMinimumHeight(112);
+            preview->setMaximumHeight(132);
+            preview->setPixmap(QPixmap(path).scaled(
+                280, 124, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+            preview->setAttribute(Qt::WA_TransparentForMouseEvents);
+            cardLayout->addWidget(preview);
+
+            auto* title = label(preset.name);
+            title->setAttribute(Qt::WA_TransparentForMouseEvents);
+            cardLayout->addWidget(title);
+            auto* description = label(preset.description, "muted");
+            description->setAttribute(Qt::WA_TransparentForMouseEvents);
+            cardLayout->addWidget(description);
+
+            QObject::connect(card, &QPushButton::clicked, this,
+                [this, id = preset.id]() { applyWallpaperId(id); });
+            grid->addWidget(card, index / 2, index % 2);
+            ++index;
+        }
+        scroll->setWidget(content);
+        layout->addWidget(scroll, 1);
+        layout->addWidget(label(
+            "Фон не меняет палитру системных состояний, контраст, фокус или цвет действий. Выбор сохраняется в локальных настройках Mora.",
+            "muted"));
+        return page;
+    }
+
+    QWidget* buildSystemPage()
+    {
+        auto* page = new QWidget;
+        auto* layout = new QVBoxLayout(page);
+        layout->setContentsMargins(18, 12, 18, 14);
+        layout->setSpacing(14);
+        layout->addWidget(label("SYSTEM UI", "eyebrow"));
+        layout->addWidget(label("Центр управления", "title"));
+        layout->addWidget(label("Состояние текущей host-native сессии Mora.", "subtitle"));
+
+        auto* status = panel();
+        auto* statusLayout = new QVBoxLayout(status);
+        statusLayout->setContentsMargins(18, 16, 18, 18);
+        statusLayout->setSpacing(10);
+        statusLayout->addWidget(label("НАТИВНАЯ ОБОЛОЧКА", "eyebrow"));
+        statusLayout->addWidget(label("Qt 6 Widgets", "heading"));
+        statusLayout->addWidget(label("Окна, ввод и фокус обслуживаются оконной системой хостовой ОС.", "muted"));
+        statusLayout->addWidget(label("СЛУЖБЫ ЯДРА DUCKOS", "eyebrow"));
+        statusLayout->addWidget(label("Не подключены в текущей Stage 1 сессии", "body"));
+        statusLayout->addWidget(label("Compositor, Window Manager, process broker и power service остаются отдельными kernel milestones.", "muted"));
+        layout->addWidget(status);
+
+        auto* actions = new QHBoxLayout;
+        auto* appearance = actionButton("Настроить оформление");
+        auto* workspace = actionButton("Рабочее пространство");
+        actions->addWidget(appearance);
+        actions->addWidget(workspace);
+        QObject::connect(appearance, &QPushButton::clicked, this, [this]() { showPage(3); });
+        QObject::connect(workspace, &QPushButton::clicked, this, [this]() { showPage(2); });
+        layout->addLayout(actions);
         layout->addStretch(1);
         return page;
     }
@@ -1006,6 +1213,42 @@ private:
             appGrid_->addWidget(empty, 0, 0, 1, 3);
         }
         appGrid_->setRowStretch((position + 2) / 3, 1);
+    }
+
+    void arrangeWindows(const QString& mode)
+    {
+        QList<QPointer<AppWindow>> active;
+        for (const auto& window : windows_) {
+            if (!window.isNull()) active.push_back(window);
+        }
+        if (active.isEmpty()) return;
+
+        if (mode == "focus") {
+            active.last()->showNormal();
+            active.last()->showMaximized();
+            active.last()->raise();
+            active.last()->activateWindow();
+            return;
+        }
+
+        const QRect area = QApplication::primaryScreen()
+            ? QApplication::primaryScreen()->availableGeometry() : QRect(0, 0, 1440, 900);
+        const int columns = mode == "columns" ? std::min(3, static_cast<int>(active.size())) : 2;
+        const int rows = (active.size() + columns - 1) / columns;
+        const int gap = 10;
+        const int cellWidth = std::max(320, (area.width() - gap * (columns + 1)) / columns);
+        const int cellHeight = std::max(260, (area.height() - gap * (rows + 1)) / rows);
+
+        for (int i = 0; i < active.size(); ++i) {
+            if (active[i].isNull()) continue;
+            const int column = i % columns;
+            const int row = i / columns;
+            active[i]->showNormal();
+            active[i]->setGeometry(
+                area.x() + gap + column * (cellWidth + gap),
+                area.y() + gap + row * (cellHeight + gap),
+                cellWidth, cellHeight);
+        }
     }
 
     void openAppWindow(const QString& id)

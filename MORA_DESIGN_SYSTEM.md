@@ -68,3 +68,10 @@ The primary Mora desktop surface is a host-native Qt 6 Widgets application. Its 
 
 The browser implementation remains available as a reference/compatibility preview, not as the native desktop. The Qt host adapter is still distinct from the DuckOS kernel desktop: Stage 1 does not launch user processes, and a kernel-owned compositor, input service, font stack, accessibility bridge and capability broker remain separate D8 work.
 
+
+
+## Selectable Figma wallpaper library
+
+Mora can select among six locally bundled representative wallpapers from the six visual series in the linked Figma file. Wallpaper is an artwork layer and does not create a theme palette. The canonical system palette remains black/white/yellow; semantic status colors, text contrast, focus rings and selected states remain token-driven.
+
+The current local set is declared by mora/wallpapers/catalog.json. Asset URLs are not fetched at runtime. One representative frame per series is currently bundled; the other 60 Figma frames remain to be imported and reviewed.

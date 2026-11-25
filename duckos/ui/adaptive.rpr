@@ -1,0 +1,74 @@
+# Adaptive desktop and gaming input policy.
+
+export craft input_device_valid(device) {
+    yield device == "keyboard"
+        or device == "mouse"
+        or device == "touch"
+        or device == "controller"
+        or device == "stylus"
+}
+
+export craft controller_event_valid(event) {
+    when size(event) != 5 {
+        yield false
+    }
+    when event[0] == "" or event[1] == "" or event[2] < 0 or event[2] > 1 {
+        yield false
+    }
+    when event[3] < 0 or event[4] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft touch_target_valid(width, height) {
+    yield width >= 44 and height >= 44
+}
+
+export craft viewport_valid(viewport) {
+    when size(viewport) != 4 {
+        yield false
+    }
+    when viewport[0] < 320 or viewport[1] < 200 {
+        yield false
+    }
+    when viewport[0] > 16384 or viewport[1] > 16384 {
+        yield false
+    }
+    when viewport[2] < 500 or viewport[2] > 4000 {
+        yield false
+    }
+    yield viewport[3] >= 24 and viewport[3] <= 360
+}
+
+export craft layout_mode(width, height) {
+    when width <= 720 or height <= 540 {
+        yield "compact"
+    }
+    when width >= 2560 {
+        yield "wide"
+    }
+    yield "desktop"
+}
+
+export craft gaming_profile_valid(profile) {
+    when size(profile) != 4 {
+        yield false
+    }
+    each flag in profile {
+        when flag != true and flag != false {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft controller_overlay_policy(game_mode, reduced_motion) {
+    when not game_mode {
+        yield "system-overlay"
+    }
+    when reduced_motion {
+        yield "static-minimal-overlay"
+    }
+    yield "low-latency-overlay"
+}

@@ -1,0 +1,66 @@
+# Reaper policy contract for the native desktop scene and its event boundary.
+# The native compositor and kernel event transport remain separate implementations.
+
+export craft desktop_scene_valid(scene) {
+    when size(scene) != 5 {
+        yield false
+    }
+    when scene[0] == "" or scene[1] < 320 or scene[2] < 200 {
+        yield false
+    }
+    when scene[1] > 16384 or scene[2] > 16384 {
+        yield false
+    }
+    when scene[3] < 500 or scene[3] > 4000 {
+        yield false
+    }
+    yield scene[4] >= 1 and scene[4] <= 32
+}
+
+export craft shell_component_valid(component) {
+    yield component == "desktop-scene"
+        or component == "dock"
+        or component == "launcher"
+        or component == "status-area"
+        or component == "window-layer"
+        or component == "notification-layer"
+        or component == "control-center"
+}
+
+export craft system_event_valid(event) {
+    when size(event) != 4 {
+        yield false
+    }
+    when event[0] == "" or event[1] == "" or event[2] <= 0 or event[3] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft event_route(event_name) {
+    when event_name == "window.focus" or event_name == "window.close" or event_name == "window.move" {
+        yield "window-engine"
+    }
+    when event_name == "input.pointer" or event_name == "input.keyboard" or event_name == "input.controller" {
+        yield "input-service"
+    }
+    when event_name == "notification.push" or event_name == "notification.dismiss" {
+        yield "notification-service"
+    }
+    when event_name == "power.request" or event_name == "session.lock" {
+        yield "session-service"
+    }
+    yield "reject-unhandled-event"
+}
+
+export craft shell_boot_gate(kernel_services) {
+    when size(kernel_services) != 6 {
+        yield "deny-incomplete-session"
+    }
+    each service in kernel_services {
+        when service != true {
+            yield "deny-incomplete-session"
+        }
+    }
+    yield "session-services-ready"
+}
