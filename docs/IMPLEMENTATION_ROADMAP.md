@@ -193,3 +193,17 @@ A hosted web service, remote orchestration control plane, automatic driver insta
 ## Release rule
 
 Do not claim DAK is a complete or usable desktop operating system until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. The x86_64 Stage 1 image now boots in QEMU BIOS and UEFI, but it halts after validated Boot Info v1 handoff and does not yet run a scheduler, processes, services or Mora.
+
+
+## D8 — First-party system-service policy layer
+
+**Status: Reaper reference-runtime contracts added; native providers pending.**
+
+- **Installer:** validates target identity/architecture, consent, verified source and recovery readiness; validates an aligned, ordered, non-overlapping EFI + system A/B + recovery layout.
+- **Driver Runtime:** validates descriptor/provenance state, architecture, bus, ABI, requested capabilities, lifecycle transitions and IRQ/DMA/device quiescence before a future unload.
+- **Package Manager:** validates bounded manifests, exact architecture/ABI, dependency availability, capability subsets, path components and protected-package removal.
+- **Update System:** validates signed-manifest state, strictly increasing version and monotonic sequence, inactive A/B slot selection, bounded boot health and rollback.
+
+The implementation is in Reaper modules under `dak/system/`, `dak/drivers/` and `dak/packages/`, with contract coverage in `contract_tests.rpr`. The current modules return plan-only decisions and do not have authority to mutate disks, extract or execute packages, map drivers, perform MMIO/DMA or change boot slots.
+
+**Next native dependencies:** trusted-key verifier and revocation, DABI64 syscall provider, kernel capabilities/address-space isolation, crash-safe filesystem and transaction journal, device/IRQ/DMA ownership, native boot-success/rollback path. Completion requires tree-walk/VM parity, QEMU fault/power-loss coverage and supported-target hardware evidence; contracts alone do not promote the native maturity stage.
