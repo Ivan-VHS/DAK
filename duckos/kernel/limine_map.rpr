@@ -78,10 +78,19 @@ export craft translate_map(regions) {
 }
 
 export craft reclaim_policy(region, boot_responses_released) {
-    when size(region) != 6 or not region_valid([region[0], region[1], region[2], region[3], region[4]]) {
+    # Translated region: [base_hi, base_lo, length_hi, length_lo, duck_type, deferred_reclaim].
+    when size(region) != 6 {
         yield "reject"
     }
-    when region[4] != 5 {
+    each word in [region[0], region[1], region[2], region[3]] {
+        when word < 0 or word > 4294967295 {
+            yield "reject"
+        }
+    }
+    when region[2] == 0 and region[3] == 0 {
+        yield "reject"
+    }
+    when region[4] != 2 or region[5] != true {
         yield "not-bootloader-reclaimable"
     }
     when not boot_responses_released {
