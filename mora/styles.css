@@ -7,8 +7,8 @@
   --mora-surface: #101010;
   --mora-elevated: #181818;
   --mora-text: #FFFFFF;
-  --mora-secondary: #E5E5E5;
-  --mora-muted: #A6A6A6;
+  --mora-secondary: rgba(255,255,255,.70);
+  --mora-muted: rgba(255,255,255,.40);
   --mora-brand: #FFD700;
   --mora-brand-hover: #FFE45C;
   --mora-secondary-accent: #FFD700;
@@ -1100,7 +1100,7 @@ button[data-action] {
   outline: 2px solid #FFD700;
   outline-offset: 3px;
 }
-.app-window:focus-within { border-color: rgba(255,215,0,.28); }
+.app-window:focus-within { border: 1px solid #FFD700; }
 
 /* Power and viewport profiles reduce the material budget before dropping layout. */
 @media (max-width: 760px) {
