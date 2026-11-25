@@ -12,7 +12,7 @@ export craft device_valid(device) {
     when kind(device[0]) != "text" or kind(device[1]) != "text" or kind(device[2]) != "number" or kind(device[3]) != "number" or kind(device[4]) != "number" {
         yield false
     }
-    when device[0] == "" or device[1] == "" or device[2] < 0 or device[3] <= 0 or device[4] < 0 {
+    when device[0] == "" or device[1] == "" or device[2] % 1 != 0 or device[3] % 1 != 0 or device[4] % 1 != 0 or device[2] < 0 or device[3] <= 0 or device[4] < 0 {
         yield false
     }
     when kind(device[5]) != "boolean" {
@@ -26,6 +26,9 @@ export craft resources_conflict(left, right) {
         yield true
     }
 
+    when left[0] == right[0] {
+        yield true
+    }
     when memory["ranges_overlap"](left[2], left[3], right[2], right[3]) {
         yield true
     }
