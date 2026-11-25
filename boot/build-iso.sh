@@ -126,7 +126,7 @@ xorriso -as mkisofs \
     "$iso_root" -o "$OUTPUT"
 
 "$LIMINE_BIN" bios-install "$OUTPUT"
-sha256sum "$OUTPUT" > "$OUTPUT.sha256"
+(cd "$OUTPUT_DIR" && sha256sum "$(basename -- "$OUTPUT")" > "$(basename -- "$OUTPUT").sha256")
 echo "DuckOS stage-0 ISO ready: $OUTPUT"
 echo "Kernel ELF: $WORK_DIR/duckos.elf"
 cat "$OUTPUT.sha256"
