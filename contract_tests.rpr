@@ -286,7 +286,7 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
-emit "DAK_REAPER_CONTRACTS_OK"
+# Contract success marker is emitted only after every suite section completes.
 
 
 # DAK native-system-service contracts. These prove policy decisions only.
@@ -389,9 +389,10 @@ assert(updates["admission"](wrong_arch_update, "x86_64", [1, 0, 0], 1) == "rejec
 assert(updates["inactive_slot"]("A") == "B", "A/B update targets the inactive B slot")
 assert(updates["inactive_slot"]("B") == "A", "A/B update targets the inactive A slot")
 assert(updates["inactive_slot"]("unknown") == "", "A/B update rejects an unknown active slot")
-assert(updates["activation_policy"]("A", "B", "healthy") == "activate-plan-only", "A/B activation targets the inactive slot after healthy boot")
-assert(updates["activation_policy"]("A", "A", "healthy") == "reject-slot-target", "A/B activation cannot overwrite the active slot")
-assert(updates["activation_policy"]("A", "B", "pending") == "reject-boot-unhealthy", "A/B activation requires healthy boot evidence")
+assert(updates["activation_policy"]("A", "B", "staged", "verified") == "arm-plan-only", "A/B update arms the verified inactive slot")
+assert(updates["activation_policy"]("A", "A", "staged", "verified") == "reject-slot-target", "A/B update cannot overwrite the active slot")
+assert(updates["activation_policy"]("A", "B", "staged", "unverified") == "reject-boot-entry", "A/B update rejects an unverified boot entry")
+assert(updates["activation_policy"]("unknown", "B", "staged", "verified") == "reject-active-slot", "A/B update requires a known active slot")
 assert(updates["transition_valid"]("staged", "armed"), "update manager arms only a staged payload")
 assert(not updates["transition_valid"]("staged", "confirmed"), "update manager requires a successful boot before confirmation")
 assert(updates["boot_result_policy"]("healthy", 1, 3) == "confirm-plan-only", "update manager confirms only a healthy boot")
@@ -415,3 +416,5 @@ assert(not audit["chain_valid"]([audit_one, broken_audit_link]), "audit rejects 
 assert(audit["append_policy"]([audit_one], broken_audit_link, 1024) == "reject-chain-link", "audit append rejects a broken digest link")
 assert(audit["append_policy"]([audit_one], [3, "req-3", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-3"], 1024) == "reject-sequence", "audit rejects a skipped sequence")
 assert(audit["append_policy"]([audit_one], [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-2"], 1) == "reject-capacity", "audit journal is bounded")
+
+emit "DAK_REAPER_CONTRACTS_OK"
