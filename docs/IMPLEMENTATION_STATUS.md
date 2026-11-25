@@ -32,6 +32,10 @@ Updated: 2026-11-25
 
 ## Partial or external boundaries
 
+- [x] x86_64 CPU exception IDT: vectors 0–31 have interrupt-gate descriptors, normalized assembly stubs and a fatal serial/framebuffer diagnostic path. Host tests validate descriptor fields and the C/assembly frame offsets; BIOS/UEFI QEMU now verifies the post-`lidt` marker. This does not enable maskable interrupts.
+- [ ] Owned GDT, TSS and dedicated IST stacks for double fault/NMI; the current handlers still use the active boot stack.
+- [ ] PIC/APIC setup, IRQ remapping, timer/keyboard routing and interrupt-safe scheduling.
+
 - [x] Experimental x86_64 Stage 1 boot image (QEMU BIOS/UEFI verification passed): pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native monotonic 4 KiB physical-frame allocator over validated USABLE regions. The kernel allocates and clears one frame through HHDM and emits `DUCKOS_BOOT_OK stage=1`. CI run 45527148367 passed host CTests, freestanding ISO build, BIOS and UEFI QEMU boots; both serial logs report `DUCKOS_BOOT_OK stage=1`. This is not yet a running process/service OS session.
 - [x] Host-tested frame allocator contract: alignment, reserved-range exclusion, minimum address, malformed/overlapping/overflowing map rejection and exhaustion.
 - [ ] Reusable frame allocator/free path, page tables, MMIO and DMA.
