@@ -255,10 +255,7 @@ create policy artifacts_insert_editors
     );
 
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('ecosystem-artifacts', 'ecosystem-artifacts', false, 536870912)
-on conflict (id) do update
-set public = false,
-    file_size_limit = excluded.file_size_limit;
+values ('ecosystem-artifacts', 'ecosystem-artifacts', false, 536870912);
 
 create policy ecosystem_artifacts_read_members
     on storage.objects
