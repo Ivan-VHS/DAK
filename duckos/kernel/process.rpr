@@ -6,6 +6,8 @@
 # [pid, generation, parent_pid, parent_generation, state,
 #  stack_base, stack_bytes, address_space_id, capabilities, exit_code]
 
+import "duckos/security/capabilities.rpr" as capabilities
+
 export craft state_valid(state) {
     yield state == "created" or state == "ready" or state == "running" or state == "blocked" or state == "exited" or state == "killed"
 }
@@ -99,7 +101,6 @@ export craft child_authority_valid(parent, child) {
     when child[2] != parent[0] or child[3] != parent[1] {
         yield false
     }
-    import "duckos/security/capabilities.rpr" as capabilities
     yield capabilities["child_is_subset"](parent[8], child[8])
 }
 
