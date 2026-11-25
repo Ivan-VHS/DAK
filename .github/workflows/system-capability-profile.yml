@@ -22,3 +22,9 @@ jobs:
         run: python tools/validate_system_capability_profile.py
       - name: Run validator negative-case tests
         run: python tools/validate_system_capability_profile.py --self-test
+      - name: Set up Node.js for Full System roadmap validation
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate Full System domains, evidence paths and dependency graph
+        run: node tools/validate_full_system_roadmap.mjs --self-test
