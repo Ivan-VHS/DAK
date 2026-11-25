@@ -6,6 +6,7 @@
 #include "frame_allocator.h"
 #include "limine.h"
 #include "interrupts.h"
+#include "gdt.h"
 
 #define SERIAL_PORT 0x3f8u
 #define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
@@ -476,10 +477,14 @@ void _start(void) __attribute__((noreturn));
 void _start(void) {
     __asm__ volatile ("cli");
     serial_init();
+    if (!duckos_x86_gdt_init()) {
+        boot_failure("could not install owned x86_64 GDT/TSS");
+    }
+    serial_write("gdt=owned tss=loaded rsp0=bootstrap ist=df,nmi,pf\n");
     if (!duckos_x86_interrupts_init()) {
         boot_failure("could not install CPU exception IDT");
     }
-    serial_write("exceptions=0..31 idt=loaded maskable_interrupts=disabled\n");
+    serial_write("exceptions=0..31 idt=loaded ist=df:1,nmi:2,pf:3 maskable_interrupts=disabled\n");
     serial_write("\nDUCKOS_BOOT begin protocol=limine base_revision=6\n");
 
     if (!LIMINE_BASE_REVISION_SUPPORTED(base_revision)) {
