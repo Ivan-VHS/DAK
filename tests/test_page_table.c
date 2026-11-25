@@ -209,6 +209,54 @@ static void test_splits_two_megabyte_mapping_before_modifying_one_page(void) {
     assert(count_used(&pool) == 0u);
 }
 
+
+static void test_splits_one_gigabyte_mapping_before_modifying_one_page(void) {
+    reset_pool();
+    const duckos_page_table_ops ops = test_ops(&pool);
+    duckos_page_table_space space = {0};
+    uint64_t *root;
+    uint64_t *pdpt;
+    uint64_t pdpt_physical = 0u;
+    uint64_t physical = 0u;
+
+    assert(duckos_page_table_create(&space, 48u, 1, &ops) == DUCKOS_PAGE_TABLE_OK);
+    root = test_map_page(&pool, space.root_physical);
+    pdpt_physical = test_allocate(&pool);
+    assert(pdpt_physical != 0u);
+    pdpt = test_map_page(&pool, pdpt_physical);
+    assert(pdpt != NULL);
+
+    root[0] = pdpt_physical | DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE;
+    pdpt[1] = 0x40000000u | DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE |
+        DUCKOS_PAGE_LARGE | DUCKOS_PAGE_NX;
+
+    assert(duckos_page_table_translate(
+        &space, 0x40001234u, &physical, NULL
+    ) == DUCKOS_PAGE_TABLE_OK);
+    assert(physical == 0x40001234u);
+
+    assert(duckos_page_table_map(
+        &space, 0x40001000u, 0x900000u,
+        DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE | DUCKOS_PAGE_NX
+    ) == DUCKOS_PAGE_TABLE_ALREADY_MAPPED);
+    assert(duckos_page_table_unmap(&space, 0x40001000u) == DUCKOS_PAGE_TABLE_OK);
+    assert(duckos_page_table_map(
+        &space, 0x40001000u, 0x900000u,
+        DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE | DUCKOS_PAGE_NX
+    ) == DUCKOS_PAGE_TABLE_OK);
+    assert(duckos_page_table_translate(
+        &space, 0x40001000u, &physical, NULL
+    ) == DUCKOS_PAGE_TABLE_OK);
+    assert(physical == 0x900000u);
+    assert(duckos_page_table_translate(
+        &space, 0x40002000u, &physical, NULL
+    ) == DUCKOS_PAGE_TABLE_OK);
+    assert(physical == 0x40002000u);
+
+    duckos_page_table_destroy(&space);
+    assert(count_used(&pool) == 0u);
+}
+
 static void test_clones_existing_hierarchy_into_owned_pages(void) {
     test_page_pool pool = {0};
     const duckos_page_table_ops ops = test_ops(&pool);
@@ -261,6 +309,7 @@ int main(void) {
     test_canonical_addresses();
     test_map_translate_protect_and_unmap();
     test_splits_two_megabyte_mapping_before_modifying_one_page();
+    test_splits_one_gigabyte_mapping_before_modifying_one_page();
     test_clones_existing_hierarchy_into_owned_pages();
     test_rejects_writable_executable_and_unsupported_nx();
     puts("DuckOS x86_64 page-table tests passed");
