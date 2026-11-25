@@ -9,6 +9,8 @@ extern "C" {
 #endif
 
 #define DUCKOS_BOOT_INFO_VERSION 1u
+#define DUCKOS_BOOT_INFO_V1_SIZE UINT32_C(88)
+#define DUCKOS_MEMORY_REGION_V1_SIZE UINT32_C(24)
 #define DUCKOS_BOOT_MAX_MEMORY_REGIONS 256u
 
 typedef enum duckos_memory_type {
@@ -53,6 +55,41 @@ typedef struct duckos_boot_info_v1 {
     uint32_t memory_region_count;
     uint32_t reserved;
 } duckos_boot_info_v1;
+
+#if defined(__cplusplus)
+#define DUCKOS_ABI_STATIC_ASSERT(condition, message) static_assert((condition), message)
+#else
+#define DUCKOS_ABI_STATIC_ASSERT(condition, message) _Static_assert((condition), message)
+#endif
+
+/*
+ * v1 is a wire/FFI contract, not a compiler-native object layout.
+ * Keep these assertions in the public header so every C11/C++ consumer
+ * rejects an incompatible packing or alignment configuration at compile time.
+ */
+DUCKOS_ABI_STATIC_ASSERT(sizeof(duckos_memory_region) == DUCKOS_MEMORY_REGION_V1_SIZE,
+                         "duckos_memory_region v1 size changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_memory_region, base) == 0u,
+                         "duckos_memory_region.base offset changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_memory_region, length) == 8u,
+                         "duckos_memory_region.length offset changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_memory_region, type) == 16u,
+                         "duckos_memory_region.type offset changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_memory_region, flags) == 20u,
+                         "duckos_memory_region.flags offset changed");
+
+DUCKOS_ABI_STATIC_ASSERT(sizeof(duckos_boot_info_v1) == DUCKOS_BOOT_INFO_V1_SIZE,
+                         "duckos_boot_info_v1 size changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_boot_info_v1, flags) == 8u,
+                         "duckos_boot_info_v1.flags offset changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_boot_info_v1, kernel_phys_base) == 16u,
+                         "duckos_boot_info_v1.kernel_phys_base offset changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_boot_info_v1, framebuffer_phys_base) == 48u,
+                         "duckos_boot_info_v1.framebuffer_phys_base offset changed");
+DUCKOS_ABI_STATIC_ASSERT(offsetof(duckos_boot_info_v1, memory_region_count) == 80u,
+                         "duckos_boot_info_v1.memory_region_count offset changed");
+
+#undef DUCKOS_ABI_STATIC_ASSERT
 
 typedef enum duckos_boot_info_status {
     DUCKOS_BOOT_INFO_OK = 0,
