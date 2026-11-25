@@ -13,7 +13,7 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
-const DUCK_ACCENT = "#FFD400";
+const DUCK_ACCENT = "#FFD700";
 
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
@@ -107,12 +107,72 @@ function setLocale(locale) {
   return true;
 }
 
+function applyThemeDocument(themeDocument) {
+  if (!themeDocument || themeDocument.schema !== "mora.theme.v1" ||
+      themeDocument.defaultPalette !== "duck") return;
+  const palette = themeDocument.palettes?.duck;
+  const materials = themeDocument.materials;
+  const motion = themeDocument.motion;
+  const shape = themeDocument.shape;
+  if (!palette || !materials || !motion || !shape) return;
+  const root = document.documentElement;
+  const set = (key, value) => {
+    if (typeof value === "string" && value.length > 0) root.style.setProperty(key, value);
+  };
+  const bounded = (value, min, max, fallback) =>
+    Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+  set("--mora-canvas", palette.canvas);
+  set("--mora-page", palette.page);
+  set("--mora-surface", palette.surface);
+  set("--mora-elevated", palette.elevated);
+  set("--mora-text", palette.text);
+  set("--mora-brand", palette.brand);
+  set("--mora-brand-hover", palette.brandHover);
+  set("--mora-border", palette.border);
+  set("--mora-selection", palette.selection);
+  set("--mora-danger", palette.danger);
+  set("--mora-secondary", "rgba(255,255,255," + bounded(themeDocument.textOpacity?.secondary, 0, 1, 0.72) + ")");
+  set("--mora-muted", "rgba(255,255,255," + bounded(themeDocument.textOpacity?.tertiary, 0, 1, 0.42) + ")");
+  set("--mora-glass-background", materials.backgroundGlass.fill);
+  set("--mora-glass-content", materials.contentGlass.fill);
+  set("--mora-glass-modal", materials.modalGlass.fill);
+  set("--mora-background-blur", bounded(materials.backgroundGlass.blurPx, 0, 36, 28) + "px");
+  set("--mora-content-blur", bounded(materials.contentGlass.blurPx, 0, 36, 18) + "px");
+  set("--mora-modal-blur", bounded(materials.modalGlass.blurPx, 0, 36, 32) + "px");
+  set("--mora-grain-opacity", String(bounded(materials.modalGlass.grainOpacity, 0, 0.05, 0.03)));
+  set("--mora-specular-opacity", String(bounded(materials.modalGlass.specularOpacity, 0, 0.25, 0.12)));
+  set("--mora-radius-window", bounded(shape.windowRadius, 4, 8, 6) + "px");
+  set("--mora-radius-card", bounded(shape.cardRadius, 4, 8, 6) + "px");
+  set("--mora-radius-control", bounded(shape.controlRadius, 4, 8, 4) + "px");
+  set("--motion-fast", bounded(motion.fastMs, 0, 300, 120) + "ms");
+  set("--motion-standard", bounded(motion.standardMs, 0, 300, 180) + "ms");
+  set("--motion-spatial", bounded(motion.spatialMs, 0, 300, 220) + "ms");
+  set("--motion-emphasis", bounded(motion.emphasisMs, 0, 300, 280) + "ms");
+  set("--ease-spring", motion.easing.spring);
+  set("--ease-snappy", motion.easing.snappy);
+  set("--ease-strict", motion.easing.strict);
+}
+async function loadThemeDocument() {
+  try {
+    const response = await fetch("./theme.json", { cache: "no-cache", credentials: "same-origin" });
+    if (!response.ok) return;
+    applyThemeDocument(await response.json());
+  } catch {
+    /* Built-in CSS tokens remain available for file:// and offline previews. */
+  }
+}
+function prefersReducedMotion() {
+  return preferences.appearance.reducedMotion ||
+    (typeof window.matchMedia === "function" &&
+     window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
 function applyPreferences() {
-  document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
-  document.documentElement.dataset.theme = "duck";
+  const root = document.documentElement;
+  root.classList.toggle("reduce-motion", prefersReducedMotion());
+  root.classList.toggle("reduce-transparency", preferences.appearance.reducedTransparency);
+  root.dataset.theme = "duck";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
-  document.documentElement.dataset.powerProfile = preferences.powerProfile;
-
+  root.dataset.powerProfile = preferences.powerProfile;
 }
 
 function persistPreferences() {
@@ -183,6 +243,8 @@ function executeApprovedPlan() {
       preferences.powerProfile = action.value;
     } else if (action.type === "set" && action.setting === "reducedMotion") {
       preferences.appearance.reducedMotion = action.value === true;
+    } else if (action.type === "set" && action.setting === "reducedTransparency") {
+      preferences.appearance.reducedTransparency = action.value === true;
     }
   }
 
@@ -225,7 +287,9 @@ function updateWorkspacePanel() {
   panel.querySelectorAll("[data-setting]").forEach((button) => {
     const enabled = button.dataset.setting === "focusMode"
       ? preferences.focusMode
-      : preferences.appearance.reducedMotion;
+      : button.dataset.setting === "reducedTransparency"
+        ? preferences.appearance.reducedTransparency
+        : preferences.appearance.reducedMotion;
     button.setAttribute("aria-pressed", String(enabled));
     button.textContent = enabled
       ? (currentLocale === "zh-CN" ? "已开启" : "Включено")
@@ -736,6 +800,7 @@ function panelMarkup(appId) {
         '<div class="profile-options">' + profileButton("saver", currentLocale === "zh-CN" ? "节能" : "Экономия") + profileButton("balanced", currentLocale === "zh-CN" ? "均衡" : "Баланс") + profileButton("performance", currentLocale === "zh-CN" ? "性能" : "Производительность") + '</div></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "专注模式" : "Режим фокуса") + '</strong><span>' + (currentLocale === "zh-CN" ? "弱化次要界面元素" : "Приглушить второстепенные элементы оболочки") + '</span></div><button class="permission-toggle" data-setting="focusMode" aria-pressed="' + String(preferences.focusMode) + '">' + (preferences.focusMode ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
         '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "减少动态效果" : "Снижение движения") + '</strong><span>' + (currentLocale === "zh-CN" ? "减少装饰性过渡和移动" : "Убрать декоративные переходы и перемещения") + '</span></div><button class="permission-toggle" data-setting="reducedMotion" aria-pressed="' + String(preferences.appearance.reducedMotion) + '">' + (preferences.appearance.reducedMotion ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
+        '<div class="permission-row"><div class="permission-copy"><strong>' + (currentLocale === "zh-CN" ? "降低透明度" : "Снижение прозрачности") + '</strong><span>' + (currentLocale === "zh-CN" ? "使用更致密的表面并关闭背景模糊" : "Плотные поверхности без фонового размытия") + '</span></div><button class="permission-toggle" data-setting="reducedTransparency" aria-pressed="' + String(preferences.appearance.reducedTransparency) + '">' + (preferences.appearance.reducedTransparency ? (currentLocale === "zh-CN" ? "已开启" : "Включено") : (currentLocale === "zh-CN" ? "已关闭" : "Выключено")) + '</button></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>' + (currentLocale === "zh-CN" ? "自适应布局和无障碍偏好在桌面外壳中生效。硬件配置、VRR 与 NPU 调度仍需原生系统服务。" : "Адаптивная сетка и настройки доступности работают в оболочке. Аппаратные профили, VRR и NPU-планирование требуют native services.") + '</span></div>' +
         '<p class="window-copy">' + (currentLocale === "zh-CN" ? "设置保存在当前浏览器配置中。" : "Настройки хранятся локально в профиле браузера и могут быть сброшены очисткой данных сайта.") + '</p>';
     case "red-sparrow":
@@ -819,7 +884,8 @@ function showToast(message) {
 }
 
 function updateActiveApp() {
-  const windows = Array.from(windowLayer.querySelectorAll(".app-window"));
+  const windows = Array.from(windowLayer.querySelectorAll(".app-window"))
+    .filter((item) => !item.classList.contains("is-closing"));
   if (windows.length === 0) {
     activeAppLabel.textContent = LOCALE_TEXT[currentLocale].desktop;
   } else {
@@ -842,6 +908,18 @@ function openApp(appId) {
   if (!definition) return;
   let appWindow = windowLayer.querySelector('[data-window="' + appId + '"]');
   if (appWindow) {
+    if (appWindow.classList.contains("is-closing")) {
+      appWindow.classList.remove("is-closing");
+      appWindow.classList.add("is-reopening");
+      const reopenEnd = (event) => {
+        if (event.target === appWindow && event.animationName === "duck-window-in") {
+          appWindow.classList.remove("is-reopening");
+          appWindow.removeEventListener("animationend", reopenEnd);
+        }
+      };
+      appWindow.addEventListener("animationend", reopenEnd);
+    }
+    appWindow.removeAttribute("aria-hidden");
     focusWindow(appWindow);
     return;
   }
@@ -873,8 +951,24 @@ function openApp(appId) {
 }
 
 function closeWindow(appWindow) {
-  if (!appWindow) return;
-  appWindow.remove();
+  if (!appWindow || appWindow.classList.contains("is-closing")) return;
+  if (prefersReducedMotion()) {
+    appWindow.remove();
+    updateActiveApp();
+    return;
+  }
+  appWindow.classList.add("is-closing");
+  appWindow.setAttribute("aria-hidden", "true");
+  const finishClose = (event) => {
+    if (event.target !== appWindow || event.animationName !== "duck-window-out") return;
+    appWindow.removeEventListener("animationend", finishClose);
+    appWindow.removeEventListener("animationcancel", cancelClose);
+    appWindow.remove();
+    updateActiveApp();
+  };
+  const cancelClose = () => appWindow.removeEventListener("animationend", finishClose);
+  appWindow.addEventListener("animationend", finishClose);
+  appWindow.addEventListener("animationcancel", cancelClose, { once: true });
   updateActiveApp();
 }
 
@@ -1174,6 +1268,8 @@ document.addEventListener("click", (event) => {
       preferences.focusMode = !preferences.focusMode;
     } else if (setting.dataset.setting === "reducedMotion") {
       preferences.appearance.reducedMotion = !preferences.appearance.reducedMotion;
+    } else if (setting.dataset.setting === "reducedTransparency") {
+      preferences.appearance.reducedTransparency = !preferences.appearance.reducedTransparency;
     } else {
       return;
     }
@@ -1291,6 +1387,7 @@ document.addEventListener("keydown", (event) => {
 document.documentElement.lang = currentLocale;
 applyChromeLocale();
 applyPreferences();
+void loadThemeDocument();
 updateClock();
 window.setInterval(updateClock, 1000);
 updateActiveApp();
