@@ -9,7 +9,7 @@
 # Unsupported readings are "unknown" and are omitted, never coerced to zero.
 # UTC is provenance only; caller supplies a monotonic timestamp separately.
 
-import "duckos/system/telemetry.rpr" as telemetry
+import "../system/telemetry.rpr" as telemetry
 
 export craft optional_metric_valid(value, minimum, maximum) {
     when kind(value) == "text" { yield value == "unknown" }
