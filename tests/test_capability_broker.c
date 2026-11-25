@@ -83,7 +83,7 @@ static void test_admin_rights_are_separate(void) {
 
 static void test_attenuation_and_parent_revocation(void) {
     duckos_capability_broker broker;
-    uint64_t parent = 0U, child = 0U;
+    uint64_t parent = 0U, child = 0U, denied_child = 0U;
     init(&broker);
     assert(duckos_capability_issue(&broker, &authority, &compositor,
         REAPER_SYSTEM_CAP_DESKTOP_WINDOW | DUCKOS_CAPABILITY_BROKER_DELEGATE,
@@ -99,7 +99,7 @@ static void test_attenuation_and_parent_revocation(void) {
 
     assert(duckos_capability_attenuate(&broker, &client, child, &other_client,
         REAPER_SYSTEM_CAP_DESKTOP_WINDOW, REAPER_SYSTEM_DOMAIN_DESKTOP_WINDOW,
-        DUCKOS_CAPABILITY_SCOPE_OBJECT, 44U, 3U, &parent) == DUCKOS_CAPABILITY_NOT_DELEGABLE);
+        DUCKOS_CAPABILITY_SCOPE_OBJECT, 44U, 3U, &denied_child) == DUCKOS_CAPABILITY_NOT_DELEGABLE);
 
     assert(duckos_capability_revoke(&broker, &authority, parent) == DUCKOS_CAPABILITY_OK);
     assert(duckos_capability_authorize(&broker, &client, child,
