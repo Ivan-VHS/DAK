@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ivan-vhs.dev/ecosystem-event.v1.schema.json",
+  "title": "Ivan-VHS Ecosystem Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "event_id",
+    "organization_id",
+    "device_id",
+    "source_project",
+    "schema_id",
+    "schema_version",
+    "event_type",
+    "occurred_at",
+    "payload"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ivan-vhs.ecosystem-event.v1"
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "device_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_project": {
+      "enum": [
+        "duckos",
+        "reaper",
+        "pytyliki",
+        "ventusample",
+        "oplague"
+      ]
+    },
+    "schema_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$",
+      "maxLength": 128
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32767
+    },
+    "event_type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,127}$"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object",
+      "maxProperties": 64
+    }
+  }
+}
