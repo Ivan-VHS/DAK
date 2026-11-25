@@ -1,0 +1,90 @@
+# OPlague GPU telemetry v1 policy adapter; receives a normalized record only.
+# Trusted ingest must parse JSON, validate the complete schema and canonical
+# digest before calling this module. Normalized snapshot:
+# [schema, snapshot_id, captured_at_utc, provider, mode, available, reason,
+#  controls_performed, digest_verified, gpu_rows]
+# GPU row:
+# [name, driver_version, temperature_c, utilization_pct, memory_used_mib,
+#  memory_total_mib, power_w, graphics_clock_mhz, memory_clock_mhz]
+# Unsupported readings are "unknown" and are omitted, never coerced to zero.
+# UTC is provenance only; caller supplies a monotonic timestamp separately.
+
+import "duckos/system/telemetry.rpr" as telemetry
+
+export craft optional_metric_valid(value, minimum, maximum) {
+    when kind(value) == "text" { yield value == "unknown" }
+    when kind(value) != "number" { yield false }
+    yield value >= minimum and value <= maximum
+}
+
+export craft gpu_descriptor_valid(gpu) {
+    when kind(gpu) != "list" or size(gpu) != 9 { yield false }
+    when kind(gpu[0]) != "text" or gpu[0] == "" or size(gpu[0]) > 256 { yield false }
+    when kind(gpu[1]) != "text" or gpu[1] == "" or size(gpu[1]) > 128 { yield false }
+    when not optional_metric_valid(gpu[2], -20, 150) or
+         not optional_metric_valid(gpu[3], 0, 100) or
+         not optional_metric_valid(gpu[4], 0, 2147483647) or
+         not optional_metric_valid(gpu[5], 1, 2147483647) or
+         not optional_metric_valid(gpu[6], 0, 10000) or
+         not optional_metric_valid(gpu[7], 0, 20000) or
+         not optional_metric_valid(gpu[8], 0, 20000) { yield false }
+    when kind(gpu[4]) == "number" and kind(gpu[5]) == "number" and gpu[4] > gpu[5] { yield false }
+    yield true
+}
+
+export craft gpu_snapshot_valid(snapshot) {
+    when kind(snapshot) != "list" or size(snapshot) != 10 { yield false }
+    when snapshot[0] != "oplage.gpu-telemetry.v1" or
+         kind(snapshot[1]) != "text" or snapshot[1] == "" or
+         kind(snapshot[2]) != "text" or snapshot[2] == "" or
+         snapshot[3] != "nvidia-smi" or snapshot[4] != "read_only" { yield false }
+    when kind(snapshot[5]) != "boolean" or kind(snapshot[6]) != "text" or
+         snapshot[7] != false or snapshot[8] != true or
+         kind(snapshot[9]) != "list" or size(snapshot[9]) > 16 { yield false }
+    when snapshot[5] == true and (snapshot[6] != "" or size(snapshot[9]) == 0) { yield false }
+    when snapshot[5] == false and (snapshot[6] == "" or size(snapshot[9]) != 0) { yield false }
+    each gpu in snapshot[9] {
+        when not gpu_descriptor_valid(gpu) { yield false }
+    }
+    yield true
+}
+
+export craft append_metric(samples, sequence, device_name, metric) {
+    when kind(metric[1]) == "text" and metric[1] == "unknown" {
+        yield ["skipped", samples, sequence]
+    }
+    when kind(metric[1]) != "number" or sequence <= 0 or sequence >= 9223372036854770000 {
+        yield ["invalid", samples, sequence]
+    }
+    make sample := [sequence, device_name, metric[0], metric[1], metric[2], metric[3]]
+    when not telemetry["sample_valid"](sample) { yield ["invalid", samples, sequence] }
+    yield ["appended", push(samples, sample), sequence + 1]
+}
+
+export craft gpu_snapshot_samples(snapshot, first_sequence, monotonic_timestamp) {
+    when not gpu_snapshot_valid(snapshot) or kind(first_sequence) != "number" or
+         kind(monotonic_timestamp) != "number" or first_sequence < 0 or
+         first_sequence >= 9223372036854770000 or monotonic_timestamp < 0 { yield ["invalid", []] }
+    when snapshot[5] == false { yield ["unavailable", []] }
+
+    vary samples := []
+    vary sequence := first_sequence + 1
+    each gpu in snapshot[9] {
+        make metrics := [
+            ["temperature_c", gpu[2], "celsius", monotonic_timestamp],
+            ["utilization_pct", gpu[3], "percent", monotonic_timestamp],
+            ["memory_used_mib", gpu[4], "MiB", monotonic_timestamp],
+            ["memory_total_mib", gpu[5], "MiB", monotonic_timestamp],
+            ["power_w", gpu[6], "watt", monotonic_timestamp],
+            ["graphics_clock_mhz", gpu[7], "MHz", monotonic_timestamp],
+            ["memory_clock_mhz", gpu[8], "MHz", monotonic_timestamp]
+        ]
+        each metric in metrics {
+            make result := append_metric(samples, sequence, gpu[0], metric)
+            when result[0] == "invalid" { yield ["invalid", []] }
+            change samples := result[1]
+            change sequence := result[2]
+        }
+    }
+    yield ["ready", samples, sequence]
+}
