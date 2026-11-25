@@ -53,16 +53,16 @@
 
 namespace {
 
-QColor kPage("#080808");
-QColor kSurface("#151515");
-QColor kRaised("#242424");
+QColor kPage("#070707");
+QColor kSurface("#111111");
+QColor kRaised("#191919");
 QColor kText("#FFFFFF");
-QColor kSecondary("#E5E5E5");
-QColor kMuted("#A6A6A6");
-QColor kBrand("#FFD400");
-QColor kBrandHover("#FFE45C");
-QColor kBorder("#3A3A3A");
-QColor kSelection("#3A3100");
+QColor kSecondary("#D6D6D6");
+QColor kMuted("#929292");
+QColor kBrand("#FFD700");
+QColor kBrandHover("#FFE36E");
+QColor kBorder("#343434");
+QColor kSelection("#3B3100");
 
 void loadThemeTokens()
 {
@@ -227,8 +227,8 @@ protected:
 
         QRadialGradient glow(QPointF(width() * 0.51, height() * 0.38),
                              std::max(width(), height()) * 0.78);
-        glow.setColorAt(0.0, QColor("#242018"));
-        glow.setColorAt(0.46, QColor("#11100E"));
+        glow.setColorAt(0.0, QColor("#211A08"));
+        glow.setColorAt(0.46, QColor("#0E0D0A"));
         glow.setColorAt(1.0, kPage);
         painter.fillRect(rect(), glow);
 
@@ -240,8 +240,8 @@ protected:
             path.cubicTo(x - width() * 0.025, height() * 0.29,
                          x + width() * 0.035, height() * 0.63,
                          x + width() * 0.008, height());
-            QPen pen(QColor(255, 255, 255, i % 3 == 0 ? 15 : 7));
-            pen.setWidthF(i % 3 == 0 ? 1.3 : 0.8);
+            QPen pen(QColor(255, 215, 0, i % 3 == 0 ? 16 : 6));
+            pen.setWidthF(i % 3 == 0 ? 1.2 : 0.7);
             painter.setPen(pen);
             painter.drawPath(path);
         }
@@ -285,7 +285,7 @@ protected:
         }
         painter.setPen(QPen(kBrand, 1.35));
         painter.drawPath(waveform);
-        painter.setPen(QPen(QColor(255, 212, 0, 55), 5));
+        painter.setPen(QPen(QColor(255, 215, 0, 42), 4));
         painter.drawLine(width() * 0.42, 8, width() * 0.42, height() - 8);
     }
 };
@@ -303,14 +303,23 @@ public:
         resize(720, 470);
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QMainWindow { background: #080808; color: #FFFFFF; }
-            QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
-            QFrame#panel { background: #151515; border: 1px solid #3A3A3A; border-radius: 16px; }
+            QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; background: transparent; }
+            QFrame#panel { background: rgba(21,21,21,236); border: 1px solid #3A3A3A; border-radius: 14px; }
             QLabel[role="muted"] { color: #A6A6A6; }
             QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
-            QPushButton { color: #FFFFFF; background: #242424; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 14px; }
-            QPushButton:hover { border-color: #FFD400; background: #2B281A; }
-            QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; selection-background-color: #3A3100; }
-            QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 7px; }
+            QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 8px; padding: 9px 14px; min-height: 28px; }
+            QPushButton:hover { border-color: #FFD400; background: #242424; }
+            QPushButton:pressed { background: #3A3100; }
+            QPushButton:focus { border: 2px solid #FFE45C; }
+            QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
+            QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 8px; padding: 8px; selection-background-color: #3A3100; }
+            QTreeWidget::item { min-height: 28px; padding: 4px 6px; border-bottom: 1px solid #242424; }
+            QTreeWidget::item:selected { color: #FFFFFF; background: #3A3100; }
+            QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 8px; }
+            QScrollBar:vertical { width: 8px; background: transparent; margin: 2px; }
+            QScrollBar::handle:vertical { min-height: 28px; border-radius: 4px; background: #3A3A3A; }
+            QScrollBar::handle:vertical:hover { background: #FFD400; }
+            QToolTip { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; padding: 5px 7px; }
         )")));
         buildContent();
     }
@@ -479,7 +488,7 @@ public:
         : QMainWindow(parent)
     {
         setWindowTitle("Mora — DuckOS");
-        setMinimumSize(1120, 720);
+        setMinimumSize(1000, 660);
         resize(1440, 900);
         loadCatalogue();
         buildInterface();
@@ -595,22 +604,30 @@ private:
     void buildInterface()
     {
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
-            QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
+            QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; background: transparent; }
             QLabel[role="muted"] { color: #A6A6A6; }
             QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QLabel[role="title"] { color: #FFFFFF; font-size: 25pt; font-weight: 650; }
             QLabel[role="subtitle"] { color: #E5E5E5; }
-            QFrame#panel { background: rgba(21,21,21,238); border: 1px solid #3A3A3A; border-radius: 16px; }
-            QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #3A3A3A; border-radius: 14px; }
-            QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; text-align: left; }
-            QPushButton:hover { border-color: #FFD400; background: #222016; }
+            QFrame#panel { background: rgba(21,21,21,232); border: 1px solid #3A3A3A; border-radius: 14px; }
+            QFrame#softPanel { background: rgba(25,25,25,224); border: 1px solid #3A3A3A; border-radius: 12px; }
+            QPushButton { color: #FFFFFF; background: rgba(17,17,17,232); border: 1px solid #3A3A3A; border-radius: 8px; padding: 9px 12px; min-height: 28px; text-align: left; }
+            QPushButton:hover { border-color: #FFD400; background: #242424; }
+            QPushButton:pressed { background: #3A3100; }
             QPushButton:checked { color: #080808; background: #FFD400; border-color: #FFD400; }
+            QPushButton:focus { border: 2px solid #FFE45C; }
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
-            QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
-            QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
-            QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
+            QPushButton#appTile { background: rgba(17,17,17,236); border-radius: 12px; min-height: 78px; }
+            QPushButton#appTile:hover { background: #242424; border-color: #FFD400; }
+            QLineEdit, QComboBox { color: #FFFFFF; background: rgba(17,17,17,232); border: 1px solid #3A3A3A; border-radius: 8px; padding: 9px 12px; min-height: 26px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
+            QComboBox::drop-down { width: 30px; border: 0; }
+            QComboBox QAbstractItemView { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; selection-background-color: #3A3100; }
             QScrollArea { border: 0; background: transparent; }
+            QScrollBar:vertical { width: 8px; background: transparent; margin: 2px; }
+            QScrollBar::handle:vertical { min-height: 28px; border-radius: 4px; background: #3A3A3A; }
+            QScrollBar::handle:vertical:hover { background: #FFD400; }
+            QToolTip { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; padding: 5px 7px; }
         )")));
 
         auto* background = new Backdrop;
@@ -654,7 +671,7 @@ private:
     QWidget* buildTopBar()
     {
         auto* bar = new QWidget;
-        bar->setFixedHeight(52);
+        bar->setFixedHeight(56);
         auto* layout = new QHBoxLayout(bar);
         layout->setContentsMargins(22, 4, 22, 4);
         layout->setSpacing(16);
