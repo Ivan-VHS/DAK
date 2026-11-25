@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(20);
+select plan(21);
 
 select extensions.has_table('public', 'ecosystem_organizations', 'organization metadata table exists');
 select extensions.has_table('public', 'ecosystem_memberships', 'membership table exists');
