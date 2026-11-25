@@ -7,7 +7,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QTimer>
-#include <QDebug>
+#include <QTextStream>
 
 #ifndef DUCKOS_SOURCE_ROOT
 #define DUCKOS_SOURCE_ROOT "."
@@ -72,8 +72,9 @@ int main(int argc, char *argv[])
         return 2;
     }
     if (parser.isSet(validateOption)) {
-        qInfo().noquote() << QStringLiteral("DuckOS native catalog: %1 apps, %2 built-in modules, %3 external launchers.")
-            .arg(catalog.applications().size()).arg(catalog.nativeCount()).arg(catalog.launchableCount());
+        QTextStream output(stdout);
+        output << QStringLiteral("DuckOS native catalog: %1 apps, %2 built-in modules, %3 external launchers.")
+            .arg(catalog.applications().size()).arg(catalog.nativeCount()).arg(catalog.launchableCount()) << Qt::endl;
         return 0;
     }
 
