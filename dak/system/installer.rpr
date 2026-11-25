@@ -6,10 +6,16 @@ import "../platform/targets.rpr" as targets
 
 # Target: [disk_id, architecture, disk_bytes, logical_sector_bytes, firmware_mode, consent].
 export craft target_valid(target) {
-    when size(target) != 6 {
+    when kind(target) != "list" or size(target) != 6 {
         yield false
     }
-    when target[0] == "" or not targets["architecture_known"](target[1]) {
+    when kind(target[0]) != "text" or kind(target[1]) != "text" or not targets["architecture_known"](target[1]) {
+        yield false
+    }
+    when kind(target[2]) != "number" or kind(target[3]) != "number" {
+        yield false
+    }
+    when kind(target[4]) != "text" or kind(target[5]) != "boolean" {
         yield false
     }
     when target[2] <= 1048576 or (target[3] != 512 and target[3] != 4096) {
@@ -27,7 +33,10 @@ export craft target_valid(target) {
 # Source evidence: [publisher, digest, signature_state].
 # "verified" must come from a trusted verifier, not from the image itself.
 export craft source_record_valid(source) {
-    when size(source) != 3 {
+    when kind(source) != "list" or size(source) != 3 {
+        yield false
+    }
+    when kind(source[0]) != "text" or kind(source[1]) != "text" or kind(source[2]) != "text" {
         yield false
     }
     when source[0] == "" or source[1] == "" {
@@ -63,7 +72,10 @@ export craft admission(target, source, recovery_state) {
 
 # Partition: [partition_id, kind, start_byte, length_bytes].
 export craft partition_valid(partition, disk_bytes) {
-    when size(partition) != 4 {
+    when kind(partition) != "list" or size(partition) != 4 {
+        yield false
+    }
+    when kind(partition[0]) != "text" or kind(partition[1]) != "text" or kind(partition[2]) != "number" or kind(partition[3]) != "number" {
         yield false
     }
     when partition[0] == "" or partition[1] == "" {
@@ -72,7 +84,7 @@ export craft partition_valid(partition, disk_bytes) {
     when partition[2] < 1048576 {
         yield false
     }
-    when not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
+    when kind(disk_bytes) != "number" or not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
         yield false
     }
     when partition[1] != "efi" and partition[1] != "bios_boot" and partition[1] != "system" and partition[1] != "recovery" and partition[1] != "userdata" {
