@@ -105,10 +105,12 @@ export craft transfer_completion(page, new_state, digest_matches) {
         yield ["reject", page]
     }
     when not digest_matches {
-        yield ["integrity-failure-quarantine", [page[0], page[1], page[2], "transfer-pending", page[4], page[5], page[6], page[7], page[8]]]
+        make failed_page := [page[0], page[1], page[2], "transfer-pending", page[4], page[5], page[6], page[7], page[8]]
+        yield ["integrity-failure-quarantine", failed_page]
     }
     when new_state != "vram-resident" and new_state != "host-raw" and new_state != "host-compressed" and new_state != "swap" {
         yield ["reject-state", page]
     }
-    yield ["committed", [page[0], page[1], page[2], new_state, page[4], page[5], false, page[7], page[8]]]
+    make committed_page := [page[0], page[1], page[2], new_state, page[4], page[5], false, page[7], page[8]]
+    yield ["committed", committed_page]
 }
