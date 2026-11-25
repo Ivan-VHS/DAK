@@ -1,0 +1,165 @@
+{
+  "schema": "ivan-vhs.ecosystem-cloud.v1",
+  "version": 1,
+  "status": "foundation",
+  "provider": "supabase",
+  "architecture": "local-first-cloud-optional",
+  "default_mode": "local-only",
+  "network": {
+    "default": "disabled",
+    "enablement": "explicit-user-opt-in",
+    "credentials": "user-managed-secret-store",
+    "retry": "bounded-idempotent",
+    "offline_fallback": "required"
+  },
+  "identity": {
+    "authority": "supabase-auth-when-connected",
+    "local_identity": "not-required",
+    "subject": "auth.users.id"
+  },
+  "authorization": {
+    "database": "postgres-rls",
+    "default_role": "least-privilege",
+    "client_role_mutation": false,
+    "service_role_in_client": false
+  },
+  "shared_domains": [
+    {
+      "id": "organizations",
+      "purpose": "organization metadata and membership"
+    },
+    {
+      "id": "projects",
+      "purpose": "repository/project references and non-secret metadata"
+    },
+    {
+      "id": "artifact-metadata",
+      "purpose": "hash, size, type, visibility and private object key"
+    },
+    {
+      "id": "sync-receipts",
+      "purpose": "idempotency metadata and payload hash only"
+    },
+    {
+      "id": "audit-events",
+      "purpose": "append-only server-authored security and synchronization audit"
+    }
+  ],
+  "storage": {
+    "bucket": "ecosystem-artifacts",
+    "visibility": "private",
+    "max_object_size_bytes": 104857600,
+    "object_key": "<organization UUID>/<project key>/<artifact UUID>",
+    "public_urls": false,
+    "upload_mode": "explicit-user-action-only"
+  },
+  "forbidden_data_classes": [
+    "secrets",
+    "access_tokens",
+    "service_role_keys",
+    "raw_source_trees",
+    "raw_device_serial_numbers",
+    "raw_hardware_identifiers",
+    "driver_binaries",
+    "raw_inf_payloads",
+    "audio_recordings_by_default",
+    "plugin_binaries",
+    "unbounded_raw_telemetry"
+  ],
+  "synchronization": {
+    "payload_storage": "domain-specific-only",
+    "idempotency_key": "actor_id+client_instance_id+event_id",
+    "client_instance_id": "random UUID; never hardware-derived",
+    "conflict_policy": "domain-specific; no blind last-write-wins",
+    "offline_queue": "local-first"
+  },
+  "repositories": [
+    {
+      "id": "duckos",
+      "project_key": "duckos",
+      "adapter": "federation/ecosystem-cloud-adapter.v1.json",
+      "eligible": [
+        "user-selected-preferences",
+        "app-catalog-metadata",
+        "project-references"
+      ],
+      "forbidden": [
+        "boot-secrets",
+        "kernel-memory",
+        "credentials",
+        "local-files"
+      ]
+    },
+    {
+      "id": "reaper",
+      "project_key": "reaper",
+      "adapter": "federation/ecosystem-cloud-adapter.v1.json",
+      "eligible": [
+        "published-package-metadata",
+        "versioned-contract-metadata",
+        "user-selected-doc-artifacts"
+      ],
+      "forbidden": [
+        "private-source",
+        "tokens",
+        "local-build-outputs"
+      ]
+    },
+    {
+      "id": "pytyliki",
+      "project_key": "pytyliki",
+      "adapter": "federation/ecosystem-cloud-adapter.v1.json",
+      "eligible": [
+        "user-selected-aggregate-profiles",
+        "sanitized-report-metadata"
+      ],
+      "forbidden": [
+        "serial-numbers",
+        "raw-device-identifiers",
+        "full-hardware-inventory"
+      ]
+    },
+    {
+      "id": "oplague",
+      "project_key": "oplague",
+      "adapter": "federation/ecosystem-cloud-adapter.v1.json",
+      "eligible": [
+        "sanitized-report-metadata",
+        "artifact-hashes"
+      ],
+      "forbidden": [
+        "driver-binaries",
+        "inf-payloads",
+        "raw-device-identifiers",
+        "private-signing-material"
+      ]
+    },
+    {
+      "id": "ventusample",
+      "project_key": "ventusample",
+      "adapter": "federation/ecosystem-cloud-adapter.v1.json",
+      "eligible": [
+        "pack-manifests",
+        "preset-manifests",
+        "published-artifact-metadata"
+      ],
+      "forbidden": [
+        "audio-recordings-by-default",
+        "source-sessions",
+        "plugin-binaries"
+      ]
+    }
+  ],
+  "rollout": {
+    "hosted_project": "not-configured",
+    "hosted_migrations": "not-deployed",
+    "ci": "local-supabase-stack-only",
+    "cli_version": "3.4.0",
+    "required_checks": [
+      "schema-validation",
+      "migration-reset",
+      "pgtap-rls-tests",
+      "repository-native-tests"
+    ]
+  }
+}
