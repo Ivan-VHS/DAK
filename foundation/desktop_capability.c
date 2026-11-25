@@ -33,13 +33,15 @@ duckos_desktop_broker_status duckos_desktop_broker_issue(
  if(!admin(b,issuer))return DUCKOS_DESKTOP_BROKER_ACCESS_DENIED;
  if(!lookup(b,target,&peer))return DUCKOS_DESKTOP_BROKER_UNAUTHENTICATED;
  if((peer.role_flags&DUCKOS_DESKTOP_ROLE_SYSTEM)!=0u)return DUCKOS_DESKTOP_BROKER_INVALID_SCOPE;
+ /* Reclaim every expired lease before selecting a reusable slot. */
+ b->active_count=0u;
  for(i=0u;i<DUCKOS_DESKTOP_BROKER_MAX_GRANTS;i++){
   duckos_desktop_capability_grant *g=&b->grants[i];
-  /* Expired leases must not permanently consume bounded grant slots. */
-  if(g->active!=0u&&now>=g->expires_at_ns){
-   (void)memset(g,0,sizeof(*g));
-   if(b->active_count>0u)b->active_count--;
-  }
+  if(g->active!=0u&&now>=g->expires_at_ns)(void)memset(g,0,sizeof(*g));
+  if(g->active!=0u)b->active_count++;
+ }
+ for(i=0u;i<DUCKOS_DESKTOP_BROKER_MAX_GRANTS;i++){
+  duckos_desktop_capability_grant *g=&b->grants[i];
   if(g->active!=0u)continue;
   if(b->next_token_id==0u||b->next_token_id==UINT64_MAX)return DUCKOS_DESKTOP_BROKER_OVERFLOW;
   g->token_id=b->next_token_id++;g->process_id=peer.process_id;
