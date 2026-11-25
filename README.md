@@ -11,11 +11,12 @@
   <a href="docs/RELEASE_EDITION.md">Release edition</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
+  <a href="docs/DUCKBOOT_CORE.md">DuckBoot Core</a> ·
   <a href="docs/IMPLEMENTATION_ROADMAP.md">Roadmap</a> ·
   <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
 </p>
 
-> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora is a separate host-browser application; it is not started by this kernel.
+> **Current release boundary:** The main-branch image retains the QEMU-verified Limine Stage 1 path. This feature branch adds a first-party x86-64 UEFI application, ELF64 loading and a DuckBoot kernel handoff; both BIOS fallback and the native DuckBoot UEFI handoff now pass the GitHub Actions QEMU/OVMF gate. Legacy BIOS remains on Limine until a native DuckBoot BIOS stage exists. Mora is a separate host-browser application, not a kernel desktop.
 
 ## System map
 
@@ -23,9 +24,13 @@ The three implementation tracks are deliberately shown separately. A policy cont
 
 ```mermaid
 flowchart TB
-  subgraph BOOT["DuckOS native boot path — QEMU verified"]
-    L["Limine firmware handoff"] --> B["x86_64 Stage 1 entry"]
-    B --> V["Boot Info v1 validation"]
+  subgraph BOOT["DuckOS firmware boot paths"]
+    BIOS["Legacy BIOS"] --> LIM["Limine fallback handoff"]
+    UEFI["UEFI firmware"] --> DB["DuckBoot PE32+ application"]
+    DB --> ELF["ELF64 PT_LOAD validation and mapping"]
+    ELF --> HANDOFF["DuckBoot handoff v1 + Boot Info v1"]
+    LIM --> V["Kernel handoff validation"]
+    HANDOFF --> V
     V --> F["Early 4 KiB frame allocation"]
     F --> M["DUCKOS_BOOT_OK stage=1"]
     M --> H["Kernel halts"]
@@ -53,7 +58,8 @@ flowchart TB
 | **Mora desktop shell** | Responsive local browser workspace, launcher, interactive windows, dock, local preferences, reduced-motion mode, local app data and scoped offline cache | Runs on the host browser; not a native kernel compositor |
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
-| **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
+| **x86_64 boot foundation** | BIOS Limine fallback, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
+| **DuckBoot Core** | Host-tested BootArena/config/ELF64 contracts; UEFI PE32+ loader, kernel segment mapping and versioned handoff producer/consumer | QEMU BIOS fallback and DuckBoot UEFI/OVMF handoff verified; BIOS still uses Limine |
 | **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DuckOS kernel executables |
 | **Release pipeline** | Source-pin validation, project builds/tests, SHA-256 inventory, hybrid BIOS/UEFI ISO and QEMU boot checks | Preview source-and-tools distribution, not a complete installable OS |
 
@@ -94,7 +100,7 @@ npm test
 
 ## Build the release ISO
 
-The reproducible release pipeline targets Linux x86_64 and expects Git/submodules, GCC/G++, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
+The reproducible release pipeline targets Linux x86_64 and expects Git/submodules, GCC/G++, Clang/lld-link, dosfstools/mtools, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
 
 ```sh
 git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git
@@ -110,7 +116,8 @@ The ISO is content-sized. It is not padded to 4 GiB: empty bytes would only incr
 
 | Layer | Status |
 |---|---|
-| Limine firmware handoff and Boot Info v1 validation | Implemented and QEMU-verified |
+| Limine BIOS fallback and Boot Info v1 validation | Implemented and QEMU-verified |
+| DuckBoot UEFI application, ELF64 loader and handoff v1 | Implemented in feature branch; QEMU/OVMF handoff verified |
 | Early physical-frame allocation | Implemented for the Stage 1 boot path |
 | Reaper core subsystem MVP (40 contracts) | Implemented on the reference runtime; native enforcement pending |
 | Reusable memory manager, page tables and address spaces | Pending |

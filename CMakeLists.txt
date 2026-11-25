@@ -32,6 +32,23 @@ if(DUCKOS_ENABLE_SANITIZERS)
     endif()
 endif()
 
+add_library(duckboot_core STATIC
+    duckboot/core/arena.c
+    duckboot/core/config.c
+    duckboot/core/elf64.c
+)
+target_include_directories(duckboot_core PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/duckboot/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/foundation
+)
+if(MSVC)
+    target_compile_options(duckboot_core PRIVATE /W4 /sdl)
+else()
+    target_compile_options(duckboot_core PRIVATE
+        -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+endif()
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(duckos_boot_info_tests tests/test_boot_info.c)
@@ -51,6 +68,15 @@ if(BUILD_TESTING)
         target_compile_options(duckos_frame_allocator_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-frame-allocator COMMAND duckos_frame_allocator_tests)
+
+    add_executable(duckos_duckboot_core_tests tests/test_duckboot_core.c)
+    target_link_libraries(duckos_duckboot_core_tests PRIVATE duckboot_core)
+    if(MSVC)
+        target_compile_options(duckos_duckboot_core_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_duckboot_core_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    endif()
+    add_test(NAME duckos-duckboot-core COMMAND duckos_duckboot_core_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")

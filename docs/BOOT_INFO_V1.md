@@ -85,3 +85,16 @@ ctest --test-dir build-sanitize --output-on-failure
 ## Bootable stage-0 image
 
 The native adapter is built into the experimental x86_64 ISO using the instructions in [BOOTABLE_IMAGE.md](BOOTABLE_IMAGE.md). Limine is pinned by version and SHA-256, and the upstream protocol header retains its 0BSD notice. The adapter rejects unsupported Limine base revision, missing required responses, malformed map data, reserved-range violations and framebuffer/MMIO inconsistencies. It reports the handoff and then halts; it does not transfer into an init process or claim that the remaining kernel subsystems exist.
+
+
+## DuckBoot handoff boundary
+
+DuckBoot defines a separate versioned handoff envelope in duckboot/include/duckboot/handoff.h. The envelope carries virtual addresses for the validated Boot Info v1 record, memory-map array, HHDM base, framebuffer and command line, plus framebuffer channel masks. The Boot Info v1 record itself remains pointer-free.
+
+The DuckBoot feature branch now contains both sides of the UEFI contract:
+
+- duckboot/uefi/entry.c produces the envelope after validating the ELF64 kernel, mapping its PT_LOAD segments, building page tables and normalizing the EFI memory map.
+- duckboot/kernel_entry.c consumes the envelope, validates Boot Info v1 and initializes the early physical-frame allocator.
+- duckboot/uefi/enter.S switches to the new CR3 and kernel stack, then enters the high-half kernel using the documented x86-64 System V entry convention.
+
+The main branch remains unchanged; the feature branch now passes the UEFI QEMU/OVMF gate. GitHub Actions run 45640060710 verified both the Limine BIOS fallback and DuckBoot UEFI handoff. The UEFI serial log contains DUCKBOOT_HANDOFF_READY v1 and DUCKOS_BOOT_OK stage=1 loader=duckboot handoff=v1 frames=1. The image builder retains Limine as the BIOS fallback until a native DuckBoot BIOS implementation is completed. A PE32+ link alone is not treated as evidence of a successful transfer.

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "boot/**"
+      - "duckboot/**"
       - "kernel/**"
       - "foundation/**"
       - "mora/**"
@@ -19,6 +20,7 @@ on:
     branches: [main]
     paths:
       - "boot/**"
+      - "duckboot/**"
       - "kernel/**"
       - "foundation/**"
       - "mora/**"
@@ -36,7 +38,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: duckos-ecosystem-release-${__{ github.event.pull_request.head.ref || github.ref }}
+  group: duckos-ecosystem-release-${{ github.event.pull_request.head.ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -59,7 +61,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake ninja-build binutils curl tar xorriso \
+            build-essential cmake ninja-build binutils clang lld dosfstools mtools curl tar xorriso \
             qemu-system-x86 ovmf qt6-base-dev python3 python3-tk
 
       - name: Show toolchain versions

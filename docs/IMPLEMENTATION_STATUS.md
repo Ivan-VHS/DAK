@@ -144,3 +144,33 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Core subsystem MVP — 2026-11-25
+
+- [x] 40 additional Reaper policy contracts cover process lifecycle and capability attenuation, virtual-memory ranges and page-fault decisions, VFS paths and mounts, networking, graphics, audio, mandatory access control, architecture/device targets, init policy and accessibility.
+- [x] Contract suite exercises the reference-runtime tree-walk engine and VM engine in GitHub Actions.
+- [ ] Native execution remains pending: these contracts do not create processes, map hardware pages, mount filesystems, send packets, render through a GPU or enforce kernel security boundaries.
+
+This MVP expands policy coverage only. It does not promote a Reaper reference contract into a native DuckOS service or driver.
+
+
+## DuckBoot Core — UEFI integration, 2026-11-25
+
+- [x] Dedicated feature branch created; the main branch has not yet integrated DuckBoot.
+- [x] Caller-owned BootArena with checked arithmetic, power-of-two alignment, bounded allocation, checkpoints and optional clearing.
+- [x] Bounded configuration parser with duplicate/unknown-key rejection, path traversal rejection and timeout validation.
+- [x] ELF64 x86-64 ET_EXEC inspector with checked program-header bounds, canonical virtual ranges, a 32-segment cap, page-overlap rejection, executable-entry validation and W^X rejection.
+- [x] DuckBoot handoff envelope v1 defined separately from pointer-free DuckOS Boot Info v1.
+- [x] Host CMake/CTest coverage for arena, configuration and ELF validation; local GCC 14.2 Release build passed with warnings-as-errors.
+- [x] x86-64 UEFI application cross-compiled and linked as PE32+ EFI application using Clang/lld-link.
+- [x] Separate high-half DuckBoot ELF64 kernel compiled and linked; real output accepted by the ELF64 inspector with three load segments.
+- [x] UEFI implementation includes Loaded Image, Simple File System and GOP discovery; bounded kernel/config reads; physical PT_LOAD copy and BSS zeroing; four-level page tables; identity/HHDM mappings; segment permissions; EFI memory-map normalization; Boot Info v1 validation; ExitBootServices retry; and the CR3/stack/kernel handoff trampoline.
+- [x] Separate kernel entry consumes DuckBoot handoff v1, validates Boot Info, initializes the early frame allocator and emits a DuckBoot-specific serial marker.
+- [x] BIOS remains available through the existing pinned Limine fallback; its config now points to a separately named Limine kernel image.
+- [x] QEMU UEFI test tightened to require DUCKOS_BOOT_OK stage=1 loader=duckboot, preventing a Limine UEFI boot from being counted as DuckBoot success.
+- [x] Build the hybrid BIOS/UEFI ISO and verify both firmware paths in QEMU/OVMF. GitHub Actions run 45640060710 passed BIOS and DuckBoot UEFI; the UEFI serial log contains `DUCKOS_BOOT_OK stage=1 loader=duckboot handoff=v1 frames=1`. The bootable ISO, checksum and serial logs were uploaded as an artifact.
+- [ ] Native BIOS Stage 1/Stage 2 implementation.
+- [ ] Interactive menu, script engine, own FAT32/ext-family drivers, Multiboot2, PXE/TFTP/HTTP, Secure Boot verification, signatures and authenticated rollback.
+
+The current feature branch contains a first-party UEFI loader path but is not yet a GRUB-class replacement. It uses UEFI Simple File System rather than shipping filesystem drivers, loads fixed-address x86-64 ET_EXEC kernels, requires NX and four-level paging, and has bounded memory-map capacity. BIOS still uses Limine.

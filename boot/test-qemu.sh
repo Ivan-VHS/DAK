@@ -72,12 +72,12 @@ run_uefi() {
         cat "$log" >&2 || true
         return "$status"
     fi
-    if ! grep -Fq "DUCKOS_BOOT_OK stage=1" "$log"; then
-        echo "UEFI QEMU did not reach the DuckOS boot handoff:" >&2
+    if ! grep -Fq "DUCKOS_BOOT_OK stage=1 loader=duckboot" "$log"; then
+        echo "UEFI QEMU did not reach the native DuckBoot handoff:" >&2
         cat "$log" >&2 || true
         return 1
     fi
-    echo "UEFI boot: PASS"
+    echo "UEFI DuckBoot handoff: PASS"
     cat "$log"
 }
 
