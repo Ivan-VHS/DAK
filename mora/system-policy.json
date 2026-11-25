@@ -1,7 +1,7 @@
 {
   "schema": "duckos.mora.system.v1",
-  "product": "DuckOS",
-  "desktop": "Mora",
+  "product": "DAK",
+  "desktop": "DAK",
   "version": 2,
   "principles": [
     "The shell never executes arbitrary commands or manifest-provided shell strings.",
@@ -13,7 +13,7 @@
   "capabilities": {
     "desktop": {
       "maturity": "partial",
-      "scope": "Qt 6 Widgets host-native shell with host-managed top-level windows, local catalogue and native host input/focus; browser workspace retained as reference preview; not launched by DuckOS Stage 1"
+      "scope": "Qt 6 Widgets host-native shell with host-managed top-level windows, local catalogue and native host input/focus; browser workspace retained as reference preview; not launched by DAK Stage 1"
     },
     "intent_ui": {
       "maturity": "partial",
@@ -25,7 +25,7 @@
     },
     "approval_zones": {
       "maturity": "partial",
-      "scope": "Mora intent actions only; system-level approvals require native broker"
+      "scope": "DAK intent actions only; system-level approvals require native broker"
     },
     "immutable_updates": {
       "maturity": "planned",
@@ -33,7 +33,7 @@
     },
     "app_sandboxing": {
       "maturity": "planned",
-      "scope": "catalogue entries are metadata only and are never executed by the native shell; future process isolation and capability enforcement require DuckOS native services"
+      "scope": "catalogue entries are metadata only and are never executed by the native shell; future process isolation and capability enforcement require DAK native services"
     },
     "zero_trust_permissions": {
       "maturity": "partial",
@@ -45,7 +45,7 @@
     },
     "adaptive_workspace": {
       "maturity": "partial",
-      "scope": "Figma-derived home, app catalogue and multi-window workspace implemented in host-native Qt UI; host display topology and host window manager own placement; no DuckOS virtual workspace runtime"
+      "scope": "Figma-derived home, app catalogue and multi-window workspace implemented in host-native Qt UI; host display topology and host window manager own placement; no DAK virtual workspace runtime"
     },
     "multimodal_input": {
       "maturity": "planned",
@@ -53,7 +53,7 @@
     },
     "material_interface": {
       "maturity": "implemented",
-      "scope": "canonical black/white/yellow Mora material language: black structural surfaces, white content, #FFD400 selection and focus, restrained graphite depth; no alternate shell palettes"
+      "scope": "canonical black/white/yellow DAK material language: black structural surfaces, white content, #FFD400 selection and focus, restrained graphite depth; no alternate shell palettes"
     },
     "compatibility": {
       "maturity": "partial",
@@ -77,27 +77,27 @@
     },
     "installable_workspace": {
       "maturity": "partial",
-      "scope": "browser reference preview remains locally servable; Qt host-native shell is built as a host executable; neither is a DuckOS installer or kernel-launched session"
+      "scope": "browser reference preview remains locally servable; Qt host-native shell is built as a host executable; neither is a DAK installer or kernel-launched session"
     },
     "gaming_performance": {
       "maturity": "partial",
-      "scope": "Mora Boost links to OPlague's Windows workbench; no direct browser PCI, GPU, driver or power-plan access"
+      "scope": "DAK Boost links to OPlague's Windows workbench; no direct browser PCI, GPU, driver or power-plan access"
     },
     "desktop_optimizer": {
       "maturity": "partial",
-      "scope": "existing native user-space maintenance utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; it is not the Mora compositor or kernel desktop"
+      "scope": "existing native user-space maintenance utility for read-only desktop/process audit, reversible current-user startup management and confirmed move-to-Inbox; it is not the DAK compositor or kernel desktop"
     },
     "language_profile": {
       "maturity": "partial",
-      "scope": "Persistent ru-RU and Simplified Chinese (zh-CN) selection in Mora Control, with localized desktop metadata, app launcher labels, date/time and Red Sparrow; legacy application panels are not yet all translated."
+      "scope": "Persistent ru-RU and Simplified Chinese (zh-CN) selection in DAK Control, with localized desktop metadata, app launcher labels, date/time and Red Sparrow; legacy application panels are not yet all translated."
     },
     "red_sparrow_workspace": {
       "maturity": "partial",
-      "scope": "Creative Wuxia production workspace inside Mora with Russian and Simplified Chinese content, local note editor and stage-safe visual design; not a native combat system or executable third-party extension."
+      "scope": "Creative Wuxia production workspace inside DAK with Russian and Simplified Chinese content, local note editor and stage-safe visual design; not a native combat system or executable third-party extension."
     },
     "local_first_documents": {
       "maturity": "partial",
-      "scope": "Poi notes use host-local QSettings in the native adapter; browser preview has its existing local browser store; no DuckOS-native VFS/SQLite service or CRDT sync is connected"
+      "scope": "Poi notes use host-local QSettings in the native adapter; browser preview has its existing local browser store; no DAK-native VFS/SQLite service or CRDT sync is connected"
     },
     "native_host_shell": {
       "maturity": "partial",
