@@ -77,12 +77,14 @@ export craft receive(endpoint, caller_pid, grants) {
     when size(endpoint[6]) == 0 {
         yield ["empty", endpoint, nothing]
     }
+    make queue := endpoint[6]
     vary remaining := []
-    each index in range(1, size(endpoint[6])) {
-        change remaining := push(remaining, endpoint[6][index])
+    each index in range(1, size(queue)) {
+        change remaining := push(remaining, queue[index])
     }
     make updated := [endpoint[0], endpoint[1], endpoint[2], endpoint[3], endpoint[4], endpoint[5], remaining]
-    yield ["received", updated, endpoint[6][0]]
+    make first_message := queue[0]
+    yield ["received", updated, first_message]
 }
 
 export craft close(endpoint, caller_pid, grants) {
