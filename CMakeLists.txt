@@ -47,6 +47,20 @@ else()
 endif()
 
 
+
+add_library(duckos_framebuffer_compositor STATIC
+    kernel/graphics/framebuffer_compositor.c
+    kernel/graphics/framebuffer_compositor.h
+)
+target_include_directories(duckos_framebuffer_compositor PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/kernel/graphics
+)
+if(MSVC)
+    target_compile_options(duckos_framebuffer_compositor PRIVATE /W4 /sdl)
+else()
+    target_compile_options(duckos_framebuffer_compositor PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+endif()
+
 add_library(duckos_capability_broker STATIC
     foundation/capability_broker.c
     foundation/capability_broker.h
@@ -69,6 +83,8 @@ if(DUCKOS_ENABLE_SANITIZERS)
         target_link_options(duckos_desktop_ipc PUBLIC -fsanitize=address,undefined)
         target_compile_options(duckos_capability_broker PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
         target_link_options(duckos_capability_broker PUBLIC -fsanitize=address,undefined)
+        target_compile_options(duckos_framebuffer_compositor PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
+        target_link_options(duckos_framebuffer_compositor PUBLIC -fsanitize=address,undefined)
     else()
         message(FATAL_ERROR "DUCKOS_ENABLE_SANITIZERS requires GCC or Clang")
     endif()
@@ -123,6 +139,15 @@ if(BUILD_TESTING)
         target_compile_options(duckos_capability_broker_tests PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
     endif()
     add_test(NAME duckos-capability-broker COMMAND duckos_capability_broker_tests)
+
+    add_executable(duckos_framebuffer_compositor_tests tests/test_framebuffer_compositor.c)
+    target_link_libraries(duckos_framebuffer_compositor_tests PRIVATE duckos_framebuffer_compositor)
+    if(MSVC)
+        target_compile_options(duckos_framebuffer_compositor_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_framebuffer_compositor_tests PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+    endif()
+    add_test(NAME duckos-framebuffer-compositor COMMAND duckos_framebuffer_compositor_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")

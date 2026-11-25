@@ -109,6 +109,12 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -mgeneral-regs-only \
     -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" -I "$ROOT/third_party/limine-protocol" \
     -c "$ROOT/kernel/boot/entry.c" -o "$WORK_DIR/objects/duckos-entry.o"
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only -I "$ROOT/kernel/graphics" \
+    -c "$ROOT/kernel/graphics/framebuffer_compositor.c" -o "$WORK_DIR/objects/framebuffer-compositor.o"
 
 gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
@@ -148,6 +154,7 @@ gcc -m64 -mcmodel=kernel -mno-red-zone -fno-pic -fno-pie \
 ld -nostdlib -static -z max-page-size=0x1000 \
     -T "$ROOT/kernel/linker.ld" \
     "$WORK_DIR/objects/duckos-entry.o" \
+    "$WORK_DIR/objects/framebuffer-compositor.o" \
     "$WORK_DIR/objects/boot-info.o" \
     "$WORK_DIR/objects/frame-allocator.o" \
     "$WORK_DIR/objects/idt.o" \
