@@ -43,7 +43,8 @@ export craft classify(data) {
 
 export craft rle_encode(data) {
     when not byte_array_valid(data) {
-        yield ["invalid", []]
+        make empty_payload := []
+        yield ["invalid", empty_payload]
     }
     vary pairs := []
     make first := data[0]
@@ -112,22 +113,29 @@ export craft compress(data, sha256_digest) {
     }
     make kind := classify(data)
     when kind == "zero" {
-        yield ["compressed", ["zero", size(data), 0, sha256_digest, []]]
+        make empty_payload := []
+        make encoded_block := ["zero", size(data), 0, sha256_digest, empty_payload]
+        yield ["compressed", encoded_block]
     }
     when kind == "constant" {
-        yield ["compressed", ["constant", size(data), 1, sha256_digest, [data[0]]]]
+        make constant_payload := [data[0]]
+        make encoded_block := ["constant", size(data), 1, sha256_digest, constant_payload]
+        yield ["compressed", encoded_block]
     }
     make encoded := rle_encode(data)
     make encoded_bytes := size(encoded[1])
     when encoded_bytes * 100 < size(data) * 80 {
-        yield ["compressed", ["rle", size(data), encoded_bytes, sha256_digest, encoded[1]]]
+        make rle_block := ["rle", size(data), encoded_bytes, sha256_digest, encoded[1]]
+        yield ["compressed", rle_block]
     }
-    yield ["compressed", ["raw", size(data), size(data), sha256_digest, data]]
+    make raw_block := ["raw", size(data), size(data), sha256_digest, data]
+    yield ["compressed", raw_block]
 }
 
 export craft repeat_byte(value, count) {
     when value < 0 or value > 255 or count < 0 or count > 4096 {
-        yield ["invalid", []]
+        make empty_result := []
+        yield ["invalid", empty_result]
     }
     vary result := []
     each ignored in range(0, count) {
@@ -138,7 +146,8 @@ export craft repeat_byte(value, count) {
 
 export craft decompress(block) {
     when not block_valid(block) {
-        yield ["invalid", [] , ""]
+        make empty_result := []
+        yield ["invalid", empty_result, ""]
     }
     when block[0] == "zero" {
         make output := repeat_byte(0, block[1])
@@ -162,7 +171,8 @@ export craft decompress(block) {
         }
     }
     when size(output) != block[1] {
-        yield ["invalid", [], ""]
+        make empty_result := []
+        yield ["invalid", empty_result, ""]
     }
     yield ["decoded", output, block[3]]
 }
