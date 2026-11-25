@@ -14,28 +14,37 @@ export craft palette_valid(ratios) {
 
 export craft palette_color(role) {
     when role == "page" {
-        yield "#080808"
+        yield "#050505"
     }
     when role == "surface" {
-        yield "#151515"
+        yield "#101010"
     }
     when role == "elevated" {
-        yield "#242424"
+        yield "#181818"
     }
     when role == "navigation" {
-        yield "#FFD400"
+        yield "#FFD700"
     }
-    when role == "accent" {
-        yield "#FFD400"
+    when role == "accent" or role == "navigation" {
+        yield "#FFD700"
     }
-    when role == "alert" {
-        yield "#FFD400"
+    when role == "alert" or role == "error" {
+        yield "#FF7777"
+    }
+    when role == "success" {
+        yield "#6EDAA3"
+    }
+    when role == "warning" or role == "brand" {
+        yield "#FFD700"
+    }
+    when role == "info" {
+        yield "#79B8FF"
     }
     when role == "border" {
-        yield "#3A3A3A"
+        yield "#343434"
     }
     when role == "focus" {
-        yield "#FFE45C"
+        yield "#FFE36E"
     }
     yield "#FFFFFF"
 }
