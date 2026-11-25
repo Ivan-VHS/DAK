@@ -50,15 +50,6 @@ static uint16_t current_code_selector(void) {
     return selector;
 }
 
-uint8_t duckos_x86_exception_ist(uint32_t vector) {
-    switch (vector) {
-    case 8u: return 1u;  /* double fault */
-    case 2u: return 2u;  /* NMI */
-    case 14u: return 3u; /* page fault */
-    default: return 0u;
-    }
-}
-
 int duckos_x86_interrupts_init(void) {
     const uint16_t code_selector = current_code_selector();
     if (code_selector == 0u) return 0;
