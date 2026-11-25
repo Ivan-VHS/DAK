@@ -64,5 +64,7 @@ OS reduced-motion preferences override decorative movement. Disable nonessential
 
 `mora/theme.json` is the canonical token source. Native adapters may expose toolkit-specific names but must preserve semantic roles and contrast. The shell may read local theme assets; it must not fetch CSS or theme data from a remote server at runtime.
 
-Mora remains a browser desktop shell, not a native process launcher. Native application capabilities and security boundaries remain owned by their respective projects; a permissioned launcher/IPC layer must be implemented and verified separately.
+The primary Mora desktop surface is a host-native Qt 6 Widgets application. Its application windows are real top-level host windows managed by the host operating system; the shell does not embed Qt WebEngine, WebView, HTML or browser-rendered application windows. The native shell reads the shared local catalogue and never executes manifest-provided command strings.
+
+The browser implementation remains available as a reference/compatibility preview, not as the native desktop. The Qt host adapter is still distinct from the DuckOS kernel desktop: Stage 1 does not launch user processes, and a kernel-owned compositor, input service, font stack, accessibility bridge and capability broker remain separate D8 work.
 
