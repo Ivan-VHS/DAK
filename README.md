@@ -19,6 +19,20 @@
 
 > **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
 
+## Contents
+
+- [System map](#system-map)
+- [What is included](#what-is-included)
+- [Federated workbenches](#federated-workbenches)
+- [Build and run native Mora](#build-and-run-native-mora)
+- [Browser reference preview](#browser-reference-preview)
+- [Build the release ISO](#build-the-release-iso)
+- [Kernel status and next layers](#kernel-status-and-next-layers)
+- [Architecture targets](#architecture-targets)
+- [Source federation and integrity](#source-federation-and-integrity)
+- [Licensing and attribution](#licensing-and-attribution)
+- [Engineering rule](#engineering-rule)
+
 ## System map
 
 The three implementation tracks are deliberately shown separately. A policy contract, host application and bootable kernel stage are different kinds of evidence.
@@ -147,6 +161,12 @@ git submodule update --init --recursive
 ```
 
 The pre-release DuckOS repository snapshot is preserved on `archive/pre-release-snapshot-2026-11-25`. That branch preserves this repository's Git state; it does not recreate the histories of external repositories.
+
+## Licensing and attribution
+
+The federated workbenches remain independently licensed. Their declared license identifiers and pinned source revisions are recorded in [the repository federation manifest](federation/repositories.v1.json). Preserve each upstream repository's `LICENSE` file and applicable notices with its source; federation does not relicense or transfer ownership of those components.
+
+The DuckOS root repository currently has no root-level `LICENSE` file, so this README does not claim a single project-wide license for DuckOS-owned files or for the federated source. A root-project license remains an explicit governance decision and should be published before a common license grant is claimed.
 
 ## Engineering rule
 
