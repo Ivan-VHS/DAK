@@ -1,7 +1,7 @@
 # DuckOS Boot Handoff Contract v1
 
 **Author / project direction:** Ivan-VHS  
-**Implementation status:** host-testable C11 contract and experimental x86_64 Limine stage-0 adapter. The image is firmware-bootable when the BIOS/UEFI QEMU gate passes; it is not a complete kernel or usable desktop OS.
+**Implementation status:** host-testable C11 boot/allocator/IDT contracts and an experimental x86_64 Limine Stage 1 kernel with CPU exception diagnostics. The image is firmware-bootable when the BIOS/UEFI QEMU gate passes; it is not a complete kernel or usable desktop OS.
 
 ## Purpose
 
@@ -12,7 +12,10 @@ Implemented files:
 - `foundation/boot_info.h` — v1 structures, memory-region types and validation status codes.
 - `foundation/boot_info.c` — range, memory-map, image-overlap and framebuffer validation.
 - `tests/test_boot_info.c` — host-side positive and negative fixtures.
-- `kernel/boot/entry.c` — freestanding x86_64 Limine entry, COM1 diagnostics and basic 32-bit RGB framebuffer output.
+- `kernel/boot/entry.c` — freestanding x86_64 Limine entry, COM1 diagnostics, CPU-exception panic reporting and basic 32-bit RGB framebuffer output.
+- `foundation/idt.h` / `foundation/idt.c` — host-testable 64-bit IDT gate construction.
+- `kernel/arch/x86_64/interrupts.c` and `exceptions.S` — IDT loading and normalized exception entry stubs.
+- `tests/test_idt.c` — descriptor and C/assembly exception-frame layout contracts.
 - `kernel/linker.ld` — high-half ELF layout with separate read-only, executable and writable load segments.
 - `boot/build-iso.sh` — pinned hybrid BIOS/UEFI ISO build; `boot/test-qemu.sh` — serial-marker boot test.
 
@@ -56,14 +59,14 @@ The version identifies the semantics of the record. `struct_size` allows a futur
 This v1 handoff and stage-0 entry do not yet:
 
 - build or manage kernel page tables or a physical/virtual page allocator;
-- install an interrupt descriptor table, APIC or timer;
+- initialize PIC/APIC or timer routing, or enable maskable interrupts;
 - allocate general-purpose kernel memory;
 - start a scheduler, process, thread or syscall runtime;
 - mount an initramfs or filesystem;
 - provide a production framebuffer console, compositor or display driver;
 - probe and initialise PCI/USB/ACPI devices or load drivers.
 
-The boot protocol and initial CPU target are now selected for stage 0. The listed runtime, allocator, interrupt, process and device subsystems remain subsequent native implementation gates.
+The boot protocol, initial CPU target and fatal CPU-exception IDT are now present for Stage 1. The reusable allocator, page tables, owned GDT/TSS/IST, interrupt-controller routing, process and device subsystems remain subsequent native implementation gates.
 
 ## Build and test
 
