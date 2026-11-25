@@ -63,12 +63,13 @@ static void test_backpressure_and_sequence(void) {
 }
 static void test_rejection_and_close(void) {
  duckos_desktop_ipc_endpoint e; uint8_t frame[CAP]; size_t n;
+ ReaperDabi64DesktopRequestV1 header;
  init(&e); n=request(frame,sizeof(frame),REAPER_SYSTEM_PROCESS_SPAWN,1U,1U,"not-desktop");
  assert(duckos_desktop_ipc_send(&e,&owner,frame,n)==DUCKOS_DESKTOP_IPC_NOT_DESKTOP_OPERATION);
  n=request(frame,sizeof(frame),0x8007U,1U,2U,"unknown");
  assert(duckos_desktop_ipc_send(&e,&owner,frame,n)==DUCKOS_DESKTOP_IPC_UNKNOWN_OPERATION);
  n=request(frame,sizeof(frame),REAPER_SYSTEM_WINDOW_CREATE,1U,3U,"bad");
- ((ReaperDabi64DesktopRequestV1 *)frame)->flags=1U;
+ memcpy(&header,frame,sizeof(header)); header.flags=1U; memcpy(frame,&header,sizeof(header));
  assert(duckos_desktop_ipc_send(&e,&owner,frame,n)==DUCKOS_DESKTOP_IPC_MALFORMED_FRAME);
  assert(duckos_desktop_ipc_endpoint_close(&e,&peer)==DUCKOS_DESKTOP_IPC_IDENTITY_MISMATCH);
  assert(duckos_desktop_ipc_endpoint_close(&e,&owner)==DUCKOS_DESKTOP_IPC_OK);
