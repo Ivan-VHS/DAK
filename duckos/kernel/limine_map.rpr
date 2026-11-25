@@ -129,7 +129,7 @@ export craft translate_map(regions) {
         }
         make result := translate_region(region)
         when result[0] != "translated" {
-            yield ["reject", "invalid-region", []]
+            yield ["reject", "invalid-region", empty_regions]
         }
         change translated := push(translated, result[1])
     }
