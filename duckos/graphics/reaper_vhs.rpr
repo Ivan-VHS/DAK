@@ -530,5 +530,5 @@ export craft dashboard_residency_basis_points(snapshot) {
     when not dashboard_snapshot_valid(snapshot) {
         yield -1
     }
-    yield snapshot[1] * 10000 / snapshot[0]
+    yield (snapshot[1] / snapshot[0]) * 10000
 }
