@@ -31,11 +31,11 @@ test("missing evidence paths are rejected", () => {
   assert.ok(validateProjectLadder(changed, ROOT).some(error => error.includes("does not exist")));
 });
 
-test("a maturity level cannot be claimed without its required evidence kinds", () => {
+test("a completed stage cannot omit one of its required evidence categories", () => {
   const changed = structuredClone(record);
-  const stage = changed.stages.find(item => item.number === changed.current_stage);
+  const stage = changed.stages.find(item => item.number === 3);
   stage.evidence = stage.evidence.filter(item => item.kind !== "tests");
-  assert.ok(validateProjectLadder(changed, ROOT).some(error => error.includes("missing required evidence kind")));
+  assert.ok(validateProjectLadder(changed, ROOT).some(error => error.includes("missing required evidence kind tests")));
 });
 
 test("verified status requires a pinned CI run and test evidence", () => {
