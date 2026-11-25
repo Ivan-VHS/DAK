@@ -34,7 +34,7 @@ export craft descriptor_valid(driver) {
     yield true
 }
 
-# Device follows DuckDriver's six-field resource descriptor.
+# Device follows DAK Driver Core's six-field resource descriptor.
 export craft resource_admission(device, registered_devices) {
     when kind(registered_devices) != "list" or not orchestrator["device_valid"](device) {
         yield "reject-invalid-device"
