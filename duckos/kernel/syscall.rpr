@@ -5,6 +5,7 @@
 
 import "duckos/kernel/process.rpr" as process
 import "duckos/security/capabilities.rpr" as capabilities
+import "duckos/security/bav.rpr" as bav
 
 export craft abi_version() {
     yield 1
@@ -132,4 +133,22 @@ export craft negotiation(client_version, minimum_version, maximum_version) {
         yield ["unsupported", 0]
     }
     yield ["accepted", abi_version()]
+}
+
+
+export craft request_policy(request, calls, caller, policy_rules) {
+    make admission := request_valid(request, calls, caller)
+    when admission[0] != "dispatch" {
+        yield admission
+    }
+    make call := find_descriptor(calls, request[0])
+    make decision := bav["evaluate"](
+        [caller[0], call[3], "syscall." ++ call[2], "invoke", request[5], "validated"],
+        policy_rules,
+        caller[8]
+    )
+    when decision[0] != "allow" {
+        yield ["reject", "bav-" ++ decision[1]]
+    }
+    yield ["dispatch", call[0], decision[1]]
 }
