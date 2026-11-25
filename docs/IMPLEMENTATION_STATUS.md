@@ -138,18 +138,19 @@ The existing implemented/partial boundary list above remains authoritative. This
 
 ## First native-systems implementation slice — 2026-11-25
 
-The branch `feat/kernel-syscall-process-contracts-v1` adds Reaper-authored, executable policy/state contracts for process identity, syscall admission, W^X virtual mappings, interrupt routing, process-bound IPC endpoints, BAV policy, service lifecycle, native-window state, package transactions and Limine memory-map type translation.
+The branch `feat/kernel-syscall-process-contracts-v1` adds Reaper-authored, executable policy/state contracts for process identity and scheduling, syscall admission, W^X virtual mappings, interrupt routing, process-bound IPC endpoints over the canonical FIFO, BAV policy, service lifecycle, native-window state, package transactions and validated Limine memory-map translation.
 
 - [x] Process descriptor and generation-handle validation, lifecycle transitions and child capability attenuation model.
+- [x] Process-aware adapter binds ready PID/generation handles to the existing priority/deadline scheduler; stale generations are rejected.
 - [x] Versioned syscall descriptor table, caller-handle validation, bounded argument/payload metadata and BAV admission model.
 - [x] Virtual mapping metadata validation with 4 KiB alignment and W^X policy.
 - [x] Interrupt route, mask, priority and nesting policy.
-- [x] Capability-gated bounded IPC endpoint and sequence model.
+- [x] Capability-gated bounded IPC endpoint and sequence model reusing `duckos/kernel/ipc.rpr` for canonical FIFO/backpressure behavior.
 - [x] BAV deny-by-default rule matching, trust-state checks and sequence audit model.
 - [x] Service dependency, health and finite restart policy.
 - [x] Native desktop window/display state, keyboard movement and focus-order policy.
 - [x] Package admission and reversible inactive-slot transaction model.
-- [x] Limine memory-map type conversion with conservative treatment of loader/module ranges.
+- [x] Limine memory-map type conversion with split-u64 end-overflow, sort and overlap checks; loader/module ranges stay reserved until safe release.
 - [x] Reaper contract fixtures for the new models and CI invocation through tree-walk and VM.
 - [ ] Execute the updated Reaper suite on the exact PR head and retain successful CI evidence.
 - [ ] Implement a freestanding Limine entry point and serial boot marker.
