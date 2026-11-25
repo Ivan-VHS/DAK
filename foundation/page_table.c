@@ -451,7 +451,10 @@ duckos_page_table_status duckos_page_table_translate(
             const uint64_t base =
                 entry & space->physical_address_mask & ~offset_mask;
             *physical_address = base | (virtual_address & offset_mask);
-            combined_flags |= entry & DUCKOS_PAGE_LARGE;
+            combined_flags = (entry & ~(space->physical_address_mask |
+                DUCKOS_PAGE_WRITABLE | DUCKOS_PAGE_USER | DUCKOS_PAGE_NX)) |
+                (combined_flags & (DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE |
+                                   DUCKOS_PAGE_USER | DUCKOS_PAGE_NX));
             if (effective_flags != NULL) *effective_flags = combined_flags;
             return DUCKOS_PAGE_TABLE_OK;
         }
@@ -465,6 +468,10 @@ duckos_page_table_status duckos_page_table_translate(
 
     combined_flags &= entry | ~(DUCKOS_PAGE_WRITABLE | DUCKOS_PAGE_USER);
     if ((entry & DUCKOS_PAGE_NX) != 0u) combined_flags |= DUCKOS_PAGE_NX;
+    combined_flags = (entry & ~(space->physical_address_mask |
+        DUCKOS_PAGE_WRITABLE | DUCKOS_PAGE_USER | DUCKOS_PAGE_NX)) |
+        (combined_flags & (DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE |
+                           DUCKOS_PAGE_USER | DUCKOS_PAGE_NX));
     *physical_address = (entry & space->physical_address_mask) |
         (virtual_address & (DUCKOS_PAGE_TABLE_PAGE_SIZE - 1u));
     if (effective_flags != NULL) *effective_flags = combined_flags;
@@ -495,6 +502,19 @@ duckos_page_table_status duckos_page_table_protect(
 
     const uint64_t current = leaf[leaf_index];
     if ((current & DUCKOS_PAGE_PRESENT) == 0u) return DUCKOS_PAGE_TABLE_NOT_MAPPED;
+
+    for (uint32_t depth = 0u; depth < 3u; ++depth) {
+        uint64_t *parent = path_tables[depth];
+        if (parent == NULL) return DUCKOS_PAGE_TABLE_CORRUPT;
+        const uint32_t index = path_indices[depth];
+        const uint64_t entry = parent[index];
+        if ((entry & DUCKOS_PAGE_NX) != 0u &&
+            (flags & DUCKOS_PAGE_NX) == 0u) {
+            return DUCKOS_PAGE_TABLE_PERMISSION_CONFLICT;
+        }
+        if ((flags & DUCKOS_PAGE_USER) != 0u) parent[index] |= DUCKOS_PAGE_USER;
+        if ((flags & DUCKOS_PAGE_WRITABLE) != 0u) parent[index] |= DUCKOS_PAGE_WRITABLE;
+    }
     leaf[leaf_index] = (current & space->physical_address_mask) | flags;
     if (space->active != 0u && space->ops.invalidate_page != NULL) {
         space->ops.invalidate_page(space->ops.context, virtual_address);
