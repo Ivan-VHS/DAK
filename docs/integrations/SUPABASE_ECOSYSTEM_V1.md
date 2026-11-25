@@ -20,7 +20,7 @@ The GitHub Actions workflow runs the same commands against an isolated local sta
 ## Shared data model
 
 - Organizations and memberships define tenant boundaries.
-- Devices are organization-scoped and user-owned. Optional fingerprints are SHA-256 pseudonyms, not anonymous identifiers.
+- Devices are organization-scoped and user-owned. Their IDs are random registration UUIDs; the schema stores no hardware fingerprint, serial number or raw PnP identifier.
 - Sync events are append-only, bounded to 64 KiB and unique by organization/event ID. The database checks the actor and device owner against the authenticated session.
 - Artifact metadata is immutable in v1. Private objects use the organization UUID as the first path segment and are bounded to 512 MiB.
 
