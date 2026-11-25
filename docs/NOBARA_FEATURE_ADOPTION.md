@@ -49,6 +49,8 @@ This is a feature and documentation review, not a claim that every Wiki.js artic
 | OBS, capture, audio and creator tools | Preserve Reaper, VentuSample and OPlague as independently licensed ecosystem workbenches; future creator profile is presentation only | Existing integrations remain separate user-space tools |
 | GPU overlay and screen capture | Future GPU service must report provider, codec, permission and capture scope; no screen recorder or instant-replay service is connected | Planned |
 | OBS and professional media applications | Treat hardware encode/decode and plug-in compatibility as target-specific; third-party apps stay separately licensed and user-installed | No bundled creator packages |
+| GPU overlay and screen capture | Future GPU service must report provider, codec, permission and capture scope; no screen recorder or instant-replay service is connected | Planned |
+| OBS and professional media applications | Treat hardware encode/decode and plug-in compatibility as target-specific; third-party apps stay separately licensed and user-installed | No bundled creator packages |
 | Controller, GPU and codec compatibility guides | Add a future device compatibility matrix with exact device/driver/runtime evidence; support claims expire when upstream driver support changes | Planned |
 | Security posture and secure boot | Retain Duck capability/MAC design, then add its own trust chain, key custody, revocation and recovery evidence; never reuse distro/vendor signing keys | Reaper policy exists; enforcement planned |
 | Installer and media integrity | Retain Duck's SHA-256 release inventory and optional signed release metadata; add a guided installer only after native storage and recovery gates | Release tooling partial; installer planned |
