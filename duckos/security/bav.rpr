@@ -1,0 +1,48 @@
+# BAV antivirus artifact and scan policy.
+# A .bav file is signed evidence metadata, never an executable or a live signature database.
+
+export craft artifact_valid(artifact) {
+    when size(artifact) != 8 {
+        yield false
+    }
+    when artifact[0] != "DUCKBAV1" {
+        yield false
+    }
+    when artifact[1] != "application/vnd.duckos.bav+json;version=1" {
+        yield false
+    }
+    when artifact[2] != 1 or artifact[3] == "" or artifact[4] == "" {
+        yield false
+    }
+    when artifact[5] != "verified" or artifact[6] <= 0 or artifact[7] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft scan_disposition(verdict, confidence_basis_points, recovery_available) {
+    when confidence_basis_points < 0 or confidence_basis_points > 10000 {
+        yield "invalid"
+    }
+    when verdict == "clean" {
+        yield "allow"
+    }
+    when verdict == "malicious" and confidence_basis_points >= 9900 and recovery_available {
+        yield "quarantine-reversible"
+    }
+    when verdict == "malicious" {
+        yield "block-and-preserve"
+    }
+    when verdict == "suspicious" {
+        yield "user-review"
+    }
+    yield "unknown-review"
+}
+
+export craft update_allowed(network_enabled, user_opt_in, signature_verified, digest_verified) {
+    yield network_enabled and user_opt_in and signature_verified and digest_verified
+}
+
+export craft sample_execution_allowed() {
+    yield false
+}
