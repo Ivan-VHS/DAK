@@ -8,7 +8,7 @@ export craft artifact_valid(artifact) {
     when artifact[0] != "DUCKBAV1" {
         yield false
     }
-    when artifact[1] != "application/vnd.duckos.bav+json;version=1" {
+    when artifact[1] != "application/vnd.duckos.bav+json" {
         yield false
     }
     when artifact[2] != 1 or artifact[3] == "" or artifact[4] == "" {
