@@ -4,6 +4,8 @@
 
 [Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
 
+[NEXUS Architecture Profile v1](NEXUS_ARCHITECTURE_V1.md) defines the additive cross-project vocabulary and federation boundaries. [NEXUS Application Catalog v1](NEXUS_APPLICATION_CATALOG_V1.md) proposes separate, non-replacing specialist applications with explicit maturity gates.
+
 [Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
 
 ## Visual design
@@ -12,7 +14,7 @@
 
 ## Runnable prototypes
 
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
+[The current Mora shell](../mora/index.html) — unified home screen, first-party app identities and system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
 
 [The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
 
@@ -30,7 +32,7 @@
 
 ## Product specification
 
-[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
+[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
 
 ## Normative standards
 
@@ -51,7 +53,6 @@ This index is a documentation entry point. It does not itself assert that any pa
 ## Windows application compatibility
 
 [Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
-
 
 ## Capability completeness standard
 
