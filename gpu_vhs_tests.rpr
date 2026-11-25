@@ -124,7 +124,8 @@ assert(gpu_security["dma_mapping_allowed"](gpu_context, device, 4096, 4096, true
 assert(not gpu_security["dma_mapping_allowed"](gpu_context, device, 4096, 4096, true, false), "DMA without IOMMU isolation is denied")
 make shader := ["shader-a", digest, 1200, 64000, 1048576, "bounded-control-flow", ["gpu.queue.submit"]]
 assert(gpu_security["shader_valid"](shader, 4194304, 10000), "bounded shader IR metadata is accepted")
-assert(not gpu_security["shader_valid"](["shader-a", digest, 1200, 64000, 1048576, "unknown", []], 4194304, 10000), "shader without bounded control flow proof is rejected")
+make no_shader_effects := []
+assert(not gpu_security["shader_valid"](["shader-a", digest, 1200, 64000, 1048576, "unknown", no_shader_effects], 4194304, 10000), "shader without bounded control flow proof is rejected")
 assert(gpu_security["integrity_result"](digest, digest, 4096) == "integrity-ok", "matching trusted digest passes")
 assert(gpu_security["integrity_result"](digest, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", 4096) == "quarantine-resource", "digest mismatch quarantines resource")
 assert(gpu_security["recovery_action"]("hung", true, 0) == "request-driver-reset-after-quiesce", "device reset requires quiesced transfers")
