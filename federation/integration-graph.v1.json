@@ -25,7 +25,7 @@
       "id": "pytyliki",
       "repository": "Ivan-VHS/Pytyliki",
       "path": "projects/pytyliki",
-      "pinned_commit": "4f679d24d4073cfac5fd4ec566b0f070dd4756d5",
+      "pinned_commit": "455e1c9d397b6dd308a9ce68aa194e686fa4fa1a",
       "license": "MIT",
       "license_file": "projects/pytyliki/LICENSE",
       "runtime_boundary": "user-space-only",
