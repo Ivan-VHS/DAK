@@ -9,7 +9,16 @@ import "../storage/vfs.rpr" as vfs
 #           dependencies, requested_capabilities, digest, publisher,
 #           signature_state, payload_bytes].
 export craft package_valid(package) {
-    when size(package) != 13 {
+    when kind(package) != "list" or size(package) != 13 {
+        yield false
+    }
+    when kind(package[0]) != "text" or kind(package[1]) != "number" or kind(package[2]) != "number" or kind(package[3]) != "number" {
+        yield false
+    }
+    when kind(package[4]) != "text" or kind(package[5]) != "number" or kind(package[6]) != "text" {
+        yield false
+    }
+    when kind(package[7]) != "list" or kind(package[8]) != "list" or kind(package[9]) != "text" or kind(package[10]) != "text" or kind(package[11]) != "text" or kind(package[12]) != "number" {
         yield false
     }
     when package[0] == "" or package[1] < 0 or package[2] < 0 or package[3] < 0 {
@@ -37,6 +46,9 @@ export craft package_valid(package) {
 }
 
 export craft dependencies_satisfied(required, installed_ids) {
+    when kind(required) != "list" or kind(installed_ids) != "list" {
+        yield false
+    }
     each dependency in required {
         vary found := false
         each installed in installed_ids {
@@ -54,7 +66,7 @@ export craft dependencies_satisfied(required, installed_ids) {
 # Every payload path is represented as normalized path components.
 # The archive parser must reject separators inside individual components.
 export craft paths_valid(paths) {
-    when size(paths) == 0 or size(paths) > 4096 {
+    when kind(paths) != "list" or size(paths) == 0 or size(paths) > 4096 {
         yield false
     }
     each path in paths {
@@ -66,6 +78,9 @@ export craft paths_valid(paths) {
 }
 
 export craft admission(package, target_arch, expected_abi, installed_ids, grants) {
+    when kind(installed_ids) != "list" or kind(grants) != "list" {
+        yield "reject-manifest"
+    }
     when not package_valid(package) {
         yield "reject-manifest"
     }
