@@ -75,12 +75,25 @@ The intended service is split into small, independently testable components:
 | BAV Control | User-facing scan requests, policy display and result summaries | No direct privilege escalation |
 | BAV Scanner Worker | Bounded file inspection and deterministic rule evaluation | Separate process and restricted filesystem capabilities |
 | BAV Bundle Verifier | Schema, signature, signer trust, expiry and anti-rollback validation | Uses pinned trust material; never trusts bundle-provided keys |
+| BAV Context Classifier | Optional descriptive tags from the Reaper defense-context vocabulary | Metadata-only channel; never contributes to a malware verdict or enforcement action |
 | BAV Policy Broker | Converts verdicts into approved actions | Native capability checks; no UI-only enforcement |
 | BAV Quarantine Store | Reversible isolation, manifest, integrity checks and restore | Dedicated storage namespace, atomic state transitions and strict ACLs |
 | BAV Update Manager | Explicit import or opt-in retrieval of signed bundles | Verify before activation; retain last-known-good bundle |
 | BAV Audit | Bounded local decision and action records | Redaction, rotation, export only by explicit user action |
 
 The BAV Scanner Worker MUST NOT run as an unrestricted administrator/root process. It receives a read-only handle or narrowly scoped file capability for each scan request, a bounded output channel and no ambient network permission. A separate broker performs approved state-changing operations.
+
+### 4.1 Existing Reaper security components
+
+The Reaper repository already contains a Beelzebul 66-rule **repository scanner** (`tools/beelzebul.py`, `security/beelzebul.v1.json`, its regression tests and CI workflow). It audits tracked repository files, source patterns, paths and workflow metadata in read-only mode. Its `beelzebul.report.v1` output is useful for developer/repository assurance, but it is not an endpoint scanner: it does not provide general file-on-access protection, process-memory scanning, behavior monitoring or kernel enforcement. Preserve it as a distinct specialist tool; do not relabel its results as an antivirus scan of the host.
+
+Reaper also defines `duckos.bav.defense-context.v1` and `security/defense-context.v1.tsv`, a 60-term descriptive vocabulary grouped into WMD/CBRN, Chinese military-platform and air-defence context. A match means only that content discusses a listed subject. It MUST NOT raise malware confidence, create a malicious verdict, block execution/builds, trigger quarantine or revoke capabilities. Keep these context tags separate from malware evidence and the detection-rule engine.
+
+The Reaper defensive-security doctrine describes a Java context-classification library and self-test. The named Java source paths were not independently retrievable from the current default-branch file view during this integration audit; therefore the DuckOS integration MUST treat the TSV taxonomy as the confirmed data contract and the Java classifier implementation as requiring source/CI re-verification before it is called delivered.
+
+DuckOS may later ingest Beelzebul reports and context tags only through explicit versioned, bounded schemas. Do not import Reaper Python modules into a native DuckOS service or use a context-tag result as a privileged decision.
+
+### 4.2 Scan worker trust boundary
 
 The scanner MUST not execute a file to inspect it. Parsers for executable formats and archives must be memory-safe where possible, bounded, fuzzed and isolated. Unsupported or truncated formats produce an explicit unsupported/incomplete result.
 
@@ -233,11 +246,13 @@ A schema-only test proves the schema accepts or rejects JSON. It does not verify
 
 ## 11. Extension and namespace ownership
 
-The .bav suffix is reserved exclusively for Beelzebub AV security bundles. The earlier Reaper proposal used .bav for Buffer Allocation & Validation. That creates an ambiguous file type and MUST NOT be carried into implementation.
+The .bav suffix is reserved exclusively for Beelzebub AV signed security bundles. In the uploaded OS(2).txt proposal, the same suffix was also assigned to Buffer Allocation & Validation. That creates an ambiguous file type and MUST NOT be carried into implementation.
 
 The buffer layout/allocation specification is renamed to .bufspec. Its schema and parser are separate contracts and are not implemented by this BAV document.
 
-The Reaper extension registry, examples, validators, IDE syntax, content-type detection and DuckOS package registry must be updated in a separate, reviewable Reaper change before either extension is advertised as supported. Until then, both are specified formats only; no parser or runtime support is implied.
+Do not confuse the file suffix with Reaper's existing policy identifier duckos.bav.defense-context.v1 or its security/defense-context.v1.tsv catalog. Those are a policy namespace and a plain-text context vocabulary, not .bav files and not malware signatures.
+
+The Reaper extension registry, examples, validators, IDE syntax, content-type detection and DuckOS package registry must be updated in separate, reviewable changes before either extension is advertised as supported. Until then, .bav and .bufspec are specified formats only; no parser or runtime support is implied.
 
 ## 12. Delivery stages
 
