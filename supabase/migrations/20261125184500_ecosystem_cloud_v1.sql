@@ -50,7 +50,7 @@ create table public.sync_events (
     event_type text not null check (event_type ~ '^[a-z][a-z0-9_.-]{0,127}$'),
     occurred_at timestamptz not null,
     payload jsonb not null check (
-        jsonb_typeof(payload) = 'object' and pg_column_size(payload) <= 65536
+        jsonb_typeof(payload) = 'object' and octet_length(payload::text) <= 65536
     ),
     created_at timestamptz not null default now(),
     unique (org_id, event_id)
@@ -77,7 +77,7 @@ create table public.artifacts (
     sha256 text not null check (sha256 ~ '^[0-9a-f]{64}$'),
     byte_size bigint not null check (byte_size between 1 and 536870912),
     metadata jsonb not null default '{}'::jsonb check (
-        jsonb_typeof(metadata) = 'object' and pg_column_size(metadata) <= 16384
+        jsonb_typeof(metadata) = 'object' and octet_length(metadata::text) <= 16384
     ),
     created_at timestamptz not null default now(),
     unique (org_id, storage_key),
