@@ -155,12 +155,20 @@ EOF
 )
 
 echo "[8/8] Build hybrid BIOS/UEFI release ISO"
-bash "$ROOT/boot/build-iso.sh" \
-    --work-dir "$BUILD_DIR/boot" \
-    --payload-dir "$PAYLOAD/duckos" \
-    --volume-id DUCKOS_RELEASE \
-    --output "$OUTPUT" \
-    "${LOADER_MENU_ARGS[@]}"
+if ((${#LOADER_MENU_ARGS[@]} > 0)); then
+    bash "$ROOT/boot/build-iso.sh" \
+        --work-dir "$BUILD_DIR/boot" \
+        --payload-dir "$PAYLOAD/duckos" \
+        --volume-id DUCKOS_RELEASE \
+        --output "$OUTPUT" \
+        "${LOADER_MENU_ARGS[@]}"
+else
+    bash "$ROOT/boot/build-iso.sh" \
+        --work-dir "$BUILD_DIR/boot" \
+        --payload-dir "$PAYLOAD/duckos" \
+        --volume-id DUCKOS_RELEASE \
+        --output "$OUTPUT"
+fi
 
 ISO_BYTES="$(wc -c < "$OUTPUT" | tr -d ' ')"
 echo "DuckOS Release ISO ready: $OUTPUT"
