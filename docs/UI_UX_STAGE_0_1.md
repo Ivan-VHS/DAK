@@ -1,6 +1,6 @@
-# Свод 666 правил UI/UX — инженерная редакция 40026
+# Duck UI/UX Foundation — Stage 0.1
 
-**Версия:** 40026.1  
+**Этап:** Stage 0.1 — Foundation  
 **Область:** все пользовательские поверхности продукта — основное окно, диалоги, панели, списки, редакторы, журналы, статусы и вспомогательные инструменты.  
 **Статус:** обязательный проектный контракт; выполнение подтверждается исходным кодом и проверками, а не наличием этого документа.
 
@@ -8,7 +8,7 @@
 
 Интерфейс помогает человеку достигать цели быстро, спокойно и предсказуемо. Он не соревнуется за внимание, не имитирует состояние, не скрывает последствия и не перекладывает внутреннюю сложность системы на пользователя.
 
-Предоставленный Свод 001–666 остаётся нормативным источником. Эта редакция переводит его в единый исполнимый стандарт для настольных приложений 40026 года. Номера правил сохранены для ссылок в задачах, ревью и тестах. Наличие правила в документе **не означает**, что соответствующая возможность уже реализована.
+Предоставленный Свод 001–666 остаётся нормативным источником. Эта редакция переводит его в единый исполнимый стандарт для современных настольных приложений экосистемы Duck. Номера правил сохранены для ссылок в задачах, ревью и тестах. Наличие правила в документе **не означает**, что соответствующая возможность уже реализована.
 
 ## Шесть циклов и проверяемые контракты
 
@@ -107,11 +107,11 @@
 
 Используйте команды тестирования конкретного проекта и добавленные проверки UI/UX. Успешный тест доказывает только покрытый инвариант; он не заменяет ручную клавиатурную, масштабную и экранную проверку на реальной платформе.
 
-## Local implementation profiles
+## Stage 0.5 — Local product profiles
 
-Each repository keeps its toolkit-specific acceptance notes and implementation evidence in its own docs/UI_UX_CODEX_40026.md. This shared document defines the common rules; it does not certify that every rule is implemented.
+Each repository keeps its toolkit-specific acceptance notes and implementation evidence in its own docs/UI_UX_PROFILE_STAGE_0_5.md. This shared document defines the common rules; it does not certify that every rule is implemented.
 
-- [Pytyliki profile](https://github.com/Ivan-VHS/Pytyliki/blob/main/docs/UI_UX_CODEX_40026.md)
-- [Reaper profile](https://github.com/Ivan-VHS/Reaper/blob/main/docs/UI_UX_CODEX_40026.md)
-- [OPlague profile](https://github.com/Ivan-VHS/OPlague/blob/main/docs/UI_UX_CODEX_40026.md)
-- [VentuSample profile](https://github.com/Ivan-VHS/VentuSample/blob/main/docs/UI_UX_CODEX_40026.md)
+- [Pytyliki profile](https://github.com/Ivan-VHS/Pytyliki/blob/main/docs/UI_UX_PROFILE_STAGE_0_5.md)
+- [Reaper profile](https://github.com/Ivan-VHS/Reaper/blob/main/docs/UI_UX_PROFILE_STAGE_0_5.md)
+- [OPlague profile](https://github.com/Ivan-VHS/OPlague/blob/main/docs/UI_UX_PROFILE_STAGE_0_5.md)
+- [VentuSample profile](https://github.com/Ivan-VHS/VentuSample/blob/main/docs/UI_UX_PROFILE_STAGE_0_5.md)

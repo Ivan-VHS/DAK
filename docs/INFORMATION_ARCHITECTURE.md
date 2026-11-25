@@ -35,6 +35,8 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 ### 3. Engineering and language standards
 
 - [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) — maturity, runtime state, evidence and terminology.
+- [Product stage naming standard](STAGE_NAMING_STANDARD.md) — shared milestone labels and migration policy.
+- [Duck UI/UX Foundation — Stage 0.1](UI_UX_STAGE_0_1.md) — cross-product interaction and accessibility contract.
 - [Language quality standard](LANGUAGE_QUALITY.md) — editorial conventions and diagnostic scope.
 
 ### 4. Runnable prototypes and evidence
