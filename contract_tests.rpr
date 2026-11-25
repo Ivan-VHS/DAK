@@ -13,6 +13,7 @@ import "duckos/security/trust.rpr" as trust
 import "duckos/drivers/abi.rpr" as drivers
 import "duckos/drivers/orchestrator.rpr" as orchestrator
 import "duckos/services/supervisor.rpr" as supervisor
+import "duckos/services/system_runtime.rpr" as system_runtime
 import "duckos/storage/hypergraph.rpr" as storage
 import "duckos/storage/crdt.rpr" as crdt
 import "duckos/system/three_media.rpr" as media
@@ -261,4 +262,24 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
+make service_request := [114, 1, 0, 9001, 1500, 256, 0]
+make service_grants := ["log.append", "service.registry"]
+make denied_service_grants := ["service.registry"]
+assert(system_runtime["operation_capability"](114) == "log.append", "system service ID maps to a stable capability")
+assert(system_runtime["operation_capability"](130) == "toolchain.cross-build", "cross build capability is explicit")
+assert(system_runtime["service_request_valid"](service_request), "bounded system service request")
+assert(system_runtime["service_request_decision"](service_request, service_grants) == "admit-to-owning-provider", "granted service request is admitted only to its owner")
+assert(system_runtime["service_request_decision"](service_request, denied_service_grants) == "reject-capability-denied", "service request cannot amplify capabilities")
+assert(system_runtime["service_request_decision"]([114, 1, 0, 0, 1500, 256, 0], service_grants) == "reject-invalid-request", "request ID zero is rejected")
+assert(system_runtime["service_transition_valid"]("starting", "active"), "service lifecycle accepts a valid transition")
+assert(not system_runtime["service_transition_valid"]("active", "registered"), "service lifecycle rejects an invalid transition")
+assert(system_runtime["restart_delay_ms"](2, 100, 250) == 250, "restart backoff is bounded")
+assert(system_runtime["log_record_valid"]([3, 256, 9001, 12000]), "structured logs have bounded payloads and identity")
+assert(not system_runtime["log_record_valid"]([9, 256, 9001, 12000]), "invalid log severity is rejected")
+assert(system_runtime["device_event_valid"](["remove", "gpu0", 2, 32]), "versioned device event is accepted")
+assert(not system_runtime["device_event_valid"](["remove", "", 2, 32]), "device event requires an identity")
+assert(system_runtime["firmware_stage_decision"](true, true, true, false, 4096) == "require-explicit-approval", "firmware staging requires user approval")
+assert(not system_runtime["package_transaction_valid"](4096, true, true, false), "package transaction requires rollback")
+assert(not system_runtime["container_isolation_valid"](true, true, false, 1048576, 8), "container admission requires explicit network policy")
+
 emit "DUCKOS_REAPER_CONTRACTS_OK"
