@@ -151,7 +151,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
 
 test("glass materials use bounded progressive enhancement and accessible fallbacks", () => {
   const glass = theme.materials?.glass;
-  assert.equal(theme.version, 3);
+  assert.equal(theme.version, 4);
   assert.ok(glass, "glass material contract must be present");
   assert.equal(glass.progressiveEnhancement, true);
   assert.equal(glass.fallback, "#151515");
