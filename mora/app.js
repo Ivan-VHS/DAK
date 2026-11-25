@@ -13,7 +13,7 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
-const DUCK_ACCENT = "#FFD400";
+const DUCK_ACCENT = "#FFD700";
 
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
