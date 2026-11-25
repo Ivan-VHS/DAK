@@ -995,8 +995,32 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_tab
     if (EFI_ERROR(status)) fail("final GetMemoryMap failed");
     if (descriptor_version != 1u) fail("unsupported EFI memory descriptor version");
     build_memory_map((EFI_MEMORY_DESCRIPTOR *)gMemoryMapBuffer, map_size, descriptor_size);
-    if (duckos_boot_info_validate(&gBootInfo, gMemoryRegions,
-                                  gBootInfo.memory_region_count) != DUCKOS_BOOT_INFO_OK) {
+    const duckos_boot_info_status boot_info_status =
+        duckos_boot_info_validate(&gBootInfo, gMemoryRegions,
+                                  gBootInfo.memory_region_count);
+    if (boot_info_status != DUCKOS_BOOT_INFO_OK) {
+        serial_write("DUCKBOOT_BOOTINFO_REJECT status=");
+        serial_write(duckos_boot_info_status_name(boot_info_status));
+        serial_write(" regions=");
+        serial_hex(gBootInfo.memory_region_count);
+        serial_write(" kernel_phys=");
+        serial_hex(gBootInfo.kernel_phys_base);
+        serial_write(" kernel_bytes=");
+        serial_hex(gBootInfo.kernel_size);
+        serial_write(" framebuffer_phys=");
+        serial_hex(gBootInfo.framebuffer_phys_base);
+        serial_write(" framebuffer_bytes=");
+        serial_hex(gBootInfo.framebuffer_size);
+        serial_write("\r\n");
+        for (uint32_t index = 0u; index < gBootInfo.memory_region_count; ++index) {
+            serial_write("DUCKBOOT_MEMORY_REGION type=");
+            serial_hex(gMemoryRegions[index].type);
+            serial_write(" base=");
+            serial_hex(gMemoryRegions[index].base);
+            serial_write(" size=");
+            serial_hex(gMemoryRegions[index].length);
+            serial_write("\r\n");
+        }
         fail("constructed DuckOS Boot Info v1 did not validate");
     }
 
