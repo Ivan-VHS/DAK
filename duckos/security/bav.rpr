@@ -1,0 +1,132 @@
+# BAV deny-by-default decision contract v1.
+# The native security broker must authenticate caller identity, enforce the
+# result at the syscall/service boundary and persist audit events. This module
+# evaluates policy records; it is not itself a process sandbox or kernel hook.
+
+import "duckos/security/capabilities.rpr" as capabilities
+
+export craft forbidden_capability(name) {
+    yield name == "kernel.exec" or name == "kernel.patch" or name == "firmware.write" or name == "device.flash" or name == "process.inject" or name == "security.disable"
+}
+
+export craft rule_valid(rule) {
+    # [capability, resource_scope, operation, maximum_bytes, enabled]
+    when size(rule) != 5 {
+        yield false
+    }
+    when rule[0] == "" or rule[1] == "" or rule[2] == "" or rule[3] < 0 or rule[3] > 1048576 {
+        yield false
+    }
+    when rule[4] != true and rule[4] != false {
+        yield false
+    }
+    yield true
+}
+
+export craft policy_valid(rules) {
+    when size(rules) > 4096 {
+        yield false
+    }
+    each index in range(0, size(rules)) {
+        when not rule_valid(rules[index]) {
+            yield false
+        }
+        each other_index in range(index + 1, size(rules)) {
+            when rules[index][0] == rules[other_index][0] and rules[index][1] == rules[other_index][1] and rules[index][2] == rules[other_index][2] {
+                yield false
+            }
+        }
+    }
+    yield true
+}
+
+export craft rule_matches(rule, request) {
+    when not rule_valid(rule) or size(request) != 6 {
+        yield false
+    }
+    when not rule[4] or rule[0] != request[1] {
+        yield false
+    }
+    when rule[1] != "*" and rule[1] != request[2] {
+        yield false
+    }
+    when rule[2] != "*" and rule[2] != request[3] {
+        yield false
+    }
+    when request[4] < 0 or request[4] > rule[3] {
+        yield false
+    }
+    yield true
+}
+
+export craft evaluate(request, rules, grants) {
+    # Request: [actor_pid, capability, resource, operation, payload_bytes, trust_state]
+    when size(request) != 6 or not policy_valid(rules) {
+        yield ["deny", "invalid-policy-or-request"]
+    }
+    when request[0] <= 0 or request[1] == "" or request[2] == "" or request[3] == "" {
+        yield ["deny", "invalid-identity-or-scope"]
+    }
+    when request[4] < 0 or request[4] > 1048576 {
+        yield ["deny", "payload-limit"]
+    }
+    when forbidden_capability(request[1]) {
+        yield ["deny", "forbidden-capability"]
+    }
+    when not capabilities["permits"](grants, request[1]) {
+        yield ["deny", "capability-not-granted"]
+    }
+    when request[5] == "quarantined" {
+        yield ["deny", "quarantined-input"]
+    }
+    when request[5] == "untrusted" and request[3] != "sanitize" {
+        yield ["deny", "untrusted-effect"]
+    }
+    when request[5] != "untrusted" and request[5] != "validated" {
+        yield ["deny", "unknown-trust-state"]
+    }
+    vary selected := -1
+    each index in range(0, size(rules)) {
+        when rule_matches(rules[index], request) {
+            change selected := index
+        }
+    }
+    when selected < 0 {
+        yield ["deny", "no-matching-rule"]
+    }
+    yield ["allow", selected]
+}
+
+export craft audit_event_valid(event) {
+    # [sequence, actor_pid, capability, resource, operation, decision]
+    when size(event) != 6 or event[0] <= 0 or event[1] <= 0 {
+        yield false
+    }
+    when event[2] == "" or event[3] == "" or event[4] == "" {
+        yield false
+    }
+    yield event[5] == "allow" or event[5] == "deny"
+}
+
+export craft audit_valid(journal) {
+    vary expected := 1
+    each event in journal {
+        when not audit_event_valid(event) or event[0] != expected {
+            yield false
+        }
+        change expected := expected + 1
+    }
+    yield true
+}
+
+export craft audit_append(journal, event) {
+    when not audit_valid(journal) or size(event) != 5 {
+        yield ["invalid", journal]
+    }
+    make sequence := size(journal) + 1
+    make record := [sequence, event[0], event[1], event[2], event[3], event[4]]
+    when not audit_event_valid(record) {
+        yield ["invalid", journal]
+    }
+    yield ["appended", push(journal, record), sequence]
+}
