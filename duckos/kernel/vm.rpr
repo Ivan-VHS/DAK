@@ -56,7 +56,7 @@ export craft overlaps(left, right) {
 }
 
 export craft page_map_valid(mappings) {
-    when size(mappings) > 65536 {
+    when size(mappings) > 1024 {
         yield false
     }
     each index in range(0, size(mappings)) {
@@ -78,7 +78,7 @@ export craft map(mappings, candidate) {
     when not page_map_valid(mappings) {
         yield ["reject", "corrupt-page-map", mappings]
     }
-    when size(mappings) >= 65536 or not mapping_valid(candidate) {
+    when size(mappings) >= 1024 or not mapping_valid(candidate) {
         yield ["reject", "invalid-mapping", mappings]
     }
     each existing in mappings {
