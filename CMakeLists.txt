@@ -46,12 +46,29 @@ else()
     target_compile_options(duckos_boot_contract PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+
+add_library(duckos_capability_broker STATIC
+    foundation/capability_broker.c
+    foundation/capability_broker.h
+)
+target_include_directories(duckos_capability_broker PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/foundation
+)
+target_link_libraries(duckos_capability_broker PUBLIC duckos_desktop_ipc)
+if(MSVC)
+    target_compile_options(duckos_capability_broker PRIVATE /W4 /sdl)
+else()
+    target_compile_options(duckos_capability_broker PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+endif()
+
 if(DUCKOS_ENABLE_SANITIZERS)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(duckos_boot_contract PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
         target_link_options(duckos_boot_contract PUBLIC -fsanitize=address,undefined)
         target_compile_options(duckos_desktop_ipc PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
         target_link_options(duckos_desktop_ipc PUBLIC -fsanitize=address,undefined)
+        target_compile_options(duckos_capability_broker PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
+        target_link_options(duckos_capability_broker PUBLIC -fsanitize=address,undefined)
     else()
         message(FATAL_ERROR "DUCKOS_ENABLE_SANITIZERS requires GCC or Clang")
     endif()
@@ -97,6 +114,15 @@ if(BUILD_TESTING)
         target_compile_options(duckos_desktop_ipc_tests PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
     endif()
     add_test(NAME duckos-dabi64-ipc-foundation COMMAND duckos_desktop_ipc_tests)
+
+    add_executable(duckos_capability_broker_tests tests/test_capability_broker.c)
+    target_link_libraries(duckos_capability_broker_tests PRIVATE duckos_capability_broker)
+    if(MSVC)
+        target_compile_options(duckos_capability_broker_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_capability_broker_tests PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+    endif()
+    add_test(NAME duckos-capability-broker COMMAND duckos_capability_broker_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
