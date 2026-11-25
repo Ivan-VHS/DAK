@@ -296,6 +296,7 @@ make install_target := ["disk0", "x86_64", 4000000, 512, "uefi", true]
 make install_target_no_consent := ["disk0", "x86_64", 4000000, 512, "uefi", false]
 assert(installer["target_valid"](install_target), "installer accepts a bounded x86_64 UEFI target")
 assert(not installer["target_valid"](["", "x86_64", 1000000, 512, "uefi", true]), "installer rejects an unnamed disk")
+assert(not installer["target_valid"]("malformed-target"), "installer rejects a non-list target record")
 make verified_source := ["DAK Release", "sha256:installer-image", "verified"]
 make unverified_source := ["DAK Release", "sha256:installer-image", "unverified"]
 assert(installer["admission"](install_target, verified_source, "ready") == "admit-plan-only", "installer admits only a verified, recoverable plan")
@@ -342,6 +343,7 @@ make verified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Iv
 make unverified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "unverified", 65536]
 make wrong_bus_driver := ["nvme.sample", 1, "usb", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]
 make driver_grants := ["read.device"]
+assert(not driver_runtime["descriptor_valid"]("malformed-driver"), "driver runtime rejects a non-list descriptor")
 assert(driver_runtime["admission"](verified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "admit-isolated-plan-only", "driver admission requires verified provenance and least authority")
 assert(driver_runtime["admission"](unverified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-signature", "driver runtime rejects unverified signatures")
 assert(driver_runtime["admission"](wrong_bus_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-device-match", "driver runtime rejects a bus mismatch")
@@ -360,6 +362,7 @@ make installed_ids := ["lib.core", "shell.base"]
 make app_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "sha256:app", "Ivan-VHS", "verified", 1048576]
 make unsigned_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "sha256:app", "Ivan-VHS", "unverified", 1048576]
 assert(packages["package_valid"](app_package), "package manager accepts a bounded package manifest")
+assert(not packages["package_valid"]("malformed-package"), "package manager rejects a non-list manifest")
 assert(not packages["package_valid"](["", 1, 0, 0, "x86_64", 1, "application", [], [], "sha256:app", "Ivan-VHS", "verified", 1048576]), "package manager rejects an empty package identity")
 assert(not packages["package_valid"](["bad.digest", 1, 0, 0, "x86_64", 1, "application", [], [], "", "Ivan-VHS", "verified", 1048576]), "package manager requires a payload digest")
 assert(packages["dependencies_satisfied"](["lib.core"], installed_ids), "package manager resolves installed dependencies")
@@ -368,6 +371,7 @@ assert(packages["paths_valid"]([["usr", "bin", "example"], ["usr", "share", "exa
 assert(not packages["paths_valid"]([["usr", "..", "system"]]), "package manager rejects parent traversal in payload paths")
 assert(not packages["paths_valid"]([["usr", "bin/tool"]]), "package manager rejects slash inside a path component")
 assert(not packages["paths_valid"]([["usr", "bin\\\\tool"]]), "package manager rejects backslash inside a path component")
+assert(not packages["paths_valid"]([["usr", 7]]), "package manager rejects non-text path components")
 assert(packages["admission"](app_package, "x86_64", 1, installed_ids, ["fs.read"]) == "admit-transaction-plan-only", "package manager admits a verified dependency-complete plan")
 assert(packages["admission"](unsigned_package, "x86_64", 1, installed_ids, ["fs.read"]) == "reject-signature", "package manager rejects unverified package provenance")
 assert(packages["admission"](app_package, "x86_64", 1, installed_ids, ["fs.write"]) == "reject-capability", "package manager rejects capabilities outside its grants")
@@ -381,6 +385,7 @@ make update_manifest := ["stable", 1, 1, 0, "x86_64", 2, 10485760, "sha256:paylo
 make downgrade_manifest := ["stable", 0, 9, 0, "x86_64", 3, 10485760, "sha256:payload", "DAK Release", "verified"]
 make unsigned_update := ["stable", 1, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "unverified"]
 assert(updates["manifest_valid"](update_manifest), "update manager accepts a bounded signed manifest")
+assert(not updates["manifest_valid"]("malformed-update"), "update manager rejects a non-list manifest")
 assert(updates["admission"](update_manifest, "x86_64", [1, 0, 0], 1) == "stage-inactive-slot-plan-only", "update manager stages a newer verified image")
 assert(updates["admission"](downgrade_manifest, "x86_64", [1, 0, 0], 1) == "reject-downgrade", "update manager rejects version rollback")
 assert(updates["admission"](unsigned_update, "x86_64", [1, 0, 0], 1) == "reject-signature", "update manager rejects unverified update signatures")
@@ -406,6 +411,7 @@ assert(updates["boot_result_policy"]("pending", 1, 3) == "await-confirmation", "
 make audit_one := [1, "req-1", "installer", "install.plan", "disk0", "accepted", "consent-and-trust-checked", "genesis", "sha256:audit-1"]
 make audit_two := [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "signature-and-rollback-checked", "sha256:audit-1", "sha256:audit-2"]
 assert(audit["record_valid"](audit_one), "audit accepts a complete bounded event")
+assert(not audit["record_valid"]("malformed-audit"), "audit rejects a non-list event record")
 assert(not audit["record_valid"]([1, "", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", "sha256:audit"]), "audit requires a request identity")
 assert(not audit["record_valid"]([1, "req-1", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", ""]), "audit requires a record digest")
 assert(audit["append_policy"]([], audit_one, 1024) == "append-plan-only", "audit plans the first journal record")
