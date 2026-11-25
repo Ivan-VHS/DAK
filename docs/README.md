@@ -1,63 +1,24 @@
 # DuckOS documentation
 
-## Desktop and application interfaces
+Start with the [project README](../README.md). The [full documentation map](INFORMATION_ARCHITECTURE.md) indexes every specification and retained reference.
 
-[Mora unified desktop](../mora/index.html) is the current browser shell and system-control surface. Its neutral application discovery hub, **Mora Commons**, is documented in [Mora Commons](MORA_COMMONS.md). Its application and native-service boundaries are described in [Mora shell and native integration](MORA_INTEGRATION.md). The [Mora Boost and OPlague gaming integration](GAMING_PERFORMANCE_INTEGRATION.md) describes measured telemetry, reversible Windows sessions and the future native bridge contract.
+## Architecture and delivery
+- [System architecture](ARCHITECTURE.md) · [Implementation status](IMPLEMENTATION_STATUS.md) · [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md)
+- [Repository evolution directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) · [Project overview](clusters/project-overview.md)
 
-[Unify manual transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) specifies the bounded JSON file used for manual tab, clip and selected-setting transfer in the earlier browser prototype. Its schema is [unify.transfer.v1.schema.json](../schemas/unify.transfer.v1.schema.json).
+## Desktop and applications
+- [Mora shell and native integration](MORA_INTEGRATION.md) · [Mora design system](../MORA_DESIGN_SYSTEM.md) · [Gaming integration](GAMING_PERFORMANCE_INTEGRATION.md)
+- [Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) · [Application catalogue](../catalogs/preinstalled-applications.v1.json) · [Catalogue schema](../schemas/preinstalled-applications.v1.schema.json)
+- [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) · [Extended Terminal](EXTENDED_TERMINAL.md) · [Native Reaper integration](REAPER_INTEGRATION.md)
+- [Unify transfer format v1](UNIFY_TRANSFER_FORMAT_V1.md) · [Transfer schema](../schemas/unify.transfer.v1.schema.json)
+- [Current Mora shell](../mora/index.html) · [Earlier seven-app prototype](../prototype/mora-home.html)
 
-## Visual design
+## Security and compatibility
+- [BAV Security Bundle v1](BAV_SECURITY_BUNDLE_V1.md) · [BAV schema](../schemas/bav-security-bundle.v1.schema.json)
+- [Windows compatibility](WINDOWS_COMPATIBILITY.md) · [DuckBridge](DUCKBRIDGE.md) · [Repository federation](REPOSITORY_FEDERATION.md)
 
-[Mora Design System](../MORA_DESIGN_SYSTEM.md) is the canonical interface standard; [mora/theme.json](../mora/theme.json) contains the versioned color, shape, spacing, typography and motion tokens.
+## Engineering standards
+- [Unified documentation and semantics](UNIFIED_DOCUMENTATION_STANDARD.md) · [Interaction and ergonomics](ERGONOMICS_AND_INTERACTION_STANDARD.md)
+- [Capability completeness and evolution](ENGINEERING_EVOLUTION_FRAMEWORK.md)
 
-## Runnable prototypes
-
-[The current Mora shell](../mora/index.html) — unified home screen, seven first-party app identities and eight system tools, including Mora Commons, with local intent, preference, recovery, file-inspection and Mora Boost/OPlague entry points.
-
-[The earlier seven-app Mora prototype](../prototype/mora-home.html) — retained as a reference while the unified shell evolves. Neither browser prototype is a native compositor or proof that kernel and hardware services are available.
-
-## Command-line tools
-
-[DuckOS Extended Terminal](EXTENDED_TERMINAL.md) documents the separate allowlisted user-space command environment, command registry, local configuration, bounded history, extension contract and security boundaries.
-
-## Native workbench
-
-[Native Reaper integration](REAPER_INTEGRATION.md) documents the process-isolated Reaper Studio launcher, static-check bridge and Duck Desktop panel.
-
-## Desktop optimization
-
-[Duck Desktop optimization](DESKTOP_OPTIMIZATION.md) documents the native user-space maintenance window, read-only audit, safe file organization, reversible per-user startup controls and the current compositor boundary.
-
-## Product specification
-
-[Preinstalled application suite](PREINSTALLED_APPLICATIONS.md) defines the seven default DuckOS application roles, their initial capability scope, boundaries and proposed cross-app workflows. The versioned inventory is available as [JSON](../catalogs/preinstalled-applications.v1.json) and validated against its [JSON Schema](../schemas/preinstalled-applications.v1.schema.json).
-
-## Normative standards
-
-[Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) defines the shared Ivan-VHS terminology, capability maturity, runtime states, verification outcomes, evidence rules and documentation acceptance criteria. It applies to new and materially revised documentation in this repository.
-
-[DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) defines motor, visual, cognitive, keyboard, window, accessibility, error-recovery, latency, privacy and measurement requirements for Mora and native applications.
-
-## Security architecture
-
-[BAV Security Bundle v1](BAV_SECURITY_BUNDLE_V1.md) specifies the signed declarative .bav detection-policy format, trust boundaries, planned scanner/broker/quarantine services, anti-rollback requirements and verification gates. Its [JSON Schema](../schemas/bav-security-bundle.v1.schema.json) validates bundle structure only; it does not verify signatures or scan files.
-
-## Documentation rules
-
-Describe current behavior from the source, build configuration and tests. Mark designs and future work as specified or planned; do not present them as implemented. Keep kernel, boot, driver, runtime, graphics and desktop claims tied to concrete source paths and reproducible verification evidence.
-
-This index is a documentation entry point. It does not itself assert that any particular subsystem is implemented or absent.
-
-## Windows application compatibility
-
-[Windows compatibility foundation](WINDOWS_COMPATIBILITY.md) documents PE inspection, isolated prefix profiles, CLI diagnostics and implementation status against the 66-point specification. [DuckBridge](DUCKBRIDGE.md) adds local runtime inventory and structured dry-run plans for compatible backends; neither layer starts a target process.
-
-
-## Capability completeness standard
-
-[Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) — canonical vocabulary, maturity states, measurable acceptance gates, architecture and extension rules, compatibility and release criteria.
-
-## Native implementation planning
-
-- [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
-- [Implementation status](IMPLEMENTATION_STATUS.md) — current delivered/partial boundaries with source and test evidence.
+Keep implementation status evidence-based. A design, catalogue or roadmap does not prove that a kernel, driver, native service or compositor is shipped; use the implementation status and specialized specifications for exact boundaries.
