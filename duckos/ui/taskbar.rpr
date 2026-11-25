@@ -1,0 +1,49 @@
+# DuckShell taskbar visibility and Jora launch admission.
+# This module returns decisions; it does not start processes or compose apps.
+
+export craft entry_valid(entry) {
+    when size(entry) != 12 { yield false }
+    when entry[0] == "" or entry[1] == "" or entry[2] == "" { yield false }
+    when entry[3] < 0 or entry[5] < 0 { yield false }
+    when entry[9] != "user" and entry[9] != "system" { yield false }
+    when entry[10] != "trusted" and entry[10] != "validated" and entry[10] != "untrusted" and entry[10] != "quarantined" { yield false }
+    when entry[7] and (entry[3] <= 0 or entry[5] <= 0) { yield false }
+    yield true
+}
+
+export craft visibility_decision(entry, active_workspace) {
+    when not entry_valid(entry) or active_workspace <= 0 { yield "invalid" }
+    when entry[9] != "user" or entry[10] == "untrusted" or entry[10] == "quarantined" { yield "hidden" }
+    when not entry[8] { yield "hidden" }
+    when entry[6] { yield "visible-pinned" }
+    when entry[7] and entry[4] == active_workspace { yield "visible-running" }
+    yield "hidden"
+}
+
+export craft window_group(window_count) {
+    when window_count < 0 { yield ["invalid", 0] }
+    when window_count > 1 { yield ["grouped", window_count] }
+    when window_count == 1 { yield ["single", 1] }
+    yield ["empty", 0]
+}
+
+export craft catalog_entry_valid(catalog_entry) {
+    when size(catalog_entry) != 5 { yield false }
+    when catalog_entry[0] == "" or catalog_entry[1] == "" { yield false }
+    yield catalog_entry[2] == "published" and catalog_entry[3] == "verified"
+}
+
+export craft launch_decision(catalog_entry, granted, user_consent) {
+    when not catalog_entry_valid(catalog_entry) { yield "reject-catalog-entry" }
+    when not user_consent { yield "consent-required" }
+    vary allowed := true
+    each requested in catalog_entry[4] {
+        vary found := false
+        each capability in granted {
+            when requested == capability { change found := true }
+        }
+        when not found { change allowed := false }
+    }
+    when not allowed { yield "deny-capability" }
+    yield "jora-compose-request-ready"
+}

@@ -1,48 +1,68 @@
-# DuckOS single-palette design contract.
-# 65% black, 25% white and 10% yellow.
+# DuckOS semantic theme contract.
+# Imperial Noir canvas and shell with one semantic gold accent.
 
 export craft palette_ratios() {
     yield [65, 25, 10]
 }
 
 export craft palette_valid(ratios) {
-    when size(ratios) != 3 {
-        yield false
-    }
+    when size(ratios) != 3 { yield false }
     yield ratios[0] + ratios[1] + ratios[2] == 100 and ratios[0] >= ratios[1] and ratios[1] >= ratios[2]
 }
 
+export craft semantic_role_valid(role) {
+    yield role == "canvas" or role == "shell" or role == "surface" or role == "elevated" or role == "text.primary" or role == "text.muted" or role == "accent" or role == "border" or role == "focus" or role == "status.success" or role == "status.error" or role == "status.info" or role == "status.warning"
+}
+
+export craft semantic_color(role) {
+    when role == "canvas" { yield "#050505" }
+    when role == "shell" { yield "#070707" }
+    when role == "surface" { yield "#101010" }
+    when role == "elevated" { yield "#181818" }
+    when role == "text.primary" { yield "#FFFFFF" }
+    when role == "text.muted" { yield "#B8B8B8" }
+    when role == "accent" { yield "#FFD700" }
+    when role == "border" { yield "#363636" }
+    when role == "focus" { yield "#FFD700" }
+    when role == "status.success" { yield "#22C55E" }
+    when role == "status.error" { yield "#EF4444" }
+    when role == "status.info" { yield "#60A5FA" }
+    when role == "status.warning" { yield "#FFD700" }
+    yield ""
+}
+
 export craft palette_color(role) {
-    when role == "page" {
-        yield "#080808"
+    when role == "page" { yield semantic_color("canvas") }
+    when role == "navigation" or role == "accent" or role == "alert" { yield semantic_color("accent") }
+    when role == "surface" { yield semantic_color("surface") }
+    when role == "elevated" { yield semantic_color("elevated") }
+    when role == "border" { yield semantic_color("border") }
+    when role == "focus" { yield semantic_color("focus") }
+    yield semantic_color("text.primary")
+}
+
+export craft contrast_pair_valid(foreground_role, background_role) {
+    when not semantic_role_valid(foreground_role) or not semantic_role_valid(background_role) { yield false }
+    when foreground_role == "text.primary" and (background_role == "canvas" or background_role == "shell" or background_role == "surface" or background_role == "elevated") { yield true }
+    when foreground_role == "text.muted" and (background_role == "canvas" or background_role == "shell" or background_role == "surface" or background_role == "elevated") { yield true }
+    when foreground_role == "accent" and (background_role == "canvas" or background_role == "shell" or background_role == "surface" or background_role == "elevated") { yield true }
+    when foreground_role == "status.success" or foreground_role == "status.error" or foreground_role == "status.info" or foreground_role == "status.warning" {
+        yield background_role == "canvas" or background_role == "shell" or background_role == "surface" or background_role == "elevated"
     }
-    when role == "surface" {
-        yield "#151515"
-    }
-    when role == "elevated" {
-        yield "#242424"
-    }
-    when role == "navigation" {
-        yield "#FFD400"
-    }
-    when role == "accent" {
-        yield "#FFD400"
-    }
-    when role == "alert" {
-        yield "#FFD400"
-    }
-    when role == "border" {
-        yield "#3A3A3A"
-    }
-    when role == "focus" {
-        yield "#FFE45C"
-    }
-    yield "#FFFFFF"
+    yield false
+}
+
+export craft theme_mode_valid(mode) {
+    yield mode == "dark" or mode == "light" or mode == "high_contrast"
+}
+
+export craft theme_change_decision(mode, package_verified, schema_valid) {
+    when not theme_mode_valid(mode) or not schema_valid { yield "reject-invalid-theme" }
+    when not package_verified { yield "reject-unverified-theme" }
+    yield "theme-change-transaction-ready"
 }
 
 export craft motion_profile(reduced_motion) {
-    when reduced_motion {
-        yield "static"
-    }
+    when reduced_motion { yield "static" }
     yield "fluid"
 }

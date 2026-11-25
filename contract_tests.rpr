@@ -30,6 +30,10 @@ import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
 import "duckos/ui/canvas.rpr" as canvas
 import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
+import "duckos/ui/ddp.rpr" as ddp
+import "duckos/ui/window_manager.rpr" as window_manager
+import "duckos/ui/taskbar.rpr" as taskbar
+import "duckos/security/app_sandbox.rpr" as app_sandbox
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -161,8 +165,8 @@ assert(window_c[1] == [sample_b, sample_c], "telemetry history remains bounded")
 assert(telemetry["sequence_valid"](window_c[1]), "telemetry sequence is monotonic")
 
 assert(theme["palette_valid"](theme["palette_ratios"]()), "DuckOS palette proportions")
-assert(theme["palette_color"]("navigation") == "#FFD400", "navigation uses Duck yellow")
-assert(theme["palette_color"]("alert") == "#FFD400", "alerts use Duck yellow")
+assert(theme["palette_color"]("navigation") == "#FFD700", "navigation uses Duck yellow")
+assert(theme["palette_color"]("alert") == "#FFD700", "alerts use Duck yellow")
 assert(theme["motion_profile"](true) == "static", "reduced-motion preference is respected")
 assert(motion["frame_state"](15900, 16000, false) == "within-budget", "frame stays within 16 ms budget")
 assert(motion["frame_state"](17000, 16000, false) == "late", "late frame is observable")
@@ -261,4 +265,123 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
+
+# DDP v1 surface, serial, damage and input-routing policy.
+make app_surface := ["surface-app-1", 41, 1, 800, 600, 3200, "xrgb8888", 1920000, "created"]
+make malformed_surface := ["surface-bad", 41, 1, 800, 600, 100, "xrgb8888", 60000, "created"]
+assert(ddp["surface_valid"](app_surface), "valid surface descriptor is admitted")
+assert(not ddp["surface_valid"](malformed_surface), "invalid stride and backing size are rejected")
+assert(ddp["surface_owned_by"](app_surface, "surface-app-1", 41), "surface handle stays owner-bound")
+assert(not ddp["surface_owned_by"](app_surface, "surface-app-1", 42), "another process cannot claim the surface")
+assert(ddp["transition_valid"]("created", "configured"), "surface configure transition")
+assert(ddp["transition_valid"]("presented", "released"), "presented buffer can be released")
+assert(not ddp["transition_valid"]("created", "presented"), "surface lifecycle rejects skipped states")
+assert(ddp["configure_ack_valid"](9, 9, 100, 150), "current configure serial is accepted")
+assert(not ddp["configure_ack_valid"](8, 9, 100, 150), "stale configure serial is rejected")
+assert(not ddp["configure_ack_valid"](9, 9, 151, 150), "late configure acknowledgement is rejected")
+assert(ddp["damage_rect_valid"]([10, 10, 100, 100], app_surface), "damage rectangle fits the surface")
+assert(not ddp["damage_rect_valid"]([790, 590, 20, 20], app_surface), "damage outside surface bounds is rejected")
+assert(ddp["input_route_allowed"](41, 41, "focused-client", false, ""), "focused client receives normal input")
+assert(not ddp["input_route_allowed"](42, 41, "focused-client", false, ""), "unfocused process cannot receive redirected input")
+assert(ddp["input_route_allowed"](99, 41, "system-gesture", true, ""), "approved system gesture uses explicit route")
+assert(not ddp["input_route_allowed"](99, 41, "system-gesture", false, ""), "unapproved global input is denied")
+assert(ddp["input_route_allowed"](99, 41, "accessibility", false, "input.route.accessibility"), "accessibility input requires grant")
+assert(not ddp["portal_payload_valid"](2048, 1024, true), "portal payload size is bounded")
+
+# DuckWindow ownership, lifecycle, geometry, stacking and focus policy.
+make app_window := [1, 41, "surface-app-1", "normal", "editor", "Editor", 0, 800, 600, 0, "mapped", 1, 1, 1, true, false]
+make system_panel := [2, 1, "surface-shell-1", "panel", "duck-shell", "Panel", 0, 800, 48, 0, "mapped", 1, 1, 10, false, true]
+make wrong_owner_surface := ["surface-app-1", 42, 1, 800, 600, 3200, "xrgb8888", 1920000, "created"]
+assert(window_manager["window_valid"](app_window, app_surface), "window references its owner's valid surface")
+assert(not window_manager["window_valid"](app_window, wrong_owner_surface), "window cannot bind foreign process surface")
+assert(window_manager["window_valid"](system_panel, ["surface-shell-1", 1, 1, 800, 48, 3200, "xrgb8888", 153600, "created"]), "system panel role requires and accepts system ownership")
+assert(not window_manager["window_valid"]([3, 41, "surface-app-1", "lock", "editor", "Fake lock", 0, 800, 600, 0, "mapped", 1, 1, 1, true, false], app_surface), "app cannot claim system-only lock role")
+assert(window_manager["geometry_valid"](app_window, [1, 1920, 1080]), "window geometry fits output")
+assert(not window_manager["geometry_valid"]([1, 41, "surface-app-1", "normal", "editor", "Editor", 1800, 800, 600, 0, "mapped", 1, 1, 1, true, false], [1, 1920, 1080]), "window geometry cannot exceed output bounds")
+assert(window_manager["transition_valid"]("created", "configured"), "window configure transition")
+assert(window_manager["transition_valid"]("closing", "destroyed"), "window destruction follows close")
+assert(not window_manager["transition_valid"]("created", "focused"), "window cannot skip configure and map")
+assert(window_manager["focus_allowed"](app_window), "mapped focusable window may receive focus")
+assert(not window_manager["focus_allowed"]([1, 41, "surface-app-1", "normal", "editor", "Editor", 0, 800, 600, 0, "minimized", 1, 1, 1, true, false]), "minimized window cannot receive focus")
+assert(window_manager["stacking_allowed"](app_window, "normal"), "app may use normal stacking layer")
+assert(not window_manager["stacking_allowed"](app_window, "system"), "app cannot enter system stacking layer")
+assert(window_manager["stacking_allowed"](system_panel, "system"), "system panel may use system layer")
+assert(window_manager["rectangles_overlap"]([0, 0, 100, 100], [90, 90, 40, 40]), "rectangle overlap is detected")
+assert(not window_manager["notification_overlay_allowed"]([4, 41, "surface-app-1", "dialog", "editor", "Dialog", 0, 200, 120, 0, "mapped", 1, 1, 2, true, false], [0, 0, 400, 80]), "app dialog cannot cover reserved notification area")
+assert(not window_manager["resize_allowed"]("tiling", false), "tiling mode denies manual resize without override")
+assert(window_manager["resize_allowed"]("tiling", true), "tiling resize accepts explicit override token")
+assert(window_manager["tile_cell_valid"]([1, 41, "surface-app-1", "normal", "editor", "Editor", 0, 480, 270, 0, "tiled", 1, 1, 1, true, false], [1, 1920, 1080], 0, 0, 4, 4), "window geometry matches declared tile cell")
+assert(not window_manager["fullscreen_allowed"]([1, 41, "surface-app-1", "normal", "editor", "Editor", 0, 1920, 1080, 0, "fullscreen", 1, 1, 1, true, false], []), "fullscreen requires explicit capability")
+assert(window_manager["fullscreen_allowed"]([1, 41, "surface-app-1", "normal", "editor", "Editor", 0, 1920, 1080, 0, "fullscreen", 1, 1, 1, true, false], ["window.fullscreen"]), "fullscreen request passes with explicit grant")
+
+# DuckShell only lists trusted user applications and delegates launch to Jora.
+make taskbar_entry := ["editor", "Editor", "icon.editor", 41, 1, 2, false, true, true, "user", "trusted", ["window.open"]]
+make system_taskbar_entry := ["kernel", "Kernel", "icon.kernel", 1, 1, 1, false, true, true, "system", "trusted", []]
+make quarantined_taskbar_entry := ["bad-app", "Bad app", "icon.bad", 43, 1, 1, false, true, true, "user", "quarantined", []]
+assert(taskbar["visibility_decision"](taskbar_entry, 1) == "visible-running", "running user app appears in taskbar")
+assert(taskbar["visibility_decision"](taskbar_entry, 2) == "hidden", "app on another workspace is hidden unless pinned")
+assert(taskbar["visibility_decision"](system_taskbar_entry, 1) == "hidden", "system process is not listed as a user app")
+assert(taskbar["visibility_decision"](quarantined_taskbar_entry, 1) == "hidden", "quarantined app is hidden")
+assert(taskbar["window_group"](2) == ["grouped", 2], "multiple app windows are grouped")
+assert(taskbar["window_group"](1) == ["single", 1], "single app window has no group badge")
+make jora_catalog_entry := ["editor", "editor.component.v1", "published", "verified", ["window.open"]]
+assert(taskbar["launch_decision"](jora_catalog_entry, ["window.open"], true) == "jora-compose-request-ready", "verified app may be submitted to Jora after consent")
+assert(taskbar["launch_decision"](jora_catalog_entry, ["window.open"], false) == "consent-required", "Jora composition needs user consent")
+assert(taskbar["launch_decision"](jora_catalog_entry, [], true) == "deny-capability", "Jora request cannot amplify capabilities")
+assert(taskbar["launch_decision"](["unsigned", "bad.component", "published", "unverified", []], [], true) == "reject-catalog-entry", "unverified catalogue entry is rejected")
+
+# Application sandbox policy stays fail-closed and non-executing.
+make app_manifest := ["editor", "1.0.0", "verified", "trusted", 67108864, 50, "vfs-root-app-41", ["fs.read", "fs.write", "network.client"]]
+make weak_manifest := ["unsigned", "1.0.0", "unverified", "untrusted", 67108864, 50, "vfs-root-weak", []]
+assert(app_sandbox["manifest_valid"](app_manifest), "signed app manifest is valid")
+assert(not app_sandbox["manifest_valid"](weak_manifest), "unsigned app manifest is rejected")
+assert(app_sandbox["admission_decision"](app_manifest, ["fs.read", "fs.write", "network.client"], [134217728, 75]) == "admit-policy-only", "app passes bounded policy admission")
+assert(app_sandbox["admission_decision"](app_manifest, ["fs.read"], [134217728, 75]) == "reject-capability-amplification", "app requires explicit capability grants")
+assert(app_sandbox["filesystem_access_decision"](app_manifest, "vfs-root-app-41", "read", ["fs.read"]) == "allow-policy-only", "read access stays inside app VFS root")
+assert(app_sandbox["filesystem_access_decision"](app_manifest, "vfs-root-other", "read", ["fs.read"]) == "deny-outside-sandbox-root", "foreign VFS root is denied")
+assert(app_sandbox["filesystem_access_decision"](app_manifest, "vfs-root-app-41", "write", ["fs.read"]) == "deny-capability", "write requires its own capability")
+assert(app_sandbox["network_access_decision"](app_manifest, ["network.client"], false) == "consent-required", "network requires explicit user consent")
+assert(app_sandbox["network_access_decision"](app_manifest, ["network.client"], true) == "allow-policy-only", "network policy requires consent and grant")
+assert(app_sandbox["permission_request_decision"]("camera.capture", [], false) == "consent-required", "permission request is not silently granted")
+assert(app_sandbox["permission_request_decision"]("camera.capture", [], true) == "consent-recorded-awaiting-persisted-grant", "consent still needs a persisted grant")
+make child_manifest := ["editor-preview", "1.0.0", "verified", "trusted", 16777216, 20, "vfs-root-child-41", ["fs.read"]]
+assert(app_sandbox["child_manifest_valid"](app_manifest, child_manifest), "child receives narrower capability and resource budget")
+make overprivileged_child := ["editor-admin", "1.0.0", "verified", "trusted", 134217728, 80, "vfs-root-child-admin", ["fs.read", "driver.write"]]
+assert(not app_sandbox["child_manifest_valid"](app_manifest, overprivileged_child), "child cannot amplify capability or resource budget")
+assert(app_sandbox["execution_boundary"]() == "policy-only-no-execution", "policy does not claim process isolation")
+
+# Jora workspace graph is checked before the external composer receives it.
+make workspace_components := [
+    ["terminal", "tile", ["window.open"], "trusted"],
+    ["editor", "tile", ["window.open"], "trusted"],
+    ["files", "stack", ["fs.read"], "trusted"]
+]
+make workspace_edges := [["terminal", "editor"], ["editor", "files"]]
+make workspace_request := ["dev-space", "Development", "tiling", "latency", workspace_components, workspace_edges, 8]
+assert(workspace["workspace_request_valid"](workspace_request, ["window.open", "fs.read"]), "ordered Jora workspace graph is valid")
+assert(workspace["composition_decision"](workspace_request, ["window.open", "fs.read"]) == "jora-compose-request-ready", "valid graph is passed to Jora boundary")
+make cyclic_workspace := ["dev-space", "Development", "tiling", "latency", workspace_components, [["terminal", "editor"], ["files", "terminal"]], 8]
+assert(not workspace["workspace_request_valid"](cyclic_workspace, ["window.open", "fs.read"]), "back edge is rejected as cyclic")
+make untrusted_workspace := ["unsafe", "Unsafe", "floating", "modularity", [["terminal", "tile", ["window.open"], "untrusted"]], [], 1]
+assert(not workspace["workspace_request_valid"](untrusted_workspace, ["window.open"]), "untrusted component is rejected")
+assert(workspace["profile_switch_decision"](true, false, true) == "save-required", "profile switch preserves dirty app state")
+assert(workspace["profile_switch_decision"](true, true, false) == "services-not-ready", "profile switch waits for target services")
+assert(workspace["profile_switch_decision"](true, true, true) == "switch-transaction-ready", "profile switch is transaction-ready")
+
+# Semantic noir/gold theme tokens and safe theme admission.
+assert(theme["semantic_role_valid"]("canvas"), "semantic canvas token exists")
+assert(theme["semantic_color"]("canvas") == "#050505", "canvas uses noir base")
+assert(theme["semantic_color"]("shell") == "#070707", "shell uses noir surface")
+assert(theme["semantic_color"]("accent") == "#FFD700", "gold is a semantic accent")
+assert(theme["semantic_color"]("status.success") == "#22C55E", "success has a semantic token")
+assert(theme["semantic_color"]("status.error") == "#EF4444", "error has a semantic token")
+assert(theme["semantic_color"]("status.info") == "#60A5FA", "information has a semantic token")
+assert(theme["contrast_pair_valid"]("text.primary", "canvas"), "primary text has an approved canvas pairing")
+assert(not theme["contrast_pair_valid"]("text.muted", "status.error"), "status colors are not generic text backgrounds")
+assert(theme["theme_mode_valid"]("high_contrast"), "high contrast mode is recognised")
+assert(not theme["theme_mode_valid"]("neon"), "unknown theme mode is rejected")
+assert(theme["theme_change_decision"]("dark", true, true) == "theme-change-transaction-ready", "verified theme is admitted transactionally")
+assert(theme["theme_change_decision"]("dark", false, true) == "reject-unverified-theme", "unverified theme package is rejected")
+assert(theme["palette_color"]("navigation") == "#FFD700", "legacy navigation token maps to semantic gold")
+
 emit "DUCKOS_REAPER_CONTRACTS_OK"
