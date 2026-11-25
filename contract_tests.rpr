@@ -209,7 +209,9 @@ make history_row_a := history["append_revision"]([history_root], 2, 1, "main", "
 make history_row_b := history["append_revision"](history_row_a[1], 3, 1, "experiment", "branch", "alternate")
 assert(history["history_valid"](history_row_b[1]), "branched state history keeps parent links valid")
 assert(history_row_b[0] == "appended", "history branch can be appended from an older revision")
-assert(history["checkout"](history_row_b[1], 3)[1][2] == "experiment", "time travel checks out the selected branch")
+make checkout_result := history["checkout"](history_row_b[1], 3)
+make checkout_row := checkout_result[1]
+assert(checkout_row[2] == "experiment", "time travel checks out the selected branch")
 assert(history["append_revision"](history_row_b[1], 5, 4, "main", "edit", "bad")[0] == "missing-parent", "history refuses unknown parents")
 assert(history["branch_from"](history_row_b[1], 1, "sandbox") == "ready", "history can branch from a prior state")
 
@@ -294,9 +296,11 @@ assert(not process["handle_matches"]([42, 2], init_process), "stale process hand
 assert(process["transition_valid"]("running", "blocked"), "running process can block")
 assert(not process["transition_valid"]("exited", "ready"), "terminal process cannot be revived")
 make blocked_process := process["transition"](init_process, "blocked", nothing)
-assert(blocked_process[0] == "transitioned" and blocked_process[1][4] == "blocked", "process state transition is explicit")
+make blocked_descriptor := blocked_process[1]
+assert(blocked_process[0] == "transitioned" and blocked_descriptor[4] == "blocked", "process state transition is explicit")
 make exit_process := process["transition"](init_process, "exited", 0)
-assert(exit_process[0] == "transitioned" and exit_process[1][9] == 0, "exit code is retained")
+make exited_descriptor := exit_process[1]
+assert(exit_process[0] == "transitioned" and exited_descriptor[9] == 0, "exit code is retained")
 assert(process["transition"](init_process, "exited", nothing)[0] == "missing-exit-code", "terminal transition requires an exit code")
 make process_table := [init_process]
 assert(process["table_valid"](process_table), "process table validates unique process IDs")
@@ -338,7 +342,9 @@ assert(interrupts["dispatch_policy"](timer_irq, [48, true, 1, 5, true]) == "defe
 assert(interrupts["dispatch_policy"](timer_irq, [48, true, 0, 255, false]) == "untrusted-source", "untrusted interrupt source is rejected")
 assert(interrupts["acknowledge"](timer_irq, "timer", ["interrupt.ack"]) == "acknowledged", "registered handler can acknowledge its route")
 assert(interrupts["acknowledge"](timer_irq, "other", ["interrupt.ack"]) == "wrong-handler", "unregistered handler cannot acknowledge another route")
-assert(interrupts["set_mask"](timer_irq, true)[1][5], "interrupt mask transition is explicit")
+make masked_irq := interrupts["set_mask"](timer_irq, true)
+make masked_route := masked_irq[1]
+assert(masked_route[5], "interrupt mask transition is explicit")
 
 # Endpoint messages have bounded capacity, monotonically increasing sequence IDs and endpoint ownership.
 make endpoint_created := ipc_endpoint["create"](7, 42, 2, 256, "ipc.send")
@@ -347,7 +353,8 @@ make endpoint_sent := ipc_endpoint["send"](endpoint_created[1], 43, ["ipc.send"]
 assert(endpoint_sent[0] == "sent" and endpoint_sent[2] == 1, "IPC send allocates a sequence number")
 assert(ipc_endpoint["send"](endpoint_sent[1], 43, ["ipc.send"], ["large", 512, "x"])[0] == "message-limit", "IPC rejects oversized messages")
 make endpoint_received := ipc_endpoint["receive"](endpoint_sent[1], 42, ["ipc.receive"])
-assert(endpoint_received[0] == "received" and endpoint_received[2][0] == 1, "endpoint owner receives FIFO message")
+make received_envelope := endpoint_received[2]
+assert(endpoint_received[0] == "received" and received_envelope[0] == 1, "endpoint owner receives FIFO message")
 assert(ipc_endpoint["receive"](endpoint_received[1], 42, ["ipc.receive"])[0] == "empty", "empty endpoint reports a stable state")
 assert(ipc_endpoint["receive"](endpoint_sent[1], 99, ["ipc.receive"])[0] == "denied", "foreign process cannot receive endpoint messages")
 
@@ -377,12 +384,17 @@ assert(service_lifecycle["exit_decision"](1, 2, 2) == ["failed", 2], "service re
 make primary_display := ["display0", 0, 0, 1920, 1080, 100, true]
 make lost_display_window := ["w1", 42, "disconnected", 3000, 3000, 1280, 720, "normal", true]
 make restored_window := window_manager["restore_display"](lost_display_window, [primary_display])
-assert(restored_window[0] == "clamped" and restored_window[1][2] == "display0", "window moves to the remaining primary display")
-assert(restored_window[1][3] == 640 and restored_window[1][4] == 360, "restored window stays inside display work area")
-assert(window_manager["move_keyboard"](restored_window[1], primary_display, -16, 16)[1][3] == 624, "keyboard move uses deterministic bounded steps")
+make restored_descriptor := restored_window[1]
+assert(restored_window[0] == "clamped" and restored_descriptor[2] == "display0", "window moves to the remaining primary display")
+assert(restored_descriptor[3] == 640 and restored_descriptor[4] == 360, "restored window stays inside display work area")
+make moved_result := window_manager["move_keyboard"](restored_descriptor, primary_display, -16, 16)
+make moved_descriptor := moved_result[1]
+assert(moved_descriptor[3] == 624, "keyboard move uses deterministic bounded steps")
 make second_window := ["w2", 43, "display0", 10, 10, 500, 400, "normal", true]
 make focused_windows := window_manager["focus_order"]([restored_window[1], second_window], "w1")
-assert(focused_windows[0] == "focused" and focused_windows[1][size(focused_windows[1]) - 1][0] == "w1", "focus order brings selected window to the front")
+make focused_list := focused_windows[1]
+make focused_last := focused_list[size(focused_list) - 1]
+assert(focused_windows[0] == "focused" and focused_last[0] == "w1", "focus order brings selected window to the front")
 
 # Package installation is staged, health-checked and reversible.
 make demo_manifest := ["org.duck.demo", "1.0.0", "x86_64", 1, "DuckOrg", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", true, ["storage.read"], 1024, "apps/org.duck.demo/main.rpr"]
@@ -410,9 +422,11 @@ assert(limine_map["memory_type"](99)[0] == 0, "unknown memory map type is reject
 make limine_boot_regions := [[0, 0, 0, 4096, 0], [0, 4096, 0, 4096, 5], [0, 8192, 0, 4096, 7]]
 make duck_boot_regions := limine_map["translate_map"](limine_boot_regions)
 assert(duck_boot_regions[0] == "translated" and size(duck_boot_regions[1]) == 3, "Limine memory map types convert to bounded DuckOS regions")
-assert(duck_boot_regions[1][1][4] == 2 and duck_boot_regions[1][1][5], "bootloader memory is not released during initial handoff")
-assert(limine_map["reclaim_policy"](duck_boot_regions[1][1], false) == "retain-reserved", "bootloader memory is retained while boot responses remain live")
-assert(limine_map["reclaim_policy"](duck_boot_regions[1][1], true) == "reclaim-eligible", "bootloader memory becomes eligible only after consumers release responses")
+make translated_regions := duck_boot_regions[1]
+make bootloader_region := translated_regions[1]
+assert(bootloader_region[4] == 2 and bootloader_region[5], "bootloader memory is not released during initial handoff")
+assert(limine_map["reclaim_policy"](bootloader_region, false) == "retain-reserved", "bootloader memory is retained while boot responses remain live")
+assert(limine_map["reclaim_policy"](bootloader_region, true) == "reclaim-eligible", "bootloader memory becomes eligible only after consumers release responses")
 assert(limine_map["translate_region"]([0, 0, 0, 0, 9])[0] == "reject", "unknown Limine region types are not translated")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"
