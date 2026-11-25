@@ -24,6 +24,16 @@ The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and
 
 Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. The panels provide bounded local browser interactions, share the existing window manager and profile storage, and do not claim native service implementations.
 
+## Versioned application categories
+
+Mora reads seven architectural categories from `mora/categories.v1.json` and application entries from `mora/apps.json`. The application registry is versioned as **1.5.0**; every built-in app and federated workbench has one canonical `category`, its original product/domain label is retained in `domain`, and `required_capabilities` is explicit. The JSON contracts are described by `schemas/mora-categories.v1.schema.json` and `schemas/mora-application-manifest.v1.schema.json`.
+
+The category groups are **System Core**, **Security & Contracts**, **Development & Federation**, **Mora Desktop Shell**, **Media & Processing**, **Network & Communication** and **Utilities**. Mora builds the launcher groups and category filters from those local manifests at startup. Unknown categories, duplicate IDs, missing launcher tiles and capability mismatches stop the registry from being applied; the previous static launcher remains as a fallback.
+
+System Core and Security & Contracts are privileged categories. Their manifests require `duckos.system.core.inspect` and `duckos.security.contracts.audit` respectively. The new Reaper policy in `duckos/security/app_registry.rpr` rejects native admission when the manifest is invalid, the category is unknown, or any category/application grant is missing. An allow result is **policy-only** and never starts a process or substitutes for kernel validation.
+
+**Stage 1 boundary:** the native capability broker, syscall enforcement, process manager and native Mora launcher are not yet implemented. Consequently privileged native launches remain unavailable even when a category is visible. Existing Mora tiles open only local browser panels; those panels do not receive kernel privileges, native process access or real device telemetry. Network, audio, drivers, storage and other native services remain separate implementation milestones.
+
 ## Run and validate
 
 Open **mora/index.html** directly in a modern browser. The desktop itself requires no network request. Some browser APIs such as Web Crypto may require a secure context.

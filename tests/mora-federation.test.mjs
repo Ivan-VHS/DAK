@@ -20,7 +20,7 @@ test("Mora launcher exposes every pinned ecosystem workbench", () => {
   assert.equal(registry.policy.external_process_launch, false);
   assert.equal(registry.policy.auto_execute, false);
   assert.deepEqual(registry.workbenches.map((entry) => entry.id), ids);
-  assert.equal(appRegistry.schema_version, "1.4.0");
+  assert.equal(appRegistry.schema_version, "1.5.0");
   assert.deepEqual(appRegistry.ecosystem_workbenches.map((entry) => entry.id), ids);
   assert.ok(appRegistry.ecosystem_workbenches.every((entry) => entry.auto_execute === false));
   for (const entry of registry.workbenches) {
@@ -54,5 +54,5 @@ test("release metadata declares firmware and application boundaries honestly", (
   assert.equal(release.desktop.external_process_launch, false);
   assert.equal(release.projects.length, 4);
   assert.equal(release.release_policy.artificial_size_padding, false);
-  assert.ok(serviceWorker.includes("mora-shell-v9-ecosystem"));
+  assert.ok(serviceWorker.includes("mora-shell-v10-categories"));
 });
