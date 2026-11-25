@@ -115,3 +115,8 @@ Each gate needs a conformance suite and target hardware or emulator evidence. Do
 ## DABI64 Desktop Host v1
 
 The host-side foundation now has a C11 DIPC v1 framing/sequence validator, bounded event ring and peer-identity-bound capability-broker core. Native integration is deliberately incomplete: the process model and user address spaces are a separate gate, and the trusted peer-identity callback must be implemented by a kernel endpoint or OS credential adapter. See DABI64_DESKTOP_HOST_V1.md.
+
+
+## Software framebuffer compositor v1
+
+DuckOS now has a host-testable C11 CPU compositor core for validated 32-bpp output targets, bounded app surfaces, clipped drawing, alpha blending and stable Z-order. It does not yet own surface pages, receive kernel input, schedule a desktop process or present through a GPU. See FRAMEBUFFER_COMPOSITOR_V1.md.
