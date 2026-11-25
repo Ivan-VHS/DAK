@@ -206,7 +206,7 @@ QPushButton* actionButton(const QString& text, const QString& objectName = {})
 {
     auto* button = new QPushButton(text);
     button->setCursor(Qt::PointingHandCursor);
-    button->setMinimumHeight(42);
+    button->setMinimumHeight(44);
     if (!objectName.isEmpty()) button->setObjectName(objectName);
     return button;
 }
@@ -331,8 +331,10 @@ public:
             QLabel[role="muted"] { color: #A6A6A6; }
             QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QPushButton { color: #FFFFFF; background: #242424; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 14px; }
-            QPushButton:hover { border-color: #FFD400; background: #2B281A; }
+            QPushButton:hover { border-color: #FFD400; background: #242424; }
+            QPushButton:focus { border: 2px solid #FFE45C; }
             QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; selection-background-color: #3A3100; }
+            QPlainTextEdit:focus, QTreeWidget:focus { border: 2px solid #FFE45C; }
             QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 7px; }
         )")));
         buildContent();
