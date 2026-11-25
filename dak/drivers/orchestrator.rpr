@@ -15,7 +15,7 @@ export craft device_valid(device) {
     when device[0] == "" or device[1] == "" or device[2] < 0 or device[3] <= 0 or device[4] < 0 {
         yield false
     }
-    when device[5] != true and device[5] != false {
+    when kind(device[5]) != "boolean" {
         yield false
     }
     yield true
