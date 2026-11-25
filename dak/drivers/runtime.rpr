@@ -1,0 +1,103 @@
+# DAK Driver Runtime v1 — admission, lifecycle and safe-unload policy.
+# No PCI/USB enumeration, module mapping, IRQ routing, MMIO or DMA occurs here.
+
+import "abi.rpr" as abi
+import "orchestrator.rpr" as orchestrator
+import "../platform/targets.rpr" as targets
+
+# Driver: [id, abi, bus, architecture, capabilities, publisher, signature_state, payload_bytes].
+export craft descriptor_valid(driver) {
+    when size(driver) != 8 {
+        yield false
+    }
+    when driver[0] == "" or driver[1] <= 0 or driver[2] == "" {
+        yield false
+    }
+    when not targets["architecture_known"](driver[3]) {
+        yield false
+    }
+    when size(driver[4]) > 64 or driver[5] == "" {
+        yield false
+    }
+    when driver[6] != "verified" and driver[6] != "unverified" and driver[6] != "revoked" {
+        yield false
+    }
+    when driver[7] <= 0 or driver[7] > 268435456 {
+        yield false
+    }
+    yield true
+}
+
+# Device follows DuckDriver's six-field resource descriptor.
+export craft admission(driver, device, target_arch, expected_abi, supported_buses, grants) {
+    when not descriptor_valid(driver) or not orchestrator["device_valid"](device) {
+        yield "reject-descriptor"
+    }
+    when driver[6] == "revoked" {
+        yield "reject-revoked"
+    }
+    when driver[6] != "verified" {
+        yield "reject-signature"
+    }
+    when driver[5] == "" or driver[3] != target_arch {
+        yield "reject-provenance-or-architecture"
+    }
+    when driver[2] != device[1] {
+        yield "reject-device-match"
+    }
+
+    make request := [driver[0], driver[1], driver[2], driver[4]]
+    when abi["load_policy"](request, expected_abi, supported_buses, grants) != "descriptor-approved" {
+        yield "reject-capability-or-abi"
+    }
+    yield "admit-isolated-plan-only"
+}
+
+# candidate -> verified -> admitted -> mapped -> initialized -> running.
+# stopping/stopped is a separate, quiesced shutdown path.
+export craft transition_valid(current, next) {
+    when current == "candidate" and next == "verified" {
+        yield true
+    }
+    when current == "verified" and next == "admitted" {
+        yield true
+    }
+    when current == "admitted" and next == "mapped" {
+        yield true
+    }
+    when current == "mapped" and next == "initialized" {
+        yield true
+    }
+    when current == "initialized" and next == "running" {
+        yield true
+    }
+    when current == "running" and next == "stopping" {
+        yield true
+    }
+    when current == "stopping" and next == "stopped" {
+        yield true
+    }
+    when current == "candidate" and next == "rejected" {
+        yield true
+    }
+    when (current == "verified" or current == "admitted" or current == "mapped" or current == "initialized") and next == "failed" {
+        yield true
+    }
+    yield false
+}
+
+export craft unload_policy(state, irqs_quiesced, dma_stopped, device_quiesced) {
+    when state != "running" and state != "stopping" {
+        yield "reject-state"
+    }
+    when not irqs_quiesced {
+        yield "reject-irq-active"
+    }
+    when not dma_stopped {
+        yield "reject-dma-active"
+    }
+    when not device_quiesced {
+        yield "reject-device-active"
+    }
+    yield "unload-plan-only"
+}
