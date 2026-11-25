@@ -1092,6 +1092,7 @@ button:disabled, input:disabled, select:disabled { cursor: not-allowed; opacity:
 }
 @media (max-width: 760px) {
   .statusbar { height: 52px; padding-inline: 14px; gap: 12px; }
+  .window-layer { inset: 52px 0 0; }
   .system-status { gap: 9px; }
   .desktop-content { width: calc(100% - 28px); padding-top: 28px; padding-bottom: 104px; }
   .app-window { border-radius: 12px; }
