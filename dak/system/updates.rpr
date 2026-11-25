@@ -6,7 +6,13 @@ import "../platform/targets.rpr" as targets
 # Manifest: [channel, major, minor, patch, architecture, sequence,
 #            payload_bytes, digest, publisher, signature_state].
 export craft manifest_valid(manifest) {
-    when size(manifest) != 10 {
+    when kind(manifest) != "list" or size(manifest) != 10 {
+        yield false
+    }
+    when kind(manifest[0]) != "text" or kind(manifest[1]) != "number" or kind(manifest[2]) != "number" or kind(manifest[3]) != "number" or kind(manifest[4]) != "text" {
+        yield false
+    }
+    when kind(manifest[5]) != "number" or kind(manifest[6]) != "number" or kind(manifest[7]) != "text" or kind(manifest[8]) != "text" or kind(manifest[9]) != "text" {
         yield false
     }
     when manifest[0] == "" or manifest[1] < 0 or manifest[2] < 0 or manifest[3] < 0 {
@@ -28,10 +34,16 @@ export craft manifest_valid(manifest) {
 }
 
 export craft version_newer(candidate, current) {
-    when size(candidate) != 3 or size(current) != 3 {
+    when kind(candidate) != "list" or kind(current) != "list" or size(candidate) != 3 or size(current) != 3 {
+        yield false
+    }
+    when kind(candidate[0]) != "number" or kind(candidate[1]) != "number" or kind(candidate[2]) != "number" {
         yield false
     }
     when candidate[0] < 0 or candidate[1] < 0 or candidate[2] < 0 {
+        yield false
+    }
+    when kind(current[0]) != "number" or kind(current[1]) != "number" or kind(current[2]) != "number" {
         yield false
     }
     when current[0] < 0 or current[1] < 0 or current[2] < 0 {
@@ -53,6 +65,9 @@ export craft version_newer(candidate, current) {
 }
 
 export craft admission(manifest, target_arch, current_version, current_sequence) {
+    when kind(target_arch) != "text" or kind(current_sequence) != "number" {
+        yield "reject-manifest"
+    }
     when not manifest_valid(manifest) {
         yield "reject-manifest"
     }
