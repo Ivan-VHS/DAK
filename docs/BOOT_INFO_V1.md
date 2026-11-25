@@ -1,7 +1,7 @@
 # DuckOS Boot Handoff Contract v1
 
 **Author / project direction:** Ivan-VHS  
-**Implementation status:** host-testable C11 contract. It is not a bootloader, kernel or bootable image.
+**Implementation status:** host-testable C11 contract and experimental x86_64 Limine stage-0 adapter. The image is firmware-bootable when the BIOS/UEFI QEMU gate passes; it is not a complete kernel or usable desktop OS.
 
 ## Purpose
 
@@ -12,6 +12,9 @@ Implemented files:
 - `foundation/boot_info.h` — v1 structures, memory-region types and validation status codes.
 - `foundation/boot_info.c` — range, memory-map, image-overlap and framebuffer validation.
 - `tests/test_boot_info.c` — host-side positive and negative fixtures.
+- `kernel/boot/entry.c` — freestanding x86_64 Limine entry, COM1 diagnostics and basic 32-bit RGB framebuffer output.
+- `kernel/linker.ld` — high-half ELF layout with separate read-only, executable and writable load segments.
+- `boot/build-iso.sh` — pinned hybrid BIOS/UEFI ISO build; `boot/test-qemu.sh` — serial-marker boot test.
 
 ## Handoff record
 
@@ -38,7 +41,9 @@ The validator rejects:
 6. partially populated or inconsistent framebuffer metadata;
 7. unsupported framebuffer depth, undersized pitch or undersized framebuffer extent;
 8. empty, oversized, unsorted, overlapping or malformed memory maps;
-9. unknown memory-region types.
+9. unknown memory-region types;
+10. a kernel or initramfs range not fully covered by reserved memory-map entries;
+11. a framebuffer range not fully covered by MMIO memory-map entries.
 
 Memory-map entries must be sorted by ascending base and must not overlap. Gaps are allowed. The caller must map the handoff record and array before calling the validator; stored physical addresses are validated but never dereferenced by this routine.
 
@@ -48,15 +53,15 @@ The version identifies the semantics of the record. `struct_size` allows a futur
 
 ## Deliberate non-goals
 
-This contract does not yet:
+This v1 handoff and stage-0 entry do not yet:
 
-- enter long mode or establish CPU page tables;
-- install an interrupt descriptor table;
-- allocate physical or virtual memory;
-- start a scheduler or process;
-- mount an initramfs;
-- draw to the framebuffer;
-- probe or initialize hardware.
+- build or manage kernel page tables or a physical/virtual page allocator;
+- install an interrupt descriptor table, APIC or timer;
+- allocate general-purpose kernel memory;
+- start a scheduler, process, thread or syscall runtime;
+- mount an initramfs or filesystem;
+- provide a production framebuffer console, compositor or display driver;
+- probe and initialise PCI/USB/ACPI devices or load drivers.
 
 Those steps require a selected boot protocol and CPU target, recorded as architecture decisions before the kernel entry implementation.
 
@@ -75,3 +80,8 @@ cmake -S . -B build-sanitize -DDUCKOS_ENABLE_SANITIZERS=ON
 cmake --build build-sanitize --parallel
 ctest --test-dir build-sanitize --output-on-failure
 ```
+
+
+## Bootable stage-0 image
+
+The native adapter is built into the experimental x86_64 ISO using the instructions in [BOOTABLE_IMAGE.md](BOOTABLE_IMAGE.md). Limine is pinned by version and SHA-256, and the upstream protocol header retains its 0BSD notice. The adapter rejects unsupported Limine base revision, missing required responses, malformed map data, reserved-range violations and framebuffer/MMIO inconsistencies. It reports the handoff and then halts; it does not transfer into an init process or claim that the remaining kernel subsystems exist.
