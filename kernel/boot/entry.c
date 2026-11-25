@@ -4,6 +4,8 @@
 #include "boot_info.h"
 #include "idt.h"
 #include "frame_allocator.h"
+#include "page_table.h"
+#include "virtual_memory.h"
 #include "limine.h"
 #include "interrupts.h"
 
@@ -68,6 +70,7 @@ static volatile uint64_t requests_end[2] = LIMINE_REQUESTS_END_MARKER;
 static duckos_memory_region boot_regions[MAX_BOOT_REGIONS];
 static struct limine_framebuffer *active_framebuffer;
 static duckos_frame_allocator early_frame_allocator;
+static duckos_x86_page_table kernel_page_tables;
 static uint64_t first_frame_phys;
 
 static inline void port_out8(uint16_t port, uint8_t value) {
@@ -259,9 +262,9 @@ static void draw_boot_screen(void) {
     draw_text(28u, 29u, "DUCK OS", 4u, 7u, 7u, 7u);
 
     const uint64_t body_y = fb->height > 140u ? fb->height / 2u - 70u : 8u;
-    draw_centered(body_y, "NATIVE MEMORY READY", 3u, 255u, 212u, 0u);
-    draw_centered(body_y + 70u, "MEMORY MAP VALIDATED", 2u, 90u, 220u, 120u);
-    draw_centered(body_y + 112u, "FRAME ALLOCATOR READY", 2u, 255u, 212u, 0u);
+    draw_centered(body_y, "VIRTUAL MEMORY READY", 3u, 255u, 212u, 0u);
+    draw_centered(body_y + 70u, "FOUR LEVEL PAGING ACTIVE", 2u, 90u, 220u, 120u);
+    draw_centered(body_y + 112u, "KERNEL W^X ENABLED", 2u, 255u, 212u, 0u);
     if (fb->width > 64u && fb->height > 45u) {
         draw_rect(32u, fb->height - 42u, fb->width - 64u, 3u, 255u, 212u, 0u);
     }
@@ -382,7 +385,8 @@ static int initialize_early_memory(uint32_t memory_region_count) {
             &early_frame_allocator,
             boot_regions,
             memory_region_count,
-            0x00100000u
+            0x00100000u,
+            hhdm->offset
         ) != DUCKOS_FRAME_ALLOCATOR_OK) {
         return 0;
     }
@@ -517,6 +521,23 @@ void _start(void) {
         boot_failure("bootstrap physical frame allocation failed");
     }
 
+    struct limine_hhdm_response *hhdm = hhdm_request.response;
+    if (hhdm == NULL ||
+        !duckos_x86_virtual_memory_init(
+            &early_frame_allocator,
+            &kernel_page_tables,
+            &info,
+            boot_regions,
+            hhdm->offset
+        )) {
+        boot_failure("could not build and activate Duck Kernel page tables");
+    }
+    serial_write("DUCKOS_PAGING_OK mode=4level pml4=active root=");
+    serial_hex(kernel_page_tables.root_phys);
+    serial_write(" table_pages=");
+    serial_decimal(kernel_page_tables.table_pages);
+    serial_write("\\n");
+
     serial_write("firmware=");
     serial_decimal(info.flags);
     serial_write(" memory_regions=");
@@ -527,8 +548,10 @@ void _start(void) {
     serial_decimal(info.kernel_size);
     serial_write("\n");
 
-    serial_write("memory=early-frame-allocator page_size=4096 usable_pages=");
+    serial_write("memory=physical-frame-allocator page_size=4096 total_pages=");
     serial_decimal(early_frame_allocator.total_pages);
+    serial_write(" free_pages=");
+    serial_decimal(early_frame_allocator.free_pages);
     serial_write(" allocated_pages=");
     serial_decimal(early_frame_allocator.allocated_pages);
     serial_write(" first_frame_phys=");
@@ -548,6 +571,6 @@ void _start(void) {
         serial_write("framebuffer=unavailable; serial console remains active\n");
     }
 
-    serial_write("DUCKOS_BOOT_OK stage=1 handoff=v1 frames=1 reaper_policy=reference-only\n");
+    serial_write("DUCKOS_BOOT_OK stage=2 handoff=v1 paging=4level reaper_policy=reference-only\n");
     halt_forever();
 }

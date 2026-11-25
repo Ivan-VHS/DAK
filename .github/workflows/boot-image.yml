@@ -1,4 +1,4 @@
-name: DuckOS bootable Stage 1 ISO
+name: DuckOS bootable Stage 2 virtual-memory ISO
 
 on:
   pull_request:
@@ -8,6 +8,7 @@ on:
       - "foundation/**"
       - "tests/test_boot_info.c"
       - "tests/test_frame_allocator.c"
+      - "tests/test_page_table.c"
       - "tests/test_idt.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
@@ -19,6 +20,7 @@ on:
       - "foundation/**"
       - "tests/test_boot_info.c"
       - "tests/test_frame_allocator.c"
+      - "tests/test_page_table.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
   workflow_dispatch:
@@ -32,7 +34,7 @@ concurrency:
 
 jobs:
   bootable-iso:
-    name: Build and boot-test x86_64 ISO
+    name: Build and boot-test x86_64 kernel paging
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -82,7 +84,7 @@ jobs:
       - name: Publish bootable ISO and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: DuckOS-Stage1-x86_64-ISO
+          name: DuckOS-Stage2-VM-x86_64-ISO
           path: |
             build/DuckOS-Stage1-x86_64.iso
             build/DuckOS-Stage1-x86_64.iso.sha256

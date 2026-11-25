@@ -12,6 +12,8 @@ add_library(duckos_boot_contract STATIC
     foundation/boot_info.h
     foundation/frame_allocator.c
     foundation/frame_allocator.h
+    foundation/page_table.c
+    foundation/page_table.h
     foundation/idt.c
     foundation/idt.h
 )
@@ -53,6 +55,15 @@ if(BUILD_TESTING)
         target_compile_options(duckos_frame_allocator_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-frame-allocator COMMAND duckos_frame_allocator_tests)
+
+    add_executable(duckos_page_table_tests tests/test_page_table.c)
+    target_link_libraries(duckos_page_table_tests PRIVATE duckos_boot_contract)
+    if(MSVC)
+        target_compile_options(duckos_page_table_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_page_table_tests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME duckos-x86-page-tables COMMAND duckos_page_table_tests)
 
     add_executable(duckos_idt_tests tests/test_idt.c)
     target_link_libraries(duckos_idt_tests PRIVATE duckos_boot_contract)
