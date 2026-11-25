@@ -779,8 +779,12 @@ public:
         openAppWindow("mora-boost");
         QApplication::processEvents();
 
-        if (nativeWindows < 3) {
-            return fail("The three-window workspace did not create three native top-level windows.");
+        int totalNativeWindows = 0;
+        for (QWidget* widget : QApplication::topLevelWidgets()) {
+            if (widget->property("moraAppId").isValid()) ++totalNativeWindows;
+        }
+        if (nativeWindows < 3 || totalNativeWindows < 7) {
+            return fail("The native workspace and four system experience panels must create seven top-level windows.");
         }
         if (windows_.value("setupup").isNull()
             || !windows_.value("setupup")->findChild<QComboBox*>("setupup-profile")) {
@@ -1319,6 +1323,7 @@ private:
     {
         if (!pageStack_ || index < 0 || index >= pageStack_->count()) return;
         pageStack_->setCurrentIndex(index);
+        if (index == 1) rebuildAppsGrid();
         if (navigationGroup_) {
             if (auto* button = navigationGroup_->button(index)) button->setChecked(true);
         }
