@@ -55,3 +55,4 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 - [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
 - [Implementation status](IMPLEMENTATION_STATUS.md) — current delivered/partial boundaries with source and test evidence.
+- [System services and application experience standard](SYSTEM_SERVICES_AND_APPLICATIONS_STANDARD.md) — lifecycle, least privilege, IPC, resource budgets, app sandboxing, accessibility, focus/notifications, recovery and BAV artifact policy. Reaper contracts are reference policy; native enforcement remains separately gated.
