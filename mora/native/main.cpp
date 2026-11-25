@@ -729,7 +729,7 @@ public:
     explicit MoraWindow(QWidget* parent = nullptr)
         : QMainWindow(parent)
     {
-        setWindowTitle("Mora — DuckOS");
+        setWindowTitle("Mora — Duck");
         setMinimumSize(1120, 720);
         resize(1440, 900);
         loadCatalogue();
