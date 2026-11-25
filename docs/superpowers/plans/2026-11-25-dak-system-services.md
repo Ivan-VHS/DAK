@@ -53,7 +53,7 @@
 - Consumes: `dak/drivers/abi.rpr`, `dak/drivers/orchestrator.rpr`, `dak/platform/targets.rpr`.
 - Produces: `descriptor_valid`, `admission`, `resource_admission`, `transition_valid`, `unload_policy`.
 
-- [x] Test publisher, digest and signature state; device-bus and architecture gates; resource conflicts; lifecycle skips and active DMA.
+- [x] Test publisher, digest and signature state; typed descriptor validation; device-bus and architecture gates; resource conflicts; lifecycle skips and active DMA.
 - [x] Implement admission and safe-unload decision policy; no driver is loaded or mapped.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -67,7 +67,7 @@
 - Consumes: `dak/platform/targets.rpr`, `dak/security/capabilities.rpr`, `dak/storage/vfs.rpr`.
 - Produces: `package_valid`, `dependencies_satisfied`, `paths_valid`, `admission`, `transition_valid`, `remove_policy`.
 
-- [x] Test malformed manifests, publisher/digest fields, dependency absence, dot traversal, embedded POSIX/Windows separators, capability denial and protected/dependent removal.
+- [x] Test malformed manifests and field types, publisher/digest fields, dependency absence, dot traversal, embedded POSIX/Windows separators, capability denial and protected/dependent removal.
 - [x] Implement bounded manifest and transaction policy; no payload is extracted or executed.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -81,7 +81,7 @@
 - Consumes: `dak/platform/targets.rpr`.
 - Produces: `manifest_valid`, `version_newer`, `admission`, `inactive_slot`, `activation_policy`, `transition_valid`, `boot_result_policy`.
 
-- [x] Test signature state, architecture, version/sequence rollback, inactive-slot arming, boot-entry validation, skipped states and failed boot.
+- [x] Test signature state, architecture, version/sequence rollback, inactive-slot arming, boot-entry validation, malformed manifests and skipped states.
 - [x] Implement A/B update and boot-confirmation policy; no slot is written or switched.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
@@ -94,8 +94,7 @@
 **Interfaces:**
 - Produces: `record_valid`, `chain_valid`, `append_policy`.
 
-- [x] Test valid hash-linked events, missing request identity, sequence gaps, broken digest links, bounded capacity and append-only ordering.
-- [x] Test duplicate device-resource conflicts as a mandatory driver-admission gate.
+- [x] Test valid hash-linked events, malformed records, missing request identity, sequence gaps, broken digest links, bounded capacity and append-only ordering.
 - [x] Implement append-intent validation; durable storage and tamper-evident signing remain provider responsibilities.
 - [ ] Verify tree-walk and VM contract results in GitHub Actions.
 
