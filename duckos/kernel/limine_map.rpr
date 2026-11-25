@@ -124,7 +124,7 @@ export craft translate_map(regions) {
         when index > 0 {
             make previous := regions[index - 1]
             when not regions_ordered(previous, region) {
-                yield ["reject", "unsorted-overlapping-or-invalid-region", []]
+                yield ["reject", "unsorted-overlapping-or-invalid-region", empty_regions]
             }
         }
         make result := translate_region(region)
