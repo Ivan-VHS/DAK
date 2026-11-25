@@ -682,6 +682,60 @@ static void sort_and_validate_memory_map(void) {
     }
 }
 
+/*
+ * GOP framebuffers are not guaranteed to have a covering EFI memory
+ * descriptor. Preserve all firmware-described ranges, but add only the
+ * framebuffer portions that are true gaps as explicit MMIO regions.
+ * Existing EFI descriptors intersecting the framebuffer were already split
+ * and classified as MMIO by append_split_region().
+ */
+static void ensure_framebuffer_mmio_coverage(void) {
+    uint64_t framebuffer_end;
+    uint64_t cursor;
+    const uint32_t original_count = gBootInfo.memory_region_count;
+
+    if (gFramebuffer.size == 0u) return;
+    if (gFramebuffer.physical_base > UINT64_MAX - gFramebuffer.size) {
+        fail("framebuffer physical range overflow");
+    }
+    framebuffer_end = gFramebuffer.physical_base + gFramebuffer.size;
+    cursor = gFramebuffer.physical_base;
+
+    for (uint32_t index = 0u; index < original_count && cursor < framebuffer_end; ++index) {
+        const duckos_memory_region *region = &gMemoryRegions[index];
+        uint64_t region_end;
+        if (region->base > UINT64_MAX - region->length) {
+            fail("memory region overflow while covering framebuffer");
+        }
+        region_end = region->base + region->length;
+        if (region_end <= cursor) continue;
+
+        if (region->base > cursor) {
+            const uint64_t gap_end =
+                region->base < framebuffer_end ? region->base : framebuffer_end;
+            if (!append_memory_region(cursor, gap_end - cursor, DUCKOS_MEMORY_MMIO)) {
+                fail("DuckOS Boot Info memory-map capacity exceeded by framebuffer MMIO");
+            }
+            cursor = gap_end;
+            if (cursor >= framebuffer_end) break;
+        }
+
+        if (region->base <= cursor && region_end > cursor) {
+            if (region->type != DUCKOS_MEMORY_MMIO) {
+                fail("framebuffer overlaps a non-MMIO EFI memory descriptor");
+            }
+            cursor = region_end < framebuffer_end ? region_end : framebuffer_end;
+        }
+    }
+
+    if (cursor < framebuffer_end &&
+        !append_memory_region(cursor, framebuffer_end - cursor, DUCKOS_MEMORY_MMIO)) {
+        fail("DuckOS Boot Info memory-map capacity exceeded by framebuffer MMIO");
+    }
+
+    sort_and_validate_memory_map();
+}
+
 static uint64_t read_max_physical_end(const EFI_MEMORY_DESCRIPTOR *descriptors,
                                       UINTN map_size, UINTN descriptor_size) {
     uint64_t maximum = 0u;
@@ -736,6 +790,7 @@ static void build_memory_map(const EFI_MEMORY_DESCRIPTOR *descriptors,
         }
     }
     sort_and_validate_memory_map();
+    ensure_framebuffer_mmio_coverage();
 }
 
 static uint64_t allocate_table_page(void) {
