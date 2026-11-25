@@ -2,6 +2,8 @@
 
 **A Reaper-first operating-system project with a local-first desktop shell and a federated native-tooling ecosystem.**
 
+**Project evolution:** [10-rung ladder](docs/PROJECT_EVOLUTION_LADDER.md) · [Current rung record](.github/project-ladder.v1.json)
+
 <p align="center">
   <img src="assets/readme/duckos-overview.svg" alt="DuckOS architecture overview: Stage 1 boot, Reaper policy contracts and the separate Mora host shell" width="100%">
 </p>

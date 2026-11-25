@@ -4,6 +4,8 @@ DuckOS hosts the canonical shared standards for the Ivan-VHS project ecosystem. 
 
 ## Documentation and delivery
 
+- [Project Evolution Ladder](PROJECT_EVOLUTION_LADDER.md) — ten cumulative, evidence-led project maturity rungs and repository-owned assessment records.
+
 - [Unified documentation and semantics](UNIFIED_DOCUMENTATION_STANDARD.md) — maturity, evidence, terminology, localization and acceptance.
 - [Engineering evolution framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — 20 domains, 40 practices, coordinated directives and capability-completeness gates.
 - [Repository-wide implementation directives](REPOSITORY_EVOLUTION_DIRECTIVES.md) — cross-project execution and adoption model.
