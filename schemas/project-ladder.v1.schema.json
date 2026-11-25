@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Ivan-VHS/DuckOS/main/schemas/project-ladder.v1.schema.json",
+  "title": "Ivan-VHS Project Evolution Ladder record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "project",
+    "repository",
+    "current_rung",
+    "current_name",
+    "assessment",
+    "assessment_date",
+    "assessment_basis",
+    "evidence",
+    "next_rung",
+    "next_gate",
+    "semver_independent"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ivan-vhs.project-ladder.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^Ivan-VHS/[A-Za-z0-9._-]+$"
+    },
+    "current_rung": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "current_name": {
+      "enum": [
+        "Genesis",
+        "Foundation",
+        "Evolution",
+        "Ascension",
+        "Vanguard",
+        "Frontier",
+        "Dominion",
+        "Apex",
+        "Zenith",
+        "Singularity"
+      ]
+    },
+    "assessment": {
+      "enum": [
+        "provisional",
+        "verified"
+      ]
+    },
+    "assessment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "assessment_basis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "claim",
+          "verification"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification": {
+            "enum": [
+              "documentation_only",
+              "source_reviewed",
+              "tests_passed",
+              "ci_passed",
+              "artifact_verified"
+            ]
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_rung": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 10
+    },
+    "next_gate": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "semver_independent": {
+      "const": true
+    }
+  }
+}
