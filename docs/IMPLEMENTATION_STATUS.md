@@ -17,6 +17,16 @@ Updated: 2026-11-25
 
 Peer applications and host tools remain user-space programs. None is a kernel module or an executable that the Stage 1 kernel can start.
 
+## Kernel Runtime — x86-64 GDT/TSS/IST bootstrap
+
+- [x] Owned seven-entry GDT with kernel/user code and data descriptors plus a 64-bit available-TSS descriptor.
+- [x] One bootstrap CPU TSS with RSP0 and dedicated IST1 double-fault, IST2 NMI and IST3 page-fault stacks.
+- [x] IDT exception gates select the dedicated IST stacks; host tests verify descriptor layout and vector-to-IST routing.
+- [x] Boot installs GDT/TSS before the exception IDT; BIOS/UEFI build remains independently gated.
+- [ ] Per-CPU GDT/TSS allocation and AP startup are not implemented.
+- [ ] Ring 3 entry/return, syscall stack switching, external interrupts, PIC/APIC/IOAPIC routing and timer scheduling remain pending.
+- [ ] Exception handlers remain fatal diagnostics; dedicated stacks do not yet provide recovery.
+
 ## Newly specified contracts — 2026-11-25
 
 - [x] DuckOS interaction and application ergonomics standard: normative requirements for motor/visual/cognitive interaction, keyboard, focus, accessibility, windowing, errors, recovery, privacy and usability evidence. This is a specification, not proof that native desktop services meet it.
