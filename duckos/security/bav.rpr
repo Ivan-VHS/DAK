@@ -1,8 +1,9 @@
 # BAV antivirus artifact and scan policy.
-# A .bav file is signed evidence metadata, never an executable or a live signature database.
+# A .bav file is signed evidence metadata, never an executable or live signature database.
+# signature_verified is supplied by the trusted native verifier, never read from the artifact.
 
-export craft artifact_valid(artifact) {
-    when size(artifact) != 8 {
+export craft artifact_valid(artifact, signature_verified) {
+    when size(artifact) != 10 {
         yield false
     }
     when artifact[0] != "DUCKBAV1" {
@@ -14,7 +15,10 @@ export craft artifact_valid(artifact) {
     when artifact[2] != 1 or artifact[3] == "" or artifact[4] == "" {
         yield false
     }
-    when artifact[5] != "verified" or artifact[6] <= 0 or artifact[7] < 0 {
+    when artifact[5] != "ed25519" or artifact[6] == "" or artifact[7] == "" {
+        yield false
+    }
+    when artifact[8] <= 0 or artifact[9] < 0 or not signature_verified {
         yield false
     }
     yield true
