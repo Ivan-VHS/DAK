@@ -7,7 +7,13 @@ import "../platform/targets.rpr" as targets
 
 # Driver: [id, abi, bus, architecture, capabilities, publisher, digest, signature_state, payload_bytes].
 export craft descriptor_valid(driver) {
-    when size(driver) != 9 {
+    when kind(driver) != "list" or size(driver) != 9 {
+        yield false
+    }
+    when kind(driver[0]) != "text" or kind(driver[1]) != "number" or kind(driver[2]) != "text" or kind(driver[3]) != "text" {
+        yield false
+    }
+    when kind(driver[4]) != "list" or kind(driver[5]) != "text" or kind(driver[6]) != "text" or kind(driver[7]) != "text" or kind(driver[8]) != "number" {
         yield false
     }
     when driver[0] == "" or driver[1] <= 0 or driver[2] == "" {
@@ -30,7 +36,7 @@ export craft descriptor_valid(driver) {
 
 # Device follows DuckDriver's six-field resource descriptor.
 export craft resource_admission(device, registered_devices) {
-    when not orchestrator["device_valid"](device) {
+    when kind(registered_devices) != "list" or not orchestrator["device_valid"](device) {
         yield "reject-invalid-device"
     }
     each registered in registered_devices {
@@ -43,6 +49,9 @@ export craft resource_admission(device, registered_devices) {
 
 # Resource reservation is part of admission, never an optional caller-side check.
 export craft admission(driver, device, registered_devices, target_arch, expected_abi, supported_buses, grants) {
+    when kind(supported_buses) != "list" or kind(grants) != "list" {
+        yield "reject-descriptor"
+    }
     when not descriptor_valid(driver) or not orchestrator["device_valid"](device) {
         yield "reject-descriptor"
     }
