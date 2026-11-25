@@ -145,3 +145,20 @@ assert(nexus["activation_gate"](true, true, false, true, true) == "blocked-authe
 assert(nexus["activation_gate"](true, true, true, false, true) == "blocked-kernel-capabilities", "service activation requires kernel-enforced capabilities")
 assert(nexus["activation_gate"](true, true, true, true, false) == "blocked-implementation-evidence", "service activation requires implementation tests")
 assert(nexus["activation_gate"](true, true, true, true, true) == "eligible-for-separate-review", "complete prerequisites permit review but never automatic launch")
+
+# Verify each declared NEXUS service descriptor against its exact dependency set.
+make memory_forge_descriptor := ["memory_forge", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["kernel_core"], 16384, 15000]
+make vector_gateway_descriptor := ["vector_gateway", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["network_stack", "security_module"], 65536, 30000]
+make pixel_pipeline_descriptor := ["pixel_pipeline", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["graphics_engine", "kernel_core"], 32768, 25000]
+make data_orchestrator_descriptor := ["data_orchestrator", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["kernel_core", "nexus_shell"], 32768, 30000]
+make build_vanguard_descriptor := ["build_vanguard", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["build_toolchain"], 65536, 300000]
+assert(nexus["service_descriptor_valid"](memory_forge_descriptor), "MEMORY_FORGE descriptor and dependency are valid")
+assert(nexus["service_descriptor_valid"](vector_gateway_descriptor), "VECTOR_GATEWAY descriptor and dependencies are valid")
+assert(nexus["service_descriptor_valid"](pixel_pipeline_descriptor), "PIXEL_PIPELINE descriptor and dependencies are valid")
+assert(nexus["service_descriptor_valid"](data_orchestrator_descriptor), "DATA_ORCHESTRATOR descriptor and dependencies are valid")
+assert(nexus["service_descriptor_valid"](build_vanguard_descriptor), "BUILD_VANGUARD descriptor and dependency are valid")
+assert(nexus["service_maturity"]("build_vanguard") == "specified", "service maturity remains a specification")
+assert(nexus["service_runtime_state"]("unknown_service") == "unknown", "unknown service has no runtime state")
+assert(not nexus["service_descriptor_valid"](["memory_forge", "untrusted", "specified", "not_implemented", ["kernel_core"], 16384, 15000]), "service owner cannot be reassigned by an untrusted descriptor")
+assert(not nexus["service_descriptor_valid"](["memory_forge", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["kernel_core"], 0, 15000]), "zero-length payload budget is rejected")
+assert(not nexus["service_descriptor_valid"](["memory_forge", "Ivan-VHS/DuckOS", "specified", "not_implemented", ["kernel_core"], 16384, 600000]), "unbounded service deadline is rejected")
