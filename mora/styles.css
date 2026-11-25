@@ -907,3 +907,79 @@ input[type="range"] { accent-color: #FFD400; }
   }
 }
 
+
+
+/* Ergonomic interaction baseline: clear focus, forgiving targets and adjustable density. */
+:focus-visible {
+  outline: 3px solid var(--mora-focus, #FFE45C);
+  outline-offset: 3px;
+  scroll-margin-block: 72px;
+}
+button, input, select, textarea, a, [tabindex]:not([tabindex="-1"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+button, input[type="checkbox"], input[type="radio"], select {
+  min-height: 44px;
+}
+.window-close {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+}
+.status-control, .action-button, .permission-toggle, .subtle-button,
+.wide-action, .commons-filter, .compass-tab {
+  min-height: 44px;
+}
+.switch {
+  width: 48px;
+  height: 28px;
+  min-height: 28px;
+}
+.app-tile, .widget-card, .dock-item, .window-close {
+  touch-action: manipulation;
+}
+.window-titlebar[tabindex="0"] { cursor: grab; }
+.window-titlebar[tabindex="0"]:focus-visible {
+  outline-offset: -3px;
+  border-radius: 12px;
+}
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: 8px;
+  left: 8px;
+  transform: translateY(-160%);
+  padding: 12px 16px;
+  border: 2px solid #FFE45C;
+  border-radius: 10px;
+  color: #080808;
+  background: #FFD400;
+  font-weight: 700;
+}
+.skip-link:focus { transform: translateY(0); }
+:root[data-density="compact"] .app-tile {
+  min-height: 108px;
+  padding: 12px;
+}
+:root[data-density="compact"] .system-app-grid .app-tile {
+  min-height: 96px;
+  padding: 10px 12px;
+}
+:root[data-density="compact"] .desktop-content { gap: clamp(20px, 3vw, 48px); }
+:root[data-density="compact"] .widget-card { padding: 14px; }
+:root[data-density="compact"] .window-body { padding: 16px; }
+:root[data-density="compact"] .control-row { padding: 9px 0; }
+:root[data-density="compact"] .system-section-heading { margin-top: 20px; }
+
+@media (max-width: 760px) {
+  .statusbar .status-control { min-height: 40px; }
+  .dock-item { width: 44px; height: 44px; min-width: 44px; }
+  .app-window { width: min(640px, calc(100vw - 16px)); }
+  .window-close { width: 44px; height: 44px; }
+  .approval-actions > * { min-height: 44px; }
+}
+@media (forced-colors: active) {
+  :focus-visible { outline: 3px solid Highlight; }
+  .skip-link { color: LinkText; background: Canvas; border-color: Highlight; }
+}
