@@ -59,7 +59,7 @@ QColor kRaised("#242424");
 QColor kText("#FFFFFF");
 QColor kSecondary("#E5E5E5");
 QColor kMuted("#A6A6A6");
-QColor kBrand("#FFD400");
+QColor kBrand("#FFD700");
 QColor kBrandHover("#FFE45C");
 QColor kBorder("#3A3A3A");
 QColor kSelection("#3A3100");
@@ -101,7 +101,7 @@ QString applyThemeTokens(QString style)
         {"#FFFFFF", "@@MORA_TEXT@@"},
         {"#E5E5E5", "@@MORA_SECONDARY@@"},
         {"#A6A6A6", "@@MORA_MUTED@@"},
-        {"#FFD400", "@@MORA_BRAND@@"},
+        {"#FFD700", "@@MORA_BRAND@@"},
         {"#FFE45C", "@@MORA_BRAND_HOVER@@"},
         {"#3A3A3A", "@@MORA_BORDER@@"},
         {"#3A3100", "@@MORA_SELECTION@@"}
@@ -285,7 +285,7 @@ protected:
         }
         painter.setPen(QPen(kBrand, 1.35));
         painter.drawPath(waveform);
-        painter.setPen(QPen(QColor(255, 212, 0, 55), 5));
+        painter.setPen(QPen(QColor(255, 215, 0, 55), 5));
         painter.drawLine(width() * 0.42, 8, width() * 0.42, height() - 8);
     }
 };
@@ -306,11 +306,11 @@ public:
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QFrame#panel { background: #151515; border: 1px solid #3A3A3A; border-radius: 16px; }
             QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QPushButton { color: #FFFFFF; background: #242424; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 14px; }
-            QPushButton:hover { border-color: #FFD400; background: #2B281A; }
+            QPushButton:hover { border-color: #FFD700; background: #2B281A; }
             QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; selection-background-color: #3A3100; }
-            QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 7px; }
+            QHeaderView::section { background: #242424; color: #FFD700; border: 0; padding: 7px; }
         )")));
         buildContent();
     }
@@ -621,14 +621,14 @@ private:
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QLabel[role="title"] { color: #FFFFFF; font-size: 25pt; font-weight: 650; }
             QLabel[role="subtitle"] { color: #E5E5E5; }
             QFrame#panel { background: rgba(21,21,21,238); border: 1px solid #3A3A3A; border-radius: 16px; }
             QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #3A3A3A; border-radius: 14px; }
             QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; text-align: left; }
-            QPushButton:hover { border-color: #FFD400; background: #222016; }
-            QPushButton:checked { color: #080808; background: #FFD400; border-color: #FFD400; }
+            QPushButton:hover { border-color: #FFD700; background: #222016; }
+            QPushButton:checked { color: #080808; background: #FFD700; border-color: #FFD700; }
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
             QPushButton#appTile {
                 background: rgba(21,21,21,242);
@@ -640,13 +640,13 @@ private:
             }
             QPushButton#appTile:hover {
                 background: #201E16;
-                border-color: #FFD400;
+                border-color: #FFD700;
             }
             QPushButton#appTile:focus {
                 border: 2px solid #FFE45C;
             }
             QLabel[role="tileIcon"] {
-                color: #FFD400;
+                color: #FFD700;
                 background: #28230D;
                 border: 1px solid #49400F;
                 border-radius: 13px;
@@ -668,7 +668,7 @@ private:
                 font-size: 8pt;
             }
             QLabel[role="tileMeta"] {
-                color: #FFD400;
+                color: #FFD700;
                 background: #28230D;
                 border: 1px solid #49400F;
                 border-radius: 8px;
@@ -676,7 +676,7 @@ private:
                 font-size: 8pt;
             }
             QLabel[role="tileAction"] {
-                color: #FFD400;
+                color: #FFD700;
                 font-size: 9pt;
                 font-weight: 650;
             }
