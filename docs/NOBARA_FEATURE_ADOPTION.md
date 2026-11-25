@@ -28,6 +28,9 @@ Primary sources:
 - [Updating troubleshooting](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/updating-troubleshooting)
 - [Kernel fallback versions](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/why-3-versions)
 - [DaVinci Resolve wizard guidance](https://wiki.nobaraproject.org/en/general-usage/additional-software/davinci-resolve)
+- [Updating troubleshooting](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/updating-troubleshooting)
+- [Kernel fallback versions](https://wiki.nobaraproject.org/en/general-usage/troubleshooting/why-3-versions)
+- [DaVinci Resolve wizard guidance](https://wiki.nobaraproject.org/en/general-usage/additional-software/davinci-resolve)
 
 This is a feature and documentation review, not a claim that every Wiki.js article, historical post or external package was independently audited.
 
