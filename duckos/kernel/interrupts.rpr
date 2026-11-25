@@ -2,6 +2,8 @@
 # This validates routes and nesting rules; it does not install an IDT,
 # register an ISR, mask a hardware controller or issue an EOI instruction.
 
+import "duckos/security/capabilities.rpr" as capabilities
+
 export craft descriptor_valid(route) {
     # [vector, priority, trigger, owner, eoi_provider, masked, shared, max_nesting]
     when size(route) != 8 {
@@ -66,7 +68,7 @@ export craft acknowledge(route, handler_id, grants) {
     when handler_id != route[3] {
         yield "wrong-handler"
     }
-    when not contains(grants, "interrupt.ack") {
+    when not capabilities["permits"](grants, "interrupt.ack") {
         yield "capability-denied"
     }
     yield "acknowledged"
