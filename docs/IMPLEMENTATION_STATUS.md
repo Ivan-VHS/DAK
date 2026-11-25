@@ -144,3 +144,17 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+## Desktop and boot profile integration — 2026-11-25
+
+- [x] Reaper-authored registry and readiness policy for 20 desktop environments/window managers, with X11/Wayland requirements, explicit Linux ABI dependencies and capability/checkpoint-gated rollback transitions.
+- [x] Versioned JSON desktop profile catalog and schema; external profiles remain `catalog-only` and `native_supported: false`.
+- [x] Reaper-authored classification of 20 boot ecosystem entries, separating real UEFI/BIOS targets from firmware, network loaders, helper modules, embedded loaders, techniques and kernel handoff.
+- [x] Limine ISO menu renderer for operator-supplied existing UEFI boot-entry names and BIOS drive/partition targets; validates input, rejects duplicates and performs atomic config replacement.
+- [x] Optional chainload targets are forwarded through Stage 1 and release ISO builders; the native DuckOS Limine entry remains the default.
+- [x] Renderer and policy tests are registered in the boot-image and Reaper workflows. QEMU BIOS/OVMF UEFI Stage 1 build-and-boot workflow and repository completeness workflow passed for this branch.
+- [ ] Native DuckOS process/session manager, Linux ABI, VFS, input services, X11/Wayland host, compositor and actual DE/WM process launch.
+- [ ] Automatic discovery of UEFI NVRAM entries and physical BIOS disk targets; this version requires explicit operator-supplied targets.
+- [ ] Physical hardware chainload qualification for supported external loaders and Secure Boot/authenticated update validation.
+
+The Limine menu is an implemented ISO-build feature. Desktop switching is currently an executable Reaper readiness/state-machine contract, not yet a running native graphical session switcher. Stage 1 still halts after its boot marker.
