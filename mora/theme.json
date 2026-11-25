@@ -1,7 +1,7 @@
 {
   "schema": "mora.theme.v1",
   "name": "DuckOS Imperial Noir & Glass",
-  "version": 3,
+  "version": 4,
   "palettes": {
     "duck": {
       "page": "#050505",
@@ -26,9 +26,9 @@
     }
   },
   "shape": {
-    "windowRadius": 22,
-    "cardRadius": 16,
-    "controlRadius": 10
+    "windowRadius": 8,
+    "cardRadius": 8,
+    "controlRadius": 6
   },
   "spacing": [
     4,
@@ -47,7 +47,12 @@
     "standardMs": 180,
     "spatialMs": 220,
     "reduceMotionMaxMs": 80,
-    "ecoVisualsMaxMs": 80
+    "ecoVisualsMaxMs": 80,
+    "microMs": 100,
+    "emphasisMs": 280,
+    "maxDurationMs": 280,
+    "springCurve": "cubic-bezier(0.34, 1.12, 0.64, 1)",
+    "strictCurve": "cubic-bezier(0.65, 0, 0.35, 1)"
   },
   "typography": {
     "ui": "Segoe UI",
@@ -56,8 +61,21 @@
   },
   "defaultPalette": "duck",
   "glass": {
-    "surface": "rgba(7,7,7,0.72)",
-    "border": "rgba(255,255,255,0.14)",
-    "blurPx": 22
+    "surface": "rgba(7,7,7,0.78)",
+    "strongSurface": "rgba(7,7,7,0.86)",
+    "border": "rgba(255,255,255,0.16)",
+    "activeBorder": "#FFD700",
+    "fallback": "#101010",
+    "strongFallback": "#070707",
+    "blurPx": 18,
+    "strongBlurPx": 22,
+    "grainOpacity": 0.035,
+    "maxConcurrentBlurLayers": 5,
+    "maxNestedLevels": 2,
+    "mobileBlurScale": 0.55,
+    "ecoBlurScale": 0.5,
+    "reducedTransparency": "opaque",
+    "animateBackdrop": false,
+    "noiseAsset": "./glass-noise.svg"
   }
 }
