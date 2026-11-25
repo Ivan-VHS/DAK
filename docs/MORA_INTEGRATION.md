@@ -10,25 +10,47 @@ Mora follows the fixed DuckOS black/white/yellow visual identity: deep black str
 
 | Surface | Responsibility | Current boundary |
 |---|---|---|
-| Desktop | Clock, status bar, app launcher, widgets and dock | Browser-hosted |
-| App windows | Focus, move, close, running state and Escape handling | DOM window manager |
-| Mora AI | Parse safe local intents, preview plan, request approval | Allowlisted rules, no model or shell |
-| Sentinel | Show and store capability preferences | No native process enforcement |
-| Restore | Save/restore shell settings and preview an update sequence | No OS image update/rollback |
-| Bridge | Inspect PE/ELF file headers and architecture | No executable loading |
-| Control | Persist focus, motion and resource-profile choices | No kernel/device scheduler |
-| Proof | Calculate local SHA-256 | No signer or C2PA verification |
+| Desktop | Clock, status bar, home workspace, application catalogue and dock | Qt 6 Widgets host-native shell; browser preview retained separately |
+| App windows | Focus, move, close, title, host input and native window decoration | Separate top-level Qt windows managed by the host OS; not a DuckOS kernel window manager |
+| Mora AI | Parse safe local intents, preview plan, request approval | Browser preview only; native agent and approval broker not connected |
+| Sentinel | Show and store capability preferences | Browser preview only; no native process enforcement |
+| Restore | Save/restore shell settings and preview an update sequence | Browser preview only; no OS image update/rollback |
+| Bridge | Inspect PE/ELF file headers and architecture | Browser preview only; no executable loading |
+| Control | Persist focus, motion and resource-profile choices | Browser preview only; no kernel/device scheduler |
+| Proof | Calculate local SHA-256 | Browser preview only; no signer or C2PA verification |
 | Mora Boost | Link to OPlague gaming performance workbench | Browser catalog only; host telemetry and reversible power sessions run in OPlague, not in the page |
 
 The seven original apps remain: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Mora Boost is an additional system tool that opens the native OPlague gaming workbench; it does not make the browser a privileged driver or telemetry service.
 
-Mora also contains 13 extended first-party app concepts: Sestem, SetupUP, Orriganize, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. The panels provide bounded local browser interactions, share the existing window manager and profile storage, and do not claim native service implementations.
+The browser reference preview also contains 13 extended first-party app concepts: Sestem, SetupUP, ORGze, Abriganza, Olaab, Concrete Thump, Seu-Beu, Love-IL, Poi, Poi-2, Po-2, GameCharager and EXEdotEXE. Their initial roles are working interpretations because the names were supplied without briefs. Those panels provide bounded browser interactions and do not claim native service implementations. The Qt shell currently integrates only the native Poi, Abriganza and illustrative VentuSample panels; other catalogue entries open descriptive placeholder windows.
 
 ## Run and validate
 
-Open **mora/index.html** directly in a modern browser. The desktop itself requires no network request. Some browser APIs such as Web Crypto may require a secure context.
+### Host-native Mora
 
-Run **npm test** with Node.js 18 or newer. Contract tests check the static shell, registry and local policy helpers. They do not certify native OS operation or interaction with actual hardware.
+Build with Qt 6 Widgets using the root CMake target.
+
+Linux:
+```sh
+cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --target duckos_mora_native --parallel
+./build/mora-native/duckos_mora_native
+```
+
+Windows (Qt 6 Widgets and its CMake package configured):
+```powershell
+cmake -S . -B build/mora-native -A x64 -DDUCKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --config Release --target duckos_mora_native
+.\build\mora-native\Release\duckos_mora_native.exe
+```
+
+The native host app reads mora/apps.json and does not execute manifest commands. Poi drafts use host-local QSettings; Abriganza only lists metadata after the user explicitly selects a folder; the VentuSample waveform is a visual sample, not an audio engine. Other catalogue entries open descriptive placeholder windows until their native applications are integrated.
+
+### Browser reference preview
+
+Open mora/index.html directly or use the existing local run script. Browser-specific AI, intent, recovery and compatibility panels remain reference-preview capabilities; they do not become host-native system services.
+
+Run npm test with Node.js 22 or newer. These contract tests validate the browser preview and shared catalogue/policy contracts; the native Qt build and window lifecycle are validated by the dedicated Mora native desktop CI workflow.
 
 ## Intent actions and approval
 
