@@ -14,7 +14,7 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 | Boot contract | ordered startup phases and recovery transitions | Reaper reference contract; stage-0 firmware handoff also exists |
 | Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 range/map validation; not a physical allocator or page-table manager |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
-| IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
+| IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | Reaper policy plus a tested C11 duplex endpoint queue with DABI64 frame validation; scheduler/syscall delivery and shared-page mapping remain pending |
 | Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
 | BAV Security | signed declarative detection bundles, isolated scan worker, policy broker and reversible quarantine | bundle v1 format/schema specified; scanner, verifier, quarantine and enforcement not implemented |
 | DuckDriver boundary | driver ABI, package metadata and resource-conflict policy | descriptor policy implemented; signature verifier and device discovery pending |
@@ -22,7 +22,7 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
 | Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
-| Desktop | Black/white/yellow Mora design contract, Reaper UI policies and a Qt 6 Widgets host-native shell | host-native app windows are separate from the still-pending DuckOS compositor/renderer |
+| Desktop | Reaper-first DABI64 Desktop Host v1, bounded IPC endpoint foundation, Reaper window policies and a Qt 6 Widgets host-native shell | message framing and endpoint queues are tested; syscall delivery, task-authenticated endpoint creation, native window manager and DuckOS compositor remain pending |
 
 ## Startup contract
 
@@ -47,6 +47,8 @@ These are arithmetic and lifecycle contracts, not physical page allocation. Page
 Tasks use `[id, priority, deadline, state]`. The policy chooses the highest-priority runnable task and uses the earliest deadline as a deterministic tie-breaker. A separate flock selector chooses the least-loaded eligible worker by comparing load/capacity ratios without floating-point division. Neither function starts a thread, preempts a task or steals a live stack.
 
 IPC queues have a caller-supplied capacity. A full queue returns `backpressure` and leaves state unchanged. The UDB byte-stream contract accounts capacity, occupied bytes, producer/consumer sequence and a high watermark. It models admission and release only; there is no shared-memory mapping or zero-copy transfer yet.
+
+The DABI64 desktop foundation reuses the request layout and operation catalogue from the pinned Reaper submodule. Its C11 endpoint primitive uses two bounded queues for owner-to-peer and peer-to-owner requests, task-generation identities, exact sequence progression, operation-range checks, frame validation and backpressure. Queue buffers are supplied by trusted kernel/service code and access is serialized by the owning service lock. This is not yet connected to a syscall entry or a scheduler-owned task table; callers must not construct principals from user-supplied fields.
 
 ## Security and DuckDriver
 
