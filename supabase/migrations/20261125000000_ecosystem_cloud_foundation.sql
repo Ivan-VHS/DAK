@@ -50,7 +50,8 @@ create table if not exists public.ecosystem_projects (
   repository_full_name text check (repository_full_name is null or repository_full_name ~ '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'),
   created_by uuid not null references auth.users(id) on delete restrict,
   created_at timestamptz not null default now(),
-  unique (organization_id, project_key)
+  unique (organization_id, project_key),
+  unique (id, organization_id, project_key)
 );
 
 create index if not exists ecosystem_projects_org_idx
@@ -59,7 +60,8 @@ create index if not exists ecosystem_projects_org_idx
 create table if not exists public.ecosystem_artifacts (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.ecosystem_organizations(id) on delete cascade,
-  project_id uuid not null references public.ecosystem_projects(id) on delete cascade,
+  project_id uuid not null,
+  project_key text not null,
   owner_id uuid not null references auth.users(id) on delete restrict,
   artifact_kind text not null check (artifact_kind in ('document', 'manifest', 'report', 'preset-pack', 'release-metadata')),
   visibility text not null check (visibility in ('private', 'organization')),
@@ -68,12 +70,9 @@ create table if not exists public.ecosystem_artifacts (
   sha256 text not null check (sha256 ~ '^[a-f0-9]{64}$'),
   size_bytes bigint not null check (size_bytes between 0 and 104857600),
   created_at timestamptz not null default now(),
-  check (
-    object_key is null
-    or object_key = organization_id::text || '/' || (
-      select project_key from public.ecosystem_projects where id = project_id
-    ) || '/' || id::text
-  )
+  foreign key (project_id, organization_id, project_key)
+    references public.ecosystem_projects (id, organization_id, project_key) on delete cascade,
+  check (object_key is null or object_key = organization_id::text || '/' || project_key || '/' || id::text)
 );
 
 create index if not exists ecosystem_artifacts_org_project_idx
@@ -147,7 +146,11 @@ using (exists (
 
 create policy ecosystem_organizations_insert_creator
 on public.ecosystem_organizations for insert to authenticated
-with check (created_by = (select auth.uid()));
+with check (exists (
+  select 1 from public.ecosystem_memberships m
+  where m.organization_id = ecosystem_organizations.id
+    and m.user_id = (select auth.uid()) and m.role in ('owner', 'admin')
+));
 
 create policy ecosystem_organizations_update_owner
 on public.ecosystem_organizations for update to authenticated
@@ -165,7 +168,7 @@ create policy ecosystem_projects_select_member
 on public.ecosystem_projects for select to authenticated
 using (exists (
   select 1 from public.ecosystem_memberships m
-  where m.organization_id = organization_id and m.user_id = (select auth.uid())
+  where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
 ));
 
 create policy ecosystem_projects_insert_contributor
@@ -174,7 +177,7 @@ with check (
   created_by = (select auth.uid())
   and exists (
     select 1 from public.ecosystem_memberships m
-    where m.organization_id = organization_id and m.user_id = (select auth.uid())
+    where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
       and m.role in ('owner', 'admin', 'editor', 'contributor')
   )
 );
@@ -183,12 +186,12 @@ create policy ecosystem_projects_update_editor
 on public.ecosystem_projects for update to authenticated
 using (exists (
   select 1 from public.ecosystem_memberships m
-  where m.organization_id = organization_id and m.user_id = (select auth.uid())
+  where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
     and m.role in ('owner', 'admin', 'editor')
 ))
 with check (exists (
   select 1 from public.ecosystem_memberships m
-  where m.organization_id = organization_id and m.user_id = (select auth.uid())
+  where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
     and m.role in ('owner', 'admin', 'editor')
 ));
 
@@ -196,7 +199,7 @@ create policy ecosystem_projects_delete_admin
 on public.ecosystem_projects for delete to authenticated
 using (exists (
   select 1 from public.ecosystem_memberships m
-  where m.organization_id = organization_id and m.user_id = (select auth.uid())
+  where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
     and m.role in ('owner', 'admin')
 ));
 
@@ -205,7 +208,7 @@ on public.ecosystem_artifacts for select to authenticated
 using (
   exists (
     select 1 from public.ecosystem_memberships m
-    where m.organization_id = organization_id and m.user_id = (select auth.uid())
+    where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
   )
   and (visibility = 'organization' or owner_id = (select auth.uid()))
 );
@@ -216,11 +219,11 @@ with check (
   owner_id = (select auth.uid())
   and exists (
     select 1 from public.ecosystem_projects p
-    where p.id = project_id and p.organization_id = organization_id
+    where p.id = project_id and p.organization_id = ecosystem_artifacts.organization_id
   )
   and exists (
     select 1 from public.ecosystem_memberships m
-    where m.organization_id = organization_id and m.user_id = (select auth.uid())
+    where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
       and m.role in ('owner', 'admin', 'editor', 'contributor')
   )
 );
@@ -231,14 +234,15 @@ using (
   owner_id = (select auth.uid())
   or exists (
     select 1 from public.ecosystem_memberships m
-    where m.organization_id = organization_id and m.user_id = (select auth.uid())
+    where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
       and m.role in ('owner', 'admin', 'editor')
   )
 )
 with check (
   exists (
     select 1 from public.ecosystem_memberships m
-    where m.organization_id = organization_id and m.user_id = (select auth.uid())
+    where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
+      and (owner_id = (select auth.uid()) or m.role in ('owner', 'admin'))
   )
 );
 
@@ -248,7 +252,7 @@ using (
   owner_id = (select auth.uid())
   or exists (
     select 1 from public.ecosystem_memberships m
-    where m.organization_id = organization_id and m.user_id = (select auth.uid())
+    where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
       and m.role in ('owner', 'admin')
   )
 );
@@ -263,7 +267,7 @@ with check (
   actor_id = (select auth.uid())
   and exists (
     select 1 from public.ecosystem_memberships m
-    where m.organization_id = organization_id and m.user_id = (select auth.uid())
+    where m.organization_id = ecosystem_artifacts.organization_id and m.user_id = (select auth.uid())
   )
   and exists (
     select 1 from public.ecosystem_projects p
