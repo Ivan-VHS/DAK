@@ -6,12 +6,21 @@
 #include "frame_allocator.h"
 #include "limine.h"
 #include "interrupts.h"
+#include "paging.h"
 
 #define SERIAL_PORT 0x3f8u
 #define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
 
 extern unsigned char __kernel_start[];
 extern unsigned char __kernel_end[];
+extern unsigned char __limine_requests_start[];
+extern unsigned char __limine_requests_end[];
+extern unsigned char __text_start[];
+extern unsigned char __text_end[];
+extern unsigned char __rodata_start[];
+extern unsigned char __rodata_end[];
+extern unsigned char __data_start[];
+extern unsigned char __data_end[];
 
 __attribute__((used, section(".limine_requests_start"), aligned(8)))
 static volatile uint64_t requests_start[4] = LIMINE_REQUESTS_START_MARKER;
@@ -69,6 +78,7 @@ static duckos_memory_region boot_regions[MAX_BOOT_REGIONS];
 static struct limine_framebuffer *active_framebuffer;
 static duckos_frame_allocator early_frame_allocator;
 static uint64_t first_frame_phys;
+static duckos_page_table_space kernel_page_tables;
 
 static inline void port_out8(uint16_t port, uint8_t value) {
     __asm__ volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
@@ -410,6 +420,40 @@ static int initialize_early_memory(uint32_t memory_region_count) {
     return 1;
 }
 
+static int protect_kernel_sections(void) {
+    uint64_t read_only = DUCKOS_PAGE_PRESENT;
+    uint64_t writable = DUCKOS_PAGE_PRESENT | DUCKOS_PAGE_WRITABLE;
+    if (duckos_x86_paging_nx_enabled()) {
+        read_only |= DUCKOS_PAGE_NX;
+        writable |= DUCKOS_PAGE_NX;
+    }
+
+    return duckos_x86_paging_protect_range(
+            &kernel_page_tables,
+            (uint64_t)(uintptr_t)__limine_requests_start,
+            (uint64_t)(uintptr_t)__limine_requests_end,
+            read_only
+        ) &&
+        duckos_x86_paging_protect_range(
+            &kernel_page_tables,
+            (uint64_t)(uintptr_t)__text_start,
+            (uint64_t)(uintptr_t)__text_end,
+            DUCKOS_PAGE_PRESENT
+        ) &&
+        duckos_x86_paging_protect_range(
+            &kernel_page_tables,
+            (uint64_t)(uintptr_t)__rodata_start,
+            (uint64_t)(uintptr_t)__rodata_end,
+            read_only
+        ) &&
+        duckos_x86_paging_protect_range(
+            &kernel_page_tables,
+            (uint64_t)(uintptr_t)__data_start,
+            (uint64_t)(uintptr_t)__data_end,
+            writable
+        );
+}
+
 static void boot_failure(const char *reason) __attribute__((noreturn));
 static void boot_failure(const char *reason) {
     serial_write("DUCKOS_BOOT_ERROR ");
@@ -517,6 +561,23 @@ void _start(void) {
         boot_failure("bootstrap physical frame allocation failed");
     }
 
+    if (!duckos_x86_paging_takeover(
+            &kernel_page_tables,
+            &early_frame_allocator,
+            hhdm_request.response->offset
+        )) {
+        boot_failure("could not clone and activate owned x86_64 page tables");
+    }
+    if (!protect_kernel_sections()) {
+        boot_failure("could not establish kernel section page permissions");
+    }
+
+    serial_write("paging=owned-cr3 root=");
+    serial_hex(kernel_page_tables.root_physical);
+    serial_write(" nx=");
+    serial_write(duckos_x86_paging_nx_enabled() ? "enabled" : "unavailable");
+    serial_write(" write_protect=enabled\n");
+
     serial_write("firmware=");
     serial_decimal(info.flags);
     serial_write(" memory_regions=");
@@ -548,6 +609,6 @@ void _start(void) {
         serial_write("framebuffer=unavailable; serial console remains active\n");
     }
 
-    serial_write("DUCKOS_BOOT_OK stage=1 handoff=v1 frames=1 reaper_policy=reference-only\n");
+    serial_write("DUCKOS_BOOT_OK stage=2 handoff=v1 paging=owned-cr3 reaper_policy=reference-only\n");
     halt_forever();
 }
