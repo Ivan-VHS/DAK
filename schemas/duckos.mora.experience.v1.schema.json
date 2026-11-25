@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "duckos.mora.experience.v1.schema.json",
-  "title": "DuckOS Mora Experience Profile",
+  "title": "Duck Mora Experience Profile",
   "type": "object",
   "required": [
     "schema",
