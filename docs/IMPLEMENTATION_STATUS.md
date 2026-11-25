@@ -1,6 +1,6 @@
 # DuckOS implementation status
 
-Updated: 2026-11-23
+Updated: 2026-11-25
 
 ## Implemented in Reaper source
 
@@ -134,3 +134,32 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## First native-systems implementation slice — 2026-11-25
+
+The branch `feat/kernel-syscall-process-contracts-v1` adds Reaper-authored, executable policy/state contracts for process identity, syscall admission, W^X virtual mappings, interrupt routing, process-bound IPC endpoints, BAV policy, service lifecycle, native-window state, package transactions and Limine memory-map type translation.
+
+- [x] Process descriptor and generation-handle validation, lifecycle transitions and child capability attenuation model.
+- [x] Versioned syscall descriptor table, caller-handle validation, bounded argument/payload metadata and BAV admission model.
+- [x] Virtual mapping metadata validation with 4 KiB alignment and W^X policy.
+- [x] Interrupt route, mask, priority and nesting policy.
+- [x] Capability-gated bounded IPC endpoint and sequence model.
+- [x] BAV deny-by-default rule matching, trust-state checks and sequence audit model.
+- [x] Service dependency, health and finite restart policy.
+- [x] Native desktop window/display state, keyboard movement and focus-order policy.
+- [x] Package admission and reversible inactive-slot transaction model.
+- [x] Limine memory-map type conversion with conservative treatment of loader/module ranges.
+- [x] Reaper contract fixtures for the new models and CI invocation through tree-walk and VM.
+- [ ] Execute the updated Reaper suite on the exact PR head and retain successful CI evidence.
+- [ ] Implement a freestanding Limine entry point and serial boot marker.
+- [ ] Implement a physical page-frame allocator, page tables and TLB management.
+- [ ] Implement GDT/IDT/exception entry, timer and interrupt-controller operations.
+- [ ] Implement actual context switching, process address spaces and syscall entry/return.
+- [ ] Implement real cross-process IPC memory/wakeup/cancellation.
+- [ ] Enforce BAV in a native syscall/service broker and add actual process sandboxing.
+- [ ] Implement init/service process supervision, VFS/block/network/audio/graphics services.
+- [ ] Implement native window/input/display compositor and package installation/runtime.
+- [ ] Extend Reaper's native compiler to records, bounded collections, unsigned target types, freestanding runtime and direct object/ELF output.
+
+**Scope warning:** the checked Reaper modules in this branch are deterministic contract models. They do not install IDT/GDT, change CR3, write page tables, allocate physical pages, enter kernel privilege, switch CPU contexts, access devices, create native processes, launch applications or build a bootable image. Do not promote the existing `[ ]` native milestones until those operations and their target tests exist.
