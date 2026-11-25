@@ -1,0 +1,83 @@
+# Reaper-VHS GPU isolation and integrity policy.
+# Actual IOMMU programming, shader verification and cryptography are native services.
+
+export craft dma_mapping_allowed(context, device, base, bytes, pinned, iommu_isolated) {
+    when size(context) != 7 or size(device) != 8 or base < 0 or bytes <= 0 {
+        yield false
+    }
+    when not pinned or not iommu_isolated {
+        yield false
+    }
+    when context[0] <= 0 or context[1] <= 0 or context[2] == "" {
+        yield false
+    }
+    when device[6] != "kernel-verified" {
+        yield false
+    }
+    vary grant := false
+    each capability in context[6] {
+        when capability == "gpu.memory.dma" {
+            change grant := true
+        }
+    }
+    yield grant
+}
+
+export craft shader_valid(shader, device_memory_limit, instruction_limit) {
+    # [shader_id, ir_sha256, instruction_count, max_steps,
+    #  declared_memory_bytes, control_flow_proof, required_capabilities]
+    when size(shader) != 7 or shader[0] == "" or size(shader[1]) != 64 {
+        yield false
+    }
+    when shader[2] <= 0 or shader[2] > instruction_limit or shader[3] <= 0 {
+        yield false
+    }
+    when shader[4] < 0 or shader[4] > device_memory_limit {
+        yield false
+    }
+    when shader[5] != "bounded-control-flow" {
+        yield false
+    }
+    each capability in shader[6] {
+        when capability == "gpu.mmio.write" or capability == "gpu.debug.privileged" {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft integrity_result(expected_digest, observed_digest, bytes) {
+    when size(expected_digest) != 64 or size(observed_digest) != 64 or bytes <= 0 {
+        yield "invalid-evidence"
+    }
+    when expected_digest != observed_digest {
+        yield "quarantine-resource"
+    }
+    yield "integrity-ok"
+}
+
+export craft canary_result(expected_value, observed_value, canary_bytes, buffer_bytes) {
+    when canary_bytes <= 0 or buffer_bytes <= canary_bytes {
+        yield "invalid-layout"
+    }
+    when expected_value != observed_value {
+        yield "quarantine-context-and-report-overrun"
+    }
+    yield "canary-intact"
+}
+
+export craft recovery_action(driver_state, device_reset_supported, pending_transfers) {
+    when driver_state == "healthy" {
+        yield "continue"
+    }
+    when pending_transfers < 0 {
+        yield "fail-closed"
+    }
+    when driver_state == "hung" and device_reset_supported and pending_transfers == 0 {
+        yield "request-driver-reset-after-quiesce"
+    }
+    when driver_state == "hung" {
+        yield "quarantine-device-and-drain-transfers"
+    }
+    yield "disable-accelerated-path-and-fallback"
+}

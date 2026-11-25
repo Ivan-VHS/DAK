@@ -1,0 +1,106 @@
+# Reaper-VHS GPU driver ABI v1.
+# Hardware access belongs to a trusted driver adapter; this policy never touches MMIO.
+#
+# Device: [device_id, vendor, pci_address, backend, abi_version, host_arch,
+#          trust_state, capabilities]
+# Context: [context_id, pid, security_domain, qos, memory_quota_bytes,
+#           active, capabilities]
+
+export craft device_valid(device, expected_abi, host_arch) {
+    when size(device) != 8 {
+        yield false
+    }
+    when device[0] == "" or device[2] == "" {
+        yield false
+    }
+    when device[1] != "nvidia" and device[1] != "amd" and device[1] != "intel" {
+        yield false
+    }
+    when device[3] != "vulkan" and device[3] != "opengl" and device[3] != "level-zero" {
+        yield false
+    }
+    when device[4] != expected_abi or device[4] <= 0 or device[5] != host_arch {
+        yield false
+    }
+    when device[6] != "kernel-verified" {
+        yield false
+    }
+    each capability in device[7] {
+        when capability == "gpu.mmio.write" or capability == "gpu.voltage.write" or capability == "gpu.clock.force" {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft context_valid(context, device) {
+    when size(context) != 7 {
+        yield false
+    }
+    when size(device) != 8 {
+        yield false
+    }
+    when not device_valid(device, device[4], device[5]) {
+        yield false
+    }
+    when context[0] <= 0 or context[1] <= 0 or context[2] == "" {
+        yield false
+    }
+    when context[3] != "critical" and context[3] != "interactive" and context[3] != "normal" and context[3] != "background" {
+        yield false
+    }
+    when context[4] <= 0 or context[5] != true {
+        yield false
+    }
+    each requested in context[6] {
+        vary granted := false
+        each capability in device[7] {
+            when requested == capability {
+                change granted := true
+            }
+        }
+        when not granted {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft capability_allowed(device, requested) {
+    when size(device) != 8 or device[6] != "kernel-verified" {
+        yield false
+    }
+    when requested == "gpu.mmio.write" or requested == "gpu.voltage.write" or requested == "gpu.clock.force" {
+        yield false
+    }
+    vary found := false
+    each capability in device[7] {
+        when capability == requested {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft qos_rank(qos) {
+    when qos == "critical" {
+        yield 4
+    }
+    when qos == "interactive" {
+        yield 3
+    }
+    when qos == "normal" {
+        yield 2
+    }
+    when qos == "background" {
+        yield 1
+    }
+    yield 0
+}
+
+export craft context_priority_valid(context) {
+    when size(context) != 7 {
+        yield false
+    }
+    yield qos_rank(context[3]) > 0
+}

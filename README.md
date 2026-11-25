@@ -12,7 +12,8 @@
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
   <a href="docs/IMPLEMENTATION_ROADMAP.md">Roadmap</a> ·
-  <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
+  <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a> ·
+  <a href="docs/REAPER_VHS_GPU_PROTOCOL_V1.md">Reaper-VHS GPU protocol</a>
 </p>
 
 > **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora is a separate host-browser application; it is not started by this kernel.
@@ -53,6 +54,7 @@ flowchart TB
 | **Mora desktop shell** | Responsive local browser workspace, launcher, interactive windows, dock, local preferences, reduced-motion mode, local app data and scoped offline cache | Runs on the host browser; not a native kernel compositor |
 | **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
 | **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
+| **Reaper-VHS GPU protocol** | Reaper GPU-memory tier accounting, lossless VHS Codec v1, security-domain dedup/COW, HyperSwap, telemetry bridge and OEM-bounded thermal policy | Reaper reference-runtime contracts plus OPlague read-only NVIDIA snapshot; no native GPU driver, physical VRAM virtualization or clock/voltage writes |
 | **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
 | **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DuckOS kernel executables |
 | **Release pipeline** | Source-pin validation, project builds/tests, SHA-256 inventory, hybrid BIOS/UEFI ISO and QEMU boot checks | Preview source-and-tools distribution, not a complete installable OS |
@@ -113,6 +115,7 @@ The ISO is content-sized. It is not padded to 4 GiB: empty bytes would only incr
 | Limine firmware handoff and Boot Info v1 validation | Implemented and QEMU-verified |
 | Early physical-frame allocation | Implemented for the Stage 1 boot path |
 | Reaper core subsystem MVP (40 contracts) | Implemented on the reference runtime; native enforcement pending |
+| Reaper-VHS GPU policy (v1) | Implemented as Reaper reference contracts; physical memory migration and vendor driver backend pending |
 | Reusable memory manager, page tables and address spaces | Pending |
 | Interrupts, timers, preemptive scheduler and process model | Pending |
 | Syscall ABI, kernel-enforced capabilities and zero-copy IPC | Pending |
@@ -121,7 +124,7 @@ The ISO is content-sized. It is not padded to 4 GiB: empty bytes would only incr
 | Native compositor, GPU and audio stack | Pending |
 | Freestanding native Reaper compiler/backend | Pending |
 
-There is no claim of physical-hardware qualification, Secure Boot support, a disk installer, a native Mora compositor, a general process model or kernel-enforced sandboxing. See [Implementation status](docs/IMPLEMENTATION_STATUS.md), [Core subsystem MVP](docs/CORE_MVP_V1.md) and [Architecture](docs/ARCHITECTURE.md) for the detailed evidence ledger.
+There is no claim of physical-hardware qualification, Secure Boot support, a disk installer, a native Mora compositor, a general process model or kernel-enforced sandboxing. See [Implementation status](docs/IMPLEMENTATION_STATUS.md), [Core subsystem MVP](docs/CORE_MVP_V1.md), [Reaper-VHS GPU protocol](docs/REAPER_VHS_GPU_PROTOCOL_V1.md) and [Architecture](docs/ARCHITECTURE.md) for the detailed evidence ledger.
 
 ## Architecture targets
 
