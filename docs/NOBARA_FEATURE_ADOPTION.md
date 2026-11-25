@@ -91,6 +91,8 @@ This work was written independently for DuckOS. It adopts general operating-syst
 
 No Nobara source code, logo, screenshots, visual assets, wallpapers, theme, distinctive violet palette, font files, page copy, package binaries or kernel patches are copied into DuckOS. Nobara's name is used only to identify the research source. The DuckOS black/white/yellow design tokens and Mora application names remain Duck-owned.
 
+The Nobara troubleshooting guides also informed future requirements for signed repository metadata, package-conflict diagnosis, cache integrity, root/boot free-space checks and last-known-good boot recovery. DuckOS must fail closed on signature or provenance errors; the policy does not provide a force-update or signature-bypass path.
+
 Upstream projects and tools retain their own authorship and license terms. A source pin or catalogue entry does not grant permission to redistribute a binary or to relicense its source. The DAK repository root currently has no root `LICENSE` declaration; this change does not assume MIT, Apache-2.0 or any other license for DuckOS itself. Choose and approve the DAK license separately before redistribution.
 
 ## Verification boundary
