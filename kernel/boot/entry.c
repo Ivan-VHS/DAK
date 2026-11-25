@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "boot_info.h"
+#include "idt.h"
 #include "frame_allocator.h"
 #include "limine.h"
 #include "interrupts.h"
