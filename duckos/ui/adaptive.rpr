@@ -1,11 +1,12 @@
 # Adaptive desktop and gaming input policy.
 
 export craft input_device_valid(device) {
-    yield device == "keyboard"
-        or device == "mouse"
-        or device == "touch"
-        or device == "controller"
-        or device == "stylus"
+    when device == "keyboard" { yield true }
+    when device == "mouse" { yield true }
+    when device == "touch" { yield true }
+    when device == "controller" { yield true }
+    when device == "stylus" { yield true }
+    yield false
 }
 
 export craft controller_event_valid(event) {

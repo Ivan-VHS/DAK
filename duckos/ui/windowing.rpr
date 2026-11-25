@@ -2,11 +2,12 @@
 # This contract is intended for the future kernel-owned Window Manager.
 
 export craft window_state_valid(state) {
-    yield state == "floating"
-        or state == "tiled"
-        or state == "maximized"
-        or state == "fullscreen"
-        or state == "minimized"
+    when state == "floating" { yield true }
+    when state == "tiled" { yield true }
+    when state == "maximized" { yield true }
+    when state == "fullscreen" { yield true }
+    when state == "minimized" { yield true }
+    yield false
 }
 
 export craft window_descriptor_valid(window) {
@@ -51,16 +52,17 @@ export craft window_transition_valid(from_state, to_state) {
 }
 
 export craft snap_target_valid(target) {
-    yield target == "left-half"
-        or target == "right-half"
-        or target == "top-half"
-        or target == "bottom-half"
-        or target == "top-left"
-        or target == "top-right"
-        or target == "bottom-left"
-        or target == "bottom-right"
-        or target == "maximize"
-        or target == "restore"
+    when target == "left-half" { yield true }
+    when target == "right-half" { yield true }
+    when target == "top-half" { yield true }
+    when target == "bottom-half" { yield true }
+    when target == "top-left" { yield true }
+    when target == "top-right" { yield true }
+    when target == "bottom-left" { yield true }
+    when target == "bottom-right" { yield true }
+    when target == "maximize" { yield true }
+    when target == "restore" { yield true }
+    yield false
 }
 
 export craft snap_action_valid(window, target) {

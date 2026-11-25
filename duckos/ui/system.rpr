@@ -46,11 +46,12 @@ export craft greeter_transition_valid(from_state, to_state) {
 }
 
 export craft power_action_valid(action) {
-    yield action == "lock"
-        or action == "sleep"
-        or action == "restart"
-        or action == "shutdown"
-        or action == "cancel"
+    when action == "lock" { yield true }
+    when action == "sleep" { yield true }
+    when action == "restart" { yield true }
+    when action == "shutdown" { yield true }
+    when action == "cancel" { yield true }
+    yield false
 }
 
 export craft power_confirmation_required(action) {
@@ -58,10 +59,11 @@ export craft power_confirmation_required(action) {
 }
 
 export craft control_center_action_valid(action) {
-    yield action == "toggle-wifi"
-        or action == "toggle-bluetooth"
-        or action == "toggle-focus"
-        or action == "toggle-reduced-motion"
-        or action == "open-settings"
-        or action == "open-power-menu"
+    when action == "toggle-wifi" { yield true }
+    when action == "toggle-bluetooth" { yield true }
+    when action == "toggle-focus" { yield true }
+    when action == "toggle-reduced-motion" { yield true }
+    when action == "open-settings" { yield true }
+    when action == "open-power-menu" { yield true }
+    yield false
 }

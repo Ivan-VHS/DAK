@@ -34,12 +34,13 @@ export craft application_admission(manifest) {
 }
 
 export craft lifecycle_state_valid(state) {
-    yield state == "registered"
-        or state == "starting"
-        or state == "running"
-        or state == "stopping"
-        or state == "stopped"
-        or state == "failed"
+    when state == "registered" { yield true }
+    when state == "starting" { yield true }
+    when state == "running" { yield true }
+    when state == "stopping" { yield true }
+    when state == "stopped" { yield true }
+    when state == "failed" { yield true }
+    yield false
 }
 
 export craft lifecycle_transition_valid(from_state, to_state) {

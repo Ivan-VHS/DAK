@@ -35,11 +35,12 @@ export craft shell_palette_valid(palette_id) {
 }
 
 export craft material_valid(material) {
-    yield material == "industrial-glass"
-        or material == "matte"
-        or material == "acrylic"
-        or material == "metal"
-        or material == "wallpaper"
+    when material == "industrial-glass" { yield true }
+    when material == "matte" { yield true }
+    when material == "acrylic" { yield true }
+    when material == "metal" { yield true }
+    when material == "wallpaper" { yield true }
+    yield false
 }
 
 export craft material_effect_policy(material, reduced_motion, eco_visuals) {

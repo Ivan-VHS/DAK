@@ -18,13 +18,14 @@ export craft desktop_scene_valid(scene) {
 }
 
 export craft shell_component_valid(component) {
-    yield component == "desktop-scene"
-        or component == "dock"
-        or component == "launcher"
-        or component == "status-area"
-        or component == "window-layer"
-        or component == "notification-layer"
-        or component == "control-center"
+    when component == "desktop-scene" { yield true }
+    when component == "dock" { yield true }
+    when component == "launcher" { yield true }
+    when component == "status-area" { yield true }
+    when component == "window-layer" { yield true }
+    when component == "notification-layer" { yield true }
+    when component == "control-center" { yield true }
+    yield false
 }
 
 export craft system_event_valid(event) {
