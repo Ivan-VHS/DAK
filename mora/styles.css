@@ -1127,15 +1127,6 @@ button[data-action] {
 :root.reduce-transparency .widget-card,
 :root.reduce-transparency .dock,
 :root.reduce-transparency .app-window,
-:root.reduce-transparency .toast,
-@media (prefers-reduced-transparency: reduce) {
-  /* The following selectors are repeated below because media selectors cannot be
-     mixed with ordinary selectors in a single selector list. */
-}
-:root.reduce-transparency .statusbar,
-:root.reduce-transparency .widget-card,
-:root.reduce-transparency .dock,
-:root.reduce-transparency .app-window,
 :root.reduce-transparency .toast {
   background: var(--glass-strong-fallback);
   -webkit-backdrop-filter: none;
