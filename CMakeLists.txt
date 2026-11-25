@@ -44,7 +44,7 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
     add_custom_target(duckos-boot-iso
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/boot/build-iso.sh"
+        COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/boot/build-iso.sh"
             --work-dir "${CMAKE_BINARY_DIR}/duckos-boot"
             --output "${CMAKE_BINARY_DIR}/DuckOS-Stage0-x86_64.iso"
         BYPRODUCTS
