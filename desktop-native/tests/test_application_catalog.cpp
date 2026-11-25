@@ -46,12 +46,19 @@ int main(int argc, char *argv[])
                               QStringLiteral("seu-beu"), QStringLiteral("love-il"),
                               QStringLiteral("poi"), QStringLiteral("poi-2"),
                               QStringLiteral("po-2"), QStringLiteral("gamecharager"),
-                              QStringLiteral("red-sparrow"), QStringLiteral("exedotexe"),
-                              QStringLiteral("runtime")}) {
+                              QStringLiteral("red-sparrow")}) {
         const ApplicationInfo *entry = catalog.find(id);
         if (!entry || !entry->launchable || entry->nativeAction != QStringLiteral("local-collection")) {
-            std::cerr << "Missing native local collection port: " << id.toStdString() << '\\n';
+            std::cerr << "Missing native local collection port: " << id.toStdString() << '\n';
             return 7;
+        }
+    }
+
+    for (const QString &id : {QStringLiteral("exedotexe"), QStringLiteral("runtime")}) {
+        const ApplicationInfo *entry = catalog.find(id);
+        if (!entry || !entry->launchable || entry->nativeAction != QStringLiteral("executable-inspector")) {
+            std::cerr << "Missing read-only executable inspector port: " << id.toStdString() << '\n';
+            return 9;
         }
     }
 
@@ -71,7 +78,7 @@ int main(int argc, char *argv[])
     for (const QString &id : {QStringLiteral("cockos"), QStringLiteral("po"), QStringLiteral("mora-ai")}) {
         const ApplicationInfo *entry = catalog.find(id);
         if (!entry || entry->launchable || entry->state != QStringLiteral("not-ported")) {
-            std::cerr << "Large legacy app must remain explicitly not ported: " << id.toStdString() << '\\n';
+            std::cerr << "Large legacy app must remain explicitly not ported: " << id.toStdString() << '\n';
             return 8;
         }
     }
