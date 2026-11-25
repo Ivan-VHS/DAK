@@ -392,15 +392,15 @@ duckos_page_table_status duckos_page_table_map(
             entry = table[index];
         }
 
+        if ((entry & DUCKOS_PAGE_NX) != 0u &&
+            (flags & DUCKOS_PAGE_NX) == 0u) {
+            return DUCKOS_PAGE_TABLE_PERMISSION_CONFLICT;
+        }
         if ((flags & DUCKOS_PAGE_USER) != 0u) {
             table[index] |= DUCKOS_PAGE_USER;
         }
         if ((flags & DUCKOS_PAGE_WRITABLE) != 0u) {
             table[index] |= DUCKOS_PAGE_WRITABLE;
-        }
-        if ((entry & DUCKOS_PAGE_NX) != 0u &&
-            (flags & DUCKOS_PAGE_NX) == 0u) {
-            return DUCKOS_PAGE_TABLE_PERMISSION_CONFLICT;
         }
 
         current_physical = entry & space->physical_address_mask;
@@ -450,9 +450,7 @@ duckos_page_table_status duckos_page_table_translate(
             const uint64_t base =
                 entry & space->physical_address_mask & ~offset_mask;
             *physical_address = base | (virtual_address & offset_mask);
-            combined_flags = (combined_flags & ~DUCKOS_PAGE_LARGE) |
-                (entry & (DUCKOS_PAGE_LARGE | DUCKOS_PAGE_WRITABLE |
-                          DUCKOS_PAGE_USER | DUCKOS_PAGE_NX));
+            combined_flags |= entry & DUCKOS_PAGE_LARGE;
             if (effective_flags != NULL) *effective_flags = combined_flags;
             return DUCKOS_PAGE_TABLE_OK;
         }
@@ -529,29 +527,20 @@ duckos_page_table_status duckos_page_table_unmap(
         space->ops.invalidate_page(space->ops.context, virtual_address);
     }
 
-    /* Reclaim empty page-table pages, never the PML4 root or mapped data frame. */
-    uint64_t child_physical = 0u;
+    /* Reclaim empty PT, PD and PDPT pages; the PML4 root and data frames stay owned. */
     for (int depth = 2; depth >= 0; --depth) {
-        const uint8_t child_level = (uint8_t)(depth + 1);
-        if (depth == 0) {
-            child_physical = space->root_physical;
-        } else {
-            uint64_t *parent = path_tables[depth - 1];
-            if (parent == NULL) break;
-            child_physical = parent[path_indices[depth - 1]] &
-                space->physical_address_mask;
-        }
-
+        uint64_t *parent = path_tables[depth];
+        if (parent == NULL) break;
+        const uint32_t index = path_indices[depth];
+        const uint64_t child_physical =
+            parent[index] & space->physical_address_mask;
         uint64_t *child = map_table(space, child_physical);
         if (child == NULL || !table_is_empty(child)) break;
-        if (depth == 0) break;
 
-        uint64_t *parent = path_tables[depth - 1];
-        parent[path_indices[depth - 1]] = 0u;
+        parent[index] = 0u;
         if (space->ops.release_page != NULL) {
             space->ops.release_page(space->ops.context, child_physical);
         }
-        (void)child_level;
     }
     return DUCKOS_PAGE_TABLE_OK;
 }
