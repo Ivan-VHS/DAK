@@ -79,6 +79,36 @@ static int test_rejects_double_free_and_invalid_ranges(void) {
     return 1;
 }
 
+static int test_rejects_untracked_and_partial_release(void) {
+    const duckos_memory_region regions[] = {
+        {0x1000u, 0x10000u, DUCKOS_MEMORY_USABLE, 0u}
+    };
+    duckos_frame_allocator allocator;
+    uint64_t run = 0u;
+    CHECK(duckos_frame_allocator_init(&allocator, regions, 1u, 0x1000u,
+        (uint64_t)(uintptr_t)memory - 0x1000u) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(duckos_frame_allocator_allocate_pages(
+        &allocator, 3u, 1u, &run) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(allocator.allocation_count == 1u);
+    CHECK(allocator.allocated_pages == 3u);
+
+    CHECK(duckos_frame_allocator_free(
+        &allocator, run + DUCKOS_FRAME_PAGE_SIZE, 1u) ==
+        DUCKOS_FRAME_ALLOCATOR_INVALID_RELEASE);
+    CHECK(allocator.allocation_count == 1u);
+    CHECK(allocator.allocated_pages == 3u);
+    CHECK(allocator.free_pages == allocator.total_pages - 3u);
+
+    CHECK(duckos_frame_allocator_free(
+        &allocator, run, 3u) == DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(allocator.allocation_count == 0u);
+    CHECK(allocator.allocated_pages == 0u);
+    CHECK(allocator.free_pages == allocator.total_pages);
+    CHECK(duckos_frame_allocator_free(
+        &allocator, run, 3u) == DUCKOS_FRAME_ALLOCATOR_ALREADY_FREE);
+    return 1;
+}
+
 static int test_rejects_bad_maps(void) {
     duckos_frame_allocator allocator;
     const duckos_memory_region overflow[] = {
@@ -106,6 +136,7 @@ int main(void) {
     if (!test_allocate_free_and_reuse() ||
         !test_alignment_and_extent_coalescing() ||
         !test_rejects_double_free_and_invalid_ranges() ||
+        !test_rejects_untracked_and_partial_release() ||
         !test_rejects_bad_maps()) return 1;
     puts("DuckOS frame allocator tests passed");
     return 0;
