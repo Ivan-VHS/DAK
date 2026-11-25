@@ -55,7 +55,7 @@ cmake --build build/mora-native --target duckos_mora_native --parallel
 ctest --test-dir build/mora-native --output-on-failure
 ~~~
 
-The Qt desktop target is optional and is skipped when Qt 6 Widgets is not found. Mora runs as a host-native application; it is not started by the Stage 1 kernel.
+Qt 桌面目标为可选项；未检测到 Qt 6 Widgets 时将跳过。Mora 作为宿主操作系统的原生应用运行，不由 Stage 1 内核启动。
 
 ## 浏览器参考预览
 
@@ -70,7 +70,7 @@ Windows PowerShell:
 npm test
 ~~~
 
-The browser shell is a reference surface. It is not a native compositor and does not imply kernel integration.
+浏览器外壳仅用于参考展示，并非原生合成器，也不代表已与内核集成。
 
 ## 构建发布镜像
 
@@ -103,13 +103,13 @@ x86_64 是面向 Intel 和 AMD 的主要目标。Elbrus 保留为单独兼容路
 
 ## 源码联邦与完整性
 
-The active source set is pinned in federation/repositories.v1.json. Initialize the exact recorded revisions with:
+当前源码集合的固定版本记录在 `federation/repositories.v1.json` 中。请使用以下命令初始化其中指定的确切版本：
 
 ~~~sh
 git submodule update --init --recursive
 ~~~
 
-The peer projects remain separate repositories with independent ownership, licenses, contracts and release cycles:
+关联项目仍是独立仓库，分别拥有各自的权利人、许可证、契约和发布周期：
 
 - [Reaper](https://github.com/Ivan-VHS/Reaper)
 - [Pytyliki](https://github.com/Ivan-VHS/Pytyliki)
@@ -118,22 +118,22 @@ The peer projects remain separate repositories with independent ownership, licen
 
 ## 文档
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
-- [Bootable image](docs/BOOTABLE_IMAGE.md)
-- [Core subsystem MVP](docs/CORE_MVP_V1.md)
-- [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md)
-- [Project evolution ladder](docs/PROJECT_EVOLUTION_LADDER.md)
-- [Native Reaper integration](docs/REAPER_INTEGRATION.md)
-- [Documentation index](docs/README.md)
+- [架构](docs/ARCHITECTURE.md)
+- [实现状态](docs/IMPLEMENTATION_STATUS.md)
+- [可启动镜像](docs/BOOTABLE_IMAGE.md)
+- [内核子系统 MVP](docs/CORE_MVP_V1.md)
+- [生态集成](docs/ECOSYSTEM_INTEGRATION.md)
+- [项目演进阶梯](docs/PROJECT_EVOLUTION_LADDER.md)
+- [Reaper 原生集成](docs/REAPER_INTEGRATION.md)
+- [文档索引](docs/README.md)
 
-The implementation-status ledger, bootable-image guide and project evolution ladder are the authoritative records for delivered and pending system layers.
+实现状态台账、可启动镜像指南和项目演进阶梯是已交付及待完成系统层的权威记录。
 
 ## 许可证与法律状态
 
 仓库根目录没有 LICENSE 文件或许可证声明。不得假定采用 MIT、Apache-2.0 或拥有重新分发权。分发前必须由权利人选择并批准许可证条款。
 
-Do not redistribute bundled or third-party materials outside the applicable license grants. A Git submodule pin records a source revision; it does not change ownership or license terms.
+不得超出适用许可证授权范围重新分发打包内容或第三方材料。Git submodule 固定版本仅记录源码修订，不会改变权属或许可证条款。
 
 ## 工程原则
 

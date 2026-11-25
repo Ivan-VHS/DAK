@@ -55,7 +55,7 @@ cmake --build build/mora-native --target duckos_mora_native --parallel
 ctest --test-dir build/mora-native --output-on-failure
 ~~~
 
-The Qt desktop target is optional and is skipped when Qt 6 Widgets is not found. Mora runs as a host-native application; it is not started by the Stage 1 kernel.
+Цель Qt Desktop необязательна и пропускается, если Qt 6 Widgets не найден. Mora работает как нативное приложение хостовой ОС и не запускается ядром Stage 1.
 
 ## Браузерное reference preview
 
@@ -70,7 +70,7 @@ Windows PowerShell:
 npm test
 ~~~
 
-The browser shell is a reference surface. It is not a native compositor and does not imply kernel integration.
+Браузерная оболочка — демонстрационная поверхность. Она не является нативным композитором и не означает интеграцию с ядром.
 
 ## Сборка release-образа
 
@@ -103,13 +103,13 @@ x86_64 — основная цель для Intel и AMD. Эльбрус сох�
 
 ## Федерация исходников и целостность
 
-The active source set is pinned in federation/repositories.v1.json. Initialize the exact recorded revisions with:
+Активный набор исходников зафиксирован в `federation/repositories.v1.json`. Инициализируйте именно указанные ревизии командой:
 
 ~~~sh
 git submodule update --init --recursive
 ~~~
 
-The peer projects remain separate repositories with independent ownership, licenses, contracts and release cycles:
+Связанные проекты остаются отдельными репозиториями с собственными правообладателями, лицензиями, контрактами и циклами выпуска:
 
 - [Reaper](https://github.com/Ivan-VHS/Reaper)
 - [Pytyliki](https://github.com/Ivan-VHS/Pytyliki)
@@ -118,22 +118,22 @@ The peer projects remain separate repositories with independent ownership, licen
 
 ## Документация
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
-- [Bootable image](docs/BOOTABLE_IMAGE.md)
-- [Core subsystem MVP](docs/CORE_MVP_V1.md)
-- [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md)
-- [Project evolution ladder](docs/PROJECT_EVOLUTION_LADDER.md)
-- [Native Reaper integration](docs/REAPER_INTEGRATION.md)
-- [Documentation index](docs/README.md)
+- [Архитектура](docs/ARCHITECTURE.md)
+- [Статус реализации](docs/IMPLEMENTATION_STATUS.md)
+- [Загрузочный образ](docs/BOOTABLE_IMAGE.md)
+- [MVP подсистем ядра](docs/CORE_MVP_V1.md)
+- [Интеграция экосистемы](docs/ECOSYSTEM_INTEGRATION.md)
+- [Шкала эволюции проекта](docs/PROJECT_EVOLUTION_LADDER.md)
+- [Нативная интеграция Reaper](docs/REAPER_INTEGRATION.md)
+- [Индекс документации](docs/README.md)
 
-The implementation-status ledger, bootable-image guide and project evolution ladder are the authoritative records for delivered and pending system layers.
+Реестр статуса реализации, руководство по загрузочному образу и шкала эволюции проекта являются основными источниками сведений о готовых и планируемых слоях системы.
 
 ## Лицензия и правовой статус
 
 В корне репозитория нет файла LICENSE или декларации лицензии. Нельзя предполагать MIT, Apache-2.0 или право на распространение. Лицензия должна быть выбрана и одобрена правообладателем до распространения.
 
-Do not redistribute bundled or third-party materials outside the applicable license grants. A Git submodule pin records a source revision; it does not change ownership or license terms.
+Не распространяйте включённые или сторонние материалы за пределами прав, предоставленных соответствующими лицензиями. Фиксация Git submodule указывает ревизию исходников, но не меняет правообладание и условия лицензирования.
 
 ## Инженерное правило
 
