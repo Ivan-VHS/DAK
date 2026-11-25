@@ -31,7 +31,7 @@ assert(not gpu_abi["capability_allowed"](device, "gpu.clock.force"), "forced clo
 assert(gpu_abi["qos_rank"]("critical") > gpu_abi["qos_rank"]("background"), "render-critical QoS ranks above background")
 
 # Physical VRAM, host RAM, compressed RAM and swap are independently accounted.
-make initial_pool := [16384, 1024, 4096, 8192, 4096, 8192, 4096, 16384, 0, 40960]
+make initial_pool := [16384, 1024, 4096, 12288, 4096, 8192, 0, 16384, 0, 40960]
 assert(gpu_memory["pool_valid"](initial_pool), "valid multi-tier GPU memory pool")
 assert(gpu_memory["committed_bytes"](initial_pool) == 8192, "pool accounting includes resident and host bytes")
 assert(gpu_memory["capacity_report"](initial_pool) == ["ready", 15360, 8192, 32768, false], "capacity reports actual backed tiers")
