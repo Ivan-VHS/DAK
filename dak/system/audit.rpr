@@ -14,7 +14,7 @@ export craft record_valid(record) {
     when kind(record[4]) != "text" or kind(record[5]) != "text" or kind(record[6]) != "text" or kind(record[7]) != "text" or kind(record[8]) != "text" {
         yield false
     }
-    when record[0] <= 0 {
+    when record[0] % 1 != 0 or record[0] <= 0 {
         yield false
     }
     when record[1] == "" or record[2] == "" or record[3] == "" {
@@ -49,7 +49,7 @@ export craft chain_valid(records) {
 }
 
 export craft append_policy(records, record, max_records) {
-    when kind(records) != "list" or kind(max_records) != "number" or max_records <= 0 or size(records) >= max_records {
+    when kind(records) != "list" or kind(max_records) != "number" or max_records % 1 != 0 or max_records <= 0 or size(records) >= max_records {
         yield "reject-capacity"
     }
     when not chain_valid(records) or not record_valid(record) {
