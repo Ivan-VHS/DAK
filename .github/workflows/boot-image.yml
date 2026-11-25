@@ -4,20 +4,24 @@ on:
   pull_request:
     paths:
       - "boot/**"
+      - "duckboot/**"
       - "kernel/**"
       - "foundation/**"
       - "tests/test_boot_info.c"
       - "tests/test_frame_allocator.c"
+      - "tests/test_duckboot_core.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
   push:
     branches: [main]
     paths:
       - "boot/**"
+      - "duckboot/**"
       - "kernel/**"
       - "foundation/**"
       - "tests/test_boot_info.c"
       - "tests/test_frame_allocator.c"
+      - "tests/test_duckboot_core.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
   workflow_dispatch:
@@ -40,7 +44,7 @@ jobs:
       - name: Install native image and emulator tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential binutils curl xorriso qemu-system-x86 ovmf
+          sudo apt-get install -y build-essential binutils clang lld dosfstools mtools curl xorriso qemu-system-x86 ovmf
 
       - name: Build host boot contract tests
         run: |

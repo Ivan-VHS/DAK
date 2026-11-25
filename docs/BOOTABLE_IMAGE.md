@@ -1,32 +1,57 @@
 # DuckOS x86_64 bootable Stage 1 image
 
-**Status:** experimental native kernel foundation, not a complete operating system.  
-**Architecture:** x86_64, Limine protocol v12.11.1, BIOS and UEFI hybrid ISO.  
-**Kernel ownership:** DuckOS owns the freestanding entry point, memory-map adapter, Boot Info validation, early physical-frame allocator and framebuffer/serial output. Limine is a separately licensed third-party bootloader.
+**Status:** experimental native kernel foundation with a first-party DuckBoot UEFI path under integration verification. This is not a complete operating system.  
+**Architecture:** x86-64; UEFI starts DuckBoot Core, legacy BIOS retains the pinned Limine fallback.  
+**Kernel ownership:** DuckOS owns the DuckBoot EFI application, ELF64 inspection/loading, page-table setup, versioned handoff and kernel entry. Limine remains a separately licensed BIOS fallback.
 
-## What this image actually boots
+## Firmware paths
 
-The image starts a native DuckOS ELF kernel through Limine. The entry point validates protocol base revision 6, firmware identity, HHDM, executable physical/virtual base, framebuffer and memory map. It converts firmware memory regions to DuckOS Boot Info v1 and verifies that the kernel and framebuffer are covered by the expected reserved/MMIO ranges.
+The image carries both routes to preserve a known rollback path.
 
-After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel reports available/allocated page counts and emits `DUCKOS_BOOT_OK stage=1`.
+### UEFI — DuckBoot
 
-This allocator is intentionally monotonic: it does not free pages, merge ranges, reclaim memory, construct page tables or provide a heap. It is a first native memory primitive, not a finished virtual-memory subsystem.
+UEFI loads EFI/BOOT/BOOTX64.EFI from the image's FAT32 EFI System Partition. DuckBoot uses UEFI Simple File System to read \boot\duckboot.cfg and \boot\duckos.elf, GOP for framebuffer metadata and COM1 for diagnostics.
 
-The existing .rpr kernel files remain the policy/reference layer. Reaper's current native compiler is not yet a freestanding kernel compiler, so the privileged platform entry bridge is C11. The current Reaper AOT slice is not claimed to compile the kernel.
+DuckBoot validates the ELF64 x86-64 ET_EXEC header and all loadable segments before copying them to their declared physical ranges. It creates a kernel stack, an identity mapping for the transition code, an HHDM mapping and per-segment kernel mappings with W^X/NX permissions. It then normalizes the EFI memory map, validates DuckOS Boot Info v1, exits UEFI Boot Services with the exact map key and transfers to the kernel through DuckBoot handoff v1.
+
+The kernel validates the handoff, initializes the early physical-frame allocator, clears one 4 KiB frame and emits:
+
+    DUCKOS_BOOT_OK stage=1 loader=duckboot handoff=v1 frames=1
+
+The OVMF test requires the loader=duckboot field, so a Limine boot cannot masquerade as a successful DuckBoot run.
+
+### Legacy BIOS — Limine fallback
+
+The BIOS route still loads boot/duckos-limine.elf through pinned Limine v12.11.1. It validates Limine responses, adapts them to Boot Info v1, initializes the same early physical-frame allocator and emits the existing DUCKOS_BOOT_OK stage=1 marker.
+
+A first-party BIOS Stage 1/Stage 2 implementation is not yet present. Limine remains in the image until the native BIOS route is independently implemented and verified.
+
+## Kernel boundary
+
+Both entry routes lead to the same bounded Stage 1 memory foundation, but use different firmware contracts:
+
+- The BIOS fallback receives Limine protocol responses and adapts them to Boot Info v1.
+- DuckBoot UEFI produces DuckBoot handoff v1 plus Boot Info v1 directly; the DuckBoot kernel entry does not include Limine request sections.
+
+Boot Info v1 contains fixed-width fields and a separately supplied memory map. The DuckBoot envelope contains the mapped virtual addresses and HHDM metadata required by the x86-64 kernel entry.
+
+The allocator remains monotonic and single-core. It exposes only page-aligned 4 KiB frames from validated USABLE regions, excludes addresses below 1 MiB, allocates one frame and clears that frame. It does not free pages, build page tables after boot, reclaim regions or provide a heap.
+
+The existing .rpr files remain Reaper policy/reference material. The freestanding platform entry bridge is C11 because the current Reaper native compiler is not yet a freestanding kernel compiler; no claim is made that Reaper currently compiles the kernel.
 
 ## Build
 
-On Linux x86_64 install gcc, binutils, curl, tar, xorriso and sha256sum.
+On Linux x86_64 install GCC, binutils, Clang, lld-link, dosfstools, mtools, curl, tar, xorriso and sha256sum.
 
     boot/build-iso.sh
 
-The script downloads the pinned Limine binary release, checks its SHA-256 before use, compiles the freestanding DuckOS kernel and allocator, validates the ELF class/architecture/request section, creates a hybrid BIOS/UEFI ISO and writes a SHA-256 sidecar.
+The build pins and verifies the Limine archive used by the BIOS fallback, compiles both ELF kernels, cross-compiles the EFI application as PE32+, builds a FAT32 ESP and creates a hybrid BIOS/UEFI ISO.
 
-    boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage1-x86_64.iso
+    boot/build-iso.sh --work-dir build/duckboot --output build/DuckOS-Stage1-x86_64.iso
 
 CMake integration:
 
-    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
     cmake --build build --target duckos-boot-iso
     ctest --test-dir build --output-on-failure
 
@@ -36,34 +61,12 @@ Install qemu-system-x86 and OVMF firmware, then run:
 
     boot/test-qemu.sh --iso build/DuckOS-Stage1-x86_64.iso --ovmf-code /usr/share/OVMF/OVMF_CODE.fd --ovmf-vars /usr/share/OVMF/OVMF_VARS.fd
 
-The test boots through BIOS and UEFI and requires `DUCKOS_BOOT_OK stage=1` in the serial log. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
+The script verifies the BIOS fallback marker and separately requires the DuckBoot-specific UEFI marker. GitHub Actions builds the same image and runs both firmware tests.
 
-GitHub Actions builds the same ISO, runs Boot Info and frame-allocator CTests, boots the image in BIOS and OVMF UEFI, and uploads the ISO, checksum and serial logs.
+The DuckBoot UEFI application has been cross-compiled and linked as a PE32+ EFI application; the DuckBoot kernel has been linked as a high-half ELF64 executable and accepted by the ELF inspector. These build checks are necessary but do not replace the OVMF handoff test.
 
-## Allocator contract and tests
+## Deliberate limits
 
-The host-testable allocator accepts only a sorted, non-overlapping memory map with bounded region count and non-overflowing ranges. It checks page alignment and arithmetic, trims partial pages, respects a caller-supplied minimum physical address, never returns a frame twice, skips all non-USABLE regions and reports exhaustion. Tests cover usable/reserved gaps, alignment, address clamping, partial pages, malformed/overlapping/overflowing maps, no-usable-memory and exhaustion.
+DuckBoot UEFI uses the firmware's Simple File System interface rather than shipping its own filesystem drivers. There is no own BIOS reader, interactive menu, scripting engine, Multiboot2 loader, Ext/Btrfs/XFS/NTFS/ZFS driver, PXE/TFTP/HTTP path, Secure Boot trust chain, disk installer or automatic rollback yet.
 
-The kernel uses the same allocator source compiled with freestanding x86_64 flags and no hosted runtime dependency.
-
-## Pinned third-party input and attribution
-
-The build pins Limine v12.11.1 binary archive by SHA-256 in boot/limine-toolchain.lock. The protocol header is a byte-for-byte copy of limine-protocol/include/limine.h, pinned to the protocol repository commit recorded in the lock file. Its upstream SPDX 0BSD notice is retained. The Limine COPYING terms are placed inside the ISO.
-
-Upstream references: https://github.com/Limine-Bootloader/limine-protocol/blob/trunk/PROTOCOL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/INSTALL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/USAGE.md
-
-## Verified Stage 1 build
-
-GitHub Actions run [45527148367](https://github.com/Ivan-VHS/DuckOS/actions/runs/45527148367) passed the host contracts, freestanding ELF/ISO build and QEMU BIOS plus OVMF UEFI tests. Both serial logs contain exactly one `DUCKOS_BOOT_OK stage=1` marker. The ISO is 4,376,576 bytes; SHA-256: `7b5bb3c29c0eeeb13b6e0a4514c15fe7df941969353287dac8d225f741f054f7`.
-
-Observed emulator memory:
-- BIOS: 18 map regions, 65,061 allocatable 4 KiB pages, one page allocated and cleared at physical address `0x00100000`.
-- UEFI: 32 map regions, 53,041 allocatable 4 KiB pages, one page allocated and cleared at physical address `0x00100000`.
-
-These figures describe the QEMU configurations in that workflow, not a minimum hardware requirement or a promise for every machine.
-
-## Deliberate Stage 1 limits
-
-This image does not yet provide a reusable allocator/free path, page-table manager, virtual-memory heap or address-space isolation; IDT, exception/interrupt handlers, APIC/PIC, timer or preemptive context switching; processes, threads, syscalls, user mode, scheduler execution or IPC runtime; ACPI/PCI/USB drivers, DMA or production driver manager; filesystem, init/service supervisor, package manager or persistence; native Mora compositor, window manager, GPU acceleration, audio stack or user applications; Secure Boot signing/enrolment, authenticated updates, rollback, installer or production recovery.
-
-It is not tested on physical hardware. The current QEMU BIOS/UEFI tests prove only the declared x86_64 firmware path in the emulator. No blanket device or laptop compatibility claim is made.
+The current kernel still has no reusable memory manager, page-table manager, interrupt subsystem, process model, syscall layer, driver runtime, filesystem, service supervisor or compositor. The image is not qualified on physical hardware.
