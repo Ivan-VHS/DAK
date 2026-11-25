@@ -339,10 +339,10 @@ assert(app_experience["recovery_choice"](true, false, true) == "quarantine-recov
 assert(app_experience["recovery_choice"](false, false, false) == "manual-recovery-required", "missing original data is reported honestly")
 
 # BAV signed report bundle and reversible scan decisions.
-make bav_report := ["DUCKBAV1", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "ed25519", "key.bav.release.v1", "base64-signature", 1000, 3]
+make bav_report := ["DUCKBAV1", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "ed25519", "key.bav.release.v1", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 1000, 3]
 assert(bav["artifact_valid"](bav_report, true), "BAV report passes after trusted signature verification")
 assert(not bav["artifact_valid"](bav_report, false), "BAV reader rejects an artifact when the trusted verifier fails")
-assert(not bav["artifact_valid"](["wrong-magic", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "ed25519", "key.bav.release.v1", "base64-signature", 1000, 3], true), "BAV reader rejects unknown artifact magic")
+assert(not bav["artifact_valid"](["wrong-magic", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "ed25519", "key.bav.release.v1", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 1000, 3], true), "BAV reader rejects unknown artifact magic")
 assert(not bav["artifact_valid"](["DUCKBAV1", "application/vnd.duckos.bav+json", 1, "sha256:abc", "bav-engine.v1", "rsa", "key.bav.release.v1", "signature", 1000, 3], true), "BAV reader rejects an unsupported signature algorithm")
 assert(bav["scan_disposition"]("clean", 10000, true) == "allow", "clean scan does not block access")
 assert(bav["scan_disposition"]("malicious", 9999, true) == "quarantine-reversible", "high-confidence malware uses reversible quarantine")
