@@ -33,7 +33,7 @@ static duckos_capability_slot *token_slot(
 
     if (broker == NULL || broker->slots == NULL || token == 0U ||
         raw_index == 0U || raw_generation == 0U ||
-        raw_index > broker->capacity || raw_generation > UINT32_MAX) {
+        raw_index > broker->capacity) {
         return NULL;
     }
     index = (uint32_t)(raw_index - UINT64_C(1));
@@ -69,8 +69,55 @@ static int domain_valid(uint16_t domain) {
            domain <= (uint16_t)REAPER_SYSTEM_DOMAIN_DESKTOP_SHELL;
 }
 
+static uint64_t domain_capability_mask(uint16_t domain) {
+    switch ((ReaperSystemDomain)domain) {
+        case REAPER_SYSTEM_DOMAIN_PROCESS:
+            return REAPER_SYSTEM_CAP_PROCESS_INSPECT | REAPER_SYSTEM_CAP_PROCESS_CONTROL;
+        case REAPER_SYSTEM_DOMAIN_THREAD:
+            return REAPER_SYSTEM_CAP_THREAD_CONTROL;
+        case REAPER_SYSTEM_DOMAIN_SYNC:
+            return REAPER_SYSTEM_CAP_SYNC;
+        case REAPER_SYSTEM_DOMAIN_FILESYSTEM:
+            return REAPER_SYSTEM_CAP_FS_HANDLE | REAPER_SYSTEM_CAP_FS_READ |
+                   REAPER_SYSTEM_CAP_FS_WRITE;
+        case REAPER_SYSTEM_DOMAIN_CLOCK:
+            return REAPER_SYSTEM_CAP_CLOCK;
+        case REAPER_SYSTEM_DOMAIN_NETWORK:
+            return REAPER_SYSTEM_CAP_NETWORK;
+        case REAPER_SYSTEM_DOMAIN_CRYPTO:
+            return REAPER_SYSTEM_CAP_CRYPTO;
+        case REAPER_SYSTEM_DOMAIN_DESKTOP_WINDOW:
+            return REAPER_SYSTEM_CAP_DESKTOP_WINDOW;
+        case REAPER_SYSTEM_DOMAIN_DESKTOP_DISPLAY:
+            return REAPER_SYSTEM_CAP_DESKTOP_DISPLAY |
+                   REAPER_SYSTEM_CAP_DESKTOP_DISPLAY_ADMIN;
+        case REAPER_SYSTEM_DOMAIN_DESKTOP_INPUT:
+            return REAPER_SYSTEM_CAP_DESKTOP_INPUT;
+        case REAPER_SYSTEM_DOMAIN_DESKTOP_SESSION:
+            return REAPER_SYSTEM_CAP_DESKTOP_SESSION |
+                   REAPER_SYSTEM_CAP_DESKTOP_SESSION_ADMIN;
+        case REAPER_SYSTEM_DOMAIN_DESKTOP_COMPOSITOR:
+            return REAPER_SYSTEM_CAP_DESKTOP_COMPOSITOR;
+        case REAPER_SYSTEM_DOMAIN_DESKTOP_GPU:
+            return REAPER_SYSTEM_CAP_DESKTOP_GPU |
+                   REAPER_SYSTEM_CAP_DESKTOP_GPU_ADMIN;
+        case REAPER_SYSTEM_DOMAIN_DESKTOP_SHELL:
+            return REAPER_SYSTEM_CAP_DESKTOP_SHELL;
+        case REAPER_SYSTEM_DOMAIN_INVALID:
+            break;
+    }
+    return 0U;
+}
+
 static int rights_valid(uint64_t rights) {
-    return rights != 0U && (rights & ~CAPABILITY_ALLOWED_MASK) == 0U;
+    return (rights & REAPER_SYSTEM_CAP_KNOWN_MASK) != 0U &&
+           (rights & ~CAPABILITY_ALLOWED_MASK) == 0U;
+}
+
+static int rights_fit_domain(uint16_t domain, uint64_t rights) {
+    uint64_t allowed = domain_capability_mask(domain);
+    return allowed != 0U &&
+           (rights & ~(allowed | DUCKOS_CAPABILITY_BROKER_DELEGATE)) == 0U;
 }
 
 static int scope_valid(uint16_t domain, duckos_capability_scope scope,
@@ -149,8 +196,8 @@ duckos_capability_status duckos_capability_issue(
         !principal_valid(grantee) || token == NULL ||
         principal_equal(issuer, grantee) || !rights_valid(rights) ||
         (rights & ~broker->root_ceiling) != 0U ||
-        !scope_valid(resource_domain, scope, resource_id, resource_generation) ||
-        (scope == DUCKOS_CAPABILITY_SCOPE_OBJECT && !domain_valid(resource_domain))) {
+        !domain_valid(resource_domain) || !rights_fit_domain(resource_domain, rights) ||
+        !scope_valid(resource_domain, scope, resource_id, resource_generation)) {
         return DUCKOS_CAPABILITY_INVALID_ARGUMENT;
     }
     if (!principal_equal(issuer, &broker->authority)) return DUCKOS_CAPABILITY_DENIED;
@@ -193,6 +240,7 @@ duckos_capability_status duckos_capability_attenuate(
     if (broker == NULL || !principal_valid(issuer) ||
         !principal_valid(grantee) || token == NULL ||
         principal_equal(issuer, grantee) || !rights_valid(rights) ||
+        !domain_valid(resource_domain) || !rights_fit_domain(resource_domain, rights) ||
         !scope_valid(resource_domain, scope, resource_id, resource_generation)) {
         return DUCKOS_CAPABILITY_INVALID_ARGUMENT;
     }
@@ -255,7 +303,8 @@ duckos_capability_status duckos_capability_authorize(
         !grant_chain_active(broker, slot, token)) {
         return DUCKOS_CAPABILITY_DENIED;
     }
-    if ((slot->rights & info->required_capabilities) != info->required_capabilities) {
+    if (slot->resource_domain != (uint16_t)info->domain ||
+        (slot->rights & info->required_capabilities) != info->required_capabilities) {
         return DUCKOS_CAPABILITY_DENIED;
     }
     if (slot->scope == (uint8_t)DUCKOS_CAPABILITY_SCOPE_OBJECT) {
