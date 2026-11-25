@@ -215,7 +215,5 @@ assert(gpu["recovery_action"]("faulted", 3, true, true) == "request-device-reset
 make dashboard_sample := [8589934592, 6442450944, 2147483648, 536870912, 72000, 2400, 9200, 0, 2, 180000]
 assert(gpu["dashboard_snapshot_valid"](dashboard_sample), "GPU dashboard snapshot is valid")
 assert(gpu["dashboard_alert"](dashboard_sample, 80000, 90000) == "migration-in-progress", "dashboard exposes migration separately from memory capacity")
-emit "DEBUG gpu_basis=" ++ text(gpu["dashboard_residency_basis_points"](dashboard_sample))
-emit "DEBUG resident_mib=" ++ text(dashboard_sample[1] / 1048576) ++ " total_mib=" ++ text(dashboard_sample[0] / 1048576)
 assert(gpu["dashboard_residency_basis_points"](dashboard_sample) == 7500, "dashboard reports physical VRAM residency without inventing extra VRAM")
 assert(gpu["dashboard_alert"]([8589934592, 6442450944, 2147483648, 536870912, 93000, 2400, 9200, 0, 0, 180000], 80000, 90000) == "critical-thermal", "dashboard marks hard thermal limit critical")
