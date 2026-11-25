@@ -1,7 +1,7 @@
 {
   "schema": "duckos.mora.experience.v1",
   "version": 1,
-  "product": "DuckOS",
+  "product": "Duck",
   "surface": "Mora host-native Qt 6 Widgets",
   "persistence": "current-user QSettings; local only",
   "profiles": [
