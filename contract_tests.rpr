@@ -30,6 +30,24 @@ import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
 import "duckos/ui/canvas.rpr" as canvas
 import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
+import "duckos/kernel/process.rpr" as process
+import "duckos/kernel/syscall.rpr" as syscall
+import "duckos/kernel/interrupts.rpr" as interrupts
+import "duckos/kernel/vm.rpr" as vm
+import "duckos/kernel/ipc_endpoint.rpr" as ipc_endpoint
+import "duckos/security/bav.rpr" as bav
+import "duckos/services/lifecycle.rpr" as service_lifecycle
+import "duckos/desktop/window_manager.rpr" as window_manager
+import "duckos/packages/transaction.rpr" as package_transaction
+import "duckos/kernel/process.rpr" as process
+import "duckos/kernel/syscall.rpr" as syscall
+import "duckos/kernel/interrupts.rpr" as interrupts
+import "duckos/kernel/vm.rpr" as vm
+import "duckos/kernel/ipc_endpoint.rpr" as ipc_endpoint
+import "duckos/security/bav.rpr" as bav
+import "duckos/services/lifecycle.rpr" as service_lifecycle
+import "duckos/desktop/window_manager.rpr" as window_manager
+import "duckos/packages/transaction.rpr" as package_transaction
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -261,4 +279,120 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
+
+# Native systems foundations: process identity, syscall ABI, VM, IRQ and IPC.
+make process_grants := ["process.yield", "process.exit", "ipc.send", "ipc.receive", "memory.map", "interrupt.ack", "storage.read"]
+make init_process := [42, 3, 0, 0, "running", 4096, 16384, 17, process_grants, nothing]
+make child_process := [43, 1, 42, 3, "created", 20480, 8192, 18, ["storage.read"], nothing]
+assert(process["descriptor_valid"](init_process), "process descriptor has a bounded stack and address space")
+assert(process["descriptor_valid"](child_process), "child descriptor carries parent generation")
+assert(process["child_authority_valid"](init_process, child_process), "child capabilities attenuate parent authority")
+assert(not process["child_authority_valid"](child_process, init_process), "child cannot become its parent's authority")
+assert(process["handle_matches"]([42, 3], init_process), "process handle generation matches")
+assert(not process["handle_matches"]([42, 2], init_process), "stale process handle is rejected")
+assert(process["transition_valid"]("running", "blocked"), "running process can block")
+assert(not process["transition_valid"]("exited", "ready"), "terminal process cannot be revived")
+make blocked_process := process["transition"](init_process, "blocked", nothing)
+assert(blocked_process[0] == "transitioned" and blocked_process[1][4] == "blocked", "process state transition is explicit")
+make exit_process := process["transition"](init_process, "exited", 0)
+assert(exit_process[0] == "transitioned" and exit_process[1][9] == 0, "exit code is retained")
+assert(process["transition"](init_process, "exited", nothing)[0] == "missing-exit-code", "terminal transition requires an exit code")
+make process_table := [init_process]
+assert(process["table_valid"](process_table), "process table validates unique process IDs")
+assert(process["lookup"](process_table, [42, 3]) == init_process, "process table lookup checks generation")
+make spawned := process["spawn"](process_table, [42, 3], child_process)
+assert(spawned[0] == "created" and size(spawned[1]) == 2, "child process is admitted with attenuated capabilities")
+assert(process["spawn"](process_table, [42, 2], child_process)[0] == "parent-or-authority-denied", "stale parent handle cannot spawn a process")
+
+# Syscall requests use stable IDs, exact ABI versions, numeric handles and user buffers.
+make syscall_table := syscall["descriptors_v1"]()
+make yield_request := [1, 1, 42, 3, 0, 0, "none"]
+assert(syscall["table_valid"](syscall_table), "syscall descriptor table is versioned and unique")
+assert(syscall["request_valid"](yield_request, syscall_table, init_process) == ["dispatch", 1], "valid caller reaches syscall admission")
+make stale_request := [1, 1, 42, 2, 0, 0, "none"]
+assert(syscall["request_valid"](stale_request, syscall_table, init_process)[0] == "reject", "stale syscall handle is rejected")
+make kernel_pointer_request := [16, 1, 42, 3, 2, 12, "kernel-pointer"]
+assert(syscall["request_valid"](kernel_pointer_request, syscall_table, init_process)[0] == "reject", "syscall boundary rejects kernel pointers")
+make syscall_rules := [["process.yield", "syscall.process.yield", "invoke", 0, true]]
+assert(syscall["request_policy"](yield_request, syscall_table, init_process, syscall_rules)[0] == "dispatch", "BAV policy authorizes a declared syscall")
+assert(syscall["request_policy"](yield_request, syscall_table, init_process, [])[0] == "reject", "syscall with no matching BAV rule is denied")
+
+# W^X mappings are owner- and address-space-scoped.
+make writable_mapping := [4096, 8192, 8192, "rw", 42, 17, "allocated"]
+make mapped := vm["map"]([], writable_mapping)
+assert(mapped[0] == "mapped" and size(mapped[1]) == 1, "valid page mapping is admitted")
+assert(vm["translate"](mapped[1], 17, 42, 4112, "write") == ["translated", 8208], "translation checks mapping owner and write access")
+assert(vm["translate"](mapped[1], 17, 42, 4112, "execute")[0] == "fault", "writable memory cannot execute")
+assert(vm["map"](mapped[1], [8192, 16384, 4096, "r", 42, 17, "allocated"])[0] == "reject", "overlapping virtual mappings are rejected")
+assert(vm["map"]([], [4096, 8192, 4096, "rwx", 42, 17, "allocated"])[0] == "reject", "W+X mapping is impossible")
+assert(vm["map"]([], [4096, 8192, 4096, "rw", 42, 17, "unverified"])[0] == "reject", "mapping requires allocator-issued backing state")
+make unmapped := vm["unmap"](mapped[1], 17, 42, 4096)
+assert(unmapped[0] == "unmapped" and size(unmapped[1]) == 0, "unmap removes only the owning address-space mapping")
+
+# Interrupt dispatch is bounded by route, source, mask and nesting priority.
+make timer_irq := [48, 10, "edge", "timer", "lapic", false, false, 0]
+assert(interrupts["descriptor_valid"](timer_irq), "timer interrupt route is valid")
+assert(interrupts["dispatch_policy"](timer_irq, [48, true, 0, 255, true]) == "dispatch", "valid pending IRQ can be dispatched")
+assert(interrupts["dispatch_policy"](timer_irq, [48, true, 1, 5, true]) == "defer", "lower-priority nested IRQ is deferred")
+assert(interrupts["dispatch_policy"](timer_irq, [48, true, 0, 255, false]) == "untrusted-source", "untrusted interrupt source is rejected")
+assert(interrupts["acknowledge"](timer_irq, "timer", ["interrupt.ack"]) == "acknowledged", "registered handler can acknowledge its route")
+assert(interrupts["acknowledge"](timer_irq, "other", ["interrupt.ack"]) == "wrong-handler", "unregistered handler cannot acknowledge another route")
+assert(interrupts["set_mask"](timer_irq, true)[1][5], "interrupt mask transition is explicit")
+
+# Endpoint messages have bounded capacity, monotonically increasing sequence IDs and endpoint ownership.
+make endpoint_created := ipc_endpoint["create"](7, 42, 2, 256, "ipc.send")
+assert(endpoint_created[0] == "ready", "valid IPC endpoint can be created")
+make endpoint_sent := ipc_endpoint["send"](endpoint_created[1], 43, ["ipc.send"], ["log", 5, "hello"])
+assert(endpoint_sent[0] == "sent" and endpoint_sent[2] == 1, "IPC send allocates a sequence number")
+assert(ipc_endpoint["send"](endpoint_sent[1], 43, ["ipc.send"], ["large", 512, "x"])[0] == "message-limit", "IPC rejects oversized messages")
+make endpoint_received := ipc_endpoint["receive"](endpoint_sent[1], 42, ["ipc.receive"])
+assert(endpoint_received[0] == "received" and endpoint_received[2][0] == 1, "endpoint owner receives FIFO message")
+assert(ipc_endpoint["receive"](endpoint_received[1], 42, ["ipc.receive"])[0] == "empty", "empty endpoint reports a stable state")
+assert(ipc_endpoint["receive"](endpoint_sent[1], 99, ["ipc.receive"])[0] == "denied", "foreign process cannot receive endpoint messages")
+
+# BAV is deny-by-default and produces payload-free, sequence-checked audit records.
+make bav_rules := [["storage.read", "user/documents", "read", 1024, true], ["sanitize", "*", "sanitize", 4096, true]]
+make allowed_read := [42, "storage.read", "user/documents", "read", 128, "validated"]
+assert(bav["evaluate"](allowed_read, bav_rules, ["storage.read"]) == ["allow", 0], "BAV allows only a matching scoped rule")
+assert(bav["evaluate"]([42, "storage.read", "user/secrets", "read", 128, "validated"], bav_rules, ["storage.read"])[0] == "deny", "BAV denies mismatched resource scope")
+assert(bav["evaluate"]([42, "storage.read", "user/documents", "read", 2048, "validated"], bav_rules, ["storage.read"])[0] == "deny", "BAV enforces payload budgets")
+assert(bav["evaluate"]([42, "firmware.write", "device/flash", "write", 0, "validated"], bav_rules, ["firmware.write"])[0] == "deny", "BAV hard-denies firmware mutation")
+assert(bav["evaluate"]([42, "storage.read", "user/documents", "read", 128, "untrusted"], bav_rules, ["storage.read"])[0] == "deny", "untrusted data cannot exercise storage effects")
+make audit_record := bav["audit_append"]([], [42, "storage.read", "user/documents", "read", "allow"])
+assert(audit_record[0] == "appended" and audit_record[2] == 1, "BAV audit sequence starts at one")
+assert(bav["audit_valid"](audit_record[1]), "BAV audit journal is monotonic")
+assert(not bav["audit_valid"]([[2, 42, "storage.read", "user/documents", "read", "allow"]]), "BAV rejects audit sequence gaps")
+
+# Service dependency readiness and restart budgets are explicit.
+make storage_service := ["storage", 1, "ready", 0, 3, 100, [], ["storage.read"]]
+make desktop_service := ["desktop", 1, "stopped", 0, 2, 101, ["storage"], []]
+assert(service_lifecycle["descriptor_valid"](storage_service), "service descriptor is valid")
+assert(service_lifecycle["dependency_state"](desktop_service, [storage_service]) == "ready", "service starts after dependencies are ready")
+assert(service_lifecycle["start_policy"](desktop_service, [storage_service])[0] == "start", "ready dependencies allow service start")
+assert(service_lifecycle["start_policy"](desktop_service, [])[0] == "defer", "missing service dependency defers startup")
+assert(service_lifecycle["exit_decision"](1, 2, 2) == ["failed", 2], "service restart budget is finite")
+
+# Desktop state can be restored to a connected display and moved by keyboard.
+make primary_display := ["display0", 0, 0, 1920, 1080, 100, true]
+make lost_display_window := ["w1", 42, "disconnected", 3000, 3000, 1280, 720, "normal", true]
+make restored_window := window_manager["restore_display"](lost_display_window, [primary_display])
+assert(restored_window[0] == "clamped" and restored_window[1][2] == "display0", "window moves to the remaining primary display")
+assert(restored_window[1][3] == 640 and restored_window[1][4] == 360, "restored window stays inside display work area")
+assert(window_manager["move_keyboard"](restored_window[1], primary_display, 16, 16)[1][3] == 656, "keyboard move uses deterministic bounded steps")
+make second_window := ["w2", 43, "display0", 10, 10, 500, 400, "normal", true]
+make focused_windows := window_manager["focus_order"]([restored_window[1], second_window], "w1")
+assert(focused_windows[0] == "focused" and focused_windows[1][size(focused_windows[1]) - 1][0] == "w1", "focus order brings selected window to the front")
+
+# Package installation is staged, health-checked and reversible.
+make demo_manifest := ["org.duck.demo", "1.0.0", "x86_64", 1, "DuckOrg", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", true, ["storage.read"], 1024, "apps/org.duck.demo/main.rpr"]
+assert(package_transaction["manifest_valid"](demo_manifest), "package manifest fields are bounded")
+assert(package_transaction["install_policy"](demo_manifest, [], ["storage.read"], "x86_64", 1)[0] == "approved", "compatible signed manifest passes install policy")
+assert(package_transaction["install_policy"](demo_manifest, [], [], "x86_64", 1)[0] == "reject", "package cannot amplify capabilities")
+make package_stage := package_transaction["prepare"]("tx-1", demo_manifest, [], ["storage.read"], "x86_64", 1)
+assert(package_stage[0] == "prepared", "package is staged before activation")
+make package_switch := package_transaction["activate"](package_stage[1])
+assert(package_switch[0] == "switch-pending-health", "package activation waits for health confirmation")
+assert(package_transaction["accept_health"](package_switch[1], false)[0] == "rollback-required", "failed first boot requires rollback")
+assert(package_transaction["rollback"](package_switch[1])[0] == "rolled-back", "package rollback restores prior version")
+
 emit "DUCKOS_REAPER_CONTRACTS_OK"
