@@ -1,0 +1,169 @@
+# Deterministic window-manager policy core.
+# A native host must authenticate sender_is_system from the process/capability broker.
+# Window: [id, owner_pid, workspace_id, mode, x, y, width, height, z, visible, focusable, system].
+
+export craft descriptor_valid(window) {
+    when kind(window) != "list" {
+        yield false
+    }
+    when size(window) != 12 {
+        yield false
+    }
+    when kind(window[0]) != "number" or kind(window[1]) != "number" or kind(window[2]) != "number" or kind(window[3]) != "text" {
+        yield false
+    }
+    when kind(window[4]) != "number" or kind(window[5]) != "number" or kind(window[6]) != "number" or kind(window[7]) != "number" or kind(window[8]) != "number" {
+        yield false
+    }
+    when kind(window[9]) != "boolean" or kind(window[10]) != "boolean" or kind(window[11]) != "boolean" {
+        yield false
+    }
+    when window[0] <= 0 or window[1] <= 0 or window[2] < 0 or window[2] > 15 {
+        yield false
+    }
+    when window[3] != "tiled" and window[3] != "floating" and window[3] != "maximized" and window[3] != "fullscreen" and window[3] != "dialog" {
+        yield false
+    }
+    when window[4] < -32768 or window[4] > 32767 or window[5] < -32768 or window[5] > 32767 {
+        yield false
+    }
+    when window[6] < 160 or window[6] > 16384 or window[7] < 120 or window[7] > 16384 {
+        yield false
+    }
+    when window[8] < 0 or (window[9] != true and window[9] != false) {
+        yield false
+    }
+    when window[10] != true and window[10] != false {
+        yield false
+    }
+    yield window[11] == true or window[11] == false
+}
+
+export craft geometry_within_bounds(window, bounds) {
+    when not descriptor_valid(window) or kind(bounds) != "list" or size(bounds) != 4 {
+        yield false
+    }
+    when kind(bounds[0]) != "number" or kind(bounds[1]) != "number" or kind(bounds[2]) != "number" or kind(bounds[3]) != "number" {
+        yield false
+    }
+    when bounds[0] < -32768 or bounds[0] > 32767 or bounds[1] < -32768 or bounds[1] > 32767 {
+        yield false
+    }
+    when bounds[2] < 320 or bounds[2] > 16384 or bounds[3] < 200 or bounds[3] > 16384 {
+        yield false
+    }
+    yield window[4] >= bounds[0] and window[5] >= bounds[1] and window[4] + window[6] <= bounds[0] + bounds[2] and window[5] + window[7] <= bounds[1] + bounds[3]
+}
+
+export craft focus_decision(window, active_modal_id, sender_is_system) {
+    when not descriptor_valid(window) {
+        yield "deny-invalid-window"
+    }
+    when kind(active_modal_id) != "number" or kind(sender_is_system) != "boolean" {
+        yield "deny-invalid-sender-evidence"
+    }
+    when window[11] != sender_is_system {
+        yield "deny-origin-mismatch"
+    }
+    when window[9] != true {
+        yield "deny-hidden-window"
+    }
+    when window[10] != true {
+        yield "deny-not-focusable"
+    }
+    when active_modal_id > 0 and window[0] != active_modal_id and sender_is_system != true {
+        yield "deny-modal-block"
+    }
+    yield "allow-policy-only"
+}
+
+export craft z_order_decision(window, first_reserved_layer, sender_is_system) {
+    when not descriptor_valid(window) or kind(first_reserved_layer) != "number" or kind(sender_is_system) != "boolean" or first_reserved_layer <= 0 {
+        yield "deny-invalid-layer"
+    }
+    when sender_is_system != true and sender_is_system != false {
+        yield "deny-invalid-sender-evidence"
+    }
+    when window[11] != sender_is_system {
+        yield "deny-origin-mismatch"
+    }
+    when sender_is_system == true {
+        yield "system-layer"
+    }
+    when window[8] >= first_reserved_layer {
+        yield "deny-reserved-layer"
+    }
+    yield "user-layer"
+}
+
+export craft resize_decision(workspace_mode, override_token_valid, width, height) {
+    when kind(workspace_mode) != "text" or kind(override_token_valid) != "boolean" or kind(width) != "number" or kind(height) != "number" {
+        yield "deny-invalid-resize-request"
+    }
+    when width < 160 or width > 16384 or height < 120 or height > 16384 {
+        yield "deny-invalid-size"
+    }
+    when workspace_mode == "tiling" and override_token_valid != true {
+        yield "deny-layout-owned"
+    }
+    when workspace_mode != "tiling" and workspace_mode != "floating" and workspace_mode != "stack" {
+        yield "deny-invalid-workspace-mode"
+    }
+    yield "allow-policy-only"
+}
+
+export craft transition_valid(current_mode, next_mode) {
+    when kind(current_mode) != "text" or kind(next_mode) != "text" {
+        yield false
+    }
+    when current_mode != "tiled" and current_mode != "floating" and current_mode != "maximized" and current_mode != "fullscreen" and current_mode != "dialog" {
+        yield false
+    }
+    when next_mode != "tiled" and next_mode != "floating" and next_mode != "maximized" and next_mode != "fullscreen" and next_mode != "dialog" {
+        yield false
+    }
+    yield true
+}
+
+export craft tile_metrics(slot, count, display_width, display_height, gap) {
+    when kind(slot) != "number" or kind(count) != "number" or kind(display_width) != "number" or kind(display_height) != "number" or kind(gap) != "number" {
+        yield ["deny-invalid-input", 0, 0, 0, 0, 0]
+    }
+    when count <= 0 or count > 16 or slot < 0 or slot >= count {
+        yield ["deny-invalid-slot", 0, 0, 0, 0, 0]
+    }
+    when display_width < 320 or display_width > 16384 or display_height < 200 or display_height > 16384 or gap < 0 or gap > 64 {
+        yield ["deny-invalid-display", 0, 0, 0, 0, 0]
+    }
+
+    vary columns := 1
+    when count > 1 and count <= 4 {
+        change columns := 2
+    }
+    when count > 4 and count <= 9 {
+        change columns := 3
+    }
+    when count > 9 {
+        change columns := 4
+    }
+
+    make rows := quotient(count + columns - 1, columns)
+    make cell_width := quotient(display_width - (columns + 1) * gap, columns)
+    make cell_height := quotient(display_height - (rows + 1) * gap, rows)
+    when cell_width < 160 or cell_height < 120 {
+        yield ["deny-display-too-small", columns, rows, cell_width, cell_height, gap]
+    }
+    yield ["grid", columns, rows, cell_width, cell_height, gap]
+}
+
+export craft stacking_order_valid(window_ids) {
+    when kind(window_ids) != "list" or size(window_ids) > 256 {
+        yield false
+    }
+    each window_id in window_ids {
+        when window_id <= 0 {
+            yield false
+        }
+    }
+    yield true
+}

@@ -1,0 +1,81 @@
+# Desktop session and workspace lifecycle policy.
+# Session: [session_id, user_id, state, active_workspace, workspace_count, started_us, locked].
+
+export craft descriptor_valid(session) {
+    when kind(session) != "list" or size(session) != 7 {
+        yield false
+    }
+    when kind(session[0]) != "text" or kind(session[1]) != "text" or kind(session[2]) != "text" {
+        yield false
+    }
+    when kind(session[3]) != "number" or kind(session[4]) != "number" or kind(session[5]) != "number" or kind(session[6]) != "boolean" {
+        yield false
+    }
+    when session[0] == "" or session[1] == "" {
+        yield false
+    }
+    when session[2] != "starting" and session[2] != "active" and session[2] != "locked" and session[2] != "ending" and session[2] != "ended" and session[2] != "failed" {
+        yield false
+    }
+    when session[4] < 1 or session[4] > 16 or session[3] < 0 or session[3] >= session[4] {
+        yield false
+    }
+    when session[2] == "locked" and session[6] != true {
+        yield false
+    }
+    when session[2] != "locked" and session[6] == true {
+        yield false
+    }
+    when session[5] <= 0 {
+        yield false
+    }
+    yield session[6] == true or session[6] == false
+}
+
+export craft transition_valid(current_state, next_state) {
+    when current_state == "starting" and (next_state == "active" or next_state == "failed") {
+        yield true
+    }
+    when current_state == "active" and (next_state == "locked" or next_state == "ending") {
+        yield true
+    }
+    when current_state == "locked" and (next_state == "active" or next_state == "ending") {
+        yield true
+    }
+    when current_state == "ending" and (next_state == "ended" or next_state == "failed") {
+        yield true
+    }
+    yield false
+}
+
+export craft switch_workspace_decision(session, target_workspace, authorized) {
+    when not descriptor_valid(session) or target_workspace < 0 or target_workspace >= session[4] {
+        yield "deny-invalid-workspace"
+    }
+    when authorized != true {
+        yield "deny-capability"
+    }
+    when session[2] != "active" or session[6] == true {
+        yield "deny-inactive-session"
+    }
+    when target_workspace == session[3] {
+        yield "already-active"
+    }
+    yield "switch-policy-only"
+}
+
+export craft restore_decision(snapshot_valid, schema_supported, user_matches, workspace_count) {
+    when snapshot_valid != true {
+        yield "deny-invalid-snapshot"
+    }
+    when schema_supported != true {
+        yield "migration-required"
+    }
+    when user_matches != true {
+        yield "deny-user-mismatch"
+    }
+    when workspace_count < 1 or workspace_count > 16 {
+        yield "deny-invalid-workspace-count"
+    }
+    yield "restore-policy-only"
+}

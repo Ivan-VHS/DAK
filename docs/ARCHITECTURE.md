@@ -22,7 +22,7 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
 | Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
-| Desktop | Black/white/yellow Mora design contract, Reaper UI policies and a Qt 6 Widgets host-native shell | host-native app windows are separate from the still-pending DuckOS compositor/renderer |
+| Desktop | Imperial Noir & Glass Mora tokens; Reaper-first window, taskbar, session, notification and sandbox policies; Qt 6 Widgets host-native shell | Qt host windows and Reaper reference policies are implemented; kernel-owned compositor/renderer and capability enforcement remain pending |
 
 ## Startup contract
 

@@ -1,5 +1,6 @@
-# DuckOS single-palette design contract.
-# 65% black, 25% white and 10% yellow.
+# DuckOS Imperial Noir & Glass design-token policy.
+# Surfaces stay monochrome; yellow is the semantic brand accent.
+# Green, red and blue are reserved for status meaning.
 
 export craft palette_ratios() {
     yield [65, 25, 10]
@@ -12,37 +13,106 @@ export craft palette_valid(ratios) {
     yield ratios[0] + ratios[1] + ratios[2] == 100 and ratios[0] >= ratios[1] and ratios[1] >= ratios[2]
 }
 
+export craft role_valid(role) {
+    yield role == "canvas" or role == "shell" or role == "page" or role == "surface" or role == "elevated" or role == "border" or role == "text-primary" or role == "text-secondary" or role == "accent" or role == "navigation" or role == "focus" or role == "on-accent"
+}
+
 export craft palette_color(role) {
-    when role == "page" {
-        yield "#080808"
+    when not role_valid(role) {
+        yield ""
+    }
+    when role == "canvas" {
+        yield "#050505"
+    }
+    when role == "shell" or role == "page" {
+        yield "#070707"
     }
     when role == "surface" {
-        yield "#151515"
+        yield "#111111"
     }
     when role == "elevated" {
-        yield "#242424"
-    }
-    when role == "navigation" {
-        yield "#FFD400"
-    }
-    when role == "accent" {
-        yield "#FFD400"
-    }
-    when role == "alert" {
-        yield "#FFD400"
+        yield "#1B1B1B"
     }
     when role == "border" {
-        yield "#3A3A3A"
+        yield "#333333"
+    }
+    when role == "text-primary" {
+        yield "#FFFFFF"
+    }
+    when role == "text-secondary" {
+        yield "#D8D8D8"
+    }
+    when role == "accent" or role == "navigation" {
+        yield "#FFD700"
     }
     when role == "focus" {
         yield "#FFE45C"
     }
+    when role == "on-accent" {
+        yield "#050505"
+    }
+    yield ""
+}
+
+export craft status_role_valid(status) {
+    yield status == "success" or status == "error" or status == "danger" or status == "info"
+}
+
+export craft status_color(status) {
+    when not status_role_valid(status) {
+        yield ""
+    }
+    when status == "success" {
+        yield "#22C55E"
+    }
+    when status == "error" or status == "danger" {
+        yield "#EF4444"
+    }
+    when status == "info" {
+        yield "#3B82F6"
+    }
     yield "#FFFFFF"
+}
+
+export craft theme_mode_valid(mode) {
+    when kind(mode) != "text" {
+        yield false
+    }
+    yield mode == "dark" or mode == "light" or mode == "high-contrast"
+}
+
+export craft token_allowed(role, color) {
+    when kind(role) != "text" or kind(color) != "text" {
+        yield false
+    }
+    when role_valid(role) and color == palette_color(role) {
+        yield true
+    }
+    when status_role_valid(role) {
+        yield color == status_color(role)
+    }
+    yield false
+}
+
+export craft text_pair_valid(foreground_role, background_role) {
+    when kind(foreground_role) != "text" or kind(background_role) != "text" {
+        yield false
+    }
+    when foreground_role == "text-primary" and (background_role == "canvas" or background_role == "shell" or background_role == "page" or background_role == "surface" or background_role == "elevated") {
+        yield true
+    }
+    when foreground_role == "text-secondary" and (background_role == "canvas" or background_role == "shell" or background_role == "page" or background_role == "surface" or background_role == "elevated") {
+        yield true
+    }
+    when foreground_role == "on-accent" and (background_role == "accent" or background_role == "navigation") {
+        yield true
+    }
+    yield false
 }
 
 export craft motion_profile(reduced_motion) {
     when reduced_motion {
         yield "static"
     }
-    yield "fluid"
+    yield "spring-with-frame-budget"
 }
