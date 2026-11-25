@@ -1,0 +1,91 @@
+# Limine memory-map classification for DuckOS boot-info v1.
+# Input entry: [base_high_u32, base_low_u32, length_high_u32, length_low_u32, limine_type].
+# This maps memory-region types only. It does not dereference bootloader pointers,
+# read physical memory, construct page tables or reclaim bootloader memory.
+
+export craft memory_type(limine_type) {
+    # DuckOS v1: usable=1, reserved=2, ACPI reclaimable=3,
+    # ACPI NVS=4, MMIO=5, bad=6.
+    when limine_type == 0 {
+        yield [1, false]
+    }
+    when limine_type == 1 {
+        yield [2, false]
+    }
+    when limine_type == 2 {
+        yield [3, false]
+    }
+    when limine_type == 3 {
+        yield [4, false]
+    }
+    when limine_type == 4 {
+        yield [6, false]
+    }
+    when limine_type == 5 {
+        # Keep bootloader-reclaimable pages reserved until a native consumer
+        # proves every response and module reference has been released.
+        yield [2, true]
+    }
+    when limine_type == 6 {
+        # Executable and module payloads are not general-purpose free RAM.
+        yield [2, false]
+    }
+    when limine_type == 7 {
+        yield [5, false]
+    }
+    when limine_type == 8 {
+        yield [2, false]
+    }
+    yield [0, false]
+}
+
+export craft region_valid(region) {
+    when size(region) != 5 {
+        yield false
+    }
+    each word in [region[0], region[1], region[2], region[3]] {
+        when word < 0 or word > 4294967295 {
+            yield false
+        }
+    }
+    when region[2] == 0 and region[3] == 0 {
+        yield false
+    }
+    yield memory_type(region[4])[0] != 0
+}
+
+export craft translate_region(region) {
+    when not region_valid(region) {
+        yield ["reject", nothing]
+    }
+    make mapped_type := memory_type(region[4])
+    yield ["translated", [region[0], region[1], region[2], region[3], mapped_type[0], mapped_type[1]]]
+}
+
+export craft translate_map(regions) {
+    when size(regions) == 0 or size(regions) > 256 {
+        yield ["reject", "region-count", []]
+    }
+    vary translated := []
+    each region in regions {
+        make result := translate_region(region)
+        when result[0] != "translated" {
+            yield ["reject", "invalid-region", []]
+        }
+        change translated := push(translated, result[1])
+    }
+    yield ["translated", translated]
+}
+
+export craft reclaim_policy(region, boot_responses_released) {
+    when size(region) != 6 or not region_valid([region[0], region[1], region[2], region[3], region[4]]) {
+        yield "reject"
+    }
+    when region[4] != 5 {
+        yield "not-bootloader-reclaimable"
+    }
+    when not boot_responses_released {
+        yield "retain-reserved"
+    }
+    yield "reclaim-eligible"
+}
