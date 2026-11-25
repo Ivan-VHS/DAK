@@ -329,6 +329,17 @@ static void serial_write(const char *text) {
     }
 }
 
+static void serial_hex(uint64_t value) {
+    static const char digits[] = "0123456789abcdef";
+    serial_write("0x");
+    for (int shift = 60; shift >= 0; shift -= 4) {
+        char digit[2];
+        digit[0] = digits[(value >> (uint32_t)shift) & 0x0fu];
+        digit[1] = '\0';
+        serial_write(digit);
+    }
+}
+
 static void console_ascii(const char *text) {
     CHAR16 buffer[128];
     if (gSystemTable == NULL || gSystemTable->con_out == NULL || text == NULL) return;
