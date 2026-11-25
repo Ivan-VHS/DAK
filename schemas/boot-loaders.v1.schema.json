@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://duckos.dev/schemas/boot-loaders.v1.schema.json",
+  "title": "DuckOS boot loader catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema","catalog_version","active_loader","boot_loaders","switching_contract"],
+  "properties": {
+    "schema": {"const":"duckos.boot-loader-catalog/v1"},
+    "catalog_version": {"const":1},
+    "active_loader": {"const":"limine"},
+    "boot_loaders": {
+      "type":"array",
+      "minItems":20,
+      "maxItems":20,
+      "uniqueItems":true,
+      "items":{
+        "type":"object",
+        "additionalProperties":false,
+        "required":["id","name","kind","firmware","selection_method","switch_state","notes"],
+        "properties":{
+          "id":{"type":"string","pattern":"^[a-z0-9-]+$"},
+          "name":{"type":"string","minLength":1,"maxLength":96},
+          "kind":{"enum":["boot-manager","bootloader","network-loader","boot-helper","boot-technique","embedded-loader","firmware","kernel-handoff"]},
+          "firmware":{"enum":["uefi","bios","network","either","embedded","bios-uefi","runtime"]},
+          "selection_method":{"enum":["uefi-entry","bios-chainload","pxe-network","module-only","generic-chainload","firmware-owned","firmware-replacement","current","kernel-handoff"]},
+          "switch_state":{"enum":["conditional","conditional-legacy","not-a-local-target","not-standalone","target-dependent","platform-specific","not-an-os-boot-option","active","historical","not-a-bootloader"]},
+          "notes":{"type":"string","minLength":1,"maxLength":400}
+        }
+      }
+    },
+    "switching_contract":{
+      "type":"object",
+      "additionalProperties":false,
+      "required":["active_loader_is_immutable_by_default","requires_explicit_confirmation","uefi_selection","bios_selection","firmware_updates","secure_boot_claim"],
+      "properties":{
+        "active_loader_is_immutable_by_default":{"const":true},
+        "requires_explicit_confirmation":{"const":true},
+        "uefi_selection":{"const":"existing-firmware-entry-only"},
+        "bios_selection":{"const":"explicit-existing-disk-and-partition-only"},
+        "firmware_updates":{"const":"never-performed-by-loader-selector"},
+        "secure_boot_claim":{"const":false}
+      }
+    }
+  }
+}
