@@ -155,9 +155,47 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v10-imperial-noir-glass"));
+  assert.ok(serviceWorker.includes("mora-shell-v11-industrial-glass-motion"));
   assert.ok(serviceWorker.includes("./local-store.js"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
+});
+
+
+test("Industrial Glass has layered materials, local grain and opaque accessibility fallbacks", () => {
+  assert.equal(theme.version, 4);
+  assert.equal(theme.shape.windowRadius, 8);
+  assert.equal(theme.shape.cardRadius, 8);
+  assert.equal(theme.shape.controlRadius, 6);
+  assert.equal(theme.glass.blurPx, 18);
+  assert.equal(theme.glass.strongBlurPx, 22);
+  assert.equal(theme.glass.grainOpacity, 0.035);
+  assert.equal(theme.glass.maxConcurrentBlurLayers, 5);
+  assert.equal(theme.glass.maxNestedLevels, 2);
+  assert.equal(theme.glass.animateBackdrop, false);
+  assert.equal(theme.glass.reducedTransparency, "opaque");
+  assert.ok(css.includes('background-image: url("./glass-noise.svg")'));
+  assert.ok(css.includes("@supports ((backdrop-filter: blur(1px))"));
+  assert.ok(css.includes("@media (prefers-reduced-transparency: reduce)"));
+  assert.ok(css.includes(":root.reduce-transparency"));
+  assert.ok(css.includes("@media (forced-colors: active)"));
+  assert.ok(css.includes("@media (prefers-reduced-motion: reduce)"));
+  assert.ok(css.includes(".app-window.is-closing"));
+  assert.ok(css.includes("--ease-spring"));
+  assert.ok(css.includes("--ease-strict"));
+  assert.ok(js.includes('classList.toggle("reduce-transparency", preferences.appearance.reduceTransparency)'));
+  assert.ok(js.includes('data-setting="reduceTransparency"'));
+  assert.ok(js.includes('setting.dataset.setting === "reduceTransparency"'));
+  assert.ok(serviceWorker.includes("./glass-noise.svg"));
+  assert.ok(serviceWorker.includes("mora-shell-v11-industrial-glass-motion"));
+});
+
+test("shell controls stay solid and keep a crisp keyboard focus outline", () => {
+  assert.ok(css.includes(".app-tile {"));
+  assert.ok(css.includes("backdrop-filter: none"));
+  assert.ok(css.includes(":focus-visible"));
+  assert.ok(css.includes("outline: 2px solid #FFD700"));
+  assert.ok(css.includes("--glass-fallback: #101010"));
+  assert.ok(css.includes("--glass-strong-fallback: #070707"));
 });
