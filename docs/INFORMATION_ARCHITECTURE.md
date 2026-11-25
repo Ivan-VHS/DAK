@@ -36,6 +36,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 
 - [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) — maturity, runtime state, evidence and terminology.
 - [Language quality standard](LANGUAGE_QUALITY.md) — editorial conventions and diagnostic scope.
+- [Reaper 666 category integration](REAPER_666_CATEGORIES.md) — seven canonical function categories mapped to DuckOS subsystem ownership and maturity gates.
 
 ### 4. Runnable prototypes and evidence
 
