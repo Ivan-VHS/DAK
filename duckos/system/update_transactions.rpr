@@ -20,8 +20,8 @@ export craft start_allowed(manifest_verified, disk_space_ready, approved) {
 }
 
 export craft rollback_decision(group, snapshot_complete, snapshot_verified) {
-    when not (group == "kernel" or group == "graphics" or group == "system-core" or
-        group == "desktop" or group == "optional") {
+    when group != "kernel" and group != "graphics" and group != "system-core" and
+        group != "desktop" and group != "optional" {
         yield "reject-unknown-group"
     }
     when not snapshot_complete or not snapshot_verified {
