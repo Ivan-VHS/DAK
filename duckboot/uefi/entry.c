@@ -34,6 +34,8 @@
 #define DUCKBOOT_STACK_PAGES 64u
 #define PTE_PRESENT UINT64_C(0x001)
 #define PTE_WRITE UINT64_C(0x002)
+#define PTE_PWT UINT64_C(0x008)
+#define PTE_PCD UINT64_C(0x010)
 #define PTE_LARGE UINT64_C(0x080)
 #define PTE_NX (UINT64_C(1) << 63u)
 #define PTE_ADDRESS_MASK UINT64_C(0x000ffffffffff000)
@@ -652,9 +654,13 @@ static bool append_split_region(uint64_t base, uint64_t length, uint32_t type) {
     const uint64_t overlap_begin =
         base > gFramebuffer.physical_base ? base : gFramebuffer.physical_base;
     const uint64_t overlap_end = end < framebuffer_end ? end : framebuffer_end;
-    if (overlap_end > overlap_begin &&
-        !append_memory_region(overlap_begin, overlap_end - overlap_begin, DUCKOS_MEMORY_MMIO)) {
-        return false;
+    if (overlap_end > overlap_begin) {
+        if (type != DUCKOS_MEMORY_MMIO) return false;
+        if (!append_memory_region(
+                overlap_begin, overlap_end - overlap_begin,
+                DUCKOS_MEMORY_MMIO)) {
+            return false;
+        }
     }
     if (end > framebuffer_end &&
         !append_memory_region(framebuffer_end, end - framebuffer_end, type)) return false;
@@ -930,6 +936,30 @@ static bool map_kernel_segments(uint64_t *root, const duckboot_elf_image *image)
     return true;
 }
 
+static bool map_framebuffer_uncached(uint64_t *root) {
+    uint64_t framebuffer_end;
+    uint64_t aligned_end;
+    uint64_t physical_page;
+    const uint64_t cache_flags = PTE_NX | PTE_PCD | PTE_PWT;
+
+    if (gFramebuffer.size == 0u) return true;
+    if (gFramebuffer.physical_base > UINT64_MAX - gFramebuffer.size) return false;
+    framebuffer_end = gFramebuffer.physical_base + gFramebuffer.size;
+    if (!align_up(framebuffer_end, EFI_PAGE_SIZE, &aligned_end) ||
+        DUCKBOOT_HHDM_OFFSET > UINT64_MAX - aligned_end) return false;
+
+    physical_page = align_down(gFramebuffer.physical_base, EFI_PAGE_SIZE);
+    while (physical_page < aligned_end) {
+        if (!set_4k_mapping(
+                root, physical_page, physical_page, cache_flags)) return false;
+        if (!set_4k_mapping(
+                root, DUCKBOOT_HHDM_OFFSET + physical_page, physical_page,
+                cache_flags | PTE_WRITE)) return false;
+        physical_page += EFI_PAGE_SIZE;
+    }
+    return true;
+}
+
 EFI_STATUS EFIAPI efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_table) {
     EFI_LOADED_IMAGE_PROTOCOL *loaded_image = NULL;
     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *simple_fs = NULL;
@@ -1017,6 +1047,9 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *system_tab
     }
     if (!map_kernel_segments(page_table_root, &kernel_image)) {
         fail("could not map ELF64 kernel segments with requested permissions");
+    }
+    if (!map_framebuffer_uncached(page_table_root)) {
+        fail("could not create a consistent uncached GOP framebuffer mapping");
     }
 
     zero_bytes(&gBootInfo, sizeof(gBootInfo));
