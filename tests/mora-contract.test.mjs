@@ -175,6 +175,7 @@ test("Industrial Glass has layered materials, local grain and opaque accessibili
   assert.equal(theme.glass.maxNestedLevels, 2);
   assert.equal(theme.glass.animateBackdrop, false);
   assert.equal(theme.glass.reducedTransparency, "opaque");
+  assert.deepEqual(theme.textOpacity, { primary: 1, secondary: 0.7, tertiary: 0.4 });
   assert.ok(css.includes('background-image: url("./glass-noise.svg")'));
   assert.ok(css.includes("@supports ((backdrop-filter: blur(1px))"));
   assert.ok(css.includes("@media (prefers-reduced-transparency: reduce)"));
