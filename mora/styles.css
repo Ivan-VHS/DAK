@@ -912,7 +912,7 @@ body{background:var(--mora-page);color:var(--mora-text)}
  box-shadow:0 28px 90px rgba(0,0,0,.56),0 2px 0 rgba(255,255,255,.035) inset;
  -webkit-backdrop-filter:blur(var(--mora-modal-blur)) saturate(1.12);
  backdrop-filter:blur(var(--mora-modal-blur)) saturate(1.12);
- transform-origin:50% 44%;animation:duck-window-in var(--motion-spatial) var(--ease-spring) both
+ transform-origin:50% 44%;animation:duck-window-in calc(var(--motion-spatial)*var(--motion-scale)) var(--ease-spring) both
 }
 .app-window::before{
  content:"";position:absolute;z-index:0;inset:0 1px auto;height:1px;pointer-events:none;
@@ -925,7 +925,7 @@ body{background:var(--mora-page);color:var(--mora-text)}
 }
 .app-window>*{position:relative;z-index:1}
 .app-window.is-closing{animation:duck-window-out 140ms var(--ease-snappy) both;pointer-events:none}
-.app-window.is-reopening{animation:duck-window-in 160ms var(--ease-spring) both}
+.app-window.is-reopening{animation:duck-window-in calc(160ms*var(--motion-scale)) var(--ease-spring) both}
 .window-titlebar{border-bottom-color:rgba(255,255,255,.14);cursor:grab}
 .window-close,.action-button,.subtle-button,.permission-toggle,.profile-choice,.locale-select,input,select,textarea{border-radius:var(--mora-radius-control)}
 .window-close,.action-button,.subtle-button,.permission-toggle,.profile-choice{
@@ -952,7 +952,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
  100%{opacity:0;transform:translateY(3px) scale(.982)}
 }
 :root.reduce-transparency,:root[data-power-profile="saver"]{
- --mora-background-blur:0px;--mora-content-blur:0px;--mora-modal-blur:0px;--mora-grain-opacity:0
+ --mora-background-blur:0px;--mora-content-blur:0px;--mora-modal-blur:0px;--mora-grain-opacity:0;--motion-scale:.65
 }
 :root.reduce-transparency .statusbar,:root.reduce-transparency .app-tile,:root.reduce-transparency .widget-card,
 :root.reduce-transparency .dock,:root.reduce-transparency .app-window,
