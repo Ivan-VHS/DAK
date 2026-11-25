@@ -18,29 +18,29 @@ SECTIONS
     . = KERNEL_VMA;
     __kernel_start = .;
 
-    .limine_requests : ALIGN(8)
+    .limine_requests ALIGN(8) : AT(KERNEL_PHYS)
     {
         KEEP(*(.limine_requests_start))
         KEEP(*(.limine_requests))
         KEEP(*(.limine_requests_end))
     } :requests
 
-    .text : ALIGN(0x1000) AT(ADDR(.text) - KERNEL_VMA + KERNEL_PHYS)
+    .text ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.text) - KERNEL_VMA))
     {
         *(.text .text.*)
     } :text
 
-    .rodata : ALIGN(0x1000) AT(ADDR(.rodata) - KERNEL_VMA + KERNEL_PHYS)
+    .rodata ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.rodata) - KERNEL_VMA))
     {
         *(.rodata .rodata.*)
     } :rodata
 
-    .data : ALIGN(0x1000) AT(ADDR(.data) - KERNEL_VMA + KERNEL_PHYS)
+    .data ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.data) - KERNEL_VMA))
     {
         *(.data .data.*)
     } :data
 
-    .bss (NOLOAD) : ALIGN(0x1000) AT(ADDR(.bss) - KERNEL_VMA + KERNEL_PHYS)
+    .bss ALIGN(0x1000) (NOLOAD) : AT(KERNEL_PHYS + (ADDR(.bss) - KERNEL_VMA))
     {
         *(COMMON)
         *(.bss .bss.*)
@@ -56,3 +56,7 @@ SECTIONS
         *(.note .note.*)
     }
 }
+
+ASSERT(ADDR(.limine_requests) == KERNEL_VMA, "Limine requests must begin at the kernel VMA");
+ASSERT(LOADADDR(.limine_requests) == KERNEL_PHYS, "kernel physical base mismatch");
+ASSERT((__kernel_end - __kernel_start) > 0, "empty kernel image");
