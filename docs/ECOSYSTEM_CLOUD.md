@@ -34,7 +34,7 @@ The `ecosystem-artifacts` bucket is private and capped at 100 MiB per object. Ke
 <organization UUID>/<project key>/<artifact UUID>
 ```
 
-Storage row policies require active organization membership; uploads require a contributor-level role. The application must never create public URLs and must never execute or auto-open stored content. Uploads occur only after an explicit publish/share action.
+Storage row policies require an artifact metadata record, enforce its private/organization visibility, and scope every object key to its organization and project. Uploads require a pre-existing artifact metadata record owned by the caller; deletion is limited to that artifact's owner or an organization administrator. The application must never create public URLs and must never execute or auto-open stored content. Uploads occur only after an explicit publish/share action.
 
 ## Data exclusions
 

@@ -135,7 +135,7 @@ grant select on public.ecosystem_memberships to authenticated;
 grant select, insert, update, delete on public.ecosystem_projects to authenticated;
 grant select, insert, update, delete on public.ecosystem_artifacts to authenticated;
 grant select, insert on public.ecosystem_sync_receipts to authenticated;
-grant select on public.ecosystem_audit_events to authenticated;
+grant select on public.ecosystem_audit_events to authenticated;\ngrant select, insert on public.ecosystem_audit_events to service_role;
 
 create policy ecosystem_organizations_select_member
 on public.ecosystem_organizations for select to authenticated
@@ -283,37 +283,54 @@ insert into storage.buckets (id, name, public, file_size_limit)
 values ('ecosystem-artifacts', 'ecosystem-artifacts', false, 104857600)
 on conflict (id) do nothing;
 
-create policy ecosystem_storage_select_member
+create policy ecosystem_storage_select_artifact
 on storage.objects for select to authenticated
 using (
   bucket_id = 'ecosystem-artifacts'
+  and array_length(storage.foldername(name), 1) = 2
   and exists (
-    select 1 from public.ecosystem_memberships m
-    where m.organization_id::text = (storage.foldername(name))[1]
-      and m.user_id = (select auth.uid())
+    select 1
+    from public.ecosystem_artifacts a
+    where a.object_key = name
+      and a.organization_id::text = (storage.foldername(name))[1]
+      and a.project_key = (storage.foldername(name))[2]
+      and (a.visibility = 'organization' or a.owner_id = (select auth.uid()))
   )
 );
 
-create policy ecosystem_storage_insert_contributor
+create policy ecosystem_storage_insert_owned_artifact
 on storage.objects for insert to authenticated
 with check (
   bucket_id = 'ecosystem-artifacts'
+  and array_length(storage.foldername(name), 1) = 2
   and exists (
-    select 1 from public.ecosystem_memberships m
-    where m.organization_id::text = (storage.foldername(name))[1]
-      and m.user_id = (select auth.uid())
-      and m.role in ('owner', 'admin', 'editor', 'contributor')
+    select 1
+    from public.ecosystem_artifacts a
+    where a.object_key = name
+      and a.organization_id::text = (storage.foldername(name))[1]
+      and a.project_key = (storage.foldername(name))[2]
+      and a.owner_id = (select auth.uid())
   )
 );
 
-create policy ecosystem_storage_delete_admin
+create policy ecosystem_storage_delete_owner_or_admin
 on storage.objects for delete to authenticated
 using (
   bucket_id = 'ecosystem-artifacts'
-  and exists (
-    select 1 from public.ecosystem_memberships m
-    where m.organization_id::text = (storage.foldername(name))[1]
-      and m.user_id = (select auth.uid())
-      and m.role in ('owner', 'admin')
+  and array_length(storage.foldername(name), 1) = 2
+  and (
+    exists (
+      select 1 from public.ecosystem_artifacts a
+      where a.object_key = name
+        and a.organization_id::text = (storage.foldername(name))[1]
+        and a.project_key = (storage.foldername(name))[2]
+        and a.owner_id = (select auth.uid())
+    )
+    or exists (
+      select 1 from public.ecosystem_memberships m
+      where m.organization_id::text = (storage.foldername(name))[1]
+        and m.user_id = (select auth.uid())
+        and m.role in ('owner', 'admin')
+    )
   )
 );

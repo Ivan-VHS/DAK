@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(21);
+select plan(24);
 
 select extensions.has_table('public', 'ecosystem_organizations', 'organization metadata table exists');
 select extensions.has_table('public', 'ecosystem_memberships', 'membership table exists');
@@ -26,6 +26,25 @@ select extensions.is(
 select extensions.ok(
   exists (select 1 from storage.buckets where id = 'ecosystem-artifacts' and public = false and file_size_limit = 104857600),
   'artifact bucket is private and capped at 100 MiB'
+);
+
+select extensions.ok(
+  (select qual like '%ecosystem_artifacts%' and qual like '%visibility%'
+   from pg_policies where schemaname = 'storage' and tablename = 'objects'
+     and policyname = 'ecosystem_storage_select_artifact'),
+  'storage reads follow artifact visibility metadata'
+);
+select extensions.ok(
+  (select with_check like '%ecosystem_artifacts%' and with_check like '%owner_id%'
+   from pg_policies where schemaname = 'storage' and tablename = 'objects'
+     and policyname = 'ecosystem_storage_insert_owned_artifact'),
+  'storage uploads require a pre-existing artifact owned by the caller'
+);
+select extensions.ok(
+  (select qual like '%ecosystem_artifacts%' and qual like '%ecosystem_memberships%'
+   from pg_policies where schemaname = 'storage' and tablename = 'objects'
+     and policyname = 'ecosystem_storage_delete_owner_or_admin'),
+  'storage deletion is restricted to artifact owners or organization admins'
 );
 select extensions.ok(
   not has_table_privilege('authenticated', 'public.ecosystem_audit_events', 'INSERT'),
