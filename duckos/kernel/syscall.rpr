@@ -57,11 +57,13 @@ export craft table_valid(calls) {
         yield false
     }
     each index in range(0, size(calls)) {
-        when not descriptor_valid(calls[index]) {
+        make current_call := calls[index]
+        when not descriptor_valid(current_call) {
             yield false
         }
         each other_index in range(index + 1, size(calls)) {
-            when calls[index][0] == calls[other_index][0] or calls[index][2] == calls[other_index][2] {
+            make other_call := calls[other_index]
+            when current_call[0] == other_call[0] or current_call[2] == other_call[2] {
                 yield false
             }
         }
