@@ -13,7 +13,7 @@ on:
       - "tests/mora-vendored-sources.test.mjs"
       - ".github/workflows/repository-federation.yml"
   push:
-    branches: [main]
+    branches: ["**"]
     paths:
       - ".gitmodules"
       - "projects/**"
