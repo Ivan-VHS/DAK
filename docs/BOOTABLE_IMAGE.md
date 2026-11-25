@@ -1,14 +1,18 @@
-# DuckOS x86_64 bootable stage-0 image
+# DuckOS x86_64 bootable Stage 1 image
 
-**Status:** experimental bootable foundation, not a complete operating system.  
+**Status:** experimental native kernel foundation, not a complete operating system.  
 **Architecture:** x86_64, Limine protocol v12.11.1, BIOS and UEFI hybrid ISO.  
-**Kernel ownership:** DuckOS owns the freestanding entry point, memory-map adapter, boot-info validation and stage-0 framebuffer/serial output. Limine is a separately licensed third-party bootloader.
+**Kernel ownership:** DuckOS owns the freestanding entry point, memory-map adapter, Boot Info validation, early physical-frame allocator and framebuffer/serial output. Limine is a separately licensed third-party bootloader.
 
 ## What this image actually boots
 
-The image starts a native DuckOS ELF kernel through Limine. The entry point checks protocol base revision 6, receives bootloader and firmware identity, HHDM offset, executable physical/virtual base, framebuffer and memory map, converts those values into DuckOS Boot Info v1, validates reserved kernel/initramfs ranges and MMIO framebuffer ownership, writes serial diagnostics, and draws a small native screen when a 32-bit RGB framebuffer is available. It stops after reporting DUCKOS_BOOT_OK stage=0.
+The image starts a native DuckOS ELF kernel through Limine. The entry point validates protocol base revision 6, firmware identity, HHDM, executable physical/virtual base, framebuffer and memory map. It converts firmware memory regions to DuckOS Boot Info v1 and verifies that the kernel and framebuffer are covered by the expected reserved/MMIO ranges.
 
-The existing .rpr kernel files remain the policy/reference layer. Reaper's current native compiler is not yet a freestanding kernel compiler, so this first privileged entry bridge is C11. The current Reaper AOT slice is not claimed to compile the kernel.
+After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel reports available/allocated page counts and emits `DUCKOS_BOOT_OK stage=1`.
+
+This allocator is intentionally monotonic: it does not free pages, merge ranges, reclaim memory, construct page tables or provide a heap. It is a first native memory primitive, not a finished virtual-memory subsystem.
+
+The existing .rpr kernel files remain the policy/reference layer. Reaper's current native compiler is not yet a freestanding kernel compiler, so the privileged platform entry bridge is C11. The current Reaper AOT slice is not claimed to compile the kernel.
 
 ## Build
 
@@ -16,24 +20,31 @@ On Linux x86_64 install gcc, binutils, curl, tar, xorriso and sha256sum.
 
     boot/build-iso.sh
 
-The script downloads the pinned Limine binary release, checks its SHA-256 before use, compiles the freestanding kernel, validates ELF class/architecture/request section, creates a hybrid BIOS/UEFI ISO and writes a SHA-256 sidecar.
+The script downloads the pinned Limine binary release, checks its SHA-256 before use, compiles the freestanding DuckOS kernel and allocator, validates the ELF class/architecture/request section, creates a hybrid BIOS/UEFI ISO and writes a SHA-256 sidecar.
 
-    boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage0-x86_64.iso
+    boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage1-x86_64.iso
 
 CMake integration:
 
     cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
     cmake --build build --target duckos-boot-iso
+    ctest --test-dir build --output-on-failure
 
 ## Verify in QEMU
 
 Install qemu-system-x86 and OVMF firmware, then run:
 
-    boot/test-qemu.sh --iso build/DuckOS-Stage0-x86_64.iso --ovmf-code /usr/share/OVMF/OVMF_CODE.fd --ovmf-vars /usr/share/OVMF/OVMF_VARS.fd
+    boot/test-qemu.sh --iso build/DuckOS-Stage1-x86_64.iso --ovmf-code /usr/share/OVMF/OVMF_CODE.fd --ovmf-vars /usr/share/OVMF/OVMF_VARS.fd
 
-The test boots through BIOS and UEFI and requires the serial marker DUCKOS_BOOT_OK stage=0. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
+The test boots through BIOS and UEFI and requires `DUCKOS_BOOT_OK stage=1` in the serial log. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
 
-GitHub Actions builds the same ISO, runs both emulator checks and uploads the ISO and checksum as the DuckOS-Stage0-x86_64-ISO workflow artifact.
+GitHub Actions builds the same ISO, runs Boot Info and frame-allocator CTests, boots the image in BIOS and OVMF UEFI, and uploads the ISO, checksum and serial logs.
+
+## Allocator contract and tests
+
+The host-testable allocator accepts only a sorted, non-overlapping memory map with bounded region count and non-overflowing ranges. It checks page alignment and arithmetic, trims partial pages, respects a caller-supplied minimum physical address, never returns a frame twice, skips all non-USABLE regions and reports exhaustion. Tests cover usable/reserved gaps, alignment, address clamping, partial pages, malformed/overlapping/overflowing maps, no-usable-memory and exhaustion.
+
+The kernel uses the same allocator source compiled with freestanding x86_64 flags and no hosted runtime dependency.
 
 ## Pinned third-party input and attribution
 
@@ -41,12 +52,8 @@ The build pins Limine v12.11.1 binary archive by SHA-256 in boot/limine-toolchai
 
 Upstream references: https://github.com/Limine-Bootloader/limine-protocol/blob/trunk/PROTOCOL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/INSTALL.md ; https://github.com/Limine-Bootloader/Limine/blob/v12.11.1/USAGE.md
 
-## Verified build result
+## Deliberate Stage 1 limits
 
-The first pinned build completed successfully in [GitHub Actions run 45525450728](https://github.com/Ivan-VHS/DuckOS/actions/runs/45525450728). Host Boot Info v1 CTest passed; QEMU BIOS and OVMF UEFI both reached `DUCKOS_BOOT_OK stage=0`; the workflow uploaded the ISO, checksum and serial logs. The built ISO is 4,372,480 bytes with SHA-256 `f65d05cc7878d6dd15f418cf9fb4f35bf65e773f01fbd1ba74ccd520cf02e369`.
+This image does not yet provide a reusable allocator/free path, page-table manager, virtual-memory heap or address-space isolation; IDT, exception/interrupt handlers, APIC/PIC, timer or preemptive context switching; processes, threads, syscalls, user mode, scheduler execution or IPC runtime; ACPI/PCI/USB drivers, DMA or production driver manager; filesystem, init/service supervisor, package manager or persistence; native Mora compositor, window manager, GPU acceleration, audio stack or user applications; Secure Boot signing/enrolment, authenticated updates, rollback, installer or production recovery.
 
-## Deliberate stage-0 limits
-
-This image does not yet provide a physical/virtual page allocator, page-table manager or kernel heap; IDT, APIC/PIC, interrupt handlers, timer or preemptive context switching; processes, threads, syscalls, user mode, scheduler execution or IPC runtime; ACPI/PCI/USB drivers, DMA or production driver manager; filesystem, init/service supervisor, package manager or persistence; native Mora compositor, window manager, GPU acceleration, audio stack or user applications; Secure Boot signing/enrolment, authenticated updates, rollback, installer or production recovery.
-
-The existing duckos/kernel/*.rpr files describe policies/contracts; they do not execute those mechanisms. This is a real firmware-bootable stage-0 milestone, not a finished desktop OS.
+It is not tested on physical hardware. The current QEMU BIOS/UEFI tests prove only the declared x86_64 firmware path in the emulator. No blanket device or laptop compatibility claim is made.
