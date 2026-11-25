@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.5.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -9,210 +9,340 @@
     {
       "id": "cockos",
       "name": "Cockos",
-      "category": "audio",
-      "panel": "mora/app.js#cockos"
+      "category": "media-processing",
+      "panel": "mora/app.js#cockos",
+      "domain": "audio",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "kavun",
       "name": "Kavun",
-      "category": "photos",
-      "panel": "mora/app.js#kavun"
+      "category": "media-processing",
+      "panel": "mora/app.js#kavun",
+      "domain": "photos",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "kabon",
       "name": "Ka-bon",
-      "category": "finance",
-      "panel": "mora/app.js#kabon"
+      "category": "utilities",
+      "panel": "mora/app.js#kabon",
+      "domain": "finance",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "gloverty",
       "name": "Gloverty",
-      "category": "automation",
-      "panel": "mora/app.js#gloverty"
+      "category": "utilities",
+      "panel": "mora/app.js#gloverty",
+      "domain": "automation",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "po",
       "name": "Po",
-      "category": "compass",
-      "panel": "mora/app.js#po"
+      "category": "network-communication",
+      "panel": "mora/app.js#po",
+      "domain": "compass",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "illidia",
       "name": "Illidia",
-      "category": "games",
-      "panel": "mora/app.js#illidia"
+      "category": "utilities",
+      "panel": "mora/app.js#illidia",
+      "domain": "games",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "unify",
       "name": "Unify",
-      "category": "devices",
-      "panel": "mora/app.js#unify"
+      "category": "network-communication",
+      "panel": "mora/app.js#unify",
+      "domain": "devices",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "sestem",
       "name": "Sestem",
-      "category": "system",
+      "category": "system-core",
       "panel": "mora/app.js#sestem",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "system",
+      "required_capabilities": [
+        "duckos.system.core.inspect"
+      ],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "denied-until-native-capability-broker"
     },
     {
       "id": "setupup",
       "name": "SetupUP",
-      "category": "system",
+      "category": "system-core",
       "panel": "mora/app.js#setupup",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "system",
+      "required_capabilities": [
+        "duckos.system.core.inspect"
+      ],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "denied-until-native-capability-broker"
     },
     {
       "id": "orriganize",
       "name": "ORGze",
-      "category": "productivity",
+      "category": "mora-shell",
       "panel": "mora/app.js#orriganize",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "productivity",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "abriganza",
       "name": "Abriganza",
-      "category": "files",
+      "category": "mora-shell",
       "panel": "mora/app.js#abriganza",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "files",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "olaab",
       "name": "Olaab",
-      "category": "multimedia",
+      "category": "media-processing",
       "panel": "mora/app.js#olaab",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "multimedia",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "concrete-thump",
       "name": "Concrete Thump",
-      "category": "audio",
+      "category": "media-processing",
       "panel": "mora/app.js#concrete-thump",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "audio",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "seu-beu",
       "name": "Seu-Beu",
-      "category": "privacy",
+      "category": "network-communication",
       "panel": "mora/app.js#seu-beu",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "privacy",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "love-il",
       "name": "Love-IL",
-      "category": "journal",
+      "category": "mora-shell",
       "panel": "mora/app.js#love-il",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "journal",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "poi",
       "name": "Poi",
-      "category": "notes",
+      "category": "mora-shell",
       "panel": "mora/app.js#poi",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "notes",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "poi-2",
       "name": "Poi-2",
-      "category": "knowledge",
+      "category": "mora-shell",
       "panel": "mora/app.js#poi-2",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "knowledge",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "po-2",
       "name": "Po-2",
-      "category": "navigation",
+      "category": "utilities",
       "panel": "mora/app.js#po-2",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "navigation",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "gamecharager",
       "name": "GameCharager",
-      "category": "gaming",
+      "category": "utilities",
       "panel": "mora/app.js#gamecharager",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "gaming",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "exedotexe",
       "name": "EXEdotEXE",
-      "category": "compatibility",
+      "category": "security-contracts",
       "panel": "mora/app.js#exedotexe",
-      "maturity": "partial_local_workspace"
+      "maturity": "partial_local_workspace",
+      "domain": "compatibility",
+      "required_capabilities": [
+        "duckos.security.contracts.audit"
+      ],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "denied-until-native-capability-broker"
     },
     {
       "id": "red-sparrow",
       "name": "Red Sparrow / 赤雀",
-      "category": "creative",
+      "category": "media-processing",
       "panel": "mora/app.js#red-sparrow",
       "maturity": "partial_local_workspace",
       "data_policy": "local_only_user_notes",
       "locale_profiles": [
         "ru-RU",
         "zh-CN"
-      ]
+      ],
+      "domain": "creative",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "mora-ai",
       "name": "Mora AI",
-      "category": "system",
+      "category": "mora-shell",
       "panel": "mora/app.js#mora-ai",
-      "maturity": "partial_local_rules"
+      "maturity": "partial_local_rules",
+      "domain": "system",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "security",
       "name": "Sentinel",
-      "category": "security",
+      "category": "security-contracts",
       "panel": "mora/app.js#security",
-      "maturity": "shell_policy_only"
+      "maturity": "shell_policy_only",
+      "domain": "security",
+      "required_capabilities": [
+        "duckos.security.contracts.audit"
+      ],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "denied-until-native-capability-broker"
     },
     {
       "id": "updates",
       "name": "Restore",
-      "category": "recovery",
+      "category": "mora-shell",
       "panel": "mora/app.js#updates",
-      "maturity": "shell_snapshot_only"
+      "maturity": "shell_snapshot_only",
+      "domain": "recovery",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "runtime",
       "name": "Bridge",
-      "category": "compatibility",
+      "category": "utilities",
       "panel": "mora/app.js#runtime",
-      "maturity": "partial_pe_cli_and_prefix_foundation"
+      "maturity": "partial_pe_cli_and_prefix_foundation",
+      "domain": "compatibility",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "workspace",
       "name": "Control",
-      "category": "workspace",
+      "category": "mora-shell",
       "panel": "mora/app.js#workspace",
-      "maturity": "shell_preferences"
+      "maturity": "shell_preferences",
+      "domain": "workspace",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "provenance",
       "name": "Proof",
-      "category": "provenance",
+      "category": "security-contracts",
       "panel": "mora/app.js#provenance",
-      "maturity": "sha256_only"
+      "maturity": "sha256_only",
+      "domain": "provenance",
+      "required_capabilities": [
+        "duckos.security.contracts.audit"
+      ],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "denied-until-native-capability-broker"
     },
     {
       "id": "mora-boost",
       "name": "Mora Boost",
-      "category": "gaming",
+      "category": "utilities",
       "panel": "mora/app.js#mora-boost",
-      "maturity": "external_native_workbench"
+      "maturity": "external_native_workbench",
+      "domain": "gaming",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "desktop",
       "name": "Duck Desktop",
-      "category": "workspace",
+      "category": "mora-shell",
       "panel": "mora/app.js#desktop",
-      "maturity": "partial_native_userland_tool"
+      "maturity": "partial_native_userland_tool",
+      "domain": "workspace",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "mora-commons",
       "name": "Mora Commons",
-      "category": "application_catalogue",
+      "category": "mora-shell",
       "panel": "mora/app.js#mora-commons",
-      "maturity": "implemented_local_catalog"
+      "maturity": "implemented_local_catalog",
+      "domain": "application_catalogue",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     }
   ],
   "widgets": [
@@ -310,7 +440,12 @@
       "license": "Apache-2.0",
       "runtime_boundary": "user-space toolchain",
       "external_launch": "user_managed_not_enabled",
-      "auto_execute": false
+      "auto_execute": false,
+      "domain": "federated-user-space-workbench",
+      "category": "development-federation",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "pytyliki-workbench",
@@ -322,7 +457,12 @@
       "license": "MIT",
       "runtime_boundary": "user-space compute and read-only host inspection",
       "external_launch": "user_managed_not_enabled",
-      "auto_execute": false
+      "auto_execute": false,
+      "domain": "federated-user-space-workbench",
+      "category": "development-federation",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "oplague-workbench",
@@ -334,7 +474,12 @@
       "license": "Apache-2.0",
       "runtime_boundary": "read-only user-space device and driver evidence",
       "external_launch": "user_managed_not_enabled",
-      "auto_execute": false
+      "auto_execute": false,
+      "domain": "federated-user-space-workbench",
+      "category": "development-federation",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     },
     {
       "id": "ventusample-workbench",
@@ -346,7 +491,14 @@
       "license": "Apache-2.0",
       "runtime_boundary": "offline-by-default user-space audio and DSP",
       "external_launch": "user_managed_not_enabled",
-      "auto_execute": false
+      "auto_execute": false,
+      "domain": "federated-user-space-workbench",
+      "category": "development-federation",
+      "required_capabilities": [],
+      "execution_surface": "mora-panel",
+      "native_process_launch": "not-implemented"
     }
-  ]
+  ],
+  "category_registry": "mora/categories.v1.json",
+  "application_manifest_schema": "schemas/mora-application-manifest.v1.schema.json"
 }
