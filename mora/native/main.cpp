@@ -47,6 +47,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 #ifndef DUCKOS_MORA_CATALOG_PATH
 #define DUCKOS_MORA_CATALOG_PATH "mora/apps.json"
@@ -326,8 +327,25 @@ public:
         buildContent();
     }
 
+    void setClosedCallback(const std::function<void()>& callback)
+    {
+        closedCallback_ = callback;
+    }
+
+protected:
+    void closeEvent(QCloseEvent* event) override
+    {
+        QMainWindow::closeEvent(event);
+        if (event->isAccepted() && closedCallback_) {
+            const auto callback = closedCallback_;
+            closedCallback_ = {};
+            callback();
+        }
+    }
+
 private:
     AppInfo app_;
+    std::function<void()> closedCallback_;
 
     void buildContent()
     {
@@ -1484,7 +1502,7 @@ private:
         window->raise();
         window->activateWindow();
         recordNotification(app.name, "Окно открыто", "Приложение запущено в локальном сеансе Mora.");
-        QObject::connect(window, &QObject::destroyed, this, [this, name = app.name]() {
+        window->setClosedCallback([this, name = app.name]() {
             recordNotification(name, "Окно закрыто", "Окно приложения закрыто пользователем.");
         });
     }
