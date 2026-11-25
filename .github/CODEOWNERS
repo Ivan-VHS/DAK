@@ -1,0 +1,6 @@
+# Review routing only; enable required Code Owner reviews in branch protection.
+* @Ivan-VHS
+/.github/ @Ivan-VHS
+/security/ @Ivan-VHS
+/schemas/ @Ivan-VHS
+/federation/ @Ivan-VHS
