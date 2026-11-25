@@ -65,3 +65,8 @@ This index is a documentation entry point. It does not itself assert that any pa
 
 - [Native implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged gates from the host-tested boot handoff through firmware bring-up, memory, scheduling, process isolation, IPC, drivers, storage, native desktop and image qualification.
 - [Implementation status](IMPLEMENTATION_STATUS.md) — current delivered/partial boundaries with source and test evidence.
+- [Native desktop and DuckBoot architecture v1](DESKTOP_AND_DUCKBOOT_ARCHITECTURE_V1.md) — Duck's native display/session stack, twenty data-driven desktop workflow profiles, safe boot orchestration and twenty typed boot integration targets.
+- [Desktop profile catalog](../catalogs/duckos.desktop-profiles.v1.json) and [schema](../schemas/duckos.desktop-profile.v1.schema.json).
+- [Boot integration catalog](../catalogs/duckos.boot-integrations.v1.json) and [schema](../schemas/duckos.boot-integrations.v1.schema.json).
+
+The catalogs describe profiles and integration boundaries. They do not assert that those native sessions, boot adapters or privileged operations are already implemented.
