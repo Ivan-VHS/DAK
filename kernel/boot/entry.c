@@ -448,6 +448,12 @@ void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame) {
         serial_write(exception_name(frame->vector));
         serial_write(" error=");
         serial_hex(frame->error_code);
+        if (frame->vector == 14u) {
+            uint64_t fault_address;
+            __asm__ volatile ("mov %%cr2, %0" : "=r"(fault_address));
+            serial_write(" cr2=");
+            serial_hex(fault_address);
+        }
         serial_write(" rip=");
         serial_hex(frame->rip);
         serial_write(" cs=");
