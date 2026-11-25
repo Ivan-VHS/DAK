@@ -3,6 +3,7 @@
 #include <QCloseEvent>
 #include <QColor>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -49,6 +50,9 @@
 #endif
 #ifndef DUCKOS_MORA_THEME_PATH
 #define DUCKOS_MORA_THEME_PATH "mora/theme.json"
+#endif
+#ifndef DUCKOS_MORA_EXPERIENCE_PATH
+#define DUCKOS_MORA_EXPERIENCE_PATH "mora/experience.v1.json"
 #endif
 
 namespace {
@@ -128,6 +132,68 @@ struct AppInfo {
     QString category;
     QString maturity;
 };
+
+struct ExperienceProfile {
+    QString id;
+    QString name;
+    QString summary;
+};
+
+QVector<ExperienceProfile> loadExperienceProfiles()
+{
+    QFile file(QString::fromUtf8(DUCKOS_MORA_EXPERIENCE_PATH));
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {
+            {"workstation", "Рабочая станция", "Сбалансированная навигация и многозадачность."},
+            {"creator", "Создание контента", "Плотная компоновка для творческих и инженерных приложений."},
+            {"living-room", "Гостиная", "Крупные элементы управления и приоритет геймпада."},
+            {"handheld", "Портативный режим", "Компактная навигация и сенсорный сценарий."}
+        };
+    }
+    QJsonParseError error{};
+    const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &error);
+    if (error.error != QJsonParseError::NoError || !document.isObject()) return {};
+    QVector<ExperienceProfile> profiles;
+    const QJsonArray entries = document.object().value("profiles").toArray();
+    for (const QJsonValue& value : entries) {
+        if (!value.isObject()) continue;
+        const QJsonObject object = value.toObject();
+        ExperienceProfile profile{
+            object.value("id").toString(),
+            object.value("name").toString(),
+            object.value("summary").toString()
+        };
+        if (!profile.id.isEmpty() && !profile.name.isEmpty()) profiles.push_back(profile);
+    }
+    return profiles;
+}
+
+QString activeExperienceProfile()
+{
+    QSettings settings("DuckOS", "Mora");
+    const QString selected = settings.value("experience/profile", "workstation").toString();
+    const auto profiles = loadExperienceProfiles();
+    const auto found = std::find_if(profiles.cbegin(), profiles.cend(),
+        [&selected](const ExperienceProfile& profile) { return profile.id == selected; });
+    return found == profiles.cend() ? "workstation" : selected;
+}
+
+int appGridColumns()
+{
+    const QString profile = activeExperienceProfile();
+    if (profile == "creator") return 4;
+    if (profile == "living-room" || profile == "handheld") return 2;
+    return 3;
+}
+
+int appTileHeight()
+{
+    const QString profile = activeExperienceProfile();
+    if (profile == "living-room") return 108;
+    if (profile == "handheld") return 98;
+    if (profile == "creator") return 78;
+    return 86;
+}
 
 QString categoryName(const QString& category)
 {
@@ -334,7 +400,15 @@ private:
         layout->addWidget(heading);
         layout->addWidget(label(maturityText(app_.maturity), "muted"));
 
-        if (app_.id == "poi") {
+        if (app_.id == "setupup") {
+            buildSetupAssistant(layout);
+        } else if (app_.id == "sestem" || app_.id == "updates") {
+            buildSystemCenter(layout);
+        } else if (app_.id == "unify") {
+            buildHardwareCenter(layout);
+        } else if (app_.id == "mora-boost" || app_.id == "gamecharager") {
+            buildGamingCenter(layout);
+        } else if (app_.id == "poi") {
             buildNotes(layout);
         } else if (app_.id == "abriganza") {
             buildFiles(layout);
@@ -345,6 +419,183 @@ private:
         }
 
         setCentralWidget(root);
+    }
+
+    void buildSetupAssistant(QVBoxLayout* layout)
+    {
+        layout->addWidget(label("ПРОФИЛЬ РАБОЧЕГО СТОЛА", "eyebrow"));
+        layout->addWidget(label(
+            "Выберите сценарий Mora. Настройка сохраняется только в профиле текущего пользователя.",
+            "muted"));
+        auto* profile = new QComboBox;
+        profile->setObjectName("setupup-profile");
+        profile->setAccessibleName("Профиль рабочего пространства Mora");
+        const QVector<ExperienceProfile> profiles = loadExperienceProfiles();
+        for (const ExperienceProfile& item : profiles) profile->addItem(item.name, item.id);
+        const int selectedIndex = profile->findData(activeExperienceProfile());
+        profile->setCurrentIndex(selectedIndex >= 0 ? selectedIndex : 0);
+        auto* summary = label({}, "muted");
+        summary->setObjectName("setupup-profile-summary");
+        auto updateSummary = [summary, profiles](const QString& id) {
+            const auto found = std::find_if(profiles.cbegin(), profiles.cend(),
+                [&id](const ExperienceProfile& item) { return item.id == id; });
+            summary->setText(found == profiles.cend() ? QString{} : found->summary);
+        };
+        updateSummary(profile->currentData().toString());
+        QObject::connect(profile, &QComboBox::currentTextChanged, this,
+            [profile, updateSummary](const QString&) {
+                updateSummary(profile->currentData().toString());
+            });
+        layout->addWidget(profile);
+        layout->addWidget(summary);
+
+        auto* scope = panel();
+        auto* scopeLayout = new QVBoxLayout(scope);
+        scopeLayout->setContentsMargins(16, 14, 16, 14);
+        scopeLayout->addWidget(label("Границы настройки", "eyebrow"));
+        scopeLayout->addWidget(label(
+            "Профиль меняет плотность карточек и сценарий навигации Mora. "
+            "Он не меняет частоты CPU/GPU, драйверы, службы, разрешение экрана, "
+            "параметры ядра или настройки устройств."));
+        layout->addWidget(scope);
+
+        auto* consent = new QCheckBox("Я понимаю, что это локальная настройка интерфейса Mora");
+        consent->setObjectName("setupup-local-scope-consent");
+        consent->setMinimumHeight(44);
+        layout->addWidget(consent);
+        auto* footer = new QHBoxLayout;
+        auto* state = label("Изменения ещё не сохранены", "muted");
+        state->setObjectName("setupup-profile-status");
+        auto* save = actionButton("Сохранить профиль");
+        save->setObjectName("setupup-save");
+        save->setEnabled(false);
+        footer->addWidget(state, 1);
+        footer->addWidget(save);
+        layout->addLayout(footer);
+        QObject::connect(consent, &QCheckBox::toggled, save, &QPushButton::setEnabled);
+        QObject::connect(save, &QPushButton::clicked, this, [profile, state]() {
+            QSettings settings("DuckOS", "Mora");
+            settings.setValue("experience/profile", profile->currentData().toString());
+            settings.setValue("experience/schema", "duckos.mora.experience.v1");
+            settings.sync();
+            state->setText(settings.status() == QSettings::NoError
+                ? "Профиль сохранён локально" : "Не удалось сохранить настройки");
+        });
+        layout->addStretch(1);
+    }
+
+    void buildSystemCenter(QVBoxLayout* layout)
+    {
+        layout->addWidget(label("ОБСЛУЖИВАНИЕ СИСТЕМЫ", "eyebrow"));
+        layout->addWidget(label("Обновления, приложения и восстановление", "heading"));
+        auto* statusPanel = panel();
+        auto* statusLayout = new QVBoxLayout(statusPanel);
+        statusLayout->setContentsMargins(16, 14, 16, 14);
+        statusLayout->addWidget(label("Статус обновлений", "eyebrow"));
+        auto* status = label("Системный updater DuckOS пока не подключён.", "body");
+        status->setObjectName("updates-status");
+        statusLayout->addWidget(status);
+        auto* check = actionButton("Проверить обновления");
+        check->setObjectName("updates-check");
+        check->setEnabled(false);
+        statusLayout->addWidget(check);
+        statusLayout->addWidget(label(
+            "Экран не проверяет сеть и репозитории, не запускает установку и не сообщает "
+            "об успешном обновлении. На текущем этапе Stage 1 не запускает пользовательские службы.",
+            "muted"));
+        layout->addWidget(statusPanel);
+
+        auto* transaction = panel();
+        auto* transactionLayout = new QVBoxLayout(transaction);
+        transactionLayout->setContentsMargins(16, 14, 16, 14);
+        transactionLayout->addWidget(label("Целевая последовательность транзакции", "eyebrow"));
+        transactionLayout->addWidget(label(
+            "1. Ядро   →   2. Графика   →   3. Системная основа   →   "
+            "4. Рабочий стол   →   5. Необязательные компоненты"));
+        transactionLayout->addWidget(label(
+            "Reaper проверяет порядок групп и условия отката как reference-policy. "
+            "Реальный package manager, снимки системы, rollback и установка пакетов отсутствуют.",
+            "muted"));
+        layout->addWidget(transaction);
+
+        auto* catalogue = panel();
+        auto* catalogueLayout = new QVBoxLayout(catalogue);
+        catalogueLayout->setContentsMargins(16, 14, 16, 14);
+        catalogueLayout->addWidget(label("Каталог программ", "eyebrow"));
+        catalogueLayout->addWidget(label(
+            "Mora Commons и экосистемные workbench-карточки показывают локальные описания "
+            "и ссылки на документацию. Это не репозитории пакетов и не установщик.",
+            "muted"));
+        layout->addWidget(catalogue);
+        layout->addStretch(1);
+    }
+
+    void buildHardwareCenter(QVBoxLayout* layout)
+    {
+        layout->addWidget(label("ОБОРУДОВАНИЕ И ДРАЙВЕРЫ", "eyebrow"));
+        layout->addWidget(label("Центр устройств", "heading"));
+        auto* status = label("Сканирование устройств и драйверный сервис DuckOS пока не подключены.", "body");
+        status->setObjectName("hardware-status");
+        layout->addWidget(status);
+        auto* panelWidget = panel();
+        auto* content = new QVBoxLayout(panelWidget);
+        content->setContentsMargins(16, 14, 16, 14);
+        content->addWidget(label("Что доступно сейчас", "eyebrow"));
+        content->addWidget(label(
+            "DuckOS содержит Reaper-контракты для описания устройств, ABI, диапазонов ресурсов "
+            "и конфликтов IRQ. Это проверка политики, а не обнаружение PCI/USB и не загрузка драйверов."));
+        content->addWidget(label(
+            "OPlague остаётся отдельной user-space рабочей станцией для локальной проверки метаданных. "
+            "Её наличие в экосистеме не даёт Mora доступ к драйверному хранилищу хоста.",
+            "muted"));
+        layout->addWidget(panelWidget);
+        auto* unavailable = actionButton("Установка и обновление драйверов недоступны");
+        unavailable->setEnabled(false);
+        layout->addWidget(unavailable);
+        layout->addStretch(1);
+    }
+
+    void buildGamingCenter(QVBoxLayout* layout)
+    {
+        layout->addWidget(label("ИГРОВОЕ РАБОЧЕЕ ПРОСТРАНСТВО", "eyebrow"));
+        layout->addWidget(label("Локальный игровой профиль", "heading"));
+        layout->addWidget(label(
+            "Сохраните предпочтение для будущих игровых инструментов. "
+            "Сейчас оно не применяется к процессам, драйверам или аппаратуре.",
+            "muted"));
+        auto* mode = new QComboBox;
+        mode->setObjectName("gaming-profile");
+        mode->setAccessibleName("Предпочтительный игровой профиль");
+        mode->addItem("Сбалансированный", "balanced");
+        mode->addItem("Низкая задержка", "low-latency");
+        mode->addItem("Качество изображения", "quality");
+        QSettings settings("DuckOS", "Mora");
+        const int index = mode->findData(settings.value("gaming/profile", "balanced").toString());
+        mode->setCurrentIndex(index >= 0 ? index : 0);
+        layout->addWidget(mode);
+        auto* save = actionButton("Сохранить предпочтение");
+        save->setObjectName("gaming-profile-save");
+        auto* state = label("Хранится локально в настройках Mora", "muted");
+        state->setObjectName("gaming-profile-status");
+        layout->addWidget(save);
+        layout->addWidget(state);
+        QObject::connect(save, &QPushButton::clicked, this, [mode, state]() {
+            QSettings local("DuckOS", "Mora");
+            local.setValue("gaming/profile", mode->currentData().toString());
+            local.sync();
+            state->setText(local.status() == QSettings::NoError
+                ? "Предпочтение сохранено локально" : "Не удалось сохранить предпочтение");
+        });
+        auto* scope = panel();
+        auto* scopeLayout = new QVBoxLayout(scope);
+        scopeLayout->setContentsMargins(16, 14, 16, 14);
+        scopeLayout->addWidget(label("Что пока не выполняется", "eyebrow"));
+        scopeLayout->addWidget(label(
+            "Нет автоматического определения игр, Gamescope-сеанса, чтения датчиков GPU, "
+            "изменения TDP/частот/напряжения, переключения GPU, VRR или переназначения контроллеров. "
+            "Для этих функций требуются отдельные проверенные native-службы и аппаратные тесты."));
+        layout->addWidget(scope);
+        layout->addStretch(1);
     }
 
     void buildNotes(QVBoxLayout* layout)
@@ -522,8 +773,30 @@ public:
         for (QWidget* widget : QApplication::topLevelWidgets()) {
             if (widget->property("moraAppId").isValid()) ++nativeWindows;
         }
+        openAppWindow("setupup");
+        openAppWindow("sestem");
+        openAppWindow("unify");
+        openAppWindow("mora-boost");
+        QApplication::processEvents();
+
         if (nativeWindows < 3) {
             return fail("The three-window workspace did not create three native top-level windows.");
+        }
+        if (windows_.value("setupup").isNull()
+            || !windows_.value("setupup")->findChild<QComboBox*>("setupup-profile")) {
+            return fail("The first-run experience profile selector is missing.");
+        }
+        if (windows_.value("sestem").isNull()
+            || !windows_.value("sestem")->findChild<QLabel*>("updates-status")) {
+            return fail("The system update status boundary is missing.");
+        }
+        if (windows_.value("unify").isNull()
+            || !windows_.value("unify")->findChild<QLabel*>("hardware-status")) {
+            return fail("The hardware service status boundary is missing.");
+        }
+        if (windows_.value("mora-boost").isNull()
+            || !windows_.value("mora-boost")->findChild<QComboBox*>("gaming-profile")) {
+            return fail("The local gaming profile control is missing.");
         }
         for (QWidget* widget : QApplication::topLevelWidgets()) {
             if (widget->property("moraAppId").isValid()) widget->close();
@@ -749,7 +1022,8 @@ private:
 
         const QList<QPair<QString, QString>> items{
             {"▱", "abriganza"}, {"▤", "poi"}, {"∿", "ventusample-workbench"},
-            {"R", "reaper-workbench"}, {"✳", "security"}, {"⌁", "unify"}
+            {"R", "reaper-workbench"}, {"⚙", "setupup"}, {"↻", "sestem"},
+            {"⌁", "unify"}, {"⌘", "mora-boost"}, {"✳", "security"}
         };
         for (const auto& item : items) {
             auto* button = new QPushButton(item.first);
@@ -843,8 +1117,16 @@ private:
         auto* browseApps = actionButton("Каталог приложений");
         browseApps->setObjectName("open-app-catalog");
         quickLayout->addWidget(browseApps);
+        auto* setup = actionButton("Настроить рабочую среду");
+        setup->setObjectName("open-setupup");
+        quickLayout->addWidget(setup);
+        auto* system = actionButton("Центр системы");
+        system->setObjectName("open-system-center");
+        quickLayout->addWidget(system);
         QObject::connect(openWorkspace, &QPushButton::clicked, this, [this]() { openDesignWorkspace(); });
         QObject::connect(browseApps, &QPushButton::clicked, this, [this]() { showPage(1); });
+        QObject::connect(setup, &QPushButton::clicked, this, [this]() { openAppWindow("setupup"); });
+        QObject::connect(system, &QPushButton::clicked, this, [this]() { openAppWindow("sestem"); });
         side->addWidget(quick);
         side->addStretch(1);
         root->addLayout(side, 1);
@@ -932,7 +1214,7 @@ private:
     {
         auto* tile = new QPushButton;
         tile->setObjectName("appTile");
-        tile->setMinimumHeight(86);
+        tile->setMinimumHeight(appTileHeight());
         tile->setCursor(Qt::PointingHandCursor);
         auto* row = new QHBoxLayout(tile);
         row->setContentsMargins(14, 10, 14, 10);
@@ -982,6 +1264,7 @@ private:
         const QString query = appsSearch_ ? appsSearch_->text().trimmed().toCaseFolded() : QString{};
         const QString category = categoryFilter_ ? categoryFilter_->currentData().toString() : "all";
         int position = 0;
+        const int columns = appGridColumns();
         for (const AppInfo& app : apps_) {
             if (!query.isEmpty()
                 && !app.name.toCaseFolded().contains(query)
@@ -998,14 +1281,15 @@ private:
                 && app.category != "workspace") continue;
 
             auto* tile = makeAppTile(app, categoryName(app.category) + " · " + maturityText(app.maturity));
-            appGrid_->addWidget(tile, position / 3, position % 3);
+            appGrid_->addWidget(tile, position / columns, position % columns);
             ++position;
         }
         if (position == 0) {
             auto* empty = label("Ничего не найдено. Измените запрос или категорию.", "muted");
-            appGrid_->addWidget(empty, 0, 0, 1, 3);
+            appGrid_->addWidget(empty, 0, 0, 1, columns);
         }
-        appGrid_->setRowStretch((position + 2) / 3, 1);
+        for (int column = 0; column < columns; ++column) appGrid_->setColumnStretch(column, 1);
+        appGrid_->setRowStretch((position + columns - 1) / columns, 1);
     }
 
     void openAppWindow(const QString& id)
