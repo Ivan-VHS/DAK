@@ -70,7 +70,8 @@ export craft service_transition_valid(current, next) {
 
 export craft restart_delay_ms(attempt, base_ms, ceiling_ms) {
     when attempt < 0 or attempt > 100 { yield 0 }
-    when base_ms <= 0 or ceiling_ms < base_ms { yield 0 }
+    when base_ms <= 0 or base_ms > 60000 { yield 0 }
+    when ceiling_ms < base_ms or ceiling_ms > 60000 { yield 0 }
     make delay := base_ms * (attempt + 1)
     when delay > ceiling_ms { yield ceiling_ms }
     yield delay
