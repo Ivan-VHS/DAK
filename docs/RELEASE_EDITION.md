@@ -1,7 +1,7 @@
 # DuckOS Ecosystem Release Edition
 
 **Edition:** ecosystem  
-**Version:** 1.0.0-preview.1  
+**Version:** 1.0.0-preview.2  
 **Target:** x86_64, hybrid BIOS/UEFI  
 **Release state:** preview, source-and-tools distribution; not yet a complete desktop operating system.
 
@@ -40,7 +40,7 @@ Mora is a static, local-first browser shell. It supports the local UI, window in
 | OPlague | projects/oplague/ | Python compile and unit tests | Read-only user-space inspection |
 | VentuSample | projects/ventusample/ | C++20/C11 DSP, Qt 6 desktop where available | Offline-by-default audio tools |
 
-The exact checked-out commits are recorded in federation/repositories.v1.json and the image-side release/BUILD-INFO.txt. Each source repository retains its own license and notice files. Host executables are kept under release/bin/ and are built for Linux x86_64; they are not DuckOS kernel modules or executables that the current kernel can run.
+The exact checked-out commits are recorded in federation/repositories.v1.json and the image-side release/BUILD-INFO.txt. Each source repository retains its own license and notice files. Host executables are kept under release/bin/ and native libraries under release/lib/. The release payload includes Reaper System/DABI64 Desktop/FFI libraries and the Pytyliki C ABI v1 shared library, alongside the Reaper, Pytyliki and VentuSample static cores. These are Linux x86_64 user-space/developer artifacts, not DuckOS kernel modules or executables that the current kernel can run.
 
 The payload checksum list is SHA256SUMS at the root of the payload. Verify it after mounting or extracting:
 
@@ -58,7 +58,7 @@ On Ubuntu 24.04 x86_64 install GCC/G++, CMake, Python 3.12, Node.js 22, Qt 6 Wid
     npm test
     bash boot/build-release-iso.sh --work-dir build/release --output dist/DuckOS-Release-x86_64.iso
 
-The release workflow performs the same source-pin validation, project builds/tests, Mora tests, ISO build and QEMU BIOS/UEFI boot checks.
+The release workflow performs the same exact source-pin validation, project builds/tests, explicit ABI artifact packaging, Mora tests, ISO build and QEMU BIOS/UEFI boot checks.
 
 ## Size and why this is not padded
 

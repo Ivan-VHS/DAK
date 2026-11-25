@@ -124,9 +124,11 @@ copy_library() {
     fi
 }
 copy_library "$BUILD_DIR/reaper/libreaper_core.a" "libreaper_core.a"
+copy_library "$BUILD_DIR/reaper/libreaper_system.a" "libreaper_system.a"
+copy_library "$BUILD_DIR/reaper/libreaper_dabi64_desktop.a" "libreaper_dabi64_desktop.a"
 copy_library "$BUILD_DIR/reaper/libreaper_ffi.a" "libreaper_ffi.a"
 copy_library "$BUILD_DIR/pytyliki/libpytyliki_core.a" "libpytyliki_core.a"
-copy_library "$BUILD_DIR/pytyliki/libpytyliki_ffi.a" "libpytyliki_ffi.a"
+copy_library "$BUILD_DIR/pytyliki/libpytyliki_ffi.so" "libpytyliki_ffi.so"
 copy_library "$BUILD_DIR/ventusample/libventusample_core.a" "libventusample_core.a"
 copy_library "$BUILD_DIR/ventusample/libventusample_pytyliki_dsp.a" "libventusample_pytyliki_dsp.a"
 
@@ -138,6 +140,10 @@ Reaper: $(git -C "$ROOT/projects/reaper" rev-parse HEAD)
 Pytyliki: $(git -C "$ROOT/projects/pytyliki" rev-parse HEAD)
 OPlague: $(git -C "$ROOT/projects/oplague" rev-parse HEAD)
 VentuSample: $(git -C "$ROOT/projects/ventusample" rev-parse HEAD)
+Reaper artifacts: libreaper_core.a, libreaper_system.a, libreaper_dabi64_desktop.a, libreaper_ffi.a
+Pytyliki artifacts: libpytyliki_core.a, libpytyliki_ffi.so
+VentuSample artifacts: libventusample_core.a, libventusample_pytyliki_dsp.a
+All libraries above are Linux x86_64 host/user-space artifacts, not kernel modules.
 
 Mora: offline browser desktop shell with local application state.
 Host tools: Linux x86_64 builds, not DuckOS kernel executables.

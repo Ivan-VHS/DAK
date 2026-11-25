@@ -1,6 +1,6 @@
 {
   "schema": "duckos.release-edition.v1",
-  "version": "1.0.0-preview.1",
+  "version": "1.0.0-preview.2",
   "edition": "ecosystem",
   "architecture": "x86_64",
   "firmware": [
@@ -28,7 +28,7 @@
       "id": "reaper",
       "repository": "Ivan-VHS/Reaper",
       "path": "projects/reaper",
-      "commit": "02c6cda6bc67f7b9323e1635477efe15fe2bf4c0",
+      "commit": "dd652a77c905eca518873cd28f94550b22de9f11",
       "license": "Apache-2.0",
       "build": "CMake / C17 native CLI and FFI",
       "scope": "user-space language and toolchain"
@@ -37,7 +37,7 @@
       "id": "pytyliki",
       "repository": "Ivan-VHS/Pytyliki",
       "path": "projects/pytyliki",
-      "commit": "4f679d24d4073cfac5fd4ec566b0f070dd4756d5",
+      "commit": "455e1c9d397b6dd308a9ce68aa194e686fa4fa1a",
       "license": "MIT",
       "build": "CMake / C11 native CLI and FFI",
       "scope": "user-space compute tools and host inspection"
@@ -46,7 +46,7 @@
       "id": "oplague",
       "repository": "Ivan-VHS/OPlague",
       "path": "projects/oplague",
-      "commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "commit": "a7b9d6bca778cd0556fd7c0f621e7715ad282063",
       "license": "Apache-2.0",
       "build": "Python 3.12 / Tk user-space application and tests",
       "scope": "read-only host device and driver evidence"
@@ -55,7 +55,7 @@
       "id": "ventusample",
       "repository": "Ivan-VHS/VentuSample",
       "path": "projects/ventusample",
-      "commit": "45aeba3b78359bb4a3ef82d61315c962408563e7",
+      "commit": "8363c33138027856ac6cac4821b471e990caeace",
       "license": "Apache-2.0",
       "build": "C++20 / C11 DSP / optional Qt 6 desktop",
       "scope": "offline-by-default audio and DSP"
@@ -68,6 +68,39 @@
     "automatic_external_execution": false,
     "driver_installation": false,
     "firmware_writes": false,
-    "artificial_size_padding": false
-  }
+    "artificial_size_padding": false,
+    "native_artifacts_are_user_space_only": true
+  },
+  "native_artifacts": [
+    {
+      "id": "reaper-system",
+      "path": "release/lib/libreaper_system.a",
+      "provider": "reaper",
+      "abi": "Reaper System C17"
+    },
+    {
+      "id": "reaper-dabi64-desktop",
+      "path": "release/lib/libreaper_dabi64_desktop.a",
+      "provider": "reaper",
+      "abi": "DABI64 Desktop Host v1"
+    },
+    {
+      "id": "reaper-ffi",
+      "path": "release/lib/libreaper_ffi.a",
+      "provider": "reaper",
+      "abi": "Reaper FFI v1"
+    },
+    {
+      "id": "pytyliki-core",
+      "path": "release/lib/libpytyliki_core.a",
+      "provider": "pytyliki",
+      "abi": "C11 static core"
+    },
+    {
+      "id": "pytyliki-ffi",
+      "path": "release/lib/libpytyliki_ffi.so",
+      "provider": "pytyliki",
+      "abi": "Pytyliki C ABI v1"
+    }
+  ]
 }

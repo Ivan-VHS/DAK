@@ -11,6 +11,19 @@ DuckOS keeps the four specialist repositories as pinned Git submodules. This giv
 | `projects/oplague` | [OPlague](https://github.com/Ivan-VHS/OPlague) | read-only device and driver evidence workstation | Apache-2.0 |
 | `projects/ventusample` | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | C++20 procedural audio and offline DSP | Apache-2.0 |
 
+## Current reviewed source pins — 2026-11-25
+
+The following Gitlinks and the registry/release manifests advance together. These are exact upstream `main` commits, not floating branch references.
+
+| Project | Upstream pin | Primary native interface | DuckOS-side handling |
+|---|---|---|---|
+| Reaper | `dd652a77c905eca518873cd28f94550b22de9f11` | C17 System ABI, DABI64 Desktop Host v1 and Reaper FFI v1 | bounded user-space CLI workbench; ABI libraries packaged separately |
+| Pytyliki | `455e1c9d397b6dd308a9ce68aa194e686fa4fa1a` | C11 core and Pytyliki C ABI v1 | optional explicit-path metric bridge; host libraries packaged |
+| OPlague | `a7b9d6bca778cd0556fd7c0f621e7715ad282063` | versioned read-only device-snapshot JSON | source, tests and evidence schemas packaged; no driver installation or device writes |
+| VentuSample | `8363c33138027856ac6cac4821b471e990caeace` | C++20 core, C11 DSP compatibility library and versioned pack manifests | offline host library and optional Qt tool; optional Reaper C17 FFI link |
+
+DuckOS remains the fifth repository and integration host. The four specialist projects remain independently versioned and are included as exact Git submodules.
+
 DuckOS itself is the fifth repository and remains the superproject. It must not add itself as a submodule.
 
 ## First checkout
@@ -41,12 +54,12 @@ The registry is machine-readable at `federation/repositories.v1.json`; its contr
 
 ## How projects fit together
 
-- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. DuckOS should call narrow versioned interfaces or consume JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.
-- **Reaper** is the user-space language and toolchain. Its federation status is `native-workbench`: Duck Desktop and the `duckos reaper` CLI can launch Studio or request static checks through a bounded subprocess bridge. It can implement system policy and developer tools, but imported interpreters, plugins and programs never become kernel code.
-- **OPlague** provides read-only device, package and driver evidence. Device matches are candidates, not permission to install a driver.
-- **VentuSample** owns audio generation and offline DSP. Its CMake project supports an optional local Reaper source path; this is recorded as an optional dependency, not a mandatory boot dependency. Real-time audio and device access need a separate service design.
+- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. Its C ABI v1 is an optional, explicitly selected native interface used by Reaper and OPlague. It must not silently change clocks, voltage, affinity, fan curves or firmware.
+- **Reaper** is the user-space language and toolchain. Duck Desktop and the `duckos reaper` CLI use a bounded subprocess bridge. Its C17 System ABI and DABI64 Desktop Host v1 are source-of-truth contracts; their presence does not mean the Stage 1 kernel already dispatches these operations.
+- **OPlague** exports bounded, versioned, read-only device evidence. It can use explicit Reaper C17 and Pytyliki C ABI libraries for optional cross-checks; device matches remain candidates, not permission to install a driver.
+- **VentuSample** owns offline audio generation and DSP. Its CMake project can link Reaper's C17 FFI only when `REAPER_SOURCE_DIR` is explicitly set. Real-time audio and device access need a separate service design.
 
-Preferred integration order is versioned JSON first, narrow C ABI second, and IPC only after DuckOS has a process model, capabilities, resource quotas, cancellation and audit. Keep the upstream projects separate; use adapters under DuckOS rather than copying source files into kernel or Mora directories.
+The build/link dependency graph is acyclic: Reaper may optionally consume Pytyliki; OPlague may optionally consume Reaper and Pytyliki; VentuSample may optionally consume Reaper. Reaper's OPlague snapshot reader is a read-only file-format integration, not a build dependency. All native library loads require explicit paths and ABI checks.
 
 ## Reproducibility and safety
 
@@ -54,7 +67,7 @@ Every superproject commit pins exact submodule commits. Update pins intentionall
 
 Before syncing, the tool refuses to proceed if an initialized top-level submodule has local modifications or untracked files. Commit or move local work first. Recursive submodules are included if an upstream project adds any later.
 
-Submodule initialization only downloads source. The federation tool never compiles or runs imported content. All entries have `auto_build=false` and `auto_execute=false`. A cloned repository is not thereby a DuckOS app, kernel driver, trusted package or bootable OS feature.
+Submodule initialization only downloads source. It does not run imported content. `auto_build=false` means no background or implicit build is triggered by discovery; the explicit ecosystem release command builds and tests each project in separate host build directories. `auto_execute=false` remains mandatory. A cloned repository or packaged host library is not thereby a DuckOS kernel module, trusted driver or application executable inside the Stage 1 image.
 
 Each upstream LICENSE and its notices remain in the original checkout. Pytyliki is MIT; Reaper, OPlague and VentuSample are Apache-2.0. Preserve both the top-level notices and any third-party attribution shipped by each project.
 

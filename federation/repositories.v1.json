@@ -12,15 +12,15 @@
       "url": "https://github.com/Ivan-VHS/Pytyliki.git",
       "path": "projects/pytyliki",
       "default_branch": "main",
-      "pinned_commit": "4f679d24d4073cfac5fd4ec566b0f070dd4756d5",
+      "pinned_commit": "455e1c9d397b6dd308a9ce68aa194e686fa4fa1a",
       "license": "MIT",
       "license_file": "LICENSE",
       "domain": "processor-systems",
       "responsibility": "Processor and host inventory, bounded benchmarks, profiling evidence, static analysis and C11 systems utilities.",
       "integration_mode": [
-        "versioned C ABI",
-        "JSON evidence reports",
-        "user-space inspection adapter"
+        "versioned C ABI v1 for explicit native consumers",
+        "JSON evidence reports and processor profiles",
+        "read-only user-space inspection and bounded benchmark tools"
       ],
       "runtime_boundary": "user-space",
       "build_system": "CMake / C11",
@@ -36,22 +36,24 @@
       "url": "https://github.com/Ivan-VHS/Reaper.git",
       "path": "projects/reaper",
       "default_branch": "main",
-      "pinned_commit": "02c6cda6bc67f7b9323e1635477efe15fe2bf4c0",
+      "pinned_commit": "dd652a77c905eca518873cd28f94550b22de9f11",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "language-and-toolchain",
       "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser, static type diagnostics and native toolchain contracts.",
       "integration_mode": [
-        "native Duck Desktop workbench",
-        "bounded user-space subprocess bridge",
-        "user-space CLI",
-        "versioned JSON protocol",
-        "sandboxed extension ABI"
+        "native Duck Desktop user-space workbench",
+        "bounded CLI subprocess bridge with shell disabled",
+        "C17 native runtime, system ABI and DABI64 Desktop Host v1",
+        "optional Pytyliki C ABI v1 metric bridge",
+        "read-only OPlague device-snapshot v1 importer"
       ],
       "runtime_boundary": "user-space-only",
       "build_system": "CMake / C17 plus Python reference runtime",
       "depends_on": [],
-      "optional_dependencies": [],
+      "optional_dependencies": [
+        "pytyliki"
+      ],
       "integration_status": "native-workbench",
       "auto_build": false,
       "auto_execute": false
@@ -62,19 +64,23 @@
       "url": "https://github.com/Ivan-VHS/OPlague.git",
       "path": "projects/oplague",
       "default_branch": "main",
-      "pinned_commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "pinned_commit": "a7b9d6bca778cd0556fd7c0f621e7715ad282063",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "device-and-driver-evidence",
       "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes and SBOM metadata.",
       "integration_mode": [
-        "read-only user-space service",
-        "versioned JSON evidence reports"
+        "read-only user-space device and driver evidence",
+        "versioned OPlague device-snapshot v1 JSON",
+        "optional explicit-path Reaper C17 FFI and Pytyliki C ABI v1 cross-checks"
       ],
       "runtime_boundary": "user-space-read-only",
       "build_system": "Python 3.10+ / Tkinter; Windows live inventory",
       "depends_on": [],
-      "optional_dependencies": [],
+      "optional_dependencies": [
+        "pytyliki",
+        "reaper"
+      ],
       "integration_status": "source-pinned-only",
       "auto_build": false,
       "auto_execute": false
@@ -85,15 +91,15 @@
       "url": "https://github.com/Ivan-VHS/VentuSample.git",
       "path": "projects/ventusample",
       "default_branch": "main",
-      "pinned_commit": "45aeba3b78359bb4a3ef82d61315c962408563e7",
+      "pinned_commit": "8363c33138027856ac6cac4821b471e990caeace",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "audio-and-dsp",
       "responsibility": "C++20 procedural audio and sample generation, offline DSP, WAV/MIDI processing, synthesis, effects and analysis.",
       "integration_mode": [
-        "versioned C/C++ library boundary",
-        "offline render jobs",
-        "JSON manifests"
+        "versioned C++20/C11 user-space library boundary",
+        "offline render jobs and versioned pack manifests",
+        "optional Reaper C17 FFI via REAPER_SOURCE_DIR"
       ],
       "runtime_boundary": "user-space-offline-by-default",
       "build_system": "CMake / C++20; optional Qt 6 desktop",
@@ -116,6 +122,9 @@
     "Pytyliki and OPlague hardware inspection remains read-only; no clock, voltage, firmware, device or driver writes.",
     "VentuSample processing is offline by default; real-time audio and device access need a separate reviewed OS service contract.",
     "Validate licenses, provenance, schema versions and dependency boundaries before creating a native cross-project link.",
-    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image."
+    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image.",
+    "Cross-project native libraries are loaded or linked only through documented ABI versions and explicit trusted paths; no PATH or implicit plugin search is allowed.",
+    "Reaper reads OPlague device snapshots as bounded read-only JSON; OPlague native metric/expression cross-checks require an operator-supplied absolute library path and an ABI-version match.",
+    "The release pipeline packages Reaper system/DABI64 static libraries and the Pytyliki C ABI shared library as host user-space artifacts; they are not kernel modules and are not auto-loaded."
   ]
 }
