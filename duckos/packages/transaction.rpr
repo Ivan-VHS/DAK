@@ -1,0 +1,116 @@
+# Application package transaction contract v1.
+# This models validation and reversible A/B state transitions. It does not
+# write disks, extract archives, verify cryptographic signatures or execute
+# package entry points; those effects belong to a native installer/broker.
+
+import "duckos/security/capabilities.rpr" as capabilities
+
+export craft manifest_valid(manifest) {
+    # [id, version, target_arch, abi_version, publisher, digest,
+    #  signature_verified, requested_capabilities, payload_bytes, entrypoint]
+    when size(manifest) != 10 {
+        yield false
+    }
+    when manifest[0] == "" or manifest[1] == "" or manifest[2] == "" or manifest[3] <= 0 {
+        yield false
+    }
+    when manifest[4] == "" or size(manifest[5]) != 64 or manifest[9] == "" {
+        yield false
+    }
+    when manifest[6] != true or size(manifest[7]) > 64 {
+        yield false
+    }
+    when manifest[8] <= 0 or manifest[8] > 1073741824 {
+        yield false
+    }
+    each capability in manifest[7] {
+        when capability == "" {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft compatible(manifest, target_arch, target_abi) {
+    when not manifest_valid(manifest) {
+        yield false
+    }
+    yield manifest[2] == target_arch and manifest[3] == target_abi
+}
+
+export craft install_policy(manifest, active_packages, granted, target_arch, target_abi) {
+    when not manifest_valid(manifest) {
+        yield ["reject", "invalid-manifest"]
+    }
+    when not compatible(manifest, target_arch, target_abi) {
+        yield ["reject", "target-incompatible"]
+    }
+    when not capabilities["child_is_subset"](granted, manifest[7]) {
+        yield ["reject", "capability-escalation"]
+    }
+    each active in active_packages {
+        when size(active) != 2 or active[0] == "" {
+            yield ["reject", "corrupt-package-registry"]
+        }
+    }
+    yield ["approved", manifest[0]]
+}
+
+export craft transaction_valid(transaction) {
+    # [transaction_id, package_id, old_version, new_version, slot, state, verified]
+    when size(transaction) != 7 or transaction[0] == "" or transaction[1] == "" {
+        yield false
+    }
+    when transaction[3] == "" or transaction[4] != "inactive" {
+        yield false
+    }
+    when transaction[5] != "prepared" and transaction[5] != "pending-health" and transaction[5] != "committed" and transaction[5] != "rolled-back" {
+        yield false
+    }
+    yield transaction[6] == true
+}
+
+export craft prepare(transaction_id, manifest, active_packages, granted, target_arch, target_abi) {
+    when transaction_id == "" {
+        yield ["reject", "missing-transaction-id"]
+    }
+    make policy := install_policy(manifest, active_packages, granted, target_arch, target_abi)
+    when policy[0] != "approved" {
+        yield policy
+    }
+    vary old_version := "none"
+    each active in active_packages {
+        when active[0] == manifest[0] {
+            change old_version := active[1]
+        }
+    }
+    make transaction := [transaction_id, manifest[0], old_version, manifest[1], "inactive", "prepared", true]
+    yield ["prepared", transaction]
+}
+
+export craft activate(transaction) {
+    when not transaction_valid(transaction) or transaction[5] != "prepared" {
+        yield ["reject", transaction]
+    }
+    make updated := [transaction[0], transaction[1], transaction[2], transaction[3], transaction[4], "pending-health", transaction[6]]
+    yield ["switch-pending-health", updated]
+}
+
+export craft accept_health(transaction, healthy) {
+    when not transaction_valid(transaction) or transaction[5] != "pending-health" {
+        yield ["reject", transaction]
+    }
+    when not healthy {
+        yield ["rollback-required", transaction]
+    }
+    make updated := [transaction[0], transaction[1], transaction[2], transaction[3], transaction[4], "committed", transaction[6]]
+    yield ["committed", updated]
+}
+
+export craft rollback(transaction) {
+    when not transaction_valid(transaction) or transaction[5] != "pending-health" {
+        yield ["reject", transaction]
+    }
+    make updated := [transaction[0], transaction[1], transaction[2], transaction[3], transaction[4], "rolled-back", transaction[6]]
+    yield ["rolled-back", updated, transaction[2]]
+}

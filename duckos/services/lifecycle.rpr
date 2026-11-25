@@ -1,0 +1,87 @@
+# System service lifecycle contract v1.
+# This defines dependency readiness and finite restart policy. It does not
+# create OS processes, schedule threads, supervise crashes or persist state.
+
+export craft descriptor_valid(service) {
+    # [id, version, state, retries, retry_limit, owner_pid, dependencies, capabilities]
+    when size(service) != 8 {
+        yield false
+    }
+    when service[0] == "" or service[1] <= 0 {
+        yield false
+    }
+    when service[2] != "stopped" and service[2] != "starting" and service[2] != "ready" and service[2] != "degraded" and service[2] != "failed" {
+        yield false
+    }
+    when service[3] < 0 or service[4] < 0 or service[3] > service[4] or service[4] > 32 {
+        yield false
+    }
+    when service[5] < 0 or (service[2] == "ready" and service[5] == 0) {
+        yield false
+    }
+    when size(service[6]) > 64 or size(service[7]) > 64 {
+        yield false
+    }
+    yield true
+}
+
+export craft service_ready(services, service_id) {
+    vary found := false
+    each service in services {
+        when descriptor_valid(service) and service[0] == service_id and service[2] == "ready" {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft dependency_state(service, services) {
+    when not descriptor_valid(service) {
+        yield "invalid"
+    }
+    each dependency in service[6] {
+        when not service_ready(services, dependency) {
+            yield "waiting"
+        }
+    }
+    yield "ready"
+}
+
+export craft start_policy(service, services) {
+    when not descriptor_valid(service) {
+        yield ["reject", "invalid-service"]
+    }
+    when service[2] != "stopped" and service[2] != "degraded" {
+        yield ["reject", "invalid-state"]
+    }
+    when dependency_state(service, services) != "ready" {
+        yield ["defer", "dependency-not-ready"]
+    }
+    yield ["start", [service[0], service[1], "starting", service[3], service[4], service[5], service[6], service[7]]]
+}
+
+export craft exit_decision(exit_code, retries, retry_limit) {
+    when retries < 0 or retry_limit < 0 or retries > retry_limit or retry_limit > 32 {
+        yield ["invalid", retries]
+    }
+    when exit_code == 0 {
+        yield ["stopped", retries]
+    }
+    when retries >= retry_limit {
+        yield ["failed", retries]
+    }
+    yield ["restart", retries + 1]
+}
+
+export craft health_transition(service, healthy, owner_pid) {
+    when not descriptor_valid(service) or owner_pid <= 0 {
+        yield ["invalid", service]
+    }
+    when service[5] != owner_pid {
+        yield ["owner-mismatch", service]
+    }
+    when healthy {
+        yield ["ready", [service[0], service[1], "ready", service[3], service[4], service[5], service[6], service[7]]]
+    }
+    yield ["degraded", [service[0], service[1], "degraded", service[3], service[4], service[5], service[6], service[7]]]
+}

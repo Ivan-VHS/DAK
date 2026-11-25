@@ -1,0 +1,144 @@
+# Native desktop window-state contract v1.
+# This models display migration, focus ordering and keyboard movement. It does
+# not create native windows, composite pixels, receive hardware input or drive
+# physical displays; those belong to the native window manager/compositor.
+
+export craft display_valid(display) {
+    # [id, origin_x, origin_y, width, height, scale_percent, primary]
+    when size(display) != 7 or display[0] == "" {
+        yield false
+    }
+    when display[3] <= 0 or display[4] <= 0 or display[5] < 50 or display[5] > 400 {
+        yield false
+    }
+    when display[6] != true and display[6] != false {
+        yield false
+    }
+    yield true
+}
+
+export craft window_valid(window) {
+    # [id, owner_pid, display_id, x, y, width, height, state, focusable]
+    when size(window) != 9 or window[0] == "" or window[1] <= 0 or window[2] == "" {
+        yield false
+    }
+    when window[5] < 160 or window[6] < 96 {
+        yield false
+    }
+    when window[7] != "normal" and window[7] != "minimized" and window[7] != "maximized" and window[7] != "closed" {
+        yield false
+    }
+    when window[8] != true and window[8] != false {
+        yield false
+    }
+    yield true
+}
+
+export craft clamp_to_display(window, display) {
+    when not window_valid(window) or not display_valid(display) {
+        yield ["invalid", window]
+    }
+    vary width := window[5]
+    vary height := window[6]
+    when width > display[3] {
+        change width := display[3]
+    }
+    when height > display[4] {
+        change height := display[4]
+    }
+    make max_x := display[1] + display[3] - width
+    make max_y := display[2] + display[4] - height
+    vary x := window[3]
+    vary y := window[4]
+    when x < display[1] {
+        change x := display[1]
+    }
+    when x > max_x {
+        change x := max_x
+    }
+    when y < display[2] {
+        change y := display[2]
+    }
+    when y > max_y {
+        change y := max_y
+    }
+    yield ["clamped", [window[0], window[1], display[0], x, y, width, height, window[7], window[8]]]
+}
+
+export craft restore_display(window, displays) {
+    when not window_valid(window) or size(displays) == 0 or size(displays) > 16 {
+        yield ["invalid", window]
+    }
+    vary matching := nothing
+    vary primary := nothing
+    each display in displays {
+        when not display_valid(display) {
+            yield ["invalid-display", window]
+        }
+        when display[0] == window[2] {
+            change matching := display
+        }
+        when display[6] {
+            change primary := display
+        }
+    }
+    when matching == nothing {
+        when primary != nothing {
+            change matching := primary
+        } otherwise {
+            change matching := displays[0]
+        }
+    }
+    yield clamp_to_display(window, matching)
+}
+
+export craft move_keyboard(window, display, delta_x, delta_y) {
+    when not window_valid(window) or not display_valid(display) {
+        yield ["invalid", window]
+    }
+    when delta_x < -256 or delta_x > 256 or delta_y < -256 or delta_y > 256 {
+        yield ["invalid-step", window]
+    }
+    when window[2] != display[0] {
+        yield ["wrong-display", window]
+    }
+    make moved := [window[0], window[1], window[2], window[3] + delta_x, window[4] + delta_y, window[5], window[6], window[7], window[8]]
+    yield clamp_to_display(moved, display)
+}
+
+export craft focus_order(windows, window_id) {
+    when size(windows) > 1024 {
+        yield ["invalid", windows]
+    }
+    vary selected := nothing
+    vary remaining := []
+    each window in windows {
+        when not window_valid(window) {
+            yield ["invalid", windows]
+        }
+        when window[0] == window_id {
+            change selected := window
+        } otherwise {
+            when window[7] != "closed" {
+                change remaining := push(remaining, window)
+            }
+        }
+    }
+    when selected == nothing or selected[7] == "closed" or not selected[8] {
+        yield ["not-focusable", windows]
+    }
+    yield ["focused", push(remaining, selected)]
+}
+
+export craft close_policy(window, caller_pid) {
+    when not window_valid(window) or caller_pid <= 0 {
+        yield "invalid"
+    }
+    when caller_pid != window[1] {
+        yield "owner-mismatch"
+    }
+    when window[7] == "closed" {
+        yield "already-closed"
+    }
+    yield "close-allowed"
+}

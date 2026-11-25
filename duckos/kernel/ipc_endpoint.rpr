@@ -1,0 +1,98 @@
+# Process-bound IPC endpoint contract v1.
+# Payloads are represented as bounded messages with sequence and sender IDs.
+# This module does not create shared memory, wake threads or copy bytes between
+# address spaces. The kernel transport must provide those operations.
+
+import "duckos/security/capabilities.rpr" as capabilities
+
+export craft endpoint_valid(endpoint) {
+    # [endpoint_id, owner_pid, capacity, max_message_bytes,
+    #  send_capability, next_sequence, queue]
+    when size(endpoint) != 7 {
+        yield false
+    }
+    when endpoint[0] <= 0 or endpoint[1] <= 0 or endpoint[2] <= 0 or endpoint[2] > 4096 {
+        yield false
+    }
+    when endpoint[3] <= 0 or endpoint[3] > 1048576 or endpoint[4] == "" or endpoint[5] <= 0 {
+        yield false
+    }
+    when size(endpoint[6]) > endpoint[2] {
+        yield false
+    }
+    vary previous_sequence := 0
+    each envelope in endpoint[6] {
+        when size(envelope) != 5 or envelope[0] <= previous_sequence or envelope[1] <= 0 or envelope[2] == "" {
+            yield false
+        }
+        when envelope[3] <= 0 or envelope[3] > endpoint[3] {
+            yield false
+        }
+        change previous_sequence := envelope[0]
+    }
+    when previous_sequence >= endpoint[5] {
+        yield false
+    }
+    yield true
+}
+
+export craft create(endpoint_id, owner_pid, capacity, max_message_bytes, send_capability) {
+    make endpoint := [endpoint_id, owner_pid, capacity, max_message_bytes, send_capability, 1, []]
+    when not endpoint_valid(endpoint) {
+        yield ["invalid", nothing]
+    }
+    yield ["ready", endpoint]
+}
+
+export craft send(endpoint, caller_pid, grants, message) {
+    # Message: [kind, byte_count, payload]
+    when not endpoint_valid(endpoint) or size(message) != 3 or caller_pid <= 0 {
+        yield ["invalid", endpoint]
+    }
+    when not capabilities["permits"](grants, endpoint[4]) {
+        yield ["denied", "capability", endpoint]
+    }
+    when size(endpoint[6]) >= endpoint[2] {
+        yield ["backpressure", endpoint]
+    }
+    when message[0] == "" or message[1] <= 0 or message[1] > endpoint[3] {
+        yield ["message-limit", endpoint]
+    }
+    make envelope := [endpoint[5], caller_pid, message[0], message[1], message[2]]
+    make updated_queue := push(endpoint[6], envelope)
+    make updated := [endpoint[0], endpoint[1], endpoint[2], endpoint[3], endpoint[4], endpoint[5] + 1, updated_queue]
+    yield ["sent", updated, endpoint[5]]
+}
+
+export craft receive(endpoint, caller_pid, grants) {
+    when not endpoint_valid(endpoint) or caller_pid <= 0 {
+        yield ["invalid", endpoint, nothing]
+    }
+    when caller_pid != endpoint[1] {
+        yield ["denied", endpoint, nothing]
+    }
+    when not capabilities["permits"](grants, "ipc.receive") {
+        yield ["denied", endpoint, nothing]
+    }
+    when size(endpoint[6]) == 0 {
+        yield ["empty", endpoint, nothing]
+    }
+    make queue := endpoint[6]
+    vary remaining := []
+    each index in range(1, size(queue)) {
+        change remaining := push(remaining, queue[index])
+    }
+    make updated := [endpoint[0], endpoint[1], endpoint[2], endpoint[3], endpoint[4], endpoint[5], remaining]
+    make first_message := queue[0]
+    yield ["received", updated, first_message]
+}
+
+export craft close(endpoint, caller_pid, grants) {
+    when not endpoint_valid(endpoint) {
+        yield "invalid"
+    }
+    when caller_pid != endpoint[1] or not capabilities["permits"](grants, "ipc.manage") {
+        yield "denied"
+    }
+    yield "closed"
+}
