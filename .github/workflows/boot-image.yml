@@ -20,6 +20,8 @@ on:
       - "foundation/**"
       - "tests/test_boot_info.c"
       - "tests/test_frame_allocator.c"
+      - "tests/test_idt.c"
+      - "tests/test_page_table.c"
       - "CMakeLists.txt"
       - ".github/workflows/boot-image.yml"
   workflow_dispatch:
