@@ -1,107 +1,418 @@
 #include "framebuffer.h"
-#include <string.h>
-static int mask_ok(uint8_t n,uint8_t shift){return n>0u&&n<=8u&&shift<32u&&(uint32_t)n+(uint32_t)shift<=32u;}
-static uint32_t mask(uint8_t n,uint8_t s){return ((UINT32_C(1)<<n)-1u)<<s;}
-static uint32_t pack(uint8_t v,uint8_t n,uint8_t s){uint32_t m=(UINT32_C(1)<<n)-1u;return (((uint32_t)v*m+127u)/255u)<<s;}
-static uint8_t unpack(uint32_t p,uint8_t n,uint8_t s){uint32_t m=(UINT32_C(1)<<n)-1u;return (uint8_t)((((p>>s)&m)*255u+m/2u)/m);}
-static uint32_t rgb(const duckos_framebuffer_target*t,uint8_t r,uint8_t g,uint8_t b){
- return pack(r,t->red_size,t->red_shift)|pack(g,t->green_size,t->green_shift)|pack(b,t->blue_size,t->blue_shift);
+
+#include <limits.h>
+#include <stdint.h>
+
+static int channel_mask_valid(uint8_t size, uint8_t shift)
+{
+    return size > 0u && size <= 8u && shift < 32u &&
+           (uint32_t)size + (uint32_t)shift <= 32u;
 }
-static int clip(const duckos_framebuffer_target*t,int32_t x,int32_t y,uint32_t w,uint32_t h,
- uint32_t*l,uint32_t*top,uint32_t*r,uint32_t*bottom){
- int64_t x0=x,y0=y,x1=x0+(int64_t)w,y1=y0+(int64_t)h;
- if(w==0u||h==0u||x1<=0||y1<=0||x0>=(int64_t)t->width||y0>=(int64_t)t->height)return 0;
- if(x0<0)x0=0;if(y0<0)y0=0;if(x1>(int64_t)t->width)x1=t->width;if(y1>(int64_t)t->height)y1=t->height;
- *l=(uint32_t)x0;*top=(uint32_t)y0;*r=(uint32_t)x1;*bottom=(uint32_t)y1;return 1;
+
+static uint32_t channel_mask(uint8_t size, uint8_t shift)
+{
+    const uint32_t bits = (UINT32_C(1) << size) - 1u;
+    return bits << shift;
 }
-duckos_framebuffer_status duckos_framebuffer_validate_target(const duckos_framebuffer_target*t){
- size_t need;uint32_t rm,gm,bm;
- if(t==NULL||t->pixels==NULL)return DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT;
- if(t->width<320u||t->width>DUCKOS_FRAMEBUFFER_MAX_WIDTH||t->height<200u||t->height>DUCKOS_FRAMEBUFFER_MAX_HEIGHT)
-  return DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY;
- if((t->pitch_bytes&3u)!=0u||((uintptr_t)t->pixels&3u)!=0u||
-    t->pitch_bytes<t->width*4u||(size_t)t->height>SIZE_MAX/(size_t)t->pitch_bytes)
-  return DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY;
- need=(size_t)t->pitch_bytes*t->height;
- if(t->mapped_size<need||(uintptr_t)t->pixels>UINTPTR_MAX-need)return DUCKOS_FRAMEBUFFER_BUFFER_TOO_SMALL;
- if(!mask_ok(t->red_size,t->red_shift)||!mask_ok(t->green_size,t->green_shift)||!mask_ok(t->blue_size,t->blue_shift))
-  return DUCKOS_FRAMEBUFFER_INVALID_MASKS;
- rm=mask(t->red_size,t->red_shift);gm=mask(t->green_size,t->green_shift);bm=mask(t->blue_size,t->blue_shift);
- if((rm&gm)||(rm&bm)||(gm&bm))return DUCKOS_FRAMEBUFFER_INVALID_MASKS;
- return DUCKOS_FRAMEBUFFER_OK;
+
+static uint32_t encode_channel(uint8_t value, uint8_t size, uint8_t shift)
+{
+    const uint32_t maximum = (UINT32_C(1) << size) - 1u;
+    const uint32_t scaled = ((uint32_t)value * maximum + 127u) / 255u;
+
+    return scaled << shift;
 }
-duckos_framebuffer_status duckos_framebuffer_clear(duckos_framebuffer_target*t,uint8_t r,uint8_t g,uint8_t b){
- uint32_t y,x,color;duckos_framebuffer_status s=duckos_framebuffer_validate_target(t);if(s!=DUCKOS_FRAMEBUFFER_OK)return s;
- color=rgb(t,r,g,b);
- for(y=0u;y<t->height;y++){volatile uint32_t*row=(volatile uint32_t*)(void*)(t->pixels+(size_t)y*t->pitch_bytes);for(x=0u;x<t->width;x++)row[x]=color;}
- return DUCKOS_FRAMEBUFFER_OK;
+
+static uint8_t decode_channel(uint32_t pixel, uint8_t size, uint8_t shift)
+{
+    const uint32_t maximum = (UINT32_C(1) << size) - 1u;
+    const uint32_t channel = (pixel >> shift) & maximum;
+    const uint32_t scaled = (channel * 255u + maximum / 2u) / maximum;
+
+    return (uint8_t)scaled;
 }
-duckos_framebuffer_status duckos_framebuffer_fill_rect(duckos_framebuffer_target*t,int32_t x,int32_t y,uint32_t w,uint32_t h,uint8_t r,uint8_t g,uint8_t b){
- uint32_t l,tp,rt,bt,row_index,color;duckos_framebuffer_status s=duckos_framebuffer_validate_target(t);if(s!=DUCKOS_FRAMEBUFFER_OK)return s;
- if(!clip(t,x,y,w,h,&l,&tp,&rt,&bt))return DUCKOS_FRAMEBUFFER_OK;color=rgb(t,r,g,b);
- for(row_index=tp;row_index<bt;row_index++){volatile uint32_t*row=(volatile uint32_t*)(void*)(t->pixels+(size_t)row_index*t->pitch_bytes);uint32_t col;for(col=l;col<rt;col++)row[col]=color;}
- return DUCKOS_FRAMEBUFFER_OK;
+
+static uint32_t encode_rgb(const duckos_framebuffer_target *target,
+                           uint8_t red, uint8_t green, uint8_t blue)
+{
+    return encode_channel(red, target->red_size, target->red_shift) |
+           encode_channel(green, target->green_size, target->green_shift) |
+           encode_channel(blue, target->blue_size, target->blue_shift);
 }
-duckos_framebuffer_status duckos_framebuffer_surface_validate(const duckos_framebuffer_surface*s){
- size_t need;
- if(s==NULL||s->pixels==NULL)return DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT;
- if(s->id==0u||s->generation==0u||s->visible>1u||
-    (s->format!=DUCKOS_SURFACE_RGBA8888&&s->format!=DUCKOS_SURFACE_BGRA8888))
-  return DUCKOS_FRAMEBUFFER_INVALID_SURFACE;
- if(s->width==0u||s->height==0u||s->width>DUCKOS_FRAMEBUFFER_MAX_WIDTH||s->height>DUCKOS_FRAMEBUFFER_MAX_HEIGHT||
-    s->pitch_bytes<s->width*4u||(size_t)s->height>SIZE_MAX/(size_t)s->pitch_bytes)
-  return DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY;
- need=(size_t)s->pitch_bytes*s->height;
- if(s->buffer_size<need||(uintptr_t)s->pixels>UINTPTR_MAX-need)return DUCKOS_FRAMEBUFFER_BUFFER_TOO_SMALL;
- return DUCKOS_FRAMEBUFFER_OK;
+
+static int clip_rectangle(const duckos_framebuffer_target *target,
+                          int32_t x, int32_t y, uint32_t width, uint32_t height,
+                          uint32_t *left, uint32_t *top,
+                          uint32_t *right, uint32_t *bottom)
+{
+    int64_t x0 = (int64_t)x;
+    int64_t y0 = (int64_t)y;
+    int64_t x1 = x0 + (int64_t)width;
+    int64_t y1 = y0 + (int64_t)height;
+
+    if (width == 0u || height == 0u ||
+        x1 <= 0 || y1 <= 0 ||
+        x0 >= (int64_t)target->width ||
+        y0 >= (int64_t)target->height) {
+        return 0;
+    }
+
+    if (x0 < 0) {
+        x0 = 0;
+    }
+    if (y0 < 0) {
+        y0 = 0;
+    }
+    if (x1 > (int64_t)target->width) {
+        x1 = (int64_t)target->width;
+    }
+    if (y1 > (int64_t)target->height) {
+        y1 = (int64_t)target->height;
+    }
+
+    *left = (uint32_t)x0;
+    *top = (uint32_t)y0;
+    *right = (uint32_t)x1;
+    *bottom = (uint32_t)y1;
+    return 1;
 }
-duckos_framebuffer_status duckos_framebuffer_blit_surface(duckos_framebuffer_target*t,const duckos_framebuffer_surface*s){
- uint32_t l,tp,rt,bt,y;duckos_framebuffer_status st=duckos_framebuffer_validate_target(t);
- if(st!=DUCKOS_FRAMEBUFFER_OK)return st;st=duckos_framebuffer_surface_validate(s);if(st!=DUCKOS_FRAMEBUFFER_OK)return st;
- if(!s->visible||!clip(t,s->x,s->y,s->width,s->height,&l,&tp,&rt,&bt))return DUCKOS_FRAMEBUFFER_OK;
- for(y=tp;y<bt;y++){
-  uint32_t sy=(uint32_t)((int64_t)y-s->y);const uint8_t*src=s->pixels+(size_t)sy*s->pitch_bytes;
-  volatile uint32_t*dst=(volatile uint32_t*)(void*)(t->pixels+(size_t)y*t->pitch_bytes);uint32_t x;
-  for(x=l;x<rt;x++){
-   uint32_t sx=(uint32_t)((int64_t)x-s->x);const uint8_t*p=src+(size_t)sx*4u;
-   uint8_t r=s->format==DUCKOS_SURFACE_RGBA8888?p[0]:p[2],g=p[1];
-   uint8_t b=s->format==DUCKOS_SURFACE_RGBA8888?p[2]:p[0],a=p[3];
-   if(a==0u)continue;
-   if(a!=255u){
-    uint32_t d=dst[x];uint8_t dr=unpack(d,t->red_size,t->red_shift);
-    uint8_t dg=unpack(d,t->green_size,t->green_shift);uint8_t db=unpack(d,t->blue_size,t->blue_shift);
-    r=(uint8_t)(((uint32_t)r*a+(uint32_t)dr*(255u-a)+127u)/255u);
-    g=(uint8_t)(((uint32_t)g*a+(uint32_t)dg*(255u-a)+127u)/255u);
-    b=(uint8_t)(((uint32_t)b*a+(uint32_t)db*(255u-a)+127u)/255u);
-   }
-   dst[x]=rgb(t,r,g,b);
-  }
- }
- return DUCKOS_FRAMEBUFFER_OK;
+
+duckos_framebuffer_status duckos_framebuffer_validate_target(
+    const duckos_framebuffer_target *target)
+{
+    size_t required_bytes;
+    uint32_t red_mask;
+    uint32_t green_mask;
+    uint32_t blue_mask;
+
+    if (target == NULL || target->pixels == NULL) {
+        return DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT;
+    }
+
+    if (target->width < 320u ||
+        target->width > DUCKOS_FRAMEBUFFER_MAX_WIDTH ||
+        target->height < 200u ||
+        target->height > DUCKOS_FRAMEBUFFER_MAX_HEIGHT) {
+        return DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY;
+    }
+
+    if ((target->pitch_bytes & 3u) != 0u ||
+        ((uintptr_t)target->pixels & 3u) != 0u ||
+        target->pitch_bytes < target->width * 4u ||
+        (size_t)target->height > SIZE_MAX / (size_t)target->pitch_bytes) {
+        return DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY;
+    }
+
+    required_bytes = (size_t)target->pitch_bytes * (size_t)target->height;
+    if (target->mapped_size < required_bytes ||
+        (uintptr_t)target->pixels > UINTPTR_MAX - required_bytes) {
+        return DUCKOS_FRAMEBUFFER_BUFFER_TOO_SMALL;
+    }
+
+    if (!channel_mask_valid(target->red_size, target->red_shift) ||
+        !channel_mask_valid(target->green_size, target->green_shift) ||
+        !channel_mask_valid(target->blue_size, target->blue_shift)) {
+        return DUCKOS_FRAMEBUFFER_INVALID_MASKS;
+    }
+
+    red_mask = channel_mask(target->red_size, target->red_shift);
+    green_mask = channel_mask(target->green_size, target->green_shift);
+    blue_mask = channel_mask(target->blue_size, target->blue_shift);
+
+    if ((red_mask & green_mask) != 0u ||
+        (red_mask & blue_mask) != 0u ||
+        (green_mask & blue_mask) != 0u) {
+        return DUCKOS_FRAMEBUFFER_INVALID_MASKS;
+    }
+
+    return DUCKOS_FRAMEBUFFER_OK;
 }
-static int before(const duckos_framebuffer_surface*s,uint32_t a,uint32_t b){
- if(s[a].z_index!=s[b].z_index)return s[a].z_index<s[b].z_index;return s[a].id<s[b].id;
+
+duckos_framebuffer_status duckos_framebuffer_clear(
+    duckos_framebuffer_target *target, uint8_t red, uint8_t green, uint8_t blue)
+{
+    duckos_framebuffer_status status;
+    const uint32_t color = target == NULL
+        ? 0u
+        : encode_rgb(target, red, green, blue);
+    uint32_t y;
+
+    status = duckos_framebuffer_validate_target(target);
+    if (status != DUCKOS_FRAMEBUFFER_OK) {
+        return status;
+    }
+
+    for (y = 0u; y < target->height; ++y) {
+        volatile uint32_t *row = (volatile uint32_t *)(void *)(
+            target->pixels + (size_t)y * (size_t)target->pitch_bytes);
+        uint32_t x;
+
+        for (x = 0u; x < target->width; ++x) {
+            row[x] = color;
+        }
+    }
+
+    return DUCKOS_FRAMEBUFFER_OK;
 }
-duckos_framebuffer_status duckos_framebuffer_compose(duckos_framebuffer_target*t,uint8_t r,uint8_t g,uint8_t b,const duckos_framebuffer_surface*s,size_t n){
- uint32_t order[DUCKOS_COMPOSITOR_MAX_SURFACES];size_t i,j;duckos_framebuffer_status st=duckos_framebuffer_validate_target(t);
- if(st!=DUCKOS_FRAMEBUFFER_OK)return st;
- if(n>DUCKOS_COMPOSITOR_MAX_SURFACES)return DUCKOS_FRAMEBUFFER_TOO_MANY_SURFACES;
- if(n>0u&&s==NULL)return DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT;
- for(i=0u;i<n;i++){
-  st=duckos_framebuffer_surface_validate(&s[i]);if(st!=DUCKOS_FRAMEBUFFER_OK)return st;order[i]=(uint32_t)i;
-  for(j=0u;j<i;j++)if(s[j].id==s[i].id)return DUCKOS_FRAMEBUFFER_DUPLICATE_SURFACE;
- }
- for(i=1u;i<n;i++){uint32_t v=order[i];j=i;while(j>0u&&before(s,v,order[j-1u])){order[j]=order[j-1u];--j;}order[j]=v;}
- st=duckos_framebuffer_clear(t,r,g,b);if(st!=DUCKOS_FRAMEBUFFER_OK)return st;
- for(i=0u;i<n;i++){st=duckos_framebuffer_blit_surface(t,&s[order[i]]);if(st!=DUCKOS_FRAMEBUFFER_OK)return st;}
- return DUCKOS_FRAMEBUFFER_OK;
+
+duckos_framebuffer_status duckos_framebuffer_fill_rect(
+    duckos_framebuffer_target *target, int32_t x, int32_t y,
+    uint32_t width, uint32_t height,
+    uint8_t red, uint8_t green, uint8_t blue)
+{
+    duckos_framebuffer_status status;
+    uint32_t left;
+    uint32_t top;
+    uint32_t right;
+    uint32_t bottom;
+    uint32_t row_index;
+    uint32_t color;
+
+    status = duckos_framebuffer_validate_target(target);
+    if (status != DUCKOS_FRAMEBUFFER_OK) {
+        return status;
+    }
+
+    if (!clip_rectangle(target, x, y, width, height,
+                        &left, &top, &right, &bottom)) {
+        return DUCKOS_FRAMEBUFFER_OK;
+    }
+
+    color = encode_rgb(target, red, green, blue);
+    for (row_index = top; row_index < bottom; ++row_index) {
+        volatile uint32_t *row = (volatile uint32_t *)(void *)(
+            target->pixels + (size_t)row_index * (size_t)target->pitch_bytes);
+        uint32_t column;
+
+        for (column = left; column < right; ++column) {
+            row[column] = color;
+        }
+    }
+
+    return DUCKOS_FRAMEBUFFER_OK;
 }
-const char*duckos_framebuffer_status_name(duckos_framebuffer_status s){
- switch(s){
- case DUCKOS_FRAMEBUFFER_OK:return "ok";case DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT:return "invalid-argument";
- case DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY:return "invalid-geometry";case DUCKOS_FRAMEBUFFER_INVALID_FORMAT:return "invalid-format";
- case DUCKOS_FRAMEBUFFER_BUFFER_TOO_SMALL:return "buffer-too-small";case DUCKOS_FRAMEBUFFER_INVALID_MASKS:return "invalid-masks";
- case DUCKOS_FRAMEBUFFER_INVALID_SURFACE:return "invalid-surface";case DUCKOS_FRAMEBUFFER_TOO_MANY_SURFACES:return "too-many-surfaces";
- case DUCKOS_FRAMEBUFFER_DUPLICATE_SURFACE:return "duplicate-surface";
- }return "unknown";
+
+duckos_framebuffer_status duckos_framebuffer_surface_validate(
+    const duckos_framebuffer_surface *surface)
+{
+    size_t required_bytes;
+
+    if (surface == NULL || surface->pixels == NULL) {
+        return DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT;
+    }
+
+    if (surface->id == 0u || surface->generation == 0u ||
+        surface->visible > 1u) {
+        return DUCKOS_FRAMEBUFFER_INVALID_SURFACE;
+    }
+
+    if (surface->format != DUCKOS_SURFACE_RGBA8888 &&
+        surface->format != DUCKOS_SURFACE_BGRA8888) {
+        return DUCKOS_FRAMEBUFFER_INVALID_FORMAT;
+    }
+
+    if (surface->width == 0u || surface->height == 0u ||
+        surface->width > DUCKOS_FRAMEBUFFER_MAX_WIDTH ||
+        surface->height > DUCKOS_FRAMEBUFFER_MAX_HEIGHT ||
+        surface->pitch_bytes < surface->width * 4u ||
+        (size_t)surface->height > SIZE_MAX / (size_t)surface->pitch_bytes) {
+        return DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY;
+    }
+
+    required_bytes = (size_t)surface->pitch_bytes * (size_t)surface->height;
+    if (surface->buffer_size < required_bytes ||
+        (uintptr_t)surface->pixels > UINTPTR_MAX - required_bytes) {
+        return DUCKOS_FRAMEBUFFER_BUFFER_TOO_SMALL;
+    }
+
+    return DUCKOS_FRAMEBUFFER_OK;
+}
+
+duckos_framebuffer_status duckos_framebuffer_blit_surface(
+    duckos_framebuffer_target *target, const duckos_framebuffer_surface *surface)
+{
+    duckos_framebuffer_status status;
+    uint32_t left;
+    uint32_t top;
+    uint32_t right;
+    uint32_t bottom;
+    uint32_t destination_y;
+
+    status = duckos_framebuffer_validate_target(target);
+    if (status != DUCKOS_FRAMEBUFFER_OK) {
+        return status;
+    }
+
+    status = duckos_framebuffer_surface_validate(surface);
+    if (status != DUCKOS_FRAMEBUFFER_OK) {
+        return status;
+    }
+
+    if (surface->visible == 0u ||
+        !clip_rectangle(target, surface->x, surface->y,
+                        surface->width, surface->height,
+                        &left, &top, &right, &bottom)) {
+        return DUCKOS_FRAMEBUFFER_OK;
+    }
+
+    for (destination_y = top; destination_y < bottom; ++destination_y) {
+        const uint32_t source_y = (uint32_t)(
+            (int64_t)destination_y - (int64_t)surface->y);
+        const uint8_t *source_row = surface->pixels +
+            (size_t)source_y * (size_t)surface->pitch_bytes;
+        volatile uint32_t *destination_row = (volatile uint32_t *)(void *)(
+            target->pixels +
+            (size_t)destination_y * (size_t)target->pitch_bytes);
+        uint32_t destination_x;
+
+        for (destination_x = left; destination_x < right; ++destination_x) {
+            const uint32_t source_x = (uint32_t)(
+                (int64_t)destination_x - (int64_t)surface->x);
+            const uint8_t *source_pixel = source_row + (size_t)source_x * 4u;
+            uint8_t source_red;
+            uint8_t source_green = source_pixel[1];
+            uint8_t source_blue;
+            const uint8_t alpha = source_pixel[3];
+
+            if (surface->format == DUCKOS_SURFACE_RGBA8888) {
+                source_red = source_pixel[0];
+                source_blue = source_pixel[2];
+            } else {
+                source_red = source_pixel[2];
+                source_blue = source_pixel[0];
+            }
+
+            if (alpha == 0u) {
+                continue;
+            }
+
+            if (alpha != 255u) {
+                const uint32_t destination_pixel = destination_row[destination_x];
+                const uint8_t destination_red = decode_channel(
+                    destination_pixel, target->red_size, target->red_shift);
+                const uint8_t destination_green = decode_channel(
+                    destination_pixel, target->green_size, target->green_shift);
+                const uint8_t destination_blue = decode_channel(
+                    destination_pixel, target->blue_size, target->blue_shift);
+                const uint32_t inverse_alpha = 255u - (uint32_t)alpha;
+
+                source_red = (uint8_t)(
+                    ((uint32_t)source_red * (uint32_t)alpha +
+                     (uint32_t)destination_red * inverse_alpha + 127u) / 255u);
+                source_green = (uint8_t)(
+                    ((uint32_t)source_green * (uint32_t)alpha +
+                     (uint32_t)destination_green * inverse_alpha + 127u) / 255u);
+                source_blue = (uint8_t)(
+                    ((uint32_t)source_blue * (uint32_t)alpha +
+                     (uint32_t)destination_blue * inverse_alpha + 127u) / 255u);
+            }
+
+            destination_row[destination_x] = encode_rgb(
+                target, source_red, source_green, source_blue);
+        }
+    }
+
+    return DUCKOS_FRAMEBUFFER_OK;
+}
+
+static int surface_precedes(const duckos_framebuffer_surface *surfaces,
+                            uint32_t left, uint32_t right)
+{
+    if (surfaces[left].z_index != surfaces[right].z_index) {
+        return surfaces[left].z_index < surfaces[right].z_index;
+    }
+
+    return surfaces[left].id < surfaces[right].id;
+}
+
+duckos_framebuffer_status duckos_framebuffer_compose(
+    duckos_framebuffer_target *target, uint8_t red, uint8_t green, uint8_t blue,
+    const duckos_framebuffer_surface *surfaces, size_t surface_count)
+{
+    uint32_t order[DUCKOS_COMPOSITOR_MAX_SURFACES];
+    duckos_framebuffer_status status;
+    size_t index;
+    size_t other;
+
+    status = duckos_framebuffer_validate_target(target);
+    if (status != DUCKOS_FRAMEBUFFER_OK) {
+        return status;
+    }
+
+    if (surface_count > DUCKOS_COMPOSITOR_MAX_SURFACES) {
+        return DUCKOS_FRAMEBUFFER_TOO_MANY_SURFACES;
+    }
+
+    if (surface_count > 0u && surfaces == NULL) {
+        return DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT;
+    }
+
+    /* Validate everything before clearing the output, so rejection is atomic. */
+    for (index = 0u; index < surface_count; ++index) {
+        status = duckos_framebuffer_surface_validate(&surfaces[index]);
+        if (status != DUCKOS_FRAMEBUFFER_OK) {
+            return status;
+        }
+
+        order[index] = (uint32_t)index;
+        for (other = 0u; other < index; ++other) {
+            if (surfaces[other].id == surfaces[index].id) {
+                return DUCKOS_FRAMEBUFFER_DUPLICATE_SURFACE;
+            }
+        }
+    }
+
+    /* Stable deterministic order: lower Z first, then lower surface ID. */
+    for (index = 1u; index < surface_count; ++index) {
+        const uint32_t selected = order[index];
+        size_t position = index;
+
+        while (position > 0u &&
+               surface_precedes(surfaces, selected, order[position - 1u])) {
+            order[position] = order[position - 1u];
+            --position;
+        }
+        order[position] = selected;
+    }
+
+    status = duckos_framebuffer_clear(target, red, green, blue);
+    if (status != DUCKOS_FRAMEBUFFER_OK) {
+        return status;
+    }
+
+    for (index = 0u; index < surface_count; ++index) {
+        status = duckos_framebuffer_blit_surface(
+            target, &surfaces[order[index]]);
+        if (status != DUCKOS_FRAMEBUFFER_OK) {
+            return status;
+        }
+    }
+
+    return DUCKOS_FRAMEBUFFER_OK;
+}
+
+const char *duckos_framebuffer_status_name(duckos_framebuffer_status status)
+{
+    switch (status) {
+    case DUCKOS_FRAMEBUFFER_OK:
+        return "ok";
+    case DUCKOS_FRAMEBUFFER_INVALID_ARGUMENT:
+        return "invalid-argument";
+    case DUCKOS_FRAMEBUFFER_INVALID_GEOMETRY:
+        return "invalid-geometry";
+    case DUCKOS_FRAMEBUFFER_INVALID_FORMAT:
+        return "invalid-format";
+    case DUCKOS_FRAMEBUFFER_BUFFER_TOO_SMALL:
+        return "buffer-too-small";
+    case DUCKOS_FRAMEBUFFER_INVALID_MASKS:
+        return "invalid-masks";
+    case DUCKOS_FRAMEBUFFER_INVALID_SURFACE:
+        return "invalid-surface";
+    case DUCKOS_FRAMEBUFFER_TOO_MANY_SURFACES:
+        return "too-many-surfaces";
+    case DUCKOS_FRAMEBUFFER_DUPLICATE_SURFACE:
+        return "duplicate-surface";
+    }
+
+    return "unknown";
 }
