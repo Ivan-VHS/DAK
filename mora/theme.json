@@ -1,9 +1,9 @@
 {
   "schema": "mora.theme.v1",
-  "name": "DuckOS Black White Yellow",
+  "name": "DAK Black White Yellow",
   "version": 2,
   "palettes": {
-    "duck": {
+    "dak": {
       "page": "#080808",
       "surface": "#151515",
       "elevated": "#242424",
@@ -50,5 +50,5 @@
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },
-  "defaultPalette": "duck"
+  "defaultPalette": "dak"
 }

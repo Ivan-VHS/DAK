@@ -800,7 +800,7 @@ input[type="range"] { width:160px; accent-color:#ffd400; cursor:pointer; }
   --line: rgba(255,212,0,.22);
   --panel: rgba(8,8,8,.96);
 }
-:root[data-theme="duck"] { color-scheme: dark; }
+:root[data-theme="dak"] { color-scheme: dark; }
 .wallpaper { background: radial-gradient(ellipse at 50% 46%, #242424 0%, #151515 38%, #080808 78%); }
 .wallpaper svg { opacity: .34; }
 .wallpaper::after {

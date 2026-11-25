@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://duckos.dev/schemas/duckbridge-plan.v1.schema.json",
+  "$id": "https://dak.dev/schemas/duckbridge-plan.v1.schema.json",
   "title": "DuckBridge launch plan",
   "description": "A reviewable launch-command plan. Runtime and target execution are always disabled in this contract.",
   "type": "object",
@@ -11,7 +11,7 @@
     "prefix_created", "warnings", "binary_sha256", "imports"
   ],
   "properties": {
-    "schema": { "const": "duckos.duckbridge-plan.v1" },
+    "schema": { "const": "dak.duckbridge-plan.v1" },
     "status": { "enum": ["ready", "needs_configuration", "unsupported"] },
     "purpose": { "enum": ["application", "game"] },
     "target": { "type": "string", "minLength": 1 },

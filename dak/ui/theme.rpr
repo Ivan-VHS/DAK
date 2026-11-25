@@ -1,4 +1,4 @@
-# DuckOS single-palette design contract.
+# DAK single-palette design contract.
 # 65% black, 25% white and 10% yellow.
 
 export craft palette_ratios() {

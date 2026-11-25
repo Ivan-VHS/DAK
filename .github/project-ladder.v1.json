@@ -1,8 +1,8 @@
 {
   "schema": "ivan-vhs.project-ladder.v1",
   "version": 1,
-  "project": "DuckOS",
-  "repository": "Ivan-VHS/DuckOS",
+  "project": "DAK",
+  "repository": "Ivan-VHS/DAK",
   "current_rung": 3,
   "current_name": "Evolution",
   "assessment": "provisional",

@@ -12,30 +12,30 @@ The original remains in the user's ChatGPT Library. This repository records the 
 
 ## Six 111-rule domains
 
-The language constitution in the source groups its 666 rules into six domains. The full wish-list is not treated as proof that Reaper or DuckOS already supports every feature. Each domain is mapped to a testable OS responsibility:
+The language constitution in the source groups its 666 rules into six domains. The full wish-list is not treated as proof that Reaper or DAK already supports every feature. Each domain is mapped to a testable OS responsibility:
 
-| Source domain | DuckOS projection | Source modules | Current evidence |
+| Source domain | DAK projection | Source modules | Current evidence |
 |---|---|---|---|
-| 1–111: three-medium computation | CPU / accelerator / node-mesh placement and bounded worker selection | `duckos/system/three_media.rpr`, `duckos/kernel/flock.rpr` | policy tests; no GPU or network backend |
-| 112–222: calm and transparency | explicit budgets, aligned arenas, bounded history and UI frame status | `duckos/kernel/memory.rpr`, `duckos/kernel/arena.rpr`, `duckos/system/telemetry.rpr`, `duckos/ui/motion.rpr` | arithmetic, sizing and threshold contracts |
-| 223–333: type and data semantics | validated descriptors, graph references and deterministic register merge | `duckos/drivers/abi.rpr`, `duckos/drivers/orchestrator.rpr`, `duckos/storage/hypergraph.rpr`, `duckos/storage/crdt.rpr` | descriptor/merge tests; no full static refinement checker |
-| 334–444: effects and immunity | capability attenuation, trust promotion and quarantine | `duckos/security/capabilities.rpr`, `duckos/security/trust.rpr`, `duckos/services/supervisor.rpr` | policy tests; kernel enforcement pending |
-| 445–555: concurrency and flock scheduling | priority/deadline policy, worker choice, bounded IPC and byte-accounted flow control | `duckos/kernel/scheduler.rpr`, `duckos/kernel/flock.rpr`, `duckos/kernel/ipc.rpr`, `duckos/kernel/zero_copy_bus.rpr` | deterministic tests; no preemptive concurrency or shared pages |
-| 556–666: freedom, self-hosting and ergonomics | source/toolchain boundary, inspectable API and Tri-Color Duck interaction policy | `duckos/ui/theme.rpr`, `duckos/ui/motion.rpr`, `docs/ARCHITECTURE.md` | design/policy tests; no self-hosted native compiler |
+| 1–111: three-medium computation | CPU / accelerator / node-mesh placement and bounded worker selection | `dak/system/three_media.rpr`, `dak/kernel/flock.rpr` | policy tests; no GPU or network backend |
+| 112–222: calm and transparency | explicit budgets, aligned arenas, bounded history and UI frame status | `dak/kernel/memory.rpr`, `dak/kernel/arena.rpr`, `dak/system/telemetry.rpr`, `dak/ui/motion.rpr` | arithmetic, sizing and threshold contracts |
+| 223–333: type and data semantics | validated descriptors, graph references and deterministic register merge | `dak/drivers/abi.rpr`, `dak/drivers/orchestrator.rpr`, `dak/storage/hypergraph.rpr`, `dak/storage/crdt.rpr` | descriptor/merge tests; no full static refinement checker |
+| 334–444: effects and immunity | capability attenuation, trust promotion and quarantine | `dak/security/capabilities.rpr`, `dak/security/trust.rpr`, `dak/services/supervisor.rpr` | policy tests; kernel enforcement pending |
+| 445–555: concurrency and flock scheduling | priority/deadline policy, worker choice, bounded IPC and byte-accounted flow control | `dak/kernel/scheduler.rpr`, `dak/kernel/flock.rpr`, `dak/kernel/ipc.rpr`, `dak/kernel/zero_copy_bus.rpr` | deterministic tests; no preemptive concurrency or shared pages |
+| 556–666: freedom, self-hosting and ergonomics | source/toolchain boundary, inspectable API and Tri-Color Duck interaction policy | `dak/ui/theme.rpr`, `dak/ui/motion.rpr`, `docs/ARCHITECTURE.md` | design/policy tests; no self-hosted native compiler |
 
 ## Desktop and driver architecture excerpts
 
-| Source area | DuckOS module or decision |
+| Source area | DAK module or decision |
 |---|---|
-| Four-layer architecture and CPU/GPU/mesh substrate (around lines 1416–1494) | `docs/ARCHITECTURE.md`, `duckos/system/three_media.rpr`, `duckos/kernel/flock.rpr` |
-| Semantic hypergraph, content addressing and CRDT (1436–1439; extended in the AETHER architecture chapter) | `duckos/storage/hypergraph.rpr`, `duckos/storage/crdt.rpr`; hash generation and durable graph store remain external |
-| Habitats, frame arenas, FBIP and SoA (1441–1445) | `duckos/kernel/memory.rpr`, `duckos/kernel/arena.rpr`; physical allocation and compiler ownership analysis remain pending |
-| Zero-copy bus and backpressure | `duckos/kernel/zero_copy_bus.rpr`; currently byte-accounting policy only, not shared memory |
-| TCD-UI 65/25/10 palette and motion prototype (1496–1512; 6902 onward) | `duckos/ui/theme.rpr`, `duckos/ui/motion.rpr`; no native compositor |
-| DuckDriver Core and unified device topology (around lines 2661–2685) | `duckos/drivers/abi.rpr`, `duckos/drivers/orchestrator.rpr`; no hardware scan, cryptographic verifier or installer |
-| Reaper R1–R14 development roadmap (5576–6197) | remains in the Reaper toolchain repository; DuckOS pins Reaper as a language/toolchain dependency rather than copying its IDE/DAP |
+| Four-layer architecture and CPU/GPU/mesh substrate (around lines 1416–1494) | `docs/ARCHITECTURE.md`, `dak/system/three_media.rpr`, `dak/kernel/flock.rpr` |
+| Semantic hypergraph, content addressing and CRDT (1436–1439; extended in the AETHER architecture chapter) | `dak/storage/hypergraph.rpr`, `dak/storage/crdt.rpr`; hash generation and durable graph store remain external |
+| Habitats, frame arenas, FBIP and SoA (1441–1445) | `dak/kernel/memory.rpr`, `dak/kernel/arena.rpr`; physical allocation and compiler ownership analysis remain pending |
+| Zero-copy bus and backpressure | `dak/kernel/zero_copy_bus.rpr`; currently byte-accounting policy only, not shared memory |
+| TCD-UI 65/25/10 palette and motion prototype (1496–1512; 6902 onward) | `dak/ui/theme.rpr`, `dak/ui/motion.rpr`; no native compositor |
+| DuckDriver Core and unified device topology (around lines 2661–2685) | `dak/drivers/abi.rpr`, `dak/drivers/orchestrator.rpr`; no hardware scan, cryptographic verifier or installer |
+| Reaper R1–R14 development roadmap (5576–6197) | remains in the Reaper toolchain repository; DAK pins Reaper as a language/toolchain dependency rather than copying its IDE/DAP |
 | Other proposals for Pytyliki, VentuSample and OPlague | remain owned by their respective repositories; this integration does not duplicate their source |
 
 ## Acceptance rule
 
-A row moves from “planned” to “implemented” only when the implementation exists in DuckOS source, the relevant test passes under the pinned Reaper runtime, and (for hardware-facing claims) a native target or emulator test provides evidence. A source specification, catalogue entry, dashboard mock-up or green unit test alone cannot prove physical hardware functionality.
+A row moves from “planned” to “implemented” only when the implementation exists in DAK source, the relevant test passes under the pinned Reaper runtime, and (for hardware-facing claims) a native target or emulator test provides evidence. A source specification, catalogue entry, dashboard mock-up or green unit test alone cannot prove physical hardware functionality.

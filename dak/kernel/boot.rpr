@@ -1,4 +1,4 @@
-# DuckOS boot contract.
+# DAK boot contract.
 # Phases are ordered; a native boot backend must preserve this sequence.
 
 export craft expected_phases() {

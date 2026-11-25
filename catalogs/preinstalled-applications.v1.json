@@ -1,10 +1,10 @@
 {
-  "schema": "duckos.preinstalled-applications.v1",
+  "schema": "dak.preinstalled-applications.v1",
   "version": 1,
-  "operating_system": "DuckOS",
+  "operating_system": "DAK",
   "maturity_status": "specified",
   "distribution_intent": "preinstalled",
-  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DuckOS services or boot-image inclusion.",
+  "note": "Product specification only. The 20 application entries define intended product scope; browser panels are partial local prototypes and do not prove native DAK services or boot-image inclusion.",
   "applications": [
     {
       "id": "cockos",
@@ -539,7 +539,7 @@
       "localStorage",
       "IndexedDB"
     ],
-    "scope": "Interactive local prototype. It is not a native DuckOS system application or proof of integration with OS services.",
+    "scope": "Interactive local prototype. It is not a native DAK system application or proof of integration with OS services.",
     "app_boundaries": {
       "cockos": [
         "Microphone recording and local track import/mixdown are available where browser media APIs permit.",

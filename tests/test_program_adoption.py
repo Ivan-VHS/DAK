@@ -41,7 +41,7 @@ class ProgramAdoptionTests(unittest.TestCase):
         errors = validate_manifest(altered)
         self.assertTrue(any("entry_count should be 250" in error for error in errors))
 
-    def test_duckos_cannot_claim_catalogue_ids(self) -> None:
+    def test_dak_cannot_claim_catalogue_ids(self) -> None:
         altered = copy.deepcopy(self.manifest)
         altered["projects"][4]["catalogue_ranges"] = [[1, 1]]
         altered["projects"][4]["entry_count"] = 1

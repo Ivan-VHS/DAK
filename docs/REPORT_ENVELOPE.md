@@ -24,4 +24,4 @@ The envelope is a provenance aid, not a signature, security verdict, performance
 
 ## Canonical location
 
-The shared schema is maintained at [DuckOS schemas/ivan-vhs.report.v1.schema.json](../schemas/ivan-vhs.report.v1.schema.json). Product repositories may keep synchronized local copies for offline validation. The wrapper implementation and its tests remain owned by each product repository.
+The shared schema is maintained at [DAK schemas/ivan-vhs.report.v1.schema.json](../schemas/ivan-vhs.report.v1.schema.json). Product repositories may keep synchronized local copies for offline validation. The wrapper implementation and its tests remain owned by each product repository.

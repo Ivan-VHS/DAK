@@ -1,6 +1,6 @@
 # Shared engineering standards
 
-DuckOS hosts the canonical shared standards for the Ivan-VHS project ecosystem. Product repositories keep short local entry pages where a stable path is useful; their source code, tests, schemas and versioned profiles remain authoritative for local behavior.
+DAK hosts the canonical shared standards for the Ivan-VHS project ecosystem. Product repositories keep short local entry pages where a stable path is useful; their source code, tests, schemas and versioned profiles remain authoritative for local behavior.
 
 ## Documentation and delivery
 

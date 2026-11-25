@@ -1,6 +1,6 @@
 """Native launcher and read-only workflow bridge for the Reaper source checkout.
 
-DuckOS does not import Reaper into the OS process. It discovers the pinned
+DAK does not import Reaper into the OS process. It discovers the pinned
 specialist repository and invokes its Python CLI with an explicit argument
 vector, bounded output, a timeout and no shell interpretation.
 """
@@ -56,7 +56,7 @@ class ReaperWorkbench:
         if explicit is not None:
             return cls._validated_repository(explicit)
 
-        configured = os.environ.get("DUCKOS_REAPER_ROOT")
+        configured = os.environ.get("DAK_REAPER_ROOT")
         if configured:
             return cls._validated_repository(configured)
 
@@ -88,7 +88,7 @@ class ReaperWorkbench:
         root = self.repository_root
         if root is None:
             return {
-                "schema": "duckos.reaper-workbench.v1",
+                "schema": "dak.reaper-workbench.v1",
                 "available": False,
                 "status": "not_found",
                 "repository": None,
@@ -96,7 +96,7 @@ class ReaperWorkbench:
                 "capabilities": [],
                 "message": (
                     "Reaper source checkout was not found. Initialize the "
-                    "projects/reaper submodule or set DUCKOS_REAPER_ROOT."
+                    "projects/reaper submodule or set DAK_REAPER_ROOT."
                 ),
             }
 
@@ -116,19 +116,19 @@ class ReaperWorkbench:
             capabilities.append("native_aot_subset")
 
         return {
-            "schema": "duckos.reaper-workbench.v1",
+            "schema": "dak.reaper-workbench.v1",
             "available": True,
             "status": "ready",
             "repository": str(root),
             "python": self.python_executable,
             "capabilities": capabilities,
-            "message": "Reaper is available as a local DuckOS developer tool.",
+            "message": "Reaper is available as a local DAK developer tool.",
         }
 
     def _require_repository(self) -> Path:
         if self.repository_root is None or not self._is_repository(self.repository_root):
             raise ReaperIntegrationError(
-                "Reaper checkout is unavailable; initialize projects/reaper or set DUCKOS_REAPER_ROOT"
+                "Reaper checkout is unavailable; initialize projects/reaper or set DAK_REAPER_ROOT"
             )
         return self.repository_root
 

@@ -44,11 +44,11 @@
 #include <algorithm>
 #include <cmath>
 
-#ifndef DUCKOS_MORA_CATALOG_PATH
-#define DUCKOS_MORA_CATALOG_PATH "mora/apps.json"
+#ifndef DAK_MORA_CATALOG_PATH
+#define DAK_MORA_CATALOG_PATH "mora/apps.json"
 #endif
-#ifndef DUCKOS_MORA_THEME_PATH
-#define DUCKOS_MORA_THEME_PATH "mora/theme.json"
+#ifndef DAK_MORA_THEME_PATH
+#define DAK_MORA_THEME_PATH "mora/theme.json"
 #endif
 
 namespace {
@@ -66,7 +66,7 @@ QColor kSelection("#3A3100");
 
 void loadThemeTokens()
 {
-    QFile file(QString::fromUtf8(DUCKOS_MORA_THEME_PATH));
+    QFile file(QString::fromUtf8(DAK_MORA_THEME_PATH));
     if (!file.open(QIODevice::ReadOnly)) return;
 
     QJsonParseError error{};
@@ -352,7 +352,7 @@ private:
         auto* editor = new QPlainTextEdit;
         editor->setObjectName("poi-note-editor");
         editor->setPlaceholderText("Запишите мысль, идею или короткую заметку…");
-        QSettings settings("DuckOS", "Mora");
+        QSettings settings("DAK", "Mora");
         editor->setPlainText(settings.value("notes/poi").toString());
         layout->addWidget(editor, 1);
 
@@ -370,14 +370,14 @@ private:
             timer->start(450);
         });
         QObject::connect(timer, &QTimer::timeout, editor, [editor, state]() {
-            QSettings local("DuckOS", "Mora");
+            QSettings local("DAK", "Mora");
             local.setValue("notes/poi", editor->toPlainText());
             local.sync();
             state->setText("Сохранено локально");
         });
         QObject::connect(save, &QPushButton::clicked, editor, [timer, editor, state]() {
             timer->stop();
-            QSettings local("DuckOS", "Mora");
+            QSettings local("DAK", "Mora");
             local.setValue("notes/poi", editor->toPlainText());
             local.sync();
             state->setText("Сохранено локально");
@@ -478,13 +478,13 @@ public:
     explicit MoraWindow(QWidget* parent = nullptr)
         : QMainWindow(parent)
     {
-        setWindowTitle("Mora — DuckOS");
+        setWindowTitle("Mora — DAK");
         setMinimumSize(1120, 720);
         resize(1440, 900);
         loadCatalogue();
         buildInterface();
 
-        QSettings settings("DuckOS", "Mora");
+        QSettings settings("DAK", "Mora");
         const QByteArray geometry = settings.value("shell/geometry").toByteArray();
         if (!geometry.isEmpty()) restoreGeometry(geometry);
 
@@ -496,7 +496,7 @@ public:
 
     ~MoraWindow() override
     {
-        QSettings settings("DuckOS", "Mora");
+        QSettings settings("DAK", "Mora");
         settings.setValue("shell/geometry", saveGeometry());
         settings.sync();
     }
@@ -556,7 +556,7 @@ private:
 
     void loadCatalogue()
     {
-        QFile file(QString::fromUtf8(DUCKOS_MORA_CATALOG_PATH));
+        QFile file(QString::fromUtf8(DAK_MORA_CATALOG_PATH));
         if (!file.open(QIODevice::ReadOnly)) return;
         QJsonParseError error{};
         const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &error);
@@ -667,7 +667,7 @@ private:
         layout->addWidget(brand);
         layout->addWidget(label("Рабочее пространство", "muted"));
         layout->addStretch(1);
-        layout->addWidget(label("DuckOS", "muted"));
+        layout->addWidget(label("DAK", "muted"));
 
         globalSearch_ = new QLineEdit;
         globalSearch_->setObjectName("global-search");
@@ -829,7 +829,7 @@ private:
         sessionLayout->addWidget(label("Работает как отдельное приложение хостовой ОС.", "muted"));
         sessionLayout->addWidget(label("Окна ОС", "muted"));
         sessionLayout->addWidget(label("Включены", "body"));
-        sessionLayout->addWidget(label("Службы ядра DuckOS", "muted"));
+        sessionLayout->addWidget(label("Службы ядра DAK", "muted"));
         sessionLayout->addWidget(label("Пока не подключены", "body"));
         side->addWidget(session);
 
@@ -1055,7 +1055,7 @@ int main(int argc, char* argv[])
     QApplication application(argc, argv);
     loadThemeTokens();
     QApplication::setApplicationName("Mora");
-    QApplication::setOrganizationName("DuckOS");
+    QApplication::setOrganizationName("DAK");
 
     const bool selfTest = application.arguments().contains("--self-test");
     MoraWindow window;

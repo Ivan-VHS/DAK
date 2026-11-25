@@ -1,4 +1,4 @@
-"""Extended DuckOS terminal with an allowlisted command registry."""
+"""Extended DAK terminal with an allowlisted command registry."""
 
 from .service import (
     CommandRegistry,

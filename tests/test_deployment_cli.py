@@ -8,8 +8,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from duckos.cli import main
-from duckos.manifest import SCHEMA
+from dak.cli import main
+from dak.manifest import SCHEMA
 
 
 class DeploymentCliTests(unittest.TestCase):
@@ -32,10 +32,10 @@ class DeploymentCliTests(unittest.TestCase):
             })
         self.manifest = {
             "schema": SCHEMA,
-            "name": "DuckOS",
+            "name": "DAK",
             "version": "0.2.0-cli-test",
             "architecture": "x86_64",
-            "kernel_abi": "duckos-reaper-abi-test",
+            "kernel_abi": "dak-reaper-abi-test",
             "components": components,
         }
         self.manifest_path = self.base / "system-manifest.json"
@@ -49,7 +49,7 @@ class DeploymentCliTests(unittest.TestCase):
         return output.getvalue()
 
     def test_build_and_verify_commands_are_wired(self):
-        archive = self.base / "DuckOS-test.tar.gz"
+        archive = self.base / "DAK-test.tar.gz"
         build_output = json.loads(self.run_cli(
             "build-release", str(self.manifest_path), str(self.root), str(archive)
         ))

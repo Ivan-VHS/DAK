@@ -1,10 +1,10 @@
-# Windows application compatibility in DuckOS
+# Windows application compatibility in DAK
 
 **Status:** compatibility foundation, not a Wine replacement  
 **Updated:** 2026-11-23  
 **Project author/developer:** Ivan-VHS
 
-DuckOS now has a read-only PE inspection engine, isolated prefix scaffolding and command-line diagnostics. These parts establish file-format and profile contracts for a future native runtime. They do not load a Windows process or claim that a game can start.
+DAK now has a read-only PE inspection engine, isolated prefix scaffolding and command-line diagnostics. These parts establish file-format and profile contracts for a future native runtime. They do not load a Windows process or claim that a game can start.
 
 ## What is implemented
 
@@ -13,7 +13,7 @@ DuckOS now has a read-only PE inspection engine, isolated prefix scaffolding and
 - Local SHA-256 reporting during PE inspection.
 - Isolated prefix directory creation, versioned prefix.json metadata and symlink-aware layout validation.
 - Static DLL search-path checks and a dry-run launch report with explicit blockers.
-- JSON output through the DuckOS CLI and the Bridge panel in Mora.
+- JSON output through the DAK CLI and the Bridge panel in Mora.
 
 No executable image is mapped, no Windows API is implemented by this milestone, and no EXE or DLL is launched. Prefix creation does not download DLLs, install redistributables, populate the registry or grant host administrator rights.
 
@@ -28,22 +28,22 @@ python -m pip install -e .
 Inspect a Windows executable:
 
 ~~~sh
-duckos inspect-pe ./game.exe
+dak inspect-pe ./game.exe
 ~~~
 
 Create and validate an isolated profile:
 
 ~~~sh
-duckos prefix-create ~/.local/share/duckos/prefixes game --architecture x86_64
-duckos prefix-info ~/.local/share/duckos/prefixes/game
+dak prefix-create ~/.local/share/dak/prefixes game --architecture x86_64
+dak prefix-info ~/.local/share/dak/prefixes/game
 ~~~
 
 Check static DLL imports and show why launch is currently blocked:
 
 ~~~sh
-duckos compat-diagnose ./game.exe --prefix ~/.local/share/duckos/prefixes/game
-duckos compat-plan ./game.exe --prefix ~/.local/share/duckos/prefixes/game
-duckos compat-status
+dak compat-diagnose ./game.exe --prefix ~/.local/share/dak/prefixes/game
+dak compat-plan ./game.exe --prefix ~/.local/share/dak/prefixes/game
+dak compat-status
 ~~~
 
 The compat-plan command is deliberately a report-only command. It never invokes a shell, creates a process or changes the prefix.
