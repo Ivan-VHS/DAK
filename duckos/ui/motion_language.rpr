@@ -1,0 +1,87 @@
+# Digital Physics motion contract.
+# Renderer/compositor implements the interpolation; this module validates policy.
+
+export craft motion_mode(reduced_motion, eco_visuals) {
+    when reduced_motion or eco_visuals {
+        yield "static"
+    }
+    yield "digital-physics"
+}
+
+export craft duration_ms(role, reduced_motion, eco_visuals) {
+    when role != "feedback" and role != "panel" and role != "spatial" and role != "emphasis" {
+        yield -1
+    }
+    when reduced_motion {
+        yield 0
+    }
+    when eco_visuals {
+        yield 0
+    }
+    when role == "feedback" {
+        yield 120
+    }
+    when role == "panel" {
+        yield 180
+    }
+    when role == "spatial" {
+        yield 220
+    }
+    yield 280
+}
+
+export craft duration_valid(duration, essential) {
+    when kind(duration) != "number" or duration < 0 {
+        yield false
+    }
+    when essential {
+        yield duration <= 100
+    }
+    yield duration <= 300
+}
+
+export craft curve_valid(curve, purpose) {
+    when purpose == "progress" {
+        yield curve == "linear" or curve == "strict"
+    }
+    when purpose == "spatial" or purpose == "state" {
+        yield curve == "spring" or curve == "snappy" or curve == "strict"
+    }
+    yield false
+}
+
+export craft transition_policy(source_pose, target_pose, interrupted, reduced_motion) {
+    when source_pose == "" or target_pose == "" {
+        yield "invalid"
+    }
+    when source_pose == target_pose {
+        yield "no-op"
+    }
+    when reduced_motion {
+        yield "commit-target"
+    }
+    when interrupted {
+        yield "retarget-from-current"
+    }
+    yield "pose-to-pose"
+}
+
+export craft spring_profile_valid(stiffness, damping_ratio, settle_epsilon) {
+    when kind(stiffness) != "number" or kind(damping_ratio) != "number" or kind(settle_epsilon) != "number" {
+        yield false
+    }
+    when stiffness <= 0 or damping_ratio <= 0 or settle_epsilon <= 0 {
+        yield false
+    }
+    yield damping_ratio <= 2 and settle_epsilon <= 0.01
+}
+
+export craft refresh_budget_valid(refresh_hz, frame_time_us) {
+    when kind(refresh_hz) != "number" or kind(frame_time_us) != "number" {
+        yield false
+    }
+    when refresh_hz < 60 or refresh_hz > 240 or frame_time_us <= 0 {
+        yield false
+    }
+    yield frame_time_us <= quotient(1000000, refresh_hz)
+}
