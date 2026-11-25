@@ -137,7 +137,7 @@ curl --fail --location --retry 3 --output "$iso_root/third_party/Limine-COPYING.
 
 rm -f "$OUTPUT"
 xorriso -as mkisofs \
-    -R -r -J -V DUCKOS_STAGE0 \
+    -R -r -J -V DUCKOS_STAGE1 \
     -b boot/limine-bios-cd.bin \
     -no-emul-boot -boot-load-size 4 -boot-info-table \
     --efi-boot boot/limine-uefi-cd.bin \
@@ -146,6 +146,6 @@ xorriso -as mkisofs \
 
 "$LIMINE_BIN" bios-install "$OUTPUT"
 (cd "$OUTPUT_DIR" && sha256sum "$(basename -- "$OUTPUT")" > "$(basename -- "$OUTPUT").sha256")
-echo "DuckOS stage-0 ISO ready: $OUTPUT"
+echo "DuckOS Stage 1 ISO ready: $OUTPUT"
 echo "Kernel ELF: $WORK_DIR/duckos.elf"
 cat "$OUTPUT.sha256"
