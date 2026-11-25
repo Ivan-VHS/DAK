@@ -56,3 +56,8 @@ The GitHub workflow runs this local stack without linking a hosted project or re
 ## Hosted deployment gate
 
 The foundation is not a deployed service. Before hosted use, create a project in a user-selected Supabase organization, confirm any quoted cost, configure private secrets, review backup/retention settings and run the migrations against a staging project first. Production rollout requires a separate reviewed PR and an explicit deployment step.
+
+
+## DuckOS adapter
+
+`federation/ecosystem-cloud-adapter.v1.json` narrows DuckOS publication to user-selected preferences, application catalog metadata, project references and explicitly published release metadata. Boot, the kernel, Mora shell operation, local files and privileged state remain independent of Supabase.

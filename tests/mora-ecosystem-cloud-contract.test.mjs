@@ -38,3 +38,30 @@ test('private storage and sync receipts never hold raw payloads', () => {
   assert.ok(contract.forbidden_data_classes.includes('raw_device_serial_numbers'));
   assert.ok(contract.forbidden_data_classes.includes('driver_binaries'));
 });
+
+test('DuckOS owns a local-only adapter and never syncs privileged state', async () => {
+  const adapter = JSON.parse(
+    await readFile(new URL('../federation/ecosystem-cloud-adapter.v1.json', import.meta.url), 'utf8'),
+  );
+  assert.equal(adapter.schema, 'ivan-vhs.ecosystem-cloud-adapter.v1');
+  assert.equal(adapter.project, 'duckos');
+  assert.equal(adapter.shared_contract, contract.schema);
+  assert.equal(adapter.status, 'contract-only');
+  assert.equal(adapter.runtime.default_network_mode, 'disabled');
+  assert.equal(adapter.runtime.boot_requires_network, false);
+  assert.equal(adapter.runtime.shell_requires_network, false);
+  assert.ok(adapter.denylist.includes('boot-secrets'));
+  assert.ok(adapter.denylist.includes('kernel-memory'));
+  assert.ok(adapter.denylist.includes('service-role-keys'));
+});
+
+test('ecosystem cloud JSON Schema is closed and versioned', async () => {
+  const schema = JSON.parse(
+    await readFile(new URL('../schemas/ivan-vhs.ecosystem-cloud.v1.schema.json', import.meta.url), 'utf8'),
+  );
+  assert.equal(schema.$schema, 'https://json-schema.org/draft/2020-12/schema');
+  assert.equal(schema.$id, 'https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/ivan-vhs.ecosystem-cloud.v1.schema.json');
+  assert.equal(schema.additionalProperties, false);
+  assert.ok(schema.required.includes('repositories'));
+  assert.equal(schema.properties.version.const, 1);
+});
