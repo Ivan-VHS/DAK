@@ -539,6 +539,15 @@ public:
         showPage(2);
     }
 
+protected:
+    void resizeEvent(QResizeEvent* event) override
+    {
+        QMainWindow::resizeEvent(event);
+        if (appsPage_ && pageStack_ && pageStack_->currentWidget() == appsPage_) {
+            rebuildAppsGrid();
+        }
+    }
+
 private:
     QVector<AppInfo> apps_;
     QHash<QString, QPointer<AppWindow>> windows_;
@@ -550,6 +559,7 @@ private:
     QLineEdit* appsSearch_ = nullptr;
     QComboBox* categoryFilter_ = nullptr;
     QGridLayout* appGrid_ = nullptr;
+    QLabel* appsCount_ = nullptr;
     QLabel* dateLabel_ = nullptr;
     QLabel* timeLabel_ = nullptr;
     QButtonGroup* navigationGroup_ = nullptr;
@@ -606,8 +616,56 @@ private:
             QPushButton:hover { border-color: #FFD400; background: #222016; }
             QPushButton:checked { color: #080808; background: #FFD400; border-color: #FFD400; }
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
-            QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
-            QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
+            QPushButton#appTile {
+                background: rgba(21,21,21,242);
+                border: 1px solid #3A3A3A;
+                border-radius: 17px;
+                min-height: 164px;
+                padding: 0;
+                text-align: left;
+            }
+            QPushButton#appTile:hover {
+                background: #201E16;
+                border-color: #FFD400;
+            }
+            QPushButton#appTile:focus {
+                border: 2px solid #FFE45C;
+            }
+            QLabel[role="tileIcon"] {
+                color: #FFD400;
+                background: #28230D;
+                border: 1px solid #49400F;
+                border-radius: 13px;
+                min-width: 48px;
+                max-width: 48px;
+                min-height: 48px;
+                max-height: 48px;
+                font-size: 22pt;
+                font-weight: 700;
+                qproperty-alignment: AlignCenter;
+            }
+            QLabel[role="tileName"] {
+                color: #FFFFFF;
+                font-size: 12pt;
+                font-weight: 700;
+            }
+            QLabel[role="tileCategory"] {
+                color: #A6A6A6;
+                font-size: 8pt;
+            }
+            QLabel[role="tileMeta"] {
+                color: #FFD400;
+                background: #28230D;
+                border: 1px solid #49400F;
+                border-radius: 8px;
+                padding: 4px 7px;
+                font-size: 8pt;
+            }
+            QLabel[role="tileAction"] {
+                color: #FFD400;
+                font-size: 9pt;
+                font-weight: 650;
+            }
             QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
             QScrollArea { border: 0; background: transparent; }
@@ -876,6 +934,13 @@ private:
         filters->addWidget(categoryFilter_, 1);
         layout->addLayout(filters);
 
+        auto* catalogueMeta = new QHBoxLayout;
+        appsCount_ = label({}, "muted");
+        catalogueMeta->addWidget(appsCount_);
+        catalogueMeta->addStretch(1);
+        catalogueMeta->addWidget(label("ЛОКАЛЬНЫЕ ПРИЛОЖЕНИЯ · БЕЗ СКРЫТЫХ ЗАПУСКОВ", "eyebrow"));
+        layout->addLayout(catalogueMeta);
+
         auto* scroll = new QScrollArea;
         scroll->setWidgetResizable(true);
         auto* gridHost = new QWidget;
@@ -932,29 +997,36 @@ private:
     {
         auto* tile = new QPushButton;
         tile->setObjectName("appTile");
-        tile->setMinimumHeight(86);
+        tile->setProperty("moraAppId", app.id);
+        tile->setAccessibleName(app.name + " — " + categoryName(app.category) + " — открыть");
+        tile->setMinimumHeight(164);
         tile->setCursor(Qt::PointingHandCursor);
-        auto* row = new QHBoxLayout(tile);
-        row->setContentsMargins(14, 10, 14, 10);
-        row->setSpacing(12);
-        auto* glyph = label(categoryGlyph(app.category), "eyebrow");
-        QFont glyphFont = glyph->font();
-        glyphFont.setPointSize(22);
-        glyph->setFont(glyphFont);
-        glyph->setAlignment(Qt::AlignCenter);
-        glyph->setFixedWidth(38);
-        row->addWidget(glyph);
 
-        auto* textColumn = new QVBoxLayout;
-        textColumn->setSpacing(4);
-        auto* name = label(app.name);
-        QFont nameFont = name->font();
-        nameFont.setWeight(QFont::DemiBold);
-        name->setFont(nameFont);
-        textColumn->addWidget(name);
-        textColumn->addWidget(label(subtitle.isEmpty() ? categoryName(app.category) : subtitle, "muted"));
-        row->addLayout(textColumn, 1);
-        row->addWidget(label("↗", "muted"));
+        auto* column = new QVBoxLayout(tile);
+        column->setContentsMargins(16, 15, 16, 14);
+        column->setSpacing(9);
+
+        auto* top = new QHBoxLayout;
+        auto* glyph = label(categoryGlyph(app.category), "tileIcon");
+        glyph->setAlignment(Qt::AlignCenter);
+        top->addWidget(glyph);
+        top->addStretch(1);
+        top->addWidget(label(maturityText(app.maturity), "tileMeta"));
+        column->addLayout(top);
+
+        auto* name = label(app.name, "tileName");
+        column->addWidget(name);
+        column->addWidget(label(
+            subtitle.isEmpty() ? categoryName(app.category) : subtitle,
+            "tileCategory"
+        ));
+
+        auto* footer = new QHBoxLayout;
+        footer->addWidget(label(categoryName(app.category), "muted"));
+        footer->addStretch(1);
+        footer->addWidget(label("Открыть  ↗", "tileAction"));
+        column->addLayout(footer);
+
         QObject::connect(tile, &QPushButton::clicked, this, [this, id = app.id]() { openAppWindow(id); });
         return tile;
     }
@@ -981,13 +1053,19 @@ private:
 
         const QString query = appsSearch_ ? appsSearch_->text().trimmed().toCaseFolded() : QString{};
         const QString category = categoryFilter_ ? categoryFilter_->currentData().toString() : "all";
+        const int availableWidth = appGrid_->parentWidget()
+            ? appGrid_->parentWidget()->width()
+            : 900;
+        const int columns = std::max(1, std::min(4, availableWidth / 270));
         int position = 0;
+
         for (const AppInfo& app : apps_) {
-            if (!query.isEmpty()
-                && !app.name.toCaseFolded().contains(query)
-                && !categoryName(app.category).toCaseFolded().contains(query)) {
-                continue;
-            }
+            const QString searchable = (
+                app.name + " " + app.id + " " + categoryName(app.category) + " "
+                + maturityText(app.maturity)
+            ).toCaseFolded();
+            if (!query.isEmpty() && !searchable.contains(query)) continue;
+
             if (category == "creative" && app.category != "creative"
                 && app.category != "audio" && app.category != "photos") continue;
             if (category == "work" && app.category != "productivity"
@@ -997,15 +1075,19 @@ private:
                 && app.category != "security" && app.category != "recovery"
                 && app.category != "workspace") continue;
 
-            auto* tile = makeAppTile(app, categoryName(app.category) + " · " + maturityText(app.maturity));
-            appGrid_->addWidget(tile, position / 3, position % 3);
+            auto* tile = makeAppTile(app, categoryName(app.category));
+            appGrid_->addWidget(tile, position / columns, position % columns);
             ++position;
+        }
+
+        if (appsCount_) {
+            appsCount_->setText(QString("Показано %1 из %2").arg(position).arg(apps_.size()));
         }
         if (position == 0) {
             auto* empty = label("Ничего не найдено. Измените запрос или категорию.", "muted");
-            appGrid_->addWidget(empty, 0, 0, 1, 3);
+            appGrid_->addWidget(empty, 0, 0, 1, columns);
         }
-        appGrid_->setRowStretch((position + 2) / 3, 1);
+        appGrid_->setRowStretch((position + columns - 1) / columns, 1);
     }
 
     void openAppWindow(const QString& id)
