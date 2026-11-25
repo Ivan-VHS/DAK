@@ -53,7 +53,7 @@
     },
     "material_interface": {
       "maturity": "implemented",
-      "scope": "canonical black/white/yellow DAK material language: black structural surfaces, white content, #FFD400 selection and focus, restrained graphite depth; no alternate shell palettes"
+      "scope": "canonical black/white/yellow DAK material language: black structural surfaces, white content, #FFD700 selection and focus, restrained graphite depth; no alternate shell palettes"
     },
     "compatibility": {
       "maturity": "partial",
