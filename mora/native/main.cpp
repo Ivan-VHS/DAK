@@ -512,10 +512,24 @@ public:
         }
         auto* appsButton = findChild<QPushButton*>("nav-apps");
         if (!appsButton) return fail("The native app navigation control is missing.");
+        if (!appsSearch_ || !categoryFilter_ || !appGrid_ || !appsCount_) {
+            return fail("The app discovery controls were not created.");
+        }
         appsButton->click();
         if (pageStack_->currentWidget() != appsPage_) {
             return fail("The Applications navigation action did not change pages.");
         }
+        appsSearch_->setText("Reaper");
+        QApplication::processEvents();
+        if (appGrid_->count() != 1 || !appGrid_->itemAt(0)->widget()
+            || appGrid_->itemAt(0)->widget()->property("moraAppId").toString() != "reaper-workbench") {
+            return fail("The catalog search did not isolate the Reaper workbench.");
+        }
+        if (appsCount_->text().isEmpty()) {
+            return fail("The catalog result count was not updated.");
+        }
+        appsSearch_->clear();
+        QApplication::processEvents();
         openDesignWorkspace();
         QApplication::processEvents();
         int nativeWindows = 0;
