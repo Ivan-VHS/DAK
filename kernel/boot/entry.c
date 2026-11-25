@@ -253,10 +253,12 @@ static void draw_boot_screen(void) {
     draw_rect(0u, 0u, fb->width, 92u, 255u, 212u, 0u);
     draw_text(28u, 29u, "DUCK OS", 4u, 7u, 7u, 7u);
 
-    const uint64_t body_y = fb->height / 2u - 70u;
+    const uint64_t body_y = fb->height > 140u ? fb->height / 2u - 70u : 8u;
     draw_centered(body_y, "NATIVE BOOT STAGE 0", 3u, 255u, 212u, 0u);
     draw_centered(body_y + 70u, "MEMORY MAP VALIDATED", 2u, 90u, 220u, 120u);
-    draw_rect(32u, fb->height - 42u, fb->width - 64u, 3u, 255u, 212u, 0u);
+    if (fb->width > 64u && fb->height > 45u) {
+        draw_rect(32u, fb->height - 42u, fb->width - 64u, 3u, 255u, 212u, 0u);
+    }
 }
 
 static int memory_type_from_limine(uint64_t source, uint32_t *destination) {
@@ -347,7 +349,7 @@ static int prepare_boot_info(duckos_boot_info_v1 *info) {
         if (fb->address == NULL || (uint64_t)(uintptr_t)fb->address < hhdm->offset ||
             fb->width == 0u || fb->height == 0u ||
             fb->width > UINT32_MAX || fb->height > UINT32_MAX ||
-            fb->pitch > UINT32_MAX ||
+            fb->pitch == 0u || fb->pitch > UINT32_MAX ||
             (fb->bpp != 16u && fb->bpp != 24u && fb->bpp != 32u) ||
             fb->memory_model != LIMINE_FRAMEBUFFER_RGB ||
             fb->height > UINT64_MAX / fb->pitch) {
