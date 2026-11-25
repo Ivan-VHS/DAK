@@ -1,6 +1,6 @@
-<p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
+# 🦆 Duck — операційна система з пріоритетом Reaper
 
-<h1 align="center"><strong>🦆 Duck — операційна система з пріоритетом Reaper</strong></h1>
+<p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native Mora](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20Mora)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
@@ -142,3 +142,7 @@ git submodule update --init --recursive
 ---
 
 <p align="center"><sub>Psychoporter 666 README Standard v1.0 · Ivan-VHS · 2026-11-25 UTC</sub></p>
+
+## Участь у розробці
+
+Перед зміною коду, контрактів або документації ознайомтеся з [CONTRIBUTING.md](CONTRIBUTING.md). Робіть зміни перевірними, запускайте відповідні перевірки та точно описуйте докази реалізації.
