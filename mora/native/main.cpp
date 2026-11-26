@@ -1,3 +1,5 @@
+// DAK native host desktop — authored and maintained by Ivan-VHS.
+// Qt windows are managed by the host OS; this is not the DAK kernel compositor.
 #include <QApplication>
 #include <QButtonGroup>
 #include <QCloseEvent>
@@ -44,29 +46,29 @@
 #include <algorithm>
 #include <cmath>
 
-#ifndef DUCKOS_MORA_CATALOG_PATH
-#define DUCKOS_MORA_CATALOG_PATH "mora/apps.json"
+#ifndef DAK_DESKTOP_CATALOG_PATH
+#define DAK_DESKTOP_CATALOG_PATH "mora/apps.json"
 #endif
-#ifndef DUCKOS_MORA_THEME_PATH
-#define DUCKOS_MORA_THEME_PATH "mora/theme.json"
+#ifndef DAK_DESKTOP_THEME_PATH
+#define DAK_DESKTOP_THEME_PATH "mora/theme.json"
 #endif
 
 namespace {
 
-QColor kPage("#080808");
-QColor kSurface("#151515");
-QColor kRaised("#242424");
+QColor kPage("#050505");
+QColor kSurface("#101010");
+QColor kRaised("#171717");
 QColor kText("#FFFFFF");
 QColor kSecondary("#E5E5E5");
 QColor kMuted("#A6A6A6");
-QColor kBrand("#FFD400");
-QColor kBrandHover("#FFE45C");
-QColor kBorder("#3A3A3A");
-QColor kSelection("#3A3100");
+QColor kBrand("#FFD700");
+QColor kBrandHover("#FFE6A3");
+QColor kBorder("#343434");
+QColor kSelection("#2B2200");
 
 void loadThemeTokens()
 {
-    QFile file(QString::fromUtf8(DUCKOS_MORA_THEME_PATH));
+    QFile file(QString::fromUtf8(DAK_DESKTOP_THEME_PATH));
     if (!file.open(QIODevice::ReadOnly)) return;
 
     QJsonParseError error{};
@@ -95,16 +97,16 @@ void loadThemeTokens()
 QString applyThemeTokens(QString style)
 {
     const QList<QPair<QString, QString>> replacements{
-        {"#080808", "@@MORA_PAGE@@"},
-        {"#151515", "@@MORA_SURFACE@@"},
-        {"#242424", "@@MORA_RAISED@@"},
+        {"#050505", "@@MORA_PAGE@@"},
+        {"#101010", "@@MORA_SURFACE@@"},
+        {"#171717", "@@MORA_RAISED@@"},
         {"#FFFFFF", "@@MORA_TEXT@@"},
         {"#E5E5E5", "@@MORA_SECONDARY@@"},
         {"#A6A6A6", "@@MORA_MUTED@@"},
-        {"#FFD400", "@@MORA_BRAND@@"},
-        {"#FFE45C", "@@MORA_BRAND_HOVER@@"},
-        {"#3A3A3A", "@@MORA_BORDER@@"},
-        {"#3A3100", "@@MORA_SELECTION@@"}
+        {"#FFD700", "@@MORA_BRAND@@"},
+        {"#FFE6A3", "@@MORA_BRAND_HOVER@@"},
+        {"#343434", "@@MORA_BORDER@@"},
+        {"#2B2200", "@@MORA_SELECTION@@"}
     };
     for (const auto& replacement : replacements) {
         style.replace(replacement.first, replacement.second);
@@ -297,20 +299,20 @@ public:
     {
         setWindowFlag(Qt::Window, true);
         setAttribute(Qt::WA_DeleteOnClose, true);
-        setProperty("moraAppId", app_.id);
-        setWindowTitle(app_.name + " — Mora");
+        setProperty("dakAppId", app_.id);
+        setWindowTitle(app_.name + " — DAK Desktop");
         setMinimumSize(480, 340);
         resize(720, 470);
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
-            QMainWindow { background: #080808; color: #FFFFFF; }
+            QMainWindow { background: #050505; color: #FFFFFF; }
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
-            QFrame#panel { background: #151515; border: 1px solid #3A3A3A; border-radius: 16px; }
+            QFrame#panel { background: #101010; border: 1px solid #343434; border-radius: 16px; }
             QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
-            QPushButton { color: #FFFFFF; background: #242424; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 14px; }
-            QPushButton:hover { border-color: #FFD400; background: #2B281A; }
-            QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; selection-background-color: #3A3100; }
-            QHeaderView::section { background: #242424; color: #FFD400; border: 0; padding: 7px; }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QPushButton { color: #FFFFFF; background: #171717; border: 1px solid #343434; border-radius: 10px; padding: 9px 14px; }
+            QPushButton:hover { border-color: #FFD700; background: #2B281A; }
+            QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #343434; border-radius: 10px; padding: 8px; selection-background-color: #2B2200; }
+            QHeaderView::section { background: #171717; color: #FFD700; border: 0; padding: 7px; }
         )")));
         buildContent();
     }
@@ -352,12 +354,12 @@ private:
         auto* editor = new QPlainTextEdit;
         editor->setObjectName("poi-note-editor");
         editor->setPlaceholderText("Запишите мысль, идею или короткую заметку…");
-        QSettings settings("DuckOS", "Mora");
+        QSettings settings("Ivan-VHS", "DAK Desktop");
         editor->setPlainText(settings.value("notes/poi").toString());
         layout->addWidget(editor, 1);
 
         auto* footer = new QHBoxLayout;
-        auto* state = label("Хранится локально в настройках Mora", "muted");
+        auto* state = label("Хранится локально в настройках DAK", "muted");
         auto* save = actionButton("Сохранить заметку");
         footer->addWidget(state, 1);
         footer->addWidget(save);
@@ -370,14 +372,14 @@ private:
             timer->start(450);
         });
         QObject::connect(timer, &QTimer::timeout, editor, [editor, state]() {
-            QSettings local("DuckOS", "Mora");
+            QSettings local("Ivan-VHS", "DAK Desktop");
             local.setValue("notes/poi", editor->toPlainText());
             local.sync();
             state->setText("Сохранено локально");
         });
         QObject::connect(save, &QPushButton::clicked, editor, [timer, editor, state]() {
             timer->stop();
-            QSettings local("DuckOS", "Mora");
+            QSettings local("Ivan-VHS", "DAK Desktop");
             local.setValue("notes/poi", editor->toPlainText());
             local.sync();
             state->setText("Сохранено локально");
@@ -388,7 +390,7 @@ private:
     {
         auto* description = label(
             "Выберите папку, чтобы просмотреть имена и метаданные файлов. "
-            "Mora не открывает и не запускает выбранные элементы.", "muted");
+            "DAK не открывает и не запускает выбранные элементы.", "muted");
         layout->addWidget(description);
 
         auto* tree = new QTreeWidget;
@@ -460,7 +462,7 @@ private:
         auto* infoLayout = new QVBoxLayout(info);
         infoLayout->setContentsMargins(18, 16, 18, 16);
         infoLayout->setSpacing(8);
-        infoLayout->addWidget(label("Нативное окно Mora", "eyebrow"));
+        infoLayout->addWidget(label("Нативное окно DAK", "eyebrow"));
         infoLayout->addWidget(label(
             "Это отдельное окно приложения хостовой ОС. Оно не встроено "
             "в HTML, WebView или браузерный контейнер."));
@@ -473,18 +475,18 @@ private:
     }
 };
 
-class MoraWindow final : public QMainWindow {
+class DAKDesktopWindow final : public QMainWindow {
 public:
-    explicit MoraWindow(QWidget* parent = nullptr)
+    explicit DAKDesktopWindow(QWidget* parent = nullptr)
         : QMainWindow(parent)
     {
-        setWindowTitle("Mora — DuckOS");
+        setWindowTitle("DAK Desktop");
         setMinimumSize(1120, 720);
         resize(1440, 900);
         loadCatalogue();
         buildInterface();
 
-        QSettings settings("DuckOS", "Mora");
+        QSettings settings("Ivan-VHS", "DAK Desktop");
         const QByteArray geometry = settings.value("shell/geometry").toByteArray();
         if (!geometry.isEmpty()) restoreGeometry(geometry);
 
@@ -494,9 +496,9 @@ public:
         updateClock();
     }
 
-    ~MoraWindow() override
+    ~DAKDesktopWindow() override
     {
-        QSettings settings("DuckOS", "Mora");
+        QSettings settings("Ivan-VHS", "DAK Desktop");
         settings.setValue("shell/geometry", saveGeometry());
         settings.sync();
     }
@@ -520,13 +522,13 @@ public:
         QApplication::processEvents();
         int nativeWindows = 0;
         for (QWidget* widget : QApplication::topLevelWidgets()) {
-            if (widget->property("moraAppId").isValid()) ++nativeWindows;
+            if (widget->property("dakAppId").isValid()) ++nativeWindows;
         }
         if (nativeWindows < 3) {
             return fail("The three-window workspace did not create three native top-level windows.");
         }
         for (QWidget* widget : QApplication::topLevelWidgets()) {
-            if (widget->property("moraAppId").isValid()) widget->close();
+            if (widget->property("dakAppId").isValid()) widget->close();
         }
         return true;
     }
@@ -556,7 +558,7 @@ private:
 
     void loadCatalogue()
     {
-        QFile file(QString::fromUtf8(DUCKOS_MORA_CATALOG_PATH));
+        QFile file(QString::fromUtf8(DAK_DESKTOP_CATALOG_PATH));
         if (!file.open(QIODevice::ReadOnly)) return;
         QJsonParseError error{};
         const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &error);
@@ -597,19 +599,19 @@ private:
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
             QWidget { color: #FFFFFF; font-family: "Segoe UI"; font-size: 10pt; }
             QLabel[role="muted"] { color: #A6A6A6; }
-            QLabel[role="eyebrow"] { color: #FFD400; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
+            QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QLabel[role="title"] { color: #FFFFFF; font-size: 25pt; font-weight: 650; }
             QLabel[role="subtitle"] { color: #E5E5E5; }
-            QFrame#panel { background: rgba(21,21,21,238); border: 1px solid #3A3A3A; border-radius: 16px; }
-            QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #3A3A3A; border-radius: 14px; }
-            QPushButton { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; text-align: left; }
-            QPushButton:hover { border-color: #FFD400; background: #222016; }
-            QPushButton:checked { color: #080808; background: #FFD400; border-color: #FFD400; }
+            QFrame#panel { background: rgba(21,21,21,238); border: 1px solid #343434; border-radius: 16px; }
+            QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #343434; border-radius: 14px; }
+            QPushButton { color: #FFFFFF; background: #101010; border: 1px solid #343434; border-radius: 10px; padding: 9px 12px; text-align: left; }
+            QPushButton:hover { border-color: #FFD700; background: #222016; }
+            QPushButton:checked { color: #050505; background: #FFD700; border-color: #FFD700; }
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
             QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
-            QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
-            QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
-            QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
+            QPushButton#appTile:hover { background: #242118; border-color: #FFD700; }
+            QLineEdit, QComboBox { color: #FFFFFF; background: #101010; border: 1px solid #343434; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
+            QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE6A3; }
             QScrollArea { border: 0; background: transparent; }
         )")));
 
@@ -626,7 +628,7 @@ private:
         bodyLayout->addWidget(buildNavigationRail());
 
         pageStack_ = new QStackedWidget;
-        pageStack_->setObjectName("mora-page-stack");
+        pageStack_->setObjectName("dak-page-stack");
         homePage_ = buildHomePage();
         appsPage_ = buildAppsPage();
         workspacePage_ = buildWorkspacePage();
@@ -659,7 +661,7 @@ private:
         layout->setContentsMargins(22, 4, 22, 4);
         layout->setSpacing(16);
 
-        auto* brand = label("mora", "eyebrow");
+        auto* brand = label("DAK", "eyebrow");
         QFont brandFont = brand->font();
         brandFont.setPointSize(15);
         brandFont.setWeight(QFont::Bold);
@@ -667,11 +669,11 @@ private:
         layout->addWidget(brand);
         layout->addWidget(label("Рабочее пространство", "muted"));
         layout->addStretch(1);
-        layout->addWidget(label("DuckOS", "muted"));
+        layout->addWidget(label("DAK", "muted"));
 
         globalSearch_ = new QLineEdit;
         globalSearch_->setObjectName("global-search");
-        globalSearch_->setPlaceholderText("Найти в Mora   Ctrl+K");
+        globalSearch_->setPlaceholderText("Найти в DAK   Ctrl+K");
         globalSearch_->setMaximumWidth(270);
         globalSearch_->setClearButtonEnabled(true);
         layout->addWidget(globalSearch_);
@@ -720,15 +722,15 @@ private:
         layout->addStretch(1);
 
         auto* settings = new QPushButton("⚙");
-        settings->setAccessibleName("Настройки Mora");
-        settings->setToolTip("Настройки Mora");
+        settings->setAccessibleName("Настройки DAK");
+        settings->setToolTip("Настройки DAK");
         settings->setFixedSize(48, 48);
         layout->addWidget(settings);
         QObject::connect(settings, &QPushButton::clicked, this, [this]() { openAppWindow("workspace"); });
 
         auto* power = new QPushButton("⏻");
-        power->setAccessibleName("Закрыть Mora");
-        power->setToolTip("Закрыть Mora");
+        power->setAccessibleName("Закрыть DAK");
+        power->setToolTip("Закрыть DAK");
         power->setFixedSize(48, 48);
         layout->addWidget(power);
         QObject::connect(power, &QPushButton::clicked, this, &QWidget::close);
@@ -813,7 +815,7 @@ private:
         recentHeader->addWidget(label("Локально", "muted"));
         recentLayout->addLayout(recentHeader);
         recentLayout->addWidget(label(
-            "Здесь появятся документы и проекты, которые вы откроете в нативных приложениях Mora.",
+            "Здесь появятся документы и проекты, которые вы откроете в нативных приложениях DAK.",
             "muted"));
         recentLayout->addStretch(1);
         mainColumn->addWidget(recent, 1);
@@ -825,11 +827,11 @@ private:
         auto* sessionLayout = new QVBoxLayout(session);
         sessionLayout->setContentsMargins(16, 14, 16, 16);
         sessionLayout->addWidget(label("СЕССИЯ", "eyebrow"));
-        sessionLayout->addWidget(label("Нативная Mora", "heading"));
+        sessionLayout->addWidget(label("Нативная DAK", "heading"));
         sessionLayout->addWidget(label("Работает как отдельное приложение хостовой ОС.", "muted"));
         sessionLayout->addWidget(label("Окна ОС", "muted"));
         sessionLayout->addWidget(label("Включены", "body"));
-        sessionLayout->addWidget(label("Службы ядра DuckOS", "muted"));
+        sessionLayout->addWidget(label("Службы ядра DAK", "muted"));
         sessionLayout->addWidget(label("Пока не подключены", "body"));
         side->addWidget(session);
 
@@ -1020,7 +1022,7 @@ private:
 
         auto* window = new AppWindow(app, this);
         windows_.insert(id, window);
-        // QPointer tracks window lifetime without a callback into MoraWindow during base-class teardown.
+        // QPointer tracks window lifetime without a callback into DAKDesktopWindow during base-class teardown.
 
         const QRect available = QApplication::primaryScreen()
             ? QApplication::primaryScreen()->availableGeometry() : QRect(0, 0, 1440, 900);
@@ -1054,18 +1056,18 @@ int main(int argc, char* argv[])
 {
     QApplication application(argc, argv);
     loadThemeTokens();
-    QApplication::setApplicationName("Mora");
-    QApplication::setOrganizationName("DuckOS");
+    QApplication::setApplicationName("DAK Desktop");
+    QApplication::setOrganizationName("Ivan-VHS");
 
     const bool selfTest = application.arguments().contains("--self-test");
-    MoraWindow window;
+    DAKDesktopWindow window;
     if (selfTest) {
         QString failure;
         if (!window.runSelfTest(&failure)) {
-            qCritical("Mora native smoke test failed: %s", qPrintable(failure));
+            qCritical("DAK native desktop smoke test failed: %s", qPrintable(failure));
             return 1;
         }
-        qInfo("Mora native smoke test passed.");
+        qInfo("DAK native desktop smoke test passed.");
         return 0;
     }
 

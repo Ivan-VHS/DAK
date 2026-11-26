@@ -13,7 +13,7 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
-const DUCK_ACCENT = "#FFD400";
+const DUCK_ACCENT = "#FFD700";
 
 const appDefinitions = {
   cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
@@ -36,16 +36,16 @@ const appDefinitions = {
   "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: DUCK_ACCENT, glyph: "➤" },
   gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: DUCK_ACCENT, glyph: "▣" },
   exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: DUCK_ACCENT, glyph: "E" },
-  "mora-ai": { name: "Mora AI", subtitle: "Намерения и планы", color: DUCK_ACCENT, glyph: "✦" },
+  "mora-ai": { name: "DAK AI", subtitle: "Намерения и планы", color: DUCK_ACCENT, glyph: "✦" },
   security: { name: "Sentinel", subtitle: "Права и доверие", color: DUCK_ACCENT, glyph: "◇" },
   updates: { name: "Restore", subtitle: "Обновления и откат", color: DUCK_ACCENT, glyph: "↶" },
   runtime: { name: "Bridge", subtitle: "Windows compatibility", color: DUCK_ACCENT, glyph: "⇄" },
   workspace: { name: "Control", subtitle: "Среда и питание", color: DUCK_ACCENT, glyph: "⌘" },
   provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
-  "mora-boost": { name: "Mora Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
+  "mora-boost": { name: "DAK Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
   desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
   "red-sparrow": { name: "赤雀 · Red Sparrow", subtitle: "Wuxia · постановочная лаборатория", color: DUCK_ACCENT, glyph: "雀" },
-  "mora-commons": { name: "Mora Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
+  "mora-commons": { name: "DAK Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
   "reaper-workbench": { name: "Reaper", subtitle: "Язык и toolchain", color: DUCK_ACCENT, glyph: "R" },
   "pytyliki-workbench": { name: "Pytyliki", subtitle: "Вычисления и диагностика", color: DUCK_ACCENT, glyph: "P" },
   "oplague-workbench": { name: "OPlague", subtitle: "Инспекция устройств", color: DUCK_ACCENT, glyph: "O" },
@@ -194,7 +194,7 @@ function executeApprovedPlan() {
     agentWindow.querySelector("[data-intent-status]").textContent = "Подтверждённые локальные настройки применены.";
   }
   for (const appId of appsToOpen) openApp(appId);
-  showToast("План Mora выполнен");
+  showToast("План DAK выполнен");
 }
 
 function setRecoveryStatus(message) {
@@ -271,7 +271,7 @@ function renderExtensionEntries(appWindow) {
   if (entries.length === 0) {
     const empty = document.createElement("li");
     empty.className = "extension-empty";
-    empty.textContent = "Пока пусто. Записи сохраняются только в этом профиле Mora.";
+    empty.textContent = "Пока пусто. Записи сохраняются только в этом профиле DAK.";
     list.append(empty);
     return;
   }
@@ -308,8 +308,8 @@ function localCollectionPanel(appId, kicker, title, description, placeholder, la
 function extensionPanelMarkup(appId) {
   switch (appId) {
     case "sestem":
-      return '<p class="window-kicker">SESTEM · ОБЗОР СИСТЕМЫ</p><h2 class="window-heading">Состояние DuckOS</h2>' +
-        '<div class="extension-status-grid"><div class="extension-status-card"><strong>Mora Desktop</strong><span>Браузерная оболочка · активна</span></div>' +
+      return '<p class="window-kicker">SESTEM · ОБЗОР СИСТЕМЫ</p><h2 class="window-heading">Состояние DAK</h2>' +
+        '<div class="extension-status-grid"><div class="extension-status-card"><strong>DAK Desktop</strong><span>Браузерная оболочка · активна</span></div>' +
         '<div class="extension-status-card"><strong>Контракты ядра</strong><span>Reaper reference runtime · проверяемая политика</span></div>' +
         '<div class="extension-status-card"><strong>DuckBridge</strong><span>Инспекция и планы запуска · без выполнения</span></div>' +
         '<div class="extension-status-card"><strong>Native boot</strong><span>Нативный загрузочный образ ещё не готов</span></div></div>' +
@@ -320,8 +320,8 @@ function extensionPanelMarkup(appId) {
       try { complete = Boolean(localStorage.getItem("duckos.mora.setupup.v1")); } catch {}
       return '<p class="window-kicker">SETUPUP · МАСТЕР MORA</p><h2 class="window-heading">Настройте рабочее пространство</h2>' +
         '<p class="window-copy">Отметьте завершение локальной настройки. Установка ОС, разметка диска и настройка загрузчика здесь не выполняются.</p>' +
-        '<div class="setting-block"><strong>Цветовая схема</strong><span>Единая палитра DuckOS: чёрный, белый и жёлтый.</span></div><div class="approval-actions"><button class="action-button" data-action="setup-complete">Завершить настройку</button></div>' +
-        '<p class="extension-status" data-setup-status>' + (complete ? 'Первичная настройка Mora уже завершена.' : 'Настройка ещё не завершена.') + '</p>';
+        '<div class="setting-block"><strong>Цветовая схема</strong><span>Единая палитра DAK: чёрный, белый и жёлтый.</span></div><div class="approval-actions"><button class="action-button" data-action="setup-complete">Завершить настройку</button></div>' +
+        '<p class="extension-status" data-setup-status>' + (complete ? 'Первичная настройка DAK уже завершена.' : 'Настройка ещё не завершена.') + '</p>';
     }
     case "orriganize":
       return localCollectionPanel("orriganize","ORRIGANIZE · ПОРЯДОК ДЕЛ","Проекты и задачи","Собирайте рабочие пункты и идеи в локальном списке. Gloverty остаётся отдельным центром автоматизаций; системное расписание и синхронизация не подключены.","Новая задача или проект","Добавить пункт");
@@ -386,7 +386,7 @@ function commonsPanelMarkup() {
   return '<p class="window-kicker">MORA COMMONS · ЕДИНЫЙ КАТАЛОГ</p>' +
     '<h2 class="window-heading">Пространство возможностей</h2>' +
     '<p class="commons-intro">Пятнадцать направлений собраны по задачам, а не по полу. Каждый инструмент открыт каждому пользователю. Настраивайте каталог под свои интересы.</p>' +
-    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений Mora Commons"></label>' +
+    '<label class="commons-search"><span aria-hidden="true">⌕</span><input type="search" data-commons-search placeholder="Поиск по названию, функциям и ключевым словам" aria-label="Поиск приложений DAK Commons"></label>' +
     '<div class="commons-filters" data-commons-filters aria-label="Категории приложений">' +
     '<button class="commons-filter" type="button" data-commons-filter="all" aria-pressed="true">Все приложения</button>' +
     filters +
@@ -453,7 +453,7 @@ function renderCommonsDetails(detailPanel, app) {
   detailPanel.appendChild(makeCommonsText(
     "p",
     "commons-detail-status",
-    "Статус: спецификация. Каталог Mora Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
+    "Статус: спецификация. Каталог DAK Commons работает, но отдельный исполняемый модуль этого приложения ещё не подключён."
   ));
   detailPanel.hidden = false;
 }
@@ -562,7 +562,7 @@ function federatedProjectPanel(projectId) {
     reaper: {
       name: "Reaper", kind: "НАТИВНЫЙ C17 TOOLCHAIN",
       summary: "Язык Reaper, компиляторная инфраструктура, CLI и FFI для пользовательских инструментов.",
-      boundary: "User-space only. Это не freestanding kernel compiler и не исполняемая часть ядра DuckOS.",
+      boundary: "User-space only. Это не freestanding kernel compiler и не исполняемая часть ядра DAK.",
       source: "../projects/reaper/README.md", license: "../projects/reaper/LICENSE",
       build: "cmake -S projects/reaper -B build/reaper -DCMAKE_BUILD_TYPE=Release -DREAPER_BUILD_TESTS=ON",
       test: "ctest --test-dir build/reaper --output-on-failure", command: "release/bin/reaper-c"
@@ -602,7 +602,7 @@ function federatedProjectPanel(projectId) {
     '<div class="setting-block"><strong>В релизном образе</strong><span>Полные исходники, документация и лицензия включены в каталог projects/. Сборки находятся в release/bin/ и предназначены для Linux x86_64 host.</span></div>' +
     '<div class="system-notice"><span class="notice-dot"></span><span><code>' + project.build + '</code></span></div>' +
     '<div class="system-notice"><span class="notice-dot"></span><span><code>' + project.test + '</code></span></div>' +
-    '<div class="system-notice"><span class="notice-dot"></span><span>Исполняемая точка: <code>' + project.command + '</code>. Mora показывает команду как справку и не запускает её.</span></div>' +
+    '<div class="system-notice"><span class="notice-dot"></span><span>Исполняемая точка: <code>' + project.command + '</code>. DAK показывает команду как справку и не запускает её.</span></div>' +
     '<div class="approval-actions"><a class="action-button" href="' + project.source + '" target="_blank" rel="noopener">Открыть локальный README</a>' +
     '<a class="subtle-button" href="' + project.license + '" target="_blank" rel="noopener">Лицензия</a></div>' +
     '<p class="window-copy">Внешнее выполнение отключено. Запускать host-программы следует вручную после проверки целевой платформы и разрешений.</p>';
@@ -616,7 +616,7 @@ function panelMarkup(appId) {
         '<div class="control-row"><div class="control-copy"><strong>Системная громкость</strong><span>Общий уровень выхода</span></div><input type="range" min="0" max="100" value="72" data-range="volume"><span class="value-label" data-range-value="volume">72%</span></div>' +
         '<div class="control-row"><div class="control-copy"><strong>Микрофон</strong><span>Входной уровень</span></div><input type="range" min="0" max="100" value="58" data-range="mic"><span class="value-label" data-range-value="mic">58%</span></div>' +
         '<div class="control-row"><div class="control-copy"><strong>Запись</strong><span data-record-status>Готово к записи · 00:00</span></div><button class="action-button" data-action="record"><span class="record-dot"></span><span data-record-label>Начать запись</span></button></div>' +
-        '<p class="window-copy">Показатели демонстрационные. Управление реальными аудиоустройствами появится через системный аудиосервис DuckOS.</p>';
+        '<p class="window-copy">Показатели демонстрационные. Управление реальными аудиоустройствами появится через системный аудиосервис DAK.</p>';
     case "kavun":
       return '<p class="window-kicker">ГАЛЕРЕЯ · ДЕМОАЛЬБОМ</p><h2 class="window-heading">Сохранённые моменты</h2>' +
         '<div class="photo-grid">' +
@@ -652,7 +652,7 @@ function panelMarkup(appId) {
     case "unify":
       return '<p class="window-kicker">ПОДКЛЮЧЕНИЯ · ДЕМО</p><h2 class="window-heading">Ваши устройства</h2>' +
         '<div class="device-list">' +
-        '<div class="device-row"><span class="device-symbol">▣</span><div class="device-copy"><strong>Ноутбук Mora</strong><span>Основное устройство · Wi-Fi</span></div><span class="device-state">ONLINE</span></div>' +
+        '<div class="device-row"><span class="device-symbol">▣</span><div class="device-copy"><strong>Ноутбук DAK</strong><span>Основное устройство · Wi-Fi</span></div><span class="device-state">ONLINE</span></div>' +
         '<div class="device-row"><span class="device-symbol">♫</span><div class="device-copy"><strong>Беспроводные наушники</strong><span>Аудио · Bluetooth</span></div><button class="switch" role="switch" aria-checked="true" aria-label="Беспроводные наушники"></button></div>' +
         '<div class="device-row"><span class="device-symbol">⌘</span><div class="device-copy"><strong>Геймпад</strong><span>Игровой контроллер · Bluetooth</span></div><button class="switch" role="switch" aria-checked="false" aria-label="Геймпад"></button></div>' +
         '<div class="device-row"><span class="device-symbol">▤</span><div class="device-copy"><strong>Внешний дисплей</strong><span>Экран · HDMI</span></div><button class="switch" role="switch" aria-checked="true" aria-label="Внешний дисплей"></button></div>' +
@@ -660,12 +660,12 @@ function panelMarkup(appId) {
     case "mora-boost":
       return '<p class="window-kicker">MORA BOOST · OPLAGUE GAMING LAB</p>' +
         '<h2 class="window-heading">Игровая производительность под контролем</h2>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>Здесь собраны реальные локальные измерения OPlague. Mora остаётся единым рабочим столом, но браузер не притворяется драйвером или аппаратным брокером.</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>Здесь собраны реальные локальные измерения OPlague. DAK остаётся единым рабочим столом, но браузер не притворяется драйвером или аппаратным брокером.</span></div>' +
         '<div class="setting-block"><strong>Точное состояние оборудования</strong><span>Полные PCI/USB PnP ID, SUBSYS, REV, INF и версии драйверов; локальный SHA-256 отпечаток и атомарный снимок перед изменениями.</span></div>' +
         '<div class="setting-block"><strong>Обратимый игровой сеанс</strong><span>Нативный OPlague после подтверждения временно включает штатный план питания Windows и восстанавливает прежний, если он не менялся извне.</span></div>' +
         '<div class="setting-block"><strong>Телеметрия и стабильность</strong><span>NVIDIA nvidia-smi: температура, загрузка, VRAM, мощность и частоты; Windows WHEA/Display 4101; CSV frametime, средний FPS, 1%/0.1% low и p99.</span></div>' +
         '<div class="setting-block"><strong>Проверенные профили</strong><span>Локальный кэш только подтверждённых профилей по точной связке «игра + железо + версия драйвера». Деградация бенчмарка вызывает guarded restore плана питания.</span></div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Прямой доступ Mora к PCI/GPU, установке драйверов, реестру, BIOS, IRQ/MSI, службам и сетевому стеку не включён. Нативный IPC DuckOS пока описан контрактом, но не реализован.</span></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Прямой доступ DAK к PCI/GPU, установке драйверов, реестру, BIOS, IRQ/MSI, службам и сетевому стеку не включён. Нативный IPC DAK пока описан контрактом, но не реализован.</span></div>' +
         '<div class="approval-actions">' +
         '<a class="action-button" href="https://github.com/Ivan-VHS/OPlague" target="_blank" rel="noopener noreferrer">Открыть OPlague ↗</a>' +
         '<a class="subtle-button" href="https://github.com/Ivan-VHS/OPlague/blob/main/docs/GAMING_PERFORMANCE_WORKBENCH.md" target="_blank" rel="noopener noreferrer">Документация ↗</a>' +
@@ -674,12 +674,12 @@ function panelMarkup(appId) {
     case "desktop":
       return '<p class="window-kicker">DUCK DESKTOP · НАТИВНЫЙ ИНСТРУМЕНТ</p>' +
         '<h2 class="window-heading">Рабочее пространство под контролем</h2>' +
-        '<p class="window-copy">Mora остаётся графической оболочкой. Настоящая диагностика и управление пользовательской автозагрузкой выполняются отдельным приложением Duck Desktop на стороне DuckOS, а не браузерным JavaScript.</p>' +
+        '<p class="window-copy">DAK остаётся графической оболочкой. Настоящая диагностика и управление пользовательской автозагрузкой выполняются отдельным приложением Duck Desktop на стороне DAK, а не браузерным JavaScript.</p>' +
         '<div class="setting-block"><strong>Нативное приложение</strong><span>Аудит файлов, пользовательской автозагрузки и процессов.</span></div>' +
-        '<div class="setting-block"><strong>Команда запуска</strong><span>Откройте терминал установленной среды DuckOS и выполните: <code>duckos desktop gui</code>.</span></div>' +
+        '<div class="setting-block"><strong>Команда запуска</strong><span>Откройте терминал установленной среды DAK и выполните: <code>duckos desktop gui</code>.</span></div>' +
         '<div class="setting-block"><strong>Безопасная организация</strong><span>Перенос выбранных файлов в Inbox без удаления и перезаписи; операции выполняются после подтверждения.</span></div>' +
         '<div class="setting-block"><strong>Автозагрузка</strong><span>Только текущий пользователь; отключение можно восстановить.</span></div>' +
-        '<p class="window-copy">Браузерная Mora показывает только точку входа. Она не изображает системный монитор, оконный менеджер или привилегированный доступ.</p>';
+        '<p class="window-copy">Браузерная DAK показывает только точку входа. Она не изображает системный монитор, оконный менеджер или привилегированный доступ.</p>';
     case "mora-commons":
       return commonsPanelMarkup();
     case "mora-ai":
@@ -707,29 +707,29 @@ function panelMarkup(appId) {
         '<p class="window-copy">Профиль не выдаёт разрешения процессам браузера и не заменяет системную защиту.</p>';
     case "updates":
       return '<p class="window-kicker">RESTORE · ВОССТАНОВЛЕНИЕ</p><h2 class="window-heading">Обновления без сюрпризов</h2>' +
-        '<div class="update-state"><span class="state-mark">↶</span><div><strong>Системный updater не подключён</strong><span>Атомарные A/B-образы и откат — целевая архитектура DuckOS.</span></div></div>' +
-        '<div class="recovery-card"><strong>Точка восстановления Mora</strong><span data-recovery-status>' + recoveryStatus() + '</span>' +
+        '<div class="update-state"><span class="state-mark">↶</span><div><strong>Системный updater не подключён</strong><span>Атомарные A/B-образы и откат — целевая архитектура DAK.</span></div></div>' +
+        '<div class="recovery-card"><strong>Точка восстановления DAK</strong><span data-recovery-status>' + recoveryStatus() + '</span>' +
         '<div class="approval-actions"><button class="action-button" data-action="save-recovery">Сохранить профиль</button>' +
         '<button class="subtle-button" data-action="restore-recovery">Восстановить</button></div></div>' +
         '<button class="wide-action" data-action="preview-update">Проверить план обновления</button>' +
         '<div class="intent-status" data-update-preview>Проверка только сформирует локальный план. Скачивания и установки не будет.</div>' +
-        '<p class="window-copy">Сейчас сохраняются только настройки Mora в локальном хранилище браузера — не раздел ОС, приложения или пользовательские файлы.</p>';
+        '<p class="window-copy">Сейчас сохраняются только настройки DAK в локальном хранилище браузера — не раздел ОС, приложения или пользовательские файлы.</p>';
     case "runtime":
       return '<p class="window-kicker">BRIDGE · WINDOWS COMPATIBILITY</p><h2 class="window-heading">Совместимость Windows-приложений</h2>' +
-        '<p class="window-copy">Bridge проверяет выбранные EXE/DLL локально. В Mora доступна быстрая проверка заголовка; расширенный PE-анализ, список импортируемых DLL, профили приложений и диагностика доступны через инструменты DuckOS CLI.</p>' +
+        '<p class="window-copy">Bridge проверяет выбранные EXE/DLL локально. В DAK доступна быстрая проверка заголовка; расширенный PE-анализ, список импортируемых DLL, профили приложений и диагностика доступны через инструменты DAK CLI.</p>' +
         '<label class="file-picker">Проверить EXE или DLL<input type="file" data-executable-file accept=".exe,.dll"></label>' +
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
-        '<div class="setting-block"><strong>Инструменты DuckOS</strong><span>После установки пакета duckos-build-tools в среде разработки:</span>' +
+        '<div class="setting-block"><strong>Инструменты DAK</strong><span>После установки пакета duckos-build-tools в среде разработки:</span>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos inspect-pe ./game.exe — заголовки PE32/PE32+, секции и импортируемые DLL</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge runtimes — поиск Wine, Proton, CrossOver, Bottles, Box64 и QEMU без запуска этих программ</span></div>' +
         '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge plan ./game.exe --purpose game --compat-data PATH — подготовка структуры команды Proton без её выполнения</span></div></div>' +
-        '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DuckOS ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
+        '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DAK ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
         '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
     case "workspace":
-      return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">' + (currentLocale === "zh-CN" ? "Mora 工作空间" : "Рабочая среда Mora") + '</h2>' +
+      return '<p class="window-kicker">CONTROL · WORKSPACE</p><h2 class="window-heading">' + (currentLocale === "zh-CN" ? "DAK 工作空间" : "Рабочая среда DAK") + '</h2>' +
         '<div class="setting-block"><strong>' + (currentLocale === "zh-CN" ? "界面语言" : "Язык интерфейса") + '</strong><span>' + (currentLocale === "zh-CN" ? "独立的简体中文（普通话）或俄语界面配置。" : "Отдельная настройка русского или упрощённого китайского интерфейса.") + '</span>' +
         '<select class="locale-select" data-locale-select aria-label="Interface language"><option value="ru-RU"' + (currentLocale === "ru-RU" ? " selected" : "") + '>Русский</option><option value="zh-CN"' + (currentLocale === "zh-CN" ? " selected" : "") + '>简体中文（普通话）</option></select></div>' +
         '<div class="setting-block"><strong>' + (currentLocale === "zh-CN" ? "资源配置" : "Профиль ресурсов") + '</strong><span>' + (currentLocale === "zh-CN" ? "仅调整桌面偏好，不控制内核调度。" : "Локальная настройка оболочки, не планировщик ядра") + '</span>' +
@@ -939,8 +939,8 @@ document.addEventListener("click", (event) => {
     const status = setupComplete.closest(".app-window").querySelector("[data-setup-status]");
     try {
       localStorage.setItem("duckos.mora.setupup.v1", new Date().toISOString());
-      if (status) status.textContent = "Настройка Mora завершена и сохранена в профиле браузера.";
-      showToast("Первичная настройка Mora завершена");
+      if (status) status.textContent = "Настройка DAK завершена и сохранена в профиле браузера.";
+      showToast("Первичная настройка DAK завершена");
     } catch {
       if (status) status.textContent = "Не удалось сохранить состояние настройки.";
     }
@@ -1188,8 +1188,8 @@ document.addEventListener("click", (event) => {
     const snapshot = createRecoverySnapshot(preferences);
     try {
       localStorage.setItem(RECOVERY_KEY, JSON.stringify(snapshot));
-      setRecoveryStatus("Профиль Mora сохранён: " + new Date(snapshot.createdAt).toLocaleString("ru-RU"));
-      showToast("Точка настроек Mora сохранена");
+      setRecoveryStatus("Профиль DAK сохранён: " + new Date(snapshot.createdAt).toLocaleString("ru-RU"));
+      showToast("Точка настроек DAK сохранена");
     } catch {
       setRecoveryStatus("Не удалось сохранить профиль: локальное хранилище недоступно.");
     }
@@ -1202,15 +1202,15 @@ document.addEventListener("click", (event) => {
       const raw = localStorage.getItem(RECOVERY_KEY);
       const snapshot = raw ? validateRecoverySnapshot(JSON.parse(raw)) : null;
       if (!snapshot) {
-        setRecoveryStatus("Нет действительной точки восстановления настроек Mora.");
+        setRecoveryStatus("Нет действительной точки восстановления настроек DAK.");
         return;
       }
       preferences = normalizePreferences(snapshot.preferences);
       persistPreferences();
       updateSecurityPanel();
       updateWorkspacePanel();
-      setRecoveryStatus("Настройки Mora восстановлены из точки от " + new Date(snapshot.createdAt).toLocaleString("ru-RU"));
-      showToast("Профиль Mora восстановлен");
+      setRecoveryStatus("Настройки DAK восстановлены из точки от " + new Date(snapshot.createdAt).toLocaleString("ru-RU"));
+      showToast("Профиль DAK восстановлен");
     } catch {
       setRecoveryStatus("Восстановление невозможно: хранилище недоступно или данные повреждены.");
     }

@@ -1,13 +1,13 @@
 {
-  "name": "Mora — DuckOS Desktop",
-  "short_name": "Mora",
+  "name": "DAK Desktop — Ivan-VHS",
+  "short_name": "DAK",
   "id": "./",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#080808",
-  "theme_color": "#FFD400",
-  "description": "Единый рабочий стол и системная оболочка DuckOS.",
+  "background_color": "#050505",
+  "theme_color": "#FFD700",
+  "description": "Единый рабочий стол и системная оболочка DAK.",
   "icons": [
     {
       "src": "./icon.svg",
