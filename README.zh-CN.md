@@ -1,148 +1,152 @@
-# 🦆 Duck — Reaper 优先的操作系统项目
+# DAK — 基于 Reaper 的操作系统项目
 
-<p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
+[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native Mora](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20Mora)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
+> 实验性的 x86_64 系统基础：经 QEMU 验证的 Stage 1 启动路径、Reaper 策略契约，以及独立运行于宿主操作系统的桌面外壳。
 
-> **以 Reaper 为核心的系统基础、本机桌面外壳和本地优先工具生态；每条实现边界都清晰可见。**
+**规格**
 
-**项目状态:** 实验阶段 · x86_64 Stage 1 已通过 QEMU 验证 · **版本:** Stage 1 boot foundation · **README 标准:** Psychoporter 666 v1.0 · **审阅日期:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
-
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="Duck system architecture overview" width="100%"></p>
-
-## 快速导航
-
-[🚀 Demo: Browser reference preview](mora/index.html) · [Documentation](docs/README.md) · [Source](https://github.com/Ivan-VHS/DAK) · [Issues](https://github.com/Ivan-VHS/DAK/issues)
-
-## 目标与范围
-
-Duck 是一个以 Reaper 为优先的实验性操作系统项目。当前工作刻意分为内核启动基础、Reaper 策略契约和面向主机操作系统的 Mora 原生桌面应用三个独立方向。
-
-## 功能
-
-- x86_64 Stage 1 路径验证 Limine 固件交接和 Boot Info v1，分配早期 4 KiB 物理帧，输出 DUCKOS_BOOT_OK stage=1 后停机。QEMU BIOS 与 UEFI 检查均已通过。
-- Reaper 提供参考策略契约路线，包括 40 项 Core Subsystem MVP 契约。内核原生强制执行仍待实现。
-- Mora 具有基于 Qt 6 Widgets 的本机桌面应用，窗口由主机操作系统管理，并带有本地应用目录。Stage 1 内核不会启动它。
-- mora/index.html 保留为浏览器参考预览。它不是原生合成器，也不是内核桌面。
-
-## 系统结构图
-
-~~~mermaid
-flowchart TB
-  subgraph BOOT["x86_64 Stage 1 — QEMU verified"]
-    L["Limine handoff"] --> B["Boot Info v1"]
-    B --> F["Early 4 KiB frame"]
-    F --> M["Serial marker / halt"]
-  end
-  subgraph POLICY["Reaper policy contracts"]
-    R["Reference contracts"] --> T["Contract tests"]
-    T -.-> N["Native enforcement pending"]
-  end
-  subgraph HOST["Mora host desktop — separate from kernel"]
-    Q["Qt 6 Widgets"] --> W["Host-managed windows"]
-    H["Browser reference preview"]
-  end
-  BOOT -.->|"desktop integration pending"| HOST
-~~~
-
-## 构建原生 Mora
-
-发布镜像构建面向 Linux x86_64，需要 Git/子模块、GCC/G++、CMake、作为构建工具的 Python 3、Node.js 22、Qt 6 Widgets、xorriso、curl、tar、QEMU 和 OVMF。
-
-~~~sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
-ctest --test-dir build/mora-native --output-on-failure
-~~~
-
-Qt 桌面目标为可选项；未检测到 Qt 6 Widgets 时将跳过。Mora 作为宿主操作系统的原生应用运行，不由 Stage 1 内核启动。
-
-## 浏览器参考预览
-
-Linux:
-~~~sh
-./scripts/run-mora.sh
-npm test
-~~~
-Windows PowerShell:
-~~~powershell
-.\scripts\run-mora.ps1
-npm test
-~~~
-
-浏览器外壳仅用于参考展示，并非原生合成器，也不代表已与内核集成。
-
-## 构建发布镜像
-
-~~~sh
-bash boot/build-release-iso.sh --work-dir build/release --output dist/Duck-Release-x86_64.iso
-~~~
-
-发布管线验证仓库固定版本，运行项目构建和测试，生成 SHA-256 清单并组装 BIOS/UEFI 混合 ISO。该 ISO 是源码与工具预览，不是完整可安装操作系统。
-
-## 内核状态与后续层
-
-| Layer | Status |
+| 字段 | 当前记录 |
 |---|---|
-| Limine 固件交接与 Boot Info v1 | 已实现；通过 QEMU 验证 |
-| 早期物理帧分配 | Stage 1 路径已实现 |
-| Reaper Core Subsystem MVP | 40 项参考契约；原生强制执行待实现 |
-| 页表与地址空间 | 待实现 |
-| 中断、定时器和抢占式调度器 | 待实现 |
-| 进程模型与系统调用 ABI | 待实现 |
-| 内核强制能力与零拷贝 IPC | 待实现 |
-| PCI/USB/ACPI 与隔离驱动运行时 | 待实现 |
-| 文件系统、服务管理器、安装程序和持久会话 | 待实现 |
-| 原生合成器、GPU 与音频栈 | 待实现 |
+| 仓库 | [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK) |
+| 项目状态 | 实验阶段；Stage 1 基础 |
+| 产品版本 | 尚未声明统一的 DAK 发布版本 |
+| 原生启动目标 | x86_64；在 Linux 上构建；Limine BIOS/UEFI 镜像 |
+| 策略语言 | Reaper；目前为参考契约，内核原生强制执行尚未完成 |
+| 启动桥接层 | 精简的 C11 freestanding 平台边界 |
+| 宿主桌面 | C++17 / 可选 Qt 6 Widgets 6.4+ |
+| 工具链 | CMake 3.21+、Python 3.10+、Node.js 22+ |
+| 许可证 | 根目录没有 LICENSE；尚未声明分发条款 |
+| 文档审核日期 | 2026-11-26 |
 
-当前内核阶段在验证固件交接并完成早期物理帧分配后停机。尚未提供进程隔离、驱动加载、存储、网络、持久会话或内核强制沙箱。Mora 目录条目不会执行清单命令，也不会授予硬件权限。
+<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK 系统与桌面架构概览" width="100%"></p>
 
-## 架构目标
+## 目录
 
-x86_64 是面向 Intel 和 AMD 的主要目标。Elbrus 保留为单独兼容路线；这不代表已有 Elbrus 编译器后端、启动镜像或物理硬件测试矩阵。
+- [用途与范围](#用途与范围)
+- [架构](#架构与数据流)
+- [实现状态](#实现状态)
+- [构建与验证](#构建与验证)
+- [接口与生态](#接口与生态)
+- [限制与信任边界](#限制与信任边界)
+- [文档与治理](#文档与治理)
+- [历史与许可](#历史与许可)
 
-## 源码联邦与完整性
+## 用途与范围
 
-当前源码集合的固定版本记录在 `federation/repositories.v1.json` 中。请使用以下命令初始化其中指定的确切版本：
+DAK 是一个实验性操作系统项目，目前包含三个彼此独立的执行部分：freestanding x86_64 Stage 1 内核基础、Reaper 参考策略契约，以及运行在宿主操作系统中的桌面原型。它们尚未组成一个完整集成的操作系统会话。
 
-~~~sh
-git submodule update --init --recursive
-~~~
+当前启动流程验证固件交接和 Boot Info v1，分配并清零一个早期 4 KiB 物理页帧，输出串口标记后停止。桌面外壳作为宿主系统应用运行，不由内核启动。
 
-关联项目仍是独立仓库，分别拥有各自的权利人、许可证、契约和发布周期：
+## 架构与数据流
 
-- [Reaper](https://github.com/Ivan-VHS/Reaper)
-- [Pytyliki](https://github.com/Ivan-VHS/Pytyliki)
-- [OPlague](https://github.com/Ivan-VHS/OPlague)
-- [VentuSample](https://github.com/Ivan-VHS/VentuSample)
+```mermaid
+flowchart TB
+  subgraph BOOT["原生 x86_64 Stage 1"]
+    F["Limine BIOS / UEFI 交接"] --> V["Boot Info v1 验证"]
+    V --> A["早期 4 KiB 页帧分配"]
+    A --> H["串口标记并停止"]
+  end
+  subgraph POLICY["Reaper 策略层"]
+    R["参考子系统契约"] --> T["契约测试"]
+    T -.-> K["内核原生强制执行尚未实现"]
+  end
+  subgraph HOST["独立宿主应用"]
+    Q["C++17 / 可选 Qt 6"] --> W["宿主系统管理的窗口"]
+    B["浏览器参考界面"]
+  end
+  BOOT -.->|"操作系统会话集成尚未完成"| HOST
+```
 
-## 文档
+原生启动桥接层刻意保持精简。Reaper 负责策略与参考契约；在内核具备进程模型、系统调用、文件系统和能力强制执行之前，宿主工具及配套应用仍属于独立进程和独立仓库。
 
-- [架构](docs/ARCHITECTURE.md)
-- [实现状态](docs/IMPLEMENTATION_STATUS.md)
-- [可启动镜像](docs/BOOTABLE_IMAGE.md)
-- [内核子系统 MVP](docs/CORE_MVP_V1.md)
-- [生态集成](docs/ECOSYSTEM_INTEGRATION.md)
-- [项目演进阶梯](docs/PROJECT_EVOLUTION_LADDER.md)
-- [Reaper 原生集成](docs/REAPER_INTEGRATION.md)
-- [文档索引](docs/README.md)
+## 实现状态
 
-实现状态台账、可启动镜像指南和项目演进阶梯是已交付及待完成系统层的权威记录。
+| 能力 | 成熟度 | 证据边界 |
+|---|---|---|
+| Limine 交接与 Boot Info v1 验证 | Stage 1 已验证 | QEMU BIOS 和 UEFI 测试 |
+| 早期物理页帧分配 | Stage 1 已实现 | 单个 4 KiB 页帧；无释放路径 |
+| CPU 异常 IDT | 部分实现 / QEMU 标记已验证 | 向量 0–31；IRQ 路由尚未完成 |
+| Reaper 子系统策略 | 参考契约已实现 | 测试不代表内核已强制执行 |
+| 宿主原生桌面外壳 | 部分实现 | Qt 应用；窗口由宿主系统管理 |
+| 浏览器桌面预览 | 参考实现 | 不是原生合成器 |
+| 进程模型、系统调用 ABI、虚拟内存 | 计划中 | 尚无内核用户会话 |
+| 文件系统、服务管理器、包管理器、安装器 | 计划中 | 尚无内核服务生命周期 |
+| 驱动运行时、GPU 合成器、音频栈 | 计划中 | 尚无物理设备控制 |
 
-## 许可证与法律状态
+权威能力清单见 [Implementation Status](docs/IMPLEMENTATION_STATUS.md)。[Project Evolution Ladder](docs/PROJECT_EVOLUTION_LADDER.md) 定义证据门槛；阶段名称不代表发布认证。
 
-仓库根目录没有 LICENSE 文件或许可证声明。不得假定采用 MIT、Apache-2.0 或拥有重新分发权。分发前必须由权利人选择并批准许可证条款。
+## 构建与验证
 
-不得超出适用许可证授权范围重新分发打包内容或第三方材料。Git submodule 固定版本仅记录源码修订，不会改变权属或许可证条款。
+### 宿主契约测试
 
-## 工程原则
+需要 CMake 3.21+ 和 C11 编译器。
 
-根据源码、测试、Schema、构建产物和 CI 证据描述行为。目录或路线图不是实现证明。浏览器偏好不是内核强制执行；PE 检查不是进程执行；校验和不是作者身份的证明。
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
 
----
+### Stage 1 启动镜像
 
-<p align="center"><sub>Psychoporter 666 README Standard v1.0 · Ivan-VHS · 2026-11-25 UTC</sub></p>
+在 Linux x86_64 上构建，并准备 GCC/binutils、Git、curl、tar、xorriso 和 sha256sum：
 
-## 参与贡献
+```sh
+boot/build-iso.sh --work-dir build/dak-boot --output dist/DAK-Stage1-x86_64.iso
+```
 
-修改代码、契约或文档前，请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。保持更改可审查，运行相关检查，并准确说明实现证据。
+QEMU BIOS/UEFI 验证和串口日志要求见 [Bootable Image](docs/BOOTABLE_IMAGE.md)。Stage 1 成功启动不意味着已经具备可用的操作系统会话。
+
+### 可选宿主桌面与浏览器预览
+
+宿主 Qt 6 桌面需要 C++17 编译器和 Qt 6 Widgets 6.4 或更新版本：
+
+```sh
+cmake -S . -B build/desktop -DDAK_BUILD_NATIVE_DESKTOP=ON
+cmake --build build/desktop --parallel
+```
+
+浏览器参考界面使用独立的 Node 测试集：
+
+```sh
+npm test
+```
+
+当前 package manifest 声明 Node.js 18+，而维护者指南和 CI 使用 Node.js 22+。这些宿主命令不会将内核启动到桌面会话中。
+
+## 接口与生态
+
+- [Boot Info v1](docs/BOOT_INFO_V1.md) — 固件交接数据及其验证边界。
+- [Core subsystem MVP](docs/CORE_MVP_V1.md) — Reaper 参考契约和原生强制执行状态。
+- [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md) — 固定版本的伙伴仓库及版本化交换接口。
+- [Release edition](docs/RELEASE_EDITION.md) — 源码与工具打包边界；不是可安装的操作系统发行版。
+
+相关项目保持独立仓库、许可证和发布周期：[Reaper](https://github.com/Ivan-VHS/Reaper)、[Pytyliki](https://github.com/Ivan-VHS/Pytyliki)、[OPlague](https://github.com/Ivan-VHS/OPlague) 和 [VentuSample](https://github.com/Ivan-VHS/VentuSample)。子模块固定版本或宿主二进制文件不等于内核集成。
+
+## 限制与信任边界
+
+> **重要：** DAK 目前还不是通用的可安装操作系统。Stage 1 在启动验证和早期页帧分配后停止。
+
+页表、可复用的内存管理、进程隔离、系统调用分发、抢占式调度、文件系统、服务管理器、内核能力强制执行、生产级驱动加载和原生合成器均未完成。当前 Reaper 原生编译器还不能作为 freestanding 内核编译器使用。
+
+除非某个经过验证的具体契约另有说明，对硬件、固件、驱动和软件包的操作尚未实现或仅存在于参考契约中。调用方提供的“签名已验证”字段不是密码学验证。SHA-256 校验和可以检测字节变化，但不能认证发布者。
+
+截至 2026-11-26，仓库根目录没有 LICENSE 或 SECURITY.md。不要假定存在再分发权，也不要把缺少安全策略视为安全保证。请参阅 [CONTRIBUTING](CONTRIBUTING.md) 和 [Documentation Control](docs/DOCUMENTATION_CONTROL.md)。
+
+## 文档与治理
+
+请从[文档索引](docs/README.md)和[信息架构图](docs/INFORMATION_ARCHITECTURE.md)开始。实现状态清单、启动指南、架构和版本化 schema 是主要技术依据。
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
+- [Bootable Stage 1 image](docs/BOOTABLE_IMAGE.md)
+- [Build contracts](docs/BUILD_CONTRACTS.md)
+- [Unified documentation standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md)
+- [Documentation rebaseline plan](docs/superpowers/plans/2026-11-26-documentation-rebaseline.md)
+
+## 历史与许可
+
+仓库记录了实验性 Stage 1 启动里程碑，以及独立的宿主桌面开发工作。DAK 尚未声明统一的 semantic-versioning 发布历史；组件包版本不能视为操作系统发行版本。确切源码修订和构建证据应记录在实现清单及发布制品中。
+
+第三方引导程序和生态项目的条款由各自上游许可证管理。打包流程包含版权通知和固定源码修订，但不会授予额外的分发权。在声明分发条款之前，权利持有人必须为根项目选择许可证。
