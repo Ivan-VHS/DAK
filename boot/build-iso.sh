@@ -142,6 +142,21 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" \
     -c "$ROOT/kernel/arch/x86_64/interrupts.c" -o "$WORK_DIR/objects/interrupts.o"
 
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
+    -I "$ROOT/foundation" \
+    -c "$ROOT/foundation/page_table.c" -o "$WORK_DIR/objects/page-table.o"
+
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" \
+    -c "$ROOT/kernel/arch/x86_64/paging.c" -o "$WORK_DIR/objects/paging.o"
 gcc -m64 -mcmodel=kernel -mno-red-zone -fno-pic -fno-pie \
     -c "$ROOT/kernel/arch/x86_64/exceptions.S" -o "$WORK_DIR/objects/exceptions.o"
 
@@ -151,6 +166,8 @@ ld -nostdlib -static -z max-page-size=0x1000 \
     "$WORK_DIR/objects/boot-info.o" \
     "$WORK_DIR/objects/frame-allocator.o" \
     "$WORK_DIR/objects/idt.o" \
+    "$WORK_DIR/objects/page-table.o" \
+    "$WORK_DIR/objects/paging.o" \
     "$WORK_DIR/objects/interrupts.o" \
     "$WORK_DIR/objects/exceptions.o" \
     -o "$WORK_DIR/duckos.elf"

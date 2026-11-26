@@ -58,6 +58,7 @@ The Qt application is native to the host OS. It is not a kernel-owned DuckOS com
 
 ## Partial or external boundaries
 
+- [ ] Native owned four-level page-table manager and CR3 takeover are implemented on the open PR #162 branch with host tests and BIOS/UEFI QEMU gates; not yet merged or verified by current CI. The branch clones the active Limine hierarchy, applies kernel section permissions and runs a live map/protect/unmap smoke test. This remains single-core and does not yet provide demand paging, copy-on-write, SMP TLB shootdown or per-process address spaces.
 - [x] x86_64 CPU exception IDT: vectors 0–31 have interrupt-gate descriptors, normalized assembly stubs and a fatal serial/framebuffer diagnostic path. Host tests validate descriptor fields and the C/assembly frame offsets; BIOS/UEFI QEMU now verifies the post-`lidt` marker. This does not enable maskable interrupts.
 - [ ] Owned GDT, TSS and dedicated IST stacks for double fault/NMI; the current handlers still use the active boot stack.
 - [ ] PIC/APIC setup, IRQ remapping, timer/keyboard routing and interrupt-safe scheduling.

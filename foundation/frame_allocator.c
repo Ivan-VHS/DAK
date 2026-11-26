@@ -35,7 +35,10 @@ duckos_frame_allocator_status duckos_frame_allocator_init(
     allocator->active_range = 0u;
     allocator->total_pages = 0u;
     allocator->allocated_pages = 0u;
+    allocator->free_count = 0u;
+    allocator->reserved = 0u;
     for (uint32_t index = 0u; index < DUCKOS_FRAME_ALLOCATOR_MAX_RANGES; ++index) {
+        allocator->ranges[index].start = 0u;
         allocator->ranges[index].next = 0u;
         allocator->ranges[index].end = 0u;
     }
@@ -68,6 +71,7 @@ duckos_frame_allocator_status duckos_frame_allocator_init(
         }
 
         duckos_frame_range *range = &allocator->ranges[allocator->range_count++];
+        range->start = begin;
         range->next = begin;
         range->end = aligned_end;
         allocator->total_pages += pages;
@@ -85,6 +89,12 @@ duckos_frame_allocator_status duckos_frame_allocator_allocate(
         return DUCKOS_FRAME_ALLOCATOR_INVALID_ARGUMENT;
     }
 
+    if (allocator->free_count != 0u) {
+        *physical_address = allocator->free_pages[--allocator->free_count];
+        ++allocator->allocated_pages;
+        return DUCKOS_FRAME_ALLOCATOR_OK;
+    }
+
     while (allocator->active_range < allocator->range_count) {
         duckos_frame_range *range = &allocator->ranges[allocator->active_range];
         if (range->end >= DUCKOS_FRAME_PAGE_SIZE &&
@@ -98,4 +108,41 @@ duckos_frame_allocator_status duckos_frame_allocator_allocate(
     }
 
     return DUCKOS_FRAME_ALLOCATOR_EXHAUSTED;
+}
+
+
+duckos_frame_allocator_status duckos_frame_allocator_release(
+    duckos_frame_allocator *allocator,
+    uint64_t physical_address
+) {
+    if (allocator == NULL ||
+        (physical_address & ((uint64_t)DUCKOS_FRAME_PAGE_SIZE - 1u)) != 0u) {
+        return DUCKOS_FRAME_ALLOCATOR_INVALID_ARGUMENT;
+    }
+    if (allocator->allocated_pages == 0u) {
+        return DUCKOS_FRAME_ALLOCATOR_INVALID_FREE;
+    }
+
+    int was_allocated = 0;
+    for (uint32_t index = 0u; index < allocator->range_count; ++index) {
+        const duckos_frame_range *range = &allocator->ranges[index];
+        if (physical_address >= range->start && physical_address < range->next) {
+            was_allocated = 1;
+            break;
+        }
+    }
+    if (was_allocated == 0) return DUCKOS_FRAME_ALLOCATOR_INVALID_FREE;
+
+    for (uint32_t index = 0u; index < allocator->free_count; ++index) {
+        if (allocator->free_pages[index] == physical_address) {
+            return DUCKOS_FRAME_ALLOCATOR_INVALID_FREE;
+        }
+    }
+    if (allocator->free_count >= DUCKOS_FRAME_ALLOCATOR_FREE_CAPACITY) {
+        return DUCKOS_FRAME_ALLOCATOR_FREE_LIST_FULL;
+    }
+
+    allocator->free_pages[allocator->free_count++] = physical_address;
+    --allocator->allocated_pages;
+    return DUCKOS_FRAME_ALLOCATOR_OK;
 }

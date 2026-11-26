@@ -14,6 +14,8 @@ add_library(duckos_boot_contract STATIC
     foundation/frame_allocator.h
     foundation/idt.c
     foundation/idt.h
+    foundation/page_table.c
+    foundation/page_table.h
 )
 target_include_directories(duckos_boot_contract PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/foundation
@@ -65,6 +67,15 @@ if(BUILD_TESTING)
         target_compile_options(duckos_idt_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-idt-contract COMMAND duckos_idt_tests)
+
+    add_executable(duckos_page_table_tests tests/test_page_table.c)
+    target_link_libraries(duckos_page_table_tests PRIVATE duckos_boot_contract)
+    if(MSVC)
+        target_compile_options(duckos_page_table_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_page_table_tests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME duckos-page-table-contract COMMAND duckos_page_table_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")

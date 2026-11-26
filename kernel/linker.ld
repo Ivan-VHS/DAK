@@ -19,25 +19,35 @@ SECTIONS
     . = KERNEL_VMA;
     __kernel_start = .;
 
-    .limine_requests ALIGN(8) : AT(KERNEL_PHYS)
+    .limine_requests ALIGN(0x1000) : AT(KERNEL_PHYS)
     {
+        __limine_requests_start = .;
         KEEP(*(.limine_requests_start))
         KEEP(*(.limine_requests))
         KEEP(*(.limine_requests_end))
+        . = ALIGN(0x1000);
+        __limine_requests_end = .;
     } :requests
 
     .text ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.text) - KERNEL_VMA))
     {
+        __text_start = .;
         *(.text .text.*)
+        . = ALIGN(0x1000);
+        __text_end = .;
     } :text
 
     .rodata ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.rodata) - KERNEL_VMA))
     {
+        __rodata_start = .;
         *(.rodata .rodata.*)
+        . = ALIGN(0x1000);
+        __rodata_end = .;
     } :rodata
 
     .data ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.data) - KERNEL_VMA))
     {
+        __data_start = .;
         *(.data .data.*)
     } :data
 
@@ -48,6 +58,7 @@ SECTIONS
     } :data
 
     . = ALIGN(0x1000);
+    __data_end = .;
     __kernel_end = .;
 
     /DISCARD/ :
