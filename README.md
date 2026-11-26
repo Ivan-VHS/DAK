@@ -17,6 +17,7 @@
 | Host desktop | C++17 / optional Qt 6 Widgets 6.4+ |
 | Tooling | CMake 3.21+, Python 3.10+, Node.js 22+ |
 | License | No root LICENSE file; redistribution terms are not declared |
+| Code of Conduct | Not published (no root `CODE_OF_CONDUCT.md`) |
 | Last documentation review | 2026-11-26 |
 
 <p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system and desktop architecture overview" width="100%"></p>
