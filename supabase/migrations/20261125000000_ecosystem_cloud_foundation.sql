@@ -223,7 +223,8 @@ grant select on public.ecosystem_memberships to authenticated;
 grant select, insert, update, delete on public.ecosystem_projects to authenticated;
 grant select, insert, update, delete on public.ecosystem_artifacts to authenticated;
 grant select, insert on public.ecosystem_sync_receipts to authenticated;
-grant select on public.ecosystem_audit_events to authenticated;\ngrant select, insert on public.ecosystem_audit_events to service_role;
+grant select on public.ecosystem_audit_events to authenticated;
+grant select, insert on public.ecosystem_audit_events to service_role;
 grant all on public.ecosystem_organizations, public.ecosystem_memberships,
   public.ecosystem_projects, public.ecosystem_artifacts,
   public.ecosystem_sync_receipts, public.ecosystem_audit_events to service_role;
