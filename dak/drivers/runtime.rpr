@@ -30,8 +30,6 @@ export craft descriptor_valid(driver) {
             yield false
         }
     }
-        yield false
-    }
     when driver[7] != "verified" and driver[7] != "unverified" and driver[7] != "revoked" {
         yield false
     }
