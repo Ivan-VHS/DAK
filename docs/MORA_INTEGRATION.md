@@ -147,3 +147,10 @@ The release edition adds four first-party workbench panels to the Mora system-ap
 - **VentuSample** — C++20 audio/DSP workbench, with Qt 6 desktop when built.
 
 Each panel links to its local source README and lists reproducible build/test commands. These are host user-space applications. Mora does not invoke their commands, load binaries or grant them device access. See [the release edition](RELEASE_EDITION.md) and [the workbench manifest](../federation/mora-workbenches.v1.json).
+
+
+## Native shell panels — design transfer
+
+The Qt host-native adapter now maps the four Duck Shell Figma surfaces into native panels: window overview, local notification center, quick settings and the application launcher. Their entry points, local data contracts, keyboard shortcuts, build verification and maturity boundaries are recorded in [Native Shell Design Transfer](NATIVE_SHELL_DESIGN_TRANSFER.md).
+
+These panels operate only on existing host-native Mora windows and the local application catalogue. The quick-settings panel persists Mora quiet mode; hardware and host-service controls remain unavailable rather than simulated. This work does not implement the kernel compositor, native DuckOS process sessions, DABI64/IPC, virtual workspaces or capability enforcement.

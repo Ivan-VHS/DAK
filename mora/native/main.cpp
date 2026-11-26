@@ -4,6 +4,10 @@
 #include <QColor>
 #include <QComboBox>
 #include <QDateTime>
+#include <QCheckBox>
+#include <QDialog>
+#include <QListWidget>
+#include <QListWidgetItem>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
@@ -43,6 +47,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 #ifndef DUCKOS_MORA_CATALOG_PATH
 #define DUCKOS_MORA_CATALOG_PATH "mora/apps.json"
@@ -127,6 +132,13 @@ struct AppInfo {
     QString name;
     QString category;
     QString maturity;
+};
+
+struct NotificationEntry {
+    QString source;
+    QString title;
+    QString body;
+    QString time;
 };
 
 QString categoryName(const QString& category)
@@ -315,8 +327,25 @@ public:
         buildContent();
     }
 
+    void setClosedCallback(const std::function<void()>& callback)
+    {
+        closedCallback_ = callback;
+    }
+
+protected:
+    void closeEvent(QCloseEvent* event) override
+    {
+        QMainWindow::closeEvent(event);
+        if (event->isAccepted() && closedCallback_) {
+            const auto callback = closedCallback_;
+            closedCallback_ = {};
+            callback();
+        }
+    }
+
 private:
     AppInfo app_;
+    std::function<void()> closedCallback_;
 
     void buildContent()
     {
@@ -482,6 +511,7 @@ public:
         setMinimumSize(1120, 720);
         resize(1440, 900);
         loadCatalogue();
+        loadShellState();
         buildInterface();
 
         QSettings settings("DuckOS", "Mora");
@@ -510,6 +540,14 @@ public:
         if (!pageStack_ || !homePage_ || !appsPage_ || !workspacePage_) {
             return fail("A required desktop page was not created.");
         }
+        const QStringList shellActions{
+            "open-overview", "open-app-launcher", "open-notifications", "open-quick-settings"
+        };
+        for (const QString& action : shellActions) {
+            if (!findChild<QPushButton*>(action)) {
+                return fail(QString("The native shell action is missing: %1").arg(action));
+            }
+        }
         auto* appsButton = findChild<QPushButton*>("nav-apps");
         if (!appsButton) return fail("The native app navigation control is missing.");
         appsButton->click();
@@ -517,6 +555,32 @@ public:
             return fail("The Applications navigation action did not change pages.");
         }
         openDesignWorkspace();
+        QApplication::processEvents();
+        openOverview();
+        openNotifications();
+        openQuickSettings();
+        openAppLauncher();
+        QApplication::processEvents();
+        if (!overviewPanel_ || !overviewPanel_->isVisible()) {
+            return fail("The native window overview panel did not open.");
+        }
+        if (!notificationPanel_ || !notificationPanel_->isVisible()) {
+            return fail("The native notification center did not open.");
+        }
+        if (!quickSettingsPanel_ || !quickSettingsPanel_->isVisible()
+            || !quickSettingsPanel_->findChild<QCheckBox*>("quiet-mode-toggle")) {
+            return fail("The native quick-settings panel or its local focus control is missing.");
+        }
+        auto* launcherResults = launcherPanel_
+            ? launcherPanel_->findChild<QListWidget*>("launcher-results") : nullptr;
+        if (!launcherPanel_ || !launcherPanel_->isVisible()
+            || !launcherResults || launcherResults->count() == 0) {
+            return fail("The native app launcher did not populate local catalogue results.");
+        }
+        overviewPanel_->close();
+        notificationPanel_->close();
+        quickSettingsPanel_->close();
+        launcherPanel_->close();
         QApplication::processEvents();
         int nativeWindows = 0;
         for (QWidget* widget : QApplication::topLevelWidgets()) {
@@ -542,6 +606,13 @@ public:
 private:
     QVector<AppInfo> apps_;
     QHash<QString, QPointer<AppWindow>> windows_;
+    QVector<NotificationEntry> notifications_;
+    bool quietMode_ = false;
+    QPointer<QDialog> overviewPanel_;
+    QPointer<QDialog> notificationPanel_;
+    QPointer<QDialog> quickSettingsPanel_;
+    QPointer<QDialog> launcherPanel_;
+    QPointer<QLineEdit> launcherSearch_;
     QStackedWidget* pageStack_ = nullptr;
     QWidget* homePage_ = nullptr;
     QWidget* appsPage_ = nullptr;
@@ -592,6 +663,373 @@ private:
         }
     }
 
+
+    void loadShellState()
+    {
+        QSettings settings("DuckOS", "Mora");
+        quietMode_ = settings.value("shell/quiet-mode", false).toBool();
+
+        const QByteArray stored = settings.value("shell/notifications").toByteArray();
+        if (stored.isEmpty()) return;
+
+        QJsonParseError error{};
+        const QJsonDocument document = QJsonDocument::fromJson(stored, &error);
+        if (error.error != QJsonParseError::NoError || !document.isArray()) return;
+
+        for (const QJsonValue& value : document.array()) {
+            if (!value.isObject()) continue;
+            const QJsonObject object = value.toObject();
+            NotificationEntry entry{
+                object.value("source").toString(),
+                object.value("title").toString(),
+                object.value("body").toString(),
+                object.value("time").toString()
+            };
+            if (!entry.title.isEmpty()) notifications_.push_back(entry);
+            if (notifications_.size() >= 24) break;
+        }
+    }
+
+    void saveNotifications()
+    {
+        QJsonArray entries;
+        for (const NotificationEntry& entry : notifications_) {
+            entries.append(QJsonObject{
+                {"source", entry.source},
+                {"title", entry.title},
+                {"body", entry.body},
+                {"time", entry.time}
+            });
+        }
+        QSettings settings("DuckOS", "Mora");
+        settings.setValue("shell/notifications",
+                          QJsonDocument(entries).toJson(QJsonDocument::Compact));
+        settings.sync();
+    }
+
+    void recordNotification(const QString& source, const QString& title, const QString& body)
+    {
+        if (quietMode_) return;
+        notifications_.prepend(NotificationEntry{
+            source, title, body, QDateTime::currentDateTime().toString("HH:mm")
+        });
+        while (notifications_.size() > 24) notifications_.removeLast();
+        saveNotifications();
+    }
+
+    QDialog* createShellPanel(const QString& objectName, const QString& title,
+                              const QSize& size)
+    {
+        auto* dialog = new QDialog(this);
+        dialog->setObjectName(objectName);
+        dialog->setWindowFlag(Qt::Window, true);
+        dialog->setAttribute(Qt::WA_DeleteOnClose, true);
+        dialog->setWindowTitle(title);
+        dialog->setMinimumSize(size);
+        dialog->resize(size);
+        dialog->setStyleSheet(styleSheet());
+        return dialog;
+    }
+
+    void openOverview()
+    {
+        if (overviewPanel_) {
+            overviewPanel_->showNormal();
+            overviewPanel_->raise();
+            overviewPanel_->activateWindow();
+            return;
+        }
+
+        auto* dialog = createShellPanel("window-overview-panel", "Обзор окон — DuckOS", QSize(760, 520));
+        overviewPanel_ = dialog;
+        auto* layout = new QVBoxLayout(dialog);
+        layout->setContentsMargins(24, 22, 24, 18);
+        layout->setSpacing(14);
+        layout->addWidget(label("ОБЗОР ОКОН", "eyebrow"));
+        layout->addWidget(label("Всё видно. Ничего не теряется.", "title"));
+        layout->addWidget(label("Переключайтесь между открытыми окнами Mora.", "muted"));
+
+        auto* scroll = new QScrollArea;
+        scroll->setWidgetResizable(true);
+        auto* host = new QWidget;
+        auto* grid = new QGridLayout(host);
+        grid->setContentsMargins(0, 0, 6, 0);
+        grid->setSpacing(12);
+
+        int count = 0;
+        for (auto it = windows_.cbegin(); it != windows_.cend(); ++it) {
+            const QPointer<AppWindow> window = it.value();
+            if (window.isNull() || !window->isVisible()) continue;
+
+            auto* card = panel();
+            auto* cardLayout = new QVBoxLayout(card);
+            cardLayout->setContentsMargins(16, 14, 16, 14);
+            cardLayout->setSpacing(8);
+            cardLayout->addWidget(label(window->windowTitle(), "heading"));
+            cardLayout->addWidget(label(
+                window->isActiveWindow() ? "На переднем плане" : "Открыто в локальном сеансе",
+                "muted"));
+            auto* actions = new QHBoxLayout;
+            auto* activate = actionButton("Перейти");
+            auto* close = actionButton("Закрыть");
+            actions->addWidget(activate, 1);
+            actions->addWidget(close);
+            cardLayout->addLayout(actions);
+            QObject::connect(activate, &QPushButton::clicked, this, [window, dialog]() {
+                if (window.isNull()) return;
+                window->showNormal();
+                window->raise();
+                window->activateWindow();
+                dialog->close();
+            });
+            QObject::connect(close, &QPushButton::clicked, this, [window, dialog]() {
+                if (!window.isNull()) window->close();
+                dialog->close();
+            });
+            grid->addWidget(card, count / 2, count % 2);
+            ++count;
+        }
+
+        if (count == 0) {
+            grid->addWidget(label("Сейчас нет открытых окон приложений.", "muted"), 0, 0);
+        }
+        grid->setRowStretch((count + 1) / 2, 1);
+        scroll->setWidget(host);
+        layout->addWidget(scroll, 1);
+        layout->addWidget(label(
+            "Окна управляются оконной системой хоста; обзор переключает только окна Mora.",
+            "muted"));
+        dialog->show();
+        dialog->raise();
+        dialog->activateWindow();
+    }
+
+    void openNotifications()
+    {
+        if (notificationPanel_) {
+            notificationPanel_->showNormal();
+            notificationPanel_->raise();
+            notificationPanel_->activateWindow();
+            return;
+        }
+
+        auto* dialog = createShellPanel("notification-center-panel",
+                                        "Уведомления — DuckOS", QSize(480, 580));
+        notificationPanel_ = dialog;
+        auto* layout = new QVBoxLayout(dialog);
+        layout->setContentsMargins(22, 20, 22, 18);
+        layout->setSpacing(12);
+
+        auto* header = new QHBoxLayout;
+        auto* titleColumn = new QVBoxLayout;
+        titleColumn->addWidget(label("УВЕДОМЛЕНИЯ", "eyebrow"));
+        titleColumn->addWidget(label("Локальный сеанс", "title"));
+        header->addLayout(titleColumn, 1);
+        auto* clear = actionButton("Очистить");
+        clear->setObjectName("clear-notifications");
+        header->addWidget(clear, 0, Qt::AlignTop);
+        layout->addLayout(header);
+        QObject::connect(clear, &QPushButton::clicked, this, [this, dialog]() {
+            notifications_.clear();
+            saveNotifications();
+            dialog->close();
+            QTimer::singleShot(0, this, [this]() { openNotifications(); });
+        });
+
+        auto* scroll = new QScrollArea;
+        scroll->setWidgetResizable(true);
+        auto* host = new QWidget;
+        auto* feed = new QVBoxLayout(host);
+        feed->setContentsMargins(0, 0, 6, 0);
+        feed->setSpacing(10);
+
+        if (notifications_.isEmpty()) {
+            feed->addWidget(label("Пока нет уведомлений. События локального сеанса появятся здесь.", "muted"));
+        } else {
+            for (const NotificationEntry& entry : notifications_) {
+                auto* card = panel();
+                auto* cardLayout = new QVBoxLayout(card);
+                cardLayout->setContentsMargins(14, 12, 14, 12);
+                cardLayout->setSpacing(5);
+                auto* meta = new QHBoxLayout;
+                meta->addWidget(label(entry.source, "eyebrow"));
+                meta->addStretch(1);
+                meta->addWidget(label(entry.time, "muted"));
+                cardLayout->addLayout(meta);
+                cardLayout->addWidget(label(entry.title, "heading"));
+                cardLayout->addWidget(label(entry.body, "muted"));
+                feed->addWidget(card);
+            }
+        }
+        feed->addStretch(1);
+        scroll->setWidget(host);
+        layout->addWidget(scroll, 1);
+        layout->addWidget(label("История ограничена последними 24 событиями и хранится в настройках Mora на этом устройстве.", "muted"));
+        dialog->show();
+        dialog->raise();
+        dialog->activateWindow();
+    }
+
+    void openQuickSettings()
+    {
+        if (quickSettingsPanel_) {
+            quickSettingsPanel_->showNormal();
+            quickSettingsPanel_->raise();
+            quickSettingsPanel_->activateWindow();
+            return;
+        }
+
+        auto* dialog = createShellPanel("quick-settings-panel",
+                                        "Быстрые настройки — DuckOS", QSize(520, 600));
+        quickSettingsPanel_ = dialog;
+        auto* layout = new QVBoxLayout(dialog);
+        layout->setContentsMargins(22, 20, 22, 18);
+        layout->setSpacing(12);
+        layout->addWidget(label("БЫСТРЫЙ ДОСТУП", "eyebrow"));
+        layout->addWidget(label("Быстрые настройки", "title"));
+
+        auto* focusCard = panel();
+        auto* focusLayout = new QVBoxLayout(focusCard);
+        focusLayout->setContentsMargins(16, 14, 16, 14);
+        auto* focus = new QCheckBox("Тихий режим");
+        focus->setObjectName("quiet-mode-toggle");
+        focus->setChecked(quietMode_);
+        focus->setToolTip("Скрывает новые уведомления, создаваемые оболочкой Mora.");
+        QFont focusFont = focus->font();
+        focusFont.setWeight(QFont::DemiBold);
+        focus->setFont(focusFont);
+        focusLayout->addWidget(focus);
+        focusLayout->addWidget(label(
+            "Локальная настройка Mora. Она не управляет системными уведомлениями других приложений.",
+            "muted"));
+        QObject::connect(focus, &QCheckBox::toggled, this, [this](bool enabled) {
+            quietMode_ = enabled;
+            QSettings settings("DuckOS", "Mora");
+            settings.setValue("shell/quiet-mode", quietMode_);
+            settings.sync();
+        });
+        layout->addWidget(focusCard);
+
+        auto* gridHost = new QWidget;
+        auto* grid = new QGridLayout(gridHost);
+        grid->setContentsMargins(0, 0, 0, 0);
+        grid->setSpacing(10);
+        const QList<QPair<QString, QString>> services{
+            {"Wi-Fi", "Служба сети не подключена"},
+            {"Bluetooth", "Служба устройств не подключена"},
+            {"Звук и яркость", "Системный host adapter не подключён"},
+            {"Энергия", "Управление питанием хоста не подключено"}
+        };
+        for (int i = 0; i < services.size(); ++i) {
+            auto* card = panel();
+            auto* cardLayout = new QVBoxLayout(card);
+            cardLayout->setContentsMargins(14, 12, 14, 12);
+            cardLayout->addWidget(label(services[i].first, "heading"));
+            cardLayout->addWidget(label(services[i].second, "muted"));
+            cardLayout->addWidget(label("Недоступно в этой сборке", "eyebrow"));
+            grid->addWidget(card, i / 2, i % 2);
+        }
+        layout->addWidget(gridHost, 1);
+        layout->addWidget(label(
+            "Сетевые, аудио- и энергетические действия намеренно не имитируются без соответствующей системной службы.",
+            "muted"));
+        auto* done = actionButton("Готово");
+        done->setObjectName("quick-settings-done");
+        layout->addWidget(done);
+        QObject::connect(done, &QPushButton::clicked, dialog, &QDialog::close);
+        dialog->show();
+        dialog->raise();
+        dialog->activateWindow();
+    }
+
+    void openAppLauncher(const QString& query = {})
+    {
+        if (launcherPanel_) {
+            launcherPanel_->showNormal();
+            launcherPanel_->raise();
+            launcherPanel_->activateWindow();
+            if (launcherSearch_ && !query.isEmpty()) launcherSearch_->setText(query);
+            return;
+        }
+
+        auto* dialog = createShellPanel("app-launcher-panel",
+                                        "Приложения — DuckOS", QSize(720, 620));
+        launcherPanel_ = dialog;
+        auto* layout = new QVBoxLayout(dialog);
+        layout->setContentsMargins(22, 20, 22, 18);
+        layout->setSpacing(12);
+        layout->addWidget(label("ЛОКАЛЬНЫЙ ЛАУНЧЕР", "eyebrow"));
+        layout->addWidget(label("Приложения", "title"));
+
+        auto* search = new QLineEdit;
+        search->setObjectName("launcher-search");
+        search->setPlaceholderText("Найти приложение или задачу");
+        search->setClearButtonEnabled(true);
+        layout->addWidget(search);
+        launcherSearch_ = search;
+
+        auto* results = new QListWidget;
+        results->setObjectName("launcher-results");
+        results->setSelectionMode(QAbstractItemView::SingleSelection);
+        results->setSpacing(4);
+        QVector<AppInfo> sortedApps = apps_;
+        std::sort(sortedApps.begin(), sortedApps.end(), [](const AppInfo& left, const AppInfo& right) {
+            return QString::localeAwareCompare(left.name, right.name) < 0;
+        });
+        for (const AppInfo& app : sortedApps) {
+            auto* item = new QListWidgetItem(
+                categoryGlyph(app.category) + "   " + app.name
+                + "   ·   " + categoryName(app.category), results);
+            item->setData(Qt::UserRole, app.id);
+            item->setToolTip(maturityText(app.maturity));
+        }
+        layout->addWidget(results, 1);
+
+        auto filterResults = [results](const QString& value) {
+            const QString query = value.trimmed().toCaseFolded();
+            int firstVisible = -1;
+            for (int i = 0; i < results->count(); ++i) {
+                auto* item = results->item(i);
+                const bool matches = query.isEmpty() || item->text().toCaseFolded().contains(query);
+                item->setHidden(!matches);
+                if (matches && firstVisible < 0) firstVisible = i;
+            }
+            results->setCurrentRow(firstVisible);
+        };
+        QObject::connect(search, &QLineEdit::textChanged, this, filterResults);
+
+        auto launchCurrent = [this, dialog, results]() {
+            QListWidgetItem* selected = results->currentItem();
+            if (!selected || selected->isHidden()) {
+                selected = nullptr;
+                for (int i = 0; i < results->count(); ++i) {
+                    if (!results->item(i)->isHidden()) {
+                        selected = results->item(i);
+                        break;
+                    }
+                }
+            }
+            if (!selected) return;
+            const QString id = selected->data(Qt::UserRole).toString();
+            dialog->close();
+            openAppWindow(id);
+        };
+        QObject::connect(results, &QListWidget::itemActivated, this,
+                         [launchCurrent](QListWidgetItem*) { launchCurrent(); });
+        QObject::connect(search, &QLineEdit::returnPressed, this, launchCurrent);
+        auto* open = actionButton("Открыть");
+        open->setObjectName("launcher-open");
+        layout->addWidget(open);
+        QObject::connect(open, &QPushButton::clicked, this, launchCurrent);
+
+        if (!query.isEmpty()) search->setText(query);
+        filterResults(search->text());
+        search->setFocus(Qt::OtherFocusReason);
+        dialog->show();
+        dialog->raise();
+        dialog->activateWindow();
+    }
+
     void buildInterface()
     {
         setStyleSheet(applyThemeTokens(QString::fromUtf8(R"(
@@ -608,6 +1046,12 @@ private:
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
             QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
             QPushButton#appTile:hover { background: #242118; border-color: #FFD400; }
+            QPushButton[class="shellAction"] { min-width: 40px; max-width: 40px; min-height: 40px; max-height: 40px; border-radius: 12px; padding: 0; text-align: center; font-size: 16pt; }
+            QCheckBox { spacing: 10px; }
+            QCheckBox::indicator { width: 20px; height: 20px; }
+            QListWidget { background: #101010; color: #FFFFFF; border: 1px solid #3A3A3A; border-radius: 10px; padding: 8px; }
+            QListWidget::item { min-height: 42px; padding: 8px 10px; border-radius: 8px; }
+            QListWidget::item:selected { color: #FFD400; background: #3A3100; }
             QLineEdit, QComboBox { color: #FFFFFF; background: #151515; border: 1px solid #3A3A3A; border-radius: 10px; padding: 9px 12px; min-height: 24px; }
             QLineEdit:focus, QComboBox:focus { border: 2px solid #FFE45C; }
             QScrollArea { border: 0; background: transparent; }
@@ -639,10 +1083,15 @@ private:
         setCentralWidget(background);
 
         auto* searchShortcut = new QShortcut(QKeySequence("Ctrl+K"), this);
-        QObject::connect(searchShortcut, &QShortcut::activated, this, [this]() {
-            showPage(1);
-            if (appsSearch_) appsSearch_->setFocus();
-        });
+        QObject::connect(searchShortcut, &QShortcut::activated, this, [this]() { openAppLauncher(); });
+        auto* launcherShortcut = new QShortcut(QKeySequence("Ctrl+Space"), this);
+        QObject::connect(launcherShortcut, &QShortcut::activated, this, [this]() { openAppLauncher(); });
+        auto* overviewShortcut = new QShortcut(QKeySequence("Ctrl+Tab"), this);
+        QObject::connect(overviewShortcut, &QShortcut::activated, this, [this]() { openOverview(); });
+        auto* notificationsShortcut = new QShortcut(QKeySequence("Ctrl+Shift+N"), this);
+        QObject::connect(notificationsShortcut, &QShortcut::activated, this, [this]() { openNotifications(); });
+        auto* quickSettingsShortcut = new QShortcut(QKeySequence("Ctrl+Alt+S"), this);
+        QObject::connect(quickSettingsShortcut, &QShortcut::activated, this, [this]() { openQuickSettings(); });
         auto* homeShortcut = new QShortcut(QKeySequence("Ctrl+1"), this);
         QObject::connect(homeShortcut, &QShortcut::activated, this, [this]() { showPage(0); });
         auto* appsShortcut = new QShortcut(QKeySequence("Ctrl+2"), this);
@@ -659,30 +1108,53 @@ private:
         layout->setContentsMargins(22, 4, 22, 4);
         layout->setSpacing(16);
 
-        auto* brand = label("mora", "eyebrow");
+        auto* brand = label("DuckOS", "eyebrow");
         QFont brandFont = brand->font();
-        brandFont.setPointSize(15);
+        brandFont.setPointSize(13);
         brandFont.setWeight(QFont::Bold);
         brand->setFont(brandFont);
         layout->addWidget(brand);
-        layout->addWidget(label("Рабочее пространство", "muted"));
+        layout->addWidget(label("Mora", "muted"));
+        auto* workspace = label("Личное", "muted");
+        workspace->setObjectName("current-workspace-label");
+        layout->addWidget(workspace);
         layout->addStretch(1);
-        layout->addWidget(label("DuckOS", "muted"));
 
         globalSearch_ = new QLineEdit;
         globalSearch_->setObjectName("global-search");
-        globalSearch_->setPlaceholderText("Найти в Mora   Ctrl+K");
-        globalSearch_->setMaximumWidth(270);
+        globalSearch_->setPlaceholderText("Поиск приложений и задач   Ctrl+K");
+        globalSearch_->setMaximumWidth(300);
         globalSearch_->setClearButtonEnabled(true);
         layout->addWidget(globalSearch_);
+
+        const auto addShellAction = [this, layout](const QString& glyph,
+                                                   const QString& objectName,
+                                                   const QString& accessibleName,
+                                                   auto action) {
+            auto* button = new QPushButton(glyph);
+            button->setObjectName(objectName);
+            button->setAccessibleName(accessibleName);
+            button->setToolTip(accessibleName);
+            button->setProperty("class", "shellAction");
+            button->setCursor(Qt::PointingHandCursor);
+            button->setFixedSize(40, 40);
+            QFont iconFont = button->font();
+            iconFont.setPointSize(15);
+            button->setFont(iconFont);
+            layout->addWidget(button);
+            QObject::connect(button, &QPushButton::clicked, this, action);
+        };
+        addShellAction("▦", "open-overview", "Обзор окон", [this]() { openOverview(); });
+        addShellAction("⌕", "open-app-launcher", "Приложения", [this]() { openAppLauncher(); });
+        addShellAction("◷", "open-notifications", "Уведомления", [this]() { openNotifications(); });
+        addShellAction("☷", "open-quick-settings", "Быстрые настройки", [this]() { openQuickSettings(); });
 
         dateLabel_ = label({}, "muted");
         timeLabel_ = label({}, "body");
         layout->addWidget(dateLabel_);
         layout->addWidget(timeLabel_);
         QObject::connect(globalSearch_, &QLineEdit::returnPressed, this, [this]() {
-            showPage(1);
-            if (appsSearch_) appsSearch_->setText(globalSearch_->text());
+            openAppLauncher(globalSearch_->text());
         });
         return bar;
     }
@@ -1029,6 +1501,10 @@ private:
         window->show();
         window->raise();
         window->activateWindow();
+        recordNotification(app.name, "Окно открыто", "Приложение запущено в локальном сеансе Mora.");
+        window->setClosedCallback([this, name = app.name]() {
+            recordNotification(name, "Окно закрыто", "Окно приложения закрыто пользователем.");
+        });
     }
 
     void showPage(int index)
