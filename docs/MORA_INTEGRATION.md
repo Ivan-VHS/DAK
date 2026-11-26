@@ -98,3 +98,8 @@ Never promote a feature to native/verified status because its UI panel exists.
 Mora exposes Duck Desktop as a system tool, but the browser panel is informational. It gives the user the `duckos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DuckOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
 
 Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.
+
+
+## Blade launcher
+
+Mora exposes the registered app panels through a horizontally scrollable blade launcher. Its channel filters and local favorites are presentation and navigation features; selecting a card opens the existing Mora panel. The profile summary counts currently open Mora windows only. It is not an account service, online-presence indicator, native process manager or hardware telemetry source. The launcher does not execute arbitrary binaries.

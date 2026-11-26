@@ -1,4 +1,4 @@
-const CACHE = "mora-shell-v8-duck-semantic-palette";
+const CACHE = "mora-shell-v10-responsive-workspace";
 const ASSETS = [
   "./",
   "./index.html",

@@ -20,22 +20,24 @@ const systemAppIds = [
 ];
 const appIds = [...coreAppIds, ...extensionAppIds, ...systemAppIds];
 
-test("desktop exposes 20 first-party apps and nine system tools", () => {
+test("desktop exposes 29 applications and nine system tools through the app registry", () => {
   for (const id of appIds) {
     const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
-    assert.ok(matches.length >= 1, id + " is missing from the desktop");
     const appKey = id.includes("-") ? '"' + id + '"' : id;
     assert.ok(js.includes(appKey + ": { name:"), id + " must have an app definition");
+    assert.ok(matches.length >= 1 || js.includes("card.dataset.app = appId"), id + " must be reachable from the desktop launcher");
   }
   for (const id of coreAppIds) {
-    const matches = html.match(new RegExp('data-app="' + id + '"', "g")) || [];
-    assert.ok(matches.length >= 2, id + " must remain available from desktop and dock/widget");
+    assert.ok(html.includes('data-app="' + id + '"'), id + " must remain available from the dock");
   }
   assert.deepEqual(registry.built_in_apps.map((app) => app.id), appIds);
   assert.equal(registry.system_services.length, 13);
-  assert.ok(html.includes('id="extension-app-grid"'));
+  assert.ok(html.includes('id="blade-launcher"'));
+  assert.ok(html.includes('id="blade-strip"'));
+  assert.ok(html.includes('id="blade-details"'));
+  assert.ok(js.includes("const BLADE_CHANNELS ="));
   for (const id of extensionAppIds) {
-    assert.ok(html.includes('data-app="' + id + '"'), id + " is missing from the extension grid");
+    assert.ok(js.includes('"' + id + '"'), id + " is missing from the launcher or panel registry");
     assert.ok(js.includes('case "' + id + '"'), id + " is missing an extension panel");
     assert.ok(registry.built_in_apps.some((app) => app.id === id), id + " is missing from the registry");
   }
@@ -46,15 +48,74 @@ test("desktop exposes 20 first-party apps and nine system tools", () => {
 });
 
 test("required dashboard surfaces and launch affordances are present", () => {
-  for (const id of ["hero-clock", "hero-date", "active-app", "app-grid", "system-app-grid", "window-layer", "toast"]) {
+  for (const id of ["hero-clock", "hero-date", "active-app", "blade-launcher", "blade-strip", "blade-counter", "blade-status", "window-layer", "toast"]) {
     assert.ok(html.includes('id="' + id + '"'), id + " is missing");
   }
   assert.ok(html.includes('aria-label="Панель приложений"'));
   assert.ok(html.includes('data-app="workspace"'));
   assert.ok(html.includes("status-control"));
-  assert.ok(html.includes('data-app="desktop"'));
+  assert.ok(js.includes('"desktop": { name:'));
   assert.ok(js.includes('case "desktop":'));
   assert.equal(policy.capabilities.desktop_optimizer.maturity, "partial");
+});
+
+
+
+test("Mora layout scales across 8K, 5K, 4K, standard desktop, tablets and phones", () => {
+  for (const marker of [
+    "@media (min-width:1151px)",
+    "@media (min-width:1920px)",
+    "@media (min-width:2560px)",
+    "@media (min-width:3840px)",
+    "@media (min-width:5120px)",
+    "@media (max-width:1150px)",
+    "@media (max-width:760px)",
+    "@media (max-width:480px)",
+    "@media (max-width:360px)",
+    "and (max-height:900px)",
+    "max-aspect-ratio:16/10",
+    "env(safe-area-inset-bottom)",
+    "100svh",
+    "100dvh"
+  ]) {
+    assert.ok(css.includes(marker), "missing responsive rule: " + marker);
+  }
+  assert.ok(html.includes("viewport-fit=cover"));
+  assert.ok(css.includes("width:min(82vw,4200px)"));
+  assert.ok(css.includes("width:min(86vw,3600px)"));
+  assert.ok(css.includes("scroll-snap-type:x mandatory"));
+  assert.ok(css.includes("min-height:44px"));
+  assert.ok(css.includes(".window-close { width:44px; height:44px; min-width:44px; min-height:44px; }"));
+  assert.ok(css.includes("flex:0 0 44px"));
+  assert.ok(css.includes("max-height:calc(100dvh - 76px - env(safe-area-inset-bottom))"));
+});
+
+test("blade launcher filters real apps, supports local favorites and keyboard navigation", () => {
+  for (const marker of [
+    'data-launch-channel="all"', 'data-launch-channel="favorites"',
+    'data-launch-channel="creation"', 'data-launch-channel="games"',
+    'data-launch-channel="media"', 'data-launch-channel="tools"',
+    'data-launch-channel="system"', 'data-blade-action="open"',
+    'data-blade-action="favorite"', 'data-blade-action="details"',
+    'id="blade-running-count"', 'id="blade-details-open"'
+  ]) {
+    assert.ok(html.includes(marker), "missing blade launcher affordance: " + marker);
+  }
+  for (const marker of [
+    "function getBladeAppIds()", "function renderBladeStrip(",
+    "function toggleBladeFavorite(", "function openBladeDetails(",
+    "function updateBladeRunningIndicators()", "BLADE_FAVORITES_KEY",
+    'event.key === "ArrowRight"', 'event.key === "ArrowLeft"',
+    'event.key.toLowerCase() === "a"', 'event.key.toLowerCase() === "x"',
+    'event.key.toLowerCase() === "y"', "selectedCard.scrollIntoView"
+  ]) {
+    assert.ok(js.includes(marker), "missing launcher behavior: " + marker);
+  }
+  assert.ok(css.includes(".blade-card.is-selected"));
+  assert.ok(css.includes(".blade-channel[aria-pressed=\"true\"]"));
+  assert.ok(css.includes(".blade-dialog::backdrop"));
+  assert.ok(css.includes("@media (max-width:390px)"));
+  assert.ok(css.includes("@media (prefers-reduced-motion:reduce)"));
 });
 
 test("system panels expose approvals, permissions, recovery and local file inspection", () => {
@@ -130,7 +191,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
   assert.ok(html.includes('Единая палитра DuckOS'));
-  assert.ok(html.includes('data-app="mora-commons"'));
+  assert.ok(js.includes('"mora-commons": { name:'));
   assert.ok(css.includes(':root[data-theme="duck"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
   assert.ok(css.includes("#FFD400"));
@@ -196,7 +257,7 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v8-duck-semantic-palette"));
+  assert.ok(serviceWorker.includes("mora-shell-v10-responsive-workspace"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
   assert.ok(serviceWorker.includes("self.location.origin"));
