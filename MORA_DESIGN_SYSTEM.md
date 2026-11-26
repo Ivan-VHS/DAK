@@ -6,7 +6,7 @@ Mora is the shared desktop identity for the Ivan-VHS application family. The she
 
 ## Visual direction
 
-Mora uses one fixed DuckOS palette: black structural surfaces, white content and duck yellow for selection, focus and primary action. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
+Mora uses the Imperial Noir & Glass foundation: near-black structural surfaces, graphite elevation, white content and gold for primary action and focus. The desktop keeps a deep, near-black radial workspace with a restrained vertical fold rhythm; folds use tonal black, graphite, white highlights and yellow edge light. The palette is not user-switchable and the shell does not retain alternate Amber, Dark or Light modes.
 
 The target composition is approximately 65% black, 25% white/graphite and 10% yellow. These are visual balance targets, not a requirement to recolor imported media or user content. Application identities share the same yellow accent; application meaning comes from names, glyphs and labels rather than a rainbow of per-app colors.
 
@@ -16,19 +16,19 @@ The standard workspace remains visually stable at the centre. Secondary content 
 
 | Token | Value | Role |
 |---|---|---|
-| Page | `#080808` | Desktop background |
-| Surface | `#151515` | Primary panel |
-| Elevated | `#242424` | Secondary panel |
+| Page | `#050505` | Desktop background |
+| Surface | `#101010` | Primary panel |
+| Elevated | `#181818` | Secondary panel |
 | Text | `#FFFFFF` | Main copy |
 | Secondary | `#E5E5E5` | Supporting copy |
 | Muted | `#A6A6A6` | Quiet metadata |
-| Brand | `#FFD400` | Primary action and selection |
+| Brand | `#FFD700` | Primary action and selection |
 | Brand hover / focus | `#FFE45C` | Hover and keyboard focus |
-| Brand text | `#080808` | Text on yellow |
-| Secondary accent | `#FFD400` | Shared application accent |
+| Brand text | `#050505` | Text on yellow |
+| Secondary accent | `#FFD700` | Shared application accent |
 | Border | `#3A3A3A` | Structural edge |
 | Selection | `#3A3100` | Selected surface |
-| Alert | `#FFD400` | Alert marker, accompanied by text and an icon |
+| Alert | `#FFD700` | Alert marker, accompanied by text and an icon |
 
 Normal text and controls target WCAG AA contrast (4.5:1); primary body copy targets 7:1 where practical. Meaning is never communicated through hue alone: alert, warning and critical states retain explicit labels, icons and text.
 
@@ -68,3 +68,11 @@ The primary Mora desktop surface is a host-native Qt 6 Widgets application. Its 
 
 The browser implementation remains available as a reference/compatibility preview, not as the native desktop. The Qt host adapter is still distinct from the DuckOS kernel desktop: Stage 1 does not launch user processes, and a kernel-owned compositor, input service, font stack, accessibility bridge and capability broker remain separate D8 work.
 
+
+
+## Figma source integration
+
+The supplied source register and per-surface adoption gates live in
+[FIGMA_VISUAL_INTEGRATION_2026.md](docs/FIGMA_VISUAL_INTEGRATION_2026.md).
+Figma sources are references, not permission to flatten screens or replace
+native interaction patterns.

@@ -1,24 +1,28 @@
 {
   "schema": "mora.theme.v1",
-  "name": "DuckOS Black White Yellow",
-  "version": 2,
+  "name": "DuckOS Imperial Noir & Glass",
+  "version": 3,
   "palettes": {
     "duck": {
-      "page": "#080808",
-      "surface": "#151515",
-      "elevated": "#242424",
+      "page": "#050505",
+      "surface": "#101010",
+      "elevated": "#181818",
       "text": "#FFFFFF",
       "secondary": "#E5E5E5",
       "muted": "#A6A6A6",
-      "brand": "#FFD400",
+      "brand": "#FFD700",
       "brandHover": "#FFE45C",
       "onBrand": "#080808",
-      "secondaryAccent": "#FFD400",
+      "secondaryAccent": "#FFD700",
       "onSecondaryAccent": "#080808",
       "border": "#3A3A3A",
       "selection": "#3A3100",
-      "danger": "#FFD400",
-      "onDanger": "#080808"
+      "danger": "#C43A45",
+      "onDanger": "#FFFFFF",
+      "statusSuccess": "#2EAD68",
+      "statusWarning": "#FFD700",
+      "statusError": "#FF6B72",
+      "statusInfo": "#6CA8FF"
     }
   },
   "shape": {
@@ -50,5 +54,10 @@
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },
-  "defaultPalette": "duck"
+  "defaultPalette": "duck",
+  "glass": {
+    "surface": "rgba(7,7,7,0.72)",
+    "border": "rgba(255,255,255,0.14)",
+    "blurPx": 22
+  }
 }

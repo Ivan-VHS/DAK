@@ -91,6 +91,7 @@ test("the desktop remains self-contained and responsive", () => {
 const theme = JSON.parse(await readFile(new URL("../mora/theme.json", import.meta.url), "utf8"));
 const manifest = JSON.parse(await readFile(new URL("../mora/manifest.webmanifest", import.meta.url), "utf8"));
 const serviceWorker = await readFile(new URL("../mora/service-worker.js", import.meta.url), "utf8");
+const icon = await readFile(new URL("../mora/icon.svg", import.meta.url), "utf8");
 
 function relativeLuminance(hex) {
   const channels = hex.match(/[0-9a-f]{2}/gi).map((part) => parseInt(part, 16) / 255);
@@ -110,39 +111,51 @@ test("Mora uses one accessible black, white and yellow DuckOS palette", () => {
   assert.equal(theme.defaultPalette, "duck");
   assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
   const palette = theme.palettes.duck;
-  assert.equal(palette.page, "#080808");
-  assert.equal(palette.surface, "#151515");
+  assert.equal(palette.page, "#050505");
+  assert.equal(palette.surface, "#101010");
+  assert.equal(palette.elevated, "#181818");
+  assert.equal(palette.secondary, "#E5E5E5");
+  assert.equal(palette.muted, "#A6A6A6");
   assert.equal(palette.text, "#FFFFFF");
-  assert.equal(palette.brand, "#FFD400");
-  assert.equal(palette.danger, "#FFD400");
+  assert.equal(palette.brand, "#FFD700");
+  assert.equal(palette.danger, "#C43A45");
   assert.ok(contrastRatio(palette.text, palette.page) >= 7);
+  assert.ok(contrastRatio(palette.text, palette.surface) >= 7);
+  assert.ok(contrastRatio(palette.muted, palette.page) >= 4.5);
   assert.ok(contrastRatio(palette.onBrand, palette.brand) >= 4.5);
+  assert.ok(contrastRatio(palette.onDanger, palette.danger) >= 4.5);
+  for (const key of ["statusSuccess", "statusWarning", "statusError", "statusInfo"]) {
+    assert.ok(contrastRatio(palette[key], palette.page) >= 4.5, key + " must remain legible");
+  }
   assert.ok(contrastRatio(palette.onSecondaryAccent, palette.secondaryAccent) >= 4.5);
   assert.equal(manifest.name, "Mora — DuckOS Desktop");
-  assert.equal(manifest.theme_color, "#FFD400");
-  assert.equal(manifest.background_color, "#080808");
-  assert.ok(html.includes('name="theme-color" content="#FFD400"'));
+  assert.equal(manifest.theme_color, "#070707");
+  assert.equal(manifest.background_color, "#050505");
+  assert.ok(html.includes('name="theme-color" content="#070707"'));
   assert.ok(html.includes('id="mora-folds"'));
   assert.ok(html.includes('id="mora-fold-pattern"'));
   assert.ok(html.includes('Единая палитра DuckOS'));
   assert.ok(html.includes('data-app="mora-commons"'));
   assert.ok(css.includes(':root[data-theme="duck"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
-  assert.ok(css.includes("#FFD400"));
+  assert.ok(css.includes("#FFD700"));
   assert.ok(css.includes(".commons-grid"));
   const allowedColors = new Set([
-    "#080808", "#151515", "#242424", "#3A3A3A", "#3A3100",
-    "#A6A6A6", "#E5E5E5", "#FFFFFF", "#FFD400", "#FFE45C"
+    "#050505", "#070707", "#080808", "#101010", "#151515", "#181818", "#242424", "#3A3A3A", "#3A3100",
+    "#A6A6A6", "#C43A45", "#E5E5E5", "#FFFFFF", "#FFD700", "#FFE45C"
   ].map((color) => color.toLowerCase()));
   const cssColors = [...css.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only Duck palette colors");
   const inlineColors = [...html.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(inlineColors.every((color) => allowedColors.has(color)), "HTML and SVG use only Duck palette colors");
   assert.ok(js.includes('document.documentElement.dataset.theme = "duck"'));
+  assert.ok(js.includes('const DUCK_ACCENT = "#FFD700";'));
+  assert.ok(icon.includes('stop-color="#ffd700"'));
+  assert.ok(icon.includes('fill="#070707"'));
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));
-  assert.ok(serviceWorker.includes("mora-shell-v9-ecosystem"));
+  assert.ok(serviceWorker.includes("mora-shell-v10-imperial-noir-glass"));
   assert.ok(serviceWorker.includes("./local-store.js"));
   assert.ok(serviceWorker.includes("./commons-catalog.js"));
   assert.ok(serviceWorker.includes("./core.js"));
