@@ -368,7 +368,7 @@ assert(driver_runtime["unload_policy"]("running", true, false, true) == "reject-
 
 make installed_ids := ["lib.core", "shell.base"]
 make app_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "sha256:app", "Ivan-VHS", "verified", 1048576]
-make unsigned_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "sha256:app", "Ivan-VHS", "unverified", 1048576]
+make unsigned_service_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "sha256:app", "Ivan-VHS", "unverified", 1048576]
 assert(packages["package_valid"](app_package), "package manager accepts a bounded package manifest")
 assert(not packages["package_valid"]("malformed-package"), "package manager rejects a non-list manifest")
 assert(not packages["package_valid"](["", 1, 0, 0, "x86_64", 1, "application", [], [], "sha256:app", "Ivan-VHS", "verified", 1048576]), "package manager rejects an empty package identity")
@@ -382,7 +382,7 @@ assert(not packages["paths_valid"]([["usr", "bin\\\\tool"]]), "package manager r
 assert(not packages["paths_valid"]([["usr", 7]]), "package manager rejects non-text path components")
 make app_paths := [["usr", "bin", "example"], ["usr", "share", "example"]]
 assert(packages["admission"](app_package, app_paths, "x86_64", 1, installed_ids, ["fs.read"]) == "admit-transaction-plan-only", "package manager admits only a verified package with safe paths")
-assert(packages["admission"](unsigned_package, app_paths, "x86_64", 1, installed_ids, ["fs.read"]) == "reject-signature", "package manager rejects unverified package provenance")
+assert(packages["admission"](unsigned_service_package, app_paths, "x86_64", 1, installed_ids, ["fs.read"]) == "reject-signature", "package manager rejects unverified package provenance")
 assert(packages["admission"](app_package, app_paths, "x86_64", 1, installed_ids, ["fs.write"]) == "reject-capability", "package manager rejects capabilities outside its grants")
 assert(packages["admission"](app_package, [["usr", "..", "etc"]], "x86_64", 1, installed_ids, ["fs.read"]) == "reject-paths", "package manager admission cannot bypass payload path validation")
 assert(packages["transition_valid"]("resolved", "staged"), "package transaction may stage after dependency resolution")
