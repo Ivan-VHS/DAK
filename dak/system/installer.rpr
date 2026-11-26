@@ -1,0 +1,221 @@
+# DAK Installer v1 — deterministic installation policy.
+# This module emits plans only. A privileged disk writer is deliberately absent.
+
+import "../kernel/memory.rpr" as memory
+import "../platform/targets.rpr" as targets
+
+# Target: [disk_id, architecture, disk_bytes, logical_sector_bytes, firmware_mode, consent].
+export craft target_valid(target) {
+    when kind(target) != "list" or size(target) != 6 {
+        yield false
+    }
+    when kind(target[0]) != "text" or target[0] == "" or kind(target[1]) != "text" or not targets["architecture_known"](target[1]) {
+        yield false
+    }
+    when kind(target[2]) != "number" or kind(target[3]) != "number" {
+        yield false
+    }
+    when kind(target[4]) != "text" or kind(target[5]) != "boolean" {
+        yield false
+    }
+    when target[2] % 1 != 0 or target[3] % 1 != 0 or target[2] <= 1048576 or (target[3] != 512 and target[3] != 4096) {
+        yield false
+    }
+    when target[4] != "uefi" and target[4] != "bios" {
+        yield false
+    }
+    when target[5] != true and target[5] != false {
+        yield false
+    }
+    yield true
+}
+
+# Source evidence: [publisher, digest, signature_state].
+# "verified" must come from a trusted verifier, not from the image itself.
+export craft source_record_valid(source) {
+    when kind(source) != "list" or size(source) != 3 {
+        yield false
+    }
+    when kind(source[0]) != "text" or kind(source[1]) != "text" or kind(source[2]) != "text" {
+        yield false
+    }
+    when source[0] == "" or source[1] == "" {
+        yield false
+    }
+    when source[2] != "verified" and source[2] != "unverified" and source[2] != "revoked" {
+        yield false
+    }
+    yield true
+}
+
+export craft admission(target, source, recovery_state, partitions) {
+    when not target_valid(target) {
+        yield "reject-target"
+    }
+    when not target[5] {
+        yield "reject-consent"
+    }
+    when not source_record_valid(source) {
+        yield "reject-source-record"
+    }
+    when source[2] == "revoked" {
+        yield "reject-revoked"
+    }
+    when source[2] != "verified" {
+        yield "reject-source-trust"
+    }
+    when recovery_state != "ready" {
+        yield "reject-recovery"
+    }
+    when not layout_valid(partitions, target[2], target[4]) {
+        yield "reject-layout"
+    }
+    yield "admit-plan-only"
+}
+
+# Partition: [partition_id, kind, start_byte, length_bytes].
+export craft partition_valid(partition, disk_bytes) {
+    when kind(partition) != "list" or size(partition) != 4 {
+        yield false
+    }
+    when kind(partition[0]) != "text" or kind(partition[1]) != "text" or kind(partition[2]) != "number" or kind(partition[3]) != "number" {
+        yield false
+    }
+    when partition[0] == "" or partition[1] == "" {
+        yield false
+    }
+    when partition[2] % 1 != 0 or partition[3] % 4096 != 0 or partition[2] < 1048576 {
+        yield false
+    }
+    when kind(disk_bytes) != "number" or disk_bytes % 1 != 0 or not memory["region_fits"](partition[2], partition[3], disk_bytes, 4096) {
+        yield false
+    }
+    when partition[1] != "efi" and partition[1] != "bios_boot" and partition[1] != "system" and partition[1] != "recovery" and partition[1] != "userdata" {
+        yield false
+    }
+    when (partition[1] == "efi" or partition[1] == "bios_boot") and partition[2] != 1048576 {
+        yield false
+    }
+    yield true
+}
+
+# Layout is sorted by start byte and must contain system A/B and recovery.
+# UEFI requires one EFI partition; BIOS requires one BIOS boot partition.
+# User data is optional. Adjacent partitions are valid; overlap and duplicate IDs are not.
+export craft layout_valid(partitions, disk_bytes, firmware_mode) {
+    when kind(partitions) != "list" or kind(disk_bytes) != "number" or kind(firmware_mode) != "text" or disk_bytes % 1 != 0 {
+        yield false
+    }
+    when size(partitions) < 4 or size(partitions) > 5 or disk_bytes <= 1048576 {
+        yield false
+    }
+    when firmware_mode != "uefi" and firmware_mode != "bios" {
+        yield false
+    }
+
+    vary previous_end := 0
+    vary seen_ids := []
+    vary efi_count := 0
+    vary bios_boot_count := 0
+    vary system_a_count := 0
+    vary system_b_count := 0
+    vary recovery_count := 0
+    vary userdata_count := 0
+
+    each partition in partitions {
+        when not partition_valid(partition, disk_bytes) {
+            yield false
+        }
+        when partition[2] < previous_end {
+            yield false
+        }
+        each seen_id in seen_ids {
+            when seen_id == partition[0] {
+                yield false
+            }
+        }
+        change seen_ids := push(seen_ids, partition[0])
+        change previous_end := partition[2] + partition[3]
+
+        when partition[1] == "efi" {
+            change efi_count := efi_count + 1
+        }
+        when partition[1] == "bios_boot" {
+            change bios_boot_count := bios_boot_count + 1
+        }
+        when partition[1] == "system" and partition[0] == "system_a" {
+            change system_a_count := system_a_count + 1
+        }
+        when partition[1] == "system" and partition[0] == "system_b" {
+            change system_b_count := system_b_count + 1
+        }
+        when partition[1] == "system" and partition[0] != "system_a" and partition[0] != "system_b" {
+            yield false
+        }
+        when partition[1] == "recovery" {
+            change recovery_count := recovery_count + 1
+        }
+        when partition[1] == "userdata" {
+            change userdata_count := userdata_count + 1
+        }
+    }
+
+    when system_a_count != 1 or system_b_count != 1 or recovery_count != 1 or userdata_count > 1 {
+        yield false
+    }
+    when firmware_mode == "uefi" {
+        yield efi_count == 1 and bios_boot_count == 0
+    }
+    yield efi_count == 0 and bios_boot_count == 1
+}
+
+# planned -> validated -> staged -> ready_to_commit -> committed.
+export craft transition_valid(current, next) {
+    when current == "planned" and next == "validated" {
+        yield true
+    }
+    when current == "validated" and next == "staged" {
+        yield true
+    }
+    when current == "staged" and next == "ready_to_commit" {
+        yield true
+    }
+    when current == "ready_to_commit" and next == "committed" {
+        yield true
+    }
+    when (current == "planned" or current == "validated" or current == "staged" or current == "ready_to_commit") and next == "failed" {
+        yield true
+    }
+    when current == "staged" and next == "rolling_back" {
+        yield true
+    }
+    when current == "ready_to_commit" and next == "rolling_back" {
+        yield true
+    }
+    when current == "rolling_back" and next == "rolled_back" {
+        yield true
+    }
+    yield false
+}
+
+export craft commit_policy(state, consent, source, recovery_state, boot_state) {
+    when state != "ready_to_commit" {
+        yield "reject-state"
+    }
+    when kind(consent) != "boolean" or not consent {
+        yield "reject-consent"
+    }
+    when not source_record_valid(source) {
+        yield "reject-source-trust"
+    }
+    when source[2] != "verified" {
+        yield "reject-source-trust"
+    }
+    when recovery_state != "ready" {
+        yield "reject-recovery"
+    }
+    when boot_state != "healthy" {
+        yield "reject-boot-unverified"
+    }
+    yield "commit-plan-only"
+}

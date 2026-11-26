@@ -2,11 +2,17 @@
 # FAT32/ext4/NTFS names are recognised; filesystem drivers are not implemented here.
 
 export craft components_valid(components) {
-    when size(components) == 0 or size(components) > 64 {
+    when kind(components) != "list" or size(components) == 0 or size(components) > 64 {
         yield false
     }
     each component in components {
-        when component == "" or component == "." or component == ".." or component == "/" {
+        when kind(component) != "text" {
+            yield false
+        }
+        when component == "" or component == "." or component == ".." or size(component) > 255 {
+            yield false
+        }
+        when contains(component, "/") or contains(component, "\\") {
             yield false
         }
     }

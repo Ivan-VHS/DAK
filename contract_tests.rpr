@@ -31,6 +31,11 @@ import "dak/security/plugin_sandbox.rpr" as plugin_sandbox
 import "dak/ui/canvas.rpr" as canvas
 import "dak/input/spatial.rpr" as spatial_input
 import "dak/ui/desktop.rpr" as desktop
+import "dak/system/installer.rpr" as installer
+import "dak/drivers/runtime.rpr" as driver_runtime
+import "dak/packages/manager.rpr" as packages
+import "dak/system/updates.rpr" as updates
+import "dak/system/audit.rpr" as audit
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -281,4 +286,156 @@ make weak_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.2, 1030, "local"
 assert(spatial_input["resolve_spatial_intent"](weak_voice, "optimize this node", "") == ["reject", "low-intent-confidence"], "low-confidence spatial commands are rejected")
 make no_consent_voice := ["voice", "utterance", "node-17", 0, 0, 0, 0.9, 1030, "local", false]
 assert(not spatial_input["input_event_valid"](no_consent_voice), "microphone intents require explicit opt-in")
+# Contract success marker is emitted only after every suite section completes.
+
+
+# DAK native-system-service contracts. These prove policy decisions only.
+# They do not write disks, install packages, map drivers or activate boot slots.
+
+make install_target := ["disk0", "x86_64", 4000000, 512, "uefi", true]
+make install_target_no_consent := ["disk0", "x86_64", 4000000, 512, "uefi", false]
+make install_layout := [
+    ["efi", "efi", 1048576, 262144],
+    ["system_a", "system", 1310720, 524288],
+    ["system_b", "system", 1835008, 524288],
+    ["recovery", "recovery", 2359296, 262144]
+]
+assert(installer["target_valid"](install_target), "installer accepts a bounded x86_64 UEFI target")
+assert(not installer["target_valid"](["", "x86_64", 1000000, 512, "uefi", true]), "installer rejects an unnamed disk")
+assert(not installer["target_valid"]("malformed-target"), "installer rejects a non-list target record")
+make verified_source := ["DAK Release", "sha256:installer-image", "verified"]
+make unverified_source := ["DAK Release", "sha256:installer-image", "unverified"]
+assert(installer["admission"](install_target, verified_source, "ready", install_layout) == "admit-plan-only", "installer admits only a verified, recoverable plan")
+assert(installer["admission"](install_target_no_consent, verified_source, "ready", install_layout) == "reject-consent", "installer requires explicit destructive-operation consent")
+assert(installer["admission"](install_target, unverified_source, "ready", install_layout) == "reject-source-trust", "installer rejects an unverified source")
+assert(installer["admission"](install_target, verified_source, "missing", install_layout) == "reject-recovery", "installer requires a recovery path")
+
+make overlapping_layout := [
+    ["efi", "efi", 1048576, 262144],
+    ["system_a", "system", 1310720, 524288],
+    ["system_b", "system", 1703936, 524288],
+    ["recovery", "recovery", 2359296, 262144]
+]
+assert(installer["layout_valid"](install_layout, 4000000, "uefi"), "installer accepts ordered non-overlapping A/B and recovery partitions")
+assert(not installer["layout_valid"](overlapping_layout, 4000000, "uefi"), "installer rejects overlapping partitions")
+assert(installer["admission"](install_target, verified_source, "ready", overlapping_layout) == "reject-layout", "installer admission cannot bypass invalid disk layout")
+assert(installer["transition_valid"]("planned", "validated"), "installer advances a validated plan")
+assert(not installer["transition_valid"]("planned", "committed"), "installer cannot skip staging and boot verification")
+assert(installer["commit_policy"]("ready_to_commit", true, verified_source, "ready", "healthy") == "commit-plan-only", "installer requires all commit gates")
+assert(installer["commit_policy"]("ready_to_commit", true, verified_source, "ready", "pending") == "reject-boot-unverified", "installer refuses an unverified boot result")
+assert(not installer["partition_valid"](["too_early", "efi", 4096, 4096], 4000000), "installer reserves the leading disk metadata region")
+assert(not installer["partition_valid"](["fractional", "efi", 1048576.5, 262144], 4000000), "installer rejects fractional partition offsets")
+assert(not installer["partition_valid"](["unaligned_length", "efi", 1048576, 262145], 4000000), "installer rejects a partition length that is not 4 KiB aligned")
+make bios_layout := [
+    ["bios_boot", "bios_boot", 1048576, 1048576],
+    ["system_a", "system", 2097152, 524288],
+    ["system_b", "system", 2621440, 524288],
+    ["recovery", "recovery", 3145728, 262144]
+]
+assert(installer["layout_valid"](bios_layout, 4000000, "bios"), "installer accepts a BIOS boot layout without an EFI partition")
+make invalid_ab_layout := [
+    ["efi", "efi", 1048576, 262144],
+    ["system_left", "system", 1310720, 524288],
+    ["system_right", "system", 1835008, 524288],
+    ["recovery", "recovery", 2359296, 262144]
+]
+assert(not installer["layout_valid"](invalid_ab_layout, 4000000, "uefi"), "installer requires canonical A/B system slot identities")
+
+make driver_device := ["nvme0", "pci", 4096, 256, 11, true]
+make verified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]
+make unverified_driver := ["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "unverified", 65536]
+make wrong_bus_driver := ["nvme.sample", 1, "usb", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]
+make driver_grants := ["read.device"]
+assert(not driver_runtime["descriptor_valid"]("malformed-driver"), "driver runtime rejects a non-list descriptor")
+assert(driver_runtime["admission"](verified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "admit-isolated-plan-only", "driver admission requires verified provenance and least authority")
+assert(driver_runtime["admission"](unverified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-signature", "driver runtime rejects unverified signatures")
+assert(driver_runtime["admission"](wrong_bus_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-device-match", "driver runtime rejects a bus mismatch")
+make conflicting_devices := [["gpu0", "pci", 4200, 128, 11, false]]
+assert(driver_runtime["resource_admission"](driver_device, conflicting_devices) == "reject-resource-conflict", "driver runtime rejects overlapping MMIO or exclusive IRQ ownership")
+assert(driver_runtime["admission"](verified_driver, driver_device, conflicting_devices, "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-resource-conflict", "driver admission cannot bypass resource conflict checks")
+assert(driver_runtime["resource_admission"](driver_device, [device_c]) == "resource-plan-only", "driver runtime admits non-conflicting resource plans")
+make duplicate_device_id := ["nvme0", "pci", 8192, 256, 12, false]
+assert(driver_runtime["resource_admission"](driver_device, [duplicate_device_id]) == "reject-resource-conflict", "driver runtime rejects duplicate device identities")
+assert(not driver_runtime["descriptor_valid"](["nvme.sample", 1.5, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "verified", 65536]), "driver runtime rejects fractional ABI versions")
+assert(not driver_runtime["descriptor_valid"](["nvme.sample", 1, "pci", "x86_64", [7], "Ivan-VHS", "sha256:driver", "verified", 65536]), "driver runtime rejects non-text requested capabilities")
+assert(driver_runtime["admission"](verified_driver, driver_device, [], "x86_64", 1, ["pci", "usb"], [7]) == "reject-descriptor", "driver runtime rejects non-text capability grants")
+assert(driver_runtime["descriptor_valid"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "", "verified", 65536]) == false, "driver runtime requires a payload digest")
+assert(driver_runtime["admission"](["nvme.sample", 1, "pci", "x86_64", ["read.device"], "Ivan-VHS", "sha256:driver", "revoked", 65536], driver_device, [], "x86_64", 1, ["pci", "usb"], driver_grants) == "reject-revoked", "driver runtime rejects revoked publisher evidence")
+assert(driver_runtime["transition_valid"]("verified", "admitted"), "driver runtime advances verified metadata")
+assert(not driver_runtime["transition_valid"]("candidate", "running"), "driver runtime cannot jump directly to execution")
+assert(driver_runtime["unload_policy"]("running", true, true, true) == "unload-plan-only", "driver unload requires quiesced IRQ and DMA")
+assert(driver_runtime["unload_policy"]("running", true, false, true) == "reject-dma-active", "driver unload refuses active DMA")
+
+make installed_ids := ["lib.core", "shell.base"]
+make app_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "sha256:app", "Ivan-VHS", "verified", 1048576]
+make unsigned_service_package := ["example.app", 1, 0, 0, "x86_64", 1, "application", ["lib.core"], ["fs.read"], "sha256:app", "Ivan-VHS", "unverified", 1048576]
+assert(packages["package_valid"](app_package), "package manager accepts a bounded package manifest")
+assert(not packages["package_valid"]("malformed-package"), "package manager rejects a non-list manifest")
+assert(not packages["package_valid"](["", 1, 0, 0, "x86_64", 1, "application", [], [], "sha256:app", "Ivan-VHS", "verified", 1048576]), "package manager rejects an empty package identity")
+assert(not packages["package_valid"](["bad.digest", 1, 0, 0, "x86_64", 1, "application", [], [], "", "Ivan-VHS", "verified", 1048576]), "package manager requires a payload digest")
+assert(packages["dependencies_satisfied"](["lib.core"], installed_ids), "package manager resolves installed dependencies")
+assert(not packages["dependencies_satisfied"](["missing.lib"], installed_ids), "package manager rejects missing dependencies")
+assert(packages["paths_valid"]([["usr", "bin", "example"], ["usr", "share", "example"]]), "package manager accepts safe relative payload paths")
+assert(not packages["paths_valid"]([["usr", "..", "system"]]), "package manager rejects parent traversal in payload paths")
+assert(not packages["paths_valid"]([["usr", "bin/tool"]]), "package manager rejects slash inside a path component")
+assert(not packages["paths_valid"]([["usr", "bin\\\\tool"]]), "package manager rejects backslash inside a path component")
+assert(not packages["paths_valid"]([["usr", 7]]), "package manager rejects non-text path components")
+make app_paths := [["usr", "bin", "example"], ["usr", "share", "example"]]
+assert(packages["admission"](app_package, app_paths, "x86_64", 1, installed_ids, ["fs.read"]) == "admit-transaction-plan-only", "package manager admits only a verified package with safe paths")
+assert(packages["admission"](unsigned_service_package, app_paths, "x86_64", 1, installed_ids, ["fs.read"]) == "reject-signature", "package manager rejects unverified package provenance")
+assert(packages["admission"](app_package, app_paths, "x86_64", 1, installed_ids, ["fs.write"]) == "reject-capability", "package manager rejects capabilities outside its grants")
+assert(packages["admission"](app_package, [["usr", "..", "etc"]], "x86_64", 1, installed_ids, ["fs.read"]) == "reject-paths", "package manager admission cannot bypass payload path validation")
+assert(packages["transition_valid"]("resolved", "staged"), "package transaction may stage after dependency resolution")
+assert(not packages["transition_valid"]("planned", "committed"), "package transaction cannot skip verification and staging")
+assert(packages["remove_policy"]("installed", 0, false) == "remove-plan-only", "package removal is allowed only as a plan")
+assert(packages["remove_policy"]("installed", 1, false) == "reject-dependents", "package manager protects active dependents")
+assert(packages["remove_policy"]("installed", 0, true) == "reject-protected", "package manager protects system packages")
+
+make update_manifest := ["stable", 1, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "verified"]
+make downgrade_manifest := ["stable", 0, 9, 0, "x86_64", 3, 10485760, "sha256:payload", "DAK Release", "verified"]
+make unsigned_update := ["stable", 1, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "unverified"]
+assert(updates["manifest_valid"](update_manifest), "update manager accepts a bounded signed manifest")
+assert(not updates["manifest_valid"]("malformed-update"), "update manager rejects a non-list manifest")
+make fractional_update := ["stable", 1.5, 1, 0, "x86_64", 2, 10485760, "sha256:payload", "DAK Release", "verified"]
+assert(not updates["manifest_valid"](fractional_update), "update manager rejects fractional semantic versions")
+assert(updates["admission"](update_manifest, "x86_64", [1, 0, 0], 1) == "stage-inactive-slot-plan-only", "update manager stages a newer verified image")
+assert(updates["admission"](downgrade_manifest, "x86_64", [1, 0, 0], 1) == "reject-downgrade", "update manager rejects version rollback")
+assert(updates["admission"](unsigned_update, "x86_64", [1, 0, 0], 1) == "reject-signature", "update manager rejects unverified update signatures")
+make stale_sequence_update := ["stable", 1, 2, 0, "x86_64", 1, 10485760, "sha256:payload", "DAK Release", "verified"]
+make wrong_arch_update := ["stable", 1, 2, 0, "elbrus", 2, 10485760, "sha256:payload", "DAK Release", "verified"]
+assert(updates["admission"](stale_sequence_update, "x86_64", [1, 0, 0], 1) == "reject-sequence-rollback", "update manager rejects a stale sequence even with a newer version")
+assert(updates["admission"](wrong_arch_update, "x86_64", [1, 0, 0], 1) == "reject-architecture", "update manager rejects a different architecture")
+assert(updates["inactive_slot"]("A") == "B", "A/B update targets the inactive B slot")
+assert(updates["inactive_slot"]("B") == "A", "A/B update targets the inactive A slot")
+assert(updates["inactive_slot"]("unknown") == "", "A/B update rejects an unknown active slot")
+assert(updates["activation_policy"]("A", "B", "staged", "verified") == "arm-plan-only", "A/B update arms the verified inactive slot")
+assert(updates["activation_policy"]("A", "A", "staged", "verified") == "reject-slot-target", "A/B update cannot overwrite the active slot")
+assert(updates["activation_policy"]("A", "B", "staged", "unverified") == "reject-boot-entry", "A/B update rejects an unverified boot entry")
+assert(updates["activation_policy"]("unknown", "B", "staged", "verified") == "reject-active-slot", "A/B update requires a known active slot")
+assert(updates["transition_valid"]("staged", "armed"), "update manager arms only a staged payload")
+assert(not updates["transition_valid"]("staged", "confirmed"), "update manager requires a successful boot before confirmation")
+assert(updates["boot_result_policy"]("healthy", 1, 3) == "confirm-plan-only", "update manager confirms only a healthy boot")
+assert(updates["boot_result_policy"]("failed", 3, 3) == "rollback-plan-only", "update manager rolls back after the bounded retry limit")
+assert(updates["boot_result_policy"]("pending", 1, 3) == "await-confirmation", "update manager waits for explicit boot confirmation")
+
+
+# Append-only audit event policy; persistence and digest authentication belong to storage.
+make audit_one := [1, "req-1", "installer", "install.plan", "disk0", "accepted", "consent-and-trust-checked", "genesis", "sha256:audit-1"]
+make audit_two := [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "signature-and-rollback-checked", "sha256:audit-1", "sha256:audit-2"]
+assert(audit["record_valid"](audit_one), "audit accepts a complete bounded event")
+assert(not audit["record_valid"]("malformed-audit"), "audit rejects a non-list event record")
+assert(not audit["record_valid"]([1.5, "req-1", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", "sha256:audit"]), "audit rejects fractional sequence numbers")
+assert(not audit["record_valid"]([1, "", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", "sha256:audit"]), "audit requires a request identity")
+assert(not audit["record_valid"]([1, "req-1", "installer", "install.plan", "disk0", "accepted", "reason", "genesis", ""]), "audit requires a record digest")
+assert(audit["append_policy"]([], audit_one, 1024) == "append-plan-only", "audit plans the first journal record")
+assert(audit["append_policy"]([], [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason", "genesis", "sha256:audit-2"], 1024) == "reject-sequence", "audit rejects a non-genesis sequence")
+assert(audit["chain_valid"]([audit_one, audit_two]), "audit accepts strictly consecutive journal records")
+assert(not audit["chain_valid"]([audit_one, [3, "req-3", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-3"]]), "audit rejects journal sequence gaps")
+assert(audit["append_policy"]([audit_one], audit_two, 1024) == "append-plan-only", "audit appends only the next sequence")
+make broken_audit_link := [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:other", "sha256:audit-2"]
+assert(not audit["chain_valid"]([audit_one, broken_audit_link]), "audit rejects a broken digest link")
+assert(audit["append_policy"]([audit_one], broken_audit_link, 1024) == "reject-chain-link", "audit append rejects a broken digest link")
+assert(audit["append_policy"]([audit_one], [3, "req-3", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-3"], 1024) == "reject-sequence", "audit rejects a skipped sequence")
+assert(audit["append_policy"]([audit_one], [2, "req-2", "updates", "update.stage", "slot-b", "accepted", "reason", "sha256:audit-1", "sha256:audit-2"], 1) == "reject-capacity", "audit journal is bounded")
+
 emit "DAK_REAPER_CONTRACTS_OK"

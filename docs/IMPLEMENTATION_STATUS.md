@@ -174,3 +174,22 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Reaper-native system services — 2026-11-25
+
+- [x] Added Reaper policy modules for DAK Installer, Driver Runtime, Package Manager, Update System and the shared Audit Journal.
+- [x] Added explicit installer consent, verified-source and recovery gates; sorted, aligned, bounded BIOS/UEFI + A/B + recovery partition-layout validation.
+- [x] Added driver publisher/digest/signature state, bus/architecture/ABI, capability and safe-unload (IRQ/DMA/device quiescence) policies.
+- [x] Added package manifest bounds, publisher/digest fields, dependency resolution, VFS component-path validation, capability subset and protected/dependent removal policies.
+- [x] Added update manifest, version and monotonic-sequence rollback checks, inactive A/B slot selection, bounded boot confirmation and rollback policy.
+- [x] Added bounded append-only audit-record and digest-link validation in `dak/system/audit.rpr`.
+- [x] Extended the shared VFS path-component contract to reject embedded POSIX and Windows separators before package-path admission.
+- [x] Made device-resource conflict checks mandatory inside driver admission and required canonical A/B partition identities plus verified inactive-slot boot-entry arming.
+- [x] Added contract assertions for allowed, rejected, malformed and skipped-state cases in the shared Reaper suite.
+- [ ] Confirm final tree-walk and VM test runs on the exact PR head; latest GitHub Actions runs are queued.
+- [ ] Implement trusted cryptographic signature verification and authenticated publisher/key lifecycle.
+- [ ] Connect these contracts to kernel-enforced DABI64 providers, storage transactions and the native service supervisor.
+- [ ] Implement and qualify actual disk writes, package extraction/database, driver mapping and A/B boot-slot switching.
+
+**Evidence boundary:** these modules return `*-plan-only` decisions. The string trust state `verified` is expected from a future authenticated verifier; the Reaper policy modules do not perform cryptography. No installer, package executor, driver loader, updater or physical-hardware enforcement is claimed complete. See [DAK System Services v1](DAK_SYSTEM_SERVICES_V1.md).

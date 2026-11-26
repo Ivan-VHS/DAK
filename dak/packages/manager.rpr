@@ -1,0 +1,172 @@
+# DAK Package Manager v1 — manifest, dependency and transaction policy.
+# Package payloads are never extracted, executed or written by this module.
+
+import "../platform/targets.rpr" as targets
+import "../security/capabilities.rpr" as capabilities
+import "../storage/vfs.rpr" as vfs
+
+# Package: [id, major, minor, patch, architecture, abi, kind,
+#           dependencies, requested_capabilities, digest, publisher,
+#           signature_state, payload_bytes].
+export craft package_valid(package) {
+    when kind(package) != "list" or size(package) != 13 {
+        yield false
+    }
+    when kind(package[0]) != "text" or kind(package[1]) != "number" or kind(package[2]) != "number" or kind(package[3]) != "number" {
+        yield false
+    }
+    when kind(package[4]) != "text" or kind(package[5]) != "number" or kind(package[6]) != "text" {
+        yield false
+    }
+    when kind(package[7]) != "list" or kind(package[8]) != "list" or kind(package[9]) != "text" or kind(package[10]) != "text" or kind(package[11]) != "text" or kind(package[12]) != "number" {
+        yield false
+    }
+    when package[0] == "" or package[1] % 1 != 0 or package[2] % 1 != 0 or package[3] % 1 != 0 or package[5] % 1 != 0 or package[12] % 1 != 0 or package[1] < 0 or package[2] < 0 or package[3] < 0 {
+        yield false
+    }
+    when not targets["architecture_known"](package[4]) or package[5] <= 0 {
+        yield false
+    }
+    when package[6] != "application" and package[6] != "system" and package[6] != "driver" and package[6] != "library" {
+        yield false
+    }
+    when size(package[7]) > 256 or size(package[8]) > 64 {
+        yield false
+    }
+    each dependency in package[7] {
+        when kind(dependency) != "text" or dependency == "" {
+            yield false
+        }
+    }
+    each capability in package[8] {
+        when kind(capability) != "text" or capability == "" {
+            yield false
+        }
+    }
+    when package[9] == "" or package[10] == "" {
+        yield false
+    }
+    when package[11] != "verified" and package[11] != "unverified" and package[11] != "revoked" {
+        yield false
+    }
+    when package[12] <= 0 or package[12] > 2147483648 {
+        yield false
+    }
+    yield true
+}
+
+export craft dependencies_satisfied(required, installed_ids) {
+    when kind(required) != "list" or kind(installed_ids) != "list" {
+        yield false
+    }
+    each dependency in required {
+        when kind(dependency) != "text" or dependency == "" {
+            yield false
+        }
+        vary found := false
+        each installed in installed_ids {
+            when kind(installed) != "text" {
+                yield false
+            }
+            when dependency == installed {
+                change found := true
+            }
+        }
+        when not found {
+            yield false
+        }
+    }
+    yield true
+}
+
+# Every payload path is represented as normalized path components.
+# The archive parser must reject separators inside individual components.
+export craft paths_valid(paths) {
+    when kind(paths) != "list" or size(paths) == 0 or size(paths) > 4096 {
+        yield false
+    }
+    each path in paths {
+        when not vfs["components_valid"](path) {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft admission(package, payload_paths, target_arch, expected_abi, installed_ids, grants) {
+    when kind(target_arch) != "text" or kind(expected_abi) != "number" or kind(installed_ids) != "list" or kind(grants) != "list" {
+        yield "reject-manifest"
+    }
+    each grant in grants {
+        when kind(grant) != "text" or grant == "" {
+            yield "reject-capability"
+        }
+    }
+    when not package_valid(package) {
+        yield "reject-manifest"
+    }
+    when not paths_valid(payload_paths) {
+        yield "reject-paths"
+    }
+    when package[11] == "revoked" {
+        yield "reject-revoked"
+    }
+    when package[11] != "verified" {
+        yield "reject-signature"
+    }
+    when package[4] != target_arch {
+        yield "reject-architecture"
+    }
+    when package[5] != expected_abi {
+        yield "reject-abi"
+    }
+    when not dependencies_satisfied(package[7], installed_ids) {
+        yield "reject-dependencies"
+    }
+    when not capabilities["child_is_subset"](package[8], grants) {
+        yield "reject-capability"
+    }
+    yield "admit-transaction-plan-only"
+}
+
+# planned -> verified -> resolved -> staged -> committed.
+export craft transition_valid(current, next) {
+    when current == "planned" and next == "verified" {
+        yield true
+    }
+    when current == "verified" and next == "resolved" {
+        yield true
+    }
+    when current == "resolved" and next == "staged" {
+        yield true
+    }
+    when current == "staged" and next == "committed" {
+        yield true
+    }
+    when (current == "verified" or current == "resolved" or current == "staged") and next == "rolling_back" {
+        yield true
+    }
+    when current == "rolling_back" and next == "rolled_back" {
+        yield true
+    }
+    yield false
+}
+
+export craft remove_policy(state, dependent_count, protected) {
+    when state != "installed" {
+        yield "reject-state"
+    }
+    when protected {
+        yield "reject-protected"
+    }
+    when kind(dependent_count) != "number" or kind(protected) != "boolean" {
+        yield "reject-invalid-dependency-count"
+    }
+    when dependent_count % 1 != 0 or dependent_count < 0 {
+        yield "reject-invalid-dependency-count"
+    }
+    when dependent_count > 0 {
+        yield "reject-dependents"
+    }
+    yield "remove-plan-only"
+}
