@@ -12,7 +12,7 @@
       "url": "https://github.com/Ivan-VHS/Pytyliki.git",
       "path": "projects/pytyliki",
       "default_branch": "main",
-      "pinned_commit": "4f679d24d4073cfac5fd4ec566b0f070dd4756d5",
+      "pinned_commit": "fcf9843bea20c8b6a2708f49c399bd8dfef31fba",
       "license": "MIT",
       "license_file": "LICENSE",
       "domain": "processor-systems",
@@ -36,7 +36,7 @@
       "url": "https://github.com/Ivan-VHS/Reaper.git",
       "path": "projects/reaper",
       "default_branch": "main",
-      "pinned_commit": "95605b454ecef6c01da6ef24dd8671b45798306a",
+      "pinned_commit": "188b6782c9b672624891a14fff08d337e78092ea",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "language-and-toolchain",
@@ -62,19 +62,22 @@
       "url": "https://github.com/Ivan-VHS/OPlague.git",
       "path": "projects/oplague",
       "default_branch": "main",
-      "pinned_commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "pinned_commit": "b04346240171b9bfe7e723ae08db040cc0174c64",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "device-and-driver-evidence",
       "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes and SBOM metadata.",
       "integration_mode": [
         "read-only user-space service",
-        "versioned JSON evidence reports"
+        "versioned JSON evidence reports",
+        "optional Reaper C17 scalar ABI bridge"
       ],
       "runtime_boundary": "user-space-read-only",
       "build_system": "Python 3.10+ / Tkinter; Windows live inventory",
       "depends_on": [],
-      "optional_dependencies": [],
+      "optional_dependencies": [
+        "reaper"
+      ],
       "integration_status": "source-pinned-only",
       "auto_build": false,
       "auto_execute": false
@@ -85,7 +88,7 @@
       "url": "https://github.com/Ivan-VHS/VentuSample.git",
       "path": "projects/ventusample",
       "default_branch": "main",
-      "pinned_commit": "45aeba3b78359bb4a3ef82d61315c962408563e7",
+      "pinned_commit": "d2831b1481dcdee07cd1ab2c4e23055314a7bdfb",
       "license": "Apache-2.0",
       "license_file": "LICENSE",
       "domain": "audio-and-dsp",
