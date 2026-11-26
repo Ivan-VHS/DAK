@@ -77,7 +77,7 @@ duckos_page_table_status duckos_page_table_clone(
     const duckos_page_table_ops *ops
 );
 
-/* Release only page-table pages owned by this space; mapped data pages are untouched. */
+/* Release owned page-table pages only after the space is inactive. This is a no-op while active != 0; mapped data frames are never released. */
 void duckos_page_table_destroy(duckos_page_table_space *space);
 
 duckos_page_table_status duckos_page_table_map(
