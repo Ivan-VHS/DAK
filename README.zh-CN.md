@@ -17,6 +17,7 @@
 | 宿主桌面 | C++17 / 可选 Qt 6 Widgets 6.4+ |
 | 工具链 | CMake 3.21+、Python 3.10+、Node.js 22+ |
 | 许可证 | 根目录没有 LICENSE；尚未声明分发条款 |
+| 行为准则 | 尚未发布根目录 `CODE_OF_CONDUCT.md` |
 | 文档审核日期 | 2026-11-26 |
 
 <p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK 系统与桌面架构概览" width="100%"></p>
