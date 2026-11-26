@@ -174,3 +174,16 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Reaper-VHS GPU R0–R10 contracts — 2026-11-25
+
+- [x] Added `duckos/graphics/reaper_vhs.rpr`: versioned GPU ABI, PCI/BAR descriptor checks, GPU page and VRAM-budget validation, DMA/IOMMU admission, GPU context/GPUVM mapping policy, residency and migration decisions, VHS-Codec block metadata, HyperSwap admission, telemetry/governor decisions, security/recovery policy and dashboard snapshot validation.
+- [x] Added negative and positive Reaper assertions to `core_mvp_tests.rpr`; the existing CI contract job checks `.rpr` modules and executes this suite under both Reaper tree-walk and VM engines.
+- [ ] Native PCI/PCIe config-space enumeration, vendor GPU adapters and BAR reservation.
+- [ ] GPU page-table manager, VRAM allocator/reclaimer, hardware contexts, command queues and fence implementation.
+- [ ] IOMMU domains, DMA map/unmap, cache synchronization and device isolation.
+- [ ] Actual VRAM/RAM migration, codec byte transforms, fault replay and transparent oversubscription qualification.
+- [ ] Live sensor collection, vendor power-control adapters, kernel-enforced security, device reset and native dashboard.
+
+These Reaper contracts do not perform privileged hardware operations. They are Reaper-language source executed through the current reference-runtime CI path; the partial native C17 compiler is not yet capable of compiling this entire subsystem to freestanding code. See [Reaper-VHS GPU subsystem v1](REAPER_VHS_GPU_V1.md).

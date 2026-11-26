@@ -193,3 +193,22 @@ A hosted web service, remote orchestration control plane, automatic driver insta
 ## Release rule
 
 Do not claim DuckOS is a complete or usable desktop operating system until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. The x86_64 Stage 1 image now boots in QEMU BIOS and UEFI, but it halts after validated Boot Info v1 handoff and does not yet run a scheduler, processes, services or Mora.
+
+
+## D11 — Reaper-VHS GPU subsystem
+
+**Status: Partial — R0–R10 Reaper-language contracts and regression suite added; native device operations remain planned.**
+
+1. **R0 — GPU ABI:** versioned v1.0 descriptor and status contract. Keep field widths, units, ownership and maturity semantics stable.
+2. **R1 — PCI/PCIe discovery:** validate device identity and BAR descriptions in Reaper; add native PCI config-space enumeration, BAR sizing and device adapter binding.
+3. **R2 — GPU memory:** validate GPUVA/backing ranges, page alignment, permissions and VRAM budgets; then integrate physical allocation, GPU page tables and invalidation.
+4. **R3 — DMA/IOMMU:** validate DMA mappings and isolated-domain admission; then implement mapping, cache maintenance, IOTLB invalidation and teardown in trusted kernel/driver code.
+5. **R4 — GPU context/GPUVM:** bind contexts to process, domain and grants; then implement real contexts, page tables, queues and fences.
+6. **R5 — residency:** determine safe eviction/migration candidates; then implement VRAM/RAM transfers, pinning and scheduling.
+7. **R6 — VHS-Codec:** validate codec metadata, savings thresholds and decompression bounds; then add measured byte codecs and texture-format-specific paths.
+8. **R7 — HyperSwap:** admit oversubscription only with fault/replay support, backing and transfer budget; then qualify page-fault replay and fault recovery per GPU family.
+9. **R8 — telemetry/governor:** validate samples and choose bounded actions below a tested clock ceiling; then add sensors and vendor power adapters. Voltage increases are excluded from v1.
+10. **R9 — Security Guard:** validate owner/domain/capability, immutable dedup and recovery preconditions; then enforce them at kernel and IOMMU boundaries.
+11. **R10 — Dashboard:** validate truthful snapshots and alerts; then add live telemetry collection, persistent history and native UI.
+
+**Reaper verification:** `core_mvp_tests.rpr` contains R0–R10 assertions and is run by the existing CI through tree-walk and VM engines. This proves Reaper contract behavior only. Hardware milestones require native source, negative tests, emulator or hardware-in-the-loop evidence and an explicit supported-device matrix. See [Reaper-VHS GPU subsystem v1](REAPER_VHS_GPU_V1.md).

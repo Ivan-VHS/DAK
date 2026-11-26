@@ -71,3 +71,8 @@ The core suite deliberately uses the Reaper language and current Reaper CLI. Thi
 7. Kernel-enforced MAC, signed driver/package verification, TPM transport and a verifiable Secure Boot chain.
 
 Do not move a feature to `implemented-native` until source, negative tests, CI evidence and the target hardware/emulator behavior all support that exact claim.
+
+
+## Reaper-VHS GPU contracts
+
+The R0–R10 Reaper-language contract layer is documented in [Reaper-VHS GPU subsystem v1](REAPER_VHS_GPU_V1.md) and exercised by the existing tree-walk and VM core test suite. The current delivery is policy/descriptor validation only; native GPU discovery, page tables, DMA/IOMMU, compression, migration, power-control hardware paths and live dashboard remain unimplemented.
