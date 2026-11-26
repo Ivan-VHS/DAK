@@ -46,7 +46,12 @@ run_bios() {
         cat "$log" >&2 || true
         return 1
     fi
-    if ! grep -Fq "DUCKOS_BOOT_OK stage=1" "$log"; then
+    if ! grep -Fq "DUCKOS_PAGING_OK mode=4level pml4=active" "$log"; then
+        echo "QEMU did not confirm the new four-level PML4/CR3:" >&2
+        cat "$log" >&2 || true
+        return 1
+    fi
+    if ! grep -Fq "DUCKOS_BOOT_OK stage=2" "$log"; then
         echo "BIOS QEMU did not reach the DuckOS boot handoff:" >&2
         cat "$log" >&2 || true
         return 1
@@ -82,7 +87,12 @@ run_uefi() {
         cat "$log" >&2 || true
         return 1
     fi
-    if ! grep -Fq "DUCKOS_BOOT_OK stage=1" "$log"; then
+    if ! grep -Fq "DUCKOS_PAGING_OK mode=4level pml4=active" "$log"; then
+        echo "QEMU did not confirm the new four-level PML4/CR3:" >&2
+        cat "$log" >&2 || true
+        return 1
+    fi
+    if ! grep -Fq "DUCKOS_BOOT_OK stage=2" "$log"; then
         echo "UEFI QEMU did not reach the DuckOS boot handoff:" >&2
         cat "$log" >&2 || true
         return 1

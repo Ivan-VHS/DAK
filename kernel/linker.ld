@@ -21,30 +21,40 @@ SECTIONS
 
     .limine_requests ALIGN(8) : AT(KERNEL_PHYS)
     {
+        __limine_requests_start = .;
         KEEP(*(.limine_requests_start))
         KEEP(*(.limine_requests))
         KEEP(*(.limine_requests_end))
+        __limine_requests_end = .;
     } :requests
 
     .text ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.text) - KERNEL_VMA))
     {
+        __kernel_text_start = .;
         *(.text .text.*)
+        __kernel_text_end = .;
     } :text
 
     .rodata ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.rodata) - KERNEL_VMA))
     {
+        __kernel_rodata_start = .;
         *(.rodata .rodata.*)
+        __kernel_rodata_end = .;
     } :rodata
 
     .data ALIGN(0x1000) : AT(KERNEL_PHYS + (ADDR(.data) - KERNEL_VMA))
     {
+        __kernel_data_start = .;
         *(.data .data.*)
+        __kernel_data_end = .;
     } :data
 
     .bss ALIGN(0x1000) (NOLOAD) : AT(KERNEL_PHYS + (ADDR(.bss) - KERNEL_VMA))
     {
+        __kernel_bss_start = .;
         *(COMMON)
         *(.bss .bss.*)
+        __kernel_bss_end = .;
     } :data
 
     . = ALIGN(0x1000);
