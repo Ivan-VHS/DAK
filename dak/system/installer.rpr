@@ -9,7 +9,7 @@ export craft target_valid(target) {
     when kind(target) != "list" or size(target) != 6 {
         yield false
     }
-    when kind(target[0]) != "text" or kind(target[1]) != "text" or not targets["architecture_known"](target[1]) {
+    when kind(target[0]) != "text" or target[0] == "" or kind(target[1]) != "text" or not targets["architecture_known"](target[1]) {
         yield false
     }
     when kind(target[2]) != "number" or kind(target[3]) != "number" {
