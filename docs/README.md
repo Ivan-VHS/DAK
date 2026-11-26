@@ -1,37 +1,35 @@
 # DAK documentation
 
-> **Psychoporter 666 documentation profile v1.0** · Reviewed 2026-11-25 (UTC)
+**Documentation baseline:** 2026-11-26 · **Project state:** experimental Stage 1 foundation.
 
-Start with the [project README](../README.md) for the current Stage 1 boot evidence, native DAK host application and release boundary. The [documentation map](INFORMATION_ARCHITECTURE.md) links the full catalogue.
+Start with the [project README](../README.md) for the verified boot boundary, Reaper policy layer, host-native desktop and current limitations. This index is a navigation aid; it does not replace source, tests, schemas or implementation records.
 
-## Desktop and application interfaces
+## Primary technical references
 
-- [DAK Desktop](DAK_DESKTOP.md) — native host shell, Reaper session policies and interactive HTML demo.
+- [Architecture](ARCHITECTURE.md) — system decomposition and integration boundaries.
+- [Implementation status](IMPLEMENTATION_STATUS.md) — delivered, partial, specified and pending capabilities.
+- [Bootable Stage 1 image](BOOTABLE_IMAGE.md) — build, QEMU BIOS/UEFI evidence and the halt boundary.
+- [Boot Info v1](BOOT_INFO_V1.md) — firmware handoff and validated memory-map contract.
+- [Core subsystem MVP](CORE_MVP_V1.md) — Reaper reference contracts versus native enforcement.
+- [DAK Desktop](DAK_DESKTOP.md) — host-native Qt application, separate from the kernel session.
+- [Build contracts](BUILD_CONTRACTS.md) — reproducible build surfaces and dependencies.
+- [Ecosystem integration](ECOSYSTEM_INTEGRATION.md) — independent peer repositories and versioned interchange.
+- [Release edition](RELEASE_EDITION.md) — source/tool payload boundaries, not a complete installable OS.
+- [Documentation control](DOCUMENTATION_CONTROL.md) — publication gates and maintenance rules.
+- [Unified documentation standard](UNIFIED_DOCUMENTATION_STANDARD.md) — canonical standards for all Ivan-VHS repositories.
+- [Information architecture](INFORMATION_ARCHITECTURE.md) — complete documentation catalog.
 
-- [DAK native integration](MORA_INTEGRATION.md) — host-native Qt 6 application, top-level windows and native-service boundary.
-- [DAK Commons](MORA_COMMONS.md) — local app-discovery hub and catalogue responsibilities.
-- [DAK design system](../MORA_DESIGN_SYSTEM.md) — versioned interface tokens and visual language.
-- [Browser reference preview](../mora/index.html) — retained browser prototype, not a native compositor.
+## Browse the library
 
-## Native boot and kernel
+- [Project overview and cluster map](clusters/project-overview.md)
+- [All documentation pages](INFORMATION_ARCHITECTURE.md)
+- [Repository contribution guide](../CONTRIBUTING.md)
+- [Documentation rebaseline plan](superpowers/plans/2026-11-26-documentation-rebaseline.md)
 
-- [Bootable Stage 1 image](BOOTABLE_IMAGE.md) — pinned Limine BIOS/UEFI path, image assembly and QEMU checks.
-- [Implementation status](IMPLEMENTATION_STATUS.md) — delivered, partial and pending subsystems.
-- [Core subsystem MVP](CORE_MVP_V1.md) — Reaper reference contracts and native-enforcement boundary.
-- [x86_64 exception handling](X86_64_EXCEPTION_HANDLING.md) — current exception/interrupt progress and remaining work.
+## Evidence and status
 
-## Ecosystem and security
+Use the maturity vocabulary defined by the unified standard. A QEMU boot check demonstrates only the exact stage and environment it exercised. Host tests of Reaper policies do not demonstrate kernel enforcement. Browser previews and host-native windows do not demonstrate a kernel compositor or user session.
 
-- [Ecosystem integration](ECOSYSTEM_INTEGRATION.md) — peer repositories, source pins and adapters.
-- [Repository federation](REPOSITORY_FEDERATION.md) — repository-level integration record.
-- [BAV security bundle](BAV_SECURITY_BUNDLE_V1.md) — declarative format and planned security services; schema validation is not scanning or signature verification.
-- [Windows compatibility](WINDOWS_COMPATIBILITY.md) and [DAKBridge](DUCKBRIDGE.md) — offline inspection and dry-run plans, not target-process execution.
+## Maintainer checklist
 
-## Planning and evidence
-
-- [Project evolution ladder](PROJECT_EVOLUTION_LADDER.md) — cumulative evidence gates.
-- [Implementation roadmap](IMPLEMENTATION_ROADMAP.md) — staged native implementation.
-- [Unified documentation standard](UNIFIED_DOCUMENTATION_STANDARD.md) — terminology, maturity states and evidence rules.
-- [Engineering evolution framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — completeness and acceptance criteria.
-
-Describe behavior from source, build configuration, schemas, tests and CI. Mark future work as planned; never present a host prototype or a policy contract as native kernel enforcement.
+Update the root README, affected technical contract, topic map and this index in the same pull request. Verify relative links, command syntax, supported platform claims, translation parity and any changed release or interface metadata before publication.
