@@ -146,6 +146,12 @@ static void test_map_translate_protect_and_unmap(void) {
     ) == DUCKOS_PAGE_TABLE_NOT_MAPPED);
     assert(count_used(&pool) == 1u);
     duckos_page_table_destroy(&space);
+    assert(space.root_physical != 0u);
+    assert(count_used(&pool) == 1u);
+
+    space.active = 0u;
+    duckos_page_table_destroy(&space);
+    assert(space.root_physical == 0u);
     assert(count_used(&pool) == 0u);
 }
 
