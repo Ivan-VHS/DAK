@@ -174,3 +174,19 @@ The shared [Engineering Evolution and Capability Completeness Standard](ENGINEER
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+## Beelzebub AV integration — 2026-11-24
+
+- [x] Register the Beelzebub AV command group in the DuckOS CLI with structured verdict/exit-code agreement.
+- [x] Keep the Java 21 scanner behind a bounded, shell-free Python process bridge with strict JSON validation.
+- [x] Provide a native Duck Desktop BAV tab for status, user-selected scans and explicit engine/feed configuration.
+- [x] Validate UI configuration so signed-feed material and YARA-X executable/rules are supplied as complete pairs.
+- [x] Extend CI coverage to compile the native desktop adapter and run bridge, CLI and panel-configuration tests.
+- [ ] Install and supervise a native service through the future DuckOS service manager.
+- [ ] Bind current scan verdicts to immutable VFS file identities and enforce them through the native process/capability broker.
+- [ ] Add kernel-backed file-event interception, execution blocking and audited policy transitions.
+
+BAV currently provides user-selected on-demand scans only. It is not an always-on service,
+does not intercept file opens, and cannot block process execution. Missing or invalid threat
+intelligence and unavailable required engines remain INDETERMINATE rather than CLEAN.

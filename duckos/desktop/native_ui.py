@@ -13,6 +13,7 @@ from typing import Any, Callable
 
 from .service import DesktopService, move_desktop_items_to_inbox
 from .reaper import ReaperIntegrationError, ReaperWorkbench
+from .beelzebub_panel import BeelzebubPanel
 
 COLORS = {
     "background": "#101010", "surface": "#1B1B1B", "raised": "#252525",
@@ -66,12 +67,12 @@ class DesktopWindow:
 
         tabs = ttk.Notebook(self.root)
         tabs.pack(fill="both", expand=True, padx=20, pady=(4, 20))
-        overview, clean, startup, processes, rules, reaper_tab = [
-            ttk.Frame(tabs, padding=18) for _ in range(6)
+        overview, clean, startup, processes, rules, reaper_tab, bav_tab = [
+            ttk.Frame(tabs, padding=18) for _ in range(7)
         ]
         for tab, title in zip(
-            (overview, clean, startup, processes, rules, reaper_tab),
-            ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила", "Reaper"),
+            (overview, clean, startup, processes, rules, reaper_tab, bav_tab),
+            ("Обзор", "Рабочий стол", "Автозагрузка", "Процессы", "Правила", "Reaper", "BAV"),
         ):
             tabs.add(tab, text=title)
 
@@ -140,6 +141,8 @@ class DesktopWindow:
             ttk.Label(row, text=statement, wraplength=820, justify="left").pack(side="left", fill="x", expand=True)
 
         self._build_reaper_tab(reaper_tab)
+        self.beelzebub_panel = BeelzebubPanel(bav_tab, root=self.root)
+        self.beelzebub_panel.build()
         self.refresh()
 
     def _build_reaper_tab(self, tab: ttk.Frame) -> None:
