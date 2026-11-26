@@ -22,6 +22,18 @@ Branch counts include `main`. Open PR counts include only PRs returned with `sta
 
 The inventory is intentionally repository-wide. It is not evidence that all 508 diffs have been inspected. The 35 non-main-base PRs are the first mandatory dependency-graph review set. The remaining 473 main-based PRs still need duplicate/overlap, CI, review and compatibility classification.
 
+The recovery refs have now been created and verified against the exact SHAs in this table:
+
+| Repository | Recovery branch | Verified target SHA |
+|---|---|---|
+| DAK | [backup/pre-consolidation-main-2026-11-26](https://github.com/Ivan-VHS/DAK/tree/backup/pre-consolidation-main-2026-11-26) | `30bd33be646252f0f26745fa01e38e0f3972839f` |
+| OPlague | [backup/pre-consolidation-main-2026-11-26](https://github.com/Ivan-VHS/OPlague/tree/backup/pre-consolidation-main-2026-11-26) | `496506c461da84a9a68cc8cae3b5273334fcbbf4` |
+| Pytyliki | [backup/pre-consolidation-main-2026-11-26](https://github.com/Ivan-VHS/Pytyliki/tree/backup/pre-consolidation-main-2026-11-26) | `4936685d1cd6f083f315c64e5aaaaa9c29af6aab` |
+| Reaper | [backup/pre-consolidation-main-2026-11-26](https://github.com/Ivan-VHS/Reaper/tree/backup/pre-consolidation-main-2026-11-26) | `c0ac1aa2b09866d8c41bd3ff12104000f78d473f` |
+| VentuSample | [backup/pre-consolidation-main-2026-11-26](https://github.com/Ivan-VHS/VentuSample/tree/backup/pre-consolidation-main-2026-11-26) | `d2831b1481dcdee07cd1ab2c4e23055314a7bdfb` |
+
+**Important:** GitHub reports `protected=false` for all five recovery branches. They are verified snapshot refs, but they are not immutable. Before any merge campaign begins, configure protection against force-push/deletion or add independently retained annotated snapshot tags through the repository's release/administration process. Do not rely on these branch names alone as the only recovery mechanism.
+
 ## 2. Existing main rulesets
 
 All five repositories have an active ruleset targeted at `refs/heads/main`. The traditional branch-protection endpoint did not report a legacy protection configuration; the active rulesets are the current protection mechanism.
