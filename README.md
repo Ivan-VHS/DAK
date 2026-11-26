@@ -1,155 +1,152 @@
-# 🦆 DAK — Reaper-First Operating-System Project
+# DAK — Reaper-first operating-system project
 
-<p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
+[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native DAK](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20DAK)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
+> Experimental x86_64 system foundation: a QEMU-verified Stage 1 boot path, Reaper policy contracts and a separate host-native desktop shell.
 
-> **A Reaper-first system foundation, a native host desktop and a federated local-first toolchain — with every boundary visible.**
+**Specification**
 
-**State:** Experimental · x86_64 Stage 1 QEMU-verified · **Version:** Stage 1 boot foundation · **README standard:** Psychoporter 666 v1.0 · **Last reviewed:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
-
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
-
-## Quick navigation
-
-[🚀 DAK Desktop HTML demo](desktop/demo/index.html) · [Documentation](docs/README.md) · [Source](https://github.com/Ivan-VHS/DAK) · [Issues](https://github.com/Ivan-VHS/DAK/issues)
-
-## Mission & scope
-
-DAK is an experimental Reaper-first operating-system project. Its current work is intentionally split into a bootable kernel foundation, Reaper policy contracts and a host-native DAK desktop application.
-
-## Capabilities
-
-- The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, emits DUCKOS_BOOT_OK stage=1 and halts. QEMU BIOS and UEFI checks pass.
-- Reaper provides a reference policy-contract track, including 40 Core Subsystem MVP contracts. Native kernel enforcement remains pending.
-- DAK has a Qt 6 Widgets host-native desktop application with host-managed windows and a local app catalogue. It is not launched by the Stage 1 kernel.
-- desktop/demo/index.html remains available as a browser reference preview. It is not a native compositor or the kernel desktop.
-
-## DAK Desktop
-
-- The Qt 6 host-native shell opens separate top-level windows managed by the host OS; it is not the DAK kernel compositor.
-- Reaper desktop policies validate window actions, geometry, density profiles and versioned session snapshots.
-- The [interactive HTML demo](desktop/demo/index.html) runs locally; resource and device values are illustrative demo data.
-- Architecture and engineering direction: **Ivan-VHS**. See [DAK Desktop](docs/DAK_DESKTOP.md).
-
-## System map
-
-~~~mermaid
-flowchart TB
-  subgraph BOOT["x86_64 Stage 1 — QEMU verified"]
-    L["Limine handoff"] --> B["Boot Info v1"]
-    B --> F["Early 4 KiB frame"]
-    F --> M["Serial marker / halt"]
-  end
-  subgraph POLICY["Reaper policy contracts"]
-    R["Reference contracts"] --> T["Contract tests"]
-    T -.-> N["Native enforcement pending"]
-  end
-  subgraph HOST["DAK host desktop — separate from kernel"]
-    Q["Qt 6 Widgets"] --> W["Host-managed windows"]
-    H["Browser reference preview"]
-  end
-  BOOT -.->|"desktop integration pending"| HOST
-~~~
-
-## Build native DAK
-
-The release-image path targets Linux x86_64 and requires Git/submodules, GCC/G++, CMake, Python 3 build tooling, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
-
-~~~sh
-cmake -S . -B build/dak-native -DCMAKE_BUILD_TYPE=Release -DDAK_BUILD_NATIVE_DESKTOP=ON
-cmake --build build/dak-native --target dak_desktop_native --parallel
-ctest --test-dir build/dak-native --output-on-failure
-~~~
-
-The Qt desktop target is optional and is skipped when Qt 6 Widgets is not found. DAK runs as a host-native application; it is not started by the Stage 1 kernel.
-
-## Browser reference preview
-
-Linux:
-~~~sh
-./scripts/run-mora.sh
-npm test
-~~~
-Windows PowerShell:
-~~~powershell
-.\scripts\run-mora.ps1
-npm test
-~~~
-
-The browser shell is a reference surface. It is not a native compositor and does not imply kernel integration.
-
-## Build the release image
-
-~~~sh
-bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Release-x86_64.iso
-~~~
-
-The release pipeline validates pinned repositories, runs project builds/tests, generates a SHA-256 inventory and assembles a hybrid BIOS/UEFI ISO. This is a source-and-tools preview, not a complete installable OS.
-
-## Kernel status and next layers
-
-| Layer | Status |
+| Field | Current record |
 |---|---|
-| Limine handoff and Boot Info v1 | Implemented; QEMU-verified |
-| Early physical-frame allocation | Implemented for Stage 1 |
-| Reaper Core Subsystem MVP | 40 reference contracts; native enforcement pending |
-| Page tables and address spaces | Pending |
-| Interrupts, timers and preemptive scheduler | Pending |
-| Process model and syscall ABI | Pending |
-| Kernel-enforced capabilities and zero-copy IPC | Pending |
-| PCI/USB/ACPI and isolated driver runtime | Pending |
-| Filesystem, service supervisor, installer and persistent session | Pending |
-| Native compositor, GPU and audio stack | Pending |
+| Repository | [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK) |
+| Project status | Experimental; Stage 1 foundation |
+| Product version | No unified DAK release version declared |
+| Native boot target | x86_64, Linux build host, Limine BIOS/UEFI image |
+| Policy language | Reaper; reference contracts, native enforcement incomplete |
+| Boot bridge | C11 freestanding platform boundary |
+| Host desktop | C++17 / optional Qt 6 Widgets 6.4+ |
+| Tooling | CMake 3.21+, Python 3.10+, Node.js 22+ |
+| License | No root LICENSE file; redistribution terms are not declared |
+| Last documentation review | 2026-11-26 |
 
-The current kernel stage stops after firmware-handoff validation and early frame allocation. It does not yet provide process isolation, driver loading, storage, networking, a persistent user session or kernel-enforced sandboxing. DAK catalogue entries do not execute manifest commands or grant hardware privileges.
+<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system and desktop architecture overview" width="100%"></p>
 
-## Architecture targets
+## Contents
 
-x86_64 is the primary target for Intel and AMD. Elbrus remains a preserved compatibility track; this does not claim an available Elbrus compiler backend, boot image or physical-hardware test matrix.
+- [Purpose and scope](#purpose-and-scope)
+- [Architecture](#architecture-and-data-flow)
+- [Current implementation](#implementation-status)
+- [Build and verification](#build-and-verification)
+- [Interfaces and ecosystem](#interfaces-and-ecosystem)
+- [Limitations and trust boundaries](#limitations-and-trust-boundaries)
+- [Documentation and governance](#documentation-and-governance)
+- [History and licensing](#history-and-licensing)
 
-## Source federation and integrity
+## Purpose and scope
 
-The active source set is pinned in federation/repositories.v1.json. Initialize the exact recorded revisions with:
+DAK is an experimental operating-system project with three distinct execution surfaces: a freestanding x86_64 Stage 1 kernel foundation, Reaper reference policy contracts, and a host-native desktop prototype. They are not yet one integrated operating-system session.
 
-~~~sh
-git submodule update --init --recursive
-~~~
+The current boot path validates the firmware handoff and Boot Info v1, allocates and clears one early 4 KiB physical frame, prints a serial success marker and halts. The desktop shell runs as an application on the host OS; it is not started by the kernel.
 
-The peer projects remain separate repositories with independent ownership, licenses, contracts and release cycles:
+## Architecture and data flow
 
-- [Reaper](https://github.com/Ivan-VHS/Reaper)
-- [Pytyliki](https://github.com/Ivan-VHS/Pytyliki)
-- [OPlague](https://github.com/Ivan-VHS/OPlague)
-- [VentuSample](https://github.com/Ivan-VHS/VentuSample)
+```mermaid
+flowchart TB
+  subgraph BOOT["Native x86_64 Stage 1"]
+    F["Limine BIOS / UEFI handoff"] --> V["Boot Info v1 validation"]
+    V --> A["Early 4 KiB frame allocation"]
+    A --> H["Serial marker and halt"]
+  end
+  subgraph POLICY["Reaper policy layer"]
+    R["Reference subsystem contracts"] --> T["Contract tests"]
+    T -.-> K["Native kernel enforcement pending"]
+  end
+  subgraph HOST["Separate host application"]
+    Q["C++17 / optional Qt 6 shell"] --> W["Host-managed windows"]
+    B["Browser reference preview"]
+  end
+  BOOT -.->|"OS session integration pending"| HOST
+```
 
-## Documentation
+The native boot bridge is deliberately narrow. Reaper owns the policy/reference layer; host tools and companion applications remain separate processes and repositories until the kernel has process, syscall, filesystem and capability enforcement.
+
+## Implementation status
+
+| Capability | Maturity | Evidence boundary |
+|---|---|---|
+| Limine handoff and Boot Info v1 validation | Verified at Stage 1 | BIOS and UEFI QEMU checks |
+| Early physical-frame allocation | Implemented at Stage 1 | One 4 KiB frame; monotonic, no free path |
+| CPU exception IDT | Partial / QEMU marker verified | Vectors 0–31; not full interrupt routing |
+| Reaper subsystem policies | Implemented as reference contracts | Tests do not imply kernel enforcement |
+| Host-native desktop shell | Partial | Qt application; independent host windows |
+| Browser desktop preview | Reference implementation | Not a native compositor |
+| Process model, syscall ABI, virtual memory | Planned | No user process session |
+| Filesystem, service supervisor, package manager, installer | Planned | No kernel service lifecycle |
+| Driver runtime, GPU compositor, audio stack | Planned | No physical device control |
+
+The authoritative capability ledger is [Implementation Status](docs/IMPLEMENTATION_STATUS.md). The [project evolution ladder](docs/PROJECT_EVOLUTION_LADDER.md) defines evidence gates; stage names are not release certification.
+
+## Build and verification
+
+### Host contract tests
+
+Requirements: CMake 3.21+ and a C11 compiler.
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
+### Stage 1 boot image
+
+Build on Linux x86_64 with GCC/binutils, Git, curl, tar, xorriso and sha256sum available:
+
+```sh
+boot/build-iso.sh --work-dir build/dak-boot --output dist/DAK-Stage1-x86_64.iso
+```
+
+QEMU BIOS/UEFI verification and serial-log requirements are documented in [Bootable Image](docs/BOOTABLE_IMAGE.md). A successful Stage 1 boot is not a usable OS session.
+
+### Optional host desktop and browser preview
+
+The Qt 6 host shell is optional and requires a C++17 compiler plus Qt 6 Widgets 6.4 or newer:
+
+```sh
+cmake -S . -B build/desktop -DDAK_BUILD_NATIVE_DESKTOP=ON
+cmake --build build/desktop --parallel
+```
+
+The browser reference surface has its own Node test suite:
+
+```sh
+npm test
+```
+
+The current package manifest requires Node.js 18+, while the maintained contributor/CI workflow uses Node.js 22+. None of these host commands boots the kernel into a desktop session.
+
+## Interfaces and ecosystem
+
+- [Boot Info v1](docs/BOOT_INFO_V1.md) — firmware handoff data and validation boundary.
+- [Core subsystem MVP](docs/CORE_MVP_V1.md) — Reaper reference contracts and native-enforcement status.
+- [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md) — pinned peer repositories and versioned interchange.
+- [Release edition](docs/RELEASE_EDITION.md) — source/tool packaging boundary; not an installable OS release.
+
+Peer projects retain their own repositories, licenses and release cycles: [Reaper](https://github.com/Ivan-VHS/Reaper), [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [OPlague](https://github.com/Ivan-VHS/OPlague), and [VentuSample](https://github.com/Ivan-VHS/VentuSample). A submodule pin or host binary is not kernel integration.
+
+## Limitations and trust boundaries
+
+> **Important:** DAK is not yet a general-purpose, installable operating system. Stage 1 halts after boot validation and early frame allocation.
+
+Page tables, reusable memory management, process isolation, syscall dispatch, preemptive scheduling, filesystem access, service supervision, kernel-enforced capabilities, production driver loading and a native compositor are not complete. The current Reaper-native compiler is not yet a freestanding kernel compiler.
+
+Hardware, firmware, driver and package operations remain unimplemented or reference-only unless a specific reviewed contract says otherwise. A caller-supplied “signature verified” field is not cryptographic verification. SHA-256 checksums detect byte changes but do not authenticate a publisher.
+
+The repository has no root LICENSE or SECURITY.md as reviewed on 2026-11-26. Do not assume redistribution rights or interpret the absence of a security policy as a security guarantee. See [Contributing](CONTRIBUTING.md) and the [documentation control policy](docs/DOCUMENTATION_CONTROL.md).
+
+## Documentation and governance
+
+Start at [Documentation Index](docs/README.md) and [Information Architecture](docs/INFORMATION_ARCHITECTURE.md). The implementation-status ledger, boot guide, architecture and versioned schemas are the primary technical references.
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Implementation status](docs/IMPLEMENTATION_STATUS.md)
-- [Bootable image](docs/BOOTABLE_IMAGE.md)
-- [Core subsystem MVP](docs/CORE_MVP_V1.md)
-- [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md)
-- [Project evolution ladder](docs/PROJECT_EVOLUTION_LADDER.md)
-- [Native Reaper integration](docs/REAPER_INTEGRATION.md)
-- [Documentation index](docs/README.md)
+- [Bootable Stage 1 image](docs/BOOTABLE_IMAGE.md)
+- [Build contracts](docs/BUILD_CONTRACTS.md)
+- [Unified documentation standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md)
+- [Documentation rebaseline plan](docs/superpowers/plans/2026-11-26-documentation-rebaseline.md)
 
-The implementation-status ledger, bootable-image guide and project evolution ladder are the authoritative records for delivered and pending system layers.
+## History and licensing
 
-## License and legal status
+The current repository records an experimental Stage 1 boot milestone and separate host-desktop work. There is no unified semantic-version release history declared for DAK; component package versions must not be mistaken for a DAK OS release. Exact build evidence and source revisions belong in the implementation ledger and release artifacts.
 
-No LICENSE file or license declaration is present at the repository root. Do not assume MIT, Apache-2.0 or redistribution rights. A license must be selected and approved by the rights holder before distribution.
-
-Do not redistribute bundled or third-party materials outside the applicable license grants. A Git submodule pin records a source revision; it does not change ownership or license terms.
-
-## Engineering rule
-
-Describe behavior from source, tests, schemas, build output and CI evidence. A catalogue or roadmap is not proof of implementation. Browser preferences are not kernel enforcement; PE inspection is not process execution; a checksum is not proof of authorship.
-
----
-
-<p align="center"><sub>Psychoporter 666 README Standard v1.0 · Ivan-VHS · 2026-11-25 UTC</sub></p>
-
-## Contributing
-
-Read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before changing code, contracts or documentation. Keep changes reviewable, run the affected checks and describe implementation evidence accurately.
+Third-party bootloader and peer-project notices remain governed by their own upstream licenses. The release packaging workflow carries notices and source pins; it does not grant additional redistribution rights. A root project license must be selected by the rights holder before distribution terms can be stated.
