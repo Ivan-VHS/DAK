@@ -25,7 +25,7 @@ The four peer repositories remain independent Git submodules pinned at exact com
 | Service supervisor | finite restart budget | policy implemented; process manager pending |
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
-| Telemetry | bounded system samples plus an OPlague GPU telemetry policy adapter | normalized GPU records become device-labelled monotonic samples; trusted JSON ingest, native sensors and non-NVIDIA providers remain pending |
+| Telemetry | bounded system samples, Reaper OPlague GPU snapshot consumer and normalized DuckOS policy adapter | Reaper validates explicit v1 snapshots in user space; trusted DuckOS native ingest/provenance, native sensors and non-NVIDIA providers remain pending |
 | Desktop | Black/white/yellow Mora design contract, Reaper UI policies and a Qt 6 Widgets host-native shell | host-native app windows are separate from the still-pending DuckOS compositor/renderer |
 
 ## Startup contract

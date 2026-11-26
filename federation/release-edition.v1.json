@@ -28,7 +28,7 @@
       "id": "reaper",
       "repository": "Ivan-VHS/Reaper",
       "path": "projects/reaper",
-      "commit": "95605b454ecef6c01da6ef24dd8671b45798306a",
+      "commit": "e1cd8451bedad22a85bdd218d53ac174b68e26c3",
       "license": "Apache-2.0",
       "build": "CMake / C17 native CLI and FFI",
       "scope": "user-space language and toolchain"

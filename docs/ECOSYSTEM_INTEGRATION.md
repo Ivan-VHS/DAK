@@ -20,10 +20,13 @@ Exact commits are recorded in \`federation/repositories.v1.json\` and mirrored i
 | Pytyliki → Reaper | C ABI v1 | Working host interop; explicit absolute library path and ABI-version check |
 | OPlague → Reaper | Device snapshot v1 | Working read-only validation/comparison |
 | DuckOS → Reaper | Hardware inventory v1 | Working read-only host inventory audit |
-| OPlague → DuckOS | GPU telemetry v1 | Reaper policy adapter only; trusted JSON ingest still required |
-| VentuSample → Reaper | Pack manifest v1 | Specified metadata-only exchange; Reaper consumer not implemented |
+| OPlague → Reaper | GPU telemetry v1 | Reaper validates explicit v1 snapshots in read-only user space; digest is not publisher authentication |
+| OPlague → DuckOS | GPU telemetry v1 | Normalized Reaper policy adapter only; trusted native ingest and publisher/build provenance still required |
+| VentuSample → Reaper | Pack manifest v1 | Implemented metadata-only Reaper consumer for v1; no WAV reads, DSP execution or real-time audio |
 
-The GPU adapter receives a normalized record only after a trusted ingest layer validates the JSON schema and canonical digest. It does not parse JSON, authenticate the publisher, probe the GPU or grant hardware rights. UTC remains provenance; the caller supplies monotonic time. Unknown sensor values remain absent.
+The Reaper user-space GPU adapter reads explicit OPlague v1 snapshot files or supplied records, validates bounded fields and the canonical digest, and preserves unknown values. SHA-256 is integrity checking, not publisher authentication. The separate DuckOS Reaper policy bridge accepts only normalized records; trusted DuckOS native ingestion, publisher/build provenance and hardware providers remain pending.
+
+The Reaper pack-v1 consumer is metadata-only: it validates safe filenames and schema cardinality, derives 22 normalized descriptors and compares manifests. It never opens WAV data, executes DSP or starts real-time audio. Pack v2 remains a separate unsupported contract.
 
 VentuSample pack-v1 remains \`specified_only\`: a schema and integration document do not prove a consumer implementation.
 
