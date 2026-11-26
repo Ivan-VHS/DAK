@@ -102,8 +102,13 @@ def validate_manifest(data: Any) -> list[str]:
                 errors.append(f"{project_id}: {field} must be an array of repository IDs")
             elif len(set(values)) != len(values):
                 errors.append(f"{project_id}: {field} contains duplicate IDs")
-        expected_status = "native-workbench" if project_id == "reaper" else "source-pinned-only"
-        if item.get("integration_status") != expected_status:
+        expected_status = {
+            "reaper": "native-workbench",
+            "pytyliki": "native-app-launcher",
+            "oplague": "native-app-launcher",
+            "ventusample": "native-app-launcher",
+        }.get(project_id)
+        if expected_status is not None and item.get("integration_status") != expected_status:
             errors.append(f"{project_id}: integration_status must be {expected_status!r}")
         if item.get("auto_build") is not False or item.get("auto_execute") is not False:
             errors.append(f"{project_id}: automatic build and execution must remain disabled")

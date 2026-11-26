@@ -20,6 +20,7 @@ This does not make Mora the DuckOS compositor. The production compositor, window
 - Bridge / EXEdotEXE read-only PE and ELF inspection; selected targets are never executed.
 - Mora Commons search from packaged JSON data.
 - Duck Desktop and Reaper Studio process entry points.
+- Native launcher integration for Reaper, Pytyliki, OPlague and VentuSample. The launcher checks platform, checkout and build availability and opens only allowlisted entries in separate user-space processes.
 
 ## Optional toolkit adapters
 

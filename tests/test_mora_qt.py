@@ -36,9 +36,10 @@ class MoraQtDesktopTests(unittest.TestCase):
 
     def test_search_updates_the_native_launcher(self):
         window = MoraWindow()
-        self.assertIn("29 из 29", window.count_label.text())
+        total = len(window.apps)
+        self.assertIn(f"{total} из {total}", window.count_label.text())
         window.search_entry.setText("EXEdotEXE")
-        self.assertIn("1 из 29", window.count_label.text())
+        self.assertIn(f"1 из {total}", window.count_label.text())
         window.close()
 
     def test_qt_quick_scene_compiles_to_a_native_qml_window(self):

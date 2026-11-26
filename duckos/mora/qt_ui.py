@@ -13,8 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QDateTime, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QDesktopServices, QFont, QKeySequence, QShortcut
+from PySide6.QtCore import QDateTime, Qt, QTimer, Signal
+from PySide6.QtGui import QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -40,6 +40,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..desktop.native_apps import NativeApplicationError, NativeApplicationHub
+
 from .model import (
     build_intent_plan,
     calculate_sha256,
@@ -63,6 +65,10 @@ ACCENT_HOVER = "#FFE45C"
 ON_ACCENT = "#080808"
 
 APP_DESCRIPTIONS = {
+    "reaper": ("Язык и инструменты разработки", "Нативная Reaper Studio запускается в отдельном пользовательском процессе."),
+    "pytyliki": ("Процессорная рабочая станция", "Нативное Win32-приложение для инвентаризации CPU, измерений и системных отчётов. Запуск доступен после сборки на Windows."),
+    "oplague": ("Диагностика устройств и драйверов", "Нативная рабочая станция для локального анализа устройств, пакетов и игровых метрик. Live PnP-инвентаризация работает на Windows."),
+    "ventusample": ("Генератор семплов и DSP", "Нативная Qt 6 / C++20 рабочая станция. Запуск доступен после сборки upstream-проекта."),
     "cockos": ("Аудио и музыкальные проекты", "Карточка аудио-направления. Аудиодвижок, запись и управление системными аудиосессиями подключаются отдельными службами."),
     "kavun": ("Фотографии и медиатека", "Карточка медиатеки. Индексация фотографий, импорт и обработка требуют отдельного нативного модуля."),
     "kabon": ("Личные финансы", "Карточка финансового пространства. Банковские подключения и платёжные операции здесь не выполняются."),
@@ -105,6 +111,7 @@ MATURITY_LABELS = {
     "external_native_workbench": "Внешний нативный инструмент",
     "partial_native_userland_tool": "Нативная пользовательская утилита",
     "implemented_local_catalog": "Локальный каталог",
+    "external_native_workbench": "Отдельное нативное приложение",
 }
 
 
@@ -136,6 +143,7 @@ class MoraWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.preferences = load_preferences()
+        self.native_apps = NativeApplicationHub()
         registry = _read_packaged_json("apps.json", {"built_in_apps": []})
         commons = _read_packaged_json("commons-catalog.json", {"apps": [], "categories": []})
         self.apps = list(registry.get("built_in_apps", []))
@@ -471,6 +479,9 @@ class MoraWindow(QMainWindow):
     def open_app(self, app_id: str) -> None:
         if app_id == "reaper":
             self._open_reaper()
+            return
+        if app_id in {"pytyliki", "oplague", "ventusample"}:
+            self._open_native_project_app(app_id)
             return
         app = self.apps_by_id.get(app_id)
         if app is None:
@@ -854,6 +865,56 @@ class MoraWindow(QMainWindow):
         launch.clicked.connect(start)
         dialog.exec()
 
+    def _open_native_project_app(self, app_id: str) -> None:
+        try:
+            state = self.native_apps.inspect(app_id)
+        except (NativeApplicationError, OSError, ValueError, RuntimeError) as error:
+            QMessageBox.critical(self, "Нативное приложение", str(error))
+            return
+
+        dialog = QDialog(self)
+        name = str(state.get("name", app_id))
+        dialog.setWindowTitle(f"{name} — DuckOS")
+        dialog.resize(680, 420)
+        layout = QVBoxLayout(dialog)
+        layout.addWidget(self._label(name, "SectionTitle"))
+        layout.addWidget(self._label(
+            "Отдельное нативное окно · пользовательский процесс · без браузерного исполнения",
+            "Muted",
+        ))
+
+        report = QPlainTextEdit()
+        report.setReadOnly(True)
+        report.setPlainText(_json_text(state))
+        layout.addWidget(report, 1)
+
+        actions = QHBoxLayout()
+        launch = QPushButton("Открыть приложение")
+        launch.setObjectName("Primary")
+        launch.setEnabled(bool(state.get("available")))
+        close = QPushButton("Закрыть")
+        close.clicked.connect(dialog.accept)
+        actions.addWidget(launch)
+        actions.addWidget(close)
+        actions.addStretch(1)
+        layout.addLayout(actions)
+
+        def start() -> None:
+            try:
+                process = self.native_apps.open(app_id)
+            except (NativeApplicationError, OSError, ValueError, RuntimeError) as error:
+                QMessageBox.critical(dialog, name, str(error))
+                return
+            QMessageBox.information(
+                dialog,
+                name,
+                f"{name} открыт в отдельном процессе. PID: {process.pid}",
+            )
+            dialog.accept()
+
+        launch.clicked.connect(start)
+        dialog.exec()
+
     def _build_commons_panel(self, layout: QVBoxLayout) -> None:
         controls = QHBoxLayout()
         search = QLineEdit()
@@ -916,9 +977,7 @@ class MoraWindow(QMainWindow):
         ))
         button = QPushButton("Открыть проект OPlague")
         button.setObjectName("Primary")
-        button.clicked.connect(lambda: QDesktopServices.openUrl(
-            QUrl("https://github.com/Ivan-VHS/OPlague")
-        ))
+        button.clicked.connect(lambda: self._open_native_project_app("oplague"))
         layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignLeft)
 
     def _build_catalog_panel(

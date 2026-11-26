@@ -20,13 +20,14 @@
       "integration_mode": [
         "versioned C ABI",
         "JSON evidence reports",
-        "user-space inspection adapter"
+        "user-space inspection adapter",
+        "native Windows GUI launcher when the Win32 target is built"
       ],
       "runtime_boundary": "user-space",
       "build_system": "CMake / C11",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "source-pinned-only",
+      "integration_status": "native-app-launcher",
       "auto_build": false,
       "auto_execute": false
     },
@@ -69,13 +70,14 @@
       "responsibility": "Read-only device and driver inventory, package and PE inspection, signature evidence, hashes and SBOM metadata.",
       "integration_mode": [
         "read-only user-space service",
-        "versioned JSON evidence reports"
+        "versioned JSON evidence reports",
+        "native Python/Tk workbench launcher"
       ],
       "runtime_boundary": "user-space-read-only",
       "build_system": "Python 3.10+ / Tkinter; Windows live inventory",
       "depends_on": [],
       "optional_dependencies": [],
-      "integration_status": "source-pinned-only",
+      "integration_status": "native-app-launcher",
       "auto_build": false,
       "auto_execute": false
     },
@@ -93,7 +95,8 @@
       "integration_mode": [
         "versioned C/C++ library boundary",
         "offline render jobs",
-        "JSON manifests"
+        "JSON manifests",
+        "native Qt 6 desktop launcher when the target is built"
       ],
       "runtime_boundary": "user-space-offline-by-default",
       "build_system": "CMake / C++20; optional Qt 6 desktop",
@@ -101,7 +104,7 @@
       "optional_dependencies": [
         "reaper"
       ],
-      "integration_status": "source-pinned-only",
+      "integration_status": "native-app-launcher",
       "auto_build": false,
       "auto_execute": false
     }
@@ -116,6 +119,8 @@
     "Pytyliki and OPlague hardware inspection remains read-only; no clock, voltage, firmware, device or driver writes.",
     "VentuSample processing is offline by default; real-time audio and device access need a separate reviewed OS service contract.",
     "Validate licenses, provenance, schema versions and dependency boundaries before creating a native cross-project link.",
-    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image."
+    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image.",
+    "DuckOS native application discovery uses a fixed allowlist, verifies each entry point inside its pinned project checkout, and launches only after explicit user action with shell execution disabled.",
+    "Native application availability is platform- and build-dependent; missing binaries remain unavailable and are never built or launched automatically."
   ]
 }

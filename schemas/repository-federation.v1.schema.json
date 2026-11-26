@@ -126,7 +126,8 @@
           "integration_status": {
             "enum": [
               "source-pinned-only",
-              "native-workbench"
+              "native-workbench",
+              "native-app-launcher"
             ]
           },
           "auto_build": {

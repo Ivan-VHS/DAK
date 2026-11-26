@@ -104,6 +104,12 @@ def main(argv: list[str] | None = None) -> int:
     mora_commands.add_parser("scene", help="open the native Qt Quick declarative scene preview")
     mora_commands.add_parser("bridges", help="report available native platform bridge capabilities")
 
+    apps = commands.add_parser("apps", help="discover and open native specialist applications")
+    apps_commands = apps.add_subparsers(dest="apps_command", required=True)
+    apps_commands.add_parser("list", help="show installed source checkouts and built native apps")
+    app_open = apps_commands.add_parser("open", help="open one registered native application")
+    app_open.add_argument("app_id", choices=("reaper", "pytyliki", "oplague", "ventusample"))
+
     terminal = commands.add_parser(
         "terminal", help="open the separate DuckOS extended terminal"
     )
@@ -300,6 +306,24 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "desktop" and args.desktop_command == "gui":
             from .desktop.native_ui import run_native_desktop
             return run_native_desktop()
+        elif args.command == "apps":
+            from .desktop.native_apps import NativeApplicationHub
+
+            hub = NativeApplicationHub()
+            if args.apps_command == "list":
+                result = {
+                    "schema": "duckos.native-applications.v1",
+                    "applications": hub.inspect_all(),
+                }
+            else:
+                process = hub.open(args.app_id)
+                result = {
+                    "schema": "duckos.native-app-launch.v1",
+                    "app_id": args.app_id,
+                    "started": True,
+                    "pid": process.pid,
+                    "shell": False,
+                }
         elif args.command == "reaper":
             from .desktop.reaper import ReaperWorkbench
 

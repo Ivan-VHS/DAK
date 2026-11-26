@@ -47,6 +47,20 @@ duckos reaper typecheck ./examples/program.rpr
 
 Reaper Studio is also available directly from the native Mora launcher and through `duckos reaper studio`. Native launch is handled by the DuckOS user-space integration. See [Native Reaper integration](docs/REAPER_INTEGRATION.md).
 
+## Native specialist application launcher
+
+The native Mora catalogue exposes the four federated projects as separate user-space applications. Reaper keeps its existing Studio workbench; Pytyliki opens its Windows GUI when built; OPlague opens its Python/Tk workbench; VentuSample opens its Qt 6 workstation when built. The launcher checks project paths, platform support and binary availability before enabling the Open action. It never runs a shell command or builds imported projects automatically.
+
+```sh
+duckos apps list
+duckos apps open reaper
+duckos apps open pytyliki
+duckos apps open oplague
+duckos apps open ventusample
+```
+
+Build and platform requirements are documented in [Native specialist applications](docs/NATIVE_PROJECT_APPLICATIONS.md).
+
 ## Visual system and offline support
 
 The portable palette and geometry tokens are maintained in [mora/theme.json](mora/theme.json). The application registry and visual tokens are packaged as JSON resources; no web cache or browser runtime is part of the native application.

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.5.0",
   "shell": {
     "id": "ivan-vhs.duckos.mora",
     "name": "Mora",
@@ -230,6 +230,60 @@
       "maturity": "implemented_local_catalog",
       "runtime": "pyside6",
       "scope": "user-space"
+    },
+    {
+      "id": "reaper",
+      "name": "Reaper",
+      "category": "development",
+      "maturity": "external_native_workbench",
+      "runtime": "python",
+      "scope": "user-space",
+      "source": "projects/reaper",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ]
+    },
+    {
+      "id": "pytyliki",
+      "name": "Pytyliki",
+      "category": "compute",
+      "maturity": "external_native_workbench",
+      "runtime": "win32-native",
+      "scope": "user-space",
+      "source": "projects/pytyliki",
+      "platforms": [
+        "windows"
+      ]
+    },
+    {
+      "id": "oplague",
+      "name": "OPlague",
+      "category": "system",
+      "maturity": "external_native_workbench",
+      "runtime": "python-tk",
+      "scope": "user-space",
+      "source": "projects/oplague",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ]
+    },
+    {
+      "id": "ventusample",
+      "name": "VentuSample",
+      "category": "audio",
+      "maturity": "external_native_workbench",
+      "runtime": "qt6-cxx20",
+      "scope": "user-space",
+      "source": "projects/ventusample",
+      "platforms": [
+        "windows",
+        "linux",
+        "macos"
+      ]
     }
   ],
   "widgets": [
@@ -246,8 +300,15 @@
   ],
   "integration": {
     "manifest_schema": "mora/app-manifest.schema.json",
-    "external_launch": "specified_not_enabled",
-    "execution_rule": "A future native launcher must resolve trusted installed paths and require explicit operator approval. Never execute manifest commands through a shell."
+    "external_launch": "implemented_allowlisted_user_space_launcher",
+    "execution_rule": "Only fixed registered project IDs and verified entry points inside pinned projects checkouts can launch after explicit user action. Use argv with shell=false; never build or execute manifest-provided commands.",
+    "launcher_module": "duckos.desktop.native_apps.NativeApplicationHub",
+    "registered_project_apps": [
+      "reaper",
+      "pytyliki",
+      "oplague",
+      "ventusample"
+    ]
   },
   "system_services": [
     {
