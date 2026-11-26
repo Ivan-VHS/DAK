@@ -1,0 +1,16 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { validateEcosystem } from "../tools/validate_ecosystem.mjs";
+const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),"..");
+const read=path=>JSON.parse(readFileSync(resolve(ROOT,path),"utf8"));
+const graph=read("federation/integration-graph.v1.json"),registry=read("federation/repositories.v1.json"),workbenches=read("federation/mora-workbenches.v1.json");
+test("graph matches all four exact source pins and evidence paths",()=>assert.deepEqual(validateEcosystem(graph,registry,workbenches,ROOT),[]));
+test("license mismatch is rejected",()=>{const g=structuredClone(graph);g.projects.find(x=>x.id==="pytyliki").license="Apache-2.0";assert.ok(validateEcosystem(g,registry,workbenches,ROOT).some(x=>x.includes("license")));});
+test("stale commit pin is rejected",()=>{const g=structuredClone(graph);g.projects.find(x=>x.id==="reaper").pinned_commit="0".repeat(40);assert.ok(validateEcosystem(g,registry,workbenches,ROOT).some(x=>x.includes("commit pin")));});
+test("invented source evidence is rejected",()=>{const g=structuredClone(graph);g.interfaces[0].artifacts.push("projects/pytyliki/src/no-such-file.c");assert.ok(validateEcosystem(g,registry,workbenches,ROOT).some(x=>x.includes("no-such-file.c")));});
+test("peer tools cannot be auto-executed",()=>{const g=structuredClone(graph);g.projects.find(x=>x.id==="oplague").auto_execute=true;assert.ok(validateEcosystem(g,registry,workbenches,ROOT).some(x=>x.includes("auto build/execute")));});
+test("VentuSample consumer maturity cannot be overstated",()=>{const g=structuredClone(graph);g.interfaces.find(x=>x.id==="ventusample.reaper.pack.v1").status="implemented_interop";assert.ok(validateEcosystem(g,registry,workbenches,ROOT).some(x=>x.includes("specified_only")));});
+test("GPU telemetry remains a policy adapter pending trusted ingest",()=>{const g=structuredClone(graph);g.interfaces.find(x=>x.id==="oplague.duckos.gpu-telemetry.v1").status="implemented_interop";assert.ok(validateEcosystem(g,registry,workbenches,ROOT).some(x=>x.includes("policy_adapter_only")));});

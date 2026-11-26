@@ -1,4 +1,4 @@
-name: Mora native desktop
+name: DAK native desktop
 
 on:
   pull_request:
@@ -6,12 +6,18 @@ on:
     paths:
       - "CMakeLists.txt"
       - "mora/**"
+      - "desktop/**"
+      - "duckos/ui/**"
+      - "contract_tests.rpr"
       - ".github/workflows/native-mora.yml"
   push:
     branches: [main, "feat/**"]
     paths:
       - "CMakeLists.txt"
       - "mora/**"
+      - "desktop/**"
+      - "duckos/ui/**"
+      - "contract_tests.rpr"
       - ".github/workflows/native-mora.yml"
   workflow_dispatch:
 
@@ -33,10 +39,10 @@ jobs:
           cmake -S . -B build/native-mora -G Ninja
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_TESTING=ON
-          -DDUCKOS_BUILD_NATIVE_MORA=ON
+          -DDAK_BUILD_NATIVE_DESKTOP=ON
       - name: Build
-        run: cmake --build build/native-mora --target duckos_mora_native --parallel 2
+        run: cmake --build build/native-mora --target dak_desktop_native --parallel 2
       - name: Native window and navigation smoke test
         env:
           QT_QPA_PLATFORM: offscreen
-        run: ctest --test-dir build/native-mora --output-on-failure -R duckos-mora-native-smoke
+        run: ctest --test-dir build/native-mora --output-on-failure -R dak-native-desktop-smoke

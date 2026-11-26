@@ -1,5 +1,5 @@
-# DuckOS single-palette design contract.
-# 65% black, 25% white and 10% yellow.
+# DAK single-palette design contract — Ivan-VHS.
+# Imperial Noir & Glass: black canvas, white information, restrained warm gold.
 
 export craft palette_ratios() {
     yield [65, 25, 10]
@@ -14,28 +14,28 @@ export craft palette_valid(ratios) {
 
 export craft palette_color(role) {
     when role == "page" {
-        yield "#080808"
+        yield "#050505"
     }
     when role == "surface" {
-        yield "#151515"
+        yield "#101010"
     }
     when role == "elevated" {
-        yield "#242424"
+        yield "#171717"
     }
     when role == "navigation" {
-        yield "#FFD400"
+        yield "#FFD700"
     }
     when role == "accent" {
-        yield "#FFD400"
+        yield "#FFD700"
     }
     when role == "alert" {
-        yield "#FFD400"
+        yield "#FFD700"
     }
     when role == "border" {
-        yield "#3A3A3A"
+        yield "#343434"
     }
     when role == "focus" {
-        yield "#FFE45C"
+        yield "#FFE6A3"
     }
     yield "#FFFFFF"
 }

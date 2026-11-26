@@ -1,0 +1,84 @@
+# DAK native desktop shell and session policy.
+# Author: Ivan-VHS
+# This module validates user-session requests; it is not a kernel window manager.
+
+export craft workspace_id_valid(workspace_id) {
+    yield workspace_id == "main" or workspace_id == "engineering" or workspace_id == "creative" or workspace_id == "gaming"
+}
+
+export craft density_profile_valid(profile) {
+    yield profile == "comfortable" or profile == "standard" or profile == "compact"
+}
+
+export craft window_mode_valid(mode) {
+    yield mode == "floating" or mode == "tiled" or mode == "maximized" or mode == "fullscreen"
+}
+
+export craft window_action_valid(action, scope) {
+    when scope != "user_session" {
+        yield false
+    }
+    yield action == "inspect" or action == "focus" or action == "minimize" or action == "maximize" or action == "restore" or action == "move" or action == "resize" or action == "close"
+}
+
+export craft window_placement_valid(x, y, width, height, screen_width, screen_height) {
+    when screen_width < 320 or screen_height < 240 {
+        yield false
+    }
+    when width < 160 or height < 120 {
+        yield false
+    }
+    when width > screen_width or height > screen_height {
+        yield false
+    }
+    when x < 0 or y < 0 {
+        yield false
+    }
+    yield x + width <= screen_width and y + height <= screen_height
+}
+
+export craft window_count_valid(count, limit) {
+    when count < 0 or limit <= 0 {
+        yield false
+    }
+    yield count <= limit and limit <= 64
+}
+
+export craft focus_target_valid(target_exists, target_visible, target_enabled) {
+    yield target_exists and target_visible and target_enabled
+}
+
+export craft session_snapshot_valid(snapshot) {
+    when size(snapshot) != 7 {
+        yield false
+    }
+    when snapshot[0] != "dak.session.v1" {
+        yield false
+    }
+    when not workspace_id_valid(snapshot[1]) {
+        yield false
+    }
+    when not density_profile_valid(snapshot[2]) {
+        yield false
+    }
+    when not window_count_valid(snapshot[3], 16) {
+        yield false
+    }
+    when snapshot[4] != "" and snapshot[3] == 0 {
+        yield false
+    }
+    yield (snapshot[5] == true or snapshot[5] == false) and (snapshot[6] == true or snapshot[6] == false)
+}
+
+export craft layout_for(context) {
+    when context == "engineering" {
+        yield "editor-diagnostics-inspector"
+    }
+    when context == "creative" {
+        yield "canvas-timeline-inspector"
+    }
+    when context == "gaming" {
+        yield "library-performance-chat"
+    }
+    yield "balanced-workspace"
+}

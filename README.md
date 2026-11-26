@@ -1,153 +1,155 @@
-# DuckOS
+# 🦆 DAK — Reaper-First Operating-System Project
 
-**A Reaper-first operating-system project with a local-first desktop shell and a federated native-tooling ecosystem.**
+<p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
 
-**Project evolution:** [10-rung ladder](docs/PROJECT_EVOLUTION_LADDER.md) · [Current rung record](.github/project-ladder.v1.json)
+[![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native DAK](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20DAK)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
-<p align="center">
-  <img src="assets/readme/duckos-overview.svg" alt="DuckOS architecture overview: Stage 1 boot, Reaper policy contracts and the separate Mora host shell" width="100%">
-</p>
+> **A Reaper-first system foundation, a native host desktop and a federated local-first toolchain — with every boundary visible.**
 
-<p align="center">
-  <a href="docs/IMPLEMENTATION_STATUS.md">Mora native shell status</a> · <a href="mora/index.html">Browser preview</a> ·
-  <a href="docs/RELEASE_EDITION.md">Release edition</a> ·
-  <a href="docs/ARCHITECTURE.md">Architecture</a> ·
-  <a href="docs/IMPLEMENTATION_STATUS.md">Implementation status</a> ·
-  <a href="docs/IMPLEMENTATION_ROADMAP.md">Roadmap</a> ·
-  <a href="docs/CORE_MVP_V1.md">Core subsystem MVP</a>
-</p>
+**State:** Experimental · x86_64 Stage 1 QEMU-verified · **Version:** Stage 1 boot foundation · **README standard:** Psychoporter 666 v1.0 · **Last reviewed:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-> **Current release boundary:** DuckOS has an experimental x86_64 Stage 1 kernel image that passes QEMU BIOS and UEFI boot checks. The kernel validates the firmware handoff, allocates and clears an early 4 KiB frame, emits `DUCKOS_BOOT_OK stage=1`, and halts. Mora now has a host-native Qt 6 Widgets desktop application and a retained browser reference preview; neither is started by this Stage 1 kernel.
+<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
+
+## Quick navigation
+
+[🚀 DAK Desktop HTML demo](desktop/demo/index.html) · [Documentation](docs/README.md) · [Source](https://github.com/Ivan-VHS/DAK) · [Issues](https://github.com/Ivan-VHS/DAK/issues)
+
+## Mission & scope
+
+DAK is an experimental Reaper-first operating-system project. Its current work is intentionally split into a bootable kernel foundation, Reaper policy contracts and a host-native DAK desktop application.
+
+## Capabilities
+
+- The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, emits DUCKOS_BOOT_OK stage=1 and halts. QEMU BIOS and UEFI checks pass.
+- Reaper provides a reference policy-contract track, including 40 Core Subsystem MVP contracts. Native kernel enforcement remains pending.
+- DAK has a Qt 6 Widgets host-native desktop application with host-managed windows and a local app catalogue. It is not launched by the Stage 1 kernel.
+- desktop/demo/index.html remains available as a browser reference preview. It is not a native compositor or the kernel desktop.
+
+## DAK Desktop
+
+- The Qt 6 host-native shell opens separate top-level windows managed by the host OS; it is not the DAK kernel compositor.
+- Reaper desktop policies validate window actions, geometry, density profiles and versioned session snapshots.
+- The [interactive HTML demo](desktop/demo/index.html) runs locally; resource and device values are illustrative demo data.
+- Architecture and engineering direction: **Ivan-VHS**. See [DAK Desktop](docs/DAK_DESKTOP.md).
 
 ## System map
 
-The three implementation tracks are deliberately shown separately. A policy contract, host application and bootable kernel stage are different kinds of evidence.
-
-```mermaid
+~~~mermaid
 flowchart TB
-  subgraph BOOT["DuckOS native boot path — QEMU verified"]
-    L["Limine firmware handoff"] --> B["x86_64 Stage 1 entry"]
-    B --> V["Boot Info v1 validation"]
-    V --> F["Early 4 KiB frame allocation"]
-    F --> M["DUCKOS_BOOT_OK stage=1"]
-    M --> H["Kernel halts"]
+  subgraph BOOT["x86_64 Stage 1 — QEMU verified"]
+    L["Limine handoff"] --> B["Boot Info v1"]
+    B --> F["Early 4 KiB frame"]
+    F --> M["Serial marker / halt"]
   end
-
-  subgraph POLICY["Reaper policy and contract track"]
-    R["Reaper reference runtime"] --> C["Deterministic system contracts"]
-    C --> T["Contract tests and CI"]
+  subgraph POLICY["Reaper policy contracts"]
+    R["Reference contracts"] --> T["Contract tests"]
+    T -.-> N["Native enforcement pending"]
   end
-
-  subgraph HOST["Mora host-native application — separate from kernel"]
-    Q["Qt 6 Widgets"] --> S["Mora native shell"]
-    S --> A["Host-managed top-level windows"]
-    S --> P["Local app catalogue and panels"]
-    W["Browser reference preview — separate reference surface"]
+  subgraph HOST["DAK host desktop — separate from kernel"]
+    Q["Qt 6 Widgets"] --> W["Host-managed windows"]
+    H["Browser reference preview"]
   end
+  BOOT -.->|"desktop integration pending"| HOST
+~~~
 
-  BOOT -.->|kernel desktop integration pending| HOST
-  BOOT -.->|native runtime integration pending| POLICY
-```
+## Build native DAK
 
-## What is included
+The release-image path targets Linux x86_64 and requires Git/submodules, GCC/G++, CMake, Python 3 build tooling, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
 
-| Area | Present today | Boundary |
-|---|---|---|
-| **Mora desktop** | Qt 6 Widgets host-native shell, host-managed top-level windows, local app catalogue, Poi drafts, user-selected read-only file listing, plus browser reference preview | Native to the host OS; not yet launched inside a DuckOS user session or kernel compositor |
-| **Reaper policy layer** | Startup, memory-range, scheduling, bounded IPC, capabilities, service-restart and other deterministic reference contracts | Reference-runtime policy; not yet a privileged native kernel runtime |
-| **Core subsystem MVP** | 40 additional Reaper contracts for process, VM, VFS, network, graphics, audio, MAC, architecture/device, init and accessibility policy; tree-walk and VM contract suite | Policy validation only; no implicit process creation, page mapping, filesystem driver, network stack or hardware enforcement |
-| **x86_64 boot foundation** | Limine handoff, Boot Info v1 validation, early monotonic physical-frame allocation and serial boot marker | Stage 1 only; no process or service session |
-| **Ecosystem payload** | Pinned source, documentation, schemas, licenses, Mora assets and tested host tools | Host tools are not DuckOS kernel executables |
-| **Release pipeline** | Source-pin validation, project builds/tests, SHA-256 inventory, hybrid BIOS/UEFI ISO and QEMU boot checks | Preview source-and-tools distribution, not a complete installable OS |
+~~~sh
+cmake -S . -B build/dak-native -DCMAKE_BUILD_TYPE=Release -DDAK_BUILD_NATIVE_DESKTOP=ON
+cmake --build build/dak-native --target dak_desktop_native --parallel
+ctest --test-dir build/dak-native --output-on-failure
+~~~
 
-## Federated workbenches
-
-The four repositories below are pinned by exact Git commits in `federation/repositories.v1.json`. Their source trees and license notices remain attributable to their own projects.
-
-| Project | Role in the ecosystem | Native foundation |
-|---|---|---|
-| [Reaper](https://github.com/Ivan-VHS/Reaper) | Language, compiler tooling and system-policy contracts | C17 native track plus reference runtime |
-| [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | Processor inspection, bounded analysis and profiling | C11 core, CLI and Windows desktop |
-| [OPlague](https://github.com/Ivan-VHS/OPlague) | Read-only device/driver evidence and compatibility workbench | Local user-space inspection tools |
-| [VentuSample](https://github.com/Ivan-VHS/VentuSample) | Procedural samples and offline audio processing | C++20 core and optional Qt 6 desktop |
-
-Mora workbench panels provide local documentation, descriptions and build/test guidance. The native shell does not execute manifest command strings or grant hardware privileges. The browser version is retained only as a reference preview.
-
-## Build and run native Mora
-
-Mora's native host application uses Qt 6 Widgets. App windows are separate top-level host windows managed by Windows, Linux or another supported host desktop. It does not embed a browser engine, WebView or HTML application surface.
-
-**Linux**
-```sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
-./build/mora-native/duckos_mora_native
-```
-
-**Windows PowerShell** (with Qt 6 Widgets and its CMake package configured)
-```powershell
-cmake -S . -B build/mora-native -A x64 -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --config Release --target duckos_mora_native
-.\build\mora-native\Release\duckos_mora_native.exe
-```
-
-The optional target is skipped when Qt 6 Widgets is not found. Its native shell smoke test runs through CTest in the dedicated Mora native desktop workflow. mora/apps.json is the local catalogue source; app entries do not execute commands. Poi stores drafts in host-local application settings, Abriganza lists metadata only after a folder is selected, and the VentuSample waveform remains a visual preview until an audio engine is connected.
+The Qt desktop target is optional and is skipped when Qt 6 Widgets is not found. DAK runs as a host-native application; it is not started by the Stage 1 kernel.
 
 ## Browser reference preview
 
-The previous browser shell is retained for reference only. To open it, run ./scripts/run-mora.sh on Linux or .\scripts\run-mora.ps1 on Windows. The local server binds to 127.0.0.1.
-
-Run the browser-shell contract suite with Node.js 22+:
-
-```sh
+Linux:
+~~~sh
+./scripts/run-mora.sh
 npm test
-```
+~~~
+Windows PowerShell:
+~~~powershell
+.\scripts\run-mora.ps1
+npm test
+~~~
 
-## Build the release ISO
+The browser shell is a reference surface. It is not a native compositor and does not imply kernel integration.
 
-The reproducible release pipeline targets Linux x86_64 and expects Git/submodules, GCC/G++, CMake, Python 3, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU and OVMF.
+## Build the release image
 
-```sh
-git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git
-cd DuckOS
-bash boot/build-release-iso.sh --work-dir build/release --output dist/DuckOS-Release-x86_64.iso
-```
+~~~sh
+bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Release-x86_64.iso
+~~~
 
-The pipeline validates repository pins, tests Mora, builds/tests the Reaper and Pytyliki host tools, builds/tests VentuSample, verifies OPlague source and tests, packages source and license notices, checks the SHA-256 inventory, and produces a hybrid BIOS/UEFI ISO. GitHub Actions runs the release pipeline and QEMU boot gates.
-
-The ISO is content-sized. It is not padded to 4 GiB: empty bytes would only increase download size without adding a filesystem, application or operating-system capability. See [Release edition](docs/RELEASE_EDITION.md) for exact payload contents and commands.
+The release pipeline validates pinned repositories, runs project builds/tests, generates a SHA-256 inventory and assembles a hybrid BIOS/UEFI ISO. This is a source-and-tools preview, not a complete installable OS.
 
 ## Kernel status and next layers
 
 | Layer | Status |
 |---|---|
-| Limine firmware handoff and Boot Info v1 validation | Implemented and QEMU-verified |
-| Early physical-frame allocation | Implemented for the Stage 1 boot path |
-| Reaper core subsystem MVP (40 contracts) | Implemented on the reference runtime; native enforcement pending |
-| Reusable memory manager, page tables and address spaces | Pending |
-| Interrupts, timers, preemptive scheduler and process model | Pending |
-| Syscall ABI, kernel-enforced capabilities and zero-copy IPC | Pending |
-| PCI/USB/ACPI discovery and isolated driver runtime | Pending |
-| Filesystem, service supervisor, installer and persistent user session | Pending |
+| Limine handoff and Boot Info v1 | Implemented; QEMU-verified |
+| Early physical-frame allocation | Implemented for Stage 1 |
+| Reaper Core Subsystem MVP | 40 reference contracts; native enforcement pending |
+| Page tables and address spaces | Pending |
+| Interrupts, timers and preemptive scheduler | Pending |
+| Process model and syscall ABI | Pending |
+| Kernel-enforced capabilities and zero-copy IPC | Pending |
+| PCI/USB/ACPI and isolated driver runtime | Pending |
+| Filesystem, service supervisor, installer and persistent session | Pending |
 | Native compositor, GPU and audio stack | Pending |
-| Freestanding native Reaper compiler/backend | Pending |
 
-There is no claim of physical-hardware qualification, Secure Boot support, a disk installer, a native Mora compositor, a general process model or kernel-enforced sandboxing. See [Implementation status](docs/IMPLEMENTATION_STATUS.md), [Core subsystem MVP](docs/CORE_MVP_V1.md) and [Architecture](docs/ARCHITECTURE.md) for the detailed evidence ledger.
+The current kernel stage stops after firmware-handoff validation and early frame allocation. It does not yet provide process isolation, driver loading, storage, networking, a persistent user session or kernel-enforced sandboxing. DAK catalogue entries do not execute manifest commands or grant hardware privileges.
 
 ## Architecture targets
 
-DuckOS now records **x86_64 as the primary target for Intel and AMD**. The architecture policy retains **Elbrus as a compatibility-preserved track**; this recognition does not claim that an Elbrus compiler backend, boot image or physical-hardware test matrix is already available. The x86_64 target is vendor-neutral and does not split Intel and AMD into incompatible code paths.
+x86_64 is the primary target for Intel and AMD. Elbrus remains a preserved compatibility track; this does not claim an available Elbrus compiler backend, boot image or physical-hardware test matrix.
 
 ## Source federation and integrity
 
-The active source set is defined in `federation/repositories.v1.json`. Initialize the exact pinned sources with:
+The active source set is pinned in federation/repositories.v1.json. Initialize the exact recorded revisions with:
 
-```sh
+~~~sh
 git submodule update --init --recursive
-```
+~~~
 
-The pre-release DuckOS repository snapshot is preserved on `archive/pre-release-snapshot-2026-11-25`. That branch preserves this repository's Git state; it does not recreate the histories of external repositories.
+The peer projects remain separate repositories with independent ownership, licenses, contracts and release cycles:
+
+- [Reaper](https://github.com/Ivan-VHS/Reaper)
+- [Pytyliki](https://github.com/Ivan-VHS/Pytyliki)
+- [OPlague](https://github.com/Ivan-VHS/OPlague)
+- [VentuSample](https://github.com/Ivan-VHS/VentuSample)
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
+- [Bootable image](docs/BOOTABLE_IMAGE.md)
+- [Core subsystem MVP](docs/CORE_MVP_V1.md)
+- [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md)
+- [Project evolution ladder](docs/PROJECT_EVOLUTION_LADDER.md)
+- [Native Reaper integration](docs/REAPER_INTEGRATION.md)
+- [Documentation index](docs/README.md)
+
+The implementation-status ledger, bootable-image guide and project evolution ladder are the authoritative records for delivered and pending system layers.
+
+## License and legal status
+
+No LICENSE file or license declaration is present at the repository root. Do not assume MIT, Apache-2.0 or redistribution rights. A license must be selected and approved by the rights holder before distribution.
+
+Do not redistribute bundled or third-party materials outside the applicable license grants. A Git submodule pin records a source revision; it does not change ownership or license terms.
 
 ## Engineering rule
 
 Describe behavior from source, tests, schemas, build output and CI evidence. A catalogue or roadmap is not proof of implementation. Browser preferences are not kernel enforcement; PE inspection is not process execution; a checksum is not proof of authorship.
+
+---
+
+<p align="center"><sub>Psychoporter 666 README Standard v1.0 · Ivan-VHS · 2026-11-25 UTC</sub></p>
+
+## Contributing
+
+Read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before changing code, contracts or documentation. Keep changes reviewable, run the affected checks and describe implementation evidence accurately.

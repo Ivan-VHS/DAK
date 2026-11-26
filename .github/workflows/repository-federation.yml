@@ -7,6 +7,9 @@ on:
       - 'projects/**'
       - 'federation/**'
       - 'schemas/repository-federation.v1.schema.json'
+      - 'schemas/ecosystem-integration-graph.v1.schema.json'
+      - 'tools/validate_ecosystem.mjs'
+      - 'tests/ecosystem-federation.test.mjs'
       - 'tools/federate_repositories.py'
       - 'tests/test_repository_federation.py'
       - '.github/workflows/repository-federation.yml'
@@ -17,6 +20,9 @@ on:
       - 'projects/**'
       - 'federation/**'
       - 'schemas/repository-federation.v1.schema.json'
+      - 'schemas/ecosystem-integration-graph.v1.schema.json'
+      - 'tools/validate_ecosystem.mjs'
+      - 'tests/ecosystem-federation.test.mjs'
       - 'tools/federate_repositories.py'
       - 'tests/test_repository_federation.py'
       - '.github/workflows/repository-federation.yml'
@@ -33,6 +39,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -40,5 +49,10 @@ jobs:
         run: python tools/federate_repositories.py validate --json
       - name: Confirm every repository is checked out at its pin
         run: python tools/federate_repositories.py status --json
+      - name: Validate cross-repository integration graph
+        run: npm run validate:ecosystem
       - name: Test federation policy
-        run: python -m unittest tests.test_repository_federation -v
+        run: |
+          python -m unittest tests.test_repository_federation -v
+          npm test
+          npm run test:ecosystem
