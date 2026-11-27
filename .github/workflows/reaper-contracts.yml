@@ -39,6 +39,18 @@ jobs:
           python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/kernel/dabi64.rpr"
           python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/security/capability_broker.rpr"
           python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/services/ipc_contract.rpr"
+
+      - name: Execute processor and SMP policy contracts on both engines
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper"
+          source="$GITHUB_WORKSPACE/DuckOS/duckos/kernel/processor_tests.rpr"
+          python -m reaper --check "$source"
+          python -m reaper "$source" | tee processor-policy-treewalk.txt
+          python -m reaper --engine vm "$source" | tee processor-policy-vm.txt
+          grep -qx "DAK_PROCESSOR_POLICY:PASS" processor-policy-treewalk.txt
+          grep -qx "DAK_PROCESSOR_POLICY:PASS" processor-policy-vm.txt
+
       - name: Run system contract suite with tree-walk engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
 
