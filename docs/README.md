@@ -14,7 +14,8 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 
 ## Learning and family experience
 
-- [Early mathematics experience v1](EARLY_MATHEMATICS_EXPERIENCE_V1.md) — age-flexible play principles, safety rules, activity content contract and cross-repository responsibilities. This is a specification, not a shipped app.
+- [Early mathematics encyclopedia (RU)](EARLY_MATHEMATICS_ENCYCLOPEDIA_RU.md) — family-facing guide from infancy to school entry, including counting, geometry, measurement, patterns, games and safety.
+- [Early mathematics experience v1](EARLY_MATHEMATICS_EXPERIENCE_V1.md) — age-flexible product principles, safety rules, activity content contract and cross-repository responsibilities. This is a specification, not a shipped app.
 
 ## Native boot and kernel
 
