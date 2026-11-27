@@ -1,6 +1,6 @@
-# DuckOS ecosystem integration
+# DAKOS ecosystem integration
 
-DuckOS is the host repository; four independently maintained peer repositories are pinned as submodules. Cloned, built, interoperable and integrated into the running kernel are different states.
+DAKOS is the host repository; four independently maintained peer repositories are pinned as submodules. Cloned, built, interoperable and integrated into the running kernel are different states.
 
 ## Source set
 
@@ -19,8 +19,8 @@ Exact commits are recorded in \`federation/repositories.v1.json\` and mirrored i
 |---|---|---|
 | Pytyliki → Reaper | C ABI v1 | Working host interop; explicit absolute library path and ABI-version check |
 | OPlague → Reaper | Device snapshot v1 | Working read-only validation/comparison |
-| DuckOS → Reaper | Hardware inventory v1 | Working read-only host inventory audit |
-| OPlague → DuckOS | GPU telemetry v1 | Reaper policy adapter only; trusted JSON ingest still required |
+| DAKOS → Reaper | Hardware inventory v1 | Working read-only host inventory audit |
+| OPlague → DAKOS | GPU telemetry v1 | Reaper policy adapter only; trusted JSON ingest still required |
 | VentuSample → Reaper | Pack manifest v1 | Specified metadata-only exchange; Reaper consumer not implemented |
 
 The GPU adapter receives a normalized record only after a trusted ingest layer validates the JSON schema and canonical digest. It does not parse JSON, authenticate the publisher, probe the GPU or grant hardware rights. UTC remains provenance; the caller supplies monotonic time. Unknown sensor values remain absent.
@@ -29,7 +29,7 @@ VentuSample pack-v1 remains \`specified_only\`: a schema and integration documen
 
 ## Build and verification
 
-\`boot/build-release-iso.sh\` and its workflow build/test the four host projects and package source, licenses/notices, host tools and checksums. Host binaries are not DuckOS kernel binaries, and the Stage 1 kernel does not launch them.
+\`boot/build-release-iso.sh\` and its workflow build/test the four host projects and package source, licenses/notices, host tools and checksums. Host binaries are not DAKOS kernel binaries, and the Stage 1 kernel does not launch them.
 
 \`\`\`sh
 git submodule update --init --recursive
@@ -45,4 +45,4 @@ The Node check verifies exact pin agreement, source/license paths, workbench met
 
 Peer executables remain user-space programs. No automatic library loading, execution, driver installation, firmware change, clock/voltage write or device mutation is permitted. Native libraries are called only through explicitly trusted paths. VentuSample remains offline by default; real-time audio needs a separately reviewed service.
 
-The current Stage 1 kernel still lacks the scheduler/task lifecycle, Ring 3 address spaces, syscall dispatcher, filesystem, package manager, service supervisor and complete native desktop runtime needed to start peer workbenches inside DuckOS. Those runtime gates are distinct from source federation.
+The current Stage 1 kernel still lacks the scheduler/task lifecycle, Ring 3 address spaces, syscall dispatcher, filesystem, package manager, service supervisor and complete native desktop runtime needed to start peer workbenches inside DAKOS. Those runtime gates are distinct from source federation.

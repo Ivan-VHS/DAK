@@ -59,12 +59,12 @@ Known open stacked chains:
 ```text
 #1 release/0.1.0-rc.1
   └─ #5 work/native-os-foundation
-      ├─ #8 feat/duckos-core-services-v2
+      ├─ #8 feat/dakos-core-services-v2
       │   └─ #18 feat/evening-courier-newsroom
       └─ #98 feat/predictive-security-native
 
 #161 feat/reaper-first-desktop-policy-core
-  ├─ #167 feat/duckos-desktop-dabi64-host-v1
+  ├─ #167 feat/dakos-desktop-dabi64-host-v1
   │   └─ #168 feat/software-framebuffer-compositor-v1
   └─ #175 feat/reaper-industrial-glass-motion-contracts
 
@@ -208,7 +208,7 @@ This section supersedes the 2026-11-26 inventory counts for planning. The origin
 
 The live scan paginated the GitHub REST pull-request and branch collections. Branch enumeration returned at least 1,106 branch rows across the five repositories; the collection shifted during pagination, so a freeze-and-rescan is required before treating the branch count as an immutable exact total. Do not delete any branch based on this count.
 
-Repository metadata reported zero forks for each of the five repositories at scan time. Tag/release enumeration found one DAK tag and one published release, `duckos-4gib-2026-11-25`, targeting commit `ece161fb9998ab7a5c50e966e6e02893ba6986b2`. No tags or releases were returned for the other four repositories in that scan.
+Repository metadata reported zero forks for each of the five repositories at scan time. Tag/release enumeration found one DAK tag and one published release, `dakos-4gib-2026-11-25`, targeting commit `ece161fb9998ab7a5c50e966e6e02893ba6986b2`. No tags or releases were returned for the other four repositories in that scan.
 
 GitHub does not expose local `git stash` entries. No local worktree/stash inventory was available to this scan; operators must preserve and inspect all local worktrees separately before any branch cleanup.
 

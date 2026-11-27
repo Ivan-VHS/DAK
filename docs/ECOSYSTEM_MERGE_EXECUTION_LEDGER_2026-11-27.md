@@ -119,10 +119,10 @@ The following are observed failures in the latest PR-triggered workflow runs ret
 
 | Repository / PR | Failed check | Failure evidence |
 |---|---|---|
-| DAK #5 | DuckOS native bring-up | `wlroots-compositor` build job failed |
-| DAK #8 | DuckOS native bring-up | Same native bring-up failure pattern |
+| DAK #5 | DAKOS native bring-up | `wlroots-compositor` build job failed |
+| DAK #8 | DAKOS native bring-up | Same native bring-up failure pattern |
 | DAK #161, #167, #168 | Reaper contract tests | System contract suite failed in the tree-walk engine |
-| DAK #165 | DuckOS CI | Mora shell `npm test` failed |
+| DAK #165 | DAKOS CI | Mora shell `npm test` failed |
 | DAK #177 | CodeQL / completeness | CodeQL C/C++ autobuild could not find a declared source file; native configure failed |
 | DAK #179 | Bootable Stage 1 ISO | Framebuffer compositor assertion failed in blend-order/clip test |
 | DAK #133 | Native desktop | Windows bundle assembly failed; Linux native desktop job succeeded |
