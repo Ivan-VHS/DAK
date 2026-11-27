@@ -96,7 +96,7 @@ assert(not mmio["write_pattern_valid"]("w1c", "read-modify-write"), "W1C read-mo
 make dma_buffer := [1, 8192, 4096, 4096, "to-device", 42, "allocated"]
 assert(dma["map_decision"](dma_buffer, 42, true) == "map-through-iommu", "DMA mapping requires owner and IOMMU")
 assert(dma["map_decision"](dma_buffer, 43, true) == "deny-ownership", "DMA buffer is process-owned")
-assert(dma["submit_transition"]([1, 8192, 4096, 4096, "to-device", 42, "mapped"])[0] == "submit-after-sync", "DMA submission transitions ownership")
+assert(dma["submit_transition"]([1, 8192, 4096, 4096, "to-device", 42, "mapped"])[0] == "sync-for-device-then-submit", "DMA submission transitions ownership")
 assert(dma["completion_transition"]([1, 8192, 4096, 4096, "to-device", 42, "device-owned"])[0] == "sync-for-cpu", "DMA completion returns buffer ownership")
 assert(dma["release_decision"]([1, 8192, 4096, 4096, "to-device", 42, "device-owned"]) == "deny-device-still-owns-buffer", "device-owned DMA buffer cannot be released")
 
