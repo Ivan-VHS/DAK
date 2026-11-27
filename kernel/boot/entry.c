@@ -6,7 +6,7 @@
 #include "frame_allocator.h"
 #include "limine.h"
 #include "interrupts.h"
-#include "framebuffer_compositor.h"
+#include "../graphics/framebuffer_compositor.h"
 
 #define SERIAL_PORT 0x3f8u
 #define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
