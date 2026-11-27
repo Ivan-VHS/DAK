@@ -11,7 +11,7 @@ export craft service_known(service_id) {
 
 export craft service_owner(service_id) {
     when service_known(service_id) {
-        yield "Ivan-VHS/DuckOS"
+        yield "Ivan-VHS/DAKOS"
     }
     yield "unassigned"
 }
@@ -64,7 +64,7 @@ export craft service_descriptor_valid(descriptor) {
     when not service_known(descriptor[0]) {
         yield false
     }
-    when descriptor[1] != "Ivan-VHS/DuckOS" or descriptor[2] != "specified" or descriptor[3] != "not_implemented" {
+    when descriptor[1] != "Ivan-VHS/DAKOS" or descriptor[2] != "specified" or descriptor[3] != "not_implemented" {
         yield false
     }
     when size(descriptor[4]) == 0 or size(descriptor[4]) > 4 {

@@ -1,4 +1,4 @@
-# Architecture policy for DuckOS release and build selection.
+# Architecture policy for DAKOS release and build selection.
 # x86_64 is the primary Intel/AMD path; Elbrus remains a named compatibility track.
 # Recognition here is not evidence of a completed Elbrus compiler or boot backend.
 
