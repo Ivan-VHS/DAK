@@ -17,12 +17,12 @@ The implementation is split into three enforceable boundaries:
 A contract returning an admission decision does not itself perform the privileged operation.
 
 ## Adopted capability map
-| CPU topology and scheduling | kernel/processor.rpr, existing kernel/scheduler.rpr and kernel/threads.rpr | ACPI/APIC topology, run queues, preemption, context switch and CPU migration |
-| Timebase and pressure response | kernel/timing.rpr and kernel/telemetry.rpr | Stable timer source, ISR accounting, atomic multi-core trace publication and deferred telemetry worker |
-| Verified update admission | kernel/patch.rpr | Trusted signature verification, inactive image storage, safe executable mapping, atomic switch and rollback backend |
 
 | Capability family | Reaper implementation | Boundary still required |
 |---|---|---|
+| CPU topology and scheduling | kernel/processor.rpr, kernel/scheduler.rpr and kernel/threads.rpr | ACPI/APIC topology, run queues, preemption, context switch and CPU migration |
+| Timebase and pressure response | kernel/timing.rpr and kernel/telemetry.rpr | Stable timer source, ISR accounting, atomic multi-core trace publication and deferred telemetry worker |
+| Verified update admission | kernel/patch.rpr | Trusted signature verification, inactive image storage, safe executable mapping, atomic switch and rollback backend |
 | Boot and architecture | `kernel/arch/x86_64.rpr`, `kernel/arch/aarch64.rpr`, existing boot contract | Firmware handoff, early memory, IDT/PIC/APIC/GIC setup and real platform bring-up |
 | Memory and virtual memory | Existing range/arena and VM policy plus architecture page checks | Physical frame allocator, page-table mutation, TLB invalidation/shootdown, swap I/O and reclamation |
 | Atomics and synchronization | `kernel/atomic.rpr`, `kernel/synchronization.rpr` | Compiler atomics, CPU instructions, scheduler-aware blocking and SMP stress tests |
