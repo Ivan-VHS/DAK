@@ -1,4 +1,4 @@
-# Reaper-first event envelope for the future native DuckOS desktop bridge.
+# Reaper-first event envelope for the future native Dak desktop bridge.
 # Policy only: this module does not implement DABI64, IPC transport or process authentication.
 # Event: [version, sequence, request_id, sender_pid, workspace_id, event_name, payload_bytes, timestamp_us].
 
