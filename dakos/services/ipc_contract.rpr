@@ -1,4 +1,4 @@
-# Bounded IPC message and mailbox admission contracts for DuckOS.
+# Bounded IPC message and mailbox admission contracts for Dak.
 # This source validates metadata only; it does not send messages or allocate buffers.
 
 craft valid_ipc_message(message) {
