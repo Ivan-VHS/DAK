@@ -207,6 +207,7 @@ jobs:
 
           owner="${GITHUB_REPOSITORY%%/*}"
           repo_name="${GITHUB_REPOSITORY#*/}"
+          # shellcheck disable=SC2016
           threads_query='query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
             repository(owner: $owner, name: $name) {
               pullRequest(number: $number) {
