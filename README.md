@@ -20,8 +20,8 @@ DAK is an experimental Reaper-first operating-system project. Its current work i
 
 ## Capabilities
 
-- The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, emits DUCKOS_BOOT_OK stage=1 and halts. QEMU BIOS and UEFI checks pass.
-- Reaper provides a reference policy-contract track, including 40 Core Subsystem MVP contracts. Native kernel enforcement remains pending.
+- The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, initializes the bounded scheduler descriptor for BSP 0, and probes CPUID topology plus MCE/MCA availability. It still does not dispatch tasks or start secondary CPUs. QEMU BIOS and UEFI checks pass.
+- Reaper provides reference policy contracts, including processor topology, scheduler admission and RAS event/recovery decisions. The new Reaper and C11 contracts are tested, while actual SMP dispatch, APIC/IPI and machine-check recovery remain pending.
 - DAK has a Qt 6 Widgets host-native desktop application with host-managed windows and a local app catalogue. It is not launched by the Stage 1 kernel.
 - desktop/demo/index.html remains available as a browser reference preview. It is not a native compositor or the kernel desktop.
 
@@ -109,14 +109,15 @@ The release pipeline validates pinned repositories, runs project builds/tests, g
 | Early physical-frame allocation | Implemented for Stage 1 |
 | Reaper Core Subsystem MVP | 40 reference contracts; native enforcement pending |
 | Page tables and address spaces | Pending |
-| Interrupts, timers and preemptive scheduler | Pending |
+| Bootstrap CPU inventory, MCE/MCA capability discovery and BSP scheduler descriptor | Implemented; BIOS/UEFI QEMU boot-tested |
+| Task dispatch, preemptive timers, AP startup, APIC/IPI and MCA record recovery | Pending |
 | Process model and syscall ABI | Pending |
 | Kernel-enforced capabilities and zero-copy IPC | Pending |
 | PCI/USB/ACPI and isolated driver runtime | Pending |
 | Filesystem, service supervisor, installer and persistent session | Pending |
 | Native compositor, GPU and audio stack | Pending |
 
-The current kernel stage stops after firmware-handoff validation and early frame allocation. It does not yet provide process isolation, driver loading, storage, networking, a persistent user session or kernel-enforced sandboxing. DAK catalogue entries do not execute manifest commands or grant hardware privileges.
+The current kernel stage now also performs read-only CPUID/MCE/MCA discovery and initializes one BSP scheduler descriptor. It still does not provide task dispatch, SMP/AP startup, timer preemption, MCA-bank capture or OS recovery, process isolation, driver loading, storage, networking, a persistent user session or kernel-enforced sandboxing. DAK catalogue entries do not execute manifest commands or grant hardware privileges.
 
 ## Architecture targets
 
