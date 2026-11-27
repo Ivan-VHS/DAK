@@ -108,7 +108,7 @@ jobs:
               --arg sha "${PR_HEAD_SHA}" \
               --argjson required "${REQUIRED_WORKFLOWS}" '
                 [.workflow_runs[]
-                  | select(.event == "pull_request" and .head_sha == $sha and .name != $self)]
+                  | select((.event == "pull_request" or .event == "push") and .head_sha == $sha and .name != $self)]
                 | sort_by(.updated_at)
                 | group_by(.name)
                 | map(.[-1]) as $latest
@@ -142,7 +142,7 @@ jobs:
               ready)
                 fingerprint="$(jq -c --arg self "${GITHUB_WORKFLOW}" --arg sha "${PR_HEAD_SHA}" '
                   [.workflow_runs[]
-                    | select(.event == "pull_request" and .head_sha == $sha and .name != $self)
+                    | select((.event == "pull_request" or .event == "push") and .head_sha == $sha and .name != $self)
                     | {id, name, status, conclusion, updated_at}]
                   | sort_by(.name)
                 ' <<< "${runs}")"
