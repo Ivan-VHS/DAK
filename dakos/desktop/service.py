@@ -116,7 +116,7 @@ def move_desktop_items_to_inbox(names: list[str], home: str | Path | None = None
                 continue
         moved.append({"name": name, "destination": str(destination)})
     return {
-        "schema": "duckos.desktop-move.v1", "moved": moved,
+        "schema": "dakos.desktop-move.v1", "moved": moved,
         "rejected": rejected, "deleted": 0, "overwritten": 0,
     }
 
@@ -248,7 +248,7 @@ def host_snapshot(*, platform_name: str | None = None) -> dict[str, Any]:
 
 def _atomic_json(path: Path, value: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(prefix=".duckos-", suffix=".tmp", dir=path.parent)
+    fd, temporary = tempfile.mkstemp(prefix=".dakos-", suffix=".tmp", dir=path.parent)
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
             json.dump(value, stream, ensure_ascii=False, indent=2)
@@ -285,8 +285,8 @@ class StartupManager:
             self.startup_dir = appdata / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
         else:
             self.startup_dir = self.home / ".config" / "autostart"
-        self.disabled_dir = Path(disabled_dir) if disabled_dir is not None else self.home / ".config" / "duckos" / "disabled-autostart"
-        self.backup_dir = Path(backup_dir) if backup_dir is not None else self.home / ".config" / "duckos" / "startup-backups"
+        self.disabled_dir = Path(disabled_dir) if disabled_dir is not None else self.home / ".config" / "dakos" / "disabled-autostart"
+        self.backup_dir = Path(backup_dir) if backup_dir is not None else self.home / ".config" / "dakos" / "startup-backups"
 
     @staticmethod
     def _id(kind: str, name: str) -> str:
@@ -394,7 +394,7 @@ class StartupManager:
             raise ValueError("Startup destination must be a regular directory")
         source.rename(target)
         return {
-            "schema": "duckos.startup-change.v1", "id": self._id("folder", name),
+            "schema": "dakos.startup-change.v1", "id": self._id("folder", name),
             "enabled": enabled, "scope": "current_user", "reversible": True, "path": str(target),
         }
 
@@ -427,7 +427,7 @@ class StartupManager:
             with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
                 winreg.SetValueEx(key, name, 0, int(record["value_type"]), record["value"])
             backup.unlink()
-            return {"schema": "duckos.startup-change.v1", "id": self._id("registry", name), "enabled": True, "scope": "current_user", "reversible": True}
+            return {"schema": "dakos.startup-change.v1", "id": self._id("registry", name), "enabled": True, "scope": "current_user", "reversible": True}
 
         if backup.exists() or backup.is_symlink():
             raise FileExistsError("A startup backup already exists; inspect or restore it first")
@@ -444,7 +444,7 @@ class StartupManager:
                     raise
         except FileNotFoundError as error:
             raise ValueError("Startup registry value was not found") from error
-        return {"schema": "duckos.startup-change.v1", "id": self._id("registry", name), "enabled": False, "scope": "current_user", "reversible": True}
+        return {"schema": "dakos.startup-change.v1", "id": self._id("registry", name), "enabled": False, "scope": "current_user", "reversible": True}
 
 
 class DesktopService:
@@ -483,7 +483,7 @@ class DesktopService:
                 "detail": "Другие системные механизмы запуска могут не отображаться в этом списке.",
             })
         return {
-            "schema": "duckos.desktop-audit.v1", "generated_at_unix": int(time.time()),
+            "schema": "dakos.desktop-audit.v1", "generated_at_unix": int(time.time()),
             "scope": "current_user_read_only", "desktop": desktop,
             "startup": {"count": sum(1 for item in startup if item["enabled"]), "entries": startup},
             "resources": resources, "recommendations": recommendations,
