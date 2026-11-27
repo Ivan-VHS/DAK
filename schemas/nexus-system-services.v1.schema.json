@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/nexus-system-services.v1.schema.json",
+  "$id": "https://github.com/Ivan-VHS/DAKOS/blob/main/schemas/nexus-system-services.v1.schema.json",
   "title": "NEXUS System Services v1",
   "type": "object",
   "additionalProperties": false,
@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.nexus-system-services.v1"
+      "const": "dakos.nexus-system-services.v1"
     },
     "version": {
       "const": 1
@@ -34,7 +34,7 @@
           "const": "NEXUS"
         },
         "operating_system": {
-          "const": "DuckOS"
+          "const": "DAKOS"
         },
         "systems_language": {
           "const": "Reaper"
@@ -87,7 +87,7 @@
           },
           "owner_repository": {
             "enum": [
-              "Ivan-VHS/DuckOS",
+              "Ivan-VHS/DAKOS",
               "Ivan-VHS/Reaper",
               "unassigned"
             ]
@@ -97,7 +97,7 @@
             "uniqueItems": true,
             "items": {
               "enum": [
-                "Ivan-VHS/DuckOS",
+                "Ivan-VHS/DAKOS",
                 "Ivan-VHS/Reaper",
                 "Ivan-VHS/Pytyliki",
                 "Ivan-VHS/OPlague",
@@ -185,7 +185,7 @@
             "const": "internal_system_service"
           },
           "owner_repository": {
-            "const": "Ivan-VHS/DuckOS"
+            "const": "Ivan-VHS/DAKOS"
           },
           "maturity": {
             "const": "specified"
@@ -222,7 +222,7 @@
             "uniqueItems": true,
             "items": {
               "enum": [
-                "Ivan-VHS/DuckOS",
+                "Ivan-VHS/DAKOS",
                 "Ivan-VHS/Reaper",
                 "Ivan-VHS/Pytyliki",
                 "Ivan-VHS/OPlague",
