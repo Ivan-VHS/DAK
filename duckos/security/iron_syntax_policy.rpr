@@ -1,8 +1,8 @@
 # Pytyliki Iron Syntax v1 admission policy contract.
-//
-// This is an executable policy fixture for Reaper contract tests. It is not
-// wired into kernel admission yet. A successful result admits source metadata
-// only; it never grants hardware or process capabilities.
+#
+# This is an executable policy fixture for Reaper contract tests. It is not
+# wired into kernel admission yet. A successful result admits source metadata
+# only; it never grants hardware or process capabilities.
 
 craft iron_syntax_metadata_admission(schema, version, canonical_owner, execution_performed, record_count) {
     when schema != "pytyliki.iron-syntax-ast.v1" {
