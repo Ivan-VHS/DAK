@@ -1,4 +1,4 @@
-"""Evidence-driven policy assessment and safe session transitions for DuckOS gaming mode.
+"""Evidence-driven policy assessment and safe session transitions for Dak gaming mode.
 
 This module produces plans and capability reports. It does not set process
 priorities, CPU affinity, clocks, voltages, fan curves, driver state or registry
@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import Any
 
 CATALOG_PATH = Path(__file__).with_name("game-performance-rules.v1.json")
-CATALOG_SCHEMA = "duckos.gaming-rule-catalog.v1"
-ASSESSMENT_SCHEMA = "duckos.gaming-policy-assessment.v1"
+CATALOG_SCHEMA = "dakos.gaming-rule-catalog.v1"
+ASSESSMENT_SCHEMA = "dakos.gaming-policy-assessment.v1"
 MAX_CATALOG_BYTES = 512 * 1024
 SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 DOMAINS = {"detection", "cpu", "memory", "graphics", "io", "power"}
@@ -184,11 +184,11 @@ def assess_capability_document(document: dict[str, Any] | None = None) -> dict[s
         return assess_capabilities({})
     if not isinstance(document, dict):
         raise GamingPolicyError("capability document must be an object")
-    if document.get("schema") == "oplague.duckos-gaming-evidence.v1":
+    if document.get("schema") == "oplague.dakos-gaming-evidence.v1":
         if document.get("system_mutations_performed") is not False:
             raise GamingPolicyError("OPlague evidence must be read-only")
         return assess_capabilities(document.get("providers"))
-    if document.get("schema") == "duckos.gaming-provider-evidence.v1":
+    if document.get("schema") == "dakos.gaming-provider-evidence.v1":
         if document.get("system_mutations_performed") is not False:
             raise GamingPolicyError("Pytyliki evidence must be read-only")
         if document.get("evidence_scope") != "whole_host":
@@ -218,7 +218,7 @@ def build_session_profile(
     if not isinstance(multithreaded, bool) or not isinstance(audio_enabled, bool):
         raise GamingPolicyError("multithreaded and audio_enabled must be booleans")
     return {
-        "schema": "duckos.gaming-session-profile.v1",
+        "schema": "dakos.gaming-session-profile.v1",
         "game_id": game_id,
         "engine": engine,
         "worker_count": worker_count,
@@ -244,7 +244,7 @@ def plan_session_transition(
     key = (current_state, event)
     if key in IDEMPOTENT_EVENTS:
         return {
-            "schema": "duckos.gaming-session-transition.v1",
+            "schema": "dakos.gaming-session-transition.v1",
             "from": current_state,
             "to": current_state,
             "event": event,
@@ -265,7 +265,7 @@ def plan_session_transition(
     elif event == "snapshot_created":
         identity = {"snapshot_id": _safe_id(snapshot_id, "snapshot_id")}
     return {
-        "schema": "duckos.gaming-session-transition.v1",
+        "schema": "dakos.gaming-session-transition.v1",
         "from": current_state,
         "to": next_state,
         "event": event,
