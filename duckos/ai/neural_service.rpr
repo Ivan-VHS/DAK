@@ -55,7 +55,7 @@ craft admit_request(request) {
     when failure != "" {
         yield ["DENY", failure]
     }
-    yield ["ALLOW", request[7], request[8], "user_cpu", "no_privileged_effects"]
+    yield ["ALLOW", text(request[7]), text(request[8]), "user_cpu", "no_privileged_effects"]
 }
 
 make valid_inference := [
