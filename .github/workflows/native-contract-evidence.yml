@@ -1,0 +1,49 @@
+name: Native kernel contract and boot ISO evidence
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: ["automation/verified-build-artifacts-2026-11-28"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dak-native-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-contracts:
+    name: C11 kernel contracts and stage-1 ISO
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install ISO and boot tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build gcc binutils make curl xorriso mtools
+      - name: Configure native contracts
+        run: cmake -S . -B build-native -G Ninja -DBUILD_TESTING=ON -DDAK_BUILD_NATIVE_DESKTOP=OFF -DCMAKE_BUILD_TYPE=Release
+      - name: Compile kernel contract targets
+        run: cmake --build build-native --parallel 2
+      - name: Execute boot, allocator, GDT and IDT tests
+        run: ctest --test-dir build-native --output-on-failure --output-junit build-native/ctest-results.xml
+      - name: Build BIOS/UEFI stage-1 ISO
+        run: cmake --build build-native --target duckos-boot-iso --parallel 2
+      - name: Verify ISO checksum
+        run: sha256sum --check build-native/DuckOS-Stage1-x86_64.iso.sha256
+      - name: Publish ISO and test evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dak-stage1-x86_64-evidence
+          if-no-files-found: warn
+          path: |
+            build-native/ctest-results.xml
+            build-native/DuckOS-Stage1-x86_64.iso
+            build-native/DuckOS-Stage1-x86_64.iso.sha256
