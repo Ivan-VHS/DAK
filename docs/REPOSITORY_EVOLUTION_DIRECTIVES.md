@@ -3,7 +3,7 @@
 **Machine-readable contract:** [engineering-evolution.v1.json](../engineering-evolution.v1.json)  
 **Validator:** [validate_engineering_evolution.py](../tools/validate_engineering_evolution.py)
 
-This document translates the 20 requested directions into shared engineering rules for DuckOS, OPlague, Reaper, VentuSample and Pytyliki. It supplements each project's architecture and product contracts; it does not claim every possible capability is already implemented.
+This document translates the 20 requested directions into shared engineering rules for Dak, OPlague, Reaper, VentuSample and Pytyliki. It supplements each project's architecture and product contracts; it does not claim every possible capability is already implemented.
 
 ## How to interpret the directions
 
@@ -43,7 +43,7 @@ This document translates the 20 requested directions into shared engineering rul
 
 | Repository | Focus | Boundaries that must remain explicit |
 |---|---|---|
-| DuckOS | Mora desktop, application catalog, local system tools, build/image manifests and future native service contracts | A browser shell or preference is not a kernel, bootloader, sandbox, driver, firmware updater, NPU runtime or native Windows execution environment |
+| Dak | Mora desktop, application catalog, local system tools, build/image manifests and future native service contracts | A browser shell or preference is not a kernel, bootloader, sandbox, driver, firmware updater, NPU runtime or native Windows execution environment |
 | OPlague | Windows PnP inventory, bounded INF/ZIP/UDRV inspection, integrity evidence and candidate compatibility reports | Inspection stays read-only; no driver installation/loading, extraction/execution, registry writes or device mutation |
 | Reaper | Language frontend, Python reference runtime, IR/VM, modules, resource ledger and C17 native stages | Native loading stays explicit and opt-in; resource quotas are not a security sandbox; C17 parity needs conformance evidence |
 | VentuSample | C++20/Qt desktop, deterministic offline audio generation, DSP and versioned sample-pack exchange | Imported media remains bounded; offline rendering is not real-time playback or DAW plugin hosting |
