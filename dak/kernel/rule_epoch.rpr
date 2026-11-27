@@ -1,0 +1,146 @@
+# DAK immutable rule-model epochs.
+# A pinned model is stable for the entire install/verification transaction.
+# Native registry enforcement lives in foundation/rule_epoch.c; this module is
+# the Reaper policy contract and does not perform signature cryptography.
+
+export craft model_valid(model) {
+    when size(model) != 7 {
+        yield false
+    }
+    when model[0] == "" or model[2] == "" or model[3] == "" {
+        yield false
+    }
+    when model[1] <= 0 or model[4] <= 0 or model[4] > 4096 {
+        yield false
+    }
+    when model[5] <= 0 or model[5] > 16384 {
+        yield false
+    }
+    yield model[6] == "verified-sealed"
+}
+
+# Model: [model_id, generation, payload_digest, schema_digest,
+#         rule_count, payload_bytes, state].
+# Lease: [transaction_id, model_id, generation, payload_digest,
+#         schema_digest, rule_count, payload_bytes, state].
+export craft pin_for_install(model, transaction_id, active_install_count) {
+    when not model_valid(model) or transaction_id == "" or active_install_count < 0 {
+        yield ["deny-invalid-snapshot", nothing]
+    }
+    yield ["pinned", [
+        transaction_id, model[0], model[1], model[2], model[3],
+        model[4], model[5], "active"
+    ]]
+}
+
+export craft lease_valid(lease) {
+    when size(lease) != 8 {
+        yield false
+    }
+    when lease[0] == "" or lease[1] == "" or lease[3] == "" or lease[4] == "" {
+        yield false
+    }
+    when lease[2] <= 0 or lease[5] <= 0 or lease[6] <= 0 {
+        yield false
+    }
+    yield lease[7] == "active"
+}
+
+export craft lease_matches_model(lease, model) {
+    when not lease_valid(lease) or not model_valid(model) {
+        yield false
+    }
+    yield lease[1] == model[0] and
+        lease[2] == model[1] and
+        lease[3] == model[2] and
+        lease[4] == model[3] and
+        lease[5] == model[4] and
+        lease[6] == model[5]
+}
+
+# Publication is globally frozen while an install lease is held. A candidate
+# may be prepared off-line, but it cannot become the active verification model.
+export craft publication_decision(active_install_count, current_generation, proposed_generation) {
+    when active_install_count < 0 or current_generation < 0 or proposed_generation <= 0 {
+        yield "deny-invalid-generation"
+    }
+    when active_install_count > 0 {
+        yield "deny-model-in-use"
+    }
+    when current_generation >= 9223372036854775807 {
+        yield "deny-generation-exhausted"
+    }
+    when proposed_generation != current_generation + 1 {
+        yield "deny-nonconsecutive-generation"
+    }
+    yield "stage-verify-and-publish"
+}
+
+export craft finish_lease(lease, terminal_state) {
+    when not lease_valid(lease) {
+        yield ["deny-invalid-lease", lease]
+    }
+    when terminal_state != "completed" and terminal_state != "aborted" and terminal_state != "recovery-required" {
+        yield ["deny-invalid-terminal-state", lease]
+    }
+    yield ["released", [
+        lease[0], lease[1], lease[2], lease[3], lease[4],
+        lease[5], lease[6], terminal_state
+    ]]
+}
+
+# Required work is finite and explicit. A plan cannot be reported complete while
+# a required step is missing, duplicated, failed or silently replaced.
+export craft complete_plan(required_steps, completed_steps) {
+    when size(required_steps) == 0 or size(required_steps) != size(completed_steps) {
+        yield false
+    }
+
+    each step in required_steps {
+        when step == "" {
+            yield false
+        }
+        vary occurrences := 0
+        each other in required_steps {
+            when other == step {
+                change occurrences := occurrences + 1
+            }
+        }
+        when occurrences != 1 {
+            yield false
+        }
+
+        vary found := false
+        each completed in completed_steps {
+            when completed == step {
+                change found := true
+            }
+        }
+        when not found {
+            yield false
+        }
+    }
+
+    each completed in completed_steps {
+        vary found := false
+        each required in required_steps {
+            when required == completed {
+                change found := true
+            }
+        }
+        when not found {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft plan_terminal_action(required_steps, completed_steps, failed_step) {
+    when failed_step != "" {
+        yield "abort-or-recover"
+    }
+    when complete_plan(required_steps, completed_steps) {
+        yield "eligible-to-commit-after-independent-readback"
+    }
+    yield "incomplete-do-not-commit"
+}
