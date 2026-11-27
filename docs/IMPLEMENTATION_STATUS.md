@@ -46,6 +46,19 @@ Peer applications and host tools remain user-space programs. None is a kernel mo
 - [ ] Launch Mora inside a DuckOS user session after the process model, syscall ABI, filesystem, service supervisor, native input path and compositor exist.
 
 The Qt application is native to the host OS. It is not a kernel-owned DuckOS compositor, window manager, system service or process launcher. The bootable Stage 1 image still halts before a user session.
+## DAK compact atomic core — 2026-11-28
+
+- [x] Added the compact Reaper core module at `dak/kernel/core.rpr`, composing the existing memory, VM, process, atomic-order and scheduler contracts.
+- [x] Added fixed 34-byte little-endian passports, CRC32C integrity checks, AtomicRule-to-passport binding, bounded model lifecycle, dual load/risk predictor guard, five-sector application preparation, cross-application range/ID admission, explicit inter-sector grants, terminal mandatory-step commit barrier and non-overwriting bounded journal.
+- [x] Added `dak_kernel_tests.rpr` with positive and negative contract cases and connected it to the Reaper reference-tree-walk and VM CI paths.
+- [ ] Run and review the new CI checks before marking the Reaper contract suite verified.
+- [ ] Connect passport ownership and sector ranges to the real physical frame allocator and page tables.
+- [ ] Replace verifier receipts with trusted cryptographic signature verification and bind model immutability to read-only mappings.
+- [ ] Implement kernel-enforced IPC, process identity, per-sector permissions, DMA/IOMMU isolation, persistent audit journal and scheduler integration.
+- [ ] Compile freestanding Reaper kernel code and qualify the native backend on the x86_64 boot path.
+
+The compact core currently supplies executable policy contracts only. It does not allocate physical memory, enforce page permissions, verify signatures, switch CPU contexts or perform hardware IPC. These boundaries remain explicit until native backend evidence exists.
+
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.

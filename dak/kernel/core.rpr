@@ -1,0 +1,582 @@
+# DAK compact atomic core — Reaper policy and admission layer.
+# Native page tables, CPU atomics, crypto verification and context switches remain kernel adapters.
+
+import "../../duckos/kernel/memory.rpr" as memory
+import "../../duckos/kernel/vm.rpr" as vm
+import "../../duckos/kernel/process.rpr" as process
+import "../../duckos/kernel/atomic.rpr" as atomics
+import "../../duckos/kernel/scheduler.rpr" as scheduler
+
+export craft identity() {
+    yield ["DAK", "atomic-core", 1]
+}
+
+export craft u32_le(value) {
+    when value < 0 or value > 4294967295 or value % 1 != 0 { yield ["ERR", "u32-range"] }
+    vary rest := value
+    vary bytes := []
+    vary index := 0
+    loop while index < 4 {
+        make octet := rest % 256
+        change bytes := push(bytes, octet)
+        change rest := (rest - octet) // 256
+        change index := index + 1
+    }
+    yield ["OK", bytes]
+}
+
+export craft u63_le(value) {
+    when value < 0 or value > 9223372036854775807 or value % 1 != 0 { yield ["ERR", "u63-range"] }
+    vary rest := value
+    vary bytes := []
+    vary index := 0
+    loop while index < 8 {
+        make octet := rest % 256
+        change bytes := push(bytes, octet)
+        change rest := (rest - octet) // 256
+        change index := index + 1
+    }
+    yield ["OK", bytes]
+}
+
+craft xor_u32(left, right) {
+    when left < 0 or left > 4294967295 or right < 0 or right > 4294967295 {
+        yield -1
+    }
+    vary a := left
+    vary b := right
+    vary bit_value := 1
+    vary result := 0
+    vary index := 0
+    loop while index < 32 {
+        make a_bit := a % 2
+        make b_bit := b % 2
+        when a_bit != b_bit { change result := result + bit_value }
+        change a := (a - a_bit) // 2
+        change b := (b - b_bit) // 2
+        change bit_value := bit_value * 2
+        change index := index + 1
+    }
+    yield result
+}
+
+export craft crc32c(bytes) {
+    when size(bytes) > 256 { yield ["ERR", "checksum-input-too-large"] }
+    vary crc := 4294967295
+    each octet in bytes {
+        when octet < 0 or octet > 255 or octet % 1 != 0 {
+            yield ["ERR", "checksum-byte-out-of-range"]
+        }
+        change crc := xor_u32(crc, octet)
+        vary bit_index := 0
+        loop while bit_index < 8 {
+            when crc % 2 == 1 {
+                change crc := xor_u32((crc - 1) // 2, 2197175160)
+            } otherwise {
+                change crc := (crc - (crc % 2)) // 2
+            }
+            change bit_index := bit_index + 1
+        }
+    }
+    yield ["OK", xor_u32(crc, 4294967295)]
+}
+
+craft passport_content(object_class, flags, rule_id, sector_id, base, byte_count) {
+    make rule_bytes := u32_le(rule_id)
+    make sector_bytes := u32_le(sector_id)
+    make base_bytes := u63_le(base)
+    make size_bytes := u63_le(byte_count)
+    when rule_bytes[0] != "OK" or sector_bytes[0] != "OK" or base_bytes[0] != "OK" or size_bytes[0] != "OK" {
+        yield ["ERR", "passport-number-encoding-failed"]
+    }
+
+    vary bytes := [68, 65, 75, 1, object_class, flags]
+    each value in rule_bytes[1] { change bytes := push(bytes, value) }
+    each value in sector_bytes[1] { change bytes := push(bytes, value) }
+    each value in base_bytes[1] { change bytes := push(bytes, value) }
+    each value in size_bytes[1] { change bytes := push(bytes, value) }
+    yield ["OK", bytes]
+}
+
+export craft passport_create(object_class, flags, rule_id, sector_id, base, byte_count, alignment, address_limit) {
+    when object_class != 10 and object_class != 20 and object_class != 30 and object_class != 40 and object_class != 50 and object_class != 60 {
+        yield ["ERR", "unknown-object-class"]
+    }
+    when flags < 0 or flags > 255 or rule_id < 1 or sector_id < 0 {
+        yield ["ERR", "passport-identity-invalid"]
+    }
+    when rule_id > 4294967295 or sector_id > 4294967295 {
+        yield ["ERR", "passport-identifier-overflow"]
+    }
+    when not memory["region_fits"](base, byte_count, address_limit, alignment) {
+        yield ["ERR", "passport-range-invalid"]
+    }
+
+    make content := passport_content(object_class, flags, rule_id, sector_id, base, byte_count)
+    when content[0] != "OK" { yield content }
+    make checksum := crc32c(content[1])
+    when checksum[0] != "OK" { yield checksum }
+    yield ["OK", ["passport", 1, object_class, flags, rule_id, sector_id, base, byte_count, checksum[1]]]
+}
+
+export craft passport_valid(passport, address_limit, alignment) {
+    when size(passport) != 9 or passport[0] != "passport" or passport[1] != 1 {
+        yield false
+    }
+    make rebuilt := passport_create(
+        passport[2], passport[3], passport[4], passport[5],
+        passport[6], passport[7], alignment, address_limit
+    )
+    when rebuilt[0] != "OK" { yield false }
+    yield rebuilt[1] == passport
+}
+
+export craft passport_encode(passport, address_limit, alignment) {
+    when not passport_valid(passport, address_limit, alignment) {
+        yield ["ERR", "passport-validation-failed"]
+    }
+    make content := passport_content(passport[2], passport[3], passport[4], passport[5], passport[6], passport[7])
+    make checksum_bytes := u32_le(passport[8])
+    when content[0] != "OK" or checksum_bytes[0] != "OK" {
+        yield ["ERR", "passport-encoding-failed"]
+    }
+    vary wire := content[1]
+    each octet in checksum_bytes[1] {
+        change wire := push(wire, octet)
+    }
+    yield ["OK", wire]
+}
+
+export craft sector_create(app_id, kind, rule_id, base, byte_count, quota, address_limit) {
+    when app_id < 1 or app_id > 42949672 or kind < 1 or kind > 5 {
+        yield ["ERR", "sector-identity-invalid"]
+    }
+    when quota < 1 or quota > byte_count or byte_count % 4096 != 0 {
+        yield ["ERR", "sector-quota-or-size-invalid"]
+    }
+    make sector_id := app_id * 100 + kind
+    when sector_id > 4294967295 { yield ["ERR", "sector-code-overflow"] }
+    make passport := passport_create(30, 19, rule_id, sector_id, base, byte_count, 4096, address_limit)
+    when passport[0] != "OK" { yield passport }
+    yield ["OK", ["sector", app_id, kind, sector_id, base, byte_count, quota, "staged", passport[1]]]
+}
+
+craft sector_find(sectors, sector_id) {
+    vary index := 0
+    loop while index < size(sectors) {
+        when size(sectors[index]) == 9 and sectors[index][3] == sector_id {
+            yield ["OK", index]
+        }
+        change index := index + 1
+    }
+    yield ["ERR", "sector-not-found", sector_id]
+}
+
+craft sector_with_state(sector, next_state) {
+    yield ["sector", sector[1], sector[2], sector[3], sector[4], sector[5], sector[6], next_state, sector[8]]
+}
+
+export craft application_create(app_id, descriptors, address_limit) {
+    when app_id < 1 or app_id > 42949672 or size(descriptors) != 5 {
+        yield ["ERR", "application-shape-invalid"]
+    }
+
+    vary sectors := []
+    vary seen_kinds := []
+    each descriptor in descriptors {
+        when size(descriptor) != 5 { yield ["ERR", "sector-descriptor-shape-invalid"] }
+        make kind := descriptor[0]
+        when kind < 1 or kind > 5 { yield ["ERR", "sector-kind-invalid"] }
+        each previous_kind in seen_kinds {
+            when previous_kind == kind { yield ["ERR", "duplicate-sector-kind"] }
+        }
+
+        make candidate := sector_create(
+            app_id, kind, descriptor[1], descriptor[2],
+            descriptor[3], descriptor[4], address_limit
+        )
+        when candidate[0] != "OK" { yield candidate }
+        each previous in sectors {
+            when memory["ranges_overlap"](previous[4], previous[5], candidate[1][4], candidate[1][5]) {
+                yield ["ERR", "sector-ranges-overlap", previous[3], candidate[1][3]]
+            }
+        }
+        change sectors := push(sectors, candidate[1])
+        change seen_kinds := push(seen_kinds, kind)
+    }
+
+    each required_kind in [1, 2, 3, 4, 5] {
+        vary found := false
+        each actual_kind in seen_kinds {
+            when actual_kind == required_kind { change found := true }
+        }
+        when not found { yield ["ERR", "required-sector-missing", required_kind] }
+    }
+    yield ["OK", ["application", app_id, "staged", sectors]]
+}
+
+craft application_valid(application, address_limit) {
+    when size(application) != 4 or application[0] != "application" or size(application[3]) != 5 {
+        yield false
+    }
+    when application[1] < 1 or application[1] > 42949672 or (application[2] != "staged" and application[2] != "active") {
+        yield false
+    }
+
+    vary seen_kinds := []
+    vary checked_sectors := []
+    each sector in application[3] {
+        when size(sector) != 9 or sector[0] != "sector" or sector[1] != application[1] {
+            yield false
+        }
+        when sector[2] < 1 or sector[2] > 5 or sector[3] != application[1] * 100 + sector[2] {
+            yield false
+        }
+        when sector[7] != application[2] or sector[6] < 1 or sector[6] > sector[5] {
+            yield false
+        }
+        when not memory["region_fits"](sector[4], sector[5], address_limit, 4096) {
+            yield false
+        }
+        when not passport_valid(sector[8], address_limit, 4096) {
+            yield false
+        }
+        when sector[8][2] != 30 or sector[8][3] != 19 or sector[8][4] < 1 or sector[8][5] != sector[3] or sector[8][6] != sector[4] or sector[8][7] != sector[5] {
+            yield false
+        }
+        each previous_kind in seen_kinds {
+            when previous_kind == sector[2] { yield false }
+        }
+        each previous_sector in checked_sectors {
+            when memory["ranges_overlap"](previous_sector[4], previous_sector[5], sector[4], sector[5]) {
+                yield false
+            }
+        }
+        change seen_kinds := push(seen_kinds, sector[2])
+        change checked_sectors := push(checked_sectors, sector)
+    }
+
+    each required_kind in [1, 2, 3, 4, 5] {
+        vary found := false
+        each actual_kind in seen_kinds {
+            when actual_kind == required_kind { change found := true }
+        }
+        when not found { yield false }
+    }
+    yield true
+}
+
+export craft application_register(prepared, registered_apps, address_limit) {
+    when not application_valid(prepared, address_limit) or prepared[2] != "staged" {
+        yield ["ERR", "application-not-ready-for-registration"]
+    }
+    each existing in registered_apps {
+        when not application_valid(existing, address_limit) {
+            yield ["ERR", "registered-application-record-invalid"]
+        }
+        when existing[1] == prepared[1] {
+            yield ["ERR", "duplicate-application-id", prepared[1]]
+        }
+        each candidate_sector in prepared[3] {
+            each existing_sector in existing[3] {
+                when memory["ranges_overlap"](
+                    candidate_sector[4], candidate_sector[5],
+                    existing_sector[4], existing_sector[5]
+                ) {
+                    yield ["ERR", "cross-application-memory-overlap", candidate_sector[3], existing_sector[3]]
+                }
+            }
+        }
+    }
+    yield ["OK", push(registered_apps, prepared)]
+}
+
+export craft application_activate(application, registered_apps, verdicts, address_limit) {
+    when not application_valid(application, address_limit) or application[2] != "staged" {
+        yield ["ERR", "application-state-invalid"]
+    }
+    when size(verdicts) != 5 {
+        yield ["ERR", "application-verification-incomplete"]
+    }
+
+    vary registration_found := false
+    each existing in registered_apps {
+        when not application_valid(existing, address_limit) {
+            yield ["ERR", "application-registry-corrupt"]
+        }
+        when existing[1] == application[1] {
+            when registration_found or existing != application {
+                yield ["ERR", "application-registration-mismatch"]
+            }
+            change registration_found := true
+        }
+    }
+    when not registration_found { yield ["ERR", "application-not-registered"] }
+
+    vary active_sectors := []
+    each sector in application[3] {
+        vary accepted := false
+        each verdict in verdicts {
+            when size(verdict) == 2 and verdict[0] == sector[3] and verdict[1] == true {
+                change accepted := true
+            }
+        }
+        when not accepted { yield ["ERR", "sector-verification-failed", sector[3]] }
+        change active_sectors := push(active_sectors, sector_with_state(sector, "active"))
+    }
+
+    make active_application := ["application", application[1], "active", active_sectors]
+    vary updated_registry := []
+    each existing in registered_apps {
+        when existing[1] == application[1] {
+            change updated_registry := push(updated_registry, active_application)
+        } otherwise {
+            change updated_registry := push(updated_registry, existing)
+        }
+    }
+    yield ["OK", [active_application, updated_registry]]
+}
+
+export craft sector_ipc_decision(application, source_id, target_id, operation, grants, address_limit) {
+    when not application_valid(application, address_limit) or application[2] != "active" or source_id == target_id {
+        yield "deny-application-or-route"
+    }
+    when operation != "send" and operation != "receive" {
+        yield "deny-operation"
+    }
+    make source := sector_find(application[3], source_id)
+    make target := sector_find(application[3], target_id)
+    when source[0] != "OK" or target[0] != "OK" { yield "deny-unknown-sector" }
+    when application[3][source[1]][7] != "active" or application[3][target[1]][7] != "active" {
+        yield "deny-inactive-sector"
+    }
+    vary granted := false
+    each grant in grants {
+        when size(grant) == 3 and grant[0] == source_id and grant[1] == target_id and grant[2] == operation {
+            change granted := true
+        }
+    }
+    when not granted { yield "deny-missing-explicit-grant" }
+    yield "allow-policy-only"
+}
+
+export craft model_create(model_id, version, rule_ids, digest) {
+    when model_id < 1 or version < 1 or size(rule_ids) < 1 or size(rule_ids) > 64 {
+        yield ["ERR", "model-descriptor-invalid"]
+    }
+    when size(digest) != 71 { yield ["ERR", "model-digest-must-be-sha256-labelled"] }
+    when digest[0] != "s" or digest[1] != "h" or digest[2] != "a" or digest[3] != "2" or digest[4] != "5" or digest[5] != "6" or digest[6] != ":" {
+        yield ["ERR", "model-digest-prefix-invalid"]
+    }
+    vary digest_index := 7
+    loop while digest_index < 71 {
+        make digit := digest[digest_index]
+        when digit != "0" and digit != "1" and digit != "2" and digit != "3" and digit != "4" and digit != "5" and digit != "6" and digit != "7" and digit != "8" and digit != "9" and digit != "a" and digit != "b" and digit != "c" and digit != "d" and digit != "e" and digit != "f" {
+            yield ["ERR", "model-digest-hex-invalid"]
+        }
+        change digest_index := digest_index + 1
+    }
+    each rule_id in rule_ids {
+        when rule_id < 1 or rule_id > 4294967295 { yield ["ERR", "model-rule-id-invalid"] }
+    }
+    vary index := 0
+    loop while index < size(rule_ids) {
+        vary other := index + 1
+        loop while other < size(rule_ids) {
+            when rule_ids[index] == rule_ids[other] { yield ["ERR", "duplicate-model-rule"] }
+            change other := other + 1
+        }
+        change index := index + 1
+    }
+    yield ["OK", ["model", model_id, version, size(rule_ids), digest, rule_ids, "staged", false]]
+}
+
+export craft model_begin_install(model) {
+    when size(model) != 8 or model[0] != "model" or model[6] != "staged" or model[7] != false {
+        yield ["ERR", "model-cannot-enter-installation"]
+    }
+    yield ["OK", ["model", model[1], model[2], model[3], model[4], model[5], "installing", true]]
+}
+
+export craft model_finish_install(model, readback_digest, verifier_receipt) {
+    when size(model) != 8 or model[0] != "model" or model[6] != "installing" or model[7] != true {
+        yield ["ERR", "model-not-installing-or-not-locked"]
+    }
+    when readback_digest != model[4] {
+        yield ["ERR", "model-readback-mismatch"]
+    }
+    when size(verifier_receipt) != 5 or verifier_receipt[0] != "trusted-verifier" or verifier_receipt[1] != model[1] or verifier_receipt[2] != model[2] or verifier_receipt[3] != model[4] or verifier_receipt[4] != "verified" {
+        yield ["ERR", "trusted-verifier-receipt-invalid"]
+    }
+    yield ["OK", ["model", model[1], model[2], model[3], model[4], model[5], "active", true]]
+}
+
+export craft model_allows_rule(model, rule_id) {
+    when size(model) != 8 or model[0] != "model" or model[6] != "active" or model[7] != true {
+        yield false
+    }
+    vary found := false
+    each registered_rule in model[5] {
+        when registered_rule == rule_id { change found := true }
+    }
+    yield found
+}
+
+export craft model_update(model, next_version, next_digest) {
+    when size(model) != 8 or model[0] != "model" { yield ["ERR", "model-descriptor-invalid"] }
+    yield ["ERR", "model-is-immutable-create-a-new-version", model[1], next_version, next_digest]
+}
+
+export craft predictor_guard(actual_load, predicted_load, actual_risk, predicted_risk, margin, mismatch_limit, previous_errors, quarantined) {
+    when actual_load < 0 or actual_load > 100 or predicted_load < 0 or predicted_load > 100 or actual_risk < 0 or actual_risk > 100 or predicted_risk < 0 or predicted_risk > 100 or margin < 0 or margin > 100 or mismatch_limit < 0 or mismatch_limit > 100 or previous_errors < 0 or previous_errors > 255 or (quarantined != true and quarantined != false) {
+        yield ["OK", ["guard", 100, 100, true, ["all-required"], 1, "invalid-input"]]
+    }
+    when quarantined == true {
+        yield ["OK", ["guard", 100, 100, true, ["all-required"], previous_errors, "quarantined"]]
+    }
+
+    make load_delta := predicted_load - actual_load
+    when load_delta < 0 { change load_delta := 0 - load_delta }
+    make risk_delta := predicted_risk - actual_risk
+    when risk_delta < 0 { change risk_delta := 0 - risk_delta }
+    when load_delta > mismatch_limit or risk_delta > mismatch_limit {
+        make errors := previous_errors + 1
+        yield ["OK", ["guard", 100, 100, errors >= 2, ["all-required"], errors, "prediction-mismatch"]]
+    }
+
+    make load_base := actual_load
+    when predicted_load > load_base { change load_base := predicted_load }
+    make risk_base := actual_risk
+    when predicted_risk > risk_base { change risk_base := predicted_risk }
+    make load_guard := load_base + margin
+    when load_guard > 100 { change load_guard := 100 }
+    make risk_guard := risk_base + margin
+    when risk_guard > 100 { change risk_guard := 100 }
+    yield ["OK", ["guard", load_guard, risk_guard, false, ["all-required"], 0, "validated"]]
+}
+
+export craft rule_create(rule_id, priority, requires_predictor, sector_id, base, byte_count, address_limit) {
+    when rule_id < 1 or rule_id > 4294967295 or priority < 0 or priority > 255 {
+        yield ["ERR", "rule-identity-or-priority-invalid"]
+    }
+    when requires_predictor != true and requires_predictor != false {
+        yield ["ERR", "rule-predictor-flag-invalid"]
+    }
+    when sector_id < 0 or sector_id > 4294967295 {
+        yield ["ERR", "rule-sector-invalid"]
+    }
+    make flags := 19
+    when requires_predictor { change flags := flags + 8 }
+    make passport := passport_create(10, flags, rule_id, sector_id, base, byte_count, 64, address_limit)
+    when passport[0] != "OK" { yield passport }
+    yield ["OK", ["rule", rule_id, priority, true, requires_predictor, sector_id, base, byte_count, flags, passport[1]]]
+}
+
+export craft rule_valid(rule, address_limit) {
+    when size(rule) != 10 or rule[0] != "rule" or rule[3] != true {
+        yield false
+    }
+    when rule[2] < 0 or rule[2] > 255 or rule[5] < 0 or rule[5] > 4294967295 {
+        yield false
+    }
+    when rule[4] != true and rule[4] != false { yield false }
+    make expected_flags := 19
+    when rule[4] { change expected_flags := expected_flags + 8 }
+    when rule[8] != expected_flags { yield false }
+    when not passport_valid(rule[9], address_limit, 64) { yield false }
+    yield rule[9][2] == 10 and rule[9][3] == rule[8] and rule[9][4] == rule[1] and rule[9][5] == rule[5] and rule[9][6] == rule[6] and rule[9][7] == rule[7]
+}
+
+export craft rule_admit_in_model(rule, address_limit, model, ownership_ok, sector_ok, signature_ok, mandatory_checks_ok) {
+    when not rule_valid(rule, address_limit) or not model_allows_rule(model, rule[1]) {
+        yield "deny-rule-or-model"
+    }
+    when not ownership_ok or not sector_ok or not signature_ok or not mandatory_checks_ok {
+        yield "deny-invariant"
+    }
+    yield "allow-policy-only"
+}
+
+export craft rule_admit(passport_ok, ownership_ok, sector_ok, model_state, signature_ok, mandatory_checks_ok) {
+    when not passport_ok or not ownership_ok or not sector_ok or not signature_ok or not mandatory_checks_ok {
+        yield "deny-invariant"
+    }
+    when model_state != "active" { yield "deny-model-not-active" }
+    yield "allow-policy-only"
+}
+
+export craft cycle_begin(cycle_id, required_steps) {
+    when cycle_id < 1 or size(required_steps) < 1 or size(required_steps) > 64 {
+        yield ["ERR", "cycle-descriptor-invalid"]
+    }
+    vary index := 0
+    loop while index < size(required_steps) {
+        when required_steps[index] < 1 { yield ["ERR", "mandatory-step-id-invalid"] }
+        vary other := index + 1
+        loop while other < size(required_steps) {
+            when required_steps[index] == required_steps[other] { yield ["ERR", "duplicate-mandatory-step"] }
+            change other := other + 1
+        }
+        change index := index + 1
+    }
+    yield ["OK", ["cycle", cycle_id, required_steps, [], "open"]]
+}
+
+export craft cycle_record(cycle, step_id, passed) {
+    when size(cycle) != 5 or cycle[0] != "cycle" or cycle[4] != "open" {
+        yield ["ERR", "cycle-not-open"]
+    }
+    vary required := false
+    each expected in cycle[2] {
+        when expected == step_id { change required := true }
+    }
+    when not required { yield ["ERR", "unknown-mandatory-step", step_id] }
+    each completed in cycle[3] {
+        when completed == step_id { yield ["ERR", "mandatory-step-already-recorded", step_id] }
+    }
+    when passed != true {
+        yield ["ERR", ["cycle", cycle[1], cycle[2], cycle[3], "blocked"], step_id]
+    }
+    make completed_steps := push(cycle[3], step_id)
+    make next_state := "open"
+    when size(completed_steps) == size(cycle[2]) { change next_state := "ready-to-commit" }
+    yield ["OK", ["cycle", cycle[1], cycle[2], completed_steps, next_state]]
+}
+
+export craft cycle_commit(cycle) {
+    when size(cycle) != 5 or cycle[0] != "cycle" or cycle[4] != "ready-to-commit" {
+        yield ["ERR", "mandatory-cycle-incomplete"]
+    }
+    when size(cycle[2]) != size(cycle[3]) { yield ["ERR", "mandatory-step-count-mismatch"] }
+    yield ["OK", ["cycle", cycle[1], cycle[2], cycle[3], "committed"]]
+}
+
+export craft journal_append(journal, capacity, record) {
+    when capacity < 1 or size(record) != 5 { yield ["ERR", "journal-input-invalid", journal] }
+    when size(journal) >= capacity { yield ["ERR", "journal-full-no-record-discarded", journal] }
+    when record[0] < 1 { yield ["ERR", "journal-sequence-invalid", journal] }
+    when size(journal) > 0 and record[0] != journal[size(journal) - 1][0] + 1 {
+        yield ["ERR", "journal-sequence-not-monotonic", journal]
+    }
+    yield ["OK", push(journal, record)]
+}
+
+export craft process_admit(descriptor) {
+    when not process["descriptor_valid"](descriptor) { yield "deny-invalid-process" }
+    yield "allow-policy-only"
+}
+
+export craft page_mapping_admit(virtual_base, physical_base, bytes, permissions) {
+    when not vm["mapping_valid"](virtual_base, physical_base, bytes, permissions) {
+        yield "deny-invalid-mapping"
+    }
+    yield "allow-policy-only"
+}
+
+export craft atomic_admit(success_order, failure_order) {
+    yield atomics["compare_exchange_orders_valid"](success_order, failure_order)
+}
+
+export craft choose_ready_task(tasks) {
+    yield scheduler["pick_ready"](tasks)
+}

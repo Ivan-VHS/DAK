@@ -1,0 +1,125 @@
+# DAK compact atomic core contract suite.
+# Reaper policy tests only; no privileged instructions or physical mappings are invoked.
+
+import "dak/kernel/core.rpr" as core
+
+assert(core["identity"]() == ["DAK", "atomic-core", 1], "canonical DAK core identity")
+assert(core["u32_le"](305419896) == ["OK", [120, 86, 52, 18]], "u32 is serialized as four little-endian bytes")
+assert(core["u63_le"](1) == ["OK", [1, 0, 0, 0, 0, 0, 0, 0]], "u63 is serialized as eight little-endian bytes")
+assert(core["u32_le"](4294967296)[0] == "ERR", "u32 overflow is rejected")
+assert(core["u63_le"](-1)[0] == "ERR", "negative address is rejected")
+assert(core["crc32c"]([49, 50, 51, 52, 53, 54, 55, 56, 57]) == ["OK", 3808858755], "CRC32C matches the standard check vector")
+assert(core["crc32c"]([256])[0] == "ERR", "non-byte checksum input is rejected")
+
+make passport_result := core["passport_create"](30, 19, 3001, 2101, 4096, 4096, 4096, 32768)
+assert(passport_result[0] == "OK", "aligned passport is created")
+assert(core["passport_valid"](passport_result[1], 32768, 4096), "passport checksum and range pass")
+make passport_wire := core["passport_encode"](passport_result[1], 32768, 4096)
+assert(passport_wire[0] == "OK" and size(passport_wire[1]) == 34, "canonical passport serializes to 34 bytes including CRC32C")
+assert(not core["passport_valid"](["passport", 1, 30, 19, 3001, 2101, 4096, 4096, 1], 32768, 4096), "tampered passport is rejected")
+assert(core["passport_create"](30, 19, 3001, 2101, 4097, 4096, 4096, 32768)[0] == "ERR", "unaligned sector base is rejected")
+assert(core["passport_create"](30, 19, 3001, 2101, 28672, 8192, 4096, 32768)[0] == "ERR", "out-of-range sector is rejected")
+
+make digest := "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+make staged := core["model_create"](701, 1, [3001, 3002, 3003], digest)
+assert(staged[0] == "OK", "verification model can be staged")
+assert(core["model_create"](702, 1, [3001], "not-a-sha256-digest")[0] == "ERR", "malformed digest is rejected")
+assert(core["model_create"](703, 1, [3001], "sha256:gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg")[0] == "ERR", "non-hex digest is rejected")
+make installing := core["model_begin_install"](staged[1])
+assert(installing[0] == "OK" and installing[1][6] == "installing" and installing[1][7] == true, "model locks before installation")
+assert(core["model_update"](installing[1], 2, digest)[0] == "ERR", "model cannot be modified during installation")
+assert(core["model_finish_install"](installing[1], "sha256:wrong", ["trusted-verifier", 701, 1, digest, "verified"])[0] == "ERR", "model readback mismatch is rejected")
+make active_model := core["model_finish_install"](installing[1], digest, ["trusted-verifier", 701, 1, digest, "verified"])
+assert(active_model[0] == "OK" and active_model[1][6] == "active" and active_model[1][7] == true, "verified model becomes permanently locked")
+assert(core["model_update"](active_model[1], 2, digest)[0] == "ERR", "active model is immutable; updates require a new object")
+
+make guarded := core["predictor_guard"](40, 45, 25, 30, 10, 15, 0, false)
+assert(guarded[0] == "OK" and guarded[1][1] == 55 and guarded[1][2] == 40, "predictor adds a margin to load and risk separately")
+assert(guarded[1][4] == ["all-required"], "predictor cannot remove mandatory checks")
+make mismatch_once := core["predictor_guard"](20, 70, 40, 80, 10, 20, 0, false)
+assert(mismatch_once[1][1] == 100 and mismatch_once[1][2] == 100 and mismatch_once[1][3] == false, "first outlier forces maximum protection")
+make mismatch_twice := core["predictor_guard"](20, 70, 40, 80, 10, 20, 1, false)
+assert(mismatch_twice[1][3] == true, "repeated predictor mismatch enters quarantine")
+assert(core["predictor_guard"](20, 30, 15, 20, 5, 20, 0, true)[1][3] == true, "quarantine cannot clear itself")
+assert(core["predictor_guard"](20, 25, -1, 20, 5, 20, 0, false)[1][3] == true, "invalid observed risk fails closed")
+
+make app := core["application_create"](21, [
+    [1, 3001, 4096, 4096, 4096],
+    [2, 3002, 8192, 4096, 2048],
+    [3, 3003, 12288, 4096, 4096],
+    [4, 3004, 16384, 4096, 1024],
+    [5, 3005, 20480, 4096, 2048]
+], 32768)
+assert(app[0] == "OK" and size(app[1][3]) == 5, "application is prepared as one five-sector transaction")
+make app_registry := core["application_register"](app[1], [], 32768)
+assert(app_registry[0] == "OK" and size(app_registry[1]) == 1, "validated application is registered atomically")
+assert(core["application_register"](app[1], app_registry[1], 32768)[0] == "ERR", "duplicate application identity is rejected")
+make overlapping_app := core["application_create"](22, [
+    [1, 4001, 4096, 4096, 4096],
+    [2, 4002, 8192, 4096, 4096],
+    [3, 4003, 12288, 4096, 4096],
+    [4, 4004, 16384, 4096, 4096],
+    [5, 4005, 20480, 4096, 4096]
+], 32768)
+assert(overlapping_app[0] == "OK", "second application can be staged independently")
+assert(core["application_register"](overlapping_app[1], app_registry[1], 32768)[0] == "ERR", "cross-application range overlap is rejected before publication")
+assert(core["application_create"](22, [
+    [1, 3001, 4096, 4096, 4096],
+    [2, 3002, 8192, 4096, 4096],
+    [3, 3003, 12288, 4096, 4096],
+    [4, 3004, 16384, 4096, 4096],
+    [5, 3005, 16384, 4096, 4096]
+], 32768)[0] == "ERR", "overlapping sectors abort the whole preparation")
+assert(core["application_activate"](app[1], [], [[2101, true], [2102, true], [2103, true], [2104, true], [2105, true]], 32768)[0] == "ERR", "unregistered application cannot activate")
+make activation := core["application_activate"](app[1], app_registry[1], [[2101, true], [2102, true], [2103, true], [2104, true], [2105, true]], 32768)
+assert(activation[0] == "OK" and activation[1][0][2] == "active", "all five verified sectors activate together")
+make active_app := activation[1][0]
+make active_registry := activation[1][1]
+assert(active_registry[0][2] == "active", "registry receives the activated application state")
+assert(core["sector_ipc_decision"](active_app, 2101, 2102, "send", [[2101, 2102, "send"]], 32768) == "allow-policy-only", "explicit inter-sector grant is admitted")
+assert(core["sector_ipc_decision"](active_app, 2101, 2102, "send", [], 32768) == "deny-missing-explicit-grant", "inter-sector IPC denies by default")
+
+make rule := core["rule_create"](3001, 250, true, 2101, 24576, 64, 32768)
+assert(rule[0] == "OK" and core["rule_valid"](rule[1], 32768), "mandatory AtomicRule record and passport validate")
+assert(core["model_allows_rule"](active_model[1], 3001), "active model authorizes only its registered rule IDs")
+assert(not core["model_allows_rule"](active_model[1], 9999), "active model does not authorize unknown rule IDs")
+assert(core["rule_admit_in_model"](rule[1], 32768, active_model[1], true, true, true, true) == "allow-policy-only", "rule is admitted only through its verified model")
+assert(core["rule_admit_in_model"](rule[1], 32768, active_model[1], true, true, true, false) == "deny-invariant", "model membership cannot bypass mandatory checks")
+assert(not core["rule_valid"](["rule", rule[1][1], rule[1][2], rule[1][3], rule[1][4], rule[1][5], rule[1][6] + 64, rule[1][7], rule[1][8], rule[1][9]], 32768), "rule range cannot diverge from its passport")
+assert(core["rule_create"](0, 250, true, 2101, 24576, 64, 32768)[0] == "ERR", "zero rule identity is rejected")
+assert(core["rule_create"](3002, 256, false, 2101, 24576, 64, 32768)[0] == "ERR", "out-of-range rule priority is rejected")
+assert(core["rule_admit"](true, true, true, "active", true, true) == "allow-policy-only", "rule passes only after all invariants")
+assert(core["rule_admit"](true, true, true, "active", true, false) == "deny-invariant", "mandatory check failure cannot be bypassed")
+assert(core["rule_admit"](true, true, true, "installing", true, true) == "deny-model-not-active", "installing model cannot authorize rules")
+
+make cycle := core["cycle_begin"](1, [10, 20, 30])
+assert(cycle[0] == "OK", "mandatory cycle begins")
+assert(core["cycle_commit"](cycle[1])[0] == "ERR", "incomplete mandatory cycle cannot commit")
+make c1 := core["cycle_record"](cycle[1], 10, true)
+make c2 := core["cycle_record"](c1[1], 20, true)
+make c3 := core["cycle_record"](c2[1], 30, true)
+assert(c3[1][4] == "ready-to-commit", "cycle opens commit only after every required step")
+make committed_cycle := core["cycle_commit"](c3[1])
+assert(committed_cycle[0] == "OK" and committed_cycle[1][4] == "committed", "complete cycle commits to a terminal state")
+assert(core["cycle_commit"](committed_cycle[1])[0] == "ERR", "committed cycle cannot commit twice")
+assert(core["cycle_record"](committed_cycle[1], 10, true)[0] == "ERR", "completed cycle cannot accept duplicate work")
+assert(core["cycle_record"](cycle[1], 99, true)[0] == "ERR", "undeclared step cannot be recorded")
+make failed_cycle := core["cycle_record"](cycle[1], 10, false)
+assert(failed_cycle[0] == "ERR" and failed_cycle[1][4] == "blocked", "failed mandatory step blocks the cycle")
+assert(core["cycle_commit"](failed_cycle[1])[0] == "ERR", "blocked cycle cannot commit")
+
+make journal1 := core["journal_append"]([], 2, [1, 9001, 2101, 0, "boot"])
+make journal2 := core["journal_append"](journal1[1], 2, [2, 9002, 2101, 0, "ready"])
+assert(journal2[0] == "OK", "journal appends monotonic events")
+assert(core["journal_append"](journal2[1], 2, [3, 9003, 2101, 0, "overflow"])[0] == "ERR", "journal overflow is visible and never overwrites history")
+assert(core["journal_append"](journal1[1], 2, [3, 9003, 2101, 0, "gap"])[0] == "ERR", "journal sequence gaps are rejected")
+
+assert(core["process_admit"]([1, 0, 100, 1048576, 80, "running", ["fs.read"]]) == "allow-policy-only", "core composes process admission")
+assert(core["process_admit"]([1, 0]) == "deny-invalid-process", "invalid process descriptor is denied")
+assert(core["page_mapping_admit"](4096, 8192, 4096, "rw") == "allow-policy-only", "core composes page mapping policy")
+assert(core["page_mapping_admit"](4097, 8192, 4096, "rwx") == "deny-invalid-mapping", "invalid mapping is denied")
+assert(core["atomic_admit"]("acq_rel", "acquire"), "valid compare-exchange order passes")
+assert(not core["atomic_admit"]("relaxed", "seq_cst"), "invalid compare-exchange order fails")
+assert(core["choose_ready_task"]([["idle", 0, 10, "ready"], ["kernel", 10, 20, "ready"]]) == "kernel", "core composes deterministic ready-task selection")
+
+emit "DAK_ATOMIC_CORE_V1:PASS"
