@@ -1,4 +1,4 @@
-"""DuckOS release packaging and deployment planning.
+"""Dak release packaging and deployment planning.
 
 Creates deterministic, optionally signed component bundles and safe deployment
 plans. It never writes raw disks or claims to execute a firmware boot path.
@@ -22,8 +22,8 @@ from urllib.parse import quote, urlsplit
 from .image_layout import plan_image
 from .manifest import ManifestError, validate_manifest
 
-RELEASE_SCHEMA = "duckos.release.v1"
-DEPLOYMENT_SCHEMA = "duckos.deployment-plan.v1"
+RELEASE_SCHEMA = "dakos.release.v1"
+DEPLOYMENT_SCHEMA = "dakos.deployment-plan.v1"
 MAX_METADATA_BYTES = 1024 * 1024
 MAX_JSON_INTEGER_DIGITS = 1024
 MAX_JSON_NESTING_DEPTH = 128
@@ -271,8 +271,8 @@ def build_release_bundle(
 
     clean_manifest = json.loads(_json_bytes(manifest).decode("utf-8"))
     manifest_data = _json_bytes(clean_manifest)
-    work = Path(tempfile.mkdtemp(prefix=".duckos-release-", dir=output.parent))
-    stage = work / "duckos-release"
+    work = Path(tempfile.mkdtemp(prefix=".dakos-release-", dir=output.parent))
+    stage = work / "dakos-release"
     stage.mkdir()
     try:
         payload_root = stage / "payload"
@@ -313,14 +313,14 @@ def build_release_bundle(
             _sign(stage / "release.json", signing_key, stage / "release.json.sig")
 
         readme = (
-            "DuckOS release component bundle\n"
+            "Dak release component bundle\n"
             "================================\n\n"
             f"Version: {clean_manifest['version']}\n"
             f"Architecture: {clean_manifest['architecture']}\n\n"
             "This archive contains validated system components and release metadata.\n"
             "It is not an ISO, bootable USB image, or cloud disk image.\n"
             "No firmware boot, raw-disk write, installation, or hardware test was run.\n"
-            "A native DuckOS bootloader, kernel entry point, filesystem image builder,\n"
+            "A native Dak bootloader, kernel entry point, filesystem image builder,\n"
             "and target-specific verification are still required for those outputs.\n"
         )
         _write_new(stage / "README.txt", readme.encode("utf-8"))
@@ -343,7 +343,7 @@ def build_release_bundle(
     with output.open("rb") as stream:
         size, digest = _hash_stream(stream)
     return {
-        "schema": "duckos.release-build-result.v1",
+        "schema": "dakos.release-build-result.v1",
         "valid": True,
         "archive": str(output.resolve()),
         "archive_size_bytes": size,
@@ -379,7 +379,7 @@ def verify_release_bundle(
                 parts = path.parts
                 if not name or name.startswith("/") or "\\" in name or str(path) != name:
                     raise DeploymentError("release archive contains a non-canonical path")
-                if not parts or parts[0] != "duckos-release" or any(part in {"", ".", ".."} for part in parts):
+                if not parts or parts[0] != "dakos-release" or any(part in {"", ".", ".."} for part in parts):
                     raise DeploymentError(f"unsafe path in release archive: {member.name}")
                 if member.issym() or member.islnk() or not (member.isfile() or member.isdir()):
                     raise DeploymentError("release archive contains a link or unsupported entry")
@@ -392,8 +392,8 @@ def verify_release_bundle(
                     files[name] = member
 
             required = {
-                "duckos-release/manifest.json", "duckos-release/release.json",
-                "duckos-release/SHA256SUMS", "duckos-release/README.txt",
+                "dakos-release/manifest.json", "dakos-release/release.json",
+                "dakos-release/SHA256SUMS", "dakos-release/README.txt",
             }
             if not required <= files.keys():
                 raise DeploymentError("release archive is missing required metadata")
@@ -409,13 +409,13 @@ def verify_release_bundle(
                     return stream.read(limit + 1)
 
             manifest = _load_strict_json(
-                read_member("duckos-release/manifest.json"), "release manifest"
+                read_member("dakos-release/manifest.json"), "release manifest"
             )
             release = _load_strict_json(
-                read_member("duckos-release/release.json"), "release metadata"
+                read_member("dakos-release/release.json"), "release metadata"
             )
             try:
-                checksum_text = read_member("duckos-release/SHA256SUMS").decode("utf-8")
+                checksum_text = read_member("dakos-release/SHA256SUMS").decode("utf-8")
             except UnicodeDecodeError as error:
                 raise DeploymentError("release checksums are not valid UTF-8") from error
             if not isinstance(release, dict) or release.get("schema") != RELEASE_SCHEMA:
@@ -430,7 +430,7 @@ def verify_release_bundle(
 
             for component in checked["components"]:
                 relative = _safe_path(component["path"])
-                name = f"duckos-release/payload/{relative}"
+                name = f"dakos-release/payload/{relative}"
                 info = files.get(name)
                 if info is None or info.size != component["size_bytes"]:
                     raise DeploymentError(f"missing or incorrectly sized component: {relative}")
@@ -453,13 +453,13 @@ def verify_release_bundle(
                     raise DeploymentError(f"duplicate checksum path: {relative}")
                 sums[relative] = digest
             expected = {
-                name.removeprefix("duckos-release/")
-                for name in files if name != "duckos-release/SHA256SUMS"
+                name.removeprefix("dakos-release/")
+                for name in files if name != "dakos-release/SHA256SUMS"
             }
             if set(sums) != expected:
                 raise DeploymentError("SHA256SUMS does not cover exactly the release files")
             for relative, expected_hash in sums.items():
-                stream = archive.extractfile(files[f"duckos-release/{relative}"])
+                stream = archive.extractfile(files[f"dakos-release/{relative}"])
                 if stream is None:
                     raise DeploymentError(f"cannot read checksummed file: {relative}")
                 with stream:
@@ -467,16 +467,16 @@ def verify_release_bundle(
                 if actual_hash != expected_hash:
                     raise DeploymentError(f"SHA-256 mismatch: {relative}")
 
-            signature_name = "duckos-release/release.json.sig"
+            signature_name = "dakos-release/release.json.sig"
             has_signature = signature_name in files
             signature_verified = False
             if public_key is not None:
                 if not has_signature:
                     raise DeploymentError("a public key was supplied but the bundle has no signature")
-                with tempfile.TemporaryDirectory(prefix="duckos-verify-") as temporary:
+                with tempfile.TemporaryDirectory(prefix="dakos-verify-") as temporary:
                     base = Path(temporary)
                     release_file, signature_file = base / "release.json", base / "release.json.sig"
-                    _write_new(release_file, read_member("duckos-release/release.json"))
+                    _write_new(release_file, read_member("dakos-release/release.json"))
                     _write_new(signature_file, read_member(signature_name))
                     _verify_signature(release_file, signature_file, public_key)
                 signature_verified = True
@@ -486,7 +486,7 @@ def verify_release_bundle(
                 raise DeploymentError("release metadata does not match the system manifest")
 
             return {
-                "schema": "duckos.release-verification.v1",
+                "schema": "dakos.release-verification.v1",
                 "valid": True,
                 "name": manifest["name"],
                 "version": manifest["version"],
@@ -547,10 +547,10 @@ def create_deployment_plan(
     slot_bytes = max(2 * _GIB, ((rootfs_bytes * 5 // 4 + _ALIGNMENT - 1) // _ALIGNMENT) * _ALIGNMENT)
     layout = plan_image([
         {"name": "efi", "type": "efi-system", "size_bytes": 512 * _MIB},
-        {"name": "duck_system_a", "type": "duck-system", "size_bytes": slot_bytes},
-        {"name": "duck_system_b", "type": "duck-system", "size_bytes": slot_bytes},
-        {"name": "duck_recovery", "type": "duck-recovery", "size_bytes": 512 * _MIB},
-        {"name": "duck_data", "type": "duck-data", "size_bytes": data_size_bytes},
+        {"name": "dak_system_a", "type": "dak-system", "size_bytes": slot_bytes},
+        {"name": "dak_system_b", "type": "dak-system", "size_bytes": slot_bytes},
+        {"name": "dak_recovery", "type": "dak-recovery", "size_bytes": 512 * _MIB},
+        {"name": "dak_data", "type": "dak-data", "size_bytes": data_size_bytes},
     ])
 
     network = None
@@ -561,10 +561,10 @@ def create_deployment_plan(
         script = "\n".join([
             "#!ipxe",
             "dhcp || goto failed",
-            f"set duck_manifest {manifest_url}",
-            "chain --autofree " + loader + " manifest=$" + "{duck_manifest} || goto failed",
+            f"set dak_manifest {manifest_url}",
+            "chain --autofree " + loader + " manifest=$" + "{dak_manifest} || goto failed",
             ":failed",
-            "echo DuckOS network handoff failed",
+            "echo Dak network handoff failed",
             "shell",
             "",
         ])
@@ -574,7 +574,7 @@ def create_deployment_plan(
             "bootloader_url": loader,
             "manifest_url": manifest_url,
             "ipxe_script": script,
-            "manifest_verification_owner": "native-duck-bootloader",
+            "manifest_verification_owner": "native-dak-bootloader",
             "signature_enforcement_configured": False,
             "https_transport": urlsplit(base).scheme == "https",
         }
@@ -594,8 +594,8 @@ def create_deployment_plan(
         "image_layout": layout,
         "update_strategy": {
             "mode": "A/B",
-            "slots": ["duck_system_a", "duck_system_b"],
-            "initial_active_slot": "duck_system_a",
+            "slots": ["dak_system_a", "dak_system_b"],
+            "initial_active_slot": "dak_system_a",
             "rollback_policy": "native-bootloader-required",
             "implemented_by_this_plan": False,
         },
