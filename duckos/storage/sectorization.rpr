@@ -75,10 +75,25 @@ export craft sector_map_valid(extents, disk_sector_limit) {
         yield false
     }
 
-    vary valid := true
-    vary sector_bytes := extents[0][3]
+    # Validate every record before indexing it in the overlap pass.
+    vary records_valid := true
     each extent in extents {
-        when not extent_valid(extent, disk_sector_limit) or extent[3] != sector_bytes {
+        when not extent_valid(extent, disk_sector_limit) {
+            change records_valid := false
+        }
+    }
+    when not records_valid {
+        yield false
+    }
+
+    make sector_bytes := extents[0][3]
+    make ruleset_revision := extents[0][5]
+    make ruleset_digest := extents[0][6]
+    vary valid := true
+    each extent in extents {
+        when extent[3] != sector_bytes or
+            extent[5] != ruleset_revision or
+            extent[6] != ruleset_digest {
             change valid := false
         }
 
