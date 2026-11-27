@@ -13,7 +13,7 @@ not fork the language or reinterpret its operators.
 
 ## Record layouts
 
-The adapter consumes immutable positional records:
+The adapter consumes positional records and returns fresh proposed records. It validates exact list shape, field types, finite numeric values, and resource limits. Reaper's `size()` counts text characters, so the Duck adapter uses conservative worst-case UTF-8 bounds: at most 15 characters for identifiers/origins, 31 for core seeds, and 1,024 for signal payloads. This keeps a four-byte-per-code-point UTF-8 encoding within the matching 63/127/4,096-byte ABI capacities, at the cost of accepting fewer ASCII characters than the canonical byte limits. Pytyliki independently enforces the exact byte limits.
 
 | Record | Fields |
 |---|---|
@@ -21,14 +21,14 @@ The adapter consumes immutable positional records:
 | Link | `[id, origin, target, channel, blocked, weight]` |
 | Signal | `[sequence, origin, payload, trusted, manufactured]` |
 
-Every function validates the expected record length and returns either a
+Every record validator first checks that the input is a list of the expected length and returns either a
 boolean, a diagnostic tuple, or a proposed next record. It does not mutate the
 input records.
 
 ## Available policy functions
 
 - `rfs01_node_valid`, `rfs01_link_valid`, `rfs01_signal_valid`: validate the
-  three record types and their bounded field domains.
+  three record types and their bounded field domains, including the conservative UTF-8-safe character limits.
 - `rfs01_phase_open`: checks the pressure and integrity gate for a node.
 - `rfs01_pressure_reserve`: computes the normalized diagnostic reserve.
 - `rfs01_pressure_forward`: proposes a pressure transition and rejects
