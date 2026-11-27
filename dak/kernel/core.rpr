@@ -301,8 +301,8 @@ export craft model_update(model, next_version, next_digest) {
 }
 
 export craft predictor_guard(actual_load, predicted_load, predicted_risk, margin, mismatch_limit, previous_errors, quarantined) {
-    when actual_load < 0 or actual_load > 100 or predicted_load < 0 or predicted_load > 100 or predicted_risk < 0 or predicted_risk > 100 or margin < 0 or margin > 100 or mismatch_limit < 0 or previous_errors < 0 {
-        yield ["OK", ["guard", 100, 100, true, ["all-required"], previous_errors + 1, "invalid-input"]]
+    when actual_load < 0 or actual_load > 100 or predicted_load < 0 or predicted_load > 100 or predicted_risk < 0 or predicted_risk > 100 or margin < 0 or margin > 100 or mismatch_limit < 0 or previous_errors < 0 or previous_errors > 255 or (quarantined != true and quarantined != false) {
+        yield ["OK", ["guard", 100, 100, true, ["all-required"], 1, "invalid-input"]]
     }
     when quarantined == true {
         yield ["OK", ["guard", 100, 100, true, ["all-required"], previous_errors, "quarantined"]]
@@ -322,6 +322,33 @@ export craft predictor_guard(actual_load, predicted_load, predicted_risk, margin
     make risk_guard := predicted_risk + margin
     when risk_guard > 100 { change risk_guard := 100 }
     yield ["OK", ["guard", load_guard, risk_guard, false, ["all-required"], 0, "validated"]]
+}
+
+export craft rule_create(rule_id, priority, requires_predictor, sector_id, base, byte_count, address_limit) {
+    when rule_id < 1 or rule_id > 4294967295 or priority < 0 or priority > 255 {
+        yield ["ERR", "rule-identity-or-priority-invalid"]
+    }
+    when requires_predictor != true and requires_predictor != false {
+        yield ["ERR", "rule-predictor-flag-invalid"]
+    }
+    when sector_id < 0 or sector_id > 4294967295 {
+        yield ["ERR", "rule-sector-invalid"]
+    }
+    make flags := 19
+    when requires_predictor { change flags := flags + 8 }
+    make passport := passport_create(10, flags, rule_id, sector_id, base, byte_count, 64, address_limit)
+    when passport[0] != "OK" { yield passport }
+    yield ["OK", ["rule", rule_id, priority, true, requires_predictor, sector_id, base, byte_count, flags, passport[1]]]
+}
+
+export craft rule_valid(rule, address_limit) {
+    when size(rule) != 10 or rule[0] != "rule" or rule[3] != true {
+        yield false
+    }
+    when rule[2] < 0 or rule[2] > 255 or rule[5] < 0 or rule[5] > 4294967295 {
+        yield false
+    }
+    yield passport_valid(rule[9], address_limit, 64) and rule[9][2] == 10 and rule[9][4] == rule[1] and rule[9][5] == rule[5]
 }
 
 export craft rule_admit(passport_ok, ownership_ok, sector_ok, model_state, signature_ok, mandatory_checks_ok) {
@@ -375,7 +402,7 @@ export craft cycle_commit(cycle) {
         yield ["ERR", "mandatory-cycle-incomplete"]
     }
     when size(cycle[2]) != size(cycle[3]) { yield ["ERR", "mandatory-step-count-mismatch"] }
-    yield ["committed", cycle[1]]
+    yield ["OK", ["cycle", cycle[1], cycle[2], cycle[3], "committed"]]
 }
 
 export craft journal_append(journal, capacity, record) {
