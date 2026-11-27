@@ -17,6 +17,9 @@ The implementation is split into three enforceable boundaries:
 A contract returning an admission decision does not itself perform the privileged operation.
 
 ## Adopted capability map
+| CPU topology and scheduling | kernel/processor.rpr, existing kernel/scheduler.rpr and kernel/threads.rpr | ACPI/APIC topology, run queues, preemption, context switch and CPU migration |
+| Timebase and pressure response | kernel/timing.rpr and kernel/telemetry.rpr | Stable timer source, ISR accounting, atomic multi-core trace publication and deferred telemetry worker |
+| Verified update admission | kernel/patch.rpr | Trusted signature verification, inactive image storage, safe executable mapping, atomic switch and rollback backend |
 
 | Capability family | Reaper implementation | Boundary still required |
 |---|---|---|
@@ -68,3 +71,6 @@ The workflow uses the existing Reaper CLI as a test harness. It does not turn th
 - [ ] x86-64 Intel/AMD is qualified first; AArch64 and Elbrus require their own build, boot and hardware evidence.
 
 Until those gates pass, the new source files are executable contracts and deterministic algorithms, not a claim that all corresponding hardware services are already running inside DAK.
+
+
+See [Reaper Processor and Kernel Contracts v1](REAPER_PROCESSOR_KERNEL_V1.md) for the implementation matrix and verification boundaries.
