@@ -11,7 +11,7 @@
 DAK Desktop contains three separately verified layers:
 
 1. **Native host desktop.** The Qt 6 application creates separate top-level windows, uses the host OS window manager for focus and input routing, and persists local shell preferences. It is a native application on the host OS, not a kernel-launched DAK session.
-2. **Reaper policy layer.** `duckos/ui/shell_policy.rpr` validates workspace IDs, density profiles, window modes/actions, user-session scope, geometry, window counts, focus targets and versioned session snapshots. It does not allocate kernel surfaces, route hardware input or enforce process isolation.
+2. **Reaper policy layer.** `dakos/ui/shell_policy.rpr` validates workspace IDs, density profiles, window modes/actions, user-session scope, geometry, window counts, focus targets and versioned session snapshots. It does not allocate kernel surfaces, route hardware input or enforce process isolation.
 3. **HTML demo.** `desktop/demo/index.html` is a dependency-free interactive visual reference. It offers navigation, app discovery, movable demo windows, local notes and workspace presets. It does not run host commands, install packages, open arbitrary filesystem paths or launch processes. Resource/device values are labelled demo data.
 
 The x86_64 Stage 1 boot path remains unchanged. It does not launch Qt, browser content, application processes or a kernel compositor.
