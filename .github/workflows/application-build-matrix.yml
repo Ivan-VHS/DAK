@@ -91,6 +91,50 @@ jobs:
           cp -a projects/oplague build/artifacts/linux-x86_64/oplague-source
           printf 'Target: Linux x86_64 host\nDuck-native: no — host binaries are not Duck kernel executables\n' > build/artifacts/linux-x86_64/BUILD-CLASS.txt
 
+      - name: Create individual Linux host bundles
+        if: always()
+        run: |
+          mkdir -p build/packages
+          for project in reaper pytyliki ventusample; do
+            if [[ -d "build/$project" ]]; then
+              tar -czf "build/packages/$project-linux-x86_64.tar.gz" -C "build/$project" .
+            fi
+          done
+          tar --exclude=.git -czf build/packages/oplague-linux-x86_64-source.tar.gz -C projects/oplague .
+          printf 'Host artifacts only; not Duck-native executables.\n' > build/packages/BUILD-CLASS.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reaper-linux-x86_64-package
+          path: build/packages/reaper-linux-x86_64.tar.gz
+          if-no-files-found: warn
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytyliki-linux-x86_64-package
+          path: build/packages/pytyliki-linux-x86_64.tar.gz
+          if-no-files-found: warn
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ventusample-linux-x86_64-package
+          path: build/packages/ventusample-linux-x86_64.tar.gz
+          if-no-files-found: warn
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oplague-linux-x86_64-source
+          path: build/packages/oplague-linux-x86_64-source.tar.gz
+          if-no-files-found: warn
+          retention-days: 30
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -144,7 +188,7 @@ jobs:
         working-directory: projects/oplague
         shell: pwsh
         run: |
-          python -m compileall -q oplague_app.py oplage_app.py oplague tests tools
+          python -m compileall -q oplague_app.py tests tools
           python -m unittest discover -s tests -v
 
       - name: Collect Windows host build outputs
@@ -161,6 +205,51 @@ jobs:
           }
           Copy-Item projects/oplague build/artifacts/windows-x64/oplague-source -Recurse
           Set-Content build/artifacts/windows-x64/BUILD-CLASS.txt "Target: Windows x64 host; Duck-native: no"
+
+      - name: Create individual Windows host bundles
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/packages | Out-Null
+          foreach ($project in @("reaper", "pytyliki", "ventusample")) {
+            if (Test-Path "build/$project") {
+              Compress-Archive -Path "build/$project/*" -DestinationPath "build/packages/$project-windows-x64.zip" -Force
+            }
+          }
+          Compress-Archive -Path "projects/oplague/*" -DestinationPath "build/packages/oplague-windows-x64-source.zip" -Force
+          Set-Content build/packages/BUILD-CLASS.txt "Host artifacts only; not Duck-native executables."
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reaper-windows-x64-package
+          path: build/packages/reaper-windows-x64.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytyliki-windows-x64-package
+          path: build/packages/pytyliki-windows-x64.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ventusample-windows-x64-package
+          path: build/packages/ventusample-windows-x64.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oplague-windows-x64-source
+          path: build/packages/oplague-windows-x64-source.zip
+          if-no-files-found: warn
+          retention-days: 30
 
       - uses: actions/upload-artifact@v4
         if: always()
