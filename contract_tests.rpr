@@ -289,7 +289,7 @@ assert(window_manager["transition_valid"]("floating", "maximized"), "known windo
 assert(not window_manager["transition_valid"]("floating", "unmanaged"), "unknown window mode is rejected")
 make four_tile_metrics := window_manager["tile_metrics"](3, 4, 1920, 1080, 8)
 assert(four_tile_metrics[0] == "grid" and four_tile_metrics[1] == 2 and four_tile_metrics[2] == 2, "four windows use a deterministic two-by-two grid")
-assert(window_manager["tile_metrics"](16, 16, 320, 200, 8)[0] == "deny-display-too-small", "tile layout rejects cells below the minimum size")
+assert(window_manager["tile_metrics"](0, 16, 320, 200, 8)[0] == "deny-display-too-small", "tile layout rejects cells below the minimum size")
 assert(window_manager["tile_metrics"](0, 4, 1920, 1080, 8)[3] == quotient(1920 - 3 * 8, 2), "tile cell width uses whole pixels")
 assert(not window_manager["stacking_order_valid"]([1, 2, 0]), "stacking order rejects invalid window identifiers")
 
