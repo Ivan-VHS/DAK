@@ -42,7 +42,7 @@ export craft irq_budget_decision(execution_ticks, budget_ticks, nesting_depth) {
         yield "nested-overrun"
     }
     when execution_ticks >= budget_ticks { yield "deadline-miss" }
-    when execution_ticks * 4 >= budget_ticks * 3 { yield "near-budget-defer-telemetry" }
+    when execution_ticks >= budget_ticks - (budget_ticks / 4) { yield "near-budget-defer-telemetry" }
     yield "within-budget"
 }
 
@@ -56,7 +56,9 @@ export craft periodic_release_advance(previous_release, period, now) {
     make next_release := previous_release + period
     when next_release > now { yield ["OK", next_release, 0] }
     make lateness := now - next_release
-    make missed := lateness / period + 1
+    make completed_periods := lateness / period
+    when completed_periods == 9223372036854775807 { yield ["ERR", "missed-period counter overflow"] }
+    make missed := completed_periods + 1
     when missed > (9223372036854775807 - next_release) / period {
         yield ["ERR", "release catch-up overflow"]
     }
