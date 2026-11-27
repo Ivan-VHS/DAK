@@ -1,0 +1,200 @@
+name: DuckOS dual-track application builds
+
+on:
+  pull_request:
+    paths:
+      - "federation/**"
+      - "projects/**"
+      - "mora/**"
+      - "tools/**"
+      - ".github/workflows/application-build-matrix.yml"
+  push:
+    branches: [main]
+    paths:
+      - "federation/**"
+      - "projects/**"
+      - "mora/**"
+      - "tools/**"
+      - ".github/workflows/application-build-matrix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: duckos-application-builds-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  linux-host:
+    name: Linux x86_64 host applications
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact federated sources
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build python3-tk qt6-base-dev
+
+      - name: Validate pinned source graph and app catalogue
+        run: |
+          python3 tools/federate_repositories.py validate --json
+          python3 tools/federate_repositories.py status --json
+          npm test
+
+      - name: Build and test Reaper native host toolchain
+        run: |
+          cmake -S projects/reaper -B build/reaper -G Ninja -DCMAKE_BUILD_TYPE=Release -DREAPER_BUILD_TESTS=ON
+          cmake --build build/reaper --parallel 2
+          ctest --test-dir build/reaper --output-on-failure
+
+      - name: Build and test Pytyliki host tools
+        run: |
+          cmake -S projects/pytyliki -B build/pytyliki -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build/pytyliki --parallel 2
+          ctest --test-dir build/pytyliki --output-on-failure
+
+      - name: Build and test VentuSample desktop and DSP
+        run: |
+          cmake -S projects/ventusample -B build/ventusample -G Ninja -DCMAKE_BUILD_TYPE=Release -DVENTU_BUILD_DESKTOP=ON -DVENTU_BUILD_TESTS=ON -DREAPER_SOURCE_DIR="$GITHUB_WORKSPACE/projects/reaper"
+          cmake --build build/ventusample --parallel 2
+          QT_QPA_PLATFORM=offscreen ctest --test-dir build/ventusample --output-on-failure
+
+      - name: Test OPlague read-only host workbench
+        working-directory: projects/oplague
+        run: |
+          python -m compileall -q oplague_app.py oplage_app.py oplague tests tools
+          python -m unittest discover -s tests -v
+
+      - name: Collect Linux host build outputs
+        if: always()
+        run: |
+          mkdir -p build/artifacts/linux-x86_64
+          for item in reaper pytyliki ventusample; do
+            if [[ -d "build/$item" ]]; then
+              find "build/$item" -maxdepth 4 -type f -executable -exec cp --parents {} build/artifacts/linux-x86_64/ \;
+            fi
+          done
+          cp -a projects/oplague build/artifacts/linux-x86_64/oplague-source
+          printf 'Target: Linux x86_64 host\nDuck-native: no — host binaries are not Duck kernel executables\n' > build/artifacts/linux-x86_64/BUILD-CLASS.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: duck-host-linux-x86_64
+          path: build/artifacts/linux-x86_64
+          if-no-files-found: warn
+          retention-days: 30
+
+  windows-host:
+    name: Windows x64 host applications
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact federated sources
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate pinned source graph
+        shell: pwsh
+        run: |
+          python tools/federate_repositories.py validate --json
+          python tools/federate_repositories.py status --json
+
+      - name: Build and test Reaper native host toolchain
+        shell: pwsh
+        run: |
+          cmake -S projects/reaper -B build/reaper -A x64 -DREAPER_BUILD_TESTS=ON
+          cmake --build build/reaper --config Release --parallel 2
+          ctest --test-dir build/reaper -C Release --output-on-failure
+
+      - name: Build and test Pytyliki host tools
+        shell: pwsh
+        run: |
+          cmake -S projects/pytyliki -B build/pytyliki -A x64 -DBUILD_TESTING=ON
+          cmake --build build/pytyliki --config Release --parallel 2
+          ctest --test-dir build/pytyliki -C Release --output-on-failure
+
+      - name: Build VentuSample DSP core
+        shell: pwsh
+        run: |
+          cmake -S projects/ventusample -B build/ventusample -A x64 -DVENTU_BUILD_DESKTOP=OFF -DVENTU_BUILD_TESTS=ON
+          cmake --build build/ventusample --config Release --parallel 2
+          ctest --test-dir build/ventusample -C Release --output-on-failure
+
+      - name: Test OPlague read-only host workbench
+        working-directory: projects/oplague
+        shell: pwsh
+        run: |
+          python -m compileall -q oplague_app.py oplage_app.py oplague tests tools
+          python -m unittest discover -s tests -v
+
+      - name: Collect Windows host build outputs
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/artifacts/windows-x64 | Out-Null
+          foreach ($project in @("reaper", "pytyliki", "ventusample")) {
+            if (Test-Path "build/$project") {
+              Get-ChildItem "build/$project" -Recurse -File |
+                Where-Object { $_.Extension -in @(".exe", ".dll", ".lib") } |
+                Copy-Item -Destination build/artifacts/windows-x64 -Force
+            }
+          }
+          Copy-Item projects/oplague build/artifacts/windows-x64/oplague-source -Recurse
+          Set-Content build/artifacts/windows-x64/BUILD-CLASS.txt "Target: Windows x64 host; Duck-native: no"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: duck-host-windows-x64
+          path: build/artifacts/windows-x64
+          if-no-files-found: warn
+          retention-days: 30
+
+  duck-native-readiness:
+    name: Duck-native application target readiness
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Report native target prerequisites
+        run: |
+          mkdir -p build/native-readiness
+          cat > build/native-readiness/STATUS.txt <<'EOF'
+          Duck-native application builds are a separate target lane.
+          Status: BLOCKED — no production Duck user-process ABI/toolchain is available.
+          Required before enabling native application binaries:
+          - stable user-mode executable format and loader
+          - ring-3 entry/return and syscall ABI
+          - process and address-space management
+          - filesystem and package installation contract
+          - capability enforcement and service supervision
+          - native window/input/compositor and application runtime contracts
+          Host build artifacts must never be relabelled as Duck-native binaries.
+          EOF
+          cat build/native-readiness/STATUS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: duck-native-readiness
+          path: build/native-readiness/STATUS.txt
+          retention-days: 30
