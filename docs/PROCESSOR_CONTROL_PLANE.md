@@ -31,7 +31,7 @@ The scheduler is a bounded native core, not yet a production preemptive SMP sche
 
 ### x86_64 architecture helpers
 
-- `kernel/arch/x86_64/cpu.[ch]` probes CPUID vendor/family/model/stepping, logical/core counts and feature bits. AVX/AVX2/AVX-512 are reported only when OSXSAVE and the required XCR0 state are present.
+- `kernel/arch/x86_64/cpu.[ch]` probes CPUID vendor/family/model/stepping, logical/core counts and feature bits, including the advertised MCE and MCA capabilities (CPUID leaf 1 EDX bits 7 and 14). These bits report availability only; DuckOS does not yet read machine-check MSRs or handle recoverable machine-check records. AVX/AVX2/AVX-512 are reported only when OSXSAVE and the required XCR0 state are present.
 - `kernel/arch/x86_64/context.[ch]` builds a bounded initial thread stack frame with a System V entry-stack alignment and an explicit initial RFLAGS value.
 - `kernel/arch/x86_64/context.S` provides a real x86_64 context-switch primitive, saving/restoring the ABI-preserved integer registers, RFLAGS and stack pointer.
 - `duckos_x86_64_scheduler_platform` supplies the x86_64 scheduler callbacks for interrupt save/restore and the assembly context switch. Its interrupt helpers are privileged and are intended for ring 0 only.
@@ -88,7 +88,7 @@ The intended live-update pipeline is immutable build â†’ static/type/IR checks â
 
 ## Current implementation boundary
 
-The existing Stage 1 boot path validates Limine handoff data, early memory and bootstrap GDT/TSS/exception gates. The boot entry now initializes one scheduler descriptor for BSP 0 and runs a read-only CPUID probe. The produced ISO has passed QEMU BIOS and UEFI boot checks. The boot entry still does not dispatch a task or start application processors. There is no production SMP execution, timer-driven preemptive scheduling, FPU/XSAVE context preservation, APIC/IPI route, kernel PMU or power driver, hardware debug engine or live kernel patch implementation.
+The existing Stage 1 boot path validates Limine handoff data, early memory and bootstrap GDT/TSS/exception gates. The boot entry now initializes one scheduler descriptor for BSP 0 and runs a read-only CPUID probe, including MCE/MCA feature availability. The produced ISO has passed QEMU BIOS and UEFI boot checks. The boot entry still does not dispatch a task or start application processors. There is no production SMP execution, timer-driven preemptive scheduling, FPU/XSAVE context preservation, APIC/IPI route, kernel PMU or power driver, hardware debug engine or live kernel patch implementation.
 
 ## Acceptance gates
 
