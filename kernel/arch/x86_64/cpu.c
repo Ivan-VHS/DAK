@@ -1,7 +1,6 @@
 #include "cpu.h"
 
 #include <stddef.h>
-#include <string.h>
 
 #if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))
 #include <intrin.h>
@@ -35,7 +34,8 @@ static uint64_t xgetbv_zero(void) {
 #else
 int duckos_x86_64_cpu_probe(duckos_x86_64_cpu_info *out) {
     if (out == NULL) return 0;
-    memset(out, 0, sizeof(*out));
+    unsigned char *bytes = (unsigned char *)out;
+    for (size_t i = 0U; i < sizeof(*out); ++i) bytes[i] = 0U;
     return 0;
 }
 #endif
@@ -58,9 +58,11 @@ int duckos_x86_64_cpu_probe(duckos_x86_64_cpu_info *out) {
     uint32_t a = 0U, b = 0U, c = 0U, d = 0U;
     cpuid_query(0U, 0U, &a, &b, &c, &d);
     out->max_basic_leaf = a;
-    memcpy(&out->vendor[0], &b, sizeof(b));
-    memcpy(&out->vendor[4], &d, sizeof(d));
-    memcpy(&out->vendor[8], &c, sizeof(c));
+    for (uint32_t i = 0U; i < 4U; ++i) {
+        out->vendor[i] = (char)((b >> (i * 8U)) & 0xffU);
+        out->vendor[4U + i] = (char)((d >> (i * 8U)) & 0xffU);
+        out->vendor[8U + i] = (char)((c >> (i * 8U)) & 0xffU);
+    }
     out->vendor[12] = '\0';
 
     cpuid_query(UINT32_C(0x80000000), 0U, &a, &b, &c, &d);
