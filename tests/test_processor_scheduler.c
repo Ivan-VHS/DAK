@@ -89,10 +89,78 @@ static void test_core_drain_and_topology_generation(void) {
     assert(scheduler.cpus[0].generation == 8U);
 }
 
+typedef struct {
+    uint32_t switch_calls;
+    uint32_t restore_calls;
+    uintptr_t last_new_stack;
+} FakeContextSwitch;
+
+static uint64_t fake_irq_save(void *context) {
+    (void)context;
+    return UINT64_C(0x202);
+}
+
+static void fake_irq_restore(void *context, uint64_t state) {
+    FakeContextSwitch *fake = (FakeContextSwitch *)context;
+    assert(state == UINT64_C(0x202));
+    ++fake->restore_calls;
+}
+
+static void fake_context_switch(
+    void *context, uintptr_t *old_stack_pointer, uintptr_t new_stack_pointer
+) {
+    FakeContextSwitch *fake = (FakeContextSwitch *)context;
+    assert(old_stack_pointer != NULL && new_stack_pointer != 0U);
+    *old_stack_pointer = (uintptr_t)0x1000U +
+                         (uintptr_t)(fake->switch_calls * 0x100U);
+    fake->last_new_stack = new_stack_pointer;
+    ++fake->switch_calls;
+}
+
+static void test_scheduler_context_dispatch(void) {
+    FakeContextSwitch fake = {0};
+    duckos_sched_platform platform = {
+        .irq_context = &fake,
+        .irq_save = fake_irq_save,
+        .irq_restore = fake_irq_restore,
+        .switch_context = &fake,
+        .context_switch = fake_context_switch
+    };
+    duckos_scheduler scheduler;
+    assert(duckos_scheduler_init(&scheduler, 1U, 1U, &platform) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_bootstrap_cpu(&scheduler, 0U) == DUCKOS_SCHED_OK);
+
+    duckos_sched_thread task = make_thread(
+        91U, 40, 0U, UINT64_C(1), DUCKOS_THREAD_CREATED
+    );
+    task.saved_stack_pointer = (uintptr_t)0x2000U;
+    assert(duckos_scheduler_register_thread(&scheduler, &task) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_transition_thread(&scheduler, 91U, DUCKOS_THREAD_READY) == DUCKOS_SCHED_OK);
+
+    duckos_sched_thread selected;
+    assert(duckos_scheduler_switch(&scheduler, 0U, &selected) == DUCKOS_SCHED_OK);
+    assert(selected.tid == 91U);
+    assert(fake.last_new_stack == (uintptr_t)0x2000U);
+    assert(scheduler.cpus[0].idle_stack_pointer == (uintptr_t)0x1000U);
+    assert(scheduler.cpus[0].current_tid == 91U);
+
+    assert(duckos_scheduler_transition_thread(&scheduler, 91U, DUCKOS_THREAD_BLOCKED) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_switch(&scheduler, 0U, &selected) == DUCKOS_SCHED_OK);
+    assert(fake.last_new_stack == (uintptr_t)0x1000U);
+    assert(scheduler.cpus[0].current_tid == 0U);
+
+    assert(duckos_scheduler_transition_thread(&scheduler, 91U, DUCKOS_THREAD_READY) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_switch(&scheduler, 0U, &selected) == DUCKOS_SCHED_OK);
+    assert(fake.last_new_stack == scheduler.threads[0].saved_stack_pointer);
+    assert(scheduler.cpus[0].current_tid == 91U);
+    assert(fake.switch_calls == 3U && fake.restore_calls == 3U);
+}
+
 int main(void) {
     test_scheduler_lifecycle_and_startup();
     test_scheduling_affinity_deadline_and_round_robin();
     test_core_drain_and_topology_generation();
+    test_scheduler_context_dispatch();
     puts("DAK bounded SMP scheduler tests passed");
     return 0;
 }
