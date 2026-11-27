@@ -57,7 +57,7 @@
     {"id":"system-utilities","path":"duckos/system/utilities.rpr","contract":"implemented","backend":"pending"}
   ],
   "verification": {
-    "source_check": "all .rpr under duckos/",
+    "source_check": "all .rpr under duckos/ and dak/",
     "contract_suite": "system_platform_tests.rpr",
     "engines": [
       "reference-tree-walk",
