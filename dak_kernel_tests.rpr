@@ -70,10 +70,14 @@ assert(core["application_create"](22, [
     [4, 3004, 16384, 4096, 4096],
     [5, 3005, 16384, 4096, 4096]
 ], 32768)[0] == "ERR", "overlapping sectors abort the whole preparation")
-make active_app := core["application_activate"](app[1], [[2101, true], [2102, true], [2103, true], [2104, true], [2105, true]], 32768)
-assert(active_app[0] == "OK", "all five verified sectors activate together")
-assert(core["sector_ipc_decision"](active_app[1], 2101, 2102, "send", [[2101, 2102, "send"]], 32768) == "allow-policy-only", "explicit inter-sector grant is admitted")
-assert(core["sector_ipc_decision"](active_app[1], 2101, 2102, "send", [], 32768) == "deny-missing-explicit-grant", "inter-sector IPC denies by default")
+assert(core["application_activate"](app[1], [], [[2101, true], [2102, true], [2103, true], [2104, true], [2105, true]], 32768)[0] == "ERR", "unregistered application cannot activate")
+make activation := core["application_activate"](app[1], app_registry[1], [[2101, true], [2102, true], [2103, true], [2104, true], [2105, true]], 32768)
+assert(activation[0] == "OK" and activation[1][0][2] == "active", "all five verified sectors activate together")
+make active_app := activation[1][0]
+make active_registry := activation[1][1]
+assert(active_registry[0][2] == "active", "registry receives the activated application state")
+assert(core["sector_ipc_decision"](active_app, 2101, 2102, "send", [[2101, 2102, "send"]], 32768) == "allow-policy-only", "explicit inter-sector grant is admitted")
+assert(core["sector_ipc_decision"](active_app, 2101, 2102, "send", [], 32768) == "deny-missing-explicit-grant", "inter-sector IPC denies by default")
 
 make rule := core["rule_create"](3001, 250, true, 2101, 24576, 64, 32768)
 assert(rule[0] == "OK" and core["rule_valid"](rule[1], 32768), "mandatory AtomicRule record and passport validate")
