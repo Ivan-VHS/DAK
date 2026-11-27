@@ -37,8 +37,8 @@ if(DUCKOS_ENABLE_SANITIZERS)
 endif()
 
 
-# DAK native kernel-integrity core. This library is host-testable and is not
-# linked into the Stage 1 image until the kernel lock/IRQ adapters are ready.
+# DAK native kernel-integrity core. CMake builds the host-testable library;
+# boot/build-iso.sh compiles the same sources freestanding into the Stage 1 ELF.
 option(DAK_BUILD_KERNEL_INTEGRITY_CORE "Build the DAK native integrity core" ON)
 if(DAK_BUILD_KERNEL_INTEGRITY_CORE)
     add_library(dak_kernel_core STATIC
