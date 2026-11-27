@@ -1,4 +1,4 @@
-"""Tk-based native user-space maintenance window for Duck Desktop."""
+"""Tk-based native user-space maintenance window for Dak Desktop."""
 from __future__ import annotations
 
 import os
@@ -31,7 +31,7 @@ class DesktopWindow:
         self._reaper_queue: queue.Queue[tuple[str, dict[str, Any] | None, str | None]] = queue.Queue()
         self._reaper_busy = False
         self._reaper_studio_process: subprocess.Popen[str] | None = None
-        root.title("Duck Desktop — обслуживание рабочего пространства")
+        root.title("Dak Desktop — обслуживание рабочего пространства")
         root.geometry("1040x700")
         root.minsize(820, 560)
         root.configure(bg=COLORS["background"])
@@ -113,7 +113,7 @@ class DesktopWindow:
         ttk.Button(startup_actions, text="Обновить", command=self.refresh).pack(side="left")
 
         ttk.Label(processes, text="Наблюдение за ресурсами", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(processes, text="Локальный диагностический снимок. Duck не завершает процессы и не меняет их приоритеты.", style="Muted.TLabel").pack(anchor="w", pady=(4, 12))
+        ttk.Label(processes, text="Локальный диагностический снимок. Dak не завершает процессы и не меняет их приоритеты.", style="Muted.TLabel").pack(anchor="w", pady=(4, 12))
         self.process_tree = ttk.Treeview(processes, columns=("pid", "memory", "cpu"), show="tree headings")
         self.process_tree.heading("#0", text="Процесс")
         self.process_tree.column("#0", width=360)
@@ -123,7 +123,7 @@ class DesktopWindow:
         self.process_tree.pack(fill="both", expand=True)
         ttk.Button(processes, text="Обновить процессы", style="Accent.TButton", command=self.refresh).pack(anchor="w", pady=(12, 0))
 
-        ttk.Label(rules, text="Правила Duck Desktop", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(rules, text="Правила Dak Desktop", style="Title.TLabel").pack(anchor="w")
         statements = (
             "Рабочий стол — временная зона: ориентир не более 10 элементов.",
             "Файлы переносятся в Inbox, а не удаляются.",
@@ -131,7 +131,7 @@ class DesktopWindow:
             "Перед отключением запись сохраняется для обратного восстановления.",
             "Аудит не запускает неизвестные программы и не читает содержимое документов.",
             "Очистка кэша, изменение системных служб и управление ядром не выполняются этим модулем.",
-            "Виртуальные рабочие столы и системное управление окнами потребуют native compositor Duck.",
+            "Виртуальные рабочие столы и системное управление окнами потребуют native compositor Dak.",
         )
         for statement in statements:
             row = ttk.Frame(rules)
@@ -147,7 +147,7 @@ class DesktopWindow:
         ttk.Label(
             tab,
             text=(
-                "Нативная интеграция системного языка Reaper. DuckOS использует "
+                "Нативная интеграция системного языка Reaper. Dak использует "
                 "закреплённый исходный checkout и запускает его CLI отдельным процессом."
             ),
             style="Muted.TLabel",
@@ -264,7 +264,7 @@ class DesktopWindow:
 
         threading.Thread(
             target=worker,
-            name="duckos-reaper-check",
+            name="dakos-reaper-check",
             daemon=True,
         ).start()
 
@@ -376,16 +376,16 @@ class DesktopWindow:
     def move_selected(self) -> None:
         names = list(self.desktop_tree.selection())
         if not names:
-            messagebox.showinfo("Duck Desktop", "Сначала выберите файлы.", parent=self.root)
+            messagebox.showinfo("Dak Desktop", "Сначала выберите файлы.", parent=self.root)
             return
         if not messagebox.askyesno("Подтверждение", f"Перенести {len(names)} файлов в Inbox? Они не будут удалены или перезаписаны.", parent=self.root):
             return
         try:
             result = move_desktop_items_to_inbox(names)
         except (OSError, ValueError) as error:
-            messagebox.showerror("Duck Desktop", str(error), parent=self.root)
+            messagebox.showerror("Dak Desktop", str(error), parent=self.root)
             return
-        messagebox.showinfo("Duck Desktop", f"Перемещено: {len(result['moved'])}\nОтклонено: {len(result['rejected'])}", parent=self.root)
+        messagebox.showinfo("Dak Desktop", f"Перемещено: {len(result['moved'])}\nОтклонено: {len(result['rejected'])}", parent=self.root)
         self.refresh()
 
     def change_startup(self, enabled: bool) -> None:
@@ -402,7 +402,7 @@ class DesktopWindow:
             messagebox.showerror("Автозагрузка", str(error), parent=self.root)
             return
         self.refresh()
-        messagebox.showinfo("Автозагрузка", "Изменение выполнено. Запись можно восстановить в Duck Desktop.", parent=self.root)
+        messagebox.showinfo("Автозагрузка", "Изменение выполнено. Запись можно восстановить в Dak Desktop.", parent=self.root)
 
     def open_desktop(self) -> None:
         path = self.report.get("desktop", {}).get("path", "")
@@ -414,7 +414,7 @@ class DesktopWindow:
             else:
                 subprocess.Popen(["xdg-open", path], shell=False)
         except OSError as error:
-            messagebox.showerror("Duck Desktop", str(error), parent=self.root)
+            messagebox.showerror("Dak Desktop", str(error), parent=self.root)
 
 
 def run_native_desktop() -> int:
