@@ -1,0 +1,421 @@
+# DAK application-domain payload contracts.
+# These guards define bounded data shapes at application IPC boundaries.
+# They do not provide storage, codecs, device drivers, network transports or UI.
+
+export craft text_length_valid(length, limit) {
+    yield length >= 0 and limit > 0 and length <= limit
+}
+
+export craft byte_length_valid(length, limit) {
+    yield length >= 0 and limit > 0 and length <= limit
+}
+
+export craft consent_flag_valid(consent) {
+    yield consent == true or consent == false
+}
+
+export craft files_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] != "read" and payload[0] != "create" and payload[0] != "update" and payload[0] != "delete" and payload[0] != "export" { yield false }
+    when payload[1] <= 0 or payload[1] > 64 { yield false }
+    when payload[2] < 0 or payload[2] > 1073741824 { yield false }
+    when not consent_flag_valid(payload[4]) { yield false }
+    when (payload[0] == "delete" or payload[0] == "export") and not payload[4] { yield false }
+    yield true
+}
+
+export craft settings_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when not text_length_valid(payload[0], 128) { yield false }
+    when not byte_length_valid(payload[1], 65536) { yield false }
+    when payload[2] != "user" and payload[2] != "workspace" { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft calendar_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] != "read" and payload[0] != "create" and payload[0] != "update" and payload[0] != "delete" { yield false }
+    when payload[1] < 0 or payload[2] < payload[1] { yield false }
+    when not text_length_valid(payload[3], 64) { yield false }
+    when payload[0] == "delete" and not payload[4] { yield false }
+    yield consent_flag_valid(payload[4])
+}
+
+export craft clock_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "alarm" and payload[0] != "timer" and payload[0] != "stopwatch" { yield false }
+    when payload[1] < 0 { yield false }
+    when not text_length_valid(payload[2], 128) { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft notes_payload_valid(payload) {
+    when size(payload) != 3 { yield false }
+    when not byte_length_valid(payload[0], 1048576) { yield false }
+    when payload[1] != "private" and payload[1] != "workspace" { yield false }
+    yield consent_flag_valid(payload[2])
+}
+
+export craft tasks_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when not text_length_valid(payload[0], 2048) { yield false }
+    when payload[1] < 0 or payload[2] < 0 or payload[2] > 5 { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft calculator_payload_valid(payload) {
+    when size(payload) != 2 { yield false }
+    when not byte_length_valid(payload[0], 4096) { yield false }
+    yield payload[1] >= 0 and payload[1] <= 100
+}
+
+export craft browser_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when not text_length_valid(payload[0], 8192) { yield false }
+    when payload[1] != "ask" and payload[1] != "allow" and payload[1] != "deny" { yield false }
+    when not consent_flag_valid(payload[2]) { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft mail_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when not text_length_valid(payload[0], 256) { yield false }
+    when payload[1] < 1 or payload[1] > 100 { yield false }
+    when not byte_length_valid(payload[2], 10485760) { yield false }
+    when not consent_flag_valid(payload[3]) { yield false }
+    yield payload[3]
+}
+
+export craft contacts_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "read" and payload[0] != "create" and payload[0] != "update" and payload[0] != "delete" { yield false }
+    when not text_length_valid(payload[1], 256) { yield false }
+    when payload[2] != "local" and payload[2] != "user-selected-export" { yield false }
+    when payload[0] == "delete" and not payload[3] { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft gallery_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] <= 0 or payload[0] > 10000 { yield false }
+    when payload[1] < 0 or payload[1] > 1073741824 { yield false }
+    when payload[2] != true { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft media_player_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "play" and payload[0] != "pause" and payload[0] != "stop" { yield false }
+    when not consent_flag_valid(payload[1]) or not consent_flag_valid(payload[2]) { yield false }
+    when payload[2] and not payload[3] { yield false }
+    yield true
+}
+
+export craft document_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "read" and payload[0] != "create" and payload[0] != "update" and payload[0] != "export" { yield false }
+    when payload[1] != true { yield false }
+    when not byte_length_valid(payload[2], 16777216) { yield false }
+    when payload[0] == "export" and not payload[3] { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft system_tools_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "inspect" and payload[0] != "logs" and payload[0] != "process-list" and payload[0] != "command-preview" { yield false }
+    when payload[1] < 0 or payload[1] > 32 { yield false }
+    when payload[2] == "" { yield false }
+    # This application contract never grants privileged command execution.
+    yield payload[3] == false
+}
+
+export craft package_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "inspect" and payload[0] != "install-request" and payload[0] != "remove-request" and payload[0] != "update-request" { yield false }
+    when not text_length_valid(payload[1], 128) or not text_length_valid(payload[2], 64) { yield false }
+    yield consent_flag_valid(payload[3]) and payload[3]
+}
+
+export craft audio_recording_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] < 8000 or payload[0] > 192000 { yield false }
+    when payload[1] < 1 or payload[1] > 32 { yield false }
+    when payload[2] != 16 and payload[2] != 24 and payload[2] != 32 { yield false }
+    when payload[3] < 16 or payload[3] > 8192 { yield false }
+    yield payload[4] == true
+}
+
+export craft photos_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] == "" or payload[1] < 0 or payload[1] > 1073741824 { yield false }
+    when payload[2] != "private" and payload[2] != "workspace" and payload[2] != "shared-review" { yield false }
+    when not consent_flag_valid(payload[3]) or not consent_flag_valid(payload[4]) { yield false }
+    yield payload[3] == true
+}
+
+export craft finance_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] == "" or payload[1] < 0 { yield false }
+    when size(payload[2]) != 3 or payload[3] == "" { yield false }
+    yield payload[4] == true
+}
+
+export craft automation_payload_valid(payload) {
+    when size(payload) != 6 { yield false }
+    when payload[0] == "" or payload[1] == "" or payload[2] == "" { yield false }
+    when payload[3] != "local" and payload[3] != "user-selected" { yield false }
+    when not consent_flag_valid(payload[4]) or not consent_flag_valid(payload[5]) { yield false }
+    yield not payload[5] or payload[4]
+}
+
+export craft browser_app_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when not text_length_valid(payload[0], 8192) { yield false }
+    when payload[1] != "normal" and payload[1] != "private" { yield false }
+    when payload[2] != "ask" and payload[2] != "allow" and payload[2] != "deny" { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft gaming_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] == "" or not text_length_valid(payload[1], 512) { yield false }
+    when not text_length_valid(payload[2], 4096) { yield false }
+    when not consent_flag_valid(payload[3]) or not consent_flag_valid(payload[4]) { yield false }
+    yield true
+}
+
+export craft device_continuity_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] == "" or not text_length_valid(payload[1], 256) { yield false }
+    when payload[2] != "requested" and payload[2] != "paired" and payload[2] != "revoked" { yield false }
+    when not consent_flag_valid(payload[3]) or not consent_flag_valid(payload[4]) { yield false }
+    yield payload[3] == true
+}
+
+export craft system_status_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or payload[1] == "" or payload[2] == "" { yield false }
+    yield payload[3] >= 0
+}
+
+export craft setup_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "dark" and payload[0] != "light" { yield false }
+    when payload[1] != "en" and payload[1] != "uk" and payload[1] != "ru" { yield false }
+    when not consent_flag_valid(payload[2]) { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft project_list_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] == "" or not text_length_valid(payload[1], 256) { yield false }
+    when payload[2] < 0 or payload[2] > 10000 { yield false }
+    when payload[3] != "open" and payload[3] != "paused" and payload[3] != "done" { yield false }
+    yield consent_flag_valid(payload[4])
+}
+
+export craft archive_inspection_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when not text_length_valid(payload[0], 255) { yield false }
+    when payload[1] < 0 or payload[1] > 1073741824 { yield false }
+    when payload[2] < 0 or payload[2] > 100000 { yield false }
+    when payload[3] < 0 or payload[3] > 32 { yield false }
+    # Inspection is metadata-only; extraction is not admitted by this contract.
+    yield payload[4] == false
+}
+
+export craft media_collection_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or not text_length_valid(payload[1], 256) { yield false }
+    when payload[2] < 0 or payload[2] > 100000 { yield false }
+    yield payload[3] == "local-index"
+}
+
+export craft rhythm_profile_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] < 30 or payload[0] > 300 { yield false }
+    when payload[1] < 0 or payload[1] > 100 { yield false }
+    when payload[2] < 1 or payload[2] > 32 { yield false }
+    yield payload[3] >= 1 and payload[3] <= 128
+}
+
+export craft sharing_review_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when not consent_flag_valid(payload[0]) or not consent_flag_valid(payload[1]) { yield false }
+    when not consent_flag_valid(payload[2]) or not consent_flag_valid(payload[3]) { yield false }
+    yield payload[4] == true and payload[0] and payload[1] and payload[2] and payload[3]
+}
+
+export craft journal_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or not byte_length_valid(payload[1], 1048576) { yield false }
+    when payload[2] < 0 or payload[3] != "local-private" { yield false }
+    yield true
+}
+
+export craft capture_payload_valid(payload) {
+    when size(payload) != 3 { yield false }
+    when payload[0] == "" or not byte_length_valid(payload[1], 65536) { yield false }
+    yield payload[2] >= 0
+}
+
+export craft knowledge_card_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or not text_length_valid(payload[1], 256) { yield false }
+    when not byte_length_valid(payload[2], 1048576) { yield false }
+    yield payload[3] == "local-reference"
+}
+
+export craft manual_route_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or payload[1] < 1 or payload[1] > 256 { yield false }
+    when payload[2] != true { yield false }
+    # Po-2 is a manually ordered stop list, not a GPS or tracking client.
+    yield payload[3] == false
+}
+
+export craft game_library_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] == "" or not text_length_valid(payload[1], 256) { yield false }
+    when not text_length_valid(payload[2], 4096) { yield false }
+    when payload[3] != "metadata-only" and payload[3] != "inspected" { yield false }
+    yield payload[4] == false
+}
+
+export craft executable_inspection_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] != "pe" and payload[0] != "elf" { yield false }
+    when payload[1] < 1 or payload[1] > 1073741824 { yield false }
+    when payload[2] < 1 or payload[2] > 1048576 { yield false }
+    when payload[3] != 64 { yield false }
+    # An inspection result never authorizes executable launch.
+    yield payload[4] == true
+}
+
+export craft creative_project_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or payload[1] < 0 or payload[1] > 10000 { yield false }
+    when payload[2] < 0 or payload[2] > 1073741824 { yield false }
+    yield payload[3] == true
+}
+
+export craft assistant_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when not byte_length_valid(payload[0], 1048576) or not byte_length_valid(payload[1], 4194304) { yield false }
+    when payload[2] != "local" and payload[2] != "network-opt-in" { yield false }
+    when not consent_flag_valid(payload[3]) { yield false }
+    yield payload[4] == "bounded-session"
+}
+
+export craft security_finding_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or payload[1] < 0 or payload[1] > 4 { yield false }
+    when not byte_length_valid(payload[2], 1048576) { yield false }
+    # Remediation must be separately authorized by a privileged system service.
+    yield payload[3] == "request-only"
+}
+
+export craft recovery_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or payload[1] < 1 or payload[1] > 1073741824 { yield false }
+    when not consent_flag_valid(payload[2]) or not consent_flag_valid(payload[3]) { yield false }
+    yield payload[2] and payload[3]
+}
+
+export craft compatibility_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] == "" or payload[1] != "pe32" and payload[1] != "pe32+" and payload[1] != "elf" { yield false }
+    when not text_length_valid(payload[2], 64) { yield false }
+    when not consent_flag_valid(payload[3]) { yield false }
+    # Compatibility metadata cannot turn into process execution implicitly.
+    yield payload[4] == false
+}
+
+export craft workspace_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or payload[1] < 1 or payload[1] > 64 { yield false }
+    when payload[2] != "local" and payload[2] != "workspace" { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft provenance_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] != "sha256" and payload[0] != "sha384" and payload[0] != "sha512" { yield false }
+    when payload[1] != 64 and payload[1] != 96 and payload[1] != 128 { yield false }
+    when payload[2] < 0 or payload[2] > 1073741824 { yield false }
+    yield consent_flag_valid(payload[3])
+}
+
+export craft performance_profile_payload_valid(payload) {
+    when size(payload) != 4 { yield false }
+    when payload[0] == "" or payload[1] != "balanced" and payload[1] != "quiet" and payload[1] != "responsive" { yield false }
+    when payload[2] < 30 or payload[2] > 360 { yield false }
+    # This profile is advisory until a qualified system power service is connected.
+    yield payload[3] == false
+}
+
+export craft desktop_payload_valid(payload) {
+    when size(payload) != 5 { yield false }
+    when payload[0] != "audit" and payload[0] != "move-selected" and payload[0] != "startup-change" { yield false }
+    when payload[1] == "" or payload[2] != "current-user" { yield false }
+    when not consent_flag_valid(payload[3]) or not consent_flag_valid(payload[4]) { yield false }
+    when payload[0] != "audit" and not payload[3] { yield false }
+    yield payload[4]
+}
+
+export craft catalogue_payload_valid(payload) {
+    when size(payload) != 3 { yield false }
+    when not text_length_valid(payload[0], 256) { yield false }
+    when payload[1] < 1 or payload[1] > 100 { yield false }
+    yield payload[2] == "all" or payload[2] == "system" or payload[2] == "productivity" or payload[2] == "multimedia"
+}
+
+export craft payload_valid(app_id, payload) {
+    vary app := resolve_app_id(app_id)
+    when app == "dak.settings" { yield settings_payload_valid(payload) }
+    when app == "dak.files" { yield files_payload_valid(payload) }
+    when app == "dak.calendar" { yield calendar_payload_valid(payload) }
+    when app == "dak.clock" { yield clock_payload_valid(payload) }
+    when app == "dak.notes" { yield notes_payload_valid(payload) }
+    when app == "dak.tasks" { yield tasks_payload_valid(payload) }
+    when app == "dak.calculator" { yield calculator_payload_valid(payload) }
+    when app == "dak.browser" { yield browser_payload_valid(payload) }
+    when app == "dak.mail" { yield mail_payload_valid(payload) }
+    when app == "dak.contacts" { yield contacts_payload_valid(payload) }
+    when app == "dak.gallery" { yield gallery_payload_valid(payload) }
+    when app == "dak.media" { yield media_player_payload_valid(payload) }
+    when app == "dak.editor" { yield document_payload_valid(payload) }
+    when app == "dak.system-tools" { yield system_tools_payload_valid(payload) }
+    when app == "dak.software-center" { yield package_payload_valid(payload) }
+    when app == "cockos" { yield audio_recording_payload_valid(payload) }
+    when app == "kavun" { yield photos_payload_valid(payload) }
+    when app == "kabon" { yield finance_payload_valid(payload) }
+    when app == "gloverty" { yield automation_payload_valid(payload) }
+    when app == "po" { yield browser_app_payload_valid(payload) }
+    when app == "illidia" { yield gaming_payload_valid(payload) }
+    when app == "unify" { yield device_continuity_payload_valid(payload) }
+    when app == "sestem" { yield system_status_payload_valid(payload) }
+    when app == "setupup" { yield setup_payload_valid(payload) }
+    when app == "orriganize" { yield project_list_payload_valid(payload) }
+    when app == "abriganza" { yield archive_inspection_payload_valid(payload) }
+    when app == "olaab" { yield media_collection_payload_valid(payload) }
+    when app == "concrete-thump" { yield rhythm_profile_payload_valid(payload) }
+    when app == "seu-beu" { yield sharing_review_payload_valid(payload) }
+    when app == "love-il" { yield journal_payload_valid(payload) }
+    when app == "poi" { yield capture_payload_valid(payload) }
+    when app == "poi-2" { yield knowledge_card_payload_valid(payload) }
+    when app == "po-2" { yield manual_route_payload_valid(payload) }
+    when app == "gamecharager" { yield game_library_payload_valid(payload) }
+    when app == "exedotexe" { yield executable_inspection_payload_valid(payload) }
+    when app == "red-sparrow" { yield creative_project_payload_valid(payload) }
+    when app == "mora-ai" { yield assistant_payload_valid(payload) }
+    when app == "security" { yield security_finding_payload_valid(payload) }
+    when app == "updates" { yield recovery_payload_valid(payload) }
+    when app == "runtime" { yield compatibility_payload_valid(payload) }
+    when app == "workspace" { yield workspace_payload_valid(payload) }
+    when app == "provenance" { yield provenance_payload_valid(payload) }
+    when app == "mora-boost" { yield performance_profile_payload_valid(payload) }
+    when app == "desktop" { yield desktop_payload_valid(payload) }
+    when app == "mora-commons" { yield catalogue_payload_valid(payload) }
+    yield false
+}
