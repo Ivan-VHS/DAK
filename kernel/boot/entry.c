@@ -512,6 +512,10 @@ void _start(void) {
     serial_decimal(bootstrap_cpu_info.stepping);
     serial_write(" discovered_logical=");
     serial_decimal(bootstrap_cpu_info.logical_processors_per_package);
+    serial_write(" mce=");
+    serial_write((bootstrap_cpu_info.features & DUCKOS_CPU_FEATURE_MCE) != 0U ? "yes" : "no");
+    serial_write(" mca=");
+    serial_write((bootstrap_cpu_info.features & DUCKOS_CPU_FEATURE_MCA) != 0U ? "yes" : "no");
     serial_write(" scheduler=bsp-online scheduler_cpus=1 smp=not-started\n");
     serial_write("\nDUCKOS_BOOT begin protocol=limine base_revision=6\n");
 
