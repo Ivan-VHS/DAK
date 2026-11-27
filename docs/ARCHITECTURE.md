@@ -10,12 +10,15 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 
 The four peer repositories remain independent Git submodules pinned at exact commits. The machine-readable map is [integration-graph.v1.json](../federation/integration-graph.v1.json), validated by [validate_ecosystem.mjs](../tools/validate_ecosystem.mjs) in repository-federation CI. The graph distinguishes working host interoperability, a Reaper policy adapter that still requires trusted native ingestion, and documented interfaces without a consumer. A submodule checkout or release payload is not evidence of kernel integration.
 
+See [x86-64 GDT/TSS/IST bootstrap v1](X86_64_GDT_TSS_IST_V1.md) for the owned bootstrap segmentation and exception-stack layout.
+
 ## Layer model
 
 | Layer | Responsibility | Current state |
 |---|---|---|
 | Reaper language core | system policy, service logic, deterministic decisions | executable on reference runtime |
 | Boot contract | ordered startup phases and recovery transitions | Reaper reference contract; stage-0 firmware handoff also exists |
+| x86_64 segmentation/IST | owned GDT, bootstrap TSS, RSP0 and dedicated double-fault/NMI/page-fault stacks | installed during boot; one bootstrap CPU only, no Ring 3 transition or APIC setup |
 | Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 range/map validation; not a physical allocator or page-table manager |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
@@ -34,7 +37,7 @@ The required sequence is:
 
 `reset → firmware → memory → interrupts → scheduler → ipc → drivers → services → desktop`
 
-An out-of-order transition is rejected by the Reaper reference contract. The experimental native stage 0 now receives firmware data and validates the handoff, but does not yet run the full phase sequence, initialise an IDT, allocate pages, schedule tasks or start services.
+An out-of-order transition is rejected by the Reaper reference contract. The experimental native boot path validates firmware data, creates the owned bootstrap GDT/TSS and loads exception gates 0..31. Dedicated IST1/2/3 stacks are assigned to double fault, NMI and page fault. It still does not run the full phase sequence, enable external interrupts, create user address spaces, schedule tasks or start services.
 
 ## Memory habitats and SoA
 

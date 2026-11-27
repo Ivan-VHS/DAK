@@ -44,6 +44,14 @@ static void test_exception_frame_matches_assembly_layout(void) {
     assert(offsetof(duckos_x86_exception_frame, rflags) == 152u);
 }
 
+static void test_exception_ist_routing(void) {
+    assert(duckos_x86_exception_ist(8u) == 1u);
+    assert(duckos_x86_exception_ist(2u) == 2u);
+    assert(duckos_x86_exception_ist(14u) == 3u);
+    assert(duckos_x86_exception_ist(0u) == 0u);
+    assert(duckos_x86_exception_ist(13u) == 0u);
+}
+
 static void test_ist_is_bounded(void) {
     duckos_idt_gate gate = {0};
 
@@ -69,6 +77,7 @@ static void test_invalid_inputs_fail_closed(void) {
 int main(void) {
     test_gate_layout_and_round_trip();
     test_exception_frame_matches_assembly_layout();
+    test_exception_ist_routing();
     test_ist_is_bounded();
     test_invalid_inputs_fail_closed();
     puts("DuckOS IDT contract tests passed");
