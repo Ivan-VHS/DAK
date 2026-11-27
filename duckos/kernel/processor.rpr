@@ -210,7 +210,7 @@ export craft ras_provider_valid(provider) {
     when kind(provider[2]) != "text" or size(provider[2]) == 0 { yield false }
     when provider[5] != true { yield false }
     when provider[6] != "user" and provider[6] != "kernel" { yield false }
-    when kind(provider[7]) != "bool" or kind(provider[8]) != "list" { yield false }
+    when kind(provider[7]) != "boolean" or kind(provider[8]) != "list" { yield false }
     each operation in provider[8] {
         when operation != "event-query" and operation != "counter-read" and operation != "persisted-record-read" and operation != "simulator-input" { yield false }
     }
