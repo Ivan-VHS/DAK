@@ -6,6 +6,7 @@
 #include "frame_allocator.h"
 #include "limine.h"
 #include "interrupts.h"
+#include "../graphics/framebuffer_compositor.h"
 
 #define SERIAL_PORT 0x3f8u
 #define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
@@ -70,6 +71,15 @@ static struct limine_framebuffer *active_framebuffer;
 static duckos_frame_allocator early_frame_allocator;
 static uint64_t first_frame_phys;
 
+#define BOOT_SURFACE_MAX_WIDTH 1280u
+#define BOOT_SURFACE_MAX_HEIGHT 720u
+static uint32_t boot_surface_pixels[BOOT_SURFACE_MAX_WIDTH * BOOT_SURFACE_MAX_HEIGHT];
+static duckos_framebuffer_surface boot_surfaces[1];
+static duckos_framebuffer_compositor boot_compositor;
+static uint32_t boot_surface_width;
+static uint32_t boot_surface_height;
+static int boot_surface_initialized;
+
 static inline void port_out8(uint16_t port, uint8_t value) {
     __asm__ volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
 }
@@ -130,53 +140,21 @@ static void halt_forever(void) {
     for (;;) __asm__ volatile ("cli; hlt");
 }
 
-static uint32_t channel_bits(uint8_t channel, uint8_t width, uint8_t shift) {
-    if (width == 0u || width > 8u || shift >= 32u ||
-        (uint32_t)width + (uint32_t)shift > 32u) {
-        return 0u;
-    }
-    const uint32_t maximum = (1u << width) - 1u;
-    const uint32_t scaled = ((uint32_t)channel * maximum + 127u) / 255u;
-    return scaled << shift;
-}
-
-static uint32_t pack_rgb(
-    const struct limine_framebuffer *fb,
-    uint8_t red,
-    uint8_t green,
-    uint8_t blue
-) {
-    return channel_bits(red, fb->red_mask_size, fb->red_mask_shift) |
-        channel_bits(green, fb->green_mask_size, fb->green_mask_shift) |
-        channel_bits(blue, fb->blue_mask_size, fb->blue_mask_shift);
-}
-
-static void draw_pixel(uint64_t x, uint64_t y, uint8_t r, uint8_t g, uint8_t b) {
-    struct limine_framebuffer *fb = active_framebuffer;
-    if (fb == NULL || fb->bpp != 32u || x >= fb->width || y >= fb->height) return;
-    const uint64_t offset = y * fb->pitch + x * 4u;
-    volatile uint32_t *pixel =
-        (volatile uint32_t *)((volatile uint8_t *)fb->address + offset);
-    *pixel = pack_rgb(fb, r, g, b);
-}
-
-static void draw_rect(
-    uint64_t x,
-    uint64_t y,
-    uint64_t width,
-    uint64_t height,
-    uint8_t r,
-    uint8_t g,
-    uint8_t b
-) {
-    struct limine_framebuffer *fb = active_framebuffer;
-    if (fb == NULL || x >= fb->width || y >= fb->height) return;
-    if (width > fb->width - x) width = fb->width - x;
-    if (height > fb->height - y) height = fb->height - y;
-
-    for (uint64_t row = 0u; row < height; ++row) {
-        for (uint64_t column = 0u; column < width; ++column) {
-            draw_pixel(x + column, y + row, r, g, b);
+static void draw_rect(uint64_t x, uint64_t y, uint64_t width,
+                      uint64_t height, uint8_t r, uint8_t g, uint8_t b) {
+    const uint32_t pixel = UINT32_C(0xff000000) |
+        ((uint32_t)r << 16U) | ((uint32_t)g << 8U) | (uint32_t)b;
+    uint64_t row, column;
+    if (x >= boot_surface_width || y >= boot_surface_height) return;
+    if (width > (uint64_t)boot_surface_width - x)
+        width = (uint64_t)boot_surface_width - x;
+    if (height > (uint64_t)boot_surface_height - y)
+        height = (uint64_t)boot_surface_height - y;
+    for (row = 0U; row < height; ++row) {
+        uint32_t *destination =
+            &boot_surface_pixels[(y + row) * BOOT_SURFACE_MAX_WIDTH + x];
+        for (column = 0U; column < width; ++column) {
+            destination[column] = pixel;
         }
     }
 }
@@ -241,31 +219,105 @@ static void draw_centered(
     uint8_t g,
     uint8_t b
 ) {
-    if (active_framebuffer == NULL || text == NULL) return;
+    if (boot_surface_width == 0u || text == NULL) return;
     size_t length = 0u;
     while (text[length] != '\0') ++length;
     const uint64_t width = (uint64_t)length * 6u * scale;
-    const uint64_t x = active_framebuffer->width > width ?
-        (active_framebuffer->width - width) / 2u : 8u;
+    const uint64_t x = boot_surface_width > width ?
+        (boot_surface_width - width) / 2u : 8u;
     draw_text(x, y, text, scale, r, g, b);
+}
+
+static int present_boot_surface(void) {
+    return duckos_framebuffer_compositor_present(&boot_compositor) ==
+           DUCKOS_FRAMEBUFFER_OK;
 }
 
 static void draw_boot_screen(void) {
     struct limine_framebuffer *fb = active_framebuffer;
-    if (fb == NULL || fb->bpp != 32u) return;
+    duckos_framebuffer_target target;
+    duckos_framebuffer_surface surface;
 
-    draw_rect(0u, 0u, fb->width, fb->height, 7u, 7u, 7u);
-    draw_rect(0u, 0u, fb->width, 92u, 255u, 212u, 0u);
+    if (fb == NULL || fb->address == NULL || fb->bpp != 32u ||
+        fb->width == 0u || fb->height == 0u ||
+        fb->width > UINT32_MAX || fb->height > UINT32_MAX ||
+        fb->pitch == 0u || fb->pitch > UINT32_MAX ||
+        fb->height > UINT64_MAX / fb->pitch) {
+        return;
+    }
+
+    boot_surface_width = fb->width < BOOT_SURFACE_MAX_WIDTH ?
+                         (uint32_t)fb->width : BOOT_SURFACE_MAX_WIDTH;
+    boot_surface_height = fb->height < BOOT_SURFACE_MAX_HEIGHT ?
+                          (uint32_t)fb->height : BOOT_SURFACE_MAX_HEIGHT;
+
+    target.pixels = (volatile uint32_t *)fb->address;
+    target.mapped_bytes = fb->pitch * fb->height;
+    target.width = (uint32_t)fb->width;
+    target.height = (uint32_t)fb->height;
+    target.pitch_bytes = (uint32_t)fb->pitch;
+    target.red_mask_size = fb->red_mask_size;
+    target.red_mask_shift = fb->red_mask_shift;
+    target.green_mask_size = fb->green_mask_size;
+    target.green_mask_shift = fb->green_mask_shift;
+    target.blue_mask_size = fb->blue_mask_size;
+    target.blue_mask_shift = fb->blue_mask_shift;
+
+    if (duckos_framebuffer_compositor_init(
+            &boot_compositor, &target, boot_surfaces, 1U,
+            UINT32_C(0xff070707)) != DUCKOS_FRAMEBUFFER_OK) {
+        serial_write("framebuffer compositor init failed; serial console remains active\n");
+        boot_surface_width = 0U;
+        boot_surface_height = 0U;
+        return;
+    }
+
+    for (size_t pixel = 0U;
+         pixel < sizeof(boot_surface_pixels) / sizeof(boot_surface_pixels[0]);
+         ++pixel) {
+        boot_surface_pixels[pixel] = 0U;
+    }
+    surface.id = 1U;
+    surface.pixels = boot_surface_pixels;
+    surface.buffer_bytes = sizeof(boot_surface_pixels);
+    surface.width = boot_surface_width;
+    surface.height = boot_surface_height;
+    surface.pitch_bytes = BOOT_SURFACE_MAX_WIDTH * 4U;
+    surface.x = 0;
+    surface.y = 0;
+    surface.z = 0;
+    surface.opacity = 255U;
+    surface.visible = 1U;
+    surface.active = 1U;
+    surface.reserved = 0U;
+    if (duckos_framebuffer_surface_add(&boot_compositor, &surface) !=
+        DUCKOS_FRAMEBUFFER_OK) {
+        serial_write("framebuffer compositor surface registration failed\n");
+        boot_surface_width = 0U;
+        boot_surface_height = 0U;
+        return;
+    }
+    boot_surface_initialized = 1;
+
+    draw_rect(0u, 0u, boot_surface_width, boot_surface_height, 7u, 7u, 7u);
+    draw_rect(0u, 0u, boot_surface_width, 92u, 255u, 215u, 0u);
     draw_text(28u, 29u, "DUCK OS", 4u, 7u, 7u, 7u);
 
-    const uint64_t body_y = fb->height > 140u ? fb->height / 2u - 70u : 8u;
-    draw_centered(body_y, "NATIVE MEMORY READY", 3u, 255u, 212u, 0u);
+    const uint64_t body_y = boot_surface_height > 140u ?
+        boot_surface_height / 2u - 70u : 8u;
+    draw_centered(body_y, "NATIVE MEMORY READY", 3u, 255u, 215u, 0u);
     draw_centered(body_y + 70u, "MEMORY MAP VALIDATED", 2u, 90u, 220u, 120u);
-    draw_centered(body_y + 112u, "FRAME ALLOCATOR READY", 2u, 255u, 212u, 0u);
-    if (fb->width > 64u && fb->height > 45u) {
-        draw_rect(32u, fb->height - 42u, fb->width - 64u, 3u, 255u, 212u, 0u);
+    draw_centered(body_y + 112u, "FRAME ALLOCATOR READY", 2u, 255u, 215u, 0u);
+    if (boot_surface_width > 64u && boot_surface_height > 45u) {
+        draw_rect(32u, boot_surface_height - 42u,
+                  boot_surface_width - 64u, 3u, 255u, 215u, 0u);
+    }
+    if (!present_boot_surface()) {
+        serial_write("framebuffer compositor present failed; serial console remains active\n");
+        boot_surface_initialized = 0;
     }
 }
+
 
 static int memory_type_from_limine(uint64_t source, uint32_t *destination) {
     if (destination == NULL) return 0;
@@ -415,8 +467,9 @@ static void boot_failure(const char *reason) {
     serial_write("DUCKOS_BOOT_ERROR ");
     serial_write(reason);
     serial_write("\n");
-    if (active_framebuffer != NULL && active_framebuffer->bpp == 32u) {
-        draw_rect(0u, 0u, active_framebuffer->width, 12u, 180u, 30u, 30u);
+    if (boot_surface_initialized != 0) {
+        draw_rect(0u, 0u, boot_surface_width, 12u, 180u, 30u, 30u);
+        (void)present_boot_surface();
     }
     halt_forever();
 }
@@ -464,10 +517,11 @@ void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame) {
         serial_write("\n");
     }
 
-    if (active_framebuffer != NULL && active_framebuffer->bpp == 32u) {
-        draw_rect(0u, 0u, active_framebuffer->width, 84u, 150u, 22u, 22u);
+    if (boot_surface_initialized != 0) {
+        draw_rect(0u, 0u, boot_surface_width, 84u, 150u, 22u, 22u);
         draw_text(24u, 20u, "KERNEL EXCEPTION", 3u, 255u, 255u, 255u);
-        draw_text(24u, 52u, "SYSTEM HALTED", 2u, 255u, 212u, 0u);
+        draw_text(24u, 52u, "SYSTEM HALTED", 2u, 255u, 215u, 0u);
+        (void)present_boot_surface();
     }
     halt_forever();
 }
