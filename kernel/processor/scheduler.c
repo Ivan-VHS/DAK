@@ -508,6 +508,8 @@ duckos_sched_status duckos_scheduler_switch(
         new_stack_pointer = next->saved_stack_pointer;
     } else if (old_index != scheduler->thread_count &&
                cpu->idle_stack_pointer != 0U) {
+        /* Resume the stack saved when this CPU dispatched its previous task. */
+        new_stack_pointer = cpu->idle_stack_pointer;
         cpu->current_tid = 0U;
         cpu->quantum_ticks = 0U;
         cpu->reschedule_pending = 0U;
