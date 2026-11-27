@@ -30,6 +30,7 @@
     "claim_rule": "A Reaper policy contract is not proof of a privileged backend or hardware implementation."
   },
   "components": [
+    {"id":"dak-atomic-core","path":"dak/kernel/core.rpr","contract":"implemented","backend":"pending"},
     {"id":"atomic-ordering","path":"duckos/kernel/atomic.rpr","contract":"implemented","backend":"pending"},
     {"id":"syscall-abi-policy","path":"duckos/kernel/syscall.rpr","contract":"implemented","backend":"pending"},
     {"id":"opaque-process-handles","path":"duckos/kernel/handles.rpr","contract":"implemented","backend":"pending"},
