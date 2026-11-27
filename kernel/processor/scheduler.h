@@ -145,7 +145,7 @@ duckos_sched_status duckos_scheduler_tick(
 );
 
 int duckos_scheduler_core_offline_allowed(
-    const duckos_scheduler *scheduler, uint32_t logical_id
+    duckos_scheduler *scheduler, uint32_t logical_id
 );
 
 const char *duckos_sched_status_name(duckos_sched_status status);
