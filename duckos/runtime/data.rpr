@@ -18,7 +18,7 @@ export craft slice_valid(data, start, length) {
 
 export craft slice_copy(data, start, length) {
     when not slice_valid(data, start, length) {
-        yield ["invalid", []]
+        yield ["invalid", [] ]
     }
     vary result := []
     each index in range(start, start + length) {
@@ -29,7 +29,7 @@ export craft slice_copy(data, start, length) {
 
 export craft append_bounded(left, right, capacity) {
     when not bytes_valid(left) or not bytes_valid(right) or capacity < 0 {
-        yield ["invalid", []]
+        yield ["invalid", [] ]
     }
     when size(left) > capacity or size(right) > capacity - size(left) {
         yield ["full", left]
