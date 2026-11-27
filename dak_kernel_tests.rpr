@@ -30,14 +30,15 @@ make active_model := core["model_finish_install"](installing[1], digest, ["trust
 assert(active_model[0] == "OK" and active_model[1][6] == "active" and active_model[1][7] == true, "verified model becomes permanently locked")
 assert(core["model_update"](active_model[1], 2, digest)[0] == "ERR", "active model is immutable; updates require a new object")
 
-make guarded := core["predictor_guard"](40, 45, 30, 10, 15, 0, false)
+make guarded := core["predictor_guard"](40, 45, 25, 30, 10, 15, 0, false)
 assert(guarded[0] == "OK" and guarded[1][1] == 55 and guarded[1][2] == 40, "predictor adds a margin to load and risk separately")
 assert(guarded[1][4] == ["all-required"], "predictor cannot remove mandatory checks")
-make mismatch_once := core["predictor_guard"](20, 70, 80, 10, 20, 0, false)
+make mismatch_once := core["predictor_guard"](20, 70, 40, 80, 10, 20, 0, false)
 assert(mismatch_once[1][1] == 100 and mismatch_once[1][2] == 100 and mismatch_once[1][3] == false, "first outlier forces maximum protection")
-make mismatch_twice := core["predictor_guard"](20, 70, 80, 10, 20, 1, false)
+make mismatch_twice := core["predictor_guard"](20, 70, 40, 80, 10, 20, 1, false)
 assert(mismatch_twice[1][3] == true, "repeated predictor mismatch enters quarantine")
-assert(core["predictor_guard"](20, 30, 20, 5, 20, 0, true)[1][3] == true, "quarantine cannot clear itself")
+assert(core["predictor_guard"](20, 30, 15, 20, 5, 20, 0, true)[1][3] == true, "quarantine cannot clear itself")
+assert(core["predictor_guard"](20, 25, -1, 20, 5, 20, 0, false)[1][3] == true, "invalid observed risk fails closed")
 
 make app := core["application_create"](21, [
     [1, 3001, 4096, 4096, 4096],
