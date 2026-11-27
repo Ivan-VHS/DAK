@@ -12,7 +12,7 @@ static duckos_sched_lock_state scheduler_lock(duckos_scheduler *scheduler) {
     if (scheduler->platform.irq_save != NULL)
         state.irq_state = scheduler->platform.irq_save(scheduler->platform.irq_context);
     while (atomic_flag_test_and_set_explicit(&scheduler->lock, memory_order_acquire)) {
-        __asm__ volatile ("" ::: "memory");
+        atomic_signal_fence(memory_order_seq_cst);
     }
     return state;
 }
