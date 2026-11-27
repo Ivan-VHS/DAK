@@ -36,10 +36,10 @@ assert(pack["schema"] == "dak.education.early-math-pack.v1", "pack schema is sta
 assert(size(pack["stages"]) == 4, "four flexible age bands are present")
 assert(pack["session_policy"]["adult_guided"], "an adult guides the play")
 assert(pack["session_policy"]["child_paced"], "the child controls the pace")
-assert(not pack["session_policy"]["timed"], "activities are not timed")
-assert(not pack["session_policy"]["scored"], "activities are not scored")
-assert(not pack["session_policy"]["personal_data_collection"], "no child data is collected")
-assert(not pack["session_policy"]["network_required"], "the pack works offline")
+assert(pack["session_policy"]["timed"] == false, "activities are not timed")
+assert(pack["session_policy"]["scored"] == false, "activities are not scored")
+assert(pack["session_policy"]["personal_data_collection"] == false, "no child data is collected")
+assert(pack["session_policy"]["network_required"] == false, "the pack works offline")
 
 make row := [1, 2, 3, 4, 5]
 make scattered := [5, 3, 1, 4, 2]
