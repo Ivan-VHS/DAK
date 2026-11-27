@@ -1,0 +1,167 @@
+{
+  "schema": "duckos.ecosystem-integration-plan.v1",
+  "version": 1,
+  "host": "DuckOS",
+  "principles": {
+    "preserve_upstream_identity": true,
+    "reaper_is_primary_for_new_duckos_native_code": true,
+    "offline_first": true,
+    "auto_advance_source_pins": false,
+    "auto_build_imported_sources": false,
+    "auto_execute_imported_sources": false,
+    "require_review_for_mutations": true
+  },
+  "source_of_truth": [
+    "federation/repositories.v1.json",
+    "catalogs/preinstalled-applications.v1.json",
+    "manifests/ivan-vhs-program-adoption.v1.json",
+    ".architecture/system-capabilities.v1.json"
+  ],
+  "workstreams": [
+    {
+      "id": "reaper-duck-foundation",
+      "wave": 1,
+      "projects": [
+        "Reaper",
+        "DuckOS"
+      ],
+      "scope": [
+        "typed IR",
+        "Span/SourceMap",
+        "DABI64",
+        "boot-info",
+        "native system contracts"
+      ]
+    },
+    {
+      "id": "security-knowledge-desktop",
+      "wave": 2,
+      "projects": [
+        "BAV",
+        "Kontexa",
+        "Mora",
+        "DuckOS"
+      ],
+      "scope": [
+        "capability broker",
+        "security telemetry",
+        "offline knowledge service",
+        "audit and recovery"
+      ]
+    },
+    {
+      "id": "hardware-diagnostics",
+      "wave": 3,
+      "projects": [
+        "Pytyliki",
+        "OPlague",
+        "DuckOS"
+      ],
+      "scope": [
+        "versioned C ABI",
+        "read-only diagnostics",
+        "device evidence adapters"
+      ]
+    },
+    {
+      "id": "audio-runtime",
+      "wave": 4,
+      "projects": [
+        "VentuSample",
+        "Reaper",
+        "DuckOS"
+      ],
+      "scope": [
+        "C++20 DSP ABI",
+        "offline render jobs",
+        "audio service contract"
+      ]
+    },
+    {
+      "id": "application-platform",
+      "wave": 5,
+      "projects": [
+        "Jora",
+        "Mora",
+        "DuckOS"
+      ],
+      "scope": [
+        "app manifests",
+        "package lifecycle",
+        "capability declarations",
+        "atomic update/rollback"
+      ]
+    },
+    {
+      "id": "remaining-apps-tools",
+      "wave": 6,
+      "projects": [
+        "ORGze",
+        "DuckBridge",
+        "DuckDriver OmniCore",
+        "Reaper Studio",
+        "SAMBU",
+        "MOST",
+        "ToolNG",
+        "SaintSI"
+      ],
+      "scope": [
+        "app adapters",
+        "developer tools",
+        "system utilities",
+        "shared contracts"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "Reaper",
+      "to": "DuckOS",
+      "contract": "typed IR + Span + DABI64 + boot-info"
+    },
+    {
+      "from": "BAV",
+      "to": "DuckOS/Mora",
+      "contract": "capability and security-event API"
+    },
+    {
+      "from": "Kontexa",
+      "to": "DuckOS/Mora",
+      "contract": "offline document/index API"
+    },
+    {
+      "from": "Pytyliki",
+      "to": "DuckOS/OPlague",
+      "contract": "versioned C ABI + diagnostic schema"
+    },
+    {
+      "from": "OPlague",
+      "to": "DuckOS",
+      "contract": "read-only device/driver evidence"
+    },
+    {
+      "from": "VentuSample",
+      "to": "Reaper/DuckOS",
+      "contract": "C++20 DSP ABI + offline render manifest"
+    },
+    {
+      "from": "Jora",
+      "to": "Mora/DuckOS",
+      "contract": "app manifest + package lifecycle API"
+    }
+  ],
+  "maturity": [
+    "planned",
+    "partial",
+    "implemented",
+    "verified",
+    "blocked"
+  ],
+  "implementation_evidence": [
+    "source change",
+    "tests",
+    "CI",
+    "integration contract"
+  ],
+  "documentation_alone_is_not_implementation": true
+}

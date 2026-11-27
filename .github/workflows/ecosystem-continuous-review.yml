@@ -1,0 +1,110 @@
+name: Ecosystem continuous review
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "federation/**"
+      - "catalogs/**"
+      - "manifests/**"
+      - "docs/CONTINUOUS_ECOSYSTEM_INTEGRATION.md"
+      - ".github/workflows/ecosystem-continuous-review.yml"
+  pull_request:
+    paths:
+      - "federation/**"
+      - "catalogs/**"
+      - "manifests/**"
+      - "docs/CONTINUOUS_ECOSYSTEM_INTEGRATION.md"
+      - ".github/workflows/ecosystem-continuous-review.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ecosystem-continuous-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Inventory integrity and upstream drift
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out pinned DuckOS workspace
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Validate integration plan and source registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e '
+            .schema == "duckos.ecosystem-integration-plan.v1"
+            and .version == 1
+            and .host == "DuckOS"
+            and (.workstreams | length > 0)
+            and (.edges | length > 0)
+            and (.principles.auto_advance_source_pins == false)
+            and (.principles.auto_execute_imported_sources == false)
+          ' federation/ecosystem-integration-plan.v1.json >/dev/null
+          jq -e '
+            .schema == "duckos.repository-federation.v1"
+            and (.repositories | length > 0)
+            and all(.repositories[];
+              (.id | length > 0)
+              and (.repository | contains("/"))
+              and (.pinned_commit | test("^[0-9a-f]{40}$"))
+              and (.auto_build == false)
+              and (.auto_execute == false)
+            )
+          ' federation/repositories.v1.json >/dev/null
+          echo "Integration plan and source registry are structurally valid." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify exact submodule pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(git submodule status --recursive)"
+          printf '%s\n' "$status"
+          if printf '%s\n' "$status" | grep -Eq '^[+-]'; then
+            echo "A submodule is uninitialized or differs from its recorded pin." >&2
+            exit 1
+          fi
+          {
+            echo "## Pinned source workspace"
+            echo "All initialized submodules match the commits recorded by DuckOS."
+            printf '%s\n' "$status"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report upstream default-branch drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Upstream source drift"
+            echo
+            echo "| Project | DuckOS pin | Upstream head | Status |"
+            echo "|---|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          while IFS=$'\t' read -r project url branch pin; do
+            head="$(git ls-remote "$url" "refs/heads/$branch" | awk 'NR == 1 { print $1 }')"
+            if [[ -z "$head" ]]; then
+              state="unavailable"
+              head="not retrieved"
+            elif [[ "$head" == "$pin" ]]; then
+              state="current"
+            else
+              state="review update"
+            fi
+            printf '| %s | %s | %s | %s |\n' "$project" "$pin" "$head" "$state" >> "$GITHUB_STEP_SUMMARY"
+          done < <(jq -r '.repositories[] | [.id, .url, .default_branch, .pinned_commit] | @tsv' federation/repositories.v1.json)
+
+          {
+            echo
+            echo "Upstream drift is informational. This workflow never changes a submodule pin or imports upstream code."
+          } >> "$GITHUB_STEP_SUMMARY"
