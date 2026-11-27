@@ -62,7 +62,7 @@ static void integrated_task_entry(void *argument) {
 }
 
 static void test_scheduler_context_end_to_end(void) {
-    _Alignas(16) unsigned char task_stack[4096];
+    _Alignas(16) unsigned char task_stack[16384];
     uintptr_t saved_stack = 0U;
     integrated_task_stage = 0U;
 
