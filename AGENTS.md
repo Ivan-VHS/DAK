@@ -1,6 +1,6 @@
-# DuckOS engineering agreement
+# DAKOS engineering agreement
 
-DuckOS is built in small, verifiable layers. Keep the implementation understandable to the next person who has to debug a failed boot, a damaged image or an unexpected device boundary.
+DAKOS is built in small, verifiable layers. Keep the implementation understandable to the next person who has to debug a failed boot, a damaged image or an unexpected device boundary.
 
 ## Code and architecture
 
