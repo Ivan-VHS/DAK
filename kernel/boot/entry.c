@@ -140,14 +140,6 @@ static void halt_forever(void) {
     for (;;) __asm__ volatile ("cli; hlt");
 }
 
-static void draw_pixel(uint64_t x, uint64_t y,
-                      uint8_t r, uint8_t g, uint8_t b) {
-    if (x >= boot_surface_width || y >= boot_surface_height) return;
-    boot_surface_pixels[y * BOOT_SURFACE_MAX_WIDTH + x] =
-        UINT32_C(0xff000000) | ((uint32_t)r << 16U) |
-        ((uint32_t)g << 8U) | (uint32_t)b;
-}
-
 static void draw_rect(uint64_t x, uint64_t y, uint64_t width,
                       uint64_t height, uint8_t r, uint8_t g, uint8_t b) {
     const uint32_t pixel = UINT32_C(0xff000000) |
@@ -280,7 +272,11 @@ static void draw_boot_screen(void) {
         return;
     }
 
-    (void)memset(boot_surface_pixels, 0, sizeof(boot_surface_pixels));
+    for (size_t pixel = 0U;
+         pixel < sizeof(boot_surface_pixels) / sizeof(boot_surface_pixels[0]);
+         ++pixel) {
+        boot_surface_pixels[pixel] = 0U;
+    }
     surface.id = 1U;
     surface.pixels = boot_surface_pixels;
     surface.buffer_bytes = sizeof(boot_surface_pixels);
