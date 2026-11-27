@@ -1,6 +1,15 @@
 #include "app_sector.h"
 
-#include <string.h>
+static void dak_bytes_clear(void *destination, size_t length) {
+    uint8_t *bytes = (uint8_t *)destination;
+    for (size_t index = 0u; index < length; ++index) bytes[index] = 0u;
+}
+
+static void dak_bytes_copy(void *destination, const void *source, size_t length) {
+    uint8_t *output = (uint8_t *)destination;
+    const uint8_t *input = (const uint8_t *)source;
+    for (size_t index = 0u; index < length; ++index) output[index] = input[index];
+}
 
 static uint16_t read_u16_le(const uint8_t *bytes) {
     return (uint16_t)((uint16_t)bytes[0] | ((uint16_t)bytes[1] << 8u));
@@ -90,7 +99,7 @@ dak_sector_status dak_sector_encode(
         return DAK_SECTOR_INVALID_DESCRIPTOR;
     }
 
-    memset(output, 0, DAK_SECTOR_WIRE_BYTES);
+    dak_bytes_clear(output, DAK_SECTOR_WIRE_BYTES);
     output[0] = DAK_SECTOR_MAGIC_0;
     output[1] = DAK_SECTOR_MAGIC_1;
     output[2] = DAK_SECTOR_MAGIC_2;
@@ -105,7 +114,7 @@ dak_sector_status dak_sector_encode(
     write_u64_le(output + 32u, sector->length_bytes);
     write_u32_le(output + 40u, sector->alignment_bytes);
     write_u32_le(output + 44u, sector->permissions);
-    memcpy(output + 48u, sector->digest, DAK_SECTOR_DIGEST_BYTES);
+    dak_bytes_copy(output + 48u, sector->digest, DAK_SECTOR_DIGEST_BYTES);
     write_u64_le(output + 80u, sector->generation);
     /* Bytes 88..95 are reserved and must remain zero in v1. */
     return DAK_SECTOR_OK;
@@ -135,7 +144,7 @@ dak_sector_status dak_sector_decode(
     decoded.length_bytes = read_u64_le(input + 32u);
     decoded.alignment_bytes = read_u32_le(input + 40u);
     decoded.permissions = read_u32_le(input + 44u);
-    memcpy(decoded.digest, input + 48u, DAK_SECTOR_DIGEST_BYTES);
+    dak_bytes_copy(decoded.digest, input + 48u, DAK_SECTOR_DIGEST_BYTES);
     decoded.generation = read_u64_le(input + 80u);
 
     if (decoded.app_id == 0u || decoded.sector_id == 0u || decoded.generation == 0u ||
