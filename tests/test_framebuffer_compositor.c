@@ -48,7 +48,8 @@ static void test_blend_order_and_clip(void) {
     assert(duckos_framebuffer_surface_add(&c,&red)==DUCKOS_FRAMEBUFFER_OK);
     assert(duckos_framebuffer_compositor_present(&c)==DUCKOS_FRAMEBUFFER_OK);
     assert(scanout[1U*WIDTH+0U]==0x007f8000U);
-    assert(scanout[1U*WIDTH+1U]==0x000000ffU);\n    assert(scanout[2U*WIDTH+0U]==0x00ff0000U);
+    assert(scanout[1U*WIDTH+1U]==0x000000ffU);
+    assert(scanout[2U*WIDTH+0U]==0x00ff0000U);
     assert(scanout[0U]==0x000000ffU);
 }
 static void test_surface_bounds_and_state(void) {
