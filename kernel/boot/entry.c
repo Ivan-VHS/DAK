@@ -7,6 +7,9 @@
 #include "limine.h"
 #include "interrupts.h"
 #include "gdt.h"
+#include "scheduler.h"
+#include "context.h"
+#include "cpu.h"
 
 #define SERIAL_PORT 0x3f8u
 #define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
@@ -69,6 +72,8 @@ static volatile uint64_t requests_end[2] = LIMINE_REQUESTS_END_MARKER;
 static duckos_memory_region boot_regions[MAX_BOOT_REGIONS];
 static struct limine_framebuffer *active_framebuffer;
 static duckos_frame_allocator early_frame_allocator;
+static duckos_scheduler bootstrap_scheduler;
+static duckos_x86_64_cpu_info bootstrap_cpu_info;
 static uint64_t first_frame_phys;
 
 static inline void port_out8(uint16_t port, uint8_t value) {
@@ -486,6 +491,32 @@ void _start(void) {
     }
     serial_write("exceptions=0..31 idt=loaded maskable_interrupts=disabled\n");
     serial_write("exception_ist=double-fault:1 nmi:2 page-fault:3\n");
+
+    duckos_sched_platform scheduler_platform;
+    duckos_x86_64_scheduler_platform(&scheduler_platform);
+    if (duckos_scheduler_init(&bootstrap_scheduler, 1u, 1u,
+                              &scheduler_platform) != DUCKOS_SCHED_OK ||
+        duckos_scheduler_bootstrap_cpu(&bootstrap_scheduler, 0u) != DUCKOS_SCHED_OK) {
+        boot_failure("could not initialize the bootstrap processor scheduler state");
+    }
+    if (!duckos_x86_64_cpu_probe(&bootstrap_cpu_info)) {
+        boot_failure("could not read the bootstrap processor CPUID profile");
+    }
+    serial_write("processor vendor=");
+    serial_write(bootstrap_cpu_info.vendor);
+    serial_write(" family=");
+    serial_decimal(bootstrap_cpu_info.family);
+    serial_write(" model=");
+    serial_decimal(bootstrap_cpu_info.model);
+    serial_write(" stepping=");
+    serial_decimal(bootstrap_cpu_info.stepping);
+    serial_write(" discovered_logical=");
+    serial_decimal(bootstrap_cpu_info.logical_processors_per_package);
+    serial_write(" mce=");
+    serial_write((bootstrap_cpu_info.features & DUCKOS_CPU_FEATURE_MCE) != 0U ? "yes" : "no");
+    serial_write(" mca=");
+    serial_write((bootstrap_cpu_info.features & DUCKOS_CPU_FEATURE_MCA) != 0U ? "yes" : "no");
+    serial_write(" scheduler=bsp-online scheduler_cpus=1 smp=not-started\n");
     serial_write("\nDUCKOS_BOOT begin protocol=limine base_revision=6\n");
 
     if (!LIMINE_BASE_REVISION_SUPPORTED(base_revision)) {

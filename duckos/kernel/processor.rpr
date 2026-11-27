@@ -1,0 +1,264 @@
+# DAK processor and multiprocessor-kernel policy.
+# This module validates policy. AP startup and hardware control require native backends.
+
+export make DAK_PROCESSOR_SCHEMA := "dak.processor-control.v1"
+
+export craft control_domains() {
+    yield [
+        ["inventory", "CPUID, vendor, family, model, stepping and ISA", "read-only"],
+        ["topology", "package, die, cluster, physical core and logical CPU", "read-only"],
+        ["core-blocks", "decode, dispatch, integer, floating-point, vector, cache and PMU blocks", "arch-adapter"],
+        ["core-lifecycle", "online, starting, draining, offline, failed and quarantined", "kernel"],
+        ["ap-startup", "AP trampoline, per-CPU stack, GDT, IDT and local controller", "kernel"],
+        ["threads", "thread descriptor, lifecycle, stack ownership and exit", "kernel"],
+        ["smt", "sibling discovery, placement and isolation", "kernel"],
+        ["affinity", "hard/soft affinity and CPU isolation sets", "kernel"],
+        ["scheduler", "priority, deadline, fairness, load and migration", "kernel"],
+        ["preemption", "preemption state, critical-section bounds and safe points", "kernel"],
+        ["interrupts", "APIC mode, vector ownership, routing and affinity", "arch-adapter"],
+        ["timers", "TSC, local APIC timer, deadline and watchdog", "arch-adapter"],
+        ["cache-numa", "cache sharing, NUMA locality and memory placement", "memory-adapter"],
+        ["power-thermal", "frequency policy, idle states, throttling and emergency limits", "platform-adapter"],
+        ["pmu", "performance event selection, multiplexing and counter ownership", "platform-adapter"],
+        ["virtualization", "VMX/SVM capability and isolation policy", "platform-adapter"],
+        ["security", "mitigation, crypto, microcode provenance and trust state", "platform-adapter"],
+        ["debug", "bounded inspection, trace, breakpoint and single-step", "debug-adapter"],
+        ["verification", "boot, AP startup, scheduler, IRQ, memory and ABI evidence", "verification"],
+        ["version-control", "kernel, core, scheduler, microcode and ABI revisions", "versioned"],
+        ["live-update", "quiescence, staged activation and rollback", "kernel"],
+        ["telemetry-replay", "local metrics, fault history and deterministic replay", "verification"],
+        ["machine-check", "MCE/MCA feature discovery and OS-published machine-check records", "ras-adapter"],
+        ["ras-recovery", "corrected/uncorrected classification, evidence quality, periodicity and safe action proposals", "policy-and-platform-adapter"]
+    ]
+}
+
+export craft processor_snapshot_valid(snapshot) {
+    # [schema, snapshot_id, architecture, vendor, packages, dies, cores, logical_threads, online_threads, generation, features, source]
+    when kind(snapshot) != "list" or size(snapshot) != 12 { yield false }
+    when snapshot[0] != "dak.processor-snapshot.v1" { yield false }
+    when kind(snapshot[1]) != "text" or size(snapshot[1]) == 0 { yield false }
+    when kind(snapshot[2]) != "text" or kind(snapshot[3]) != "text" { yield false }
+    when snapshot[4] <= 0 or snapshot[5] <= 0 or snapshot[6] <= 0 { yield false }
+    when snapshot[7] < snapshot[6] or snapshot[8] < 0 or snapshot[8] > snapshot[7] { yield false }
+    when snapshot[9] < 0 or kind(snapshot[10]) != "list" or kind(snapshot[11]) != "text" { yield false }
+    yield true
+}
+
+export craft affinity_valid(affinity, logical_count) {
+    when kind(affinity) != "list" or size(affinity) == 0 or logical_count <= 0 { yield false }
+    each cpu_id in affinity {
+        when cpu_id < 0 or cpu_id >= logical_count or cpu_id % 1 != 0 { yield false }
+    }
+    yield size(unique(affinity)) == size(affinity)
+}
+
+export craft core_descriptor_valid(core, core_count, logical_count) {
+    # [core_id, package_id, die_id, cluster_id, class, state, online_threads, thread_ids, revision_id, generation]
+    when kind(core) != "list" or size(core) != 10 { yield false }
+    when core[0] < 0 or core[0] >= core_count or core[1] < 0 or core[2] < 0 or core[3] < 0 { yield false }
+    when core[4] != "performance" and core[4] != "efficiency" and core[4] != "general" and core[4] != "unknown" { yield false }
+    when core[5] != "offline" and core[5] != "starting" and core[5] != "online" and core[5] != "draining" and core[5] != "quarantined" and core[5] != "failed" { yield false }
+    when core[6] < 0 or core[6] > logical_count or core[9] < 0 { yield false }
+    when kind(core[7]) != "list" or kind(core[8]) != "text" or size(core[8]) == 0 { yield false }
+    when core[5] == "online" and (core[6] == 0 or size(core[7]) == 0) { yield false }
+    when core[5] == "offline" and core[6] != 0 { yield false }
+    each thread_id in core[7] {
+        when thread_id < 0 or thread_id >= logical_count { yield false }
+    }
+    yield true
+}
+
+export craft block_descriptor_valid(block, core_count) {
+    # [block_id, owner_core, class, width_bits, state, revision_id, generation]
+    when kind(block) != "list" or size(block) != 7 { yield false }
+    when kind(block[0]) != "text" or size(block[0]) == 0 { yield false }
+    when block[1] < 0 or block[1] >= core_count { yield false }
+    when block[2] != "decode" and block[2] != "dispatch" and block[2] != "integer" and block[2] != "floating-point" and block[2] != "vector" and block[2] != "branch-predictor" and block[2] != "cache" and block[2] != "pmu" { yield false }
+    when block[3] <= 0 or block[4] != "available" and block[4] != "disabled-by-policy" and block[4] != "faulted" and block[4] != "unknown" { yield false }
+    when kind(block[5]) != "text" or block[6] < 0 { yield false }
+    yield true
+}
+
+export craft core_transition_valid(current, next) {
+    when current == "offline" and next == "starting" { yield true }
+    when current == "starting" and (next == "online" or next == "failed" or next == "offline") { yield true }
+    when current == "online" and (next == "draining" or next == "quarantined" or next == "failed") { yield true }
+    when current == "draining" and (next == "offline" or next == "online" or next == "failed") { yield true }
+    when current == "quarantined" and (next == "offline" or next == "starting") { yield true }
+    yield false
+}
+
+export craft core_release_allowed(core, runnable_threads, active_irqs, held_locks, dma_leases) {
+    yield kind(core) == "list" and size(core) == 10 and core[5] == "draining" and runnable_threads == 0 and active_irqs == 0 and held_locks == 0 and dma_leases == 0
+}
+
+export craft thread_descriptor_valid(thread, logical_count) {
+    # [tid, pid, priority, deadline_ns, stack_bytes, state, affinity, generation]
+    when kind(thread) != "list" or size(thread) != 8 { yield false }
+    when thread[0] <= 0 or thread[1] <= 0 or thread[2] < 0 or thread[2] > 255 { yield false }
+    when thread[3] < 0 or thread[4] < 16384 or thread[4] > 16777216 { yield false }
+    when thread[5] != "created" and thread[5] != "ready" and thread[5] != "running" and thread[5] != "blocked" and thread[5] != "sleeping" and thread[5] != "zombie" { yield false }
+    when not affinity_valid(thread[6], logical_count) or thread[7] < 0 { yield false }
+    yield true
+}
+
+export craft least_loaded_cpu(workers, affinity) {
+    # Worker: [cpu_id, state, runnable_load_basis_points, interrupt_load, generation]
+    vary found := false
+    vary selected_id := -1
+    vary selected_load := 10001
+    each worker in workers {
+        when size(worker) == 5 and worker[1] == "online" and contains(affinity, worker[0]) {
+            when worker[2] >= 0 and worker[2] <= 10000 and worker[3] >= 0 {
+                when not found or worker[2] < selected_load or (worker[2] == selected_load and worker[0] < selected_id) {
+                    change found := true
+                    change selected_id := worker[0]
+                    change selected_load := worker[2]
+                }
+            }
+        }
+    }
+    yield selected_id
+}
+
+export craft split_work(total_items, worker_count) {
+    when total_items < 0 or worker_count <= 0 or total_items % 1 != 0 or worker_count % 1 != 0 { yield [] }
+    make base_size := total_items // worker_count
+    make remainder := total_items % worker_count
+    vary allocations := []
+    each worker in range(0, worker_count) {
+        vary assigned := base_size
+        when worker < remainder { change assigned := assigned + 1 }
+        change allocations := push(allocations, assigned)
+    }
+    yield allocations
+}
+
+export craft ap_startup_admission(bootstrap_ready, apic_ready, stack_ready, gdt_ready, idt_ready, per_cpu_ready) {
+    when not bootstrap_ready { yield "reject-bootstrap" }
+    when not apic_ready { yield "reject-local-controller" }
+    when not stack_ready or not gdt_ready or not idt_ready or not per_cpu_ready { yield "reject-per-cpu-state" }
+    yield "admit-native-ap-startup"
+}
+
+export craft interrupt_route_valid(route, logical_count) {
+    # [vector, destination_cpu, delivery, masked, generation]
+    when kind(route) != "list" or size(route) != 5 { yield false }
+    when route[0] < 32 or route[0] > 255 or route[1] < 0 or route[1] >= logical_count { yield false }
+    when route[2] != "fixed" and route[2] != "lowest-priority" and route[2] != "nmi" and route[2] != "smi" { yield false }
+    when route[4] < 0 { yield false }
+    yield true
+}
+
+export craft verification_evidence_valid(evidence) {
+    # [revision_id, tests_total, passed, failed, coverage_basis_points, duration_ms, artifact_sha256, verifier]
+    when kind(evidence) != "list" or size(evidence) != 8 { yield false }
+    when kind(evidence[0]) != "text" or size(evidence[0]) == 0 { yield false }
+    when evidence[1] <= 0 or evidence[2] < 0 or evidence[3] < 0 { yield false }
+    when evidence[2] + evidence[3] != evidence[1] or evidence[3] != 0 { yield false }
+    when evidence[4] < 0 or evidence[4] > 10000 or evidence[5] <= 0 { yield false }
+    when kind(evidence[6]) != "text" or size(evidence[6]) != 64 or kind(evidence[7]) != "text" or size(evidence[7]) == 0 { yield false }
+    yield true
+}
+
+export craft revision_valid(revision) {
+    # [component, major, minor, patch, parent, source_sha256, abi_major, generation, state]
+    when kind(revision) != "list" or size(revision) != 9 { yield false }
+    when kind(revision[0]) != "text" or size(revision[0]) == 0 { yield false }
+    when revision[1] < 0 or revision[2] < 0 or revision[3] < 0 or revision[6] <= 0 or revision[7] < 0 { yield false }
+    when kind(revision[4]) != "text" or kind(revision[5]) != "text" or size(revision[5]) != 64 { yield false }
+    when revision[8] != "draft" and revision[8] != "verified" and revision[8] != "staged" and revision[8] != "active" and revision[8] != "retired" and revision[8] != "rejected" { yield false }
+    yield true
+}
+
+export craft revision_transition_valid(current, next) {
+    when current == "draft" and (next == "verified" or next == "rejected") { yield true }
+    when current == "verified" and (next == "staged" or next == "rejected") { yield true }
+    when current == "staged" and (next == "active" or next == "rejected") { yield true }
+    when current == "active" and next == "retired" { yield true }
+    yield false
+}
+
+export craft live_update_admission(active, candidate, evidence, quiescent, rollback_ready, signature_valid, abi_compatible) {
+    when not revision_valid(active) or not revision_valid(candidate) { yield "reject-revision" }
+    when active[8] != "active" or candidate[8] != "staged" { yield "reject-state" }
+    when active[0] != candidate[0] or candidate[7] != active[7] + 1 { yield "reject-generation" }
+    when active[6] != candidate[6] or not abi_compatible { yield "reject-abi" }
+    when not verification_evidence_valid(evidence) or evidence[0] != candidate[0] { yield "reject-evidence" }
+    when not signature_valid { yield "reject-signature" }
+    when not quiescent { yield "defer-quiescence" }
+    when not rollback_ready { yield "reject-rollback" }
+    yield "admit-stage-only"
+}
+
+export craft power_change_admission(control, value, minimum, maximum, capability) {
+    when minimum > maximum or value < minimum or value > maximum { yield "reject-range" }
+    when control != "frequency-cap" and control != "performance-mode" and control != "idle-policy" and control != "thermal-limit" { yield "reject-control" }
+    when capability != "dak.processor.power" { yield "admit-preview-only" }
+    yield "require-native-platform-driver"
+}
+
+
+# RAS policy contracts. These functions validate proposals only; they never
+# read MSRs, acknowledge machine checks, write MMIO, offline pages or schedule CPUs.
+
+export craft ras_provider_valid(provider) {
+    # [provider_id, platform, schema, mce_supported, mca_supported, read_only, privilege, available, operations]
+    when kind(provider) != "list" or size(provider) != 9 { yield false }
+    when kind(provider[0]) != "text" or size(provider[0]) == 0 { yield false }
+    when provider[1] != "windows" and provider[1] != "linux" and provider[1] != "apple" and provider[1] != "simulator" { yield false }
+    when kind(provider[2]) != "text" or size(provider[2]) == 0 { yield false }
+    when provider[5] != true { yield false }
+    when provider[6] != "user" and provider[6] != "kernel" { yield false }
+    when kind(provider[7]) != "boolean" or kind(provider[8]) != "list" { yield false }
+    each operation in provider[8] {
+        when operation != "event-query" and operation != "counter-read" and operation != "persisted-record-read" and operation != "simulator-input" { yield false }
+    }
+    yield true
+}
+
+export craft ras_event_valid(event) {
+    # [schema, event_id, boot_id, provider_id, resource_scope, kind, severity, confidence, monotonic_ns, raw_record_ref]
+    when kind(event) != "list" or size(event) != 10 { yield false }
+    when event[0] != "pytyliki.ras.event.v1" { yield false }
+    each index in [1, 2, 3, 4, 9] {
+        when kind(event[index]) != "text" or size(event[index]) == 0 { yield false }
+    }
+    when event[5] != "corrected" and event[5] != "uncorrected_recoverable" and event[5] != "uncorrected_fatal" and event[5] != "info" and event[5] != "thermal" and event[5] != "bus_link" and event[5] != "memory_poison" and event[5] != "software_suspected" { yield false }
+    when event[6] != "info" and event[6] != "low" and event[6] != "warning" and event[6] != "high" and event[6] != "fatal" { yield false }
+    when event[7] != "confirmed" and event[7] != "supported" and event[7] != "indicative" and event[7] != "unknown" and event[7] != "conflicted" { yield false }
+    when event[8] < 0 or event[8] % 1 != 0 { yield false }
+    yield true
+}
+
+export craft ras_action_decision(event, repeated_count, os_recovery_capability, rollback_ready) {
+    when not ras_event_valid(event) or repeated_count < 0 or repeated_count % 1 != 0 { yield "reject-invalid-evidence" }
+    when event[5] == "uncorrected_fatal" or event[6] == "fatal" { yield "safe-stop-and-defer-to-kernel" }
+    when event[5] == "uncorrected_recoverable" {
+        when event[7] != "confirmed" { yield "advisory-only-insufficient-confidence" }
+        when not os_recovery_capability or not rollback_ready { yield "request-operator-and-os-review" }
+        yield "request-os-recovery"
+    }
+    when event[5] == "corrected" {
+        when event[7] == "confirmed" and repeated_count >= 4 { yield "warn-and-collect" }
+        yield "observe"
+    }
+    when event[5] == "memory_poison" and event[7] == "confirmed" {
+        when os_recovery_capability { yield "request-os-page-recovery" }
+        yield "request-operator-and-os-review"
+    }
+    when event[5] == "thermal" or event[5] == "bus_link" { yield "observe-and-correlate" }
+    yield "advisory-only"
+}
+
+export craft ras_recovery_plan_admission(plan, event, provider, target_valid, capability_valid, event_fresh, rollback_ready) {
+    # [schema, plan_id, action, target_ref, deadline_ns, dry_run]
+    when kind(plan) != "list" or size(plan) != 6 { yield "reject-plan-shape" }
+    when plan[0] != "pytyliki.ras.recovery-plan.v1" or kind(plan[1]) != "text" or size(plan[1]) == 0 { yield "reject-plan-schema" }
+    when plan[2] != "request-os-recovery" and plan[2] != "request-os-page-recovery" { yield "reject-action" }
+    when kind(plan[3]) != "text" or size(plan[3]) == 0 or plan[4] <= 0 or plan[5] != true { yield "reject-dry-run-or-target" }
+    when not ras_event_valid(event) or not ras_provider_valid(provider) { yield "reject-source-evidence" }
+    when not target_valid or not capability_valid or not event_fresh or not rollback_ready { yield "defer-or-reject-preconditions" }
+    when provider[7] != true { yield "reject-provider-unavailable" }
+    yield "admit-request-to-platform-adapter"
+}

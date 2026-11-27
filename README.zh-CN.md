@@ -20,8 +20,8 @@ Duck 是一个以 Reaper 为优先的实验性操作系统项目。当前工作�
 
 ## 功能
 
-- x86_64 Stage 1 路径验证 Limine 固件交接和 Boot Info v1，分配早期 4 KiB 物理帧，输出 DUCKOS_BOOT_OK stage=1 后停机。QEMU BIOS 与 UEFI 检查均已通过。
-- Reaper 提供参考策略契约路线，包括 40 项 Core Subsystem MVP 契约。内核原生强制执行仍待实现。
+- x86_64 Stage 1 路径验证 Limine 固件交接和 Boot Info v1，分配早期 4 KiB 物理帧，为 BSP 0 初始化有界 scheduler descriptor，并读取 CPUID 拓扑和 MCE/MCA 能力。当前尚未进行任务分派或启动辅助处理器。QEMU BIOS 与 UEFI 检查均已通过。
+- Reaper 提供处理器拓扑、scheduler admission 以及 RAS 事件/恢复决策的参考契约。新的 Reaper 和 C11 契约已纳入测试；实际 SMP 调度、APIC/IPI 和 machine-check 恢复仍待实现。
 - Mora 具有基于 Qt 6 Widgets 的本机桌面应用，窗口由主机操作系统管理，并带有本地应用目录。Stage 1 内核不会启动它。
 - mora/index.html 保留为浏览器参考预览。它不是原生合成器，也不是内核桌面。
 
@@ -88,14 +88,15 @@ bash boot/build-release-iso.sh --work-dir build/release --output dist/Duck-Relea
 | 早期物理帧分配 | Stage 1 路径已实现 |
 | Reaper Core Subsystem MVP | 40 项参考契约；原生强制执行待实现 |
 | 页表与地址空间 | 待实现 |
-| 中断、定时器和抢占式调度器 | 待实现 |
+| BSP 处理器盘点、MCE/MCA 能力发现和 BSP scheduler descriptor | 已实现；通过 QEMU BIOS/UEFI 启动验证 |
+| 任务分派、抢占定时器、AP 启动、APIC/IPI 和 MCA 记录恢复 | 待实现 |
 | 进程模型与系统调用 ABI | 待实现 |
 | 内核强制能力与零拷贝 IPC | 待实现 |
 | PCI/USB/ACPI 与隔离驱动运行时 | 待实现 |
 | 文件系统、服务管理器、安装程序和持久会话 | 待实现 |
 | 原生合成器、GPU 与音频栈 | 待实现 |
 
-当前内核阶段在验证固件交接并完成早期物理帧分配后停机。尚未提供进程隔离、驱动加载、存储、网络、持久会话或内核强制沙箱。Mora 目录条目不会执行清单命令，也不会授予硬件权限。
+当前内核阶段还会执行只读 CPUID/MCE/MCA 能力发现，并初始化一个 BSP scheduler descriptor。任务分派、SMP/AP 启动、定时器抢占、MCA bank 采集和操作系统恢复、进程隔离、驱动加载、存储、网络、持久会话及内核强制沙箱仍未实现。Mora 目录条目不会执行清单命令，也不会授予硬件权限。
 
 ## 架构目标
 

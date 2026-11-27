@@ -20,8 +20,8 @@ Duck — експериментальний проєкт ОС із пріори�
 
 ## Можливості
 
-- Шлях x86_64 Stage 1 перевіряє передавання керування від Limine та Boot Info v1, виділяє ранній кадр 4 KiB, виводить DUCKOS_BOOT_OK stage=1 і зупиняється. QEMU-перевірки BIOS та UEFI проходять.
-- Reaper надає еталонний напрям policy-контрактів, зокрема 40 контрактів Core Subsystem MVP. Нативне enforcement ядром ще не реалізовано.
+- Шлях x86_64 Stage 1 перевіряє передавання керування від Limine та Boot Info v1, виділяє ранній кадр 4 KiB, ініціалізує обмежений scheduler descriptor для BSP 0 і читає топологію CPUID та доступність MCE/MCA. Він ще не диспетчеризує потоки й не запускає вторинні CPU. QEMU-перевірки BIOS та UEFI проходять.
+- Reaper надає reference-контракти для топології процесора, admission у scheduler та рішень RAS-подій і відновлення. Нові Reaper і C11 контракти проходять перевірки; фактичний SMP dispatch, APIC/IPI та обробка machine-check ще очікують реалізації.
 - Mora має нативний host-застосунок Qt 6 Widgets із вікнами під керуванням хостової ОС та локальним каталогом застосунків. Stage 1 kernel його не запускає.
 - mora/index.html збережено як браузерне reference preview. Це не нативний compositor і не desktop ядра.
 
@@ -88,14 +88,15 @@ Release-конвеєр перевіряє pins репозиторіїв, зап�
 | Раннє виділення фізичних кадрів | Реалізовано для Stage 1 |
 | Reaper Core Subsystem MVP | 40 reference-контрактів; native enforcement очікується |
 | Page tables та адресні простори | Очікується |
-| Interrupts, timers і preemptive scheduler | Очікується |
+| Інвентаризація BSP, виявлення MCE/MCA та descriptor scheduler BSP | Реалізовано; завантаження QEMU BIOS/UEFI перевірено |
+| Диспетчеризація потоків, preemptive timers, запуск AP, APIC/IPI та відновлення MCA | Очікується |
 | Модель процесів і syscall ABI | Очікується |
 | Kernel-enforced capabilities і zero-copy IPC | Очікується |
 | PCI/USB/ACPI та ізольоване середовище драйверів | Очікується |
 | Файлова система, supervisor, installer і постійний сеанс | Очікується |
 | Native compositor, GPU та audio stack | Очікується |
 
-Поточна стадія ядра зупиняється після перевірки handoff і раннього виділення кадру. Поки немає ізоляції процесів, завантаження драйверів, сховища, мережі, постійного сеансу або kernel-enforced sandboxing. Записи каталогу Mora не виконують команди маніфестів і не надають апаратних привілеїв.
+Поточна стадія ядра також виконує read-only виявлення CPUID/MCE/MCA та ініціалізує один descriptor scheduler для BSP. Диспетчеризації потоків, SMP/AP startup, timer preemption, читання MCA-банків і системного відновлення, ізоляції процесів, завантаження драйверів, сховища, мережі, постійного сеансу й kernel-enforced sandboxing ще немає. Записи каталогу Mora не виконують команди маніфестів і не надають апаратних привілеїв.
 
 ## Архітектурні цілі
 

@@ -22,6 +22,7 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 - [Bootable Stage 1 image](BOOTABLE_IMAGE.md) — pinned Limine BIOS/UEFI path, image assembly and QEMU checks.
 - [Implementation status](IMPLEMENTATION_STATUS.md) — delivered, partial and pending subsystems.
 - [Core subsystem MVP](CORE_MVP_V1.md) — Reaper reference contracts and native-enforcement boundary.
+- [Processor Control Plane v1](PROCESSOR_CONTROL_PLANE.md) — processor topology, execution blocks, SMP/AP startup, core lifecycle, scheduling, interrupts, verification, revisions and controlled live updates.
 - [x86_64 exception handling](X86_64_EXCEPTION_HANDLING.md) — current exception/interrupt progress and remaining work.
 
 ## Ecosystem and security

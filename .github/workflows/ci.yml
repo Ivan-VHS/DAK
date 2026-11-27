@@ -89,8 +89,9 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -f CMakeLists.txt ]]; then
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
             cmake --build build --parallel
+            ctest --test-dir build --output-on-failure
           elif find src include -type f -name '*.c' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cc' -print -quit 2>/dev/null | grep -q . || find src include -type f -name '*.cpp' -print -quit 2>/dev/null | grep -q .; then
             echo "::error::Native source exists but no CMakeLists.txt build contract is defined."
             exit 1
