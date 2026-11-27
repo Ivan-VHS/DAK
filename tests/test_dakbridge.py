@@ -8,9 +8,9 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from duckos.cli import main
-from duckos.compat.bridge import (
-    DuckBridgeError, build_launch_plan, detect_runtimes, inspect_binary,
+from dakos.cli import main
+from dakos.compat.bridge import (
+    DakBridgeError, build_launch_plan, detect_runtimes, inspect_binary,
 )
 
 
@@ -68,7 +68,7 @@ def make_program(directory: Path, name: str) -> Path:
     return program.resolve()
 
 
-class DuckBridgeTests(unittest.TestCase):
+class DakBridgeTests(unittest.TestCase):
     def test_pe_inspection_reuses_shared_windows_parser(self):
         with tempfile.TemporaryDirectory() as temporary:
             target = make_pe64(Path(temporary) / "sample.exe")
@@ -101,12 +101,12 @@ class DuckBridgeTests(unittest.TestCase):
     def test_missing_and_symbolic_link_inputs_are_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            with self.assertRaises(DuckBridgeError):
+            with self.assertRaises(DakBridgeError):
                 inspect_binary(root / "missing.exe")
             target = make_pe64(root / "target.exe")
             link = root / "linked.exe"
             link.symlink_to(target)
-            with self.assertRaises(DuckBridgeError):
+            with self.assertRaises(DakBridgeError):
                 inspect_binary(link)
 
     def test_runtime_discovery_finds_wine_and_installed_proton(self):
@@ -284,13 +284,13 @@ class DuckBridgeTests(unittest.TestCase):
         self.assertEqual(plan["status"], "unsupported")
         self.assertIn("PE machine type", plan["warnings"][0])
 
-    def test_cli_exposes_duckbridge_commands_as_json(self):
+    def test_cli_exposes_dakbridge_commands_as_json(self):
         output = StringIO()
         with redirect_stdout(output):
             status = main(["bridge", "runtimes"])
         self.assertEqual(status, 0)
         report = json.loads(output.getvalue())
-        self.assertEqual(report["schema"], "duckos.duckbridge-runtimes.v1")
+        self.assertEqual(report["schema"], "dakos.dakbridge-runtimes.v1")
 
 
 if __name__ == "__main__":
