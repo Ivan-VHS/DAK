@@ -1,0 +1,210 @@
+# DAK application registry and admission contracts.
+# This module defines the 45 unique applications found in the current DAK
+# Mora and base-suite catalogs. It validates requests; it does not execute
+# host actions, grant kernel privileges or claim that a UI backend exists.
+
+export craft app_catalog() {
+    yield [
+        ["dak.settings", "Settings", "system-settings", ["system.settings.read", "system.settings.write"], ["read", "update"], "user-settings"],
+        ["dak.files", "Files", "file-management", ["files.read.user", "files.write.user", "volumes.enumerate"], ["read", "create", "update", "delete", "export"], "selected-files"],
+        ["dak.calendar", "Calendar", "calendar", ["calendar.read", "calendar.write", "notifications.schedule"], ["read", "create", "update", "delete", "export"], "local-calendar"],
+        ["dak.clock", "Clock", "clock", ["clock.read", "alarms.manage", "notifications.schedule"], ["read", "create", "update", "delete"], "local-clock"],
+        ["dak.notes", "Notes", "notes", ["notes.read", "notes.write"], ["read", "create", "update", "delete", "export"], "local-notes"],
+        ["dak.tasks", "Tasks and Reminders", "tasks", ["tasks.read", "tasks.write", "notifications.schedule"], ["read", "create", "update", "delete"], "local-tasks"],
+        ["dak.calculator", "Calculator", "calculator", ["calculator.use"], ["calculate"], "local-compute"],
+        ["dak.browser", "Web Browser", "browser", ["network.access", "sites.permissions.request", "files.download.selected"], ["read", "navigate", "download", "update"], "network-opt-in"],
+        ["dak.mail", "Mail", "mail", ["network.access", "mail.accounts.manage", "files.attach.selected", "notifications.publish", "secrets.use.mail"], ["read", "create", "update", "delete", "send"], "mail-account"],
+        ["dak.contacts", "Contacts", "contacts", ["contacts.read", "contacts.write"], ["read", "create", "update", "delete", "export"], "local-contacts"],
+        ["dak.gallery", "Gallery", "gallery", ["files.read.user", "files.write.selected", "media.decode"], ["read", "create", "update", "delete", "export"], "selected-media"],
+        ["dak.media", "Audio and Video Player", "media-player", ["files.read.selected", "network.stream.request", "audio.output.manage"], ["read", "play", "stop"], "selected-media"],
+        ["dak.editor", "Text Editor and Document Viewer", "documents", ["files.read.selected", "files.write.selected", "documents.render", "documents.export"], ["read", "create", "update", "export"], "selected-documents"],
+        ["dak.system-tools", "Terminal and System Monitor", "system-tools", ["terminal.execute", "processes.read", "processes.signal.own", "system.logs.read"], ["read", "inspect", "command-preview"], "host-userland"],
+        ["dak.software-center", "Software Center and Updates", "packages", ["packages.read", "packages.install.request", "packages.remove.request", "system.updates.manage"], ["read", "review"], "package-review"],
+
+        ["cockos", "Cockos", "audio-recording", ["audio.input.selected", "audio.output.manage", "recording.user-consent"], ["read", "record", "stop", "mixdown", "export"], "selected-audio"],
+        ["kavun", "Kavun", "photos-memories", ["media.read.selected", "media.collections.write"], ["read", "create", "update", "delete", "export"], "selected-media"],
+        ["kabon", "Ka-bon", "personal-finance", ["finance.ledger.read", "finance.ledger.write", "finance.reminders.schedule"], ["read", "create", "update", "delete", "export"], "local-finance"],
+        ["gloverty", "Gloverty", "automation", ["automation.rules.read", "automation.rules.write", "automation.actions.request"], ["read", "create", "update", "delete", "preview", "run"], "user-approved-actions"],
+        ["po", "Po", "web-browser", ["network.access", "browser.permissions", "browser.private-session"], ["read", "navigate", "bookmark", "close"], "network-opt-in"],
+        ["illidia", "Illidia", "gaming", ["games.library.read", "games.library.write", "screen.capture.request"], ["read", "create", "update", "delete", "capture", "launch"], "user-selected-games"],
+        ["unify", "Unify", "device-continuity", ["device.pair.request", "device.transfer.selected", "device.preferences.sync"], ["read", "pair", "revoke", "transfer", "sync"], "paired-device"],
+
+        ["sestem", "Sestem", "system-overview", ["system.status.read", "system.logs.read"], ["read", "inspect"], "system-readonly"],
+        ["setupup", "SetupUP", "first-run-setup", ["system.settings.read", "system.settings.write"], ["read", "update", "complete"], "user-settings"],
+        ["orriganize", "ORGze", "projects-tasks", ["workspace.items.read", "workspace.items.write"], ["read", "create", "update", "delete", "export"], "local-workspace"],
+        ["abriganza", "Abriganza", "archive-inspection", ["files.read.selected", "archive.metadata.read"], ["read", "inspect"], "selected-file-readonly"],
+        ["olaab", "Olaab", "media-collections", ["media.collections.read", "media.collections.write"], ["read", "create", "update", "delete"], "local-media-index"],
+        ["concrete-thump", "Concrete Thump", "rhythm-planning", ["audio.profiles.read", "audio.profiles.write"], ["read", "create", "update", "delete", "export"], "local-audio-profiles"],
+        ["seu-beu", "Seu-Beu", "sharing-review", ["sharing.review.read", "sharing.review.write"], ["read", "create", "update", "approve"], "local-review-only"],
+        ["love-il", "Love-IL", "private-journal", ["journal.entries.read", "journal.entries.write"], ["read", "create", "update", "delete", "export"], "local-private-journal"],
+        ["poi", "Poi", "quick-capture", ["capture.entries.read", "capture.entries.write"], ["read", "create", "update", "delete", "promote"], "local-capture"],
+        ["poi-2", "Poi-2", "knowledge-cards", ["knowledge.cards.read", "knowledge.cards.write"], ["read", "create", "update", "delete", "export"], "local-knowledge"],
+        ["po-2", "Po-2", "route-planning", ["routes.read", "routes.write"], ["read", "create", "update", "delete", "export"], "manual-route-only"],
+        ["gamecharager", "GameCharager", "game-library", ["games.library.read", "games.library.write", "files.read.selected"], ["read", "create", "update", "delete", "inspect"], "local-game-library"],
+        ["exedotexe", "EXEdotEXE", "executable-inspection", ["files.read.selected", "executable.inspect"], ["read", "inspect", "hash"], "selected-file-readonly"],
+
+        ["red-sparrow", "Red Sparrow / 赤雀", "creative-workbench", ["creative.projects.read", "creative.projects.write", "files.read.selected"], ["read", "create", "update", "delete", "export"], "local-creative-projects"],
+        ["mora-ai", "Mora AI", "local-assistant", ["assistant.local.use", "assistant.data.read", "assistant.data.write"], ["read", "create", "update", "delete"], "local-assistant-data"],
+        ["security", "Sentinel", "security-center", ["security.findings.read", "security.actions.request"], ["read", "inspect", "quarantine-request"], "system-readonly"],
+        ["updates", "Restore", "recovery", ["recovery.snapshots.read", "recovery.restore.request"], ["read", "verify", "restore"], "user-approved-recovery"],
+        ["runtime", "Bridge", "compatibility-runtime", ["compat.inspect", "compat.prefix.create.request"], ["read", "inspect", "prepare"], "isolated-userland"],
+        ["workspace", "Control", "workspace-control", ["workspace.read", "workspace.write"], ["read", "create", "update", "delete"], "local-workspace"],
+        ["provenance", "Proof", "provenance", ["provenance.hash.read", "provenance.hash.compute"], ["read", "inspect", "hash", "verify"], "selected-file-readonly"],
+        ["mora-boost", "Mora Boost", "performance-profiles", ["performance.profiles.read", "performance.profiles.write"], ["read", "create", "update", "delete", "preview"], "user-profile-only"],
+        ["desktop", "DAK Desktop", "desktop-maintenance", ["desktop.audit.read", "desktop.items.move.request", "startup.entries.manage.request"], ["read", "inspect", "move-selected", "startup-change"], "host-userland"],
+        ["mora-commons", "Mora Commons", "application-catalogue", ["catalog.read", "packages.install.request"], ["read", "search", "review-install"], "catalogue-only"]
+    ]
+}
+
+export craft app_descriptor_valid(app) {
+    when size(app) != 6 { yield false }
+    when app[0] == "" or size(app[0]) > 128 { yield false }
+    when app[1] == "" or size(app[1]) > 128 { yield false }
+    when app[2] == "" or size(app[2]) > 64 { yield false }
+    when app[3] == [] or app[4] == [] or app[5] == "" { yield false }
+    yield true
+}
+
+export craft catalog_valid() {
+    vary catalog := app_catalog()
+    when size(catalog) != 45 { yield false }
+    vary position := 0
+    each app in catalog {
+        when not app_descriptor_valid(app) { yield false }
+        vary other_position := 0
+        each other in catalog {
+            when other_position < position and other[0] == app[0] {
+                yield false
+            }
+            change other_position := other_position + 1
+        }
+        change position := position + 1
+    }
+    yield true
+}
+
+export craft resolve_app_id(app_id) {
+    when app_id == "ka-bon" or app_id == "dak.kabon" { yield "kabon" }
+    when app_id == "dak.sestem" { yield "sestem" }
+    when app_id == "dak.setupup" { yield "setupup" }
+    when app_id == "dak.orriganize" { yield "orriganize" }
+    when app_id == "dak.abriganza" { yield "abriganza" }
+    when app_id == "dak.olaab" { yield "olaab" }
+    when app_id == "dak.concrete-thump" { yield "concrete-thump" }
+    when app_id == "dak.seu-beu" { yield "seu-beu" }
+    when app_id == "dak.love-il" { yield "love-il" }
+    when app_id == "dak.poi" { yield "poi" }
+    when app_id == "dak.poi-2" { yield "poi-2" }
+    when app_id == "dak.po-2" { yield "po-2" }
+    when app_id == "dak.gamecharager" { yield "gamecharager" }
+    when app_id == "dak.exedotexe" { yield "exedotexe" }
+    each app in app_catalog() {
+        when app[0] == app_id { yield app_id }
+    }
+    yield ""
+}
+
+export craft find_app(app_id) {
+    vary canonical := resolve_app_id(app_id)
+    when canonical == "" { yield [] }
+    each app in app_catalog() {
+        when app[0] == canonical { yield app }
+    }
+    yield []
+}
+
+export craft capability_declared(app_id, capability) {
+    vary app := find_app(app_id)
+    when size(app) != 6 or capability == "" { yield false }
+    each declared in app[3] {
+        when declared == capability { yield true }
+    }
+    yield false
+}
+
+export craft operation_declared(app_id, operation) {
+    vary app := find_app(app_id)
+    when size(app) != 6 or operation == "" { yield false }
+    each declared in app[4] {
+        when declared == operation { yield true }
+    }
+    yield false
+}
+
+export craft consent_required(operation) {
+    yield operation == "delete"
+        or operation == "export"
+        or operation == "share"
+        or operation == "send"
+        or operation == "download"
+        or operation == "launch"
+        or operation == "install"
+        or operation == "restore"
+        or operation == "pair"
+        or operation == "transfer"
+        or operation == "sync"
+        or operation == "run"
+        or operation == "approve"
+        or operation == "quarantine-request"
+        or operation == "move-selected"
+        or operation == "startup-change"
+        or operation == "review-install"
+}
+
+export craft request_valid(request) {
+    when size(request) != 7 { yield false }
+    when request[0] == "" or size(request[0]) > 128 { yield false }
+    when resolve_app_id(request[1]) == "" { yield false }
+    when request[2] == "" or request[3] == "" { yield false }
+    when request[4] < 0 or request[4] > 65536 { yield false }
+    when request[5] == "" { yield false }
+    yield request[6] == true or request[6] == false
+}
+
+export craft capability_granted(capability, grants) {
+    each grant in grants {
+        when grant == capability { yield true }
+    }
+    yield false
+}
+
+export craft request_decision(request, grants) {
+    when not request_valid(request) { yield "deny-invalid-request" }
+    vary app := find_app(request[1])
+    when size(app) != 6 { yield "deny-unknown-application" }
+    when not operation_declared(request[1], request[2]) { yield "deny-unsupported-operation" }
+    when not capability_declared(request[1], request[3]) { yield "deny-undeclared-capability" }
+    when not capability_granted(request[3], grants) { yield "deny-capability" }
+    when request[5] != app[5] { yield "deny-scope" }
+    when consent_required(request[2]) and not request[6] { yield "deny-user-consent" }
+    yield "admit-policy-only"
+}
+
+export craft integration_event_valid(event) {
+    when size(event) != 8 { yield false }
+    when event[0] == "" or size(event[0]) > 128 { yield false }
+    when resolve_app_id(event[1]) == "" or resolve_app_id(event[2]) == "" { yield false }
+    when event[3] == "" or size(event[3]) > 128 { yield false }
+    when event[4] < 0 or event[4] > 65536 { yield false }
+    when event[5] != true { yield false }
+    when event[6] == "" or size(event[6]) > 128 { yield false }
+    yield event[7] == 1
+}
+
+export craft lifecycle_transition_valid(from_state, to_state) {
+    when from_state == "created" and (to_state == "ready" or to_state == "error") { yield true }
+    when from_state == "ready" and (to_state == "running" or to_state == "disabled" or to_state == "error") { yield true }
+    when from_state == "running" and (to_state == "ready" or to_state == "stopping" or to_state == "error") { yield true }
+    when from_state == "stopping" and (to_state == "stopped" or to_state == "error") { yield true }
+    when from_state == "disabled" and (to_state == "ready" or to_state == "stopped") { yield true }
+    when from_state == "error" and to_state == "stopped" { yield true }
+    yield false
+}
+
+export craft app_open_decision(app_id, state) {
+    when resolve_app_id(app_id) == "" { yield "deny-unknown-application" }
+    when state == "ready" or state == "running" { yield "allow-user-space-open" }
+    when state == "disabled" { yield "deny-disabled" }
+    when state == "error" or state == "stopped" { yield "deny-unavailable" }
+    yield "deny-invalid-state"
+}

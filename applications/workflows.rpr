@@ -1,0 +1,54 @@
+# DAK cross-application workflow contracts.
+# Workflows are metadata hand-offs only. This module does not transfer files,
+# schedule jobs, run network sync or execute automation actions.
+
+export craft workflow_catalog() {
+    yield [
+        ["automation.weekly-budget-summary.v1", "gloverty", "kabon", "prepare_weekly_budget_summary", 4096],
+        ["media.event-memory-assembly.v1", "cockos", "kavun", "add_to_event_slice", 65536],
+        ["continuity.browser-tabs.v1", "po", "unify", "transfer_tabs_to_paired_device", 65536],
+        ["continuity.game-clips.v1", "illidia", "unify", "transfer_clip_to_paired_device", 65536],
+        ["planning.poi-to-orriganize.v1", "poi", "orriganize", "add_capture_to_project_list", 65536],
+        ["media.olaab-to-kavun.v1", "olaab", "kavun", "open_selected_media_collection", 65536],
+        ["knowledge.poi-to-poi-2.v1", "poi", "poi-2", "create_knowledge_card_from_selected_text", 65536],
+        ["gaming.gamecharager-to-exedotexe.v1", "gamecharager", "exedotexe", "request_read_only_executable_inspection", 65536],
+        ["audio.concrete-thump-to-cockos.v1", "concrete-thump", "cockos", "hand_off_bpm_and_swing_metadata", 4096]
+    ]
+}
+
+export craft workflow_catalog_valid() {
+    vary entries := workflow_catalog()
+    when size(entries) != 9 { yield false }
+    vary index := 0
+    each entry in entries {
+        when size(entry) != 5 or entry[0] == "" or entry[1] == "" or entry[2] == "" or entry[3] == "" { yield false }
+        when entry[4] < 0 or entry[4] > 65536 { yield false }
+        vary duplicate_index := 0
+        each other in entries {
+            when duplicate_index < index and other[0] == entry[0] { yield false }
+            change duplicate_index := duplicate_index + 1
+        }
+        change index := index + 1
+    }
+    yield true
+}
+
+export craft workflow_find(workflow_id) {
+    each entry in workflow_catalog() {
+        when entry[0] == workflow_id { yield entry }
+    }
+    yield []
+}
+
+export craft workflow_event_valid(workflow_id, event) {
+    when size(event) != 8 { yield false }
+    vary workflow := workflow_find(workflow_id)
+    when size(workflow) != 5 { yield false }
+    when event[0] == "" or size(event[0]) > 128 { yield false }
+    when event[1] != workflow[1] or event[2] != workflow[2] { yield false }
+    when event[3] != workflow[3] { yield false }
+    when event[4] < 0 or event[4] > workflow[4] { yield false }
+    when event[5] != true { yield false }
+    when event[6] == "" or size(event[6]) > 128 { yield false }
+    yield event[7] == 1
+}
