@@ -291,13 +291,27 @@ export craft application_register(prepared, registered_apps, address_limit) {
     yield ["OK", push(registered_apps, prepared)]
 }
 
-export craft application_activate(application, verdicts, address_limit) {
+export craft application_activate(application, registered_apps, verdicts, address_limit) {
     when not application_valid(application, address_limit) or application[2] != "staged" {
         yield ["ERR", "application-state-invalid"]
     }
-    when size(verdicts) != 5 or size(application[3]) != 5 {
+    when size(verdicts) != 5 {
         yield ["ERR", "application-verification-incomplete"]
     }
+
+    vary registration_found := false
+    each existing in registered_apps {
+        when not application_valid(existing, address_limit) {
+            yield ["ERR", "application-registry-corrupt"]
+        }
+        when existing[1] == application[1] {
+            when registration_found or existing != application {
+                yield ["ERR", "application-registration-mismatch"]
+            }
+            change registration_found := true
+        }
+    }
+    when not registration_found { yield ["ERR", "application-not-registered"] }
 
     vary active_sectors := []
     each sector in application[3] {
@@ -310,7 +324,17 @@ export craft application_activate(application, verdicts, address_limit) {
         when not accepted { yield ["ERR", "sector-verification-failed", sector[3]] }
         change active_sectors := push(active_sectors, sector_with_state(sector, "active"))
     }
-    yield ["OK", ["application", application[1], "active", active_sectors]]
+
+    make active_application := ["application", application[1], "active", active_sectors]
+    vary updated_registry := []
+    each existing in registered_apps {
+        when existing[1] == application[1] {
+            change updated_registry := push(updated_registry, active_application)
+        } otherwise {
+            change updated_registry := push(updated_registry, existing)
+        }
+    }
+    yield ["OK", [active_application, updated_registry]]
 }
 
 export craft sector_ipc_decision(application, source_id, target_id, operation, grants, address_limit) {
