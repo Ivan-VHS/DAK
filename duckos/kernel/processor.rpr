@@ -26,7 +26,9 @@ export craft control_domains() {
         ["verification", "boot, AP startup, scheduler, IRQ, memory and ABI evidence", "verification"],
         ["version-control", "kernel, core, scheduler, microcode and ABI revisions", "versioned"],
         ["live-update", "quiescence, staged activation and rollback", "kernel"],
-        ["telemetry-replay", "local metrics, fault history and deterministic replay", "verification"]
+        ["telemetry-replay", "local metrics, fault history and deterministic replay", "verification"],
+        ["machine-check", "MCE/MCA feature discovery and OS-published machine-check records", "ras-adapter"],
+        ["ras-recovery", "corrected/uncorrected classification, evidence quality, periodicity and safe action proposals", "policy-and-platform-adapter"]
     ]
 }
 
@@ -194,4 +196,69 @@ export craft power_change_admission(control, value, minimum, maximum, capability
     when control != "frequency-cap" and control != "performance-mode" and control != "idle-policy" and control != "thermal-limit" { yield "reject-control" }
     when capability != "dak.processor.power" { yield "admit-preview-only" }
     yield "require-native-platform-driver"
+}
+
+
+# RAS policy contracts. These functions validate proposals only; they never
+# read MSRs, acknowledge machine checks, write MMIO, offline pages or schedule CPUs.
+
+export craft ras_provider_valid(provider) {
+    # [provider_id, platform, schema, mce_supported, mca_supported, read_only, privilege, available, operations]
+    when kind(provider) != "list" or size(provider) != 9 { yield false }
+    when kind(provider[0]) != "text" or size(provider[0]) == 0 { yield false }
+    when provider[1] != "windows" and provider[1] != "linux" and provider[1] != "apple" and provider[1] != "simulator" { yield false }
+    when kind(provider[2]) != "text" or size(provider[2]) == 0 { yield false }
+    when provider[5] != true { yield false }
+    when provider[6] != "user" and provider[6] != "kernel" { yield false }
+    when kind(provider[7]) != "bool" or kind(provider[8]) != "list" { yield false }
+    each operation in provider[8] {
+        when operation != "event-query" and operation != "counter-read" and operation != "persisted-record-read" and operation != "simulator-input" { yield false }
+    }
+    yield true
+}
+
+export craft ras_event_valid(event) {
+    # [schema, event_id, boot_id, provider_id, resource_scope, kind, severity, confidence, monotonic_ns, raw_record_ref]
+    when kind(event) != "list" or size(event) != 10 { yield false }
+    when event[0] != "pytyliki.ras.event.v1" { yield false }
+    each index in [1, 2, 3, 4, 9] {
+        when kind(event[index]) != "text" or size(event[index]) == 0 { yield false }
+    }
+    when event[5] != "corrected" and event[5] != "uncorrected_recoverable" and event[5] != "uncorrected_fatal" and event[5] != "info" and event[5] != "thermal" and event[5] != "bus_link" and event[5] != "memory_poison" and event[5] != "software_suspected" { yield false }
+    when event[6] != "info" and event[6] != "low" and event[6] != "warning" and event[6] != "high" and event[6] != "fatal" { yield false }
+    when event[7] != "confirmed" and event[7] != "supported" and event[7] != "indicative" and event[7] != "unknown" and event[7] != "conflicted" { yield false }
+    when event[8] < 0 or event[8] % 1 != 0 { yield false }
+    yield true
+}
+
+export craft ras_action_decision(event, repeated_count, os_recovery_capability, rollback_ready) {
+    when not ras_event_valid(event) or repeated_count < 0 or repeated_count % 1 != 0 { yield "reject-invalid-evidence" }
+    when event[5] == "uncorrected_fatal" or event[6] == "fatal" { yield "safe-stop-and-defer-to-kernel" }
+    when event[5] == "uncorrected_recoverable" {
+        when event[7] != "confirmed" { yield "advisory-only-insufficient-confidence" }
+        when not os_recovery_capability or not rollback_ready { yield "request-operator-and-os-review" }
+        yield "request-os-recovery"
+    }
+    when event[5] == "corrected" {
+        when event[7] == "confirmed" and repeated_count >= 4 { yield "warn-and-collect" }
+        yield "observe"
+    }
+    when event[5] == "memory_poison" and event[7] == "confirmed" {
+        when os_recovery_capability { yield "request-os-page-recovery" }
+        yield "request-operator-and-os-review"
+    }
+    when event[5] == "thermal" or event[5] == "bus_link" { yield "observe-and-correlate" }
+    yield "advisory-only"
+}
+
+export craft ras_recovery_plan_admission(plan, event, provider, target_valid, capability_valid, event_fresh, rollback_ready) {
+    # [schema, plan_id, action, target_ref, deadline_ns, dry_run]
+    when kind(plan) != "list" or size(plan) != 6 { yield "reject-plan-shape" }
+    when plan[0] != "pytyliki.ras.recovery-plan.v1" or kind(plan[1]) != "text" or size(plan[1]) == 0 { yield "reject-plan-schema" }
+    when plan[2] != "request-os-recovery" and plan[2] != "request-os-page-recovery" { yield "reject-action" }
+    when kind(plan[3]) != "text" or size(plan[3]) == 0 or plan[4] <= 0 or plan[5] != true { yield "reject-dry-run-or-target" }
+    when not ras_event_valid(event) or not ras_provider_valid(provider) { yield "reject-source-evidence" }
+    when not target_valid or not capability_valid or not event_fresh or not rollback_ready { yield "defer-or-reject-preconditions" }
+    when provider[7] != true { yield "reject-provider-unavailable" }
+    yield "admit-request-to-platform-adapter"
 }
