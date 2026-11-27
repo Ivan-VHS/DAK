@@ -35,11 +35,11 @@ DAK is an experimental Reaper-first operating-system project. Its current work i
 ## Contents
 
 - [System map](#system-map)
-- [What is included](#what-is-included)
-- [Federated workbenches](#federated-workbenches)
-- [Build and run native Mora](#build-and-run-native-mora)
+- [Capabilities](#capabilities)
+- [Source federation and integrity](#source-federation-and-integrity)
+- [Build native DAK](#build-native-dak)
 - [Browser reference preview](#browser-reference-preview)
-- [Build the release ISO](#build-the-release-iso)
+- [Build the release image](#build-the-release-image)
 - [Kernel status and next layers](#kernel-status-and-next-layers)
 - [Architecture targets](#architecture-targets)
 - [Source federation and integrity](#source-federation-and-integrity)
