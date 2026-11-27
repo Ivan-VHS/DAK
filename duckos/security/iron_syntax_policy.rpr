@@ -1,4 +1,4 @@
-// Pytyliki Iron Syntax v1 admission policy contract.
+# Pytyliki Iron Syntax v1 admission policy contract.
 //
 // This is an executable policy fixture for Reaper contract tests. It is not
 // wired into kernel admission yet. A successful result admits source metadata
