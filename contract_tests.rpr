@@ -447,3 +447,42 @@ make bridge_unknown := [1, 4, 9004, 77, 0, "shell.execute", 8, 1700000003]
 assert(not native_bridge["event_valid"](bridge_unknown), "native bridge rejects unknown operations")
 
 emit "DUCKOS_REAPER_CONTRACTS_OK"
+
+# DAK application catalog, aliases, request admission and lifecycle.
+import "applications/runtime.rpr" as applications
+
+assert(applications["catalog_valid"](), "the reconciled DAK application catalog contains 45 unique descriptors")
+assert(size(applications["app_catalog"]()) == 45, "all confirmed DAK application descriptors are registered")
+assert(applications["resolve_app_id"]("ka-bon") == "kabon", "legacy Ka-bon package ID resolves to the Mora catalog ID")
+assert(applications["resolve_app_id"]("dak.kabon") == "kabon", "base-suite Ka-bon package ID resolves to the Mora catalog ID")
+assert(applications["resolve_app_id"]("dak.orriganize") == "orriganize", "ORGze keeps its established package identity")
+assert(applications["find_app"]("orriganize")[1] == "ORGze", "ORGze display name is canonical")
+assert(applications["resolve_app_id"]("not-a-dak-app") == "", "unknown application IDs are rejected")
+
+make poi_grants := ["capture.entries.read", "capture.entries.write"]
+make poi_create := ["req-poi-1", "poi", "create", "capture.entries.write", 64, "local-capture", true]
+make poi_delete_without_consent := ["req-poi-2", "poi", "delete", "capture.entries.write", 64, "local-capture", false]
+make poi_missing_grant := ["req-poi-3", "poi", "create", "capture.entries.write", 64, "local-capture", true]
+assert(applications["request_decision"](poi_create, poi_grants) == "admit-policy-only", "a declared local operation with a grant is admitted to policy only")
+assert(applications["request_decision"](poi_delete_without_consent, poi_grants) == "deny-user-consent", "destructive app operations require explicit consent")
+assert(applications["request_decision"](poi_missing_grant, []) == "deny-capability", "an app cannot use an undelegated capability")
+
+make wrong_scope := ["req-poi-4", "poi", "create", "capture.entries.write", 64, "host-userland", true]
+make wrong_operation := ["req-poi-5", "poi", "launch", "capture.entries.write", 64, "local-capture", true]
+make oversized_request := ["req-poi-6", "poi", "create", "capture.entries.write", 65537, "local-capture", true]
+assert(applications["request_decision"](wrong_scope, poi_grants) == "deny-scope", "app requests cannot escape their declared data scope")
+assert(applications["request_decision"](wrong_operation, poi_grants) == "deny-unsupported-operation", "unregistered app operations are rejected")
+assert(applications["request_decision"](oversized_request, poi_grants) == "deny-invalid-request", "oversized inline IPC payloads are rejected")
+
+make local_event := ["event-1", "poi", "orriganize", "capture-to-project", 128, true, "idem-event-1", 1]
+make unconsented_event := ["event-2", "poi", "orriganize", "capture-to-project", 128, false, "idem-event-2", 1]
+make unknown_endpoint_event := ["event-3", "poi", "unknown-target", "capture-to-project", 128, true, "idem-event-3", 1]
+assert(applications["integration_event_valid"](local_event), "versioned app integration event with consent and idempotency is valid")
+assert(not applications["integration_event_valid"](unconsented_event), "cross-app events require explicit user consent")
+assert(not applications["integration_event_valid"](unknown_endpoint_event), "cross-app events require registered endpoints")
+assert(applications["lifecycle_transition_valid"]("created", "ready"), "new application can become ready")
+assert(applications["lifecycle_transition_valid"]("running", "stopping"), "running application can stop gracefully")
+assert(not applications["lifecycle_transition_valid"]("stopped", "running"), "stopped application cannot be revived by an invalid transition")
+assert(applications["app_open_decision"]("dak.files", "ready") == "allow-user-space-open", "registered ready app can be opened in user space")
+assert(applications["app_open_decision"]("security", "disabled") == "deny-disabled", "disabled app cannot be opened")
+emit "DAK_APPLICATION_RUNTIME_V1:PASS"
