@@ -1,7 +1,6 @@
 #include "scheduler.h"
 
 #include <limits.h>
-#include <string.h>
 
 typedef struct {
     uint64_t irq_state;
@@ -91,7 +90,8 @@ duckos_sched_status duckos_scheduler_init(
         ((platform->irq_save == NULL) != (platform->irq_restore == NULL)))
         return DUCKOS_SCHED_INVALID_ARGUMENT;
 
-    memset(scheduler, 0, sizeof(*scheduler));
+    unsigned char *storage = (unsigned char *)scheduler;
+    for (size_t i = 0U; i < sizeof(*scheduler); ++i) storage[i] = 0U;
     atomic_flag_clear_explicit(&scheduler->lock, memory_order_release);
     if (platform != NULL) scheduler->platform = *platform;
     scheduler->cpu_count = cpu_count;
