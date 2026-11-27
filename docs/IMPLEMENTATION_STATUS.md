@@ -1,19 +1,19 @@
-# DuckOS implementation status
+# Dak implementation status
 
 Updated: 2026-11-25
 
 ## Ecosystem source and interface integration — 2026-11-25
 
-- [x] DuckOS pins Reaper, Pytyliki, OPlague and VentuSample as four independent Git submodules with exact commits and preserved upstream licenses.
+- [x] Dak pins Reaper, Pytyliki, OPlague and VentuSample as four independent Git submodules with exact commits and preserved upstream licenses.
 - [x] Release ISO pipeline builds/tests the four host workbenches and packages source, notices and checksums; host binaries are not kernel executables.
 - [x] Reaper consumes Pytyliki C ABI v1 through an explicit absolute library path and checks ABI version before calls.
-- [x] Reaper validates OPlague device snapshot v1 and DuckOS hardware inventory v1 for read-only audit workflows.
+- [x] Reaper validates OPlague device snapshot v1 and Dak hardware inventory v1 for read-only audit workflows.
 - [x] Machine-readable integration graph and Node tests verify source pins, licenses, interface artifacts and maturity labels.
 - [x] Reaper policy adapter for normalized OPlague GPU telemetry v1 validates provider/mode/bounds and preserves unknown readings as absent.
 - [ ] Implement trusted native JSON ingestion that verifies OPlague schema and canonical digest before constructing normalized Reaper records.
 - [ ] Add publisher/build provenance verification; SHA-256 is not a signature.
 - [ ] Implement a VentuSample pack-v1 Reaper consumer; the current metadata interface remains specified-only.
-- [ ] Connect peer workbenches to a native DuckOS process/package service only after scheduler, syscall, filesystem and kernel capability enforcement exist.
+- [ ] Connect peer workbenches to a native Dak process/package service only after scheduler, syscall, filesystem and kernel capability enforcement exist.
 
 Peer applications and host tools remain user-space programs. None is a kernel module or an executable that the Stage 1 kernel can start.
 
@@ -29,11 +29,11 @@ Peer applications and host tools remain user-space programs. None is a kernel mo
 
 ## Newly specified contracts — 2026-11-25
 
-- [x] DuckOS interaction and application ergonomics standard: normative requirements for motor/visual/cognitive interaction, keyboard, focus, accessibility, windowing, errors, recovery, privacy and usability evidence. This is a specification, not proof that native desktop services meet it.
+- [x] Dak interaction and application ergonomics standard: normative requirements for motor/visual/cognitive interaction, keyboard, focus, accessibility, windowing, errors, recovery, privacy and usability evidence. This is a specification, not proof that native desktop services meet it.
 - [x] BAV Security Bundle v1 JSON contract and schema: the .bav namespace is reserved for signed declarative antivirus policy bundles; signature verification, scanner execution, quarantine and enforcement are not implemented by the schema.
 - [x] .bav / .bufspec namespace collision recorded for separate Reaper registry migration; no extension parser support is claimed.
-- [x] Reaper Beelzebul 66-rule repository scanner and defense-context TSV inspected as separate specialist inputs; neither is represented as DuckOS endpoint protection.
-- [ ] Re-verify the Java context-classifier source/test paths named in Reaper documentation before claiming that classifier is implemented or using it as a shipped DuckOS dependency.
+- [x] Reaper Beelzebul 66-rule repository scanner and defense-context TSV inspected as separate specialist inputs; neither is represented as Dak endpoint protection.
+- [ ] Re-verify the Java context-classifier source/test paths named in Reaper documentation before claiming that classifier is implemented or using it as a shipped Dak dependency.
 
 ## Mora host-native shell — 2026-11-25
 
@@ -43,9 +43,9 @@ Peer applications and host tools remain user-space programs. None is a kernel mo
 - [x] Added an explicitly visual-only VentuSample waveform panel that states audio playback and DSP integration are unavailable.
 - [x] Added a CMake target, headless native-window/navigation smoke test and dedicated Qt 6 CI workflow.
 - [ ] Obtain a passing Qt 6 build and smoke-test run before marking the host-native shell build gate verified.
-- [ ] Launch Mora inside a DuckOS user session after the process model, syscall ABI, filesystem, service supervisor, native input path and compositor exist.
+- [ ] Launch Mora inside a Dak user session after the process model, syscall ABI, filesystem, service supervisor, native input path and compositor exist.
 
-The Qt application is native to the host OS. It is not a kernel-owned DuckOS compositor, window manager, system service or process launcher. The bootable Stage 1 image still halts before a user session.
+The Qt application is native to the host OS. It is not a kernel-owned Dak compositor, window manager, system service or process launcher. The bootable Stage 1 image still halts before a user session.
 ## Implemented in Reaper source
 
 - [x] Boot phase sequence validation and transition validation.
@@ -72,7 +72,7 @@ The Qt application is native to the host OS. It is not a kernel-owned DuckOS com
 - [ ] Owned GDT, TSS and dedicated IST stacks for double fault/NMI; the current handlers still use the active boot stack.
 - [ ] PIC/APIC setup, IRQ remapping, timer/keyboard routing and interrupt-safe scheduling.
 
-- [x] Experimental x86_64 Stage 1 boot image (QEMU BIOS/UEFI verification passed): pinned Limine v12.11.1; DuckOS-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native monotonic 4 KiB physical-frame allocator over validated USABLE regions. The kernel allocates and clears one frame through HHDM and emits `DUCKOS_BOOT_OK stage=1`. CI run 45527148367 passed host CTests, freestanding ISO build, BIOS and UEFI QEMU boots; both serial logs report `DUCKOS_BOOT_OK stage=1`. This is not yet a running process/service OS session.
+- [x] Experimental x86_64 Stage 1 boot image (QEMU BIOS/UEFI verification passed): pinned Limine v12.11.1; Dak-owned freestanding entry; Boot Info v1 handoff validation; BIOS and UEFI QEMU boot gates; native monotonic 4 KiB physical-frame allocator over validated USABLE regions. The kernel allocates and clears one frame through HHDM and emits `DAK_BOOT_OK stage=1`. CI run 45527148367 passed host CTests, freestanding ISO build, BIOS and UEFI QEMU boots; both serial logs report `DAK_BOOT_OK stage=1`. This is not yet a running process/service OS session.
 - [x] Host-tested frame allocator contract: alignment, reserved-range exclusion, minimum address, malformed/overlapping/overflowing map rejection and exhaustion.
 - [ ] Reusable frame allocator/free path, page tables, MMIO and DMA.
 - [ ] Actual preemptive scheduler, work stealing, fibers and OS-thread runtime.
@@ -108,7 +108,7 @@ A Reaper script passing on the reference runtime proves only that the script and
 The implemented foundation never executes a Windows binary and does not install drivers or runtime DLLs. See [Windows compatibility](WINDOWS_COMPATIBILITY.md) for the full 66-point traceability table and exact CLI use.
 
 
-## DuckBridge runtime orchestration — 2026-11-23
+## DakBridge runtime orchestration — 2026-11-23
 
 - [x] PE inspection reuses the shared PE32/PE32+ parser, including section and import metadata.
 - [x] ELF header inspection reports architecture, bitness and endianness.
@@ -156,7 +156,7 @@ The release bundle is a component archive, not a bootable image. Deployment plan
 These are partial browser-shell features. The new DAK package catalog remains at design maturity and does not indicate that the corresponding native services ship in an OS image.
 
 
-## Duck Desktop optimizer — 2026-11-23
+## Dak Desktop optimizer — 2026-11-23
 
 - [x] Read-only Desktop/Рабочий стол inventory, item count and temporary-name hints.
 - [x] Ten-item default clutter threshold and machine-readable audit report.
@@ -164,18 +164,18 @@ These are partial browser-shell features. The new DAK package catalog remains at
 - [x] Current-user startup-folder inventory and reversible disable/restore on Windows and Linux.
 - [x] Windows HKCU Run inventory and backup-before-disable / restore behavior.
 - [x] Bounded process and memory snapshot; optional psutil enrichment.
-- [x] Native Tk user-space maintenance window and `duckos desktop` CLI.
+- [x] Native Tk user-space maintenance window and `dakos desktop` CLI.
 - [x] Reaper desktop policy contract for allowed actions and clutter threshold.
-- [ ] Production Duck compositor, native window manager, true virtual workspaces and shell integration.
+- [ ] Production Dak compositor, native window manager, true virtual workspaces and shell integration.
 - [ ] Native process manager, tray/notification services, capability broker and kernel-enforced resource scheduling.
 - [ ] MacOS LaunchAgents integration and machine-wide/service startup management (intentionally outside this module's scope).
 
-The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable DuckOS image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md).
+The native Tk tool is a user-space utility. It is not a compositor, a boot-time shell, a kernel service or proof of a bootable Dak image. The Mora panel only links to the native command; it does not access host resources from browser JavaScript. See [Dak Desktop optimization](DESKTOP_OPTIMIZATION.md).
 
 
 ## Unified capability completeness gate — 2026-11-23
 
-The shared [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) applies to every Mora and DuckOS capability. A feature is complete only for its explicitly declared scope and only when source, tests, CI and documentation agree.
+The shared [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) applies to every Mora and Dak capability. A feature is complete only for its explicitly declared scope and only when source, tests, CI and documentation agree.
 
 - Mora now has a Qt 6 Widgets host-native adapter and retains the browser preview separately; neither is a kernel-owned desktop session. The Reaper native bridge is a policy-only event envelope pending freestanding runtime, DABI64/IPC transport and kernel service integration.
 - User-space maintenance utilities are not kernel services, a compositor, a bootloader, a driver manager or proof of a bootable operating-system image.
@@ -187,7 +187,7 @@ The existing implemented/partial boundary list above remains authoritative. This
 
 
 
-## Duck Desktop policy core — 2026-11-25
+## Dak Desktop policy core — 2026-11-25
 
 - [x] Deterministic Reaper window records, geometry bounds, modal-focus rules, reserved z-order layers, resize policy and bounded tile metrics.
 - [x] Taskbar entry validation, system-process hiding, pinned/running visibility, per-app window grouping and workspace-aware activation decisions.
