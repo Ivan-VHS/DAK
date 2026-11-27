@@ -7,8 +7,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from duckos.cli import main
-from duckos.compat import (
+from dakos.cli import main
+from dakos.compat import (
     PEFormatError, PrefixError, compatibility_status, create_prefix,
     diagnose_binary, inspect_pe_bytes, plan_launch, read_prefix,
 )
@@ -95,7 +95,7 @@ class WindowsCompatibilityTests(unittest.TestCase):
             except (OSError, NotImplementedError):
                 self.skipTest("symlinks are not available on this host")
             with self.assertRaisesRegex(PEFormatError, "symbolic link"):
-                from duckos.compat.pe import inspect_pe_file
+                from dakos.compat.pe import inspect_pe_file
                 inspect_pe_file(linked)
 
             if hasattr(os, "mkfifo"):
@@ -105,8 +105,8 @@ class WindowsCompatibilityTests(unittest.TestCase):
                     inspect_pe_file(fifo)
 
     def test_pe_file_reader_enforces_limit_during_read(self):
-        from duckos.compat import pe as pe_module
-        from duckos.compat.pe import inspect_pe_file
+        from dakos.compat import pe as pe_module
+        from dakos.compat.pe import inspect_pe_file
 
         with tempfile.TemporaryDirectory() as temporary:
             candidate = Path(temporary) / "oversized.exe"
@@ -120,7 +120,7 @@ class WindowsCompatibilityTests(unittest.TestCase):
                 pe_module.MAX_FILE_BYTES = previous_limit
 
     def test_pe_file_reader_rejects_directory(self):
-        from duckos.compat.pe import inspect_pe_file
+        from dakos.compat.pe import inspect_pe_file
 
         with tempfile.TemporaryDirectory() as temporary:
             with self.assertRaisesRegex(PEFormatError, "regular file"):
