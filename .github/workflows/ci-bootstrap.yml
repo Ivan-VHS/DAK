@@ -1,4 +1,4 @@
-name: DuckOS bootstrap validation
+name: DAKOS bootstrap validation
 
 on:
   pull_request:
@@ -16,18 +16,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/duckos"
+          mkdir -p "$RUNNER_TEMP/dakos"
           if [[ -f artifacts/source-bundle/part00 ]]; then
-            cat artifacts/source-bundle/part0[0-4] | base64 --decode > "$RUNNER_TEMP/duckos-source.tar.xz"
-            echo "5e2368c939097f6e01e15547a0ebce7b803615ccd257fc4c216389d8e314aaa7  $RUNNER_TEMP/duckos-source.tar.xz" | sha256sum --check
-            tar -xJf "$RUNNER_TEMP/duckos-source.tar.xz" --strip-components=1 -C "$RUNNER_TEMP/duckos"
+            cat artifacts/source-bundle/part0[0-4] | base64 --decode > "$RUNNER_TEMP/dakos-source.tar.xz"
+            echo "5e2368c939097f6e01e15547a0ebce7b803615ccd257fc4c216389d8e314aaa7  $RUNNER_TEMP/dakos-source.tar.xz" | sha256sum --check
+            tar -xJf "$RUNNER_TEMP/dakos-source.tar.xz" --strip-components=1 -C "$RUNNER_TEMP/dakos"
           else
-            git archive HEAD | tar -x -C "$RUNNER_TEMP/duckos"
+            git archive HEAD | tar -x -C "$RUNNER_TEMP/dakos"
           fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: duckos-source
-          path: ${{ runner.temp }}/duckos
+          name: dakos-source
+          path: ${{ runner.temp }}/dakos
           if-no-files-found: error
 
   kernel:
@@ -36,16 +36,16 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: duckos-source
-          path: duckos
+          name: dakos-source
+          path: dakos
       - name: Build freestanding kernel
-        working-directory: duckos
+        working-directory: dakos
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential binutils
           make clean kernel
-          file build/duckos.elf
-          readelf -h build/duckos.elf
+          file build/dakos.elf
+          readelf -h build/dakos.elf
 
   initramfs:
     needs: prepare-source
@@ -53,10 +53,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: duckos-source
-          path: duckos
+          name: dakos-source
+          path: dakos
       - name: Validate initramfs reader
-        working-directory: duckos
+        working-directory: dakos
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential python3
@@ -70,10 +70,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: duckos-source
-          path: duckos
+          name: dakos-source
+          path: dakos
       - name: Test package manager, archive builder and driver ABI
-        working-directory: duckos
+        working-directory: dakos
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential python3
@@ -89,10 +89,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: duckos-source
-          path: duckos
+          name: dakos-source
+          path: dakos
       - name: Build ISO and smoke-test the BIOS path
-        working-directory: duckos
+        working-directory: dakos
         shell: bash
         run: |
           set -euo pipefail
@@ -104,7 +104,7 @@ jobs:
 
           make clean all test
 
-          iso_log="$RUNNER_TEMP/duckos-iso-build.log"
+          iso_log="$RUNNER_TEMP/dakos-iso-build.log"
           if make iso >"$iso_log" 2>&1; then
             cat "$iso_log"
           else
@@ -143,7 +143,7 @@ jobs:
 
           set +e
           timeout 18s qemu-system-x86_64 \
-            -machine q35 -m 512M -cdrom build/duckos.iso -boot d \
+            -machine q35 -m 512M -cdrom build/dakos.iso -boot d \
             -display none -monitor none -serial file:build/qemu-serial.log \
             -no-reboot -no-shutdown
           status=$?
@@ -153,9 +153,9 @@ jobs:
             exit "$status"
           fi
           cat build/qemu-serial.log
-          grep -F "DuckOS kernel: early boot" build/qemu-serial.log
+          grep -F "DAKOS kernel: early boot" build/qemu-serial.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: duckos-x86_64-iso
-          path: duckos/build/duckos.iso
+          name: dakos-x86_64-iso
+          path: dakos/build/dakos.iso
           if-no-files-found: error
