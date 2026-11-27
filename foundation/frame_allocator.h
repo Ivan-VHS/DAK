@@ -1,5 +1,5 @@
-#ifndef DUCKOS_FRAME_ALLOCATOR_H
-#define DUCKOS_FRAME_ALLOCATOR_H
+#ifndef DAK_FRAME_ALLOCATOR_H
+#define DAK_FRAME_ALLOCATOR_H
 
 #include <stdint.h>
 #include "boot_info.h"
@@ -8,29 +8,29 @@
 extern "C" {
 #endif
 
-#define DUCKOS_FRAME_PAGE_SIZE 4096u
-#define DUCKOS_FRAME_ALLOCATOR_MAX_RANGES DUCKOS_BOOT_MAX_MEMORY_REGIONS
+#define DAK_FRAME_PAGE_SIZE 4096u
+#define DAK_FRAME_ALLOCATOR_MAX_RANGES DAK_BOOT_MAX_MEMORY_REGIONS
 
-typedef struct duckos_frame_range {
+typedef struct dakos_frame_range {
     uint64_t next;
     uint64_t end;
-} duckos_frame_range;
+} dakos_frame_range;
 
-typedef struct duckos_frame_allocator {
+typedef struct dakos_frame_allocator {
     uint32_t range_count;
     uint32_t active_range;
     uint64_t total_pages;
     uint64_t allocated_pages;
-    duckos_frame_range ranges[DUCKOS_FRAME_ALLOCATOR_MAX_RANGES];
-} duckos_frame_allocator;
+    dakos_frame_range ranges[DAK_FRAME_ALLOCATOR_MAX_RANGES];
+} dakos_frame_allocator;
 
-typedef enum duckos_frame_allocator_status {
-    DUCKOS_FRAME_ALLOCATOR_OK = 0,
-    DUCKOS_FRAME_ALLOCATOR_INVALID_ARGUMENT,
-    DUCKOS_FRAME_ALLOCATOR_INVALID_MEMORY_MAP,
-    DUCKOS_FRAME_ALLOCATOR_NO_USABLE_MEMORY,
-    DUCKOS_FRAME_ALLOCATOR_EXHAUSTED
-} duckos_frame_allocator_status;
+typedef enum dakos_frame_allocator_status {
+    DAK_FRAME_ALLOCATOR_OK = 0,
+    DAK_FRAME_ALLOCATOR_INVALID_ARGUMENT,
+    DAK_FRAME_ALLOCATOR_INVALID_MEMORY_MAP,
+    DAK_FRAME_ALLOCATOR_NO_USABLE_MEMORY,
+    DAK_FRAME_ALLOCATOR_EXHAUSTED
+} dakos_frame_allocator_status;
 
 /*
  * Initializes a single-core, monotonic bootstrap frame allocator.
@@ -38,16 +38,16 @@ typedef enum duckos_frame_allocator_status {
  * reserved. min_address excludes low firmware memory (normally the first MiB).
  * Initialization is transactional: failure leaves the previous allocator intact.
  */
-duckos_frame_allocator_status duckos_frame_allocator_init(
-    duckos_frame_allocator *allocator,
-    const duckos_memory_region *regions,
+dakos_frame_allocator_status dakos_frame_allocator_init(
+    dakos_frame_allocator *allocator,
+    const dakos_memory_region *regions,
     uint32_t region_count,
     uint64_t min_address
 );
 
 /* Returns one aligned 4 KiB physical page. Pages are never returned twice. */
-duckos_frame_allocator_status duckos_frame_allocator_allocate(
-    duckos_frame_allocator *allocator,
+dakos_frame_allocator_status dakos_frame_allocator_allocate(
+    dakos_frame_allocator *allocator,
     uint64_t *physical_address
 );
 
