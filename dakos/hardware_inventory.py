@@ -1,4 +1,4 @@
-"""Read-only PCI/USB and Windows PnP inventory for DuckOS diagnostics.
+"""Read-only PCI/USB and Windows PnP inventory for DAKOS diagnostics.
 
 The collector never installs, removes, enables, disables or updates a driver.
 Device instance identifiers are represented only by per-snapshot keyed hashes.
@@ -18,7 +18,7 @@ import shutil
 import subprocess
 from typing import Any
 
-SCHEMA = "duckos.hardware-inventory.v1"
+SCHEMA = "dakos.hardware-inventory.v1"
 MAX_DEVICES = 10_000
 MAX_OUTPUT_BYTES = 16 * 1024 * 1024
 _HEX_ID = re.compile(r"^(?:0x)?[0-9a-f]{4}$", re.IGNORECASE)
@@ -269,7 +269,7 @@ def collect_host_inventory(
         "schema": SCHEMA,
         "captured_utc": captured_utc,
         "source": {
-            "provider": "duckos-host-inventory",
+            "provider": "dakos-host-inventory",
             "mode": "read_only",
             "platform": system_name,
             "architecture": machine,

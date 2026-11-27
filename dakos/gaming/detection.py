@@ -1,7 +1,7 @@
 """Read-only game-process discovery using explicit executable profiles.
 
 A process-name match is only a candidate. Window, graphics-context and user
-session evidence must be checked before DuckOS activates any gaming policy.
+session evidence must be checked before DAKOS activates any gaming policy.
 """
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-PROFILE_SCHEMA = "duckos.game-profile-catalog.v1"
-DETECTION_SCHEMA = "duckos.game-process-detection.v1"
+PROFILE_SCHEMA = "dakos.game-profile-catalog.v1"
+DETECTION_SCHEMA = "dakos.game-process-detection.v1"
 SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 MAX_PROFILE_BYTES = 256 * 1024
 MAX_PROFILES = 512
