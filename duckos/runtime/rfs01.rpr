@@ -6,20 +6,34 @@
 # Link:   [id, origin, target, channel, blocked, weight]
 # Signal: [sequence, origin, payload, trusted, manufactured]
 
+export craft rfs01_number_finite(value) {
+    yield kind(value) == "number" and value - value == 0
+}
+
+export craft rfs01_text_bounded(value, maximum_characters) {
+    yield kind(value) == "text" and size(value) <= maximum_characters
+}
+
 export craft rfs01_node_valid(node) {
     when size(node) != 8 {
+        yield false
+    }
+    when not rfs01_text_bounded(node[0], 15) or not rfs01_text_bounded(node[1], 15) or not rfs01_text_bounded(node[6], 31) {
         yield false
     }
     when node[1] != "Basement" and node[1] != "Corridor" and node[1] != "Gate" and node[1] != "Skyline" and node[1] != "Horizon" {
         yield false
     }
+    when not rfs01_number_finite(node[2]) or not rfs01_number_finite(node[3]) or not rfs01_number_finite(node[4]) or not rfs01_number_finite(node[5]) {
+        yield false
+    }
     when node[2] < 0 or node[3] <= 0 or node[4] < 0 or node[4] > 1 {
         yield false
     }
-    when node[5] < -160 or node[5] > 24 or node[6] == nothing {
+    when node[5] < -160 or node[5] > 24 {
         yield false
     }
-    when node[7] != true and node[7] != false {
+    when kind(node[7]) != "boolean" {
         yield false
     }
     yield true
@@ -29,13 +43,13 @@ export craft rfs01_link_valid(link) {
     when size(link) != 6 {
         yield false
     }
-    when link[1] == nothing or link[2] == nothing or link[0] == nothing {
+    when not rfs01_text_bounded(link[0], 15) or not rfs01_text_bounded(link[1], 15) or not rfs01_text_bounded(link[2], 15) {
         yield false
     }
     when link[3] != "Wire" and link[3] != "Rail" and link[3] != "Beat" and link[3] != "Current" and link[3] != "Bridge" {
         yield false
     }
-    when link[4] != true and link[4] != false {
+    when kind(link[4]) != "boolean" or not rfs01_number_finite(link[5]) {
         yield false
     }
     when link[5] < 0 {
@@ -48,13 +62,13 @@ export craft rfs01_signal_valid(signal) {
     when size(signal) != 5 {
         yield false
     }
-    when signal[0] < 0 or signal[1] == nothing or size(signal[2]) > 4096 {
+    when not rfs01_number_finite(signal[0]) or signal[0] < 0 or signal[0] > 18446744073709551615 or signal[0] % 1 != 0 {
         yield false
     }
-    when signal[3] != true and signal[3] != false {
+    when not rfs01_text_bounded(signal[1], 15) or not rfs01_text_bounded(signal[2], 1024) {
         yield false
     }
-    when signal[4] != true and signal[4] != false {
+    when kind(signal[3]) != "boolean" or kind(signal[4]) != "boolean" {
         yield false
     }
     yield true
