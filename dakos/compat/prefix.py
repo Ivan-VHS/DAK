@@ -1,4 +1,4 @@
-"""Safe, isolated Windows-prefix directory layout for DuckOS tooling."""
+"""Safe, isolated Windows-prefix directory layout for DAKOS tooling."""
 from __future__ import annotations
 
 import json
@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SCHEMA = "duckos.windows-prefix.v1"
+SCHEMA = "dakos.windows-prefix.v1"
 _ARCHITECTURES = {"x86", "x86_64", "aarch64"}
 _PREFIX_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
 _LAYOUT = (

@@ -37,7 +37,7 @@ craft makes_number(left, right, target) {
     yield left + right == target
 }
 
-make pack := read_json("DuckOS/duckos/education/early_math_pack.v1.json")
+make pack := read_json("DAKOS/dakos/education/early_math_pack.v1.json")
 assert(pack["schema"] == "dak.education.early-math-pack.v1", "pack schema is stable")
 assert(size(pack["stages"]) == 4, "four flexible age bands are present")
 assert(pack["session_policy"]["adult_guided"], "an adult guides the play")
