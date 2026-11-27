@@ -1,0 +1,54 @@
+# Verified system-update admission policy.
+# This module decides whether a staged update may be presented to a trusted
+# backend. It never copies executable bytes, changes page permissions or jumps
+# to a replacement image.
+
+export craft descriptor_valid(patch) {
+    when size(patch) != 9 { yield false }
+    when patch[0] <= 0 or size(patch[1]) == 0 or size(patch[2]) == 0 {
+        yield false
+    }
+    when patch[3] <= 0 or patch[3] > 67108864 { yield false }
+    when patch[4] < 0 or patch[4] > 2147483647 { yield false }
+    when size(patch[5]) == 0 or size(patch[6]) == 0 { yield false }
+    when patch[7] != "kernel" and patch[7] != "driver" and patch[7] != "service" {
+        yield false
+    }
+    yield patch[8] == "staged" or patch[8] == "verified" or patch[8] == "committed" or patch[8] == "rolled-back"
+}
+
+export craft verify_decision(patch, checksum_ok, signature_ok, abi_ok, policy_ok) {
+    when not descriptor_valid(patch) { yield "reject-invalid-descriptor" }
+    when patch[8] != "staged" { yield "reject-not-staged" }
+    when not checksum_ok { yield "reject-integrity" }
+    when not signature_ok { yield "reject-signature" }
+    when not abi_ok { yield "reject-abi" }
+    when not policy_ok { yield "reject-policy" }
+    yield "verified-policy-only"
+}
+
+export craft commit_decision(patch, safe_point, irq_depth, device_owned_dma, old_image_healthy) {
+    when not descriptor_valid(patch) or patch[8] != "verified" {
+        yield "reject-not-verified"
+    }
+    when irq_depth < 0 or device_owned_dma < 0 { yield "reject-invalid-quiescence" }
+    when not safe_point or irq_depth != 0 or device_owned_dma != 0 {
+        yield "defer-until-quiescent"
+    }
+    when not old_image_healthy { yield "recovery-required" }
+    yield "eligible-for-trusted-backend-commit"
+}
+
+export craft rollback_decision(state, candidate_healthy, boot_attempts, max_attempts) {
+    when boot_attempts < 0 or max_attempts <= 0 or boot_attempts > max_attempts {
+        yield "reject-invalid-attempt-counter"
+    }
+    when state == "committed" and candidate_healthy { yield "retain-candidate" }
+    when state == "committed" and not candidate_healthy and boot_attempts >= max_attempts {
+        yield "request-last-known-good-rollback"
+    }
+    when state == "committed" and not candidate_healthy { yield "retry-health-window" }
+    when state == "verified" { yield "keep-old-image-active" }
+    when state == "staged" { yield "discard-unverified-candidate" }
+    yield "no-update-action"
+}
