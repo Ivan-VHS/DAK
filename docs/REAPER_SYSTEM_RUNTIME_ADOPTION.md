@@ -1,21 +1,21 @@
 # Reaper System Runtime ABI adoption contract
 
-**Consumer:** DuckOS  
+**Consumer:** DAKOS  
 **Provider:** Reaper System Runtime ABI v1  
 **Status:** integration contract; no privileged adapter is claimed by this document.
 
 ## Purpose
 
-DuckOS is the intended first OS provider for Reaper's process, thread, synchronization, filesystem, clock, networking and cryptographic host operations. The adapter belongs on the DuckOS side of the existing process and trust boundary. Reaper must not bypass the host policy broker with raw syscalls.
+DAKOS is the intended first OS provider for Reaper's process, thread, synchronization, filesystem, clock, networking and cryptographic host operations. The adapter belongs on the DAKOS side of the existing process and trust boundary. Reaper must not bypass the host policy broker with raw syscalls.
 
-The native Reaper ABI is defined in include/reaper/system.h and implemented as the reaper_system library. It contributes 42 versioned operation IDs across seven domains. The adapter must match ABI version 1 and use only the capabilities explicitly granted by DuckOS.
+The native Reaper ABI is defined in include/reaper/system.h and implemented as the reaper_system library. It contributes 42 versioned operation IDs across seven domains. The adapter must match ABI version 1 and use only the capabilities explicitly granted by DAKOS.
 
 ## Provider architecture
 
 The target call path is:
 
 ~~~text
-DuckOS application / Reaper task
+DAKOS application / Reaper task
           |
           v
 Reaper typed operation + required effect
@@ -24,10 +24,10 @@ Reaper typed operation + required effect
 ReaperSystemHost (ABI v1)
           |
           v
-DuckOS ReaperSystemDispatch adapter
+DAKOS ReaperSystemDispatch adapter
           |
           v
-DuckOS capability broker / service boundary
+DAKOS capability broker / service boundary
           |
           v
 reviewed kernel or user-space service implementation
@@ -37,7 +37,7 @@ The actual provider should be split into small domain adapters rather than one u
 
 ## Capability mapping
 
-| Reaper operation domain | DuckOS-owned service |
+| Reaper operation domain | DAKOS-owned service |
 |---|---|
 | Process | Process broker, executable manifest validation and child lifecycle |
 | Thread | Scheduler-facing task/thread service and bounded join semantics |
@@ -64,17 +64,17 @@ The primary development, build and qualification target is x86-64 on modern Inte
 
 ## Integration gates
 
-1. Pin the Reaper ABI version and operation catalogue in DuckOS's dependency/federation record.
+1. Pin the Reaper ABI version and operation catalogue in DAKOS's dependency/federation record.
 2. Implement a no-op or fake provider first; test each operation's required capability before dispatch.
 3. Add host-specific payload schemas with explicit sizes, version fields, endianness and handle kinds. Never infer payload layout from a name.
-4. Implement real provider operations only where the corresponding DuckOS subsystem exists and has its own tests.
+4. Implement real provider operations only where the corresponding DAKOS subsystem exists and has its own tests.
 5. Add deny-by-default tests for missing grants, forged/stale handles, invalid lengths, path traversal, shell metacharacters, out-of-scope process IDs and denied network endpoints.
 6. Keep the existing Reaper source-check bridge separate. A user-space static check or Studio launch does not mean the kernel adapter is installed.
 7. Mark each service implemented, adapter-dependent, experimental or planned using source and test evidence.
 
 ## Acceptance
 
-DuckOS may claim an operation is available only when:
+DAKOS may claim an operation is available only when:
 - a concrete provider function exists;
 - policy and handle validation execute before side effects;
 - fake-host tests and target integration tests cover success and denial;

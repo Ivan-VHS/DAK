@@ -1,6 +1,6 @@
-# Reaper-driven Duck Shell implementation roadmap
+# Reaper-driven DAK Shell implementation roadmap
 
-**Target:** a desktop session started and owned by DuckOS, with Reaper as the native policy/UI language.
+**Target:** a desktop session started and owned by DAKOS, with Reaper as the native policy/UI language.
 **Current baseline:** experimental x86_64 Stage 1 kernel; host-native Qt 6 Mora adapter; Reaper desktop policy and event-envelope contracts.
 **Release rule:** a Figma frame, host-native window or policy-only contract is not proof of a kernel-owned desktop feature.
 
@@ -29,7 +29,7 @@
 - Malformed, oversized, truncated, stale-sequence and unknown-version negative tests.
 - Capability spoofing, cross-process identity and unauthorized system-notification tests.
 - Tree-walk/VM and native-runtime policy parity for the same golden cases.
-- No Python runtime dependency in the shipped DuckOS session.
+- No Python runtime dependency in the shipped DAKOS session.
 
 ### D8.3 — Process-backed desktop session and window service
 
@@ -63,7 +63,7 @@
 - Frame-time P50/P95/P99 and idle CPU/memory measurements on named hardware.
 - GPU failure returns to software rendering without losing the session.
 
-### D8.5 — Reaper-driven Duck Shell
+### D8.5 — Reaper-driven DAK Shell
 
 **Deliverables**
 - Reaper UI/runtime as the source of shell composition and policy, not a Qt or browser app embedded in the kernel.
@@ -73,7 +73,7 @@
 - Localization, keyboard navigation, accessibility semantics and reduced-motion behavior across the whole shell.
 
 **Acceptance gates**
-- DuckOS boots directly into a user-owned Reaper desktop session.
+- DAKOS boots directly into a user-owned Reaper desktop session.
 - Shell panels communicate only through versioned DABI64/IPC contracts.
 - No browser engine, remote CDN, hidden network dependency or host-window dependency.
 - App launch and device actions are denied without a broker-issued capability.
@@ -85,12 +85,12 @@
 2. Rebase and merge the Figma-derived native panels (#166) on the updated `main`.
 3. Merge the Reaper policy and bridge contracts (#161), resolving the shared architecture/status documentation against the merged Mora state.
 4. Start a separate D8.2 implementation PR for the native Reaper runtime and DABI64/IPC endpoint.
-5. Only then migrate the shell from the host adapter to the kernel-owned DuckOS desktop session.
+5. Only then migrate the shell from the host adapter to the kernel-owned DAKOS desktop session.
 
 ## Non-goals for the transition
 
-- Do not treat Qt host windows as DuckOS kernel windows.
+- Do not treat Qt host windows as DAKOS kernel windows.
 - Do not route privileged operations through browser JavaScript or local preference files.
 - Do not execute app-manifest command strings from the launcher.
 - Do not claim a compositor, scheduler, process model, VFS or device control merely because its policy contract exists.
-- Do not ship a Python test/runtime dependency as the native DuckOS Reaper execution path.
+- Do not ship a Python test/runtime dependency as the native DAKOS Reaper execution path.

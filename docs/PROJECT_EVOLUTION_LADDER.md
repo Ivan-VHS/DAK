@@ -36,17 +36,17 @@ A rung is the **highest cumulative gate supported by evidence at the recorded re
 5. **Reassess regressions:** if a required gate stops passing, downgrade the rung or mark the assessment provisional until evidence is restored.
 6. **Not applicable is explicit:** explain why a genuinely irrelevant gate does not fit. Do not silently waive applicable requirements.
 7. **Capability statuses stay separate:** individual capabilities continue to use the maturity identifiers in the Unified Documentation Standard.
-8. **No version-number collision:** this ladder is not SemVer, a release channel, a Git branch or a boot/runtime sequence. Preserve domain-specific terms such as DuckOS **Stage 1** boot. Use `Rung 04 — Ascension` or `Ladder 04/10` for project maturity.
+8. **No version-number collision:** this ladder is not SemVer, a release channel, a Git branch or a boot/runtime sequence. Preserve domain-specific terms such as DAKOS **Stage 1** boot. Use `Rung 04 — Ascension` or `Ladder 04/10` for project maturity.
 
 ## Repository record
 
-Each repository owns `.github/project-ladder.v1.json` and a short `docs/PROJECT_LADDER.md` page (DuckOS owns this canonical page). The record identifies project, rung, assessment mode, date, evidence paths and next gate.
+Each repository owns `.github/project-ladder.v1.json` and a short `docs/PROJECT_LADDER.md` page (DAKOS owns this canonical page). The record identifies project, rung, assessment mode, date, evidence paths and next gate.
 
 Initial cross-repository baseline — 25 November 2026:
 
 | Repository | Current rung | Assessment | Next rung |
 |---|---|---|---|
-| [DuckOS](https://github.com/Ivan-VHS/DuckOS) | **03 — Evolution** | Provisional; native Stage 1 boot slice and tested Reaper policy contracts are documented, but this is not a usable process/service OS session. | 04 — Ascension |
+| [DAKOS](https://github.com/Ivan-VHS/DAKOS) | **03 — Evolution** | Provisional; native Stage 1 boot slice and tested Reaper policy contracts are documented, but this is not a usable process/service OS session. | 04 — Ascension |
 | [Reaper](https://github.com/Ivan-VHS/Reaper) | **04 — Ascension** | Provisional; reference runtime, CLI/REPL, Studio, LSP/DAP and partial native C17 track are documented. Native parity is not claimed. | 05 — Vanguard |
 | [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) | **04 — Ascension** | Provisional; bounded C11 core, portable CLI, Windows GUI, versioned ABI and test/build workflows are documented. | 05 — Vanguard |
 | [OPlague](https://github.com/Ivan-VHS/OPlague) | **04 — Ascension** | Provisional; device inventory, bounded package inspection, compatibility evidence and local reporting form a documented read-only workflow. | 05 — Vanguard |
@@ -58,7 +58,7 @@ These are **documentation-review snapshots**, not new CI certifications. No test
 
 | Repository | 05 — Vanguard promotion focus |
 |---|---|
-| DuckOS | Move beyond the experimental boot slice: deliver and test further native kernel/runtime primitives and establish a versioned native boundary to Reaper without conflating reference policy with kernel enforcement. |
+| DAKOS | Move beyond the experimental boot slice: deliver and test further native kernel/runtime primitives and establish a versioned native boundary to Reaper without conflating reference policy with kernel enforcement. |
 | Reaper | Compile and execute a declared `.rpr` subset through the native path; add reference/native parity fixtures, ABI checks and reproducible target CI. |
 | Pytyliki | Exercise the declared C11 core/ABI target matrix in CI, preserve bounded behavior across compilers and record repeatable performance/failure baselines. |
 | OPlague | Exercise the end-to-end inspection/report path in the declared Windows CI target; add adversarial/fuzz coverage for untrusted PE, INF, ZIP and UDRV inputs while preserving read-only behavior. |
@@ -66,4 +66,4 @@ These are **documentation-review snapshots**, not new CI certifications. No test
 
 ## Cross-repository change control
 
-DuckOS maintains the canonical ladder text and schema. Product repositories own their implementation and evidence. Shared changes that affect several repositories should be proposed in coordinated, separately reviewable PRs. Update each local record in the same PR as a material change to scope, runtime, integration boundary or acceptance evidence. A project-level rung never upgrades the maturity of an individual capability.
+DAKOS maintains the canonical ladder text and schema. Product repositories own their implementation and evidence. Shared changes that affect several repositories should be proposed in coordinated, separately reviewable PRs. Update each local record in the same PR as a material change to scope, runtime, integration boundary or acceptance evidence. A project-level rung never upgrades the maturity of an individual capability.
