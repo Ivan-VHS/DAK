@@ -131,6 +131,22 @@ export craft passport_valid(passport, address_limit, alignment) {
     yield rebuilt[1] == passport
 }
 
+export craft passport_encode(passport, address_limit, alignment) {
+    when not passport_valid(passport, address_limit, alignment) {
+        yield ["ERR", "passport-validation-failed"]
+    }
+    make content := passport_content(passport[2], passport[3], passport[4], passport[5], passport[6], passport[7])
+    make checksum_bytes := u32_le(passport[8])
+    when content[0] != "OK" or checksum_bytes[0] != "OK" {
+        yield ["ERR", "passport-encoding-failed"]
+    }
+    vary wire := content[1]
+    each octet in checksum_bytes[1] {
+        change wire := push(wire, octet)
+    }
+    yield ["OK", wire]
+}
+
 export craft sector_create(app_id, kind, rule_id, base, byte_count, quota, address_limit) {
     when app_id < 1 or app_id > 429496729 or kind < 1 or kind > 5 {
         yield ["ERR", "sector-identity-invalid"]
