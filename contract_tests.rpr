@@ -17,6 +17,7 @@ import "duckos/storage/hypergraph.rpr" as storage
 import "duckos/storage/crdt.rpr" as crdt
 import "duckos/system/three_media.rpr" as media
 import "duckos/system/telemetry.rpr" as telemetry
+import "duckos/gpu/oplage_bridge.rpr" as oplage_gpu
 import "duckos/ui/theme.rpr" as theme
 import "duckos/ui/motion.rpr" as motion
 import "duckos/storage/history.rpr" as history
@@ -30,6 +31,7 @@ import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
 import "duckos/ui/canvas.rpr" as canvas
 import "duckos/input/spatial.rpr" as spatial_input
 import "duckos/ui/desktop.rpr" as desktop
+import "duckos/ui/shell_policy.rpr" as shell_policy
 import "duckos/ui/window_manager.rpr" as window_manager
 import "duckos/ui/taskbar.rpr" as taskbar
 import "duckos/ui/notifications.rpr" as notifications
@@ -156,6 +158,25 @@ assert(media["thermal_profile"](91, 80) == "conserve", "thermal safety takes pri
 make sample_a := [1, "cpu.load", 24, "percent", 100]
 make sample_b := [2, "cpu.load", 84, "percent", 200]
 make sample_c := [3, "cpu.load", 96, "percent", 300]
+
+make empty_gpu_rows := []
+make valid_gpu := ["NVIDIA GeForce RTX", "driver-1", 65, 75, 4096, 12288, 180, 2400, 9000]
+make gpu_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-1", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", false, true, [valid_gpu]]
+make unavailable_gpu_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-2", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", false, "nvidia-smi unavailable", false, true, empty_gpu_rows]
+assert(oplage_gpu["gpu_descriptor_valid"](valid_gpu), "OPlague GPU descriptor is bounded")
+assert(oplage_gpu["gpu_snapshot_valid"](gpu_snapshot), "normalized OPlague v1 snapshot passes the policy adapter")
+assert(oplage_gpu["gpu_snapshot_valid"](unavailable_gpu_snapshot), "explicit unavailable snapshot remains valid")
+assert(not oplage_gpu["gpu_snapshot_valid"](["oplage.gpu-telemetry.v1", "snapshot-3", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", false, false, [valid_gpu]]), "unverified digest marker is rejected")
+assert(not oplage_gpu["gpu_snapshot_valid"](["oplage.gpu-telemetry.v1", "snapshot-4", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", true, true, [valid_gpu]]), "sensor export cannot claim device controls")
+make gpu_converted := oplage_gpu["gpu_snapshot_samples"](gpu_snapshot, 100, 5000000)
+assert(gpu_converted[0] == "ready" and size(gpu_converted[1]) == 7, "supported GPU readings become bounded samples")
+assert(gpu_converted[1][0] == [101, "NVIDIA GeForce RTX", "temperature_c", 65, "celsius", 5000000], "sample retains device identity and separate monotonic time")
+assert(telemetry["sequence_valid"](gpu_converted[1]), "GPU samples keep monotonic sequence")
+make gpu_unknown := ["NVIDIA GeForce RTX", "driver-1", "unknown", 75, 4096, 12288, 180, 2400, 9000]
+make gpu_unknown_snapshot := ["oplage.gpu-telemetry.v1", "snapshot-5", "2026-11-25T12:00:00Z", "nvidia-smi", "read_only", true, "", false, true, [gpu_unknown]]
+make gpu_unknown_result := oplage_gpu["gpu_snapshot_samples"](gpu_unknown_snapshot, 200, 6000000)
+assert(gpu_unknown_result[0] == "ready" and size(gpu_unknown_result[1]) == 6, "unknown sensor values are omitted, not replaced by zero")
+assert(oplage_gpu["gpu_snapshot_samples"](unavailable_gpu_snapshot, 0, 7000000)[0] == "unavailable", "unavailable provider emits no readings")
 assert(telemetry["sample_valid"](sample_a), "telemetry sample contract")
 assert(telemetry["alert_level"](24, 70, 90) == "normal", "telemetry normal band")
 assert(telemetry["alert_level"](84, 70, 90) == "warning", "telemetry warning band")
@@ -166,10 +187,11 @@ make window_c := telemetry["append_window"](window_b[1], sample_c, 2)
 assert(window_c[1] == [sample_b, sample_c], "telemetry history remains bounded")
 assert(telemetry["sequence_valid"](window_c[1]), "telemetry sequence is monotonic")
 
-assert(theme["palette_valid"](theme["palette_ratios"]()), "DuckOS palette proportions")
-assert(theme["palette_color"]("navigation") == "#FFD700", "navigation uses semantic Duck gold")
-assert(theme["status_color"]("danger") == "#EF4444", "danger uses the semantic status red")
-assert(not theme["role_valid"]("alert"), "legacy alert is not a palette role")
+assert(theme["palette_valid"](theme["palette_ratios"]()), "DAK palette proportions")
+assert(theme["palette_color"]("page") == "#050505", "DAK uses the Imperial Noir canvas")
+assert(theme["palette_color"]("focus") == "#FFE6A3", "DAK uses warm gold focus feedback")
+assert(theme["palette_color"]("navigation") == "#FFD700", "navigation uses DAK gold")
+assert(theme["palette_color"]("alert") == "#FFD700", "alerts use DAK gold")
 assert(theme["motion_profile"](true) == "static", "reduced-motion preference is respected")
 assert(motion["frame_state"](15900, 16000, false) == "within-budget", "frame stays within 16 ms budget")
 assert(motion["frame_state"](17000, 16000, false) == "late", "late frame is observable")
@@ -191,6 +213,28 @@ assert(desktop["background_state"](25, 4) == "review", "high CPU use is flagged"
 assert(desktop["background_state"](4, 11) == "review", "high memory use is flagged")
 assert(desktop["background_state"](101, 0) == "invalid", "out-of-range metrics are rejected")
 
+
+assert(shell_policy["workspace_id_valid"]("engineering"), "engineering workspace is supported")
+assert(not shell_policy["workspace_id_valid"]("root"), "unknown workspace is rejected")
+assert(shell_policy["density_profile_valid"]("compact"), "compact density is supported")
+assert(not shell_policy["density_profile_valid"]("tiny"), "unknown density is rejected")
+assert(shell_policy["window_mode_valid"]("floating"), "floating window mode is supported")
+assert(not shell_policy["window_mode_valid"]("detached"), "unknown window mode is rejected")
+assert(shell_policy["window_action_valid"]("focus", "user_session"), "focus stays inside the user session")
+assert(not shell_policy["window_action_valid"]("focus", "machine"), "machine scope is denied")
+assert(not shell_policy["window_action_valid"]("delete", "user_session"), "unknown window actions are denied")
+assert(shell_policy["window_placement_valid"](0, 0, 640, 480, 1920, 1080), "bounded window geometry is accepted")
+assert(not shell_policy["window_placement_valid"](-1, 0, 640, 480, 1920, 1080), "negative window coordinates are rejected")
+assert(not shell_policy["window_placement_valid"](0, 0, 2000, 480, 1920, 1080), "oversized window geometry is rejected")
+assert(shell_policy["window_count_valid"](8, 16), "window count stays inside its cap")
+assert(not shell_policy["window_count_valid"](17, 16), "window count over the cap is rejected")
+assert(shell_policy["focus_target_valid"](true, true, true), "focus requires a visible enabled target")
+assert(not shell_policy["focus_target_valid"](true, false, true), "hidden windows cannot receive focus")
+make valid_desktop_session := ["dak.session.v1", "main", "standard", 3, "poi", false, false]
+make invalid_desktop_session := ["dak.session.v1", "main", "standard", 17, "poi", false, false]
+assert(shell_policy["session_snapshot_valid"](valid_desktop_session), "versioned desktop session is accepted")
+assert(not shell_policy["session_snapshot_valid"](invalid_desktop_session), "invalid session snapshot is rejected")
+assert(shell_policy["layout_for"]("engineering") == "editor-diagnostics-inspector", "engineering workspace selects its task layout")
 
 make history_root := [1, 0, "main", "create", "initial"]
 make history_row_a := history["append_revision"]([history_root], 2, 1, "main", "edit", "first")
