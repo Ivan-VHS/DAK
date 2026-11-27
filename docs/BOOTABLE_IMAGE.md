@@ -1,14 +1,14 @@
-# DuckOS x86_64 bootable Stage 1 image
+# Dak x86_64 bootable Stage 1 image
 
 **Status:** experimental native kernel foundation, not a complete operating system.  
 **Architecture:** x86_64, Limine protocol v12.11.1, BIOS and UEFI hybrid ISO.  
-**Kernel ownership:** DuckOS owns the freestanding entry point, memory-map adapter, Boot Info validation, early physical-frame allocator and framebuffer/serial output. Limine is a separately licensed third-party bootloader.
+**Kernel ownership:** Dak owns the freestanding entry point, memory-map adapter, Boot Info validation, early physical-frame allocator and framebuffer/serial output. Limine is a separately licensed third-party bootloader.
 
 ## What this image actually boots
 
-The image starts a native DuckOS ELF kernel through Limine. Early in the entry path, DuckOS disables maskable interrupts and installs an IDT for CPU exception vectors 0–31 using the active code selector. The entry point then validates protocol base revision 6, firmware identity, HHDM, executable physical/virtual base, framebuffer and memory map. It converts firmware memory regions to DuckOS Boot Info v1 and verifies that the kernel and framebuffer are covered by the expected reserved/MMIO ranges.
+The image starts a native Dak ELF kernel through Limine. Early in the entry path, Dak disables maskable interrupts and installs an IDT for CPU exception vectors 0–31 using the active code selector. The entry point then validates protocol base revision 6, firmware identity, HHDM, executable physical/virtual base, framebuffer and memory map. It converts firmware memory regions to Dak Boot Info v1 and verifies that the kernel and framebuffer are covered by the expected reserved/MMIO ranges.
 
-After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel emits the IDT-installed marker before processing firmware responses. It then reports available/allocated page counts and finally emits `DUCKOS_BOOT_OK stage=1`. CPU exceptions are logged to COM1 with their vector, error code, RIP and (for page faults) CR2; when a 32-bit RGB framebuffer is available, a fatal banner is drawn before the kernel halts.
+After that validation, the kernel initializes a native, freestanding, single-core bootstrap physical-frame allocator. It exposes only page-aligned 4 KiB frames from memory-map regions typed **USABLE**, excludes addresses below 1 MiB, allocates one frame and clears that frame through the Limine-provided HHDM mapping. Reserved, ACPI, MMIO and bad-memory ranges are never allocator inputs. The kernel emits the IDT-installed marker before processing firmware responses. It then reports available/allocated page counts and finally emits `DAK_BOOT_OK stage=1`. CPU exceptions are logged to COM1 with their vector, error code, RIP and (for page faults) CR2; when a 32-bit RGB framebuffer is available, a fatal banner is drawn before the kernel halts.
 
 This allocator is intentionally monotonic: it does not free pages, merge ranges, reclaim memory, construct page tables or provide a heap. It is a first native memory primitive, not a finished virtual-memory subsystem.
 
@@ -20,23 +20,23 @@ On Linux x86_64 install gcc, binutils, curl, tar, xorriso and sha256sum.
 
     boot/build-iso.sh
 
-The script downloads the pinned Limine binary release, checks its SHA-256 before use, compiles the freestanding DuckOS kernel, IDT gate builder, exception entry stubs and allocator, validates the ELF class/architecture/request section, creates a hybrid BIOS/UEFI ISO and writes a SHA-256 sidecar.
+The script downloads the pinned Limine binary release, checks its SHA-256 before use, compiles the freestanding Dak kernel, IDT gate builder, exception entry stubs and allocator, validates the ELF class/architecture/request section, creates a hybrid BIOS/UEFI ISO and writes a SHA-256 sidecar.
 
-    boot/build-iso.sh --work-dir build/duckos-boot --output build/DuckOS-Stage1-x86_64.iso
+    boot/build-iso.sh --work-dir build/dakos-boot --output build/Dak-Stage1-x86_64.iso
 
 CMake integration:
 
     cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-    cmake --build build --target duckos-boot-iso
+    cmake --build build --target dakos-boot-iso
     ctest --test-dir build --output-on-failure
 
 ## Verify in QEMU
 
 Install qemu-system-x86 and OVMF firmware, then run:
 
-    boot/test-qemu.sh --iso build/DuckOS-Stage1-x86_64.iso --ovmf-code /usr/share/OVMF/OVMF_CODE.fd --ovmf-vars /usr/share/OVMF/OVMF_VARS.fd
+    boot/test-qemu.sh --iso build/Dak-Stage1-x86_64.iso --ovmf-code /usr/share/OVMF/OVMF_CODE.fd --ovmf-vars /usr/share/OVMF/OVMF_VARS.fd
 
-The test boots through BIOS and UEFI and requires both the IDT-installed marker and `DUCKOS_BOOT_OK stage=1` in the serial log. This verifies that `lidt` was reached; it does not inject a fault to exercise every exception handler. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
+The test boots through BIOS and UEFI and requires both the IDT-installed marker and `DAK_BOOT_OK stage=1` in the serial log. This verifies that `lidt` was reached; it does not inject a fault to exercise every exception handler. The kernel halts after the marker by design; QEMU is stopped by the test timeout.
 
 GitHub Actions builds the same ISO, runs Boot Info, frame-allocator and IDT CTests, boots the image in BIOS and OVMF UEFI, and uploads the ISO, checksum and serial logs.
 
@@ -54,7 +54,7 @@ Upstream references: https://github.com/Limine-Bootloader/limine-protocol/blob/t
 
 ## Verified Stage 1 build
 
-GitHub Actions run [45527148367](https://github.com/Ivan-VHS/DuckOS/actions/runs/45527148367) passed the host contracts, freestanding ELF/ISO build and QEMU BIOS plus OVMF UEFI tests. Both serial logs contain exactly one `DUCKOS_BOOT_OK stage=1` marker. The ISO is 4,376,576 bytes; SHA-256: `7b5bb3c29c0eeeb13b6e0a4514c15fe7df941969353287dac8d225f741f054f7`.
+GitHub Actions run [45527148367](https://github.com/Ivan-VHS/Dak/actions/runs/45527148367) passed the host contracts, freestanding ELF/ISO build and QEMU BIOS plus OVMF UEFI tests. Both serial logs contain exactly one `DAK_BOOT_OK stage=1` marker. The ISO is 4,376,576 bytes; SHA-256: `7b5bb3c29c0eeeb13b6e0a4514c15fe7df941969353287dac8d225f741f054f7`.
 
 Observed emulator memory:
 - BIOS: 18 map regions, 65,061 allocatable 4 KiB pages, one page allocated and cleared at physical address `0x00100000`.
