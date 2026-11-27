@@ -5,6 +5,7 @@ import "duckos/kernel/atomic.rpr" as atomic
 import "duckos/kernel/syscall.rpr" as syscall
 import "duckos/kernel/handles.rpr" as handles
 import "duckos/kernel/threads.rpr" as threads
+import "duckos/kernel/processor.rpr" as processor
 import "duckos/kernel/synchronization.rpr" as synchronization
 import "duckos/kernel/arch/x86_64.rpr" as x86
 import "duckos/kernel/arch/aarch64.rpr" as aarch64
@@ -59,6 +60,23 @@ assert(threads["descriptor_valid"](thread, 2), "thread descriptor and CPU affini
 assert(not threads["descriptor_valid"](thread, 1), "thread cannot target an unavailable CPU")
 assert(threads["transition_valid"]("running", "blocked"), "running thread may block")
 assert(not threads["transition_valid"]("zombie", "running"), "zombie thread cannot restart")
+
+# Processor RAS contracts: discovery remains read-only and recovery is a proposal.
+make ras_provider := ["windows-whea", "windows", "windows-whea.v1", true, true, true, "user", true, ["event-query", "persisted-record-read"]]
+assert(processor["ras_provider_valid"](ras_provider), "read-only WHEA provider descriptor is valid")
+assert(not processor["ras_provider_valid"](["bad-provider", "windows", "v1", true, true, false, "user", true, ["event-query"]]), "provider with write authority is rejected")
+make corrected_ras_event := ["pytyliki.ras.event.v1", "event-1", "boot-1", "windows-whea", "package-0", "corrected", "low", "confirmed", 1000, "record-1"]
+assert(processor["ras_event_valid"](corrected_ras_event), "confirmed corrected hardware event is valid")
+assert(processor["ras_action_decision"](corrected_ras_event, 1, false, false) == "observe", "isolated corrected error is observed")
+assert(processor["ras_action_decision"](corrected_ras_event, 5, false, false) == "warn-and-collect", "repeated corrected errors create a warning")
+make fatal_ras_event := ["pytyliki.ras.event.v1", "event-2", "boot-1", "windows-whea", "package-0", "uncorrected_fatal", "fatal", "confirmed", 2000, "record-2"]
+assert(processor["ras_action_decision"](fatal_ras_event, 1, true, true) == "safe-stop-and-defer-to-kernel", "fatal error is never retried by user policy")
+make recoverable_ras_event := ["pytyliki.ras.event.v1", "event-3", "boot-1", "windows-whea", "page-17", "uncorrected_recoverable", "high", "confirmed", 3000, "record-3"]
+assert(processor["ras_action_decision"](recoverable_ras_event, 1, false, true) == "request-operator-and-os-review", "uncorrected event needs OS capability")
+assert(processor["ras_action_decision"](recoverable_ras_event, 1, true, true) == "request-os-recovery", "confirmed recoverable error may request supported OS action")
+make ras_plan := ["pytyliki.ras.recovery-plan.v1", "plan-1", "request-os-recovery", "page-17", 9000, true]
+assert(processor["ras_recovery_plan_admission"](ras_plan, recoverable_ras_event, ras_provider, true, true, true, true) == "admit-request-to-platform-adapter", "dry-run plan may reach an authorized platform adapter")
+assert(processor["ras_recovery_plan_admission"](ras_plan, recoverable_ras_event, ras_provider, true, false, true, true) == "defer-or-reject-preconditions", "missing capability blocks platform action")
 assert(threads["join_decision"]("zombie", 10, 11) == "collect-exit-status", "join collects terminated thread result")
 assert(threads["affinity_allows"]([0, 2], 2), "thread affinity admits selected CPU")
 make free_mutex := [0, 0, [], 4, false]
