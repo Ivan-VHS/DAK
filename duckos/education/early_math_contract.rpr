@@ -20,6 +20,9 @@ craft balanced(shares) {
 }
 
 craft distribution_valid(total, group_count) {
+    when total < 0 {
+        yield false
+    }
     when group_count < 1 {
         yield false
     }
@@ -28,6 +31,9 @@ craft distribution_valid(total, group_count) {
 }
 
 craft makes_number(left, right, target) {
+    when left < 0 or right < 0 or target < 0 {
+        yield false
+    }
     yield left + right == target
 }
 
@@ -55,8 +61,11 @@ assert(balanced(pile_sizes), "balanced groups differ by at most one object")
 make ten_for_three := distribute(10, 3)
 assert(ten_for_three == [4, 3, 3], "ten objects shared by three recipients preserves the total")
 assert(distribution_valid(12, 3), "twelve objects can be shared evenly by three recipients")
+assert(distribution_valid(-1, 3) == false, "negative object counts are rejected")
 
 make bonds_to_ten := [[1, 9], [2, 8], [3, 7], [4, 6], [5, 5]]
+assert(makes_number(-1, 1, 0) == false, "number parts cannot be negative")
+
 each bond in bonds_to_ten {
     assert(size(bond) == 2, "a number bond contains two parts")
     assert(makes_number(bond[0], bond[1], 10), "each displayed pair makes ten")
