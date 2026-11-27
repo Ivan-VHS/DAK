@@ -109,6 +109,13 @@ make wx_sector := [
 ]
 assert(not sectors["sector_valid"](wx_sector, app_id, 16384), "W+X sector permissions are forbidden")
 
+make invalid_alignment_sector := [
+    app_id, 4, "resource", 12288, 512, 3, "r",
+    "3333333333333333333333333333333333333333333333333333333333333333",
+    1, "verified-sealed"
+]
+assert(not sectors["sector_valid"](invalid_alignment_sector, app_id, 16384), "non-power-of-two alignment is rejected")
+
 make install_preflight := install["preflight"](
     model_v1, lease_v1, app_id, app_sector_table, 12288, neutral_history, fingerprint, 128
 )
