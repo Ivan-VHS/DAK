@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #define CHECK(expression) do { \
     if (!(expression)) { \
@@ -86,8 +87,47 @@ static int test_rejects_invalid_allocate_arguments(void) {
     return 1;
 }
 
+
+static int test_failed_reinitialization_preserves_existing_allocator(void) {
+    const duckos_memory_region valid[] = {
+        {0x00100000u, 0x00003000u, DUCKOS_MEMORY_USABLE, 0u}
+    };
+    const duckos_memory_region invalid_after_usable[] = {
+        {0x00200000u, 0x00004000u, DUCKOS_MEMORY_USABLE, 0u},
+        {0x00202000u, 0x00001000u, DUCKOS_MEMORY_USABLE, 0u}
+    };
+    const duckos_memory_region no_usable[] = {
+        {0x00100000u, 0x00004000u, DUCKOS_MEMORY_RESERVED, 0u}
+    };
+    duckos_frame_allocator allocator;
+    duckos_frame_allocator before;
+    uint64_t page = 0u;
+
+    CHECK(duckos_frame_allocator_init(&allocator, valid, 1u, 0u) ==
+        DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(duckos_frame_allocator_allocate(&allocator, &page) ==
+        DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(page == 0x00100000u);
+
+    before = allocator;
+    CHECK(duckos_frame_allocator_init(&allocator, invalid_after_usable, 2u, 0u) ==
+        DUCKOS_FRAME_ALLOCATOR_INVALID_MEMORY_MAP);
+    CHECK(memcmp(&allocator, &before, sizeof(allocator)) == 0);
+
+    CHECK(duckos_frame_allocator_allocate(&allocator, &page) ==
+        DUCKOS_FRAME_ALLOCATOR_OK);
+    CHECK(page == 0x00101000u);
+
+    before = allocator;
+    CHECK(duckos_frame_allocator_init(&allocator, no_usable, 1u, 0u) ==
+        DUCKOS_FRAME_ALLOCATOR_NO_USABLE_MEMORY);
+    CHECK(memcmp(&allocator, &before, sizeof(allocator)) == 0);
+    return 1;
+}
+
 int main(void) {
-    if (!test_allocates_only_usable_aligned_pages() ||
+    if (!test_failed_reinitialization_preserves_existing_allocator() ||
+        !test_allocates_only_usable_aligned_pages() ||
         !test_minimum_address_and_partial_pages() ||
         !test_rejects_bad_maps() ||
         !test_rejects_invalid_allocate_arguments()) {
