@@ -77,6 +77,10 @@ assert(core["sector_ipc_decision"](active_app[1], 2101, 2102, "send", []) == "de
 
 make rule := core["rule_create"](3001, 250, true, 2101, 24576, 64, 32768)
 assert(rule[0] == "OK" and core["rule_valid"](rule[1], 32768), "mandatory AtomicRule record and passport validate")
+assert(core["model_allows_rule"](active_model[1], 3001), "active model authorizes only its registered rule IDs")
+assert(not core["model_allows_rule"](active_model[1], 9999), "active model does not authorize unknown rule IDs")
+assert(core["rule_admit_in_model"](rule[1], 32768, active_model[1], true, true, true, true) == "allow-policy-only", "rule is admitted only through its verified model")
+assert(core["rule_admit_in_model"](rule[1], 32768, active_model[1], true, true, true, false) == "deny-invariant", "model membership cannot bypass mandatory checks")
 assert(not core["rule_valid"](["rule", rule[1][1], rule[1][2], rule[1][3], rule[1][4], rule[1][5], rule[1][6] + 64, rule[1][7], rule[1][8], rule[1][9]], 32768), "rule range cannot diverge from its passport")
 assert(core["rule_create"](0, 250, true, 2101, 24576, 64, 32768)[0] == "ERR", "zero rule identity is rejected")
 assert(core["rule_create"](3002, 256, false, 2101, 24576, 64, 32768)[0] == "ERR", "out-of-range rule priority is rejected")
