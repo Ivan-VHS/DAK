@@ -1,0 +1,43 @@
+{
+  "schema": "rfs-01.duckos.v1",
+  "contract": {
+    "id": "rfs-01.duckos.v1",
+    "version": "1.0",
+    "canonical_owner": "reaper",
+    "consumer": "duck",
+    "source": "duckos/runtime/rfs01.rpr",
+    "language": "Reaper",
+    "mode": "local-pure-policy-adapter"
+  },
+  "records": {
+    "node": ["id", "layer", "pressure", "load_limit", "integrity", "noise_db", "core_seed", "active"],
+    "link": ["id", "origin", "target", "channel", "blocked", "weight"],
+    "signal": ["sequence", "origin", "payload", "trusted", "manufactured"]
+  },
+  "limits": {
+    "nodes": 4096,
+    "links": 16384,
+    "signal_frames": 65536,
+    "signal_payload_bytes": 4096,
+    "cycles": 108
+  },
+  "semantics": {
+    "pressure_reserve": "integrity * (1 - min(pressure / load_limit, 1))",
+    "pressure_forward": "target_pressure + source_pressure * link_weight; reject rather than clamp when above target load_limit",
+    "signal_attenuation_db": -4.436974992327127,
+    "signal_acceptance": "trusted == true && manufactured == false",
+    "root_recovery": "replace complete current record with immutable boot snapshot",
+    "core_recovery": "replace only core_seed with the seed from the immutable boot snapshot"
+  },
+  "safety": [
+    "This adapter validates immutable input records and returns proposed records; it does not commit process or kernel state.",
+    "No hardware registers, drivers, firmware, clocks, voltage controls, scheduler knobs, files, network sockets, or external processes are accessed.",
+    "A future privileged system-service bridge must be separately designed, capability-gated, audited, and tested."
+  ],
+  "verification": {
+    "canonical_reaper_spec": "Ivan-VHS/Reaper:docs/RFS_01.md",
+    "canonical_reaper_runtime": "Ivan-VHS/Reaper:reaper/rfs01.py",
+    "duck_adapter": "duckos/runtime/rfs01.rpr",
+    "consumer_contract": "this document"
+  }
+}
