@@ -1,0 +1,74 @@
+# Bounded kernel telemetry and cooperative quota policy.
+# Trace entries are metadata records; concurrent publication requires a native
+# atomic protocol and is deliberately not implemented by this reference module.
+
+export craft saturating_add(value, delta, limit) {
+    when value < 0 or delta < 0 or limit < 0 or value > limit {
+        yield ["ERR", "invalid counter range"]
+    }
+    when delta > limit - value { yield ["OK", limit, true] }
+    yield ["OK", value + delta, false]
+}
+
+export craft pressure_action(score, hard_fault) {
+    when score < 0 { yield "invalid" }
+    when hard_fault or score >= 320 { yield "safe-stop-required" }
+    when score >= 240 { yield "degraded-shed-noncritical" }
+    when score >= 120 { yield "throttle-diagnostics" }
+    when score >= 60 { yield "observe-and-record" }
+    yield "nominal"
+}
+
+export craft quota_valid(quota) {
+    when size(quota) != 3 { yield false }
+    when quota[0] <= 0 or quota[1] < 0 or quota[1] > quota[0] or quota[2] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft quota_poll(quota) {
+    when not quota_valid(quota) { yield ["invalid", quota] }
+    when quota[2] > 0 {
+        yield ["breathe", [quota[0], quota[1], quota[2] - 1]]
+    }
+    when quota[1] == quota[0] {
+        yield ["yield", [quota[0], 0, 2]]
+    }
+    yield ["run", [quota[0], quota[1] + 1, 0]]
+}
+
+export craft trace_valid(trace, capacity) {
+    when capacity <= 0 or size(trace) > capacity { yield false }
+    vary index := 0
+    loop while index < size(trace) {
+        when size(trace[index]) != 4 { yield false }
+        when trace[index][0] < 0 or size(trace[index][1]) == 0 { yield false }
+        vary previous := 0
+        loop while previous < index {
+            when trace[previous][0] == trace[index][0] { yield false }
+            change previous := previous + 1
+        }
+        change index := index + 1
+    }
+    yield true
+}
+
+export craft trace_append(trace, capacity, dropped, entry) {
+    when not trace_valid(trace, capacity) or dropped < 0 or size(entry) != 4 {
+        yield ["ERR", trace, dropped]
+    }
+    when size(trace) < capacity {
+        yield ["OK", push(trace, entry), dropped]
+    }
+    vary retained := []
+    vary index := 1
+    loop while index < size(trace) {
+        change retained := push(retained, trace[index])
+        change index := index + 1
+    }
+    when dropped == 9223372036854775807 {
+        yield ["ERR", trace, dropped]
+    }
+    yield ["OK", push(retained, entry), dropped + 1]
+}
