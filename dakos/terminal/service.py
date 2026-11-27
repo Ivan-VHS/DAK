@@ -1,4 +1,4 @@
-"""Interactive, non-shell terminal for trusted DuckOS commands."""
+"""Interactive, non-shell terminal for trusted Dak commands."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -26,8 +26,8 @@ from ..hardware_inventory import collect_host_inventory
 from ..module_abi import resolve_load_order
 
 
-CONFIG_SCHEMA = "duckos.terminal-config.v1"
-RESULT_SCHEMA = "duckos.terminal-result.v1"
+CONFIG_SCHEMA = "dakos.terminal-config.v1"
+RESULT_SCHEMA = "dakos.terminal-result.v1"
 MAX_COMMAND_LENGTH = 4096
 MAX_ARGUMENTS = 64
 MAX_CONFIG_BYTES = 64 * 1024
@@ -101,7 +101,7 @@ def _validate_json_depth(raw: str, source_name: str) -> None:
 
 @dataclass(frozen=True)
 class CommandSpec:
-    """One trusted command exposed through the DuckOS terminal registry."""
+    """One trusted command exposed through the Dak terminal registry."""
 
     path: tuple[str, ...]
     summary: str
@@ -186,7 +186,7 @@ class TerminalService:
         extra_commands: Iterable[CommandSpec] = (),
     ) -> None:
         self.state_dir = Path(state_dir) if state_dir is not None else (
-            Path.home() / ".config" / "duckos" / "terminal"
+            Path.home() / ".config" / "dakos" / "terminal"
         )
         self.config_path = self.state_dir / "config.json"
         self.history_path = self.state_dir / "history.json"
@@ -210,7 +210,7 @@ class TerminalService:
         return str(self.config["prompt"])
 
     def register_command(self, command: CommandSpec) -> None:
-        """Register a command from a trusted in-process DuckOS extension."""
+        """Register a command from a trusted in-process Dak extension."""
         self.registry.register(command)
         self._reserved_aliases.add(command.path[0])
 
@@ -305,7 +305,7 @@ class TerminalService:
     def _load_config(self) -> dict[str, Any]:
         default = {
             "schema": CONFIG_SCHEMA,
-            "prompt": "duckos",
+            "prompt": "dakos",
             "history_limit": 500,
             "aliases": {},
         }
@@ -451,7 +451,7 @@ class TerminalService:
     def _register_builtin_commands(self) -> None:
         register = self.registry.register
         register(CommandSpec(("help",), "List commands or explain one command.", "help [command]", self._help))
-        register(CommandSpec(("version",), "Show the installed DuckOS tools version.", "version", self._version))
+        register(CommandSpec(("version",), "Show the installed Dak tools version.", "version", self._version))
         register(CommandSpec(("status",), "Show the terminal runtime and execution policy.", "status", self._status))
         register(CommandSpec(("hardware", "inventory"), "Collect a read-only host device inventory.", "hardware inventory [SYSFS_ROOT]", self._hardware_inventory))
         register(CommandSpec(("desktop", "audit"), "Audit the current user's desktop without changing files.", "desktop audit [ITEM_LIMIT]", self._desktop_audit))
@@ -494,15 +494,15 @@ class TerminalService:
     def _version(self, arguments: list[str]) -> Any:
         self._require_no_arguments("version", arguments)
         try:
-            installed = package_version("duckos-build-tools")
+            installed = package_version("dakos-build-tools")
         except PackageNotFoundError:
             installed = "source-checkout"
-        return {"project": "DuckOS", "tools_package": "duckos-build-tools", "version": installed}
+        return {"project": "Dak", "tools_package": "dakos-build-tools", "version": installed}
 
     def _status(self, arguments: list[str]) -> Any:
         self._require_no_arguments("status", arguments)
         return {
-            "schema": "duckos.terminal-status.v1",
+            "schema": "dakos.terminal-status.v1",
             "runtime_state": "ready",
             "maturity_status": "partial",
             "command_count": len(self.registry.commands()),
@@ -547,7 +547,7 @@ class TerminalService:
     def _startup_list(self, arguments: list[str]) -> Any:
         self._require_no_arguments("desktop startup list", arguments)
         return {
-            "schema": "duckos.startup-list.v1",
+            "schema": "dakos.startup-list.v1",
             "scope": "current_user",
             "entries": DesktopService().startup.list_entries(),
             "machine_wide_entries_included": False,
@@ -593,7 +593,7 @@ class TerminalService:
         if not isinstance(items, list):
             raise TerminalInputError("module input must be a list or an object with a modules list")
         return {
-            "schema": "duckos.module-order.v1",
+            "schema": "dakos.module-order.v1",
             "load_order": resolve_load_order(items),
             "modules_loaded": False,
         }
@@ -601,7 +601,7 @@ class TerminalService:
     def _doctor(self, arguments: list[str]) -> Any:
         self._require_no_arguments("doctor", arguments)
         return {
-            "schema": "duckos.terminal-doctor.v1",
+            "schema": "dakos.terminal-doctor.v1",
             "python": platform.python_version(),
             "platform": platform.system().lower(),
             "state_directory": "available" if self.state_dir.exists() else "not_created",
@@ -615,7 +615,7 @@ class TerminalService:
         arguments = tokens[1:]
         if command in {"exit", "quit"}:
             self._require_no_arguments(command, arguments)
-            return {"exit": True, "message": "DuckOS Extended Terminal closed."}
+            return {"exit": True, "message": "Dak Extended Terminal closed."}
         if command == "doctor":
             return self._doctor(arguments)
         if command == "history":
@@ -646,7 +646,7 @@ class TerminalService:
             try:
                 expanded = self._expand_alias([name])
                 if self.registry.resolve(expanded) is None:
-                    raise TerminalInputError("alias target must resolve to a registered DuckOS command")
+                    raise TerminalInputError("alias target must resolve to a registered Dak command")
             except Exception:
                 if previous is None:
                     self.config["aliases"].pop(name, None)
@@ -741,7 +741,7 @@ def run_interactive(service: TerminalService | None = None) -> int:
         readline.parse_and_bind("tab: complete")
     except (ImportError, AttributeError):
         pass
-    print("DuckOS Extended Terminal — trusted commands only. Run help for commands.")
+    print("Dak Extended Terminal — trusted commands only. Run help for commands.")
     while True:
         try:
             line = input(terminal.prompt + "> ")
