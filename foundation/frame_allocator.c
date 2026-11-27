@@ -25,19 +25,11 @@ duckos_frame_allocator_status duckos_frame_allocator_init(
     uint64_t min_address
 ) {
     uint64_t previous_end = 0u;
+    duckos_frame_allocator next = {0};
 
     if (allocator == NULL || regions == NULL || region_count == 0u ||
         region_count > DUCKOS_BOOT_MAX_MEMORY_REGIONS) {
         return DUCKOS_FRAME_ALLOCATOR_INVALID_ARGUMENT;
-    }
-
-    allocator->range_count = 0u;
-    allocator->active_range = 0u;
-    allocator->total_pages = 0u;
-    allocator->allocated_pages = 0u;
-    for (uint32_t index = 0u; index < DUCKOS_FRAME_ALLOCATOR_MAX_RANGES; ++index) {
-        allocator->ranges[index].next = 0u;
-        allocator->ranges[index].end = 0u;
     }
 
     for (uint32_t index = 0u; index < region_count; ++index) {
@@ -62,19 +54,23 @@ duckos_frame_allocator_status duckos_frame_allocator_init(
         if (begin >= aligned_end) continue;
 
         const uint64_t pages = (aligned_end - begin) / DUCKOS_FRAME_PAGE_SIZE;
-        if (allocator->total_pages > UINT64_MAX - pages ||
-            allocator->range_count >= DUCKOS_FRAME_ALLOCATOR_MAX_RANGES) {
+        if (next.total_pages > UINT64_MAX - pages ||
+            next.range_count >= DUCKOS_FRAME_ALLOCATOR_MAX_RANGES) {
             return DUCKOS_FRAME_ALLOCATOR_INVALID_MEMORY_MAP;
         }
 
-        duckos_frame_range *range = &allocator->ranges[allocator->range_count++];
+        duckos_frame_range *range = &next.ranges[next.range_count++];
         range->next = begin;
         range->end = aligned_end;
-        allocator->total_pages += pages;
+        next.total_pages += pages;
     }
 
-    return allocator->total_pages != 0u ?
-        DUCKOS_FRAME_ALLOCATOR_OK : DUCKOS_FRAME_ALLOCATOR_NO_USABLE_MEMORY;
+    if (next.total_pages == 0u) {
+        return DUCKOS_FRAME_ALLOCATOR_NO_USABLE_MEMORY;
+    }
+
+    *allocator = next;
+    return DUCKOS_FRAME_ALLOCATOR_OK;
 }
 
 duckos_frame_allocator_status duckos_frame_allocator_allocate(
