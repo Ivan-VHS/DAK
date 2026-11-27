@@ -10,9 +10,31 @@
     "mode": "local-pure-policy-adapter"
   },
   "records": {
-    "node": ["id", "layer", "pressure", "load_limit", "integrity", "noise_db", "core_seed", "active"],
-    "link": ["id", "origin", "target", "channel", "blocked", "weight"],
-    "signal": ["sequence", "origin", "payload", "trusted", "manufactured"]
+    "node": [
+      "id",
+      "layer",
+      "pressure",
+      "load_limit",
+      "integrity",
+      "noise_db",
+      "core_seed",
+      "active"
+    ],
+    "link": [
+      "id",
+      "origin",
+      "target",
+      "channel",
+      "blocked",
+      "weight"
+    ],
+    "signal": [
+      "sequence",
+      "origin",
+      "payload",
+      "trusted",
+      "manufactured"
+    ]
   },
   "limits": {
     "nodes": 4096,
@@ -27,7 +49,8 @@
     "signal_attenuation_db": -4.436974992327127,
     "signal_acceptance": "trusted == true && manufactured == false",
     "root_recovery": "replace complete current record with immutable boot snapshot",
-    "core_recovery": "replace only core_seed with the seed from the immutable boot snapshot"
+    "core_recovery": "replace only core_seed with the seed from the immutable boot snapshot",
+    "signal_sequence": "uint64, strictly increasing for each origin; the adapter exposes a pairwise predicate and does not retain sequence history"
   },
   "safety": [
     "This adapter validates immutable input records and returns proposed records; it does not commit process or kernel state.",
@@ -39,5 +62,22 @@
     "canonical_reaper_runtime": "Ivan-VHS/Reaper:reaper/rfs01.py",
     "duck_adapter": "duckos/runtime/rfs01.rpr",
     "consumer_contract": "this document"
+  },
+  "text_bounds": {
+    "unit": "Unicode code points, checked by the Reaper size() primitive",
+    "rationale": "Conservative worst-case UTF-8 bound of four bytes per code point; consumers retain the exact byte ceilings in the canonical ABI",
+    "identifier_characters": 15,
+    "core_seed_characters": 31,
+    "signal_payload_characters": 1024,
+    "equivalent_max_utf8_bytes": {
+      "identifier": 60,
+      "core_seed": 124,
+      "signal_payload": 4096
+    },
+    "pytyliki_exact_utf8_byte_limits": {
+      "identifier": 63,
+      "core_seed": 127,
+      "signal_payload": 4096
+    }
   }
 }
