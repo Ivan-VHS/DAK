@@ -100,7 +100,7 @@ The authoritative DAK shell catalogue is `mora/apps.json`. Catalogue panels are 
 | sestem | Sestem | partial local workspace |
 | setupup | SetupUP | partial local workspace |
 | orriganize | ORGze | partial local workspace; preserve the display name ORGze |
-| abrig anza | Abriganza | partial local workspace |
+| abriganza | Abriganza | partial local workspace |
 | olaab | Olaab | partial local workspace |
 | concrete-thump | Concrete Thump | partial local workspace |
 | seu-beu | Seu-Beu | partial local workspace |
