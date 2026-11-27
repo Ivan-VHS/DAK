@@ -1,10 +1,10 @@
-# DuckOS x86_64 CPU exception handling
+# Dak x86_64 CPU exception handling
 
 **Status:** experimental kernel foundation. The CPU exception IDT is installed during Stage 1 boot; this is not yet a complete interrupt subsystem.
 
 ## Scope
 
-DuckOS installs a 256-entry x86_64 Interrupt Descriptor Table. The first 32 entries are populated with CPU exception handlers. Other entries remain absent until the kernel owns interrupt-controller setup and routing.
+Dak installs a 256-entry x86_64 Interrupt Descriptor Table. The first 32 entries are populated with CPU exception handlers. Other entries remain absent until the kernel owns interrupt-controller setup and routing.
 
 Each populated entry is a present ring-0 interrupt gate (`0x8E`) whose code selector is read from the currently active `CS`. This deliberately avoids assuming that the bootloader's GDT uses a particular selector value. The gate builder is a privileged-instruction-free C11 contract and is tested on the host.
 
@@ -18,7 +18,7 @@ The current error-code vectors are:
 
 `8, 10, 11, 12, 13, 14, 17, 21, 29, 30`.
 
-The common stub saves general-purpose registers in the order declared by `duckos_x86_exception_frame`, clears the direction flag, aligns the temporary call stack for the x86_64 System V ABI, and calls the non-returning kernel diagnostic handler.
+The common stub saves general-purpose registers in the order declared by `dakos_x86_exception_frame`, clears the direction flag, aligns the temporary call stack for the x86_64 System V ABI, and calls the non-returning kernel diagnostic handler.
 
 The frame layout is covered by host tests. Its fixed offsets are:
 
@@ -59,7 +59,7 @@ That marker proves the kernel reached the code after `lidt`; the current test do
 
 ## Deliberate limitations
 
-- The bootloader-provided GDT remains active. DuckOS does not yet install its own GDT.
+- The bootloader-provided GDT remains active. Dak does not yet install its own GDT.
 - No TSS or Interrupt Stack Table (IST) is configured. The double-fault handler therefore still depends on the current kernel stack and is not a guaranteed recovery path for a corrupted stack.
 - PIC/APIC initialization, IRQ remapping, timer interrupts, keyboard IRQs and external interrupt dispatch are not enabled.
 - Maskable interrupts stay disabled. No `sti`, preemption, context switching or user-mode entry is performed.
