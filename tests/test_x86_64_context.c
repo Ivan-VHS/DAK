@@ -38,7 +38,8 @@ int main(void) {
     duckos_x86_64_context_frame *frame = (duckos_x86_64_context_frame *)saved;
     assert(frame->rdi == (uintptr_t)&task_argument);
     assert(frame->rip == (uintptr_t)task_entry);
-    assert(((uintptr_t)frame & 0x0fU) == 8U);
+    assert((frame->rflags & (uintptr_t)(1U << 9)) != 0U);
+    assert(((uintptr_t)frame & 0x0fU) == 0U);
     assert(*(uintptr_t *)(saved + sizeof(*frame)) == (uintptr_t)task_exit);
 
     task_argument = 7U;
