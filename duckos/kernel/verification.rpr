@@ -1,0 +1,98 @@
+# Immutable verification-model lifecycle for DuckOS installation.
+# A model is a value snapshot: installation keeps its revision, digest and epoch fixed.
+
+export craft descriptor_valid(model) {
+    when size(model) != 6 {
+        yield false
+    }
+    when model[0] == "" or model[3] == "" or model[1] <= 0 or model[2] <= 0 or model[5] < 0 {
+        yield false
+    }
+    yield model[4] == "draft" or model[4] == "frozen" or model[4] == "installing" or model[4] == "installed"
+}
+
+export craft snapshot(model) {
+    when not descriptor_valid(model) {
+        yield []
+    }
+    yield [model[0], model[1], model[2], model[3], model[5]]
+}
+
+export craft snapshot_matches(model, candidate) {
+    when not descriptor_valid(model) or size(candidate) != 5 {
+        yield false
+    }
+    yield candidate[0] == model[0] and
+        candidate[1] == model[1] and
+        candidate[2] == model[2] and
+        candidate[3] == model[3] and
+        candidate[4] == model[5]
+}
+
+export craft freeze(model) {
+    when not descriptor_valid(model) or model[4] != "draft" {
+        yield ["deny-not-draft", model]
+    }
+    yield ["frozen", [model[0], model[1], model[2], model[3], "frozen", model[5]]]
+}
+
+export craft begin_install(model, expected_epoch) {
+    when not descriptor_valid(model) {
+        yield ["deny-invalid-model", model]
+    }
+    when model[4] != "frozen" {
+        yield ["deny-not-frozen", model]
+    }
+    when model[5] != expected_epoch {
+        yield ["deny-stale-epoch", model]
+    }
+    yield ["installing", [model[0], model[1], model[2], model[3], "installing", model[5]]]
+}
+
+export craft mutation_decision(model) {
+    when not descriptor_valid(model) {
+        yield "deny-invalid-model"
+    }
+    when model[4] == "frozen" or model[4] == "installing" {
+        yield "deny-install-locked"
+    }
+    when model[4] == "installed" {
+        yield "deny-installed-snapshot-create-revision"
+    }
+    yield "allow-draft-update"
+}
+
+export craft install_commit(model, candidate) {
+    when not descriptor_valid(model) or model[4] != "installing" {
+        yield ["deny-not-installing", model]
+    }
+    when not snapshot_matches(model, candidate) {
+        yield ["deny-snapshot-drift", model]
+    }
+    yield ["installed", [model[0], model[1], model[2], model[3], "installed", model[5]]]
+}
+
+# A new revision is a new value, not an in-place edit of the installed snapshot.
+export craft fork_revision(model, next_revision, next_digest, next_epoch) {
+    when not descriptor_valid(model) or model[4] != "installed" {
+        yield ["deny-revision-source-not-installed", model]
+    }
+    when next_revision <= model[2] or next_digest == "" or next_epoch <= model[5] {
+        yield ["deny-non-monotonic-revision", model]
+    }
+    yield ["new-draft", [model[0], model[1], next_revision, next_digest, "draft", next_epoch]]
+}
+
+# Unlock only after an external native rollback has been verified.
+export craft abort_install(model, candidate, next_epoch, rollback_verified) {
+    when not descriptor_valid(model) or model[4] != "installing" {
+        yield ["deny-not-installing", model]
+    }
+    when not snapshot_matches(model, candidate) {
+        yield ["deny-snapshot-drift", model]
+    }
+    when not rollback_verified or next_epoch <= model[5] {
+        yield ["deny-unverified-rollback", model]
+    }
+    yield ["aborted-to-draft", [model[0], model[1], model[2], model[3], "draft", next_epoch]]
+}
