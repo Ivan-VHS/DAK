@@ -13,7 +13,7 @@ jobs:
   contracts:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out DuckOS and pinned specialist projects
+      - name: Check out DAK and pinned specialist projects
         uses: actions/checkout@v4
         with:
           path: DAK
