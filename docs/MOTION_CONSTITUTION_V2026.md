@@ -6,7 +6,7 @@
 **Canonical upstream:** [Pytyliki / Motion Constitution v2026](https://github.com/Ivan-VHS/Pytyliki/blob/main/docs/MOTION_CONSTITUTION_V2026.md)  
 **Status:** normative design contract. Product runtime contracts define what is actually shipped.
 
-This DuckOS document is the canonical shared motion contract. Each product keeps its native toolkit mapping in docs/UI_MOTION.md; local adapters may add constraints but must not weaken the accessibility or safety invariants below.
+This Dak document is the canonical shared motion contract. Each product keeps its native toolkit mapping in docs/UI_MOTION.md; local adapters may add constraints but must not weaken the accessibility or safety invariants below.
 
 ## 1. Five invariants
 

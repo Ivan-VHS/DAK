@@ -4,12 +4,12 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "$BASH_SOURCE")/.." && pwd)"
 source "$ROOT/boot/limine-toolchain.lock"
 
-WORK_DIR="/tmp/duckos-boot-build"
+WORK_DIR="/tmp/dakos-boot-build"
 TMP_ROOT="$(printenv TMPDIR || true)"
-if [[ -n "$TMP_ROOT" ]]; then WORK_DIR="$TMP_ROOT/duckos-boot-build"; fi
-OUTPUT="$ROOT/dist/DuckOS-Stage1-x86_64.iso"
+if [[ -n "$TMP_ROOT" ]]; then WORK_DIR="$TMP_ROOT/dakos-boot-build"; fi
+OUTPUT="$ROOT/dist/Dak-Stage1-x86_64.iso"
 PAYLOAD_DIR=""
-VOLUME_ID="DUCKOS_STAGE1"
+VOLUME_ID="DAK_STAGE1"
 
 while (($#)); do
     case "$1" in
@@ -45,7 +45,7 @@ for tool in gcc ld readelf curl tar sha256sum xorriso find make; do require_tool
 target="$(gcc -dumpmachine)"
 case "$target" in
     x86_64-*|amd64-*) ;;
-    *) echo "DuckOS stage-1 targets x86_64; compiler target is: $target" >&2; exit 1 ;;
+    *) echo "Dak stage-1 targets x86_64; compiler target is: $target" >&2; exit 1 ;;
 esac
 
 [[ "$VOLUME_ID" =~ ^[A-Z0-9_]{1,32}$ ]] || { echo "volume id must use 1-32 uppercase letters, digits or underscores" >&2; exit 2; }
@@ -108,7 +108,7 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
     -mgeneral-regs-only \
     -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" -I "$ROOT/third_party/limine-protocol" \
-    -c "$ROOT/kernel/boot/entry.c" -o "$WORK_DIR/objects/duckos-entry.o"
+    -c "$ROOT/kernel/boot/entry.c" -o "$WORK_DIR/objects/dakos-entry.o"
 
 gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
@@ -166,7 +166,7 @@ gcc -m64 -mcmodel=kernel -mno-red-zone -fno-pic -fno-pie \
 
 ld -nostdlib -static -z max-page-size=0x1000 \
     -T "$ROOT/kernel/linker.ld" \
-    "$WORK_DIR/objects/duckos-entry.o" \
+    "$WORK_DIR/objects/dakos-entry.o" \
     "$WORK_DIR/objects/boot-info.o" \
     "$WORK_DIR/objects/frame-allocator.o" \
     "$WORK_DIR/objects/idt.o" \
@@ -175,17 +175,17 @@ ld -nostdlib -static -z max-page-size=0x1000 \
     "$WORK_DIR/objects/segments.o" \
     "$WORK_DIR/objects/interrupts.o" \
     "$WORK_DIR/objects/exceptions.o" \
-    -o "$WORK_DIR/duckos.elf"
+    -o "$WORK_DIR/dakos.elf"
 
-readelf -h "$WORK_DIR/duckos.elf" | grep -q 'Class:.*ELF64'
-readelf -h "$WORK_DIR/duckos.elf" | grep -q 'Machine:.*Advanced Micro Devices X86-64'
-readelf -S "$WORK_DIR/duckos.elf" | grep -q '\.limine_requests'
-readelf -l "$WORK_DIR/duckos.elf" | grep -q 'LOAD'
+readelf -h "$WORK_DIR/dakos.elf" | grep -q 'Class:.*ELF64'
+readelf -h "$WORK_DIR/dakos.elf" | grep -q 'Machine:.*Advanced Micro Devices X86-64'
+readelf -S "$WORK_DIR/dakos.elf" | grep -q '\.limine_requests'
+readelf -l "$WORK_DIR/dakos.elf" | grep -q 'LOAD'
 
 iso_root="$WORK_DIR/iso-root"
 rm -rf "$iso_root"
 mkdir -p "$iso_root/boot" "$iso_root/EFI/BOOT" "$iso_root/third_party"
-cp "$WORK_DIR/duckos.elf" "$iso_root/boot/duckos.elf"
+cp "$WORK_DIR/dakos.elf" "$iso_root/boot/dakos.elf"
 cp "$ROOT/boot/limine.conf" "$iso_root/limine.conf"
 cp "$LIMINE_BIOS_SYS" "$iso_root/boot/limine-bios.sys"
 cp "$LIMINE_BIOS_CD" "$iso_root/boot/limine-bios-cd.bin"
@@ -194,8 +194,8 @@ cp "$LIMINE_EFI" "$iso_root/EFI/BOOT/BOOTX64.EFI"
 curl --fail --location --retry 3 --output "$iso_root/third_party/Limine-COPYING.txt" "$LIMINE_COPYING_URL"
 
 if [[ -n "$PAYLOAD_DIR" ]]; then
-    mkdir -p "$iso_root/duckos"
-    cp -a "$PAYLOAD_DIR"/. "$iso_root/duckos/"
+    mkdir -p "$iso_root/dakos"
+    cp -a "$PAYLOAD_DIR"/. "$iso_root/dakos/"
 fi
 
 rm -f "$OUTPUT"
@@ -209,6 +209,6 @@ xorriso -as mkisofs \
 
 "$LIMINE_BIN" bios-install "$OUTPUT"
 (cd "$OUTPUT_DIR" && sha256sum "$(basename -- "$OUTPUT")" > "$(basename -- "$OUTPUT").sha256")
-echo "DuckOS ISO ready ($VOLUME_ID): $OUTPUT"
-echo "Kernel ELF: $WORK_DIR/duckos.elf"
+echo "Dak ISO ready ($VOLUME_ID): $OUTPUT"
+echo "Kernel ELF: $WORK_DIR/dakos.elf"
 cat "$OUTPUT.sha256"

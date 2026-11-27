@@ -1,9 +1,9 @@
-# DuckOS interaction and application ergonomics standard
+# Dak interaction and application ergonomics standard
 
-**Document ID:** DUCKOS-UX-STD-001  
+**Document ID:** DAK-UX-STD-001  
 **Version:** 1.0  
 **Status:** Normative design and acceptance standard  
-**Scope:** Mora, native DuckOS applications, native desktop services, system dialogs and developer workbenches  
+**Scope:** Mora, native Dak applications, native desktop services, system dialogs and developer workbenches  
 **Source basis:** OS(2).txt, parts I–X of the application ergonomics standard and the desktop UX/HCI standard  
 **Related contracts:** [Mora Design System](../MORA_DESIGN_SYSTEM.md), [native implementation roadmap](IMPLEMENTATION_ROADMAP.md), [unified documentation standard](UNIFIED_DOCUMENTATION_STANDARD.md)
 
@@ -11,15 +11,15 @@ This standard turns the supplied ergonomics material into requirements that can 
 
 ## 1. Product and implementation boundaries
 
-DuckOS has distinct interaction surfaces. Apply the same human-centered principles to all of them, but verify each at its actual runtime boundary.
+Dak has distinct interaction surfaces. Apply the same human-centered principles to all of them, but verify each at its actual runtime boundary.
 
 | Surface | Owns | Must not claim |
 |---|---|---|
 | Mora browser shell | Application discovery, browser-local panels, presentation preferences and approved local workflows | Kernel isolation, native window management, host-device control or privileged actions |
-| Native Duck Desktop | Host-side workbench, native app launch handoff and user-space maintenance workflows | Kernel scheduling, global input security or compositor behavior unless those services are implemented |
+| Native Dak Desktop | Host-side workbench, native app launch handoff and user-space maintenance workflows | Kernel scheduling, global input security or compositor behavior unless those services are implemented |
 | Native desktop services | Window lifecycle, compositor, input routing, display topology, accessibility bridge and system dialogs | Hardware acceleration, multi-seat or multi-monitor guarantees without target evidence |
 | Native applications | Task-specific workflows, data presentation, local persistence and user-facing errors | Unbounded permissions or hidden work outside the declared capabilities |
-| Reaper | Primary language and contract layer for new DuckOS-owned system code and policy models | Native enforcement merely because a Reaper reference contract passes |
+| Reaper | Primary language and contract layer for new Dak-owned system code and policy models | Native enforcement merely because a Reaper reference contract passes |
 
 A feature's maturity is reported per capability, not per product name. Use the canonical states from the unified documentation standard. A browser preference is not an operating-system setting; a reference policy is not kernel enforcement.
 
@@ -106,9 +106,9 @@ Provide three predictable density profiles where the product type benefits from 
 
 Density MUST NOT shrink text below the product's tested readability floor, remove keyboard focus, hide status text or reduce important hit targets. Changing density MUST NOT destroy user layout preferences; store a profile plus explicit overrides.
 
-### 5.3 Duck visual identity
+### 5.3 Dak visual identity
 
-- The shared DuckOS/Mora shell identity remains black, white and duck-yellow, using the canonical tokens in MORA_DESIGN_SYSTEM.md and mora/theme.json.
+- The shared Dak/Mora shell identity remains black, white and dak-yellow, using the canonical tokens in MORA_DESIGN_SYSTEM.md and mora/theme.json.
 - Status colors are semantic and restrained. Green, red and blue may indicate status classes, but color alone MUST never carry meaning.
 - App-specific identity is scoped to the application; it MUST NOT fork the system shell palette or interaction rules.
 - Typography, spacing, surfaces, border, elevation and motion MUST use semantic tokens rather than scattered literal values.
@@ -156,7 +156,7 @@ Every reusable control and every major screen MUST define the states that apply 
 - Prefer event-driven updates and incremental rendering over continuous polling and full-screen redraws.
 - Use determinate progress when the amount of work is knowable. Use an inline activity state for short indeterminate work; do not show an indefinite spinner as a substitute for operation state.
 - Record frame-time distributions and input-to-visual-feedback latency on declared target hardware. A 60 Hz display has a 16.7 ms frame interval; higher refresh rates have proportionally tighter frame budgets. Do not claim a frame-rate target without measurements.
-- The first DuckOS target profile MUST publish P50/P95/P99 interaction and frame-time measurements rather than a universal performance promise.
+- The first Dak target profile MUST publish P50/P95/P99 interaction and frame-time measurements rather than a universal performance promise.
 
 ### 7.2 Undo, drafts and failure recovery
 
@@ -217,12 +217,12 @@ Track time-to-completion, successful completion on first attempt, error/retry ra
 | Workstream | Required work | Dependency / acceptance |
 |---|---|---|
 | Mora and app panels | Apply shared tokens, states, keyboard paths, responsive layouts, preserved drafts and error recovery | Browser contract tests; no claim of native accessibility enforcement |
-| Native Duck Desktop | Focus model, keyboard command routing, panel resizing, workspace persistence and display-safe geometry | Host UI tests and multi-display tests |
+| Native Dak Desktop | Focus model, keyboard command routing, panel resizing, workspace persistence and display-safe geometry | Host UI tests and multi-display tests |
 | Native compositor | Isolated surfaces, damage tracking, frame scheduling, output management and safe display-loss recovery | Native rendering and compositor integration tests |
 | Input service | Device event normalization, focus routing, hotplug, pointer/touch/stylus and secure input boundaries | Device fixtures and native hardware tests |
 | Accessibility service | Semantic tree, screen-reader bridge, focus announcements and platform settings | Per-platform assistive-technology verification |
 | Kernel and services | Scheduling priority classes, IPC backpressure, capability checks and resource quotas that protect interactive work | Kernel/service tests; UI responsiveness cannot be inferred from policy-only models |
-| Reaper | Typed interaction contracts, diagnostics and deterministic policy modules for native DuckOS services | Reaper compiler/runtime tests and native ABI conformance |
+| Reaper | Typed interaction contracts, diagnostics and deterministic policy modules for native Dak services | Reaper compiler/runtime tests and native ABI conformance |
 | BAV | Clear alerts, explainable actions, reviewable quarantine and reversible restore | BAV-specific UX and security gates in BAV_SECURITY_BUNDLE_V1.md |
 
 ## 12. Source traceability
@@ -232,7 +232,7 @@ This standard consolidates, without silently replacing, the supplied source's ma
 - Application ergonomics parts I–X: physical/sensorimotor interaction, cognition, navigation, states/errors, accessibility, context/ethics, measurement, response latency, scanning, memory, mobile/desktop/web/data workflows and screen checklist.
 - Desktop UX/HCI standard: Fitts's law, keyboard-first operation, command palette, scrolling/zoom, large displays, docking/workspaces, window restoration, modal restraint, density, typography, color, Undo/Redo, responsiveness and OS integration.
 - Correct operating-system rules: fault containment, deterministic behavior, observability, minimal trusted base, isolation, memory protection, resource limits, network hygiene, integrity, recovery and user sovereignty.
-- Reaper sections: contract discipline, deterministic stream processing, bounded buffers, backpressure, diagnostics and verified self-host evolution. The Python and C examples in the source are references to review, not production-ready DuckOS implementations.
+- Reaper sections: contract discipline, deterministic stream processing, bounded buffers, backpressure, diagnostics and verified self-host evolution. The Python and C examples in the source are references to review, not production-ready Dak implementations.
 
 ## 13. Change control
 

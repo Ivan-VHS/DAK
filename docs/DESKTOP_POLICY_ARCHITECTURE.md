@@ -1,32 +1,32 @@
-# DuckOS Reaper-first desktop policy architecture
+# Dak Reaper-first desktop policy architecture
 
 **Status:** policy core implementation; native desktop execution remains a separate, incomplete milestone.
 
-This document defines the deterministic policy boundary for a future DuckOS desktop session. It does not claim that the kernel currently starts a desktop, that Reaper contracts are enforced by a privileged runtime, or that a compositor, process broker or native app launcher is already present.
+This document defines the deterministic policy boundary for a future Dak desktop session. It does not claim that the kernel currently starts a desktop, that Reaper contracts are enforced by a privileged runtime, or that a compositor, process broker or native app launcher is already present.
 
 ## Authority and execution model
 
 The desktop is split into four independently testable layers:
 
-1. **Reaper policy core (duckos/**/*.rpr)** validates descriptors and returns deterministic decisions. It owns window admission, geometry constraints, focus, z-order, workspace state, taskbar visibility, notification priority, app admission and semantic theme tokens.
+1. **Reaper policy core (dakos/**/*.rpr)** validates descriptors and returns deterministic decisions. It owns window admission, geometry constraints, focus, z-order, workspace state, taskbar visibility, notification priority, app admission and semantic theme tokens.
 2. **Native desktop services (not yet delivered)** own window surfaces, input dispatch, frame scheduling, monitor hotplug, session persistence, process lifecycle, notification delivery and capability enforcement. They must treat policy results as inputs to a transaction, not as authority supplied by an app.
 3. **Compositor and display backends (not yet delivered)** own buffer lifetime, damage tracking, presentation fences, GPU submission, fallback rendering and recovery from device loss.
 4. **Jora (current maturity: scaffold composer)** describes and validates component/dependency graphs. It must not install, execute or grant capabilities to a composed application until a signed package and native broker exist.
 
-Mora now has a Qt 6 Widgets host-native adapter plus a retained browser reference preview. The host adapter uses the host OS window manager and is not the trusted DuckOS window manager; neither host UI nor browser JavaScript can grant kernel privileges. Reaper Studio is the language IDE, not the DuckOS desktop environment.
+Mora now has a Qt 6 Widgets host-native adapter plus a retained browser reference preview. The host adapter uses the host OS window manager and is not the trusted Dak window manager; neither host UI nor browser JavaScript can grant kernel privileges. Reaper Studio is the language IDE, not the Dak desktop environment.
 
 ## Reaper policy modules
 
 | Module | Responsibility | Decision boundary |
 |---|---|---|
-| duckos/ui/window_manager.rpr | Window records, geometry, modal focus, reserved z layers, resize policy, deterministic tile metrics and stacking-order bounds | allow-policy-only, deny-*, system-layer, user-layer, or tile metrics |
-| duckos/ui/taskbar.rpr | Taskbar entry validation, hiding system processes, pinned/running visibility, grouping counts and activation routing | visible, hidden-*, focus-running-app, switch-workspace-and-focus, jora-compose-request |
-| duckos/ui/session.rpr | Session descriptor, lifecycle, authorized workspace switching and restore admission | *-policy-only, deny-*, migration-required |
-| duckos/ui/notifications.rpr | Bounded notification records, capability admission, anti-spoofing, reserved system priority, expiry and backpressure | admit-policy-only, deny-*, layer name, expiry boolean |
-| duckos/security/desktop_sandbox.rpr | App manifest, catalog/signature/sandbox gates, capability attenuation, network broker mode and explicit permission requests | admit-policy-only or deny-* |
-| duckos/ui/workspace.rpr | Context layouts, panels, layout modes, descriptor bounds and window caps | selected layout or boolean |
-| duckos/ui/theme.rpr | Imperial Noir & Glass semantic tokens, yellow brand accent, green/red/blue status meanings, mode and contrast-pair allowlist | token values and boolean decisions |
-| duckos/ui/native_bridge.rpr | Versioned event envelope, monotonic sequence, payload bounds, capability routing, system-notification origin gate and settings validation routing | route-window-manager-policy, route-session-policy, route-notification-policy, route-app-admission-policy, route-theme-policy, route-config-policy, or deny-* |
+| dakos/ui/window_manager.rpr | Window records, geometry, modal focus, reserved z layers, resize policy, deterministic tile metrics and stacking-order bounds | allow-policy-only, deny-*, system-layer, user-layer, or tile metrics |
+| dakos/ui/taskbar.rpr | Taskbar entry validation, hiding system processes, pinned/running visibility, grouping counts and activation routing | visible, hidden-*, focus-running-app, switch-workspace-and-focus, jora-compose-request |
+| dakos/ui/session.rpr | Session descriptor, lifecycle, authorized workspace switching and restore admission | *-policy-only, deny-*, migration-required |
+| dakos/ui/notifications.rpr | Bounded notification records, capability admission, anti-spoofing, reserved system priority, expiry and backpressure | admit-policy-only, deny-*, layer name, expiry boolean |
+| dakos/security/desktop_sandbox.rpr | App manifest, catalog/signature/sandbox gates, capability attenuation, network broker mode and explicit permission requests | admit-policy-only or deny-* |
+| dakos/ui/workspace.rpr | Context layouts, panels, layout modes, descriptor bounds and window caps | selected layout or boolean |
+| dakos/ui/theme.rpr | Imperial Noir & Glass semantic tokens, yellow brand accent, green/red/blue status meanings, mode and contrast-pair allowlist | token values and boolean decisions |
+| dakos/ui/native_bridge.rpr | Versioned event envelope, monotonic sequence, payload bounds, capability routing, system-notification origin gate and settings validation routing | route-window-manager-policy, route-session-policy, route-notification-policy, route-app-admission-policy, route-theme-policy, route-config-policy, or deny-* |
 
 ### Stable record shapes
 
@@ -77,13 +77,13 @@ Window movement, focus, resize, workspace switching, launcher activation and the
 
 ## Explicitly not claimed
 
-The policy modules do not create windows, switch CPU contexts, map pages, start processes, render pixels, access PCI/GPU devices, persist user profiles, verify cryptographic signatures, isolate an address space or enforce capabilities in the kernel. Current Jora composition is a project scaffold and returns installable: false. Current DuckOS Stage 1 boots, validates Boot Info and halts; it does not start the desktop.
+The policy modules do not create windows, switch CPU contexts, map pages, start processes, render pixels, access PCI/GPU devices, persist user profiles, verify cryptographic signatures, isolate an address space or enforce capabilities in the kernel. Current Jora composition is a project scaffold and returns installable: false. Current Dak Stage 1 boots, validates Boot Info and halts; it does not start the desktop.
 
 These limits are release gates, not reasons to replace the Reaper policy model with browser JavaScript or to describe a visual mockup as a working operating-system desktop.
 
 
 ## Native shell bridge contract
 
-The Reaper-first event envelope and capability routes are specified in [Native Desktop Bridge](NATIVE_DESKTOP_BRIDGE.md) and implemented as the policy-only module `duckos/ui/native_bridge.rpr`.
+The Reaper-first event envelope and capability routes are specified in [Native Desktop Bridge](NATIVE_DESKTOP_BRIDGE.md) and implemented as the policy-only module `dakos/ui/native_bridge.rpr`.
 
 The host-native Mora adapter is the current Qt reference surface. Its events are not yet transported through DABI64/IPC and its windows are not kernel-owned. The next step is a freestanding/native Reaper runtime and authenticated IPC endpoint that evaluates the Reaper policy before a kernel transaction commits. No Python runner, browser script or host UI preference may stand in for that runtime or capability enforcement.

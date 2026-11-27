@@ -1,11 +1,11 @@
-# DuckOS Foundation Architecture
+# Dak Foundation Architecture
 
 **Author / project direction:** Ivan-VHS  
 **Status:** initial architecture baseline; decisions marked TBD must be resolved by an Architecture Decision Record before implementation.
 
 ## 1. Scope
 
-DuckOS is intended to be an independently implemented operating system with a stable system ABI, native services, a graphical environment, package management and capability-based application isolation. This document describes boundaries and sequencing, not shipped functionality.
+Dak is intended to be an independently implemented operating system with a stable system ABI, native services, a graphical environment, package management and capability-based application isolation. This document describes boundaries and sequencing, not shipped functionality.
 
 The first practical target should be a single documented PC architecture and an emulator-backed development environment. Keep architecture-specific code behind a hardware abstraction boundary so later targets do not leak into generic kernel code.
 
@@ -46,7 +46,7 @@ AI agents run as untrusted user processes. File, network, device and process pri
 
 ## 4. Reaper integration
 
-The Reaper language is a possible first-party development path, not a dependency that may be assumed before it is proven. The integration requires a native compiler, target object generation, relocation support, stable DuckOS ABI, runtime support and conformance tests. The bootstrap remains buildable with a documented fallback toolchain until self-hosting is verified.
+The Reaper language is a possible first-party development path, not a dependency that may be assumed before it is proven. The integration requires a native compiler, target object generation, relocation support, stable Dak ABI, runtime support and conformance tests. The bootstrap remains buildable with a documented fallback toolchain until self-hosting is verified.
 
 ## 5. Security invariants
 

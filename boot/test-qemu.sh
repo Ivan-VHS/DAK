@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 ISO=""
-OUTPUT_DIR="/tmp/duckos-qemu-test"
+OUTPUT_DIR="/tmp/dakos-qemu-test"
 OVMF_CODE=""
 OVMF_VARS=""
 TIMEOUT_SECONDS=12
@@ -46,8 +46,8 @@ run_bios() {
         cat "$log" >&2 || true
         return 1
     fi
-    if ! grep -Fq "DUCKOS_BOOT_OK stage=1" "$log"; then
-        echo "BIOS QEMU did not reach the DuckOS boot handoff:" >&2
+    if ! grep -Fq "DAK_BOOT_OK stage=1" "$log"; then
+        echo "BIOS QEMU did not reach the Dak boot handoff:" >&2
         cat "$log" >&2 || true
         return 1
     fi
@@ -82,8 +82,8 @@ run_uefi() {
         cat "$log" >&2 || true
         return 1
     fi
-    if ! grep -Fq "DUCKOS_BOOT_OK stage=1" "$log"; then
-        echo "UEFI QEMU did not reach the DuckOS boot handoff:" >&2
+    if ! grep -Fq "DAK_BOOT_OK stage=1" "$log"; then
+        echo "UEFI QEMU did not reach the Dak boot handoff:" >&2
         cat "$log" >&2 || true
         return 1
     fi

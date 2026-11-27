@@ -3,7 +3,7 @@
 **Contract:** [`ivan-vhs.ecosystem-cloud.v1`](../federation/ecosystem-cloud.v1.json)  
 **Status:** foundation; hosted deployment is not configured.
 
-DuckOS owns the shared Supabase contract and local migration set. Peer repositories provide adapters; they do not become cloud-dependent applications.
+Dak owns the shared Supabase contract and local migration set. Peer repositories provide adapters; they do not become cloud-dependent applications.
 
 ## Operating model
 
@@ -58,6 +58,6 @@ The GitHub workflow runs this local stack without linking a hosted project or re
 The foundation is not a deployed service. Before hosted use, create a project in a user-selected Supabase organization, confirm any quoted cost, configure private secrets, review backup/retention settings and run the migrations against a staging project first. Production rollout requires a separate reviewed PR and an explicit deployment step.
 
 
-## DuckOS adapter
+## Dak adapter
 
-`federation/ecosystem-cloud-adapter.v1.json` narrows DuckOS publication to user-selected preferences, application catalog metadata, project references and explicitly published release metadata. Boot, the kernel, Mora shell operation, local files and privileged state remain independent of Supabase.
+`federation/ecosystem-cloud-adapter.v1.json` narrows Dak publication to user-selected preferences, application catalog metadata, project references and explicitly published release metadata. Boot, the kernel, Mora shell operation, local files and privileged state remain independent of Supabase.

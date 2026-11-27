@@ -32,7 +32,7 @@ jobs:
     name: Inventory integrity and upstream drift
     runs-on: ubuntu-latest
     steps:
-      - name: Check out pinned DuckOS workspace
+      - name: Check out pinned Dak workspace
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -43,16 +43,16 @@ jobs:
         run: |
           set -euo pipefail
           jq -e '
-            .schema == "duckos.ecosystem-integration-plan.v1"
+            .schema == "dakos.ecosystem-integration-plan.v1"
             and .version == 1
-            and .host == "DuckOS"
+            and .host == "Dak"
             and (.workstreams | length > 0)
             and (.edges | length > 0)
             and (.principles.auto_advance_source_pins == false)
             and (.principles.auto_execute_imported_sources == false)
           ' federation/ecosystem-integration-plan.v1.json >/dev/null
           jq -e '
-            .schema == "duckos.repository-federation.v1"
+            .schema == "dakos.repository-federation.v1"
             and (.repositories | length > 0)
             and all(.repositories[];
               (.id | length > 0)
@@ -76,7 +76,7 @@ jobs:
           fi
           {
             echo "## Pinned source workspace"
-            echo "All initialized submodules match the commits recorded by DuckOS."
+            echo "All initialized submodules match the commits recorded by Dak."
             printf '%s\n' "$status"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -87,7 +87,7 @@ jobs:
           {
             echo "## Upstream source drift"
             echo
-            echo "| Project | DuckOS pin | Upstream head | Status |"
+            echo "| Project | Dak pin | Upstream head | Status |"
             echo "|---|---|---|---|"
           } >> "$GITHUB_STEP_SUMMARY"
 

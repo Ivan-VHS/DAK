@@ -20,13 +20,13 @@ static int ranges_overlap(
 }
 
 static int memory_type_valid(uint32_t type) {
-    return type >= (uint32_t)DUCKOS_MEMORY_USABLE &&
-        type <= (uint32_t)DUCKOS_MEMORY_BAD;
+    return type >= (uint32_t)DAK_MEMORY_USABLE &&
+        type <= (uint32_t)DAK_MEMORY_BAD;
 }
 
 
 static int range_covered_by_type(
-    const duckos_memory_region *regions,
+    const dakos_memory_region *regions,
     size_t region_count,
     uint64_t begin,
     uint64_t end,
@@ -35,7 +35,7 @@ static int range_covered_by_type(
     uint64_t cursor = begin;
 
     for (size_t index = 0u; index < region_count; ++index) {
-        const duckos_memory_region *region = &regions[index];
+        const dakos_memory_region *region = &regions[index];
         uint64_t region_end;
 
         if (region->type != expected_type) continue;
@@ -49,7 +49,7 @@ static int range_covered_by_type(
     return 0;
 }
 
-static int validate_framebuffer(const duckos_boot_info_v1 *info) {
+static int validate_framebuffer(const dakos_boot_info_v1 *info) {
     const int any_field =
         info->framebuffer_phys_base != 0u ||
         info->framebuffer_size != 0u ||
@@ -90,9 +90,9 @@ static int validate_framebuffer(const duckos_boot_info_v1 *info) {
     );
 }
 
-duckos_boot_info_status duckos_boot_info_validate(
-    const duckos_boot_info_v1 *info,
-    const duckos_memory_region *regions,
+dakos_boot_info_status dakos_boot_info_validate(
+    const dakos_boot_info_v1 *info,
+    const dakos_memory_region *regions,
     size_t region_count
 ) {
     uint64_t kernel_end;
@@ -101,43 +101,43 @@ duckos_boot_info_status duckos_boot_info_validate(
     uint64_t framebuffer_end = 0u;
 
     if (info == NULL || regions == NULL) {
-        return DUCKOS_BOOT_INFO_INVALID_ARGUMENT;
+        return DAK_BOOT_INFO_INVALID_ARGUMENT;
     }
     if (info->struct_size < (uint32_t)sizeof(*info) ||
-        info->version != DUCKOS_BOOT_INFO_VERSION) {
-        return DUCKOS_BOOT_INFO_UNSUPPORTED_VERSION;
+        info->version != DAK_BOOT_INFO_VERSION) {
+        return DAK_BOOT_INFO_UNSUPPORTED_VERSION;
     }
     if (info->memory_region_count != region_count ||
         region_count == 0u ||
-        region_count > DUCKOS_BOOT_MAX_MEMORY_REGIONS) {
-        return DUCKOS_BOOT_INFO_INVALID_MEMORY_MAP;
+        region_count > DAK_BOOT_MAX_MEMORY_REGIONS) {
+        return DAK_BOOT_INFO_INVALID_MEMORY_MAP;
     }
     if (!range_end(info->kernel_phys_base, info->kernel_size, &kernel_end)) {
-        return DUCKOS_BOOT_INFO_INVALID_KERNEL_RANGE;
+        return DAK_BOOT_INFO_INVALID_KERNEL_RANGE;
     }
 
     if ((info->initramfs_phys_base == 0u) != (info->initramfs_size == 0u)) {
-        return DUCKOS_BOOT_INFO_INVALID_INITRAMFS_RANGE;
+        return DAK_BOOT_INFO_INVALID_INITRAMFS_RANGE;
     }
     if (info->initramfs_size != 0u &&
         !range_end(info->initramfs_phys_base, info->initramfs_size, &initramfs_end)) {
-        return DUCKOS_BOOT_INFO_INVALID_INITRAMFS_RANGE;
+        return DAK_BOOT_INFO_INVALID_INITRAMFS_RANGE;
     }
     if (!validate_framebuffer(info)) {
-        return DUCKOS_BOOT_INFO_INVALID_FRAMEBUFFER;
+        return DAK_BOOT_INFO_INVALID_FRAMEBUFFER;
     }
 
     for (size_t index = 0u; index < region_count; ++index) {
-        const duckos_memory_region *region = &regions[index];
+        const dakos_memory_region *region = &regions[index];
         uint64_t current_end;
 
         if (region->length == 0u ||
             !memory_type_valid(region->type) ||
             !range_end(region->base, region->length, &current_end)) {
-            return DUCKOS_BOOT_INFO_INVALID_MEMORY_MAP;
+            return DAK_BOOT_INFO_INVALID_MEMORY_MAP;
         }
         if (index != 0u && region->base < previous_end) {
-            return DUCKOS_BOOT_INFO_INVALID_MEMORY_MAP;
+            return DAK_BOOT_INFO_INVALID_MEMORY_MAP;
         }
         previous_end = current_end;
     }
@@ -145,8 +145,8 @@ duckos_boot_info_status duckos_boot_info_validate(
     if (!range_covered_by_type(
             regions, region_count,
             info->kernel_phys_base, kernel_end,
-            (uint32_t)DUCKOS_MEMORY_RESERVED)) {
-        return DUCKOS_BOOT_INFO_KERNEL_NOT_RESERVED;
+            (uint32_t)DAK_MEMORY_RESERVED)) {
+        return DAK_BOOT_INFO_KERNEL_NOT_RESERVED;
     }
 
     if (info->initramfs_size != 0u &&
@@ -154,15 +154,15 @@ duckos_boot_info_status duckos_boot_info_validate(
             info->kernel_phys_base, kernel_end,
             info->initramfs_phys_base, initramfs_end
         )) {
-        return DUCKOS_BOOT_INFO_OVERLAPPING_IMAGES;
+        return DAK_BOOT_INFO_OVERLAPPING_IMAGES;
     }
 
     if (info->initramfs_size != 0u &&
         !range_covered_by_type(
             regions, region_count,
             info->initramfs_phys_base, initramfs_end,
-            (uint32_t)DUCKOS_MEMORY_RESERVED)) {
-        return DUCKOS_BOOT_INFO_INITRAMFS_NOT_RESERVED;
+            (uint32_t)DAK_MEMORY_RESERVED)) {
+        return DAK_BOOT_INFO_INITRAMFS_NOT_RESERVED;
     }
 
     if (info->framebuffer_size != 0u) {
@@ -173,27 +173,27 @@ duckos_boot_info_status duckos_boot_info_validate(
             !range_covered_by_type(
                 regions, region_count,
                 info->framebuffer_phys_base, framebuffer_end,
-                (uint32_t)DUCKOS_MEMORY_MMIO)) {
-            return DUCKOS_BOOT_INFO_FRAMEBUFFER_NOT_MMIO;
+                (uint32_t)DAK_MEMORY_MMIO)) {
+            return DAK_BOOT_INFO_FRAMEBUFFER_NOT_MMIO;
         }
     }
 
-    return DUCKOS_BOOT_INFO_OK;
+    return DAK_BOOT_INFO_OK;
 }
 
-const char *duckos_boot_info_status_name(duckos_boot_info_status status) {
+const char *dakos_boot_info_status_name(dakos_boot_info_status status) {
     switch (status) {
-        case DUCKOS_BOOT_INFO_OK: return "ok";
-        case DUCKOS_BOOT_INFO_INVALID_ARGUMENT: return "invalid argument";
-        case DUCKOS_BOOT_INFO_UNSUPPORTED_VERSION: return "unsupported boot-info version";
-        case DUCKOS_BOOT_INFO_INVALID_KERNEL_RANGE: return "invalid kernel range";
-        case DUCKOS_BOOT_INFO_INVALID_INITRAMFS_RANGE: return "invalid initramfs range";
-        case DUCKOS_BOOT_INFO_INVALID_FRAMEBUFFER: return "invalid framebuffer description";
-        case DUCKOS_BOOT_INFO_INVALID_MEMORY_MAP: return "invalid memory map";
-        case DUCKOS_BOOT_INFO_OVERLAPPING_IMAGES: return "kernel and initramfs overlap";
-        case DUCKOS_BOOT_INFO_KERNEL_NOT_RESERVED: return "kernel range is not reserved";
-        case DUCKOS_BOOT_INFO_INITRAMFS_NOT_RESERVED: return "initramfs range is not reserved";
-        case DUCKOS_BOOT_INFO_FRAMEBUFFER_NOT_MMIO: return "framebuffer range is not MMIO";
+        case DAK_BOOT_INFO_OK: return "ok";
+        case DAK_BOOT_INFO_INVALID_ARGUMENT: return "invalid argument";
+        case DAK_BOOT_INFO_UNSUPPORTED_VERSION: return "unsupported boot-info version";
+        case DAK_BOOT_INFO_INVALID_KERNEL_RANGE: return "invalid kernel range";
+        case DAK_BOOT_INFO_INVALID_INITRAMFS_RANGE: return "invalid initramfs range";
+        case DAK_BOOT_INFO_INVALID_FRAMEBUFFER: return "invalid framebuffer description";
+        case DAK_BOOT_INFO_INVALID_MEMORY_MAP: return "invalid memory map";
+        case DAK_BOOT_INFO_OVERLAPPING_IMAGES: return "kernel and initramfs overlap";
+        case DAK_BOOT_INFO_KERNEL_NOT_RESERVED: return "kernel range is not reserved";
+        case DAK_BOOT_INFO_INITRAMFS_NOT_RESERVED: return "initramfs range is not reserved";
+        case DAK_BOOT_INFO_FRAMEBUFFER_NOT_MMIO: return "framebuffer range is not MMIO";
         default: return "unknown boot-info status";
     }
 }

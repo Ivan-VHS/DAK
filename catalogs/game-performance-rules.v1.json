@@ -1,5 +1,5 @@
 {
-  "schema": "duckos.gaming-rule-catalog.v1",
+  "schema": "dakos.gaming-rule-catalog.v1",
   "version": 1,
   "rule_count": 66,
   "source": "User-provided 66-rule operating-system gaming performance specification",

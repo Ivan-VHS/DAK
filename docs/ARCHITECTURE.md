@@ -1,8 +1,8 @@
-# DuckOS architecture
+# Dak architecture
 
 ## Product boundary
 
-DuckOS is a Reaper-first operating-system implementation. Reaper owns the source-language semantics and system policy. Native platform code is a narrow, auditable boundary for operations that require privilege or architecture-specific instructions.
+Dak is a Reaper-first operating-system implementation. Reaper owns the source-language semantics and system policy. Native platform code is a narrow, auditable boundary for operations that require privilege or architecture-specific instructions.
 
 The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry bridge now provides the privileged firmware boundary needed for an experimental bootable stage-0 image; it translates Limine handoff data into the existing Boot Info v1 contract. It does not make the Reaper reference policies into a scheduler or kernel runtime.
 
@@ -24,7 +24,7 @@ See [x86-64 GDT/TSS/IST bootstrap v1](X86_64_GDT_TSS_IST_V1.md) for the owned bo
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
 | Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
 | BAV Security | signed declarative detection bundles, isolated scan worker, policy broker and reversible quarantine | bundle v1 format/schema specified; scanner, verifier, quarantine and enforcement not implemented |
-| DuckDriver boundary | driver ABI, package metadata and resource-conflict policy | descriptor policy implemented; signature verifier and device discovery pending |
+| DakDriver boundary | driver ABI, package metadata and resource-conflict policy | descriptor policy implemented; signature verifier and device discovery pending |
 | Service supervisor | finite restart budget | policy implemented; process manager pending |
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
@@ -55,21 +55,21 @@ Tasks use `[id, priority, deadline, state]`. The policy chooses the highest-prio
 
 IPC queues have a caller-supplied capacity. A full queue returns `backpressure` and leaves state unchanged. The UDB byte-stream contract accounts capacity, occupied bytes, producer/consumer sequence and a high watermark. It models admission and release only; there is no shared-memory mapping or zero-copy transfer yet.
 
-## Security and DuckDriver
+## Security and DakDriver
 
 A capability is an explicit string token in the current reference contract. Child grants must be a subset of the parent's grants. External input moves from `untrusted` to `validated` only after an explicit successful validation result; a failed check moves it to `quarantined`. Even validated data still needs the requested capability.
 
-DuckDriver device descriptors record a device identity, bus, resource range, IRQ and IRQ sharing policy. The orchestrator rejects overlapping resource ranges and conflicting exclusive IRQ assignments. Driver packages are approved only when metadata matches the device bus, target architecture, ABI and granted capabilities.
+DakDriver device descriptors record a device identity, bus, resource range, IRQ and IRQ sharing policy. The orchestrator rejects overlapping resource ranges and conflicting exclusive IRQ assignments. Driver packages are approved only when metadata matches the device bus, target architecture, ABI and granted capabilities.
 
-**Signature boundary:** the current package record contains a boolean supplied by the caller to represent a signature-verification result. DuckOS does not yet perform cryptographic verification, scan PCI/USB/ACPI, parse platform driver packages, load modules or modify the host driver store.
+**Signature boundary:** the current package record contains a boolean supplied by the caller to represent a signature-verification result. Dak does not yet perform cryptographic verification, scan PCI/USB/ACPI, parse platform driver packages, load modules or modify the host driver store.
 
 ## BAV Security boundary
 
 Keep three security capabilities distinct:
 
 1. **Beelzebul repository assurance in Reaper:** the 66-rule read-only repository scanner and CI workflow inspect tracked source/configuration, paths and repository metadata. This is developer/supply-chain assurance, not endpoint malware protection or process-memory scanning.
-2. **BAV defense-context taxonomy:** Reaper's duckos.bav.defense-context.v1 policy and security/defense-context.v1.tsv catalog return descriptive topic tags only. A context match MUST NOT increase malware confidence, create a malicious verdict, block a build or execution, quarantine/delete content or revoke a capability. The Java classifier described by Reaper documentation still requires source-path and CI evidence confirmation before it can be marked delivered.
-3. **DuckOS endpoint BAV:** the signed .bav security-bundle format is specified below; the scanner, cryptographic verifier, quarantine store and enforcement broker remain planned.
+2. **BAV defense-context taxonomy:** Reaper's dakos.bav.defense-context.v1 policy and security/defense-context.v1.tsv catalog return descriptive topic tags only. A context match MUST NOT increase malware confidence, create a malicious verdict, block a build or execution, quarantine/delete content or revoke a capability. The Java classifier described by Reaper documentation still requires source-path and CI evidence confirmation before it can be marked delivered.
+3. **Dak endpoint BAV:** the signed .bav security-bundle format is specified below; the scanner, cryptographic verifier, quarantine store and enforcement broker remain planned.
 
 The .bav suffix is reserved for Beelzebul AV declarative detection bundles. Version 1 is specified in [BAV_SECURITY_BUNDLE_V1.md](BAV_SECURITY_BUNDLE_V1.md) and structurally described by [bav-security-bundle.v1.schema.json](../schemas/bav-security-bundle.v1.schema.json). The signature is intended to cover the RFC 8785 canonical JSON document with the signature property removed; actual verification requires a pinned local trust store and native Ed25519 verifier.
 
@@ -93,7 +93,7 @@ The selector is policy only. It does not submit GPU work, serialize a graph, ope
 
 ## Mora visual and interaction contract
 
-The shared DuckOS/Mora shell uses the black/white/yellow product identity and semantic status colors defined by the current Mora design tokens. Reduced Motion suppresses non-essential transitions. UI policy and a frame-time classifier are design/reference behavior, not evidence of native rendering performance.
+The shared Dak/Mora shell uses the black/white/yellow product identity and semantic status colors defined by the current Mora design tokens. Reduced Motion suppresses non-essential transitions. UI policy and a frame-time classifier are design/reference behavior, not evidence of native rendering performance.
 
 The [interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) is normative for browser and native surfaces. It covers keyboard-first operation, focus, pointer/touch targets, window and workspace behavior, density, text scaling, accessible semantics, asynchronous feedback, drafts, Undo, error recovery, privacy and measurable usability. The native implementation must be verified separately for each supported platform.
 
@@ -101,7 +101,7 @@ The [interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md
 
 Mora now has a separate host-native application built with Qt 6 Widgets. It uses the host operating system's normal top-level window, focus, input and decoration path; no browser engine or HTML surface is embedded. The launcher reads the versioned local application catalogue, stores Poi drafts in local application settings, and opens read-only folder metadata in Abriganza only after the user selects a folder. VentuSample's waveform is explicitly a visual sample; no audio engine or device routing is implied.
 
-This is a native host application, not yet the native DuckOS desktop session. It is not launched by the Stage 1 kernel and does not create DuckOS processes, map framebuffer pages, manage host devices or enforce kernel capabilities. The browser shell remains a reference preview. Kernel-owned window management, compositor, input routing, font shaping, accessibility services and a freestanding Reaper UI runtime remain pending.
+This is a native host application, not yet the native Dak desktop session. It is not launched by the Stage 1 kernel and does not create Dak processes, map framebuffer pages, manage host devices or enforce kernel capabilities. The browser shell remains a reference preview. Kernel-owned window management, compositor, input routing, font shaping, accessibility services and a freestanding Reaper UI runtime remain pending.
 
 ## Native bring-up gates
 

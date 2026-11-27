@@ -9,20 +9,20 @@
 #include <stdio.h>
 
 static void test_tss_layout(void) {
-    assert(sizeof(duckos_tss64) == 104u);
-    assert(offsetof(duckos_tss64, rsp0) == 4u);
-    assert(offsetof(duckos_tss64, ist1) == 36u);
-    assert(offsetof(duckos_tss64, ist2) == 44u);
-    assert(offsetof(duckos_tss64, ist3) == 52u);
-    assert(offsetof(duckos_tss64, ist7) == 84u);
-    assert(offsetof(duckos_tss64, iomap_base) == 102u);
+    assert(sizeof(dakos_tss64) == 104u);
+    assert(offsetof(dakos_tss64, rsp0) == 4u);
+    assert(offsetof(dakos_tss64, ist1) == 36u);
+    assert(offsetof(dakos_tss64, ist2) == 44u);
+    assert(offsetof(dakos_tss64, ist3) == 52u);
+    assert(offsetof(dakos_tss64, ist7) == 84u);
+    assert(offsetof(dakos_tss64, iomap_base) == 102u);
 }
 
 static void test_segment_descriptors(void) {
-    uint64_t entries[DUCKOS_GDT_ENTRY_COUNT] = {0u};
+    uint64_t entries[DAK_GDT_ENTRY_COUNT] = {0u};
     const uint64_t tss_base = UINT64_C(0xffff800012345000);
     const uint32_t tss_limit = 103u;
-    assert(duckos_gdt_table_build(entries, tss_base, tss_limit) == DUCKOS_GDT_OK);
+    assert(dakos_gdt_table_build(entries, tss_base, tss_limit) == DAK_GDT_OK);
     assert(entries[0] == 0u);
     assert(entries[1] == UINT64_C(0x00af9a000000ffff));
     assert(entries[2] == UINT64_C(0x00cf92000000ffff));
@@ -43,16 +43,16 @@ static void test_segment_descriptors(void) {
 }
 
 static void test_invalid_descriptor_arguments(void) {
-    uint64_t entries[DUCKOS_GDT_ENTRY_COUNT] = {0u};
-    assert(duckos_gdt_table_build(NULL, 0x1000u, 103u) == DUCKOS_GDT_INVALID_ARGUMENT);
-    assert(duckos_gdt_table_build(entries, 0x1000u, DUCKOS_GDT_TSS_LIMIT_MAX + 1u) ==
-        DUCKOS_GDT_INVALID_TSS_LIMIT);
+    uint64_t entries[DAK_GDT_ENTRY_COUNT] = {0u};
+    assert(dakos_gdt_table_build(NULL, 0x1000u, 103u) == DAK_GDT_INVALID_ARGUMENT);
+    assert(dakos_gdt_table_build(entries, 0x1000u, DAK_GDT_TSS_LIMIT_MAX + 1u) ==
+        DAK_GDT_INVALID_TSS_LIMIT);
 }
 
 int main(void) {
     test_tss_layout();
     test_segment_descriptors();
     test_invalid_descriptor_arguments();
-    puts("DuckOS GDT/TSS descriptor tests passed");
+    puts("Dak GDT/TSS descriptor tests passed");
     return 0;
 }

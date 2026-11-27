@@ -4,8 +4,8 @@ on:
   pull_request:
     paths:
       - "mora/**"
-      - "duckos/gaming/**"
-      - "duckos/cli.py"
+      - "dakos/gaming/**"
+      - "dakos/cli.py"
       - "catalogs/game-performance-rules.v1.json"
       - "tests/test_gaming_policy.py"
       - "tests/test_gaming_detection.py"
@@ -21,8 +21,8 @@ on:
       - main
     paths:
       - "mora/**"
-      - "duckos/gaming/**"
-      - "duckos/cli.py"
+      - "dakos/gaming/**"
+      - "dakos/cli.py"
       - "catalogs/game-performance-rules.v1.json"
       - "tests/test_gaming_policy.py"
       - "docs/GAMING_POLICY_66.md"
@@ -50,8 +50,8 @@ jobs:
       - name: Test read-only game process detection
         run: python -m unittest tests.test_gaming_detection -v
       - name: Smoke-test read-only game-process discovery
-        run: python -m duckos gaming-detect --profiles examples/game-profiles.example.json
+        run: python -m dakos gaming-detect --profiles examples/game-profiles.example.json
       - name: Smoke-test the gaming assessment CLI
-        run: python -m duckos gaming-assess
+        run: python -m dakos gaming-assess
       - name: Smoke-test the gaming lifecycle CLI
-        run: python -m duckos gaming-transition idle game_detected --profile-id smoke-test --process-identity smoke.exe
+        run: python -m dakos gaming-transition idle game_detected --profile-id smoke-test --process-identity smoke.exe

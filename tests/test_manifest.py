@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from duckos.manifest import ManifestError, SCHEMA, _hash_file, validate_manifest
+from dakos.manifest import ManifestError, SCHEMA, _hash_file, validate_manifest
 
 
 class SystemManifestTests(unittest.TestCase):
@@ -26,8 +26,8 @@ class SystemManifestTests(unittest.TestCase):
 
     def make_manifest(self):
         return {
-            "schema": SCHEMA, "name": "DuckOS", "version": "0.1.0",
-            "architecture": "x86_64", "kernel_abi": "duckos-kernel-abi-1",
+            "schema": SCHEMA, "name": "Dak", "version": "0.1.0",
+            "architecture": "x86_64", "kernel_abi": "dakos-kernel-abi-1",
             "components": list(self.files.values()),
         }
 
@@ -52,7 +52,7 @@ class SystemManifestTests(unittest.TestCase):
     def test_component_hasher_enforces_actual_byte_limit(self):
         candidate = self.root / "bounded.bin"
         candidate.write_bytes(b"12345")
-        import duckos.manifest as manifest_module
+        import dakos.manifest as manifest_module
         previous = manifest_module.MAX_COMPONENT_BYTES
         manifest_module.MAX_COMPONENT_BYTES = 4
         try:

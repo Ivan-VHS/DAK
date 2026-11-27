@@ -1,34 +1,34 @@
-# DuckOS 2026 ecosystem evolution
+# Dak 2026 ecosystem evolution
 
-**Scope:** DuckOS/Mora and the four specialist repositories federated by DuckOS.  
+**Scope:** Dak/Mora and the four specialist repositories federated by Dak.  
 **Review baseline:** 2026-11-24.  
 **Normative rule:** a roadmap, catalogue entry, UI preference, repository pin or mock-up is not evidence that a native capability has shipped.
 
 ## 1. Architecture map
 
-DuckOS is the operating-system superproject. Mora is its shared desktop environment. It owns the browser workspace, launch catalogue, app windows, local presentation preferences and entry points into native tools. Mora is not the kernel, native compositor or privileged process broker.
+Dak is the operating-system superproject. Mora is its shared desktop environment. It owns the browser workspace, launch catalogue, app windows, local presentation preferences and entry points into native tools. Mora is not the kernel, native compositor or privileged process broker.
 
 | Project | Owned domain | Integration boundary |
 |---|---|---|
-| DuckOS / Mora | Desktop, first-party apps, system policy, native integration | Shell and bounded user-space orchestration |
-| Reaper | Language, compiler, runtime, Studio and developer toolchain | Primary/native language for new DuckOS-owned system code; user-space toolchain |
+| Dak / Mora | Desktop, first-party apps, system policy, native integration | Shell and bounded user-space orchestration |
+| Reaper | Language, compiler, runtime, Studio and developer toolchain | Primary/native language for new Dak-owned system code; user-space toolchain |
 | Pytyliki | C11 processor/system inspection and bounded measurement | Read-only inventory and evidence reports |
 | OPlague | Device/driver evidence and Windows gaming workbench | Read-only package inspection and reversible user sessions |
 | VentuSample | C++20 procedural audio and offline DSP | Offline render jobs and versioned manifests |
 
-The four specialist projects remain independently versioned submodules at exact commits. Preserve source history, licences, release cadence and established implementation domains. Do not copy their source into DuckOS or silently advance their pins.
+The four specialist projects remain independently versioned submodules at exact commits. Preserve source history, licences, release cadence and established implementation domains. Do not copy their source into Dak or silently advance their pins.
 
 ## 2. 2026 engineering principles
 
 ### 2.1 Local-first, offline-first and data ownership
 - Local reads and edits should complete without a network round trip.
 - Use versioned data contracts, bounded payloads, deterministic migrations, export/import and explicit recovery.
-- Use IndexedDB for browser-shell documents where it fits. Use SQLite or DuckDB in native product domains when the data model and workload justify them.
+- Use IndexedDB for browser-shell documents where it fits. Use SQLite or DakDB in native product domains when the data model and workload justify them.
 - Add CRDT replication only for a verified multi-writer or multi-device requirement. Define conflict resolution, tombstones, causal metadata, retention and idempotency before sync is enabled.
 - A cache or local database is not a sync engine. No background or cloud sync is implied by this plan.
 
-### 2.2 Reaper-first DuckOS-native development
-- New DuckOS-owned native services, examples and system-facing code should use Reaper as the primary language, with contracts and compiler tests alongside implementation.
+### 2.2 Reaper-first Dak-native development
+- New Dak-owned native services, examples and system-facing code should use Reaper as the primary language, with contracts and compiler tests alongside implementation.
 - Specialist projects remain in their own technical domains: Pytyliki C11, VentuSample C++20 and OPlague's existing Python/C++ boundaries are not rewritten simply for cosmetic uniformity.
 - Preserve canonical typed IR, Span/SourceMap, deterministic diagnostics, explicit ABI, bounded allocation and clear user/kernel boundaries.
 - MMIO, DMA, IRQ contexts, memory management, device access, process scheduling and loader behavior require native verification and a distinct privileged-service review.
@@ -79,10 +79,10 @@ A partial maturity status is deliberate: this patch does not claim full system l
 
 ## 4. Cross-project contracts
 
-- **Reaper → DuckOS:** versioned user-space CLI, compiler/runtime and subprocess contracts; no implicit kernel privilege.
-- **Pytyliki → DuckOS/OPlague:** bounded processor inventory and measurement evidence through versioned reports; no hardware mutation.
-- **OPlague → DuckOS:** read-only device, driver-package and performance evidence; no automatic installation or payload execution.
-- **VentuSample → DuckOS:** offline render jobs, audio manifests and bounded DSP contracts; no real-time device access by default.
+- **Reaper → Dak:** versioned user-space CLI, compiler/runtime and subprocess contracts; no implicit kernel privilege.
+- **Pytyliki → Dak/OPlague:** bounded processor inventory and measurement evidence through versioned reports; no hardware mutation.
+- **OPlague → Dak:** read-only device, driver-package and performance evidence; no automatic installation or payload execution.
+- **VentuSample → Dak:** offline render jobs, audio manifests and bounded DSP contracts; no real-time device access by default.
 - **Mora → native tools:** catalogue entries and explicit workbench links; the browser shell never impersonates a native service.
 - **Red Sparrow → Mora:** creative panel and local notes only; no privilege escalation or external executable content.
 
@@ -118,4 +118,4 @@ Every cross-project edge must name provider, consumer, owner, schema/ABI version
 - OWASP Top 10:2025: https://owasp.org/Top10/
 - Microsoft Windows app best practices: https://learn.microsoft.com/windows/apps/get-started/best-practices
 
-These references inform design and verification; they do not certify DuckOS compliance by themselves.
+These references inform design and verification; they do not certify Dak compliance by themselves.
