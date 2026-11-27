@@ -24,7 +24,7 @@ int duckos_x86_64_context_frame_init(
     uintptr_t *saved_stack_pointer
 );
 
-#if defined(__x86_64__) || defined(_M_X64)
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
 void duckos_x86_64_context_switch(
     uintptr_t *old_stack_pointer, uintptr_t new_stack_pointer
 );
