@@ -78,6 +78,7 @@ jobs:
           fi
 
           PR_HEAD_SHA="${pr_head_sha}"
+          echo "VERIFIED_PR_HEAD_SHA=${PR_HEAD_SHA}" >> "$GITHUB_ENV"
           echo "Verifying PR #${PR_NUMBER} at ${PR_HEAD_SHA}"
 
           ready_streak=0
@@ -282,7 +283,7 @@ jobs:
               echo "::notice::PR #${PR_NUMBER} is already merged."
               exit 0
             fi
-            if [[ "${state}" != "open" || "${head}" != "${EXPECTED_HEAD_SHA:-${head}}" || "${base}" != "main" || "${head_repo}" != "${GITHUB_REPOSITORY}" || "${draft}" != "false" ]]; then
+            if [[ "${state}" != "open" || "${head}" != "${VERIFIED_PR_HEAD_SHA}" || "${base}" != "main" || "${head_repo}" != "${GITHUB_REPOSITORY}" || "${draft}" != "false" ]]; then
               echo "::error::PR changed or is no longer eligible; refusing auto-merge."
               exit 1
             fi
