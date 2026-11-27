@@ -1,11 +1,11 @@
-# DuckOS Boot Handoff Contract v1
+# Dak Boot Handoff Contract v1
 
 **Author / project direction:** Ivan-VHS  
 **Implementation status:** host-testable C11 boot/allocator/IDT contracts and an experimental x86_64 Limine Stage 1 kernel with CPU exception diagnostics. The image is firmware-bootable when the BIOS/UEFI QEMU gate passes; it is not a complete kernel or usable desktop OS.
 
 ## Purpose
 
-The first foundation component defines the data boundary between a future bootloader and the DuckOS kernel. The handoff uses fixed-width integer fields and carries a version and structure size. The physical memory map is passed separately so the record contains no native pointer whose width or layout changes across targets.
+The first foundation component defines the data boundary between a future bootloader and the Dak kernel. The handoff uses fixed-width integer fields and carries a version and structure size. The physical memory map is passed separately so the record contains no native pointer whose width or layout changes across targets.
 
 Implemented files:
 
@@ -29,17 +29,17 @@ are:
 
 | Type | Field | Offset | Width |
 |---|---|---:|---:|
-| `duckos_boot_info_v1` | `struct_size` | 0 | 4 |
-| `duckos_boot_info_v1` | `version` | 4 | 4 |
-| `duckos_boot_info_v1` | `flags` | 8 | 8 |
-| `duckos_boot_info_v1` | `kernel_phys_base` | 16 | 8 |
-| `duckos_boot_info_v1` | `initramfs_phys_base` | 32 | 8 |
-| `duckos_boot_info_v1` | `framebuffer_phys_base` | 48 | 8 |
-| `duckos_boot_info_v1` | `framebuffer_width` | 64 | 4 |
-| `duckos_boot_info_v1` | `memory_region_count` | 80 | 4 |
-| `duckos_boot_info_v1` | `reserved` | 84 | 4 |
-| `duckos_memory_region` | `type` | 16 | 4 |
-| `duckos_memory_region` | `flags` | 20 | 4 |
+| `dakos_boot_info_v1` | `struct_size` | 0 | 4 |
+| `dakos_boot_info_v1` | `version` | 4 | 4 |
+| `dakos_boot_info_v1` | `flags` | 8 | 8 |
+| `dakos_boot_info_v1` | `kernel_phys_base` | 16 | 8 |
+| `dakos_boot_info_v1` | `initramfs_phys_base` | 32 | 8 |
+| `dakos_boot_info_v1` | `framebuffer_phys_base` | 48 | 8 |
+| `dakos_boot_info_v1` | `framebuffer_width` | 64 | 4 |
+| `dakos_boot_info_v1` | `memory_region_count` | 80 | 4 |
+| `dakos_boot_info_v1` | `reserved` | 84 | 4 |
+| `dakos_memory_region` | `type` | 16 | 4 |
+| `dakos_memory_region` | `flags` | 20 | 4 |
 
 A compatible extension appends fields after the complete 88-byte v1 prefix and
 sets `struct_size` to the actual accessible allocation size. The v1 validator
@@ -108,7 +108,7 @@ ctest --test-dir build --output-on-failure
 For a GCC/Clang host build with address and undefined-behavior sanitizers:
 
 ```sh
-cmake -S . -B build-sanitize -DDUCKOS_ENABLE_SANITIZERS=ON
+cmake -S . -B build-sanitize -DDAK_ENABLE_SANITIZERS=ON
 cmake --build build-sanitize --parallel
 ctest --test-dir build-sanitize --output-on-failure
 ```
