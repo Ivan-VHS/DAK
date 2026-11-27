@@ -177,3 +177,93 @@ assert(utilities["dispatch_decision"](list_command, [], "running") == "deny-capa
 assert(not utilities["environment_key_valid"]("LD_PRELOAD"), "dynamic loader injection variables are denied")
 
 emit "DAK Reaper Native System Platform: contract suite passed"
+
+# Primary native kernel gate, immutable verification snapshots and fail-closed install barrier.
+import "duckos/kernel/core.rpr" as kernel_core
+import "duckos/kernel/verification.rpr" as verification
+import "duckos/kernel/predictor.rpr" as predictor
+import "duckos/kernel/execution.rpr" as execution
+import "duckos/storage/sectorization.rpr" as sectorization
+
+make rules_draft := ["duckos.core.rules", 1, 1, "sha256:rules-a", "draft", 7]
+assert(verification["descriptor_valid"](rules_draft), "verification model descriptor is valid")
+make frozen_rules := verification["freeze"](rules_draft)
+assert(frozen_rules[0] == "frozen", "draft model freezes before installation")
+assert(verification["mutation_decision"](frozen_rules[1]) == "deny-install-locked", "frozen model cannot be mutated")
+make installing_rules := verification["begin_install"](frozen_rules[1], 7)
+assert(installing_rules[0] == "installing", "installation begins only from the frozen model")
+assert(verification["mutation_decision"](installing_rules[1]) == "deny-install-locked", "verification model remains locked during installation")
+assert(verification["freeze"](installing_rules[1])[0] == "deny-not-draft", "an installing model cannot be re-frozen as a new revision")
+assert(verification["begin_install"](frozen_rules[1], 8)[0] == "deny-stale-epoch", "installation rejects a stale epoch")
+make rules_snapshot := verification["snapshot"](installing_rules[1])
+assert(verification["snapshot_matches"](installing_rules[1], rules_snapshot), "installation snapshot remains identical")
+assert(not verification["snapshot_matches"](installing_rules[1], ["duckos.core.rules", 1, 2, "sha256:rules-a", 7]), "revision drift is rejected")
+make installed_rules := verification["install_commit"](installing_rules[1], rules_snapshot)
+assert(installed_rules[0] == "installed", "only an identical frozen snapshot can be committed")
+assert(verification["mutation_decision"](installed_rules[1]) == "deny-installed-snapshot-create-revision", "installed snapshot is immutable")
+make next_rules := verification["fork_revision"](installed_rules[1], 2, "sha256:rules-b", 8)
+assert(next_rules[0] == "new-draft" and next_rules[1][4] == "draft", "updates create a separate monotonic draft revision")
+assert(verification["abort_install"](installing_rules[1], rules_snapshot, 8, true)[0] == "aborted-to-draft", "an install unlocks only after verified rollback")
+assert(verification["abort_install"](installing_rules[1], rules_snapshot, 8, false)[0] == "deny-unverified-rollback", "unverified rollback cannot unlock policy mutation")
+
+# Predictors accelerate preflight but cannot replace a live authoritative check.
+make stable_condition := ["memory-map-stable", 1, 7, 1000, "stable"]
+assert(predictor["candidate_valid"](stable_condition, installing_rules[1], 500), "fresh predictor matches the frozen rules revision and epoch")
+assert(predictor["preflight_action"](stable_condition, installing_rules[1], 500, "stable") == "candidate-requires-live-revalidation", "predictor is advisory before commit")
+assert(predictor["commit_guard"](stable_condition, installing_rules[1], 500, "stable", true) == "allow-commit", "commit requires a fresh independent condition check")
+assert(predictor["commit_guard"](stable_condition, installing_rules[1], 500, "stable", false) == "deny-no-authoritative-check", "prediction alone cannot authorize commit")
+assert(predictor["commit_guard"](stable_condition, installing_rules[1], 500, "changed", true) == "deny-condition-changed", "changed live condition rejects the prediction")
+assert(predictor["commit_guard"](stable_condition, installing_rules[1], 1001, "stable", true) == "deny-stale-predictor", "expired predictor is rejected")
+make stale_condition := ["memory-map-stable", 1, 6, 1000, "stable"]
+assert(not predictor["candidate_valid"](stale_condition, installing_rules[1], 500), "predictor from another install epoch is rejected")
+
+# Every required operation must complete exactly once; missing, duplicate or failed work blocks commit.
+make required_kernel_steps := ["verify-rules", "map-application-sectors", "write-payload", "verify-payload", "publish-install"]
+make completed_kernel_steps := ["verify-rules", "map-application-sectors", "write-payload", "verify-payload", "publish-install"]
+make incomplete_kernel_steps := ["verify-rules", "map-application-sectors", "write-payload", "verify-payload"]
+make duplicate_kernel_steps := ["verify-rules", "map-application-sectors", "write-payload", "verify-payload", "verify-payload"]
+assert(execution["exact_completion"](required_kernel_steps, completed_kernel_steps), "complete execution set matches exactly")
+assert(not execution["exact_completion"](required_kernel_steps, incomplete_kernel_steps), "missing mandatory operation blocks completion")
+assert(not execution["exact_completion"](required_kernel_steps, duplicate_kernel_steps), "duplicate operation cannot replace a missing operation")
+assert(kernel_core["install_commit_decision"](["x86_64", "DABI64-v1", "freestanding", "ring0", "qualified", "disabled"], installing_rules[1], rules_snapshot, required_kernel_steps, completed_kernel_steps, []) == "allow-commit", "native install gate admits a fully verified operation set")
+assert(kernel_core["install_commit_decision"](["x86_64", "DABI64-v1", "freestanding", "ring0", "qualified", "disabled"], installing_rules[1], rules_snapshot, required_kernel_steps, incomplete_kernel_steps, []) == "deny-incomplete-execution", "native install gate denies skipped operations")
+assert(kernel_core["install_commit_decision"](["x86_64", "DABI64-v1", "freestanding", "ring0", "qualified", "disabled"], installing_rules[1], rules_snapshot, required_kernel_steps, completed_kernel_steps, ["verify-payload"]) == "recovery-required", "failed operation selects recovery")
+assert(kernel_core["primary_kernel_decision"](["x86_64", "DABI64-v1", "freestanding", "ring0", "pending", "disabled"]) == "deny-native-backend-unqualified", "an unqualified backend cannot become the primary kernel")
+assert(kernel_core["primary_kernel_decision"](["x86_64", "DABI64-v1", "freestanding", "ring0", "qualified", "enabled"]) == "deny-native-backend-unqualified", "host fallback cannot replace the native kernel")
+assert(kernel_core["primary_kernel_decision"](["x86_64", "DABI64-v1", "freestanding", "ring0", "qualified", "disabled"]) == "admit-native-primary", "qualified freestanding Reaper backend is the only primary-kernel profile")
+make full_startup := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
+assert(kernel_core["startup_decision"](full_startup) == "startup-sequence-valid", "complete system startup sequence is accepted")
+assert(kernel_core["startup_decision"](["reset", "firmware", "memory", "drivers"]) == "deny-incomplete-startup", "startup cannot skip required phases")
+assert(kernel_core["activation_decision"](["x86_64", "DABI64-v1", "freestanding", "ring0", "qualified", "disabled"], full_startup, installed_rules[1], verification["snapshot"](installed_rules[1])) == "activate-native-kernel", "kernel activation requires native qualification, full startup and the installed snapshot")
+
+# Unified u8 code bytes, page-aligned executable memory and per-application sectors share one ruleset identity.
+make app_bytes := [127, 69, 76, 70, 0]
+make app_code := ["com.duck.demo", "entry", "u8le-v1", 5, 1, "sha256:rules-a", app_bytes]
+make app_memory := ["com.duck.demo", 4096, 4096, "rx", 1, "sha256:rules-a"]
+make app_extent := ["com.duck.demo", 64, 1, 512, 5, 1, "sha256:rules-a"]
+make app_manifest := ["com.duck.demo", 1, 1, "sha256:rules-a", "DABI64-v1", "entry"]
+assert(sectorization["byte_sequence_valid"](app_bytes, 5), "canonical byte sequence is accepted")
+assert(not sectorization["byte_sequence_valid"]([127, 69, 256], 3), "byte outside u8 range is rejected")
+assert(sectorization["code_record_valid"](app_code), "u8le code record is valid")
+assert(sectorization["memory_region_valid"](app_memory), "page-aligned non-W+X memory region is valid")
+assert(not sectorization["memory_region_valid"](["com.duck.demo", 4097, 4096, "rx", 1, "sha256:rules-a"]), "unaligned memory base is rejected")
+assert(not sectorization["memory_region_valid"](["com.duck.demo", 4096, 4096, "rwx", 1, "sha256:rules-a"]), "writable-executable memory is rejected")
+assert(sectorization["extent_valid"](app_extent, 8192), "application extent stays within the disk")
+assert(not sectorization["extent_valid"](["com.duck.demo", 8192, 1, 512, 5, 1, "sha256:rules-a"], 8192), "sector range beyond the disk is rejected")
+assert(sectorization["application_consistent"](app_manifest, app_code, app_memory, app_extent, 8192), "manifest, code, memory and sector extent share one revision and digest")
+assert(not sectorization["application_consistent"](app_manifest, app_code, ["com.duck.demo", 4096, 4096, "rwx", 1, "sha256:rules-a"], app_extent, 8192), "application binding rejects W+X memory")
+assert(not sectorization["application_consistent"](app_manifest, app_code, app_memory, ["com.duck.demo", 64, 1, 512, 5, 2, "sha256:rules-b"], 8192), "application binding rejects sector ruleset drift")
+make second_app_extent := ["com.duck.editor", 66, 2, 512, 700, 1, "sha256:rules-a"]
+make overlapping_app_extent := ["com.duck.editor", 64, 1, 512, 700, 1, "sha256:rules-a"]
+assert(sectorization["sector_map_valid"]([app_extent, second_app_extent], 8192), "non-overlapping application sectors are accepted")
+assert(not sectorization["sector_map_valid"]([app_extent, overlapping_app_extent], 8192), "overlapping application sectors are rejected")
+assert(not sectorization["sector_map_valid"]([app_extent, ["com.duck.demo", 66, 1, 512, 5, 1, "sha256:rules-a"]], 8192), "one application cannot be assigned two independent extents")
+
+make different_ruleset_extent := ["com.duck.editor", 66, 2, 512, 700, 2, "sha256:rules-b"]
+make different_sector_size_extent := ["com.duck.editor", 66, 2, 4096, 700, 1, "sha256:rules-a"]
+make malformed_extent := ["com.duck.editor", 66]
+assert(not sectorization["sector_map_valid"]([app_extent, different_ruleset_extent], 8192), "one application map cannot mix verification revisions or digests")
+assert(not sectorization["sector_map_valid"]([app_extent, different_sector_size_extent], 8192), "one application map cannot mix logical sector sizes")
+assert(not sectorization["sector_map_valid"]([app_extent, malformed_extent], 8192), "malformed extent records are rejected before indexing")
+
+

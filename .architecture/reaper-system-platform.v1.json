@@ -53,7 +53,12 @@
     {"id":"package-transactions","path":"duckos/system/package_manager.rpr","contract":"implemented","backend":"pending"},
     {"id":"ab-updater","path":"duckos/system/updater.rpr","contract":"implemented","backend":"pending"},
     {"id":"build-graph-contract","path":"duckos/system/build.rpr","contract":"implemented","backend":"pending"},
-    {"id":"system-utilities","path":"duckos/system/utilities.rpr","contract":"implemented","backend":"pending"}
+    {"id":"system-utilities","path":"duckos/system/utilities.rpr","contract":"implemented","backend":"pending"},
+    {"id":"primary-native-kernel-gate","path":"duckos/kernel/core.rpr","contract":"implemented","backend":"pending"},
+    {"id":"immutable-verification-snapshot","path":"duckos/kernel/verification.rpr","contract":"implemented","backend":"pending"},
+    {"id":"predictive-condition-guard","path":"duckos/kernel/predictor.rpr","contract":"implemented","backend":"pending"},
+    {"id":"mandatory-install-completion","path":"duckos/kernel/execution.rpr","contract":"implemented","backend":"pending"},
+    {"id":"application-code-memory-sectorization","path":"duckos/storage/sectorization.rpr","contract":"implemented","backend":"pending"}
   ],
   "verification": {
     "source_check": "all .rpr under duckos/",

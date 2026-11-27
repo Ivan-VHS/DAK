@@ -21,7 +21,7 @@ DAK is an experimental Reaper-first operating-system project. Its current work i
 ## Capabilities
 
 - The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, emits DUCKOS_BOOT_OK stage=1 and halts. QEMU BIOS and UEFI checks pass.
-- Reaper provides a reference policy-contract track, including 40 Core Subsystem MVP contracts. Native kernel enforcement remains pending.
+- Reaper provides reference policy contracts, including 40 Core Subsystem MVP contracts and the new primary-kernel integrity layer (immutable verification snapshots, predictive preflight, mandatory install completion and application sectorization). These run as reference contracts; native kernel enforcement and the freestanding Reaper backend remain pending.
 - DAK has a Qt 6 Widgets host-native desktop application with host-managed windows and a local app catalogue. It is not launched by the Stage 1 kernel.
 - desktop/demo/index.html remains available as a browser reference preview. It is not a native compositor or the kernel desktop.
 
@@ -41,6 +41,7 @@ DAK is an experimental Reaper-first operating-system project. Its current work i
 - [Browser reference preview](#browser-reference-preview)
 - [Build the release image](#build-the-release-image)
 - [Kernel status and next layers](#kernel-status-and-next-layers)
+- [Native kernel integrity contracts](docs/NATIVE_KERNEL_CORE_V1.md)
 - [Architecture targets](#architecture-targets)
 - [Source federation and integrity](#source-federation-and-integrity)
 - [Licensing and attribution](#licensing-and-attribution)
@@ -102,6 +103,8 @@ bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Releas
 The release pipeline validates pinned repositories, runs project builds/tests, generates a SHA-256 inventory and assembles a hybrid BIOS/UEFI ISO. This is a source-and-tools preview, not a complete installable OS.
 
 ## Kernel status and next layers
+
+See [Native kernel integrity contracts v1](docs/NATIVE_KERNEL_CORE_V1.md) for the new policy model and its native implementation gates.
 
 | Layer | Status |
 |---|---|

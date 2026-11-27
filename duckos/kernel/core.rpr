@@ -1,0 +1,57 @@
+# DuckOS primary kernel admission and activation gate.
+# Reaper owns the policy contract; privileged execution requires a qualified native backend.
+# A hosted fallback can never be admitted as the primary kernel.
+
+import "duckos/kernel/boot.rpr" as boot
+import "duckos/kernel/verification.rpr" as verification
+import "duckos/kernel/execution.rpr" as execution
+
+# [architecture, syscall_abi, execution_mode, privilege, reaper_codegen, hosted_fallback]
+export craft native_profile_valid(profile) {
+    when size(profile) != 6 {
+        yield false
+    }
+    yield profile[0] == "x86_64" and
+        profile[1] == "DABI64-v1" and
+        profile[2] == "freestanding" and
+        profile[3] == "ring0" and
+        profile[4] == "qualified" and
+        profile[5] == "disabled"
+}
+
+export craft primary_kernel_decision(profile) {
+    when native_profile_valid(profile) {
+        yield "admit-native-primary"
+    }
+    yield "deny-native-backend-unqualified"
+}
+
+export craft startup_decision(phases) {
+    when not boot["sequence_valid"](phases) {
+        yield "deny-incomplete-startup"
+    }
+    yield "startup-sequence-valid"
+}
+
+export craft install_commit_decision(profile, model, candidate, required, completed, failed) {
+    when not native_profile_valid(profile) {
+        yield "deny-native-backend-unqualified"
+    }
+    yield execution["barrier_decision"](model, candidate, required, completed, failed)
+}
+
+export craft activation_decision(profile, phases, model, candidate) {
+    when not native_profile_valid(profile) {
+        yield "deny-native-backend-unqualified"
+    }
+    when not boot["sequence_valid"](phases) {
+        yield "deny-incomplete-startup"
+    }
+    when not verification["descriptor_valid"](model) or model[4] != "installed" {
+        yield "deny-model-not-installed"
+    }
+    when not verification["snapshot_matches"](model, candidate) {
+        yield "deny-snapshot-drift"
+    }
+    yield "activate-native-kernel"
+}

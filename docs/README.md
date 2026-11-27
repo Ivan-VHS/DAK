@@ -19,6 +19,8 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 
 ## Native boot and kernel
 
+- [Native kernel integrity contracts v1](NATIVE_KERNEL_CORE_V1.md) — immutable verification snapshots, predictive revalidation, exact install completion and unified application byte/memory/sector validation; privileged enforcement remains pending.
+
 - [Bootable Stage 1 image](BOOTABLE_IMAGE.md) — pinned Limine BIOS/UEFI path, image assembly and QEMU checks.
 - [Implementation status](IMPLEMENTATION_STATUS.md) — delivered, partial and pending subsystems.
 - [Core subsystem MVP](CORE_MVP_V1.md) — Reaper reference contracts and native-enforcement boundary.
