@@ -1,5 +1,5 @@
-export const PREFERENCES_KEY = "duckos.mora.preferences.v1";
-export const RECOVERY_KEY = "duckos.mora.recovery.v1";
+export const PREFERENCES_KEY = "dakos.mora.preferences.v1";
+export const RECOVERY_KEY = "dakos.mora.recovery.v1";
 
 export const APP_IDS = Object.freeze([
   "cockos", "kavun", "kabon", "gloverty", "po", "illidia", "unify",
@@ -17,7 +17,7 @@ export function createDefaultPreferences() {
     appearance: {
       reducedMotion: false,
       density: "comfortable",
-      theme: "duck"
+      theme: "dak"
     },
     focusMode: false,
     powerProfile: "balanced",
@@ -40,7 +40,7 @@ export function normalizePreferences(value) {
     appearance: {
       reducedMotion: appearance.reducedMotion === true,
       density: appearance.density === "compact" ? "compact" : defaults.appearance.density,
-      theme: "duck"
+      theme: "dak"
     },
     focusMode: source.focusMode === true,
     powerProfile: POWER_PROFILES.includes(source.powerProfile)

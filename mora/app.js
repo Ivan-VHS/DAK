@@ -13,43 +13,43 @@ import {
   validateRecoverySnapshot
 } from "./core.js";
 
-const DUCK_ACCENT = "#FFD700";
+const DAK_ACCENT = "#FFD700";
 
 const appDefinitions = {
-  cockos: { name: "Cockos", subtitle: "Звук и запись", color: DUCK_ACCENT, glyph: "∿" },
-  kavun: { name: "Kavun", subtitle: "Фотографии", color: DUCK_ACCENT, glyph: "◒" },
-  kabon: { name: "Ka-bon", subtitle: "Финансы", color: DUCK_ACCENT, glyph: "₴" },
-  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: DUCK_ACCENT, glyph: "ϟ" },
-  po: { name: "Po", subtitle: "Компас", color: DUCK_ACCENT, glyph: "⌖" },
-  illidia: { name: "Illidia", subtitle: "Игры", color: DUCK_ACCENT, glyph: "⌘" },
-  unify: { name: "Unify", subtitle: "Устройства", color: DUCK_ACCENT, glyph: "∞" },
-  sestem: { name: "Sestem", subtitle: "Статус системы", color: DUCK_ACCENT, glyph: "♟" },
-  setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: DUCK_ACCENT, glyph: "✳" },
-  orriganize: { name: "ORGze", subtitle: "Задачи и проекты", color: DUCK_ACCENT, glyph: "▦" },
-  abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: DUCK_ACCENT, glyph: "▤" },
-  olaab: { name: "Olaab", subtitle: "Медиатека", color: DUCK_ACCENT, glyph: "◈" },
-  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: DUCK_ACCENT, glyph: "♫" },
-  "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: DUCK_ACCENT, glyph: "◇" },
-  "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: DUCK_ACCENT, glyph: "♡" },
-  poi: { name: "Poi", subtitle: "Быстрые заметки", color: DUCK_ACCENT, glyph: "⌖" },
-  "poi-2": { name: "Poi-2", subtitle: "База знаний", color: DUCK_ACCENT, glyph: "▧" },
-  "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: DUCK_ACCENT, glyph: "➤" },
-  gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: DUCK_ACCENT, glyph: "▣" },
-  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: DUCK_ACCENT, glyph: "E" },
-  "mora-ai": { name: "DAK AI", subtitle: "Намерения и планы", color: DUCK_ACCENT, glyph: "✦" },
-  security: { name: "Sentinel", subtitle: "Права и доверие", color: DUCK_ACCENT, glyph: "◇" },
-  updates: { name: "Restore", subtitle: "Обновления и откат", color: DUCK_ACCENT, glyph: "↶" },
-  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: DUCK_ACCENT, glyph: "⇄" },
-  workspace: { name: "Control", subtitle: "Среда и питание", color: DUCK_ACCENT, glyph: "⌘" },
-  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DUCK_ACCENT, glyph: "⌁" },
-  "mora-boost": { name: "DAK Boost", subtitle: "Игровая производительность", color: DUCK_ACCENT, glyph: "⚡" },
-  desktop: { name: "Duck Desktop", subtitle: "Оптимизация рабочего пространства", color: DUCK_ACCENT, glyph: "▦" },
-  "red-sparrow": { name: "赤雀 · Red Sparrow", subtitle: "Wuxia · постановочная лаборатория", color: DUCK_ACCENT, glyph: "雀" },
-  "mora-commons": { name: "DAK Commons", subtitle: "Единый центр приложений", color: DUCK_ACCENT, glyph: "✣" },
-  "reaper-workbench": { name: "Reaper", subtitle: "Язык и toolchain", color: DUCK_ACCENT, glyph: "R" },
-  "pytyliki-workbench": { name: "Pytyliki", subtitle: "Вычисления и диагностика", color: DUCK_ACCENT, glyph: "P" },
-  "oplague-workbench": { name: "OPlague", subtitle: "Инспекция устройств", color: DUCK_ACCENT, glyph: "O" },
-  "ventusample-workbench": { name: "VentuSample", subtitle: "Аудио и DSP", color: DUCK_ACCENT, glyph: "V" }
+  cockos: { name: "Cockos", subtitle: "Звук и запись", color: DAK_ACCENT, glyph: "∿" },
+  kavun: { name: "Kavun", subtitle: "Фотографии", color: DAK_ACCENT, glyph: "◒" },
+  kabon: { name: "Ka-bon", subtitle: "Финансы", color: DAK_ACCENT, glyph: "₴" },
+  gloverty: { name: "Gloverty", subtitle: "Сценарии", color: DAK_ACCENT, glyph: "ϟ" },
+  po: { name: "Po", subtitle: "Компас", color: DAK_ACCENT, glyph: "⌖" },
+  illidia: { name: "Illidia", subtitle: "Игры", color: DAK_ACCENT, glyph: "⌘" },
+  unify: { name: "Unify", subtitle: "Устройства", color: DAK_ACCENT, glyph: "∞" },
+  sestem: { name: "Sestem", subtitle: "Статус системы", color: DAK_ACCENT, glyph: "♟" },
+  setupup: { name: "SetupUP", subtitle: "Первичная настройка", color: DAK_ACCENT, glyph: "✳" },
+  orriganize: { name: "ORGze", subtitle: "Задачи и проекты", color: DAK_ACCENT, glyph: "▦" },
+  abriganza: { name: "Abriganza", subtitle: "Архивы и файлы", color: DAK_ACCENT, glyph: "▤" },
+  olaab: { name: "Olaab", subtitle: "Медиатека", color: DAK_ACCENT, glyph: "◈" },
+  "concrete-thump": { name: "Concrete Thump", subtitle: "Ритм и темп", color: DAK_ACCENT, glyph: "♫" },
+  "seu-beu": { name: "Seu-Beu", subtitle: "Проверка обмена", color: DAK_ACCENT, glyph: "◇" },
+  "love-il": { name: "Love-IL", subtitle: "Личный дневник", color: DAK_ACCENT, glyph: "♡" },
+  poi: { name: "Poi", subtitle: "Быстрые заметки", color: DAK_ACCENT, glyph: "⌖" },
+  "poi-2": { name: "Poi-2", subtitle: "База знаний", color: DAK_ACCENT, glyph: "▧" },
+  "po-2": { name: "Po-2", subtitle: "Маршруты и точки", color: DAK_ACCENT, glyph: "➤" },
+  gamecharager: { name: "GameCharager", subtitle: "Игровая библиотека", color: DAK_ACCENT, glyph: "▣" },
+  exedotexe: { name: "EXEdotEXE", subtitle: "EXE-инспектор", color: DAK_ACCENT, glyph: "E" },
+  "mora-ai": { name: "DAK AI", subtitle: "Намерения и планы", color: DAK_ACCENT, glyph: "✦" },
+  security: { name: "Sentinel", subtitle: "Права и доверие", color: DAK_ACCENT, glyph: "◇" },
+  updates: { name: "Restore", subtitle: "Обновления и откат", color: DAK_ACCENT, glyph: "↶" },
+  runtime: { name: "Bridge", subtitle: "Windows compatibility", color: DAK_ACCENT, glyph: "⇄" },
+  workspace: { name: "Control", subtitle: "Среда и питание", color: DAK_ACCENT, glyph: "⌘" },
+  provenance: { name: "Proof", subtitle: "Файлы и SHA-256", color: DAK_ACCENT, glyph: "⌁" },
+  "mora-boost": { name: "DAK Boost", subtitle: "Игровая производительность", color: DAK_ACCENT, glyph: "⚡" },
+  desktop: { name: "DAK Desktop", subtitle: "Оптимизация рабочего пространства", color: DAK_ACCENT, glyph: "▦" },
+  "red-sparrow": { name: "赤雀 · Red Sparrow", subtitle: "Wuxia · постановочная лаборатория", color: DAK_ACCENT, glyph: "雀" },
+  "mora-commons": { name: "DAK Commons", subtitle: "Единый центр приложений", color: DAK_ACCENT, glyph: "✣" },
+  "reaper-workbench": { name: "Reaper", subtitle: "Язык и toolchain", color: DAK_ACCENT, glyph: "R" },
+  "pytyliki-workbench": { name: "Pytyliki", subtitle: "Вычисления и диагностика", color: DAK_ACCENT, glyph: "P" },
+  "oplague-workbench": { name: "OPlague", subtitle: "Инспекция устройств", color: DAK_ACCENT, glyph: "O" },
+  "ventusample-workbench": { name: "VentuSample", subtitle: "Аудио и DSP", color: DAK_ACCENT, glyph: "V" }
 };
 
 const windowLayer = document.getElementById("window-layer");
@@ -62,7 +62,7 @@ let toastTimeout = null;
 let preferences = loadPreferences();
 let pendingIntentPlan = null;
 
-const LOCALE_KEY = "duckos.mora.locale.v1";
+const LOCALE_KEY = "dakos.mora.locale.v1";
 const LOCALE_TEXT = {
   "ru-RU": { desktop:"Рабочий стол", system:"Система", systemStatus:"Состояние системы", dateContext:"РАБОЧЕЕ ПРОСТРАНСТВО", welcome:"Спокойный вечер начинается с порядка.", yourSpace:"ВАШЕ ПРОСТРАНСТВО", applications:"Приложения", appsCount:"34 ПРИЛОЖЕНИЯ И ИНСТРУМЕНТА", dock:"Панель приложений", audio:"Звук и запись", photos:"Фотографии", finance:"Финансы", routines:"Сценарии", compass:"Компас", games:"Игры", devices:"Устройства", expensesToday:"РАСХОДЫ СЕГОДНЯ", devicesLabel:"УСТРОЙСТВА", connected:"подключено", offline:"ОФЛАЙН" },
   "zh-CN": { desktop:"桌面", system:"系统", systemStatus:"系统状态", dateContext:"工作空间", welcome:"让宁静的夜晚从井然有序开始。", yourSpace:"您的空间", applications:"应用程序", appsCount:"34 个应用与工具", dock:"应用程序坞", audio:"音频与录音", photos:"照片", finance:"财务", routines:"场景", compass:"指南针", games:"游戏", devices:"设备", expensesToday:"今日支出", devicesLabel:"设备", connected:"已连接", offline:"离线" }
@@ -109,7 +109,7 @@ function setLocale(locale) {
 
 function applyPreferences() {
   document.documentElement.classList.toggle("reduce-motion", preferences.appearance.reducedMotion);
-  document.documentElement.dataset.theme = "duck";
+  document.documentElement.dataset.theme = "dak";
   document.body.classList.toggle("focus-mode", preferences.focusMode);
   document.documentElement.dataset.powerProfile = preferences.powerProfile;
 
@@ -234,7 +234,7 @@ function updateWorkspacePanel() {
 }
 
 
-const EXTENSION_STORAGE_PREFIX = "duckos.mora.extension.";
+const EXTENSION_STORAGE_PREFIX = "dakos.mora.extension.";
 const EXTENSION_APP_IDS = new Set([
   "orriganize", "olaab", "love-il", "poi", "poi-2", "po-2", "gamecharager"
 ]);
@@ -311,13 +311,13 @@ function extensionPanelMarkup(appId) {
       return '<p class="window-kicker">SESTEM · ОБЗОР СИСТЕМЫ</p><h2 class="window-heading">Состояние DAK</h2>' +
         '<div class="extension-status-grid"><div class="extension-status-card"><strong>DAK Desktop</strong><span>Браузерная оболочка · активна</span></div>' +
         '<div class="extension-status-card"><strong>Контракты ядра</strong><span>Reaper reference runtime · проверяемая политика</span></div>' +
-        '<div class="extension-status-card"><strong>DuckBridge</strong><span>Инспекция и планы запуска · без выполнения</span></div>' +
+        '<div class="extension-status-card"><strong>DAKBridge</strong><span>Инспекция и планы запуска · без выполнения</span></div>' +
         '<div class="extension-status-card"><strong>Native boot</strong><span>Нативный загрузочный образ ещё не готов</span></div></div>' +
         '<div class="approval-actions"><button class="action-button" data-app="workspace">Открыть Control</button><button class="subtle-button" data-app="security">Открыть Sentinel</button></div>' +
         '<p class="window-copy">Панель показывает подтверждённую зрелость компонентов. Она не читает аппаратные датчики и не выдаёт статус оболочки за состояние ядра.</p>';
     case "setupup": {
       let complete = false;
-      try { complete = Boolean(localStorage.getItem("duckos.mora.setupup.v1")); } catch {}
+      try { complete = Boolean(localStorage.getItem("dakos.mora.setupup.v1")); } catch {}
       return '<p class="window-kicker">SETUPUP · МАСТЕР MORA</p><h2 class="window-heading">Настройте рабочее пространство</h2>' +
         '<p class="window-copy">Отметьте завершение локальной настройки. Установка ОС, разметка диска и настройка загрузчика здесь не выполняются.</p>' +
         '<div class="setting-block"><strong>Цветовая схема</strong><span>Единая палитра DAK: чёрный, белый и жёлтый.</span></div><div class="approval-actions"><button class="action-button" data-action="setup-complete">Завершить настройку</button></div>' +
@@ -336,7 +336,7 @@ function extensionPanelMarkup(appId) {
     case "concrete-thump": {
       let bpm = 150, swing = 57;
       try {
-        const saved = JSON.parse(localStorage.getItem("duckos.mora.concrete-thump.v1") || "null");
+        const saved = JSON.parse(localStorage.getItem("dakos.mora.concrete-thump.v1") || "null");
         if (saved && Number.isInteger(saved.bpm) && saved.bpm >= 40 && saved.bpm <= 240 &&
             Number.isInteger(saved.swing) && saved.swing >= 50 && saved.swing <= 75) ({bpm,swing} = saved);
       } catch {}
@@ -672,11 +672,11 @@ function panelMarkup(appId) {
         '</div>' +
         '<p class="window-copy">Сама браузерная панель не меняет настройки компьютера. Для снимка, телеметрии и игрового режима откройте нативное Windows-приложение OPlague.</p>';
     case "desktop":
-      return '<p class="window-kicker">DUCK DESKTOP · НАТИВНЫЙ ИНСТРУМЕНТ</p>' +
+      return '<p class="window-kicker">DAK DESKTOP · НАТИВНЫЙ ИНСТРУМЕНТ</p>' +
         '<h2 class="window-heading">Рабочее пространство под контролем</h2>' +
-        '<p class="window-copy">DAK остаётся графической оболочкой. Настоящая диагностика и управление пользовательской автозагрузкой выполняются отдельным приложением Duck Desktop на стороне DAK, а не браузерным JavaScript.</p>' +
+        '<p class="window-copy">DAK остаётся графической оболочкой. Настоящая диагностика и управление пользовательской автозагрузкой выполняются отдельным приложением DAK Desktop на стороне DAK, а не браузерным JavaScript.</p>' +
         '<div class="setting-block"><strong>Нативное приложение</strong><span>Аудит файлов, пользовательской автозагрузки и процессов.</span></div>' +
-        '<div class="setting-block"><strong>Команда запуска</strong><span>Откройте терминал установленной среды DAK и выполните: <code>duckos desktop gui</code>.</span></div>' +
+        '<div class="setting-block"><strong>Команда запуска</strong><span>Откройте терминал установленной среды DAK и выполните: <code>dakos desktop gui</code>.</span></div>' +
         '<div class="setting-block"><strong>Безопасная организация</strong><span>Перенос выбранных файлов в Inbox без удаления и перезаписи; операции выполняются после подтверждения.</span></div>' +
         '<div class="setting-block"><strong>Автозагрузка</strong><span>Только текущий пользователь; отключение можно восстановить.</span></div>' +
         '<p class="window-copy">Браузерная DAK показывает только точку входа. Она не изображает системный монитор, оконный менеджер или привилегированный доступ.</p>';
@@ -719,13 +719,13 @@ function panelMarkup(appId) {
         '<p class="window-copy">Bridge проверяет выбранные EXE/DLL локально. В DAK доступна быстрая проверка заголовка; расширенный PE-анализ, список импортируемых DLL, профили приложений и диагностика доступны через инструменты DAK CLI.</p>' +
         '<label class="file-picker">Проверить EXE или DLL<input type="file" data-executable-file accept=".exe,.dll"></label>' +
         '<div class="inspection-report" data-runtime-report>Файл ещё не выбран.</div>' +
-        '<div class="setting-block"><strong>Инструменты DAK</strong><span>После установки пакета duckos-build-tools в среде разработки:</span>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos inspect-pe ./game.exe — заголовки PE32/PE32+, секции и импортируемые DLL</span></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge runtimes — поиск Wine, Proton, CrossOver, Bottles, Box64 и QEMU без запуска этих программ</span></div>' +
-        '<div class="system-notice"><span class="notice-dot"></span><span>duckos bridge plan ./game.exe --purpose game --compat-data PATH — подготовка структуры команды Proton без её выполнения</span></div></div>' +
+        '<div class="setting-block"><strong>Инструменты DAK</strong><span>После установки пакета dakos-build-tools в среде разработки:</span>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>dakos inspect-pe ./game.exe — заголовки PE32/PE32+, секции и импортируемые DLL</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>dakos prefix-create ./prefixes game --architecture x86_64 — отдельный профиль игры</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>dakos compat-diagnose ./game.exe --prefix ./prefixes/game — поиск отсутствующих DLL</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>dakos compat-plan ./game.exe --prefix ./prefixes/game — отчёт о блокерах запуска</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>dakos bridge runtimes — поиск Wine, Proton, CrossOver, Bottles, Box64 и QEMU без запуска этих программ</span></div>' +
+        '<div class="system-notice"><span class="notice-dot"></span><span>dakos bridge plan ./game.exe --purpose game --compat-data PATH — подготовка структуры команды Proton без её выполнения</span></div></div>' +
         '<div class="system-notice warning"><span class="notice-dot"></span><span>Реальный запуск EXE пока заблокирован: в DAK ещё нет NT process manager, Win32 API runtime и DirectX/Vulkan backend. Автозагрузка DLL, драйверов и обход античитов не выполняются.</span></div>' +
         '<p class="window-copy">Создание профиля пока формирует только изолированную структуру и manifest. Это фундамент совместимости, а не готовая замена Wine.</p>';
     case "workspace":
@@ -938,7 +938,7 @@ document.addEventListener("click", (event) => {
   if (setupComplete) {
     const status = setupComplete.closest(".app-window").querySelector("[data-setup-status]");
     try {
-      localStorage.setItem("duckos.mora.setupup.v1", new Date().toISOString());
+      localStorage.setItem("dakos.mora.setupup.v1", new Date().toISOString());
       if (status) status.textContent = "Настройка DAK завершена и сохранена в профиле браузера.";
       showToast("Первичная настройка DAK завершена");
     } catch {
@@ -974,7 +974,7 @@ document.addEventListener("click", (event) => {
     const bpm = Number(owner.querySelector('[data-beat-range="bpm"]').value);
     const swing = Number(owner.querySelector('[data-beat-range="swing"]').value);
     try {
-      localStorage.setItem("duckos.mora.concrete-thump.v1", JSON.stringify({ bpm, swing, savedAt: new Date().toISOString() }));
+      localStorage.setItem("dakos.mora.concrete-thump.v1", JSON.stringify({ bpm, swing, savedAt: new Date().toISOString() }));
       owner.querySelector("[data-beat-status]").textContent = "Профиль " + bpm + " BPM / " + swing + "% сохранён локально.";
       showToast("Ритмический профиль сохранён");
     } catch {
