@@ -1,0 +1,25 @@
+#!/bin/sh
+
+PATH=/bin:/sbin
+export PATH
+
+mount -t proc proc /proc 2>/dev/null || true
+mount -t sysfs sysfs /sys 2>/dev/null || true
+mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+mount -t devpts devpts /dev/pts 2>/dev/null || true
+
+echo "[DuckOS initramfs] early userspace started"
+
+if [ -x /sbin/init ]; then
+    exec /sbin/init
+fi
+
+if [ -x /bin/sh ]; then
+    echo "[DuckOS initramfs] no real init found; starting recovery shell"
+    exec /bin/sh
+fi
+
+echo "[DuckOS initramfs] no shell found; power off or reboot from the boot menu"
+while :; do
+    sleep 60
+done

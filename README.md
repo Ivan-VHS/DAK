@@ -88,8 +88,25 @@ duckos file-age-hist DIRECTORY
 4. **Свой код — человеческий.** Небольшие функции, понятные имена, явная обработка ошибок, минимум абстракций ради абстракций.
 5. **Свои лицензии остаются своими.** Каждый federation submodule сохраняет исходный LICENSE; корневые файлы DuckOS лицензированы отдельно.
 
-## Текущее ограничение
+## Native platform bring-up
 
-В этой версии ещё нет собственного kernel, bootloader, initramfs, Wayland compositor, package manager, драйверного ABI, аппаратного GPU-ускорения оболочки, sandbox для AI-агента или установочного образа. Они описаны как отдельные будущие подсистемы, а не заявлены как готовая функциональность.
+Ветка work/native-os-foundation добавляет отдельный нативный контур DuckOS поверх пользовательской оболочки и Linux-инструментов. Исходники и инструкции находятся в каталоге [native](https://github.com/Ivan-VHS/DuckOS/tree/work/native-os-foundation/native).
 
-См. архитектуру, матрицу функций, безопасность и дорожную карту в каталоге docs.
+| Подсистема | Реализовано в этой ветке | Что ещё не готово |
+|---|---|---|
+| Kernel / Limine | Freestanding x86-64 ELF, ранняя serial-консоль, карта памяти, framebuffer, обнаружение и проверка initramfs | Аллокаторы, IDT/APIC, прерывания, процессы, планировщик, VFS и драйверы |
+| Boot / initramfs | Конфигурация Limine, newc CPIO-сборщик, ранний init и валидация архива | Распаковка в RAM и запуск PID 1 ядром |
+| Wayland | wlroots compositor bring-up и отдельный EGL/GLES shell-клиент с опросом GL_RENDERER | Input seat, фокус, полная логика оболочки и GPU-драйверы собственного kernel |
+| Packages / driver ABI | Локальный SHA-256-проверяющий пакетный store и версия ABI 1.0 | Подписанные репозитории, зависимости, модульный загрузчик и kernel device model |
+| AI sandbox | Linux-обёртка Bubblewrap с отдельными namespace и лимитами | Собственный syscall policy и изоляция на уровне DuckOS kernel |
+| ISO | Скрипт подготовки BIOS/UEFI boot-test image | Установщик разделов, recovery/rollback и проверенный desktop boot |
+
+Это ранняя нативная bring-up ветка, а не готовая ОС для повседневной установки. GPU-ускорение через Mesa/wlroots доступно только при запуске compositor на подходящем Linux-хосте; собственный kernel DuckOS пока не содержит DRM/GPU-драйверов. Подробные границы реализации и следующие инженерные этапы описаны в [native/README.md](https://github.com/Ivan-VHS/DuckOS/blob/work/native-os-foundation/native/README.md).
+
+Базовая сборка (Linux x86-64, Clang/LLD):
+
+~~~bash
+make -C native kernel initramfs test
+~~~
+
+Сборка Wayland compositor требует wlroots 0.18 и Wayland development headers. ISO требует Limine BIOS/UEFI assets, xorriso и Limine host utility; см. [инструкцию](https://github.com/Ivan-VHS/DuckOS/blob/work/native-os-foundation/native/README.md).
