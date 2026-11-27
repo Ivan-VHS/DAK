@@ -1,0 +1,45 @@
+{
+  "schema": "ivan-vhs.ecosystem-cloud-adapter.v1",
+  "version": 1,
+  "project": "duckos",
+  "project_key": "duckos",
+  "shared_contract": "ivan-vhs.ecosystem-cloud.v1",
+  "shared_contract_version": 1,
+  "status": "contract-only",
+  "runtime": {
+    "default_network_mode": "disabled",
+    "user_opt_in_required": true,
+    "boot_requires_network": false,
+    "shell_requires_network": false,
+    "supabase_transport": "not-implemented",
+    "secret_source": "external-secret-store-only"
+  },
+  "publish_allowlist": [
+    "user-selected-preferences",
+    "app-catalog-metadata",
+    "project-references",
+    "user-published-release-metadata"
+  ],
+  "denylist": [
+    "local-files",
+    "credentials",
+    "boot-secrets",
+    "kernel-memory",
+    "private-kernel-logs",
+    "device-serial-numbers",
+    "access-tokens",
+    "service-role-keys"
+  ],
+  "synchronization": {
+    "local_source_of_truth": true,
+    "upload_requires_user_action": true,
+    "retry": "bounded-idempotent",
+    "idempotency": "actor_id+client_instance_id+event_id",
+    "conflicts": "preference-specific-explicit-resolution"
+  },
+  "compatibility": {
+    "native_os_runtime": "Reaper-driven-DuckOS",
+    "sdk_dependency": false,
+    "boot_and_shell_offline": true
+  }
+}
