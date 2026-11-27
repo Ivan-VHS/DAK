@@ -25,6 +25,39 @@ export craft thermal_balance_valid(current_millic, next_millic, maximum_step_mil
     yield difference <= maximum_step_millic
 }
 
+# Одноузловая тепловая модель: ΔTмК = (Pвх − Pвых)мВт × Δtнс / (CмДж/°C × 1 000 000).
+# Это оценка для регулирования; пределы датчиков и реальные задержки задаёт драйвер.
+export craft thermal_model_prediction(current_temp_millic, heat_in_mw, heat_out_mw, thermal_capacity_mj_per_c, duration_ns) {
+    make maximum := 9223372036854775807
+    when current_temp_millic < -100000 or current_temp_millic > 250000 or heat_in_mw < 0 or heat_out_mw < 0 or thermal_capacity_mj_per_c <= 0 or duration_ns <= 0 {
+        yield [-1, false]
+    }
+    when thermal_capacity_mj_per_c > maximum / 1000000 {
+        yield [-1, false]
+    }
+    make divisor := thermal_capacity_mj_per_c * 1000000
+    vary heating := heat_in_mw >= heat_out_mw
+    vary net_power_mw := heat_in_mw - heat_out_mw
+    when not heating {
+        change net_power_mw := heat_out_mw - heat_in_mw
+    }
+    when net_power_mw > 0 and duration_ns > maximum / net_power_mw {
+        yield [-1, false]
+    }
+    make energy_scaled := net_power_mw * duration_ns
+    make delta_millic := energy_scaled / divisor
+    when heating {
+        when delta_millic > 250000 - current_temp_millic {
+            yield [-1, false]
+        }
+        yield [current_temp_millic + delta_millic, true]
+    }
+    when delta_millic > current_temp_millic + 100000 {
+        yield [-1, false]
+    }
+    yield [current_temp_millic - delta_millic, true]
+}
+
 export craft frequency_step_valid(current_khz, requested_khz, maximum_step_khz) {
     when current_khz <= 0 or requested_khz <= 0 or maximum_step_khz <= 0 {
         yield false
@@ -102,7 +135,7 @@ export craft acoustic_profile_action(temperature_millic, safe_limit_millic, requ
 }
 
 export craft cooling_failure_action(previous_millic, current_millic, throttle_active, emergency_limit_millic) {
-    when previous_millic < -100000 or previous_millic > 250000 or current_millic < -100000 or current_millic > 250000 or emergency_limit_millic <= -100000 {
+    when previous_millic < -100000 or previous_millic > 250000 or current_millic < -100000 or current_millic > 250000 or emergency_limit_millic <= -100000 or emergency_limit_millic > 250000 {
         yield "invalid-thermal-reading"
     }
     when current_millic < previous_millic or current_millic < emergency_limit_millic {
@@ -129,7 +162,7 @@ export craft ambient_limit(warning_limit_millic, ambient_millic, nominal_ambient
 }
 
 export craft battery_charge_current(temp_millic, normal_current_ma, hot_limit_millic, cold_limit_millic, hot_percent) {
-    when normal_current_ma < 0 or cold_limit_millic >= hot_limit_millic or hot_percent < 0 or hot_percent > 100 {
+    when temp_millic < -100000 or temp_millic > 250000 or normal_current_ma < 0 or cold_limit_millic >= hot_limit_millic or hot_percent < 0 or hot_percent > 100 {
         yield ["invalid", 0]
     }
     when hot_percent > 0 and normal_current_ma > 9223372036854775807 / hot_percent {
@@ -145,7 +178,7 @@ export craft battery_charge_current(temp_millic, normal_current_ma, hot_limit_mi
 }
 
 export craft battery_voltage_limit(temp_millic, normal_limit_mv, hot_limit_millic, reduced_limit_mv) {
-    when normal_limit_mv <= 0 or reduced_limit_mv <= 0 or reduced_limit_mv > normal_limit_mv {
+    when temp_millic < -100000 or temp_millic > 250000 or normal_limit_mv <= 0 or reduced_limit_mv <= 0 or reduced_limit_mv > normal_limit_mv {
         yield -1
     }
     when temp_millic >= hot_limit_millic {
@@ -186,6 +219,9 @@ export craft low_battery_action(charge_percent, critical_percent) {
 }
 
 export craft storage_io_action(temperature_millic, safe_limit_millic, background_write_rate, maximum_background_rate) {
+    when temperature_millic < -100000 or temperature_millic > 250000 or safe_limit_millic < -100000 or safe_limit_millic > 250000 {
+        yield "invalid-storage-temperature"
+    }
     when temperature_millic >= safe_limit_millic {
         yield "pause-background-writes"
     }
