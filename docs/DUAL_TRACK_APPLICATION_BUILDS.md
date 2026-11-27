@@ -12,7 +12,7 @@ The GitHub Actions workflow `.github/workflows/application-build-matrix.yml` bui
 - OPlague: read-only user-space workbench validation and source payload.
 - Mora: catalogue and shell contract tests on Linux.
 
-Artifacts are labelled by host OS and architecture. They are development/workbench builds, not Duck-native executables. The existing `release-iso.yml` remains the Linux x86_64 source-pinned ecosystem ISO build and QEMU BIOS/UEFI boot-validation pipeline.
+Each workbench receives a separate host/architecture-labelled archive (Reaper, Pytyliki, VentuSample and the OPlague source snapshot). These are reproducible CI build bundles, not end-user installers and not Duck-native executables. The existing `release-iso.yml` remains the Linux x86_64 source-pinned ecosystem ISO build and QEMU BIOS/UEFI boot-validation pipeline.
 
 ## Track B — Duck-native application builds
 
