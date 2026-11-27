@@ -28,7 +28,7 @@
       "id": "reaper",
       "repository": "Ivan-VHS/Reaper",
       "path": "projects/reaper",
-      "commit": "02c6cda6bc67f7b9323e1635477efe15fe2bf4c0",
+      "commit": "188b6782c9b672624891a14fff08d337e78092ea",
       "license": "Apache-2.0",
       "build": "CMake / C17 native CLI and FFI",
       "scope": "user-space language and toolchain"
@@ -37,7 +37,7 @@
       "id": "pytyliki",
       "repository": "Ivan-VHS/Pytyliki",
       "path": "projects/pytyliki",
-      "commit": "4f679d24d4073cfac5fd4ec566b0f070dd4756d5",
+      "commit": "fcf9843bea20c8b6a2708f49c399bd8dfef31fba",
       "license": "MIT",
       "build": "CMake / C11 native CLI and FFI",
       "scope": "user-space compute tools and host inspection"
@@ -46,7 +46,7 @@
       "id": "oplague",
       "repository": "Ivan-VHS/OPlague",
       "path": "projects/oplague",
-      "commit": "3524ea00d99a57ee408733557a01ccbca07b8e9e",
+      "commit": "b04346240171b9bfe7e723ae08db040cc0174c64",
       "license": "Apache-2.0",
       "build": "Python 3.12 / Tk user-space application and tests",
       "scope": "read-only host device and driver evidence"
@@ -55,7 +55,7 @@
       "id": "ventusample",
       "repository": "Ivan-VHS/VentuSample",
       "path": "projects/ventusample",
-      "commit": "45aeba3b78359bb4a3ef82d61315c962408563e7",
+      "commit": "d2831b1481dcdee07cd1ab2c4e23055314a7bdfb",
       "license": "Apache-2.0",
       "build": "C++20 / C11 DSP / optional Qt 6 desktop",
       "scope": "offline-by-default audio and DSP"

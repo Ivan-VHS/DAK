@@ -17,7 +17,7 @@ try {
 
   const response = await page.goto(new URL("/mora/", baseUrl).href, { waitUntil: "networkidle" });
   assert.equal(response?.status(), 200, "Mora desktop HTML must load");
-  assert.equal(await page.title(), "Mora — DuckOS");
+  assert.equal(await page.title(), "DAK Desktop — Ivan-VHS");
 
   for (const project of projects) {
     await page.locator('[data-app="' + project.id + '"]').click();
@@ -36,7 +36,7 @@ try {
   await page.locator('.app-tile[data-app="workspace"]').click();
   await page.locator('.app-window[data-window="workspace"]').waitFor({ state: "visible" });
   assert.equal(pageErrors.length, 0, "Mora must not produce uncaught browser errors: " + pageErrors.join("; "));
-  console.log("Mora browser smoke test passed: desktop loaded, four native workbench panels opened, source links resolved, windows closed.");
+  console.log("DAK desktop browser smoke test passed: desktop loaded, four native workbench panels opened, source links resolved, windows closed.");
 } finally {
   await browser.close();
 }

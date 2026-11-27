@@ -36,6 +36,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 
 - [Unified documentation and semantics standard](UNIFIED_DOCUMENTATION_STANDARD.md) — maturity, runtime state, evidence and terminology.
 - [Language quality standard](LANGUAGE_QUALITY.md) — editorial conventions and diagnostic scope.
+- [Ecosystem branch consolidation v1](ECOSYSTEM_BRANCH_CONSOLIDATION_V1.md) — verified five-repository branch inventory, merge dependency graph, mainline rulesets and release-safe execution procedure.
 
 ### 4. Runnable prototypes and evidence
 
@@ -46,7 +47,7 @@ This map is the canonical navigation graph for DuckOS. It describes the document
 
 ## Dependency and cross-repository boundaries
 
-DuckOS may link to specialist repositories, but a link is not evidence of shared source, ABI compatibility, native launchability or feature parity. Cross-repository integration must name the interface, version and verification evidence.
+DAK may link to specialist repositories, but a link is not evidence of shared source, ABI compatibility, native launchability or feature parity. Cross-repository integration must name the interface, version and verification evidence.
 
 ## Growth rules
 
