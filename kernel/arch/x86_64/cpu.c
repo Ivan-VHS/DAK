@@ -2,6 +2,11 @@
 
 #include <stddef.h>
 
+static void zero_bytes(void *memory, size_t size) {
+    unsigned char *bytes = (unsigned char *)memory;
+    for (size_t i = 0U; i < size; ++i) bytes[i] = 0U;
+}
+
 #if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))
 #include <intrin.h>
 static void cpuid_query(uint32_t leaf, uint32_t subleaf,
@@ -53,7 +58,7 @@ static uint32_t max_value(uint32_t left, uint32_t right) {
 
 int duckos_x86_64_cpu_probe(duckos_x86_64_cpu_info *out) {
     if (out == NULL) return 0;
-    memset(out, 0, sizeof(*out));
+    zero_bytes(out, sizeof(*out));
 
     uint32_t a = 0U, b = 0U, c = 0U, d = 0U;
     cpuid_query(0U, 0U, &a, &b, &c, &d);
