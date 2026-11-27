@@ -311,6 +311,7 @@ public:
             QLabel[role="eyebrow"] { color: #FFD700; font-size: 8pt; font-weight: 700; letter-spacing: 1px; }
             QPushButton { color: #FFFFFF; background: #171717; border: 1px solid #343434; border-radius: 10px; padding: 9px 14px; }
             QPushButton:hover { border-color: #FFD700; background: #2B281A; }
+            QPushButton:focus { border: 2px solid #FFE6A3; }
             QPlainTextEdit, QTreeWidget { background: #101010; color: #FFFFFF; border: 1px solid #343434; border-radius: 10px; padding: 8px; selection-background-color: #2B2200; }
             QHeaderView::section { background: #171717; color: #FFD700; border: 0; padding: 7px; }
         )")));
@@ -606,6 +607,7 @@ private:
             QFrame#softPanel { background: rgba(36,36,36,218); border: 1px solid #343434; border-radius: 14px; }
             QPushButton { color: #FFFFFF; background: #101010; border: 1px solid #343434; border-radius: 10px; padding: 9px 12px; text-align: left; }
             QPushButton:hover { border-color: #FFD700; background: #222016; }
+            QPushButton:focus { border: 2px solid #FFE6A3; }
             QPushButton:checked { color: #050505; background: #FFD700; border-color: #FFD700; }
             QPushButton:disabled { color: #777777; background: #171717; border-color: #303030; }
             QPushButton#appTile { background: rgba(21,21,21,235); border-radius: 14px; min-height: 78px; }
