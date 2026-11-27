@@ -12,6 +12,8 @@ int main(void) {
     assert(info.logical_processors_per_package >= 1U);
     assert(info.physical_cores_per_package >= 1U);
     assert(info.smt_threads_per_core >= 1U);
+    const uint32_t known_features = (UINT32_C(1) << 15) - 1U;
+    assert((info.features & ~known_features) == 0U);
     printf("x86_64 CPU probe: %.12s family=%u model=%u stepping=%u logical=%u cores=%u features=0x%x\n",
            info.vendor, info.family, info.model, info.stepping,
            info.logical_processors_per_package,
