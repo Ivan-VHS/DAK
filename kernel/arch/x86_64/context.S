@@ -3,6 +3,7 @@
 .global duckos_x86_64_context_switch
 .type duckos_x86_64_context_switch, @function
 duckos_x86_64_context_switch:
+    pushfq
     pushq %rbx
     pushq %rbp
     pushq %r12
@@ -19,6 +20,7 @@ duckos_x86_64_context_switch:
     popq %r12
     popq %rbp
     popq %rbx
+    popfq
     ret
 .size duckos_x86_64_context_switch, .-duckos_x86_64_context_switch
 .section .note.GNU-stack,"",@progbits
