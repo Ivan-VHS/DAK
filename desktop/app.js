@@ -17,9 +17,18 @@
     'Reaper': 'Язык программирования, reference runtime и локальная Studio.',
     'OPlague': 'Read-only инвентаризация устройств и проверка метаданных драйверов.',
     'VentuSample': 'Генерация сэмплов и офлайн-обработка аудио.',
+    'Cockos': 'Системный граф аудио: обнаружение портов PipeWire и безопасное соединение потоков.',
+    'Kavun': 'Планировщик тайловых, сеточных и плавающих геометрий окон.',
+    'Ka-bon': 'Контекстные сочетания клавиш и маршрутизация разрешённых действий.',
+    'Gloverty': 'Семантические палитры и аудит контрастности интерфейса.',
+    'Po': 'Поиск зарегистрированных системных команд без выполнения произвольной shell-строки.',
+    'Illidia': 'Контрольные точки настроек и рабочего пространства с проверкой целостности.',
+    'Unify': 'Профили, общая конфигурация и событийная шина пользовательских служб.',
     'Профиль': 'Локальная учётная запись и настройки пользовательской сессии.',
     'Проект DuckOS': 'Архитектура и пользовательская оболочка DuckOS.'
   };
+
+  const coreServiceApps = new Set(['Cockos', 'Kavun', 'Ka-bon', 'Gloverty', 'Po', 'Illidia', 'Unify']);
 
   function showToast(message) {
     toast.textContent = message;
@@ -36,7 +45,9 @@
 
     const details = description || appDetails[name] || 'Локальное приложение DuckOS.';
     document.getElementById('dialogTitle').textContent = name;
-    document.getElementById('dialogSubtitle').textContent = 'Приложение DuckOS';
+    document.getElementById('dialogSubtitle').textContent = coreServiceApps.has(name)
+      ? 'DuckOS Core Services · пользовательский прототип'
+      : 'Приложение DuckOS';
     document.getElementById('dialogHeading').textContent = name;
     document.getElementById('dialogDescription').textContent = details;
     if (typeof appDialog.showModal === 'function' && !appDialog.open) appDialog.showModal();

@@ -30,6 +30,8 @@ jobs:
         run: python -m compileall -q native
       - name: Run native tests
         run: python -m unittest discover -s native/tests -v
+      - name: Run DuckOS core service tests
+        run: PYTHONPATH=native/services python -m unittest discover -s native/services/tests -v
       - name: Check ISO builder shell syntax
         run: bash -n native/scripts/build-iso.sh
       - name: Check public driver ABI header

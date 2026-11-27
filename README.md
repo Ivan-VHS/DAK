@@ -10,6 +10,7 @@ DuckOS задуман как самостоятельная рабочая ср�
 
 - **DuckOS Shell** — адаптивный рабочий стол с окнами-приложениями, доком, палитрой команд, быстрыми настройками, уведомлениями, переключением темы и Reduce Motion.
 - **DuckOS Tools** — Python 3.10+ CLI без сторонних runtime-зависимостей. В наборе: монитор CPU/RAM/swap/interrupts, просмотр FD по PID, mmap benchmark с page faults, сравнение деревьев каталогов, безопасный дамп process environment, поиск дисковых hotspots, аудит mount flags, карта OOM scores, анализ IRQ, clock jitter, entropy gauge, snapshot системы, атомарная запись, поиск проблемных symlink, гистограмма возраста файлов и probe размера страницы.
+- **Core Services** — Cockos (PipeWire audio routing), Kavun (window geometry), Ka-bon (contextual shortcuts), Gloverty (themes and contrast), Po (safe command registry), Illidia (session snapshots) и Unify (profiles and event bus). Это пользовательский сервисный слой, а не модули freestanding-ядра.
 - **Federation** — Pytyliki, Reaper, OPlague и VentuSample подключаются как Git submodules. История, лицензия и собственная сборка каждого проекта остаются на месте.
 - **Release hygiene** — CI, тесты базовых операций, схема федерации, архитектурные и security-заметки.
 
@@ -41,6 +42,7 @@ python -m http.server 4173 --directory desktop
 
 ~~~bash
 python -m unittest discover -s tools/tests -v
+make -C native services-test
 ~~~
 
 ## Репозитории внутри DuckOS
@@ -100,8 +102,11 @@ duckos file-age-hist DIRECTORY
 | Packages / driver ABI | Локальный SHA-256-проверяющий пакетный store и версия ABI 1.0 | Подписанные репозитории, зависимости, модульный загрузчик и kernel device model |
 | AI sandbox | Linux-обёртка Bubblewrap с отдельными namespace и лимитами | Собственный syscall policy и изоляция на уровне DuckOS kernel |
 | ISO | Скрипт подготовки BIOS/UEFI boot-test image | Установщик разделов, recovery/rollback и проверенный desktop boot |
+| Core Services | Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify user-space prototypes | Binding to compositor/seat, shared theme provider and authenticated IPC |
 
 Это ранняя нативная bring-up ветка, а не готовая ОС для повседневной установки. GPU-ускорение через Mesa/wlroots доступно только при запуске compositor на подходящем Linux-хосте; собственный kernel DuckOS пока не содержит DRM/GPU-драйверов. Подробные границы реализации и следующие инженерные этапы описаны в [native/README.md](https://github.com/Ivan-VHS/DuckOS/blob/work/native-os-foundation/native/README.md).
+
+Core Services CLI: `PYTHONPATH=native/services python -m duckos_services status`. Подробности и ограничения: [docs/CORE_SERVICES.md](docs/CORE_SERVICES.md).
 
 Базовая сборка (Linux x86-64, Clang/LLD):
 
