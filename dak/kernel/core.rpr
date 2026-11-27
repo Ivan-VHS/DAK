@@ -267,7 +267,7 @@ craft application_valid(application, address_limit) {
 }
 
 export craft application_register(prepared, registered_apps, address_limit) {
-    when prepared[2] != "staged" or not application_valid(prepared, address_limit) {
+    when not application_valid(prepared, address_limit) or prepared[2] != "staged" {
         yield ["ERR", "application-not-ready-for-registration"]
     }
     each existing in registered_apps {
@@ -292,7 +292,7 @@ export craft application_register(prepared, registered_apps, address_limit) {
 }
 
 export craft application_activate(application, verdicts, address_limit) {
-    when application[2] != "staged" or not application_valid(application, address_limit) {
+    when not application_valid(application, address_limit) or application[2] != "staged" {
         yield ["ERR", "application-state-invalid"]
     }
     when size(verdicts) != 5 or size(application[3]) != 5 {
@@ -314,7 +314,7 @@ export craft application_activate(application, verdicts, address_limit) {
 }
 
 export craft sector_ipc_decision(application, source_id, target_id, operation, grants, address_limit) {
-    when application[2] != "active" or not application_valid(application, address_limit) or source_id == target_id {
+    when not application_valid(application, address_limit) or application[2] != "active" or source_id == target_id {
         yield "deny-application-or-route"
     }
     when operation != "send" and operation != "receive" {
