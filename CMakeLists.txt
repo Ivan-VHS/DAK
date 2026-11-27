@@ -12,13 +12,16 @@ add_library(duckos_boot_contract STATIC
     foundation/boot_info.h
     foundation/frame_allocator.c
     foundation/frame_allocator.h
+    kernel/core/invariants.c
+    kernel/core/invariants.h
     foundation/idt.c
     foundation/idt.h
     foundation/gdt_descriptor.c
     foundation/gdt_descriptor.h
 )
-target_include_directories(duckos_boot_contract PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/foundation
+target_include_directories(duckos_boot_contract
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/foundation
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/kernel/core
 )
 
 if(MSVC)
@@ -49,6 +52,9 @@ if(BUILD_TESTING)
 
     add_executable(duckos_frame_allocator_tests tests/test_frame_allocator.c)
     target_link_libraries(duckos_frame_allocator_tests PRIVATE duckos_boot_contract)
+    target_include_directories(duckos_frame_allocator_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/core
+    )
     if(MSVC)
         target_compile_options(duckos_frame_allocator_tests PRIVATE /W4 /sdl)
     else()
@@ -76,6 +82,18 @@ if(BUILD_TESTING)
         target_compile_options(duckos_gdt_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-x86-64-gdt-tss COMMAND duckos_gdt_tests)
+
+    add_executable(duckos_kernel_invariant_tests tests/test_kernel_invariants.c)
+    target_link_libraries(duckos_kernel_invariant_tests PRIVATE duckos_boot_contract)
+    target_include_directories(duckos_kernel_invariant_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/kernel/core
+    )
+    if(MSVC)
+        target_compile_options(duckos_kernel_invariant_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_kernel_invariant_tests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME duckos-kernel-invariants COMMAND duckos_kernel_invariant_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")

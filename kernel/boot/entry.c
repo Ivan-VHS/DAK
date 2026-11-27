@@ -4,6 +4,7 @@
 #include "boot_info.h"
 #include "idt.h"
 #include "frame_allocator.h"
+#include "invariants.h"
 #include "limine.h"
 #include "interrupts.h"
 #include "gdt.h"
@@ -391,7 +392,8 @@ static int initialize_early_memory(uint32_t memory_region_count) {
     if (duckos_frame_allocator_allocate(
             &early_frame_allocator,
             &first_frame_phys
-        ) != DUCKOS_FRAME_ALLOCATOR_OK) {
+        ) != DUCKOS_FRAME_ALLOCATOR_OK ||
+        !duckos_frame_allocator_accounting_valid(&early_frame_allocator)) {
         return 0;
     }
 
@@ -535,8 +537,14 @@ void _start(void) {
 
     serial_write("memory=early-frame-allocator page_size=4096 usable_pages=");
     serial_decimal(early_frame_allocator.total_pages);
+    serial_write(" free_pages=");
+    serial_decimal(early_frame_allocator.total_pages - early_frame_allocator.allocated_pages);
     serial_write(" allocated_pages=");
     serial_decimal(early_frame_allocator.allocated_pages);
+    serial_write(" reserved_pages=");
+    serial_decimal(early_frame_allocator.reserved_pages);
+    serial_write(" managed_pages=");
+    serial_decimal(early_frame_allocator.managed_pages);
     serial_write(" first_frame_phys=");
     serial_hex(first_frame_phys);
     serial_write("\n");
@@ -554,6 +562,6 @@ void _start(void) {
         serial_write("framebuffer=unavailable; serial console remains active\n");
     }
 
-    serial_write("DUCKOS_BOOT_OK stage=1 handoff=v1 frames=1 reaper_policy=reference-only\n");
+    serial_write("DUCKOS_BOOT_OK stage=1 handoff=v1 frames=1 memory_accounting=verified reaper_policy=reference-only\n");
     halt_forever();
 }

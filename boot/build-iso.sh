@@ -107,7 +107,7 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
     -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
     -mgeneral-regs-only \
-    -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" -I "$ROOT/third_party/limine-protocol" \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/core" -I "$ROOT/kernel/arch/x86_64" -I "$ROOT/third_party/limine-protocol" \
     -c "$ROOT/kernel/boot/entry.c" -o "$WORK_DIR/objects/duckos-entry.o"
 
 gcc -std=c11 -O2 -Wall -Wextra -Werror \
@@ -123,7 +123,15 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
     -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
     -mgeneral-regs-only \
-    -I "$ROOT/foundation" \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/core" \
+    -c "$ROOT/kernel/core/invariants.c" -o "$WORK_DIR/objects/kernel-invariants.o"
+
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/core" \
     -c "$ROOT/foundation/frame_allocator.c" -o "$WORK_DIR/objects/frame-allocator.o"
 
 gcc -std=c11 -O2 -Wall -Wextra -Werror \
@@ -169,6 +177,7 @@ ld -nostdlib -static -z max-page-size=0x1000 \
     "$WORK_DIR/objects/duckos-entry.o" \
     "$WORK_DIR/objects/boot-info.o" \
     "$WORK_DIR/objects/frame-allocator.o" \
+    "$WORK_DIR/objects/kernel-invariants.o" \
     "$WORK_DIR/objects/idt.o" \
     "$WORK_DIR/objects/gdt-descriptor.o" \
     "$WORK_DIR/objects/gdt.o" \

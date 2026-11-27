@@ -19,7 +19,8 @@ See [x86-64 GDT/TSS/IST bootstrap v1](X86_64_GDT_TSS_IST_V1.md) for the owned bo
 | Reaper language core | system policy, service logic, deterministic decisions | executable on reference runtime |
 | Boot contract | ordered startup phases and recovery transitions | Reaper reference contract; stage-0 firmware handoff also exists |
 | x86_64 segmentation/IST | owned GDT, bootstrap TSS, RSP0 and dedicated double-fault/NMI/page-fault stacks | installed during boot; one bootstrap CPU only, no Ring 3 transition or APIC setup |
-| Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 range/map validation; not a physical allocator or page-table manager |
+| Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 validation and a native early frame allocator; page tables and reclaim remain pending |
+| Kernel invariant helpers | monotonic-step checks, exact page conservation, bounded wait-graph cycle detection, queue/range limits, capability subset, watchdog decisions, idempotent transitions and CRC-32 | freestanding C11 helpers are linked into the boot image and covered by native CTest; only frame-accounting validation is currently called by the bootstrap allocator |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
 | Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
@@ -47,7 +48,9 @@ The memory contract uses an exclusive upper bound and validates ranges before a 
 
 A new frame or event transaction reserves aligned spans and resets the cursor as one state transition. The current policy uses a 64-byte alignment boundary, matching the source specification's cache-line target. SoA layout computes padding to a supplied lane width and checks the resulting byte budget.
 
-These are arithmetic and lifecycle contracts, not physical page allocation. Page tables, MMIO mapping, DMA pinning, NUMA allocation, static ownership analysis, FBIP reuse and actual reclamation remain native-backend work.
+The bootstrap frame allocator now counts free, allocated and reserved complete RAM pages separately and validates `free + allocated + reserved = managed` before committing initialization or an allocation. The same invariant is checked after the first bootstrap allocation. Native helper routines also provide bounded cycle detection and common resource checks, but the wait-graph helper is not yet wired into a live kernel lock manager.
+
+The Reaper arena and SoA rules remain arithmetic and lifecycle contracts, not physical page allocation. Page tables, MMIO mapping, DMA pinning, NUMA allocation, static ownership analysis, FBIP reuse and actual reclamation remain native-backend work.
 
 ## Scheduling, flock and flow control
 
