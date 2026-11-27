@@ -23,19 +23,22 @@ The C11 scheduler provides a fixed-capacity kernel-side data model for up to 64 
 - round-robin tie-breaking within equal priority/deadline classes;
 - bounded tick accounting and a reschedule-pending signal;
 - CPU drain/offline checks which reject outstanding critical sections and threads pinned exclusively to the retiring CPU;
-- topology generation increments on successful CPU release.
+- topology generation increments on successful CPU release;
+- cooperative context dispatch through `duckos_scheduler_switch`, which saves the outgoing thread's stack pointer and selects the next eligible saved context;
+- an idle-context handoff, allowing a blocked or exited thread to return to its previously saved idle call frame.
 
 The scheduler is a bounded native core, not yet a production preemptive SMP scheduler. It still needs per-CPU run queues, inter-processor interrupts, work stealing/load balancing, an interrupt-safe timer entry, wait/wake queues, priority inheritance and integration into the booted runtime.
 
 ### x86_64 architecture helpers
 
 - `kernel/arch/x86_64/cpu.[ch]` probes CPUID vendor/family/model/stepping, logical/core counts and feature bits. AVX/AVX2/AVX-512 are reported only when OSXSAVE and the required XCR0 state are present.
-- `kernel/arch/x86_64/context.[ch]` builds a bounded initial thread stack frame.
-- `kernel/arch/x86_64/context.S` provides a real x86_64 general-register context-switch primitive, saving/restoring the ABI-preserved integer registers and stack pointer.
+- `kernel/arch/x86_64/context.[ch]` builds a bounded initial thread stack frame with a System V entry-stack alignment and an explicit initial RFLAGS value.
+- `kernel/arch/x86_64/context.S` provides a real x86_64 context-switch primitive, saving/restoring the ABI-preserved integer registers, RFLAGS and stack pointer.
+- `duckos_x86_64_scheduler_platform` supplies the x86_64 scheduler callbacks for interrupt save/restore and the assembly context switch. Its interrupt helpers are privileged and are intended for ring 0 only.
 - Hosted C tests exercise scheduler admission, topology generations, selection, drain and the assembly context-switch primitive.
 - The Stage 1 ISO build script compiles and links the scheduler, CPU probe and context-switch objects. CMake exposes a native processor runtime target and corresponding tests.
 
-The context-switch primitive is GPR-only v1. It does not yet save/restore FPU/SSE/AVX state, debug registers, full interrupt frames or address-space state. The scheduler and context-switch primitive are not yet wired into `kernel/boot/entry.c`; compiling them into the ELF is not equivalent to running them.
+The context-switch primitive is integer-register + RFLAGS v1. It does not yet save/restore FPU/SSE/AVX state, debug registers, full interrupt frames or address-space state. The scheduler and context-switch primitive are not yet wired into `kernel/boot/entry.c`; compiling them into the ELF is not equivalent to running them. The current scheduler uses a bounded shared ready table protected by one spinlock; per-CPU run queues and lock-free/work-stealing paths remain future optimization work.
 
 ## Processor ownership
 
@@ -69,7 +72,7 @@ The target lifecycle is:
 
 `firmware → bootstrap CPU → per-CPU resources → local APIC/timer → AP startup → scheduler admission → SMP operation`
 
-The native scheduler refuses to admit a secondary CPU until the bootstrap CPU is online and its startup evidence includes GDT, IDT, a unique stack, per-CPU data, local controller readiness and an AP trampoline. This is a readiness gate only: the current boot path does not yet discover ACPI MADT processor entries, map/configure the local APIC, send INIT/SIPI or execute a real AP trampoline.
+The native scheduler refuses to admit a secondary CPU until the bootstrap CPU is online and its startup evidence includes GDT, IDT, a unique stack, per-CPU data, local controller readiness and an AP trampoline. This is a readiness gate only: the current boot path does not yet discover ACPI MADT processor entries, map/configure the local APIC, send INIT/SIPI or execute a real AP trampoline. The callback route now connects scheduler state transitions to the tested stack-switch primitive, but there is not yet a boot-time caller or timer/IPI integration.
 
 Core removal requires zero runnable/affinity-pinned work, active interrupt handlers, held locks, preemption depth and DMA leases. Hotplug increments the topology generation and invalidates stale snapshots.
 
