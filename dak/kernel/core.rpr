@@ -215,12 +215,63 @@ export craft application_create(app_id, descriptors, address_limit) {
     yield ["OK", ["application", app_id, "staged", sectors]]
 }
 
-export craft application_register(prepared, registered_apps) {
-    when size(prepared) != 4 or prepared[0] != "application" or prepared[2] != "staged" or size(prepared[3]) != 5 {
+craft application_valid(application, address_limit) {
+    when size(application) != 4 or application[0] != "application" or size(application[3]) != 5 {
+        yield false
+    }
+    when application[1] < 1 or application[1] > 42949672 or (application[2] != "staged" and application[2] != "active") {
+        yield false
+    }
+
+    vary seen_kinds := []
+    vary checked_sectors := []
+    each sector in application[3] {
+        when size(sector) != 9 or sector[0] != "sector" or sector[1] != application[1] {
+            yield false
+        }
+        when sector[2] < 1 or sector[2] > 5 or sector[3] != application[1] * 100 + sector[2] {
+            yield false
+        }
+        when sector[7] != application[2] or sector[6] < 1 or sector[6] > sector[5] {
+            yield false
+        }
+        when not memory["region_fits"](sector[4], sector[5], address_limit, 4096) {
+            yield false
+        }
+        when not passport_valid(sector[8], address_limit, 4096) {
+            yield false
+        }
+        when sector[8][2] != 30 or sector[8][3] != 19 or sector[8][4] < 1 or sector[8][5] != sector[3] or sector[8][6] != sector[4] or sector[8][7] != sector[5] {
+            yield false
+        }
+        each previous_kind in seen_kinds {
+            when previous_kind == sector[2] { yield false }
+        }
+        each previous_sector in checked_sectors {
+            when memory["ranges_overlap"](previous_sector[4], previous_sector[5], sector[4], sector[5]) {
+                yield false
+            }
+        }
+        change seen_kinds := push(seen_kinds, sector[2])
+        change checked_sectors := push(checked_sectors, sector)
+    }
+
+    each required_kind in [1, 2, 3, 4, 5] {
+        vary found := false
+        each actual_kind in seen_kinds {
+            when actual_kind == required_kind { change found := true }
+        }
+        when not found { yield false }
+    }
+    yield true
+}
+
+export craft application_register(prepared, registered_apps, address_limit) {
+    when prepared[2] != "staged" or not application_valid(prepared, address_limit) {
         yield ["ERR", "application-not-ready-for-registration"]
     }
     each existing in registered_apps {
-        when size(existing) != 4 or existing[0] != "application" or size(existing[3]) != 5 {
+        when not application_valid(existing, address_limit) {
             yield ["ERR", "registered-application-record-invalid"]
         }
         when existing[1] == prepared[1] {
@@ -240,8 +291,8 @@ export craft application_register(prepared, registered_apps) {
     yield ["OK", push(registered_apps, prepared)]
 }
 
-export craft application_activate(application, verdicts) {
-    when size(application) != 4 or application[0] != "application" or application[2] != "staged" {
+export craft application_activate(application, verdicts, address_limit) {
+    when application[2] != "staged" or not application_valid(application, address_limit) {
         yield ["ERR", "application-state-invalid"]
     }
     when size(verdicts) != 5 or size(application[3]) != 5 {
@@ -262,8 +313,8 @@ export craft application_activate(application, verdicts) {
     yield ["OK", ["application", application[1], "active", active_sectors]]
 }
 
-export craft sector_ipc_decision(application, source_id, target_id, operation, grants) {
-    when size(application) != 4 or application[2] != "active" or source_id == target_id {
+export craft sector_ipc_decision(application, source_id, target_id, operation, grants, address_limit) {
+    when application[2] != "active" or not application_valid(application, address_limit) or source_id == target_id {
         yield "deny-application-or-route"
     }
     when operation != "send" and operation != "receive" {
