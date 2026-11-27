@@ -215,6 +215,31 @@ export craft application_create(app_id, descriptors, address_limit) {
     yield ["OK", ["application", app_id, "staged", sectors]]
 }
 
+export craft application_register(prepared, registered_apps) {
+    when size(prepared) != 4 or prepared[0] != "application" or prepared[2] != "staged" or size(prepared[3]) != 5 {
+        yield ["ERR", "application-not-ready-for-registration"]
+    }
+    each existing in registered_apps {
+        when size(existing) != 4 or existing[0] != "application" or size(existing[3]) != 5 {
+            yield ["ERR", "registered-application-record-invalid"]
+        }
+        when existing[1] == prepared[1] {
+            yield ["ERR", "duplicate-application-id", prepared[1]]
+        }
+        each candidate_sector in prepared[3] {
+            each existing_sector in existing[3] {
+                when memory["ranges_overlap"](
+                    candidate_sector[4], candidate_sector[5],
+                    existing_sector[4], existing_sector[5]
+                ) {
+                    yield ["ERR", "cross-application-memory-overlap", candidate_sector[3], existing_sector[3]]
+                }
+            }
+        }
+    }
+    yield ["OK", push(registered_apps, prepared)]
+}
+
 export craft application_activate(application, verdicts) {
     when size(application) != 4 or application[0] != "application" or application[2] != "staged" {
         yield ["ERR", "application-state-invalid"]
