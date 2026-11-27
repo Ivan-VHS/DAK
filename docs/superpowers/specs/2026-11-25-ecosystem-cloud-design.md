@@ -1,12 +1,12 @@
 # Ecosystem Cloud Foundation v1 — Design
 
 **Status:** approved by the implementation request; deployment remains pending a Supabase project.
-**Owner:** Ivan-VHS/DuckOS
+**Owner:** Ivan-VHS/DAKOS
 **Date:** 2026-11-25
 
 ## Intent
 
-Introduce one optional Supabase-backed identity and synchronization plane for DuckOS, Reaper, Pytyliki, OPlague and VentuSample. The cloud is an additional collaboration and backup boundary; local operation remains complete when the network, Auth or cloud database is unavailable.
+Introduce one optional Supabase-backed identity and synchronization plane for DAKOS, Reaper, Pytyliki, OPlague and VentuSample. The cloud is an additional collaboration and backup boundary; local operation remains complete when the network, Auth or cloud database is unavailable.
 
 ## Goals
 
@@ -28,7 +28,7 @@ Introduce one optional Supabase-backed identity and synchronization plane for Du
 
 ### Approaches considered
 
-1. **One central optional cloud plane (selected).** DuckOS owns the shared contract and database migrations; each repository owns a small adapter declaration and maps only approved metadata. This avoids schema drift while preserving domain boundaries.
+1. **One central optional cloud plane (selected).** DAKOS owns the shared contract and database migrations; each repository owns a small adapter declaration and maps only approved metadata. This avoids schema drift while preserving domain boundaries.
 2. **One Supabase project per repository.** Stronger database isolation, but duplicates identity, membership and operations and adds cross-project synchronization complexity.
 3. **Supabase SDK embedded in every application.** Rejected because it couples native C/C++/Reaper applications to a cloud vendor and encourages network assumptions in core workflows.
 
@@ -46,7 +46,7 @@ Introduce one optional Supabase-backed identity and synchronization plane for Du
 
 | Repository | Permitted cloud metadata | Never upload automatically |
 |---|---|---|
-| DuckOS | Account preferences explicitly selected for sync, app catalog metadata, project references | Local files, credentials, boot secrets, kernel memory or logs |
+| DAKOS | Account preferences explicitly selected for sync, app catalog metadata, project references | Local files, credentials, boot secrets, kernel memory or logs |
 | Reaper | Published package/contract metadata and user-selected documentation artifacts | Private source, tokens, local build outputs |
 | Pytyliki | User-selected summary profiles and aggregate reports | Serial numbers, raw device IDs, full hardware inventory |
 | OPlague | Sanitized report metadata and hashes | Driver binaries, INF payloads, signatures' private material, raw identifiers |
@@ -66,10 +66,10 @@ Introduce one optional Supabase-backed identity and synchronization plane for Du
 
 ## Migration and rollout
 
-1. Add the canonical JSON contract, JSON Schema, SQL migrations and local pgTAP tests to DuckOS.
+1. Add the canonical JSON contract, JSON Schema, SQL migrations and local pgTAP tests to DAKOS.
 2. Add repository-local adapter manifests, data policies and validation tests to each peer project.
 3. Run the local Supabase stack in CI with Supabase CLI 3.4.0; do not link CI to a hosted project.
-4. Review and merge the DuckOS foundation PR first, then the four consumer PRs in dependency order.
+4. Review and merge the DAKOS foundation PR first, then the four consumer PRs in dependency order.
 5. Create a hosted Supabase project only after the user connects/chooses an organization and approves any costs. Hosted migrations remain a distinct deployment step.
 
 ## Acceptance

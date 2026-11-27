@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-PORT="${DUCKOS_MORA_PORT:-8765}"
+PORT="${DAKOS_MORA_PORT:-8765}"
 URL="http://127.0.0.1:${{PORT}/mora/"
 
 command -v python3 >/dev/null 2>&1 || {

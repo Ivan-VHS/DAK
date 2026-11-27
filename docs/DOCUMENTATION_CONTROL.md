@@ -1,6 +1,6 @@
 # Documentation control
 
-**Scope:** DuckOS repository documentation, Markdown entry points, machine-readable contracts and cross-links.
+**Scope:** DAKOS repository documentation, Markdown entry points, machine-readable contracts and cross-links.
 
 This policy governs information quality; it does not define product behavior. Implementation claims must be supported by current source, schemas, tests or reproducible CI evidence.
 
@@ -14,7 +14,7 @@ This policy governs information quality; it does not define product behavior. Im
 | Navigation depth | Important pages stay within three to four clicks of the root README. | Root entry → documentation index → topic hub → detail page. |
 | No orphan pages | Important pages have at least two contextual incoming links. | Root/index or cluster hub plus a relevant neighbouring specification. |
 | Descriptive links | Link text identifies its destination and purpose. | No vague “here” anchors or keyword stuffing. |
-| Canonical paths | Use relative links inside DuckOS and canonical HTTPS links across repositories. | No machine-specific paths or duplicate local copies. |
+| Canonical paths | Use relative links inside DAKOS and canonical HTTPS links across repositories. | No machine-specific paths or duplicate local copies. |
 | Consistent terminology | README, topic hubs, schemas, code and tests agree on names and status. | Update dependent pages in the same change. |
 | Lifecycle maintenance | Update indexes when adding, renaming or removing documents. | Broken-link and stale-reference review. |
 | Accessibility | Keep heading order, link labels and navigation understandable on narrow screens and with assistive technology. | Keyboard and text-only review. |
@@ -40,4 +40,4 @@ Before merging documentation changes:
 4. Run the Markdown quality diagnostic and repository validation workflows where applicable.
 5. Preserve existing author, contributor, trademark and third-party license notices.
 
-See the [DuckOS documentation index](README.md) and [project overview](clusters/project-overview.md) for current navigation.
+See the [DAKOS documentation index](README.md) and [project overview](clusters/project-overview.md) for current navigation.

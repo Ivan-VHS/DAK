@@ -1,9 +1,9 @@
 {
-  "schema": "duckos.nexus-system-services.v1",
+  "schema": "dakos.nexus-system-services.v1",
   "version": 1,
   "identity": {
     "architecture": "NEXUS",
-    "operating_system": "DuckOS",
+    "operating_system": "DAKOS",
     "systems_language": "Reaper",
     "repository_identity_policy": "immutable",
     "scope": "Technical component ownership and internal system-service contracts for the Ivan-VHS repository federation."
@@ -12,7 +12,7 @@
     {
       "id": "kernel_core",
       "name": "KernelCore",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "provider_repositories": [],
       "maturity": "partial",
       "current_scope": [
@@ -36,14 +36,14 @@
     {
       "id": "nexus_shell",
       "name": "NexusShell",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "provider_repositories": [],
       "maturity": "partial",
       "current_scope": [
         "Mora local browser-host desktop, launcher, windows, preferences and application panels."
       ],
       "missing_capabilities": [
-        "Native shell session launched by the DuckOS kernel.",
+        "Native shell session launched by the DAKOS kernel.",
         "Native window server, input routing, compositor and kernel-backed application lifecycle."
       ],
       "evidence": [
@@ -57,7 +57,7 @@
     {
       "id": "audio_subsys",
       "name": "AudioSubsys",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "provider_repositories": [
         "Ivan-VHS/VentuSample"
       ],
@@ -66,7 +66,7 @@
         "VentuSample provides independent C++20 offline rendering, DSP, asset I/O and versioned pack/preset metadata."
       ],
       "missing_capabilities": [
-        "DuckOS audio-device discovery, native driver interface and session ownership.",
+        "DAKOS audio-device discovery, native driver interface and session ownership.",
         "Real-time callback scheduling, bounded device buffers and hardware-backed latency qualification."
       ],
       "evidence": [
@@ -82,7 +82,7 @@
     {
       "id": "security_module",
       "name": "SecurityModule",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "provider_repositories": [
         "Ivan-VHS/Reaper",
         "Ivan-VHS/OPlague"
@@ -90,7 +90,7 @@
       "maturity": "partial",
       "current_scope": [
         "Reaper reference capability and trust-state policies.",
-        "DuckOS BAV declarative bundle v1 format and schema.",
+        "DAKOS BAV declarative bundle v1 format and schema.",
         "OPlague read-only device, package, Authenticode, hash and telemetry evidence."
       ],
       "missing_capabilities": [
@@ -111,7 +111,7 @@
     {
       "id": "network_stack",
       "name": "NetworkStack",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "provider_repositories": [],
       "maturity": "specified",
       "current_scope": [
@@ -126,13 +126,13 @@
         "docs/IMPLEMENTATION_STATUS.md"
       ],
       "interfaces": [
-        "No native DuckOS network-service ABI is published."
+        "No native DAKOS network-service ABI is published."
       ]
     },
     {
       "id": "graphics_engine",
       "name": "GraphicsEngine",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "provider_repositories": [],
       "maturity": "partial",
       "current_scope": [
@@ -162,7 +162,7 @@
         "Experimental native C17 implementation with separate conformance maturity."
       ],
       "missing_capabilities": [
-        "Feature-equivalent native compiler and complete freestanding DuckOS backend.",
+        "Feature-equivalent native compiler and complete freestanding DAKOS backend.",
         "Self-hosting bootstrap and reproducible native link/load pipeline."
       ],
       "evidence": [
@@ -194,7 +194,7 @@
       "id": "kernel_sentinel",
       "name": "KERNEL_SENTINEL",
       "service_type": "internal_system_service",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "maturity": "specified",
       "runtime_state": "not_implemented",
       "execution_model": "planned_user_space_service",
@@ -218,8 +218,8 @@
         "Explicit unknown, unsupported, stale and failed-verification states."
       ],
       "host_technology_options": [
-        "TPM 2.0 may be an optional provider after a DuckOS driver and trust chain exist.",
-        "Linux IMA and eBPF are host-adapter options, not native DuckOS APIs."
+        "TPM 2.0 may be an optional provider after a DAKOS driver and trust chain exist.",
+        "Linux IMA and eBPF are host-adapter options, not native DAKOS APIs."
       ],
       "safety_boundary": "Read-only initially; process-memory scanning, injection prevention, quarantine, execution blocking and kernel enforcement are not implemented."
     },
@@ -227,7 +227,7 @@
       "id": "memory_forge",
       "name": "MEMORY_FORGE",
       "service_type": "internal_system_service",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "maturity": "specified",
       "runtime_state": "not_implemented",
       "execution_model": "planned_user_space_service",
@@ -259,7 +259,7 @@
       "id": "vector_gateway",
       "name": "VECTOR_GATEWAY",
       "service_type": "internal_system_service",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "maturity": "specified",
       "runtime_state": "not_implemented",
       "execution_model": "planned_user_space_service",
@@ -280,7 +280,7 @@
         "Dry-run rule plans until the native packet path exists."
       ],
       "host_technology_options": [
-        "nftables and XDP are Linux-host adapter options, not DuckOS kernel APIs.",
+        "nftables and XDP are Linux-host adapter options, not DAKOS kernel APIs.",
         "WireGuard requires a separately reviewed protocol and cryptographic implementation.",
         "DoH/DoT require a supported resolver and explicit trust policy."
       ],
@@ -290,7 +290,7 @@
       "id": "pixel_pipeline",
       "name": "PIXEL_PIPELINE",
       "service_type": "internal_system_service",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "maturity": "specified",
       "runtime_state": "not_implemented",
       "execution_model": "planned_user_space_service",
@@ -311,9 +311,9 @@
         "Frame timing and presentation diagnostics with provider provenance."
       ],
       "host_technology_options": [
-        "Vulkan is optional after a supported DuckOS backend and driver exist.",
-        "Wayland is a protocol compatibility option, not an assumed DuckOS compositor.",
-        "DRM/KMS is a Linux host boundary, not a native DuckOS subsystem."
+        "Vulkan is optional after a supported DAKOS backend and driver exist.",
+        "Wayland is a protocol compatibility option, not an assumed DAKOS compositor.",
+        "DRM/KMS is a Linux host boundary, not a native DAKOS subsystem."
       ],
       "safety_boundary": "Applications receive validated graphics resources, not arbitrary VRAM mappings; Mora browser rendering is not native composition."
     },
@@ -321,7 +321,7 @@
       "id": "data_orchestrator",
       "name": "DATA_ORCHESTRATOR",
       "service_type": "internal_system_service",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "maturity": "specified",
       "runtime_state": "not_implemented",
       "execution_model": "planned_user_space_service",
@@ -344,7 +344,7 @@
         "Validated scheduling and resource-policy decisions."
       ],
       "host_technology_options": [
-        "cgroups v2, Linux namespaces and systemd are not native DuckOS dependencies.",
+        "cgroups v2, Linux namespaces and systemd are not native DAKOS dependencies.",
         "A Linux compatibility adapter may be developed independently."
       ],
       "safety_boundary": "No process creation, priority mutation, container isolation or service supervision is exposed until the corresponding OS primitives are implemented and verified."
@@ -353,7 +353,7 @@
       "id": "build_vanguard",
       "name": "BUILD_VANGUARD",
       "service_type": "internal_system_service",
-      "owner_repository": "Ivan-VHS/DuckOS",
+      "owner_repository": "Ivan-VHS/DAKOS",
       "maturity": "specified",
       "runtime_state": "not_implemented",
       "execution_model": "planned_user_space_service",
@@ -382,13 +382,13 @@
     }
   ],
   "integration_invariants": [
-    "DuckOS and Reaper remain canonical OS and language names; component labels never rename repositories or public products.",
-    "Reaper owns language and policy semantics; DuckOS owns privileged kernel operations, service lifecycle and native enforcement.",
+    "DAKOS and Reaper remain canonical OS and language names; component labels never rename repositories or public products.",
+    "Reaper owns language and policy semantics; DAKOS owns privileged kernel operations, service lifecycle and native enforcement.",
     "No service is a runnable microservice until process isolation, service lifecycle, authenticated IPC and kernel-enforced capabilities exist.",
     "Cross-repository exchanges use existing versioned contracts or reviewed schemas with bounded payloads, provenance and typed failure states.",
     "Missing, stale, unsupported or invalid providers remain explicit; measurements and execution results are never invented.",
     "Default behavior is local-first and read-only; network access, process execution and privileged hardware actions require scoped authorization.",
-    "Linux-specific facilities are optional host adapters and do not silently become DuckOS kernel dependencies.",
+    "Linux-specific facilities are optional host adapters and do not silently become DAKOS kernel dependencies.",
     "Source, tests, CI output and target verification determine maturity; catalogs and architecture documents do not prove runtime behavior."
   ]
 }

@@ -28,7 +28,7 @@ def validate_manifest(data: Any) -> list[str]:
         "schema_version": "1.0.0",
         "owner": "Ivan-VHS",
         "catalogue_size": 1000,
-        "integration_host": "DuckOS",
+        "integration_host": "DAKOS",
     }
     for key, expected in expected_top_level.items():
         if data.get(key) != expected:
@@ -41,7 +41,7 @@ def validate_manifest(data: Any) -> list[str]:
     seen_projects: set[str] = set()
     seen_repositories: set[str] = set()
     seen_ids: dict[int, str] = {}
-    duckos_found = False
+    dakos_found = False
 
     for project in projects:
         if not isinstance(project, dict):
@@ -114,20 +114,20 @@ def validate_manifest(data: Any) -> list[str]:
                 errors.append(
                     f"{project_id}: expected ranges {expected_ranges}, got {tuple(normalized)}"
                 )
-        elif project_id == "duckos":
-            duckos_found = True
-            if repository != "Ivan-VHS/DuckOS":
-                errors.append("duckos: repository must be Ivan-VHS/DuckOS")
+        elif project_id == "dakos":
+            dakos_found = True
+            if repository != "Ivan-VHS/DAKOS":
+                errors.append("dakos: repository must be Ivan-VHS/DAKOS")
             if normalized or project_count != 0 or declared_count != 0:
-                errors.append("duckos: integration host must not own catalogue IDs")
+                errors.append("dakos: integration host must not own catalogue IDs")
         else:
             errors.append(f"unexpected project id: {project_id}")
 
     for project_id in EXPECTED_PROJECTS:
         if project_id not in seen_projects:
             errors.append(f"missing catalogue owner: {project_id}")
-    if not duckos_found:
-        errors.append("missing integration host: duckos")
+    if not dakos_found:
+        errors.append("missing integration host: dakos")
 
     missing_ids = sorted(set(range(1, 1001)) - set(seen_ids))
     if missing_ids:
@@ -174,7 +174,7 @@ def main() -> int:
 
     print("Valid adoption manifest: 1,000 IDs assigned exactly once.")
     print("Ownership counts: Pytyliki 200, Reaper 250, OPlague 200, VentuSample 350.")
-    print("DuckOS is the integration host and owns no catalogue IDs.")
+    print("DAKOS is the integration host and owns no catalogue IDs.")
     return 0
 
 

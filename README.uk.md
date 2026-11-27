@@ -1,4 +1,4 @@
-# 🦆 Duck — операційна система з пріоритетом Reaper
+# 🦆 DAK — операційна система з пріоритетом Reaper
 
 <p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
 
@@ -8,7 +8,7 @@
 
 **Стан:** Експериментальний проєкт · Stage 1 x86_64 перевірено в QEMU · **Версія:** Stage 1 boot foundation · **Стандарт README:** Psychoporter 666 v1.0 · **Дата перевірки:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="Duck system architecture overview" width="100%"></p>
+<p align="center"><img src="assets/readme/dakos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
 
 ## Швидка навігація
 
@@ -16,11 +16,11 @@
 
 ## Призначення та межі
 
-Duck — експериментальний проєкт ОС із пріоритетом Reaper. Поточну роботу навмисно розділено на завантажувальну основу ядра, policy-контракти Reaper і нативний desktop-застосунок Mora для хостової ОС.
+DAK — експериментальний проєкт ОС із пріоритетом Reaper. Поточну роботу навмисно розділено на завантажувальну основу ядра, policy-контракти Reaper і нативний desktop-застосунок Mora для хостової ОС.
 
 ## Можливості
 
-- Шлях x86_64 Stage 1 перевіряє передавання керування від Limine та Boot Info v1, виділяє ранній кадр 4 KiB, виводить DUCKOS_BOOT_OK stage=1 і зупиняється. QEMU-перевірки BIOS та UEFI проходять.
+- Шлях x86_64 Stage 1 перевіряє передавання керування від Limine та Boot Info v1, виділяє ранній кадр 4 KiB, виводить DAKOS_BOOT_OK stage=1 і зупиняється. QEMU-перевірки BIOS та UEFI проходять.
 - Reaper надає еталонний напрям policy-контрактів, зокрема 40 контрактів Core Subsystem MVP. Нативне enforcement ядром ще не реалізовано.
 - Mora має нативний host-застосунок Qt 6 Widgets із вікнами під керуванням хостової ОС та локальним каталогом застосунків. Stage 1 kernel його не запускає.
 - mora/index.html збережено як браузерне reference preview. Це не нативний compositor і не desktop ядра.
@@ -50,8 +50,8 @@ flowchart TB
 Збирання release-образу орієнтоване на Linux x86_64 і потребує Git із submodules, GCC/G++, CMake, Python 3 як інструмент збирання, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU та OVMF.
 
 ~~~sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
+cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDAKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --target dakos_mora_native --parallel
 ctest --test-dir build/mora-native --output-on-failure
 ~~~
 
@@ -75,7 +75,7 @@ npm test
 ## Збирання release-образу
 
 ~~~sh
-bash boot/build-release-iso.sh --work-dir build/release --output dist/Duck-Release-x86_64.iso
+bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Release-x86_64.iso
 ~~~
 
 Release-конвеєр перевіряє pins репозиторіїв, запускає збирання й тести проєктів, створює SHA-256 inventory та збирає гібридний BIOS/UEFI ISO. ISO — preview вихідного коду й інструментів, а не повноцінна встановлювана ОС.

@@ -1,8 +1,8 @@
 {
-  "schema": "duckos.repository-federation.v1",
+  "schema": "dakos.repository-federation.v1",
   "version": 1,
   "owner": "Ivan-VHS",
-  "integration_host": "DuckOS",
+  "integration_host": "DAKOS",
   "checkout_strategy": "git-submodules",
   "projects_root": "projects",
   "repositories": [
@@ -42,7 +42,7 @@
       "domain": "language-and-toolchain",
       "responsibility": "Reaper language, reference runtime, CLI/REPL, Studio, LSP/DAP, parser, static type diagnostics and native toolchain contracts.",
       "integration_mode": [
-        "native Duck Desktop workbench",
+        "native DAK Desktop workbench",
         "bounded user-space subprocess bridge",
         "user-space CLI",
         "versioned JSON protocol",
@@ -110,15 +110,15 @@
     }
   ],
   "shared_rules": [
-    "Each upstream repository remains an independently versioned Git repository and is pinned by an exact commit in the DuckOS superproject.",
+    "Each upstream repository remains an independently versioned Git repository and is pinned by an exact commit in the DAKOS superproject.",
     "Use git submodule update --init --recursive; never use --remote in a reproducible build or silently advance pins.",
-    "Do not copy upstream source files into DuckOS directories; preserve repository history, license files and notices.",
+    "Do not copy upstream source files into DAKOS directories; preserve repository history, license files and notices.",
     "Do not automatically build, load, launch or execute imported project content.",
     "Reaper tools and extensions run only in user space with explicit filesystem scope, capabilities, quotas and audit.",
-    "The native Duck Desktop Reaper workbench uses a bounded subprocess bridge; it does not grant kernel, driver, administrator or ambient FFI privileges.",
+    "The native DAK Desktop Reaper workbench uses a bounded subprocess bridge; it does not grant kernel, driver, administrator or ambient FFI privileges.",
     "Pytyliki and OPlague hardware inspection remains read-only; no clock, voltage, firmware, device or driver writes.",
     "VentuSample processing is offline by default; real-time audio and device access need a separate reviewed OS service contract.",
     "Validate licenses, provenance, schema versions and dependency boundaries before creating a native cross-project link.",
-    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DuckOS image."
+    "An initialized submodule means source is present, not that the project is integrated, bootable, trusted or shipped in a DAKOS image."
   ]
 }

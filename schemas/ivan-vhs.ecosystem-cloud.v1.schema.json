@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/ivan-vhs.ecosystem-cloud.v1.schema.json",
+  "$id": "https://github.com/Ivan-VHS/DAKOS/blob/main/schemas/ivan-vhs.ecosystem-cloud.v1.schema.json",
   "title": "Ivan-VHS Ecosystem Cloud Contract v1",
   "type": "object",
   "additionalProperties": false,
@@ -228,7 +228,7 @@
         "properties": {
           "id": {
             "enum": [
-              "duckos",
+              "dakos",
               "reaper",
               "pytyliki",
               "oplague",

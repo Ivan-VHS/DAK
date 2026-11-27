@@ -1,0 +1,41 @@
+# DAK Desktop optimization policy.
+# This file defines policy only; filesystem changes are implemented in user space.
+
+export craft item_limit() {
+    yield 10
+}
+
+export craft clutter_state(item_count) {
+    when item_count < 0 {
+        yield "invalid"
+    }
+    when item_count > item_limit() {
+        yield "review"
+    }
+    yield "clear"
+}
+
+export craft startup_action_valid(action, scope) {
+    when scope != "current_user" {
+        yield false
+    }
+    yield action == "list" or action == "disable" or action == "restore"
+}
+
+export craft process_action_valid(action) {
+    yield action == "inspect" or action == "refresh"
+}
+
+export craft file_action_valid(action) {
+    yield action == "list" or action == "move_to_inbox"
+}
+
+export craft background_state(cpu_percent, memory_percent) {
+    when cpu_percent < 0 or cpu_percent > 100 or memory_percent < 0 or memory_percent > 100 {
+        yield "invalid"
+    }
+    when cpu_percent >= 20 or memory_percent >= 10 {
+        yield "review"
+    }
+    yield "normal"
+}

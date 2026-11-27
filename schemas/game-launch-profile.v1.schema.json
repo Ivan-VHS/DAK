@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ivan-vhs.github.io/DuckOS/schemas/game-launch-profile.v1.schema.json",
-  "title": "DuckOS Windows XP SP3 game launch profile",
+  "$id": "https://ivan-vhs.github.io/DAKOS/schemas/game-launch-profile.v1.schema.json",
+  "title": "DAKOS Windows XP SP3 game launch profile",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "id", "name", "executable", "runtime", "compatibility"],
   "properties": {
-    "schema": {"const": "duckos.game-launch-profile.v1"},
+    "schema": {"const": "dakos.game-launch-profile.v1"},
     "id": {"type": "string", "minLength": 1, "maxLength": 128},
     "name": {"type": "string", "minLength": 1, "maxLength": 128},
     "executable": {"type": "string", "minLength": 1, "maxLength": 2048},

@@ -1,8 +1,8 @@
-# DuckOS Gaming Performance Policy — 66 rules
+# DAKOS Gaming Performance Policy — 66 rules
 
 **Project author/developer:** Ivan-VHS
 
-DuckOS owns the canonical versioned catalog `duckos.gaming-rule-catalog.v1` and the session-policy boundary. The catalog preserves all 66 requirements in six domains: game detection, CPU scheduling, memory, graphics, I/O and power/reliability.
+DAKOS owns the canonical versioned catalog `dakos.gaming-rule-catalog.v1` and the session-policy boundary. The catalog preserves all 66 requirements in six domains: game detection, CPU scheduling, memory, graphics, I/O and power/reliability.
 
 ## What this implementation does
 
@@ -16,16 +16,16 @@ DuckOS owns the canonical versioned catalog `duckos.gaming-rule-catalog.v1` and 
 
 The policy engine does not yet perform kernel context switches, CPU affinity changes, interrupt routing, clock/voltage tuning, fan-curve writes, graphics-driver recovery, network queue changes or process suspension. Those operations require platform-specific providers, permission checks, measurements and tested rollback. The current transition actions are plans only: every result reports `execution_performed=false` and `system_settings_changed=false`.
 
-OPlague supplies the reversible Windows power-plan and NVIDIA telemetry adapter. Pytyliki supplies read-only host measurements. Reaper can validate declarative scheduling plans. VentuSample supplies a bounded audio-workload profile. DuckOS remains the orchestrator and source of the 66-rule catalog.
+OPlague supplies the reversible Windows power-plan and NVIDIA telemetry adapter. Pytyliki supplies read-only host measurements. Reaper can validate declarative scheduling plans. VentuSample supplies a bounded audio-workload profile. DAKOS remains the orchestrator and source of the 66-rule catalog.
 
 ## API
 
 ```python
-from duckos.gaming import assess_capabilities, load_rule_catalog, plan_session_transition
+from dakos.gaming import assess_capabilities, load_rule_catalog, plan_session_transition
 
 catalog = load_rule_catalog()
 assessment = assess_capabilities({
-    "process_catalog": {"available": True, "provider": "duckos-process-source"},
+    "process_catalog": {"available": True, "provider": "dakos-process-source"},
 })
 transition = plan_session_transition(
     "idle", "game_detected",

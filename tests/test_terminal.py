@@ -8,9 +8,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from duckos.cli import main
-from duckos.terminal import CommandSpec, TerminalInputError, TerminalService
-from duckos.terminal.service import _tokenize
+from dakos.cli import main
+from dakos.terminal import CommandSpec, TerminalInputError, TerminalService
+from dakos.terminal.service import _tokenize
 
 
 class ExtendedTerminalTests(unittest.TestCase):
@@ -22,13 +22,13 @@ class ExtendedTerminalTests(unittest.TestCase):
 
     def test_status_reports_a_restricted_command_runtime(self):
         result = self.terminal.execute("status", record_history=False)["result"]
-        self.assertEqual(result["schema"], "duckos.terminal-status.v1")
+        self.assertEqual(result["schema"], "dakos.terminal-status.v1")
         self.assertEqual(result["runtime_state"], "ready")
         self.assertFalse(result["execution_policy"]["host_shell"])
         self.assertFalse(result["execution_policy"]["arbitrary_process_launch"])
 
     def test_command_tokenizer_preserves_quoted_windows_paths(self):
-        path = r"C:\Program Files\DuckOS Tools\inspect.exe"
+        path = r"C:\Program Files\DAKOS Tools\inspect.exe"
         self.assertEqual(_tokenize('bridge inspect "' + path + '"'), [
             "bridge", "inspect", path
         ])
@@ -44,7 +44,7 @@ class ExtendedTerminalTests(unittest.TestCase):
         self.terminal.execute("alias v version", record_history=False)
         result = self.terminal.execute("v", record_history=False)
         self.assertEqual(result["command"], ["version"])
-        self.assertEqual(result["result"]["project"], "DuckOS")
+        self.assertEqual(result["result"]["project"], "DAKOS")
         reloaded = TerminalService(state_dir=self.state)
         self.assertEqual(reloaded.execute("v", record_history=False)["command"], ["version"])
 
@@ -66,10 +66,10 @@ class ExtendedTerminalTests(unittest.TestCase):
         self.assertEqual(self.terminal._read_history(), [])
 
     def test_config_changes_are_validated_and_persisted(self):
-        self.terminal.execute('config set prompt "duck dev"', record_history=False)
+        self.terminal.execute('config set prompt "dak dev"', record_history=False)
         self.terminal.execute("config set history_limit 25", record_history=False)
         reloaded = TerminalService(state_dir=self.state)
-        self.assertEqual(reloaded.prompt, "duck dev")
+        self.assertEqual(reloaded.prompt, "dak dev")
         self.assertEqual(reloaded.config["history_limit"], 25)
         with self.assertRaises(TerminalInputError):
             reloaded.execute('config set prompt "' + chr(27) + '[31m"', record_history=False)
@@ -166,7 +166,7 @@ class ExtendedTerminalTests(unittest.TestCase):
             self.terminal.execute("module order " + str(linked), record_history=False)
 
     def test_module_order_rejects_oversized_file(self):
-        from duckos.terminal import service as terminal_module
+        from dakos.terminal import service as terminal_module
         source = self.state.parent / "large-modules.json"
         source.write_text('[]', encoding="utf-8")
         previous = terminal_module.MAX_INPUT_JSON_BYTES
@@ -183,8 +183,8 @@ class ExtendedTerminalTests(unittest.TestCase):
             status = main(["terminal", "run", "version"])
         self.assertEqual(status, 0)
         payload = json.loads(output.getvalue())
-        self.assertEqual(payload["schema"], "duckos.terminal-result.v1")
-        self.assertEqual(payload["result"]["project"], "DuckOS")
+        self.assertEqual(payload["schema"], "dakos.terminal-result.v1")
+        self.assertEqual(payload["result"]["project"], "DAKOS")
 
 
 if __name__ == "__main__":

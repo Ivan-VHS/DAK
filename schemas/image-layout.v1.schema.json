@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/image-layout.v1.schema.json",
-  "title": "DuckOS dry-run image layout v1",
+  "$id": "https://github.com/Ivan-VHS/DAKOS/blob/main/schemas/image-layout.v1.schema.json",
+  "title": "DAKOS dry-run image layout v1",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "sector_size", "alignment_bytes", "image_size_bytes", "partitions", "write_performed", "bootability_verified"],
   "properties": {
-    "schema": {"const": "duckos.image-layout.v1"},
+    "schema": {"const": "dakos.image-layout.v1"},
     "sector_size": {"enum": [512, 1024, 2048, 4096]},
     "alignment_bytes": {"type": "integer", "minimum": 1, "maximum": 16777216},
     "image_size_bytes": {"type": "integer", "minimum": 1, "maximum": 68719476736},

@@ -105,10 +105,10 @@ test("PE inspection recognises a 64-bit image without attempting to launch it", 
 });
 
 
-test("legacy appearance settings migrate to the fixed DuckOS palette", () => {
+test("legacy appearance settings migrate to the fixed DAKOS palette", () => {
   const defaults = createDefaultPreferences();
-  assert.equal(defaults.appearance.theme, "duck");
+  assert.equal(defaults.appearance.theme, "dak");
   for (const theme of ["amber", "dark", "light", "system", "custom", null]) {
-    assert.equal(normalizePreferences({ appearance: { theme } }).appearance.theme, "duck");
+    assert.equal(normalizePreferences({ appearance: { theme } }).appearance.theme, "dak");
   }
 });

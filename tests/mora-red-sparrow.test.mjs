@@ -55,6 +55,6 @@ test("Red Sparrow and locale are registered without changing DAK's shared theme"
   assert.match(coreText, /"red-sparrow"/);
   assert.equal(policy.capabilities.language_profile.maturity, "partial");
   assert.equal(policy.capabilities.red_sparrow_workspace.maturity, "partial");
-  assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
-  assert.equal(theme.palettes.duck.brand, "#FFD700");
+  assert.deepEqual(Object.keys(theme.palettes), ["dak"]);
+  assert.equal(theme.palettes.dak.brand, "#FFD700");
 });

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/preinstalled-applications.v1.schema.json",
-  "title": "DuckOS preinstalled applications catalog v1",
+  "$id": "https://github.com/Ivan-VHS/DAKOS/blob/main/schemas/preinstalled-applications.v1.schema.json",
+  "title": "DAKOS preinstalled applications catalog v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,13 +17,13 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.preinstalled-applications.v1"
+      "const": "dakos.preinstalled-applications.v1"
     },
     "version": {
       "const": 1
     },
     "operating_system": {
-      "const": "DuckOS"
+      "const": "DAKOS"
     },
     "maturity_status": {
       "enum": [

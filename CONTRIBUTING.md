@@ -1,6 +1,6 @@
-# Contributing to Duck
+# Contributing to DAK
 
-Duck is a Reaper-first operating-system project. Keep its native boot path, Reaper policy layer, and Mora host application as separate implementation tracks. A passing host-side policy test is not evidence of a native kernel capability.
+DAK is a Reaper-first operating-system project. Keep its native boot path, Reaper policy layer, and Mora host application as separate implementation tracks. A passing host-side policy test is not evidence of a native kernel capability.
 
 ## Engineering boundaries
 

@@ -4,16 +4,16 @@
 
 **Goal:** Establish a local-first optional Supabase platform contract and safe per-repository adapters for the five Ivan-VHS projects.
 
-**Architecture:** DuckOS owns the versioned ecosystem contract, JSON Schema, Supabase migrations and local database CI. Reaper, Pytyliki, OPlague and VentuSample each own a small adapter manifest that references the same contract and restricts data to approved metadata. Network use remains disabled until explicitly configured.
+**Architecture:** DAKOS owns the versioned ecosystem contract, JSON Schema, Supabase migrations and local database CI. Reaper, Pytyliki, OPlague and VentuSample each own a small adapter manifest that references the same contract and restricts data to approved metadata. Network use remains disabled until explicitly configured.
 
-**Tech Stack:** Supabase CLI 3.4.0, PostgreSQL 17, SQL migrations, pgTAP, JSON Schema 2020-12, Node.js built-in test runner in DuckOS, Python unittest for repository metadata validators.
+**Tech Stack:** Supabase CLI 3.4.0, PostgreSQL 17, SQL migrations, pgTAP, JSON Schema 2020-12, Node.js built-in test runner in DAKOS, Python unittest for repository metadata validators.
 
 **Spec:** `docs/superpowers/specs/2026-11-25-ecosystem-cloud-design.md`
 
 ## Global Constraints
 
-- Keep DuckOS kernel and desktop behavior local-first; cloud must never be required for boot or core OS operation.
-- Use Reaper for DuckOS code and examples; do not add Python implementations or Python test runners to DuckOS.
+- Keep DAKOS kernel and desktop behavior local-first; cloud must never be required for boot or core OS operation.
+- Use Reaper for DAKOS code and examples; do not add Python implementations or Python test runners to DAKOS.
 - Do not add cloud SDK dependencies to native C11/C17/C++20 application cores.
 - Use Supabase CLI 3.4.0 in local-only CI; no hosted project link, access token or secrets.
 - Do not upload source, secrets, raw device identifiers, driver packages or audio files by default.
@@ -45,7 +45,7 @@
 - [ ] Add a Node test asserting schema ID/version, local-only default, five unique repository IDs and forbidden-data policies.
 - [ ] Run the new test against the contract fixture and confirm it fails before the contract is added.
 - [ ] Add the JSON contract and JSON Schema; keep the schema closed to unknown top-level fields.
-- [ ] Run `npm test` and the existing DuckOS completeness checks.
+- [ ] Run `npm test` and the existing DAKOS completeness checks.
 
 ### Task 2: Local Supabase database foundation
 
@@ -125,8 +125,8 @@
 **Files:** No additional source files; update only if test evidence requires a focused correction.
 
 - [ ] Verify all five PRs against their current `main` heads.
-- [ ] Require local Supabase migration/pgTAP CI on DuckOS and repository-native CI on each consumer.
+- [ ] Require local Supabase migration/pgTAP CI on DAKOS and repository-native CI on each consumer.
 - [ ] Review diffs for secrets, unwanted data classes, unpinned actions and accidental SDK dependencies.
-- [ ] Merge the DuckOS foundation first, then Reaper, Pytyliki, OPlague and VentuSample only after each PR is green; stop on the first failed gate.
+- [ ] Merge the DAKOS foundation first, then Reaper, Pytyliki, OPlague and VentuSample only after each PR is green; stop on the first failed gate.
 - [ ] Verify each merge commit and the final main-branch CI state.
 

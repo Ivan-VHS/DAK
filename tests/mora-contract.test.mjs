@@ -107,9 +107,9 @@ function contrastRatio(foreground, background) {
 
 test("DAK uses one accessible black, white and yellow DAK palette", () => {
   assert.equal(theme.schema, "mora.theme.v1");
-  assert.equal(theme.defaultPalette, "duck");
-  assert.deepEqual(Object.keys(theme.palettes), ["duck"]);
-  const palette = theme.palettes.duck;
+  assert.equal(theme.defaultPalette, "dak");
+  assert.deepEqual(Object.keys(theme.palettes), ["dak"]);
+  const palette = theme.palettes.dak;
   assert.equal(palette.page, "#050505");
   assert.equal(palette.surface, "#101010");
   assert.equal(palette.text, "#FFFFFF");
@@ -126,7 +126,7 @@ test("DAK uses one accessible black, white and yellow DAK palette", () => {
   assert.ok(html.includes('id="mora-fold-pattern"'));
   assert.ok(html.includes('Единая палитра DAK'));
   assert.ok(html.includes('data-app="mora-commons"'));
-  assert.ok(css.includes(':root[data-theme="duck"]'));
+  assert.ok(css.includes(':root[data-theme="dak"]'));
   assert.ok(!/data-theme="(amber|dark|light)"/.test(css));
   assert.ok(css.includes("#FFD700"));
   assert.ok(css.includes(".commons-grid"));
@@ -138,7 +138,7 @@ test("DAK uses one accessible black, white and yellow DAK palette", () => {
   assert.ok(cssColors.every((color) => allowedColors.has(color)), "CSS uses only DAK palette colors");
   const inlineColors = [...html.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toLowerCase());
   assert.ok(inlineColors.every((color) => allowedColors.has(color)), "HTML and SVG use only DAK palette colors");
-  assert.ok(js.includes('document.documentElement.dataset.theme = "duck"'));
+  assert.ok(js.includes('document.documentElement.dataset.theme = "dak"'));
   assert.ok(!js.includes("nextTheme"));
   assert.ok(!js.includes("data-setup-theme"));
   assert.ok(!html.includes('data-action="toggle-theme"'));

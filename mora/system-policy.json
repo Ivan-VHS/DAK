@@ -1,5 +1,5 @@
 {
-  "schema": "duckos.mora.system.v1",
+  "schema": "dakos.mora.system.v1",
   "product": "DAK",
   "desktop": "DAK",
   "version": 2,
@@ -73,7 +73,7 @@
     },
     "shared_design_system": {
       "maturity": "implemented",
-      "scope": "mora/theme.json canonical Duck palette, semantic geometry/spacing/typography/motion; native adapter consumes the fixed black/white/yellow roles; kernel UI integration remains pending"
+      "scope": "mora/theme.json canonical DAK palette, semantic geometry/spacing/typography/motion; native adapter consumes the fixed black/white/yellow roles; kernel UI integration remains pending"
     },
     "installable_workspace": {
       "maturity": "partial",

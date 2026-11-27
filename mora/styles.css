@@ -333,7 +333,7 @@ input[type="range"] { width:160px; accent-color:#FFD700; cursor:pointer; }
 
 
 
-/* Duck palette — final visual pass on the live desktop shell. */
+/* DAK palette — final visual pass on the live desktop shell. */
 :root {
   --mora-secondary-accent:#2B2200;
   --mora-focus:#FFD700;
@@ -778,7 +778,7 @@ input[type="range"] { width:160px; accent-color:#FFD700; cursor:pointer; }
 @media (max-width:760px) { .commons-grid { grid-template-columns: 1fr; } }
 
 
-/* DuckOS single palette: black structure, white content and yellow action. */
+/* DAKOS single palette: black structure, white content and yellow action. */
 :root {
   color-scheme: dark;
   --mora-page: #050505;
@@ -800,7 +800,7 @@ input[type="range"] { width:160px; accent-color:#FFD700; cursor:pointer; }
   --line: rgba(255,212,0,.22);
   --panel: rgba(8,8,8,.96);
 }
-:root[data-theme="duck"] { color-scheme: dark; }
+:root[data-theme="dak"] { color-scheme: dark; }
 .wallpaper { background: radial-gradient(ellipse at 50% 46%, #171717 0%, #101010 38%, #050505 78%); }
 .wallpaper svg { opacity: .34; }
 .wallpaper::after {
@@ -823,7 +823,7 @@ input[type="range"] { accent-color: #FFD700; }
 .extension-theme-options { display: none; }
 
 
-/* Red Sparrow is scoped to its own Mora app window and uses DuckOS semantic tokens. */
+/* Red Sparrow is scoped to its own Mora app window and uses DAKOS semantic tokens. */
 .locale-select{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--mora-border);border-radius:10px;background:var(--mora-surface);color:var(--mora-text);font:inherit}
 .red-sparrow-tile{border-color:var(--mora-brand)!important}
 .red-sparrow-tile .app-icon{color:var(--mora-brand);background:linear-gradient(145deg,var(--mora-surface),var(--mora-elevated));border:1px solid var(--mora-border)}

@@ -75,8 +75,8 @@
   },
   "repositories": [
     {
-      "id": "duckos",
-      "project_key": "duckos",
+      "id": "dakos",
+      "project_key": "dakos",
       "adapter": "federation/ecosystem-cloud-adapter.v1.json",
       "eligible": [
         "user-selected-preferences",

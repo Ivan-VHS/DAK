@@ -80,7 +80,7 @@ void loadThemeTokens()
     if (error.error != QJsonParseError::NoError || !document.isObject()) return;
 
     const QJsonObject palette = document.object()
-        .value("palettes").toObject().value("duck").toObject();
+        .value("palettes").toObject().value("dak").toObject();
 
     auto readColor = [&palette](const char* key, QColor& target) {
         const QColor candidate(palette.value(QLatin1String(key)).toString());
@@ -223,7 +223,7 @@ public:
 
         const QString root = repositoryRoot();
         if (root.isEmpty()) {
-            plan.explanation = "Корень DuckOS не найден. Откройте Mora из полного checkout DuckOS или из его распакованного релизного каталога.";
+            plan.explanation = "Корень DAKOS не найден. Откройте Mora из полного checkout DAKOS или из его распакованного релизного каталога.";
             return plan;
         }
 
@@ -306,8 +306,8 @@ public:
             const QStringList candidates{
                 "release/bin/VentuSample",
                 "release/bin/VentuSample.exe",
-                "build/release/payload/duckos/release/bin/VentuSample",
-                "build/release/payload/duckos/release/bin/VentuSample.exe",
+                "build/release/payload/dakos/release/bin/VentuSample",
+                "build/release/payload/dakos/release/bin/VentuSample.exe",
                 "build/release/build/ventusample/VentuSample",
                 "build/release/build/ventusample/VentuSample.exe",
                 "projects/ventusample/build/VentuSample",
@@ -707,8 +707,8 @@ private:
         summaryLayout->addWidget(label("РАБОЧАЯ СТАНЦИЯ ЭКОСИСТЕМЫ", "eyebrow"));
         summaryLayout->addWidget(label(description));
         summaryLayout->addWidget(label(
-            "Запускается отдельное приложение хостовой ОС из доверенного каталога DuckOS. "
-            "Это не запуск процесса внутри ядра DuckOS и не выдача системных разрешений.",
+            "Запускается отдельное приложение хостовой ОС из доверенного каталога DAKOS. "
+            "Это не запуск процесса внутри ядра DAKOS и не выдача системных разрешений.",
             "muted"));
         layout->addWidget(summary);
 
@@ -744,8 +744,8 @@ private:
                 this,
                 "Запуск " + plan.displayName,
                 "Открыть " + plan.displayName + " отдельным процессом хостовой ОС?\n\n"
-                "Программа запускается из проверенного каталога DuckOS. "
-                "Она не становится процессом ядра DuckOS и не получает дополнительных привилегий.",
+                "Программа запускается из проверенного каталога DAKOS. "
+                "Она не становится процессом ядра DAKOS и не получает дополнительных привилегий.",
                 QMessageBox::Yes | QMessageBox::No,
                 QMessageBox::No);
             if (answer != QMessageBox::Yes) return;

@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_DIR="$ROOT/build/release"
-OUTPUT="$ROOT/dist/DuckOS-Release-x86_64.iso"
+OUTPUT="$ROOT/dist/DAKOS-Release-x86_64.iso"
 
 while (($#)); do
     case "$1" in
@@ -77,7 +77,7 @@ echo "[6/8] Verify OPlague read-only user-space workbench"
 
 echo "[7/8] Assemble offline source, licenses, host tools and Mora"
 rm -rf "$PAYLOAD"
-mkdir -p "$PAYLOAD/duckos/release/bin" "$PAYLOAD/duckos/release/lib" "$PAYLOAD/duckos/release/evidence"
+mkdir -p "$PAYLOAD/dakos/release/bin" "$PAYLOAD/dakos/release/lib" "$PAYLOAD/dakos/release/evidence"
 
 # Keep full source and notices; exclude Git metadata and generated build caches.
 tar -C "$ROOT" \
@@ -87,12 +87,12 @@ tar -C "$ROOT" \
     --exclude='*/node_modules' --exclude='*/__pycache__' \
     --exclude='*/.pytest_cache' --exclude='*/.mypy_cache' \
     --exclude='*/.venv' --exclude='*/CMakeFiles' \
-    -cf - . | tar -C "$PAYLOAD/duckos" -xf -
+    -cf - . | tar -C "$PAYLOAD/dakos" -xf -
 
 copy_binary() {
     local source="$1" destination="$2"
     if [[ -f "$source" ]]; then
-        install -m 0755 "$source" "$PAYLOAD/duckos/release/bin/$destination"
+        install -m 0755 "$source" "$PAYLOAD/dakos/release/bin/$destination"
         echo "included host tool: $destination"
     fi
 }
@@ -120,7 +120,7 @@ copy_binary "$BUILD_DIR/ventusample/VentuSample" "VentuSample"
 copy_library() {
     local source="$1" destination="$2"
     if [[ -f "$source" ]]; then
-        install -m 0644 "$source" "$PAYLOAD/duckos/release/lib/$destination"
+        install -m 0644 "$source" "$PAYLOAD/dakos/release/lib/$destination"
     fi
 }
 copy_library "$BUILD_DIR/reaper/libreaper_core.a" "libreaper_core.a"
@@ -130,23 +130,23 @@ copy_library "$BUILD_DIR/pytyliki/libpytyliki_ffi.a" "libpytyliki_ffi.a"
 copy_library "$BUILD_DIR/ventusample/libventusample_core.a" "libventusample_core.a"
 copy_library "$BUILD_DIR/ventusample/libventusample_pytyliki_dsp.a" "libventusample_pytyliki_dsp.a"
 
-cat > "$PAYLOAD/duckos/release/BUILD-INFO.txt" <<EOF
-DuckOS Ecosystem Release Edition
+cat > "$PAYLOAD/dakos/release/BUILD-INFO.txt" <<EOF
+DAKOS Ecosystem Release Edition
 Build date (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)
-DuckOS source revision: $(git -C "$ROOT" rev-parse HEAD)
+DAKOS source revision: $(git -C "$ROOT" rev-parse HEAD)
 Reaper: $(git -C "$ROOT/projects/reaper" rev-parse HEAD)
 Pytyliki: $(git -C "$ROOT/projects/pytyliki" rev-parse HEAD)
 OPlague: $(git -C "$ROOT/projects/oplague" rev-parse HEAD)
 VentuSample: $(git -C "$ROOT/projects/ventusample" rev-parse HEAD)
 
 Mora: offline browser desktop shell with local application state.
-Host tools: Linux x86_64 builds, not DuckOS kernel executables.
-Kernel: experimental Stage 1; validates Boot Info v1, allocates and clears one early physical frame, prints DUCKOS_BOOT_OK and halts.
+Host tools: Linux x86_64 builds, not DAKOS kernel executables.
+Kernel: experimental Stage 1; validates Boot Info v1, allocates and clears one early physical frame, prints DAKOS_BOOT_OK and halts.
 External application execution: disabled by default.
 EOF
 
 (
-    cd "$PAYLOAD/duckos"
+    cd "$PAYLOAD/dakos"
     find . -type f ! -name SHA256SUMS -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > SHA256SUMS
     sha256sum --check SHA256SUMS >/dev/null
 )
@@ -154,12 +154,12 @@ EOF
 echo "[8/8] Build hybrid BIOS/UEFI release ISO"
 bash "$ROOT/boot/build-iso.sh" \
     --work-dir "$BUILD_DIR/boot" \
-    --payload-dir "$PAYLOAD/duckos" \
-    --volume-id DUCKOS_RELEASE \
+    --payload-dir "$PAYLOAD/dakos" \
+    --volume-id DAKOS_RELEASE \
     --output "$OUTPUT"
 
 ISO_BYTES="$(wc -c < "$OUTPUT" | tr -d ' ')"
-echo "DuckOS Release ISO ready: $OUTPUT"
+echo "DAKOS Release ISO ready: $OUTPUT"
 echo "ISO size: $ISO_BYTES bytes (content-sized; no artificial 4 GiB padding)"
 echo "SHA-256: $(sha256sum "$OUTPUT" | awk '{print $1}')"
-echo "Payload checksums: $PAYLOAD/duckos/SHA256SUMS"
+echo "Payload checksums: $PAYLOAD/dakos/SHA256SUMS"

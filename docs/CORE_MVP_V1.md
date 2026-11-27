@@ -1,10 +1,10 @@
-# DuckOS core subsystem MVP v1
+# DAKOS core subsystem MVP v1
 
 Updated: 2026-11-25
 
 ## Purpose
 
-This change adds forty deterministic Reaper contracts across the ten core subsystem groups requested for DuckOS. It gives the project a consistent, testable policy boundary before those decisions are wired to privileged kernel mechanisms.
+This change adds forty deterministic Reaper contracts across the ten core subsystem groups requested for DAKOS. It gives the project a consistent, testable policy boundary before those decisions are wired to privileged kernel mechanisms.
 
 The contracts run on Reaper's reference runtime. They validate descriptors, enforce deterministic admission decisions, reject invalid state transitions and bound resource requests. They do **not** create processes, map pages, mount filesystems, encrypt blocks, send packets, load drivers, submit GPU work, schedule audio interrupts or enforce MAC from ring 0.
 
@@ -12,16 +12,16 @@ The contracts run on Reaper's reference runtime. They validate descriptors, enfo
 
 | Area | Reaper contract module | MVP coverage |
 |---|---|---|
-| Process lifecycle | `duckos/kernel/process.rpr` | Descriptor validation, child capability attenuation, lifecycle transitions, CPU/RAM limits, graceful-stop deadline |
-| Virtual memory | `duckos/kernel/vm.rpr` | User address bounds, page mapping permissions, demand-fault action, swap-slot metadata, safe deduplication candidate |
-| VFS and snapshots | `duckos/storage/vfs.rpr` | Path traversal rejection, FAT32/ext4/NTFS mount metadata, capability-gated access, snapshot record validation |
-| Network | `duckos/network/stack.rpr` | TCP/UDP endpoint metadata, deny-by-default firewall rule evaluation, DNS query bounds, VPN profile validation |
-| Graphics | `duckos/graphics/compositor.rpr` | Framebuffer geometry, monitor bounds/scaling, Vulkan/OpenGL/framebuffer preference, frame-budget decision |
-| Audio | `duckos/audio/pipeline.rpr` | Sample-rate/format/period validation, MIDI channel event bounds, spatial-mix budget |
-| Security | `duckos/security/mac.rpr` | MAC rule evaluation, trust-label transitions, fail-closed secure-boot gate, TPM evidence shape, AES-256 profile metadata |
-| Platform and device classes | `duckos/platform/targets.rpr` | Architecture recognition, primary/compatibility track, package architecture matching, PCI/USB-C/Bluetooth/Wi-Fi/NVMe/GPU/audio class taxonomy |
-| System services | `duckos/services/init.rpr` | Service-unit limits, dependency-aware start decision, graceful shutdown deadline, bounded cron fields |
-| Windowing and accessibility | `duckos/ui/accessibility.rpr` | Tiled/floating/maximized/fullscreen geometry, scale/reduced-motion/contrast/screen-reader/keyboard profile |
+| Process lifecycle | `dakos/kernel/process.rpr` | Descriptor validation, child capability attenuation, lifecycle transitions, CPU/RAM limits, graceful-stop deadline |
+| Virtual memory | `dakos/kernel/vm.rpr` | User address bounds, page mapping permissions, demand-fault action, swap-slot metadata, safe deduplication candidate |
+| VFS and snapshots | `dakos/storage/vfs.rpr` | Path traversal rejection, FAT32/ext4/NTFS mount metadata, capability-gated access, snapshot record validation |
+| Network | `dakos/network/stack.rpr` | TCP/UDP endpoint metadata, deny-by-default firewall rule evaluation, DNS query bounds, VPN profile validation |
+| Graphics | `dakos/graphics/compositor.rpr` | Framebuffer geometry, monitor bounds/scaling, Vulkan/OpenGL/framebuffer preference, frame-budget decision |
+| Audio | `dakos/audio/pipeline.rpr` | Sample-rate/format/period validation, MIDI channel event bounds, spatial-mix budget |
+| Security | `dakos/security/mac.rpr` | MAC rule evaluation, trust-label transitions, fail-closed secure-boot gate, TPM evidence shape, AES-256 profile metadata |
+| Platform and device classes | `dakos/platform/targets.rpr` | Architecture recognition, primary/compatibility track, package architecture matching, PCI/USB-C/Bluetooth/Wi-Fi/NVMe/GPU/audio class taxonomy |
+| System services | `dakos/services/init.rpr` | Service-unit limits, dependency-aware start decision, graceful shutdown deadline, bounded cron fields |
+| Windowing and accessibility | `dakos/ui/accessibility.rpr` | Tiled/floating/maximized/fullscreen geometry, scale/reduced-motion/contrast/screen-reader/keyboard profile |
 
 The forty exported functions are exercised by `core_mvp_tests.rpr` in both the Reaper tree-walk and VM CI runs.
 

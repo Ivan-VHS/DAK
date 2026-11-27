@@ -1,9 +1,9 @@
 # Windows XP SP3 game launch compatibility
 
 **Project author/developer:** Ivan-VHS  
-**Contract:** `duckos.game-launch-profile.v1`
+**Contract:** `dakos.game-launch-profile.v1`
 
-DuckOS models the predictable XP-era game launch chain as a versioned profile and an explicit host-runtime adapter. The profile preserves the old game's working directory, argument vector, display depth/mode and requested DirectX/OpenGL/Glide, DirectSound/WinMM/EAX, DirectInput and network APIs.
+DAKOS models the predictable XP-era game launch chain as a versioned profile and an explicit host-runtime adapter. The profile preserves the old game's working directory, argument vector, display depth/mode and requested DirectX/OpenGL/Glide, DirectSound/WinMM/EAX, DirectInput and network APIs.
 
 ## Implemented
 
@@ -12,11 +12,11 @@ DuckOS models the predictable XP-era game launch chain as a versioned profile an
 - XP SP3 compatibility metadata and bounded display settings, including 8/16/24/32-bit color and refresh rate.
 - An allowlist for environment overrides; `PATH`, `LD_PRELOAD`, shell fragments and arbitrary variables cannot be injected through a profile.
 - An argv-only launch plan and an explicit Wine launch operation using `subprocess.Popen(..., shell=False)`.
-- Launch requires an explicitly selected, already-initialized Wine prefix containing `system.reg` and `drive_c`; no default-prefix bootstrap is allowed. DuckOS does not run prefix setup, install redistributables or download components. Wine itself may update its selected prefix while the game runs.
+- Launch requires an explicitly selected, already-initialized Wine prefix containing `system.reg` and `drive_c`; no default-prefix bootstrap is allowed. DAKOS does not run prefix setup, install redistributables or download components. Wine itself may update its selected prefix while the game runs.
 
 ## Honest runtime boundary
 
-The Wine adapter starts an external, already-installed runtime in an explicitly selected existing prefix. The external runtime may write its own registry, caches and other prefix state during execution; DuckOS does not perform those writes itself. It is not a native Win32 subsystem and does not recreate XP's XPDM driver model, DirectX 9 device, DirectSound hardware acceleration, EAX, DirectPlay, IPX/SPX or SafeDisc/SecuROM drivers. The requested Windows XP SP3 target is recorded but is **not enforced** by this launcher; the operator must verify the runtime's prefix configuration. Native NT/Win32 execution remains unavailable.
+The Wine adapter starts an external, already-installed runtime in an explicitly selected existing prefix. The external runtime may write its own registry, caches and other prefix state during execution; DAKOS does not perform those writes itself. It is not a native Win32 subsystem and does not recreate XP's XPDM driver model, DirectX 9 device, DirectSound hardware acceleration, EAX, DirectPlay, IPX/SPX or SafeDisc/SecuROM drivers. The requested Windows XP SP3 target is recorded but is **not enforced** by this launcher; the operator must verify the runtime's prefix configuration. Native NT/Win32 execution remains unavailable.
 
 The tool does not bypass DRM, anti-cheat or kernel-driver checks. A missing runtime, invalid PE, unsupported architecture or missing prefix produces an explicit blocker rather than an attempted launch.
 
@@ -30,7 +30,7 @@ The tool does not bypass DRM, anti-cheat or kernel-driver checks. A missing runt
 | 39–52 · Audio, input and network | Records DirectSound/WinMM/EAX, DirectInput/XInput and network API requirements; actual device bridges and DirectPlay/IPX services are not claimed. |
 | 53–66 · Compatibility and operations | Versioned profiles, deterministic launch planning and explicit blockers are implemented; compatibility shims, patches, mods, widescreen fixes and driver installation remain external. |
 
-The machine-readable field contract is in `schemas/game-launch-profile.v1.schema.json`. Use `python -m duckos.compat.game_profile profile.json --validate`, `--plan`, or the explicit `--launch` option. The latter requires a Wine runtime already available on the host.
+The machine-readable field contract is in `schemas/game-launch-profile.v1.schema.json`. Use `python -m dakos.compat.game_profile profile.json --validate`, `--plan`, or the explicit `--launch` option. The latter requires a Wine runtime already available on the host.
 
 
 ## Rule-by-rule traceability (66 XP SP3 behaviors)
@@ -100,7 +100,7 @@ The labels below distinguish implemented metadata from behavior supplied by an e
 | 59 | Administrator/user account selection | **External:** current host identity is used |
 | 60 | 16:9/16:10 and widescreen HUD | **Audit only:** OPlague warns about non-4:3 modes; no binary patching |
 | 61 | Overlay/hook conflicts | **Not implemented:** no automatic hook manipulation |
-| 62 | Game logs and dxdiag diagnostics | **Partial:** structured DuckOS/OPlague reports; no universal game-log parser |
+| 62 | Game logs and dxdiag diagnostics | **Partial:** structured DAKOS/OPlague reports; no universal game-log parser |
 | 63 | Driver/DirectX installation order | **External:** no driver/runtime installer |
 | 64 | Portable game folders | **Partial:** profile metadata is relocatable; registry/prefix portability not guaranteed |
 | 65 | XP SP3 platform boundary | **Documented:** XP-era profile, not an XP kernel or XPDM implementation |
@@ -108,7 +108,7 @@ The labels below distinguish implemented metadata from behavior supplied by an e
 
 ### Cross-repository responsibilities
 
-- **DuckOS:** shared versioned game profile, PE inspection, launch plan and optional dispatch to an already-installed Wine runtime.
+- **DAKOS:** shared versioned game profile, PE inspection, launch plan and optional dispatch to an already-installed Wine runtime.
 - **OPlague:** read-only legacy graphics/display/audio/input/network findings plus device/driver evidence.
 - **Pytyliki:** whole-host CPU/RAM/swap telemetry for the session.
 - **Reaper:** validated, non-executing argv task contract for a trusted host executor.

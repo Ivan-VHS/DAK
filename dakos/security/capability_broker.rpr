@@ -1,0 +1,53 @@
+# Default-deny capability broker policy for DAKOS services.
+# Grants are explicit tuples: [principal, object, operation].
+# Wildcards, implicit inheritance and ambient authority are not accepted here.
+
+craft valid_grant(grant) {
+    when size(grant) != 3 {
+        yield false
+    }
+    when grant[0] == "" or grant[1] == "" or grant[2] == "" {
+        yield false
+    }
+    when grant[0] == "*" or grant[1] == "*" or grant[2] == "*" {
+        yield false
+    }
+    yield true
+}
+
+craft grant_set_valid(grants) {
+    each grant in grants {
+        when not valid_grant(grant) {
+            yield false
+        }
+    }
+    yield true
+}
+
+craft authorize(grants, principal, object, operation) {
+    when principal == "" or object == "" or operation == "" {
+        yield false
+    }
+    each grant in grants {
+        when grant[0] == principal and grant[1] == object and grant[2] == operation {
+            yield true
+        }
+    }
+    yield false
+}
+
+make service_grants := [
+    ["desktop", "display.compositor", "submit_frame"],
+    ["audio", "device.audio0", "stream.write"],
+    ["settings", "config.user", "read"]
+]
+
+assert(grant_set_valid(service_grants), "explicit capability set must validate")
+assert(authorize(service_grants, "desktop", "display.compositor", "submit_frame"), "declared capability must authorize")
+assert(not authorize(service_grants, "desktop", "display.compositor", "map_mmio"), "undeclared MMIO access must be denied")
+assert(not authorize(service_grants, "unknown", "config.user", "read"), "unknown principal must be denied")
+assert(not authorize(service_grants, "settings", "config.user", "write"), "read grant must not imply write")
+assert(not authorize(service_grants, "settings", "config.user", ""), "empty operation must be denied")
+assert(not grant_set_valid([["*", "device.audio0", "stream.write"]]), "wildcard principal must be rejected")
+
+emit "DAK_REAPER_CAPABILITY_BROKER:PASS"

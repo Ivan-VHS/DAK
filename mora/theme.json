@@ -3,7 +3,7 @@
   "name": "DAK Imperial Noir & Glass",
   "version": 3,
   "palettes": {
-    "duck": {
+    "dak": {
       "page": "#050505",
       "surface": "#101010",
       "elevated": "#171717",
@@ -53,5 +53,5 @@
     "display": "Unbounded",
     "code": "Cascadia Mono"
   },
-  "defaultPalette": "duck"
+  "defaultPalette": "dak"
 }

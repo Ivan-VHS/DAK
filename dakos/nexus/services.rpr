@@ -1,0 +1,106 @@
+# NEXUS component and internal-service admission policy.
+# This is Reaper policy code; it does not spawn or supervise native processes.
+
+export craft component_known(component_id) {
+    yield component_id == "kernel_core" or component_id == "nexus_shell" or component_id == "audio_subsys" or component_id == "security_module" or component_id == "network_stack" or component_id == "graphics_engine" or component_id == "build_toolchain" or component_id == "ai_layer"
+}
+
+export craft service_known(service_id) {
+    yield service_id == "kernel_sentinel" or service_id == "memory_forge" or service_id == "vector_gateway" or service_id == "pixel_pipeline" or service_id == "data_orchestrator" or service_id == "build_vanguard"
+}
+
+export craft service_owner(service_id) {
+    when service_known(service_id) {
+        yield "Ivan-VHS/DAKOS"
+    }
+    yield "unassigned"
+}
+
+export craft service_maturity(service_id) {
+    when service_known(service_id) {
+        yield "specified"
+    }
+    yield "unknown"
+}
+
+export craft service_runtime_state(service_id) {
+    when service_known(service_id) {
+        yield "not_implemented"
+    }
+    yield "unknown"
+}
+
+export craft service_dependency_allowed(service_id, component_id) {
+    when not service_known(service_id) or not component_known(component_id) {
+        yield false
+    }
+    when service_id == "kernel_sentinel" {
+        yield component_id == "kernel_core" or component_id == "security_module"
+    }
+    when service_id == "memory_forge" {
+        yield component_id == "kernel_core"
+    }
+    when service_id == "vector_gateway" {
+        yield component_id == "network_stack" or component_id == "security_module"
+    }
+    when service_id == "pixel_pipeline" {
+        yield component_id == "graphics_engine" or component_id == "kernel_core"
+    }
+    when service_id == "data_orchestrator" {
+        yield component_id == "kernel_core" or component_id == "nexus_shell"
+    }
+    when service_id == "build_vanguard" {
+        yield component_id == "build_toolchain"
+    }
+    yield false
+}
+
+# Descriptor layout:
+# [service_id, owner, maturity, runtime_state, component_dependencies, payload_limit_bytes, deadline_ms]
+export craft service_descriptor_valid(descriptor) {
+    when size(descriptor) != 7 {
+        yield false
+    }
+    when not service_known(descriptor[0]) {
+        yield false
+    }
+    when descriptor[1] != "Ivan-VHS/DAKOS" or descriptor[2] != "specified" or descriptor[3] != "not_implemented" {
+        yield false
+    }
+    when size(descriptor[4]) == 0 or size(descriptor[4]) > 4 {
+        yield false
+    }
+    when descriptor[5] <= 0 or descriptor[5] > 65536 {
+        yield false
+    }
+    when descriptor[6] <= 0 or descriptor[6] > 300000 {
+        yield false
+    }
+    each component_id in descriptor[4] {
+        when not service_dependency_allowed(descriptor[0], component_id) {
+            yield false
+        }
+    }
+    yield true
+}
+
+# Reaching this state authorizes a separate implementation review only.
+# It never starts a service or grants a capability.
+export craft activation_gate(process_model_ready, supervisor_ready, authenticated_ipc_ready, kernel_capabilities_enforced, implementation_tests_passed) {
+    when not process_model_ready {
+        yield "blocked-process-model"
+    }
+    when not supervisor_ready {
+        yield "blocked-service-supervisor"
+    }
+    when not authenticated_ipc_ready {
+        yield "blocked-authenticated-ipc"
+    }
+    when not kernel_capabilities_enforced {
+        yield "blocked-kernel-capabilities"
+    }
+    when not implementation_tests_passed {
+        yield "blocked-implementation-evidence"
+    }
+    yield "eligible-for-separate-review"
+}

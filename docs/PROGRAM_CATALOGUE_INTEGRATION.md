@@ -1,4 +1,4 @@
-# 1,000-program catalogue: DuckOS integration contract
+# 1,000-program catalogue: DAKOS integration contract
 
 **Owner:** Ivan-VHS  
 **Version:** 1.0.0  
@@ -8,7 +8,7 @@
 
 The 1,000 entries describe ideas and capability patterns drawn from existing software. They are not a request to bundle 1,000 upstream applications, copy their source code or turn every idea into a kernel feature.
 
-The four specialist repositories remain the owners of their domains. DuckOS is the future integration host for selected user-space services and OS-facing adapters.
+The four specialist repositories remain the owners of their domains. DAKOS is the future integration host for selected user-space services and OS-facing adapters.
 
 The authoritative machine-readable allocation is `manifests/ivan-vhs-program-adoption.v1.json`.
 
@@ -20,7 +20,7 @@ The authoritative machine-readable allocation is `manifests/ivan-vhs-program-ado
 | Reaper | 251–500 | 250 | Language/runtime, compiler infrastructure, IDE services, build/test tooling, parsers and documentation |
 | OPlague | 501–700 | 200 | Device and driver inspection, package/binary parsing, signatures, hashes, SBOM and provenance |
 | VentuSample | 121–170, 701–1000 | 350 | DSP/audio analysis, DAW-inspired workflows, synthesis, sampling, effects, music metadata and notation |
-| DuckOS | no catalogue IDs | 0 | Operating-system integration, core services, IPC and packaging |
+| DAKOS | no catalogue IDs | 0 | Operating-system integration, core services, IPC and packaging |
 
 The ranges form a non-overlapping partition of IDs 1–1000. IDs 121–170 are assigned to VentuSample even though they appear in the Pytyliki section of the original list; this is an explicit ownership transfer to keep all audio code in one project.
 
@@ -58,7 +58,7 @@ Preferred integration order:
 
 1. **JSON** for manifests, inventory, package metadata and offline job descriptions.
 2. **Versioned C ABI** for narrow native library calls with explicit ownership and lifetime rules.
-3. **IPC** for long-running user-space services after DuckOS has a defined process and permission model.
+3. **IPC** for long-running user-space services after DAKOS has a defined process and permission model.
 
 Do not expose raw pointers across a process boundary. Do not let one project silently load arbitrary plugins or libraries discovered by another project.
 
@@ -103,4 +103,4 @@ A catalogue count, feature registry entry, README statement or roadmap item does
 
 The four specialist repositories already publish their own `docs/PROGRAM_CATALOG_1000.md` adoption maps and feature matrices. Their first implementation waves include bounded profiling and sensor evidence, Reaper language services and toolchain inventory, OPlague PE/SPDX inspection, and VentuSample offline FFT/resampling/MIDI inspection.
 
-DuckOS now checks out the four specialist repositories as commit-pinned Git submodules under `projects/`, preserving their individual histories and licences. `federation/repositories.v1.json` is the source registry and `tools/federate_repositories.py` validates and synchronizes the exact pins. This makes upstream source available in the workspace; it does not automatically build or execute those projects, nor does it complete their user-space service adapters. DuckOS still does not provide a bootable kernel, bootloader, initramfs, compositor, enforced process sandbox, package manager or installer. The next engineering task remains interface verification and native OS foundation work—not bulk-copying project code into the kernel.
+DAKOS now checks out the four specialist repositories as commit-pinned Git submodules under `projects/`, preserving their individual histories and licences. `federation/repositories.v1.json` is the source registry and `tools/federate_repositories.py` validates and synchronizes the exact pins. This makes upstream source available in the workspace; it does not automatically build or execute those projects, nor does it complete their user-space service adapters. DAKOS still does not provide a bootable kernel, bootloader, initramfs, compositor, enforced process sandbox, package manager or installer. The next engineering task remains interface verification and native OS foundation work—not bulk-copying project code into the kernel.

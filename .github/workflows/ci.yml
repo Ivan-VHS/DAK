@@ -1,4 +1,4 @@
-name: DuckOS CI
+name: DAKOS CI
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: duckos-ci-${{ github.workflow }}-${{ github.ref }}
+  group: dakos-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -95,5 +95,5 @@ jobs:
             echo "::error::Native source exists but no CMakeLists.txt build contract is defined."
             exit 1
           else
-            echo "::notice::No native C/C++ source tree or build target exists in this DuckOS repository revision; native compilation is not applicable yet."
+            echo "::notice::No native C/C++ source tree or build target exists in this DAKOS repository revision; native compilation is not applicable yet."
           fi

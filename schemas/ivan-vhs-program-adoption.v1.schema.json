@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/ivan-vhs-program-adoption.v1.schema.json",
+  "$id": "https://github.com/Ivan-VHS/DAKOS/blob/main/schemas/ivan-vhs-program-adoption.v1.schema.json",
   "title": "Ivan-VHS program adoption manifest",
   "type": "object",
   "required": [
@@ -22,7 +22,7 @@
       "const": 1000
     },
     "integration_host": {
-      "const": "DuckOS"
+      "const": "DAKOS"
     },
     "projects": {
       "type": "array",

@@ -1,5 +1,5 @@
-#ifndef DUCKOS_X86_64_INTERRUPTS_H
-#define DUCKOS_X86_64_INTERRUPTS_H
+#ifndef DAKOS_X86_64_INTERRUPTS_H
+#define DAKOS_X86_64_INTERRUPTS_H
 
 #include <stdint.h>
 
@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-typedef struct duckos_x86_exception_frame {
+typedef struct dakos_x86_exception_frame {
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
@@ -28,10 +28,10 @@ typedef struct duckos_x86_exception_frame {
     uint64_t rip;
     uint64_t cs;
     uint64_t rflags;
-} duckos_x86_exception_frame;
+} dakos_x86_exception_frame;
 
 /* Pure bootstrap routing policy: #DF=IST1, NMI=IST2, #PF=IST3. */
-static inline uint8_t duckos_x86_exception_ist(uint32_t vector) {
+static inline uint8_t dakos_x86_exception_ist(uint32_t vector) {
     switch (vector) {
     case 8u: return 1u;
     case 2u: return 2u;
@@ -41,9 +41,9 @@ static inline uint8_t duckos_x86_exception_ist(uint32_t vector) {
 }
 
 /* Installs exception gates 0..31. CPU maskable interrupts remain disabled. */
-int duckos_x86_interrupts_init(void);
+int dakos_x86_interrupts_init(void);
 
-void duckos_x86_exception_dispatch(const duckos_x86_exception_frame *frame);
+void dakos_x86_exception_dispatch(const dakos_x86_exception_frame *frame);
 
 #ifdef __cplusplus
 }

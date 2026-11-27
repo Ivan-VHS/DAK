@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/Ivan-VHS/DuckOS/main/schemas/project-ladder.v1.schema.json",
+  "$id": "https://raw.githubusercontent.com/Ivan-VHS/DAKOS/main/schemas/project-ladder.v1.schema.json",
   "title": "Ivan-VHS Project Evolution Ladder record",
   "type": "object",
   "additionalProperties": false,

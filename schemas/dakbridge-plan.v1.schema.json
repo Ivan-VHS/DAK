@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dakos.dev/schemas/dakbridge-plan.v1.schema.json",
+  "title": "DAKBridge launch plan",
+  "description": "A reviewable launch-command plan. Runtime and target execution are always disabled in this contract.",
+  "type": "object",
+  "required": [
+    "schema", "status", "purpose", "target", "format", "architecture",
+    "bits", "host_architecture", "backend", "backend_available", "argv",
+    "environment", "required_configuration", "execution_started",
+    "prefix_created", "warnings", "binary_sha256", "imports"
+  ],
+  "properties": {
+    "schema": { "const": "dakos.dakbridge-plan.v1" },
+    "status": { "enum": ["ready", "needs_configuration", "unsupported"] },
+    "purpose": { "enum": ["application", "game"] },
+    "target": { "type": "string", "minLength": 1 },
+    "format": { "enum": ["PE32", "PE32+", "ELF", "unknown"] },
+    "architecture": { "type": "string", "minLength": 1 },
+    "bits": { "type": ["integer", "null"], "enum": [32, 64, null] },
+    "host_architecture": { "type": "string", "minLength": 1 },
+    "backend": { "type": ["string", "null"] },
+    "backend_available": { "type": "boolean" },
+    "argv": { "type": "array", "items": { "type": "string" } },
+    "environment": { "type": "object", "additionalProperties": { "type": "string" } },
+    "required_configuration": { "type": "array", "items": { "type": "string" } },
+    "execution_started": { "const": false },
+    "prefix_created": { "const": false },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "binary_sha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+    "imports": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

@@ -7,7 +7,7 @@ on:
       - "CMakeLists.txt"
       - "mora/**"
       - "desktop/**"
-      - "duckos/ui/**"
+      - "dakos/ui/**"
       - "contract_tests.rpr"
       - ".github/workflows/native-mora.yml"
   push:
@@ -16,7 +16,7 @@ on:
       - "CMakeLists.txt"
       - "mora/**"
       - "desktop/**"
-      - "duckos/ui/**"
+      - "dakos/ui/**"
       - "contract_tests.rpr"
       - ".github/workflows/native-mora.yml"
   workflow_dispatch:

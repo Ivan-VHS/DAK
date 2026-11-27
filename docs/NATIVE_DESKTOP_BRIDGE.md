@@ -1,17 +1,17 @@
-# Reaper native Duck Shell bridge contract
+# Reaper native DAK Shell bridge contract
 
 **Status:** Reaper policy contract implemented; DABI64 transport, native client adapter and kernel enforcement remain pending.
 
-This contract is the boundary between a native Duck Shell client and the Reaper desktop policy core. It is deliberately separate from the Qt host window lifecycle in Mora and from the kernel-owned DuckOS desktop that will exist after the process, IPC and display services are implemented.
+This contract is the boundary between a native DAK Shell client and the Reaper desktop policy core. It is deliberately separate from the Qt host window lifecycle in Mora and from the kernel-owned DAKOS desktop that will exist after the process, IPC and display services are implemented.
 
 ## Intended topology
 
 ```text
-Native Duck Shell client
+Native DAK Shell client
         |
         | bounded DABI64 request (future transport)
         v
-DuckOS desktop IPC endpoint (not implemented)
+DAKOS desktop IPC endpoint (not implemented)
         |
         | authenticated sender + capability evidence
         v
@@ -29,11 +29,11 @@ Native transaction coordinator (not implemented)
         +--> window service / compositor / input / launcher
 ```
 
-The Qt 6 Mora application remains the host-native reference adapter. It is not loaded by the DuckOS kernel, and this Reaper contract does not make it a kernel shell.
+The Qt 6 Mora application remains the host-native reference adapter. It is not loaded by the DAKOS kernel, and this Reaper contract does not make it a kernel shell.
 
 ## Event envelope v1
 
-`duckos/ui/native_bridge.rpr` defines a bounded eight-field record:
+`dakos/ui/native_bridge.rpr` defines a bounded eight-field record:
 
 | Index | Field | Constraint |
 |---:|---|---|

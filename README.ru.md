@@ -8,7 +8,7 @@
 
 **Состояние:** Экспериментальный проект · Stage 1 x86_64 проверен в QEMU · **Версия:** Stage 1 boot foundation · **Стандарт README:** Psychoporter 666 v1.0 · **Дата проверки:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
+<p align="center"><img src="assets/readme/dakos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
 
 ## Быстрая навигация
 
@@ -20,7 +20,7 @@ DAK — экспериментальный проект ОС с приорите
 
 ## Возможности
 
-- Путь x86_64 Stage 1 проверяет передачу управления от Limine и Boot Info v1, выделяет ранний кадр 4 KiB, выводит DUCKOS_BOOT_OK stage=1 и останавливается. QEMU-проверки BIOS и UEFI проходят.
+- Путь x86_64 Stage 1 проверяет передачу управления от Limine и Boot Info v1, выделяет ранний кадр 4 KiB, выводит DAKOS_BOOT_OK stage=1 и останавливается. QEMU-проверки BIOS и UEFI проходят.
 - Reaper предоставляет эталонное направление policy-контрактов, включая 40 контрактов Core Subsystem MVP. Нативное enforcement ядром ещё не реализовано.
 - У DAK есть нативное хост-приложение Qt 6 Widgets с окнами под управлением хостовой ОС и локальным каталогом приложений. Stage 1 kernel его не запускает.
 - desktop/demo/index.html сохранён как браузерное reference preview. Это не нативный compositor и не desktop ядра.

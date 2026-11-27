@@ -5,9 +5,9 @@ import test from "node:test";
 const catalog = JSON.parse(await readFile(new URL("../catalogs/nexus-system-services.v1.json", import.meta.url), "utf8"));
 const schema = JSON.parse(await readFile(new URL("../schemas/nexus-system-services.v1.schema.json", import.meta.url), "utf8"));
 
-test("NEXUS registry preserves DuckOS and Reaper identities", () => {
-  assert.equal(catalog.schema, "duckos.nexus-system-services.v1");
-  assert.equal(catalog.identity.operating_system, "DuckOS");
+test("NEXUS registry preserves DAKOS and Reaper identities", () => {
+  assert.equal(catalog.schema, "dakos.nexus-system-services.v1");
+  assert.equal(catalog.identity.operating_system, "DAKOS");
   assert.equal(catalog.identity.systems_language, "Reaper");
   assert.equal(catalog.identity.repository_identity_policy, "immutable");
 });
