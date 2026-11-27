@@ -1,0 +1,130 @@
+# Canonical application code / memory / storage-sector mapping.
+# Code bytes use u8le-v1; executable memory is page-aligned and never W+X.
+# Logical storage sectors are 512 or 4096 bytes and every extent is disk-bounded.
+
+import "duckos/kernel/memory.rpr" as memory
+
+export craft byte_sequence_valid(bytes, expected_length) {
+    when expected_length <= 0 or size(bytes) != expected_length {
+        yield false
+    }
+    vary valid := true
+    each value in bytes {
+        when value < 0 or value > 255 {
+            change valid := false
+        }
+    }
+    yield valid
+}
+
+# [application_id, code_id, encoding, byte_length, ruleset_revision, ruleset_digest, u8_bytes]
+export craft code_record_valid(code) {
+    when size(code) != 7 {
+        yield false
+    }
+    when code[0] == "" or code[1] == "" or code[2] != "u8le-v1" or code[3] <= 0 or code[4] <= 0 or code[5] == "" {
+        yield false
+    }
+    yield byte_sequence_valid(code[6], code[3])
+}
+
+# [application_id, physical_base, byte_length, permissions, ruleset_revision, ruleset_digest]
+export craft memory_region_valid(region) {
+    make max_address := 9223372036854775807
+    when size(region) != 6 {
+        yield false
+    }
+    when region[0] == "" or region[1] < 0 or region[2] <= 0 or region[4] <= 0 or region[5] == "" {
+        yield false
+    }
+    when region[1] % 4096 != 0 or region[2] % 4096 != 0 {
+        yield false
+    }
+    when region[1] > max_address - region[2] {
+        yield false
+    }
+    yield region[3] == "r" or region[3] == "rw" or region[3] == "rx"
+}
+
+# [application_id, start_sector, sector_count, logical_sector_bytes, payload_bytes, ruleset_revision, ruleset_digest]
+export craft extent_valid(extent, disk_sector_limit) {
+    make max_value := 9223372036854775807
+    when size(extent) != 7 {
+        yield false
+    }
+    when extent[0] == "" or extent[1] < 0 or extent[2] <= 0 or extent[4] <= 0 or extent[5] <= 0 or extent[6] == "" {
+        yield false
+    }
+    when extent[3] != 512 and extent[3] != 4096 {
+        yield false
+    }
+    when disk_sector_limit <= 0 or extent[1] >= disk_sector_limit {
+        yield false
+    }
+    when extent[2] > disk_sector_limit - extent[1] {
+        yield false
+    }
+    when extent[2] > max_value / extent[3] {
+        yield false
+    }
+    yield extent[4] <= extent[2] * extent[3]
+}
+
+export craft sector_map_valid(extents, disk_sector_limit) {
+    when size(extents) == 0 {
+        yield false
+    }
+
+    vary valid := true
+    vary sector_bytes := extents[0][3]
+    each extent in extents {
+        when not extent_valid(extent, disk_sector_limit) or extent[3] != sector_bytes {
+            change valid := false
+        }
+
+        vary same_application := 0
+        each other in extents {
+            when extent[0] == other[0] {
+                change same_application := same_application + 1
+            }
+            when extent[0] != other[0] and memory["ranges_overlap"](
+                extent[1], extent[2], other[1], other[2]
+            ) {
+                change valid := false
+            }
+        }
+        when same_application != 1 {
+            change valid := false
+        }
+    }
+    yield valid
+}
+
+# [application_id, app_version, ruleset_revision, ruleset_digest, abi, entry_code_id]
+export craft application_consistent(manifest, code, region, extent, disk_sector_limit) {
+    when size(manifest) != 6 {
+        yield false
+    }
+    when manifest[0] == "" or manifest[1] <= 0 or manifest[2] <= 0 or manifest[3] == "" or manifest[4] == "" or manifest[5] == "" {
+        yield false
+    }
+    when not code_record_valid(code) or not memory_region_valid(region) or not extent_valid(extent, disk_sector_limit) {
+        yield false
+    }
+    when manifest[0] != code[0] or manifest[0] != region[0] or manifest[0] != extent[0] {
+        yield false
+    }
+    when manifest[5] != code[1] or code[2] != "u8le-v1" {
+        yield false
+    }
+    when manifest[2] != code[4] or manifest[2] != region[4] or manifest[2] != extent[5] {
+        yield false
+    }
+    when manifest[3] != code[5] or manifest[3] != region[5] or manifest[3] != extent[6] {
+        yield false
+    }
+    when code[3] != extent[4] or code[3] > region[2] {
+        yield false
+    }
+    yield region[3] == "rx"
+}
