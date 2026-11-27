@@ -1,4 +1,4 @@
-# Default-deny capability broker policy for DuckOS services.
+# Default-deny capability broker policy for Dak services.
 # Grants are explicit tuples: [principal, object, operation].
 # Wildcards, implicit inheritance and ambient authority are not accepted here.
 
