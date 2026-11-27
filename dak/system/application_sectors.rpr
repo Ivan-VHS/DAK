@@ -1,0 +1,126 @@
+# DAK application sectorization contract.
+# Native DAKS v1 byte codec and table validator live in foundation/app_sector.c.
+# All offsets and lengths are byte quantities with exclusive upper bounds.
+
+export craft digest_valid(digest) {
+    yield size(digest) == 64
+}
+
+export craft permission_valid(kind, permissions) {
+    when kind == "manifest" or kind == "read-only-data" or kind == "resource" or kind == "policy" {
+        yield permissions == "r"
+    }
+    when kind == "code" {
+        yield permissions == "rx"
+    }
+    when kind == "writable-data" or kind == "journal" {
+        yield permissions == "rw"
+    }
+    yield false
+}
+
+# Sector: [app_id, sector_id, kind, offset_bytes, length_bytes,
+#          alignment_bytes, permissions, digest, generation, state].
+export craft sector_valid(sector, app_id, image_bytes) {
+    when size(sector) != 10 or sector[0] != app_id or sector[1] <= 0 {
+        yield false
+    }
+    when app_id <= 0 or image_bytes <= 0 or sector[8] <= 0 {
+        yield false
+    }
+    when sector[3] < 0 or sector[4] <= 0 or sector[5] <= 0 {
+        yield false
+    }
+    when sector[5] > 1048576 or sector[3] % sector[5] != 0 {
+        yield false
+    }
+    when sector[3] > 9223372036854775807 - sector[4] {
+        yield false
+    }
+    when sector[3] > image_bytes or sector[4] > image_bytes - sector[3] {
+        yield false
+    }
+    when not digest_valid(sector[7]) or sector[9] != "verified-sealed" {
+        yield false
+    }
+    yield permission_valid(sector[2], sector[6])
+}
+
+export craft ranges_overlap(left_offset, left_length, right_offset, right_length) {
+    # Call only after sector_valid has proved all additions stay in range.
+    yield left_offset < right_offset + right_length and
+        right_offset < left_offset + left_length
+}
+
+export craft table_valid(app_id, sectors, image_bytes) {
+    when app_id <= 0 or size(sectors) == 0 or size(sectors) > 64 {
+        yield false
+    }
+
+    vary manifest_count := 0
+    vary code_count := 0
+    each sector in sectors {
+        when not sector_valid(sector, app_id, image_bytes) {
+            yield false
+        }
+        when sector[2] == "manifest" {
+            change manifest_count := manifest_count + 1
+        }
+        when sector[2] == "code" {
+            change code_count := code_count + 1
+        }
+
+        vary same_id := 0
+        each other in sectors {
+            when other[1] == sector[1] {
+                change same_id := same_id + 1
+            }
+        }
+        when same_id != 1 {
+            yield false
+        }
+    }
+
+    each left in sectors {
+        each right in sectors {
+            when left[1] < right[1] {
+                when ranges_overlap(left[3], left[4], right[3], right[4]) {
+                    yield false
+                }
+            }
+        }
+    }
+
+    yield manifest_count == 1 and code_count >= 1
+}
+
+export craft launch_layout_valid(sectors, image_bytes) {
+    when size(sectors) == 0 {
+        yield false
+    }
+    make owner := sectors[0][0]
+    when not table_valid(owner, sectors, image_bytes) {
+        yield false
+    }
+    vary has_code := false
+    each sector in sectors {
+        when sector[2] == "code" and sector[6] == "rx" {
+            change has_code := true
+        }
+    }
+    yield has_code
+}
+
+export craft executable_write_allowed(sector) {
+    when size(sector) != 10 or sector[2] != "code" {
+        yield false
+    }
+    yield false
+}
+
+export craft data_execute_allowed(sector) {
+    when size(sector) != 10 or sector[2] != "writable-data" {
+        yield false
+    }
+    yield false
+}
