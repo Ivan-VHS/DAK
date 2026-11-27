@@ -300,26 +300,30 @@ export craft model_update(model, next_version, next_digest) {
     yield ["ERR", "model-is-immutable-create-a-new-version", model[1], next_version, next_digest]
 }
 
-export craft predictor_guard(actual_load, predicted_load, predicted_risk, margin, mismatch_limit, previous_errors, quarantined) {
-    when actual_load < 0 or actual_load > 100 or predicted_load < 0 or predicted_load > 100 or predicted_risk < 0 or predicted_risk > 100 or margin < 0 or margin > 100 or mismatch_limit < 0 or previous_errors < 0 or previous_errors > 255 or (quarantined != true and quarantined != false) {
+export craft predictor_guard(actual_load, predicted_load, actual_risk, predicted_risk, margin, mismatch_limit, previous_errors, quarantined) {
+    when actual_load < 0 or actual_load > 100 or predicted_load < 0 or predicted_load > 100 or actual_risk < 0 or actual_risk > 100 or predicted_risk < 0 or predicted_risk > 100 or margin < 0 or margin > 100 or mismatch_limit < 0 or mismatch_limit > 100 or previous_errors < 0 or previous_errors > 255 or (quarantined != true and quarantined != false) {
         yield ["OK", ["guard", 100, 100, true, ["all-required"], 1, "invalid-input"]]
     }
     when quarantined == true {
         yield ["OK", ["guard", 100, 100, true, ["all-required"], previous_errors, "quarantined"]]
     }
 
-    make delta := predicted_load - actual_load
-    when delta < 0 { change delta := 0 - delta }
-    when delta > mismatch_limit {
+    make load_delta := predicted_load - actual_load
+    when load_delta < 0 { change load_delta := 0 - load_delta }
+    make risk_delta := predicted_risk - actual_risk
+    when risk_delta < 0 { change risk_delta := 0 - risk_delta }
+    when load_delta > mismatch_limit or risk_delta > mismatch_limit {
         make errors := previous_errors + 1
         yield ["OK", ["guard", 100, 100, errors >= 2, ["all-required"], errors, "prediction-mismatch"]]
     }
 
     make load_base := actual_load
     when predicted_load > load_base { change load_base := predicted_load }
+    make risk_base := actual_risk
+    when predicted_risk > risk_base { change risk_base := predicted_risk }
     make load_guard := load_base + margin
     when load_guard > 100 { change load_guard := 100 }
-    make risk_guard := predicted_risk + margin
+    make risk_guard := risk_base + margin
     when risk_guard > 100 { change risk_guard := 100 }
     yield ["OK", ["guard", load_guard, risk_guard, false, ["all-required"], 0, "validated"]]
 }
