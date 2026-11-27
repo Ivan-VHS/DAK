@@ -450,6 +450,7 @@ emit "DUCKOS_REAPER_CONTRACTS_OK"
 
 # DAK application catalog, aliases, request admission and lifecycle.
 import "applications/runtime.rpr" as applications
+import "applications/domain_contracts.rpr" as application_domains
 
 assert(applications["catalog_valid"](), "the reconciled DAK application catalog contains 45 unique descriptors")
 assert(size(applications["app_catalog"]()) == 45, "all confirmed DAK application descriptors are registered")
@@ -486,3 +487,59 @@ assert(not applications["lifecycle_transition_valid"]("stopped", "running"), "st
 assert(applications["app_open_decision"]("dak.files", "ready") == "allow-user-space-open", "registered ready app can be opened in user space")
 assert(applications["app_open_decision"]("security", "disabled") == "deny-disabled", "disabled app cannot be opened")
 emit "DAK_APPLICATION_RUNTIME_V1:PASS"
+
+# App-specific payload contracts: every catalog identity has a bounded record shape.
+assert(application_domains["payload_valid"]("dak.settings", [4, 16, "user", false]), "Settings accepts a bounded user preference")
+assert(application_domains["payload_valid"]("dak.files", ["read", 2, 128, true, false]), "Files accepts a bounded selected-file read")
+assert(application_domains["payload_valid"]("dak.calendar", ["create", 1700000000, 1700003600, 5, false]), "Calendar accepts a bounded event")
+assert(application_domains["payload_valid"]("dak.clock", ["alarm", 1700000000, 5, false]), "Clock accepts a local alarm")
+assert(application_domains["payload_valid"]("dak.notes", [1024, "private", false]), "Notes accepts a private note")
+assert(application_domains["payload_valid"]("dak.tasks", [64, 1700000000, 2, false]), "Tasks accepts a bounded reminder")
+assert(application_domains["payload_valid"]("dak.calculator", [32, 18]), "Calculator accepts a bounded expression")
+assert(application_domains["payload_valid"]("dak.browser", [512, "ask", true, false]), "Browser accepts a permission-pending navigation")
+assert(application_domains["payload_valid"]("dak.mail", [32, 2, 4096, true]), "Mail send requires explicit consent")
+assert(application_domains["payload_valid"]("dak.contacts", ["create", 64, "local", false]), "Contacts accepts a local contact")
+assert(application_domains["payload_valid"]("dak.gallery", [3, 1048576, true, false]), "Gallery requires a user-selected media source")
+assert(application_domains["payload_valid"]("dak.media", ["play", true, false, false]), "Media player accepts local playback")
+assert(application_domains["payload_valid"]("dak.editor", ["read", true, 4096, false]), "Editor accepts a selected document")
+assert(application_domains["payload_valid"]("dak.system-tools", ["inspect", 2, "processes.read", false]), "System tools remain non-privileged")
+assert(application_domains["payload_valid"]("dak.software-center", ["install-request", 32, 16, true]), "Software Center installation is an explicit request")
+
+assert(application_domains["payload_valid"]("cockos", [48000, 2, 24, 512, true]), "Cockos recording requires visible consent")
+assert(application_domains["payload_valid"]("kavun", ["media-1", 1000000, "private", true, false]), "Kavun keeps private media scope")
+assert(application_domains["payload_valid"]("ka-bon", ["receipt-1", 1250, "USD", "food", true]), "Ka-bon validates confirmed expense data")
+assert(application_domains["payload_valid"]("gloverty", ["rule-1", "manual", "create-task", "local", true, true]), "Gloverty requires consent for enabled automation")
+assert(application_domains["payload_valid"]("po", [512, "normal", "ask", false]), "Po models per-site permission state")
+assert(application_domains["payload_valid"]("illidia", ["game-1", 64, 128, true, false]), "Illidia validates user-authorized game action")
+assert(application_domains["payload_valid"]("unify", ["phone-1", 64, "paired", true, false]), "Unify requires an authenticated pairing state")
+assert(application_domains["payload_valid"]("sestem", ["kernel", "experimental", "source-ledger", 1700000000]), "Sestem reports evidence-backed status")
+assert(application_domains["payload_valid"]("setupup", ["dark", "ru", true, true]), "SetupUP accepts an explicit locale and theme")
+assert(application_domains["payload_valid"]("orriganize", ["list-1", 64, 3, "open", false]), "ORGze validates a local project list")
+assert(application_domains["payload_valid"]("abriganza", [64, 1024, 10, 2, false]), "Abriganza remains metadata-only")
+assert(application_domains["payload_valid"]("olaab", ["album-1", 64, 20, "local-index"]), "Olaab validates a local collection")
+assert(application_domains["payload_valid"]("concrete-thump", [120, 58, 4, 16]), "Concrete Thump validates rhythm profile bounds")
+assert(application_domains["payload_valid"]("seu-beu", [true, true, true, true, true]), "Seu-Beu requires all review confirmations")
+assert(application_domains["payload_valid"]("love-il", ["entry-1", 2048, 1700000000, "local-private"]), "Love-IL keeps journal entries local")
+assert(application_domains["payload_valid"]("poi", ["capture-1", 512, 1700000000]), "Poi validates a bounded capture")
+assert(application_domains["payload_valid"]("poi-2", ["card-1", 64, 1024, "local-reference"]), "Poi-2 validates a local knowledge card")
+assert(application_domains["payload_valid"]("po-2", ["route-1", 4, true, false]), "Po-2 is a manually ordered route without GPS")
+assert(application_domains["payload_valid"]("gamecharager", ["game-1", 64, 512, "metadata-only", false]), "GameCharager never launches an executable")
+assert(application_domains["payload_valid"]("exedotexe", ["pe", 2048, 512, 64, true]), "EXEdotEXE inspects read-only executable metadata")
+
+assert(application_domains["payload_valid"]("red-sparrow", ["project-1", 4, 1048576, true]), "Red Sparrow keeps its creative project local")
+assert(application_domains["payload_valid"]("mora-ai", [1024, 4096, "local", true, "bounded-session"]), "Mora AI accepts a bounded local session")
+assert(application_domains["payload_valid"]("security", ["finding-1", 2, 1024, "request-only"]), "Sentinel emits request-only remediation")
+assert(application_domains["payload_valid"]("updates", ["snapshot-1", 1048576, true, true]), "Restore requires a verified snapshot and explicit consent")
+assert(application_domains["payload_valid"]("runtime", ["compat-1", "pe32+", "DABI64", true, false]), "Bridge remains isolated and does not auto-execute")
+assert(application_domains["payload_valid"]("workspace", ["workspace-1", 4, "local", false]), "Control validates a local workspace")
+assert(application_domains["payload_valid"]("provenance", ["sha256", 64, 1024, true]), "Proof validates a SHA-256 evidence record")
+assert(application_domains["payload_valid"]("mora-boost", ["profile-1", "balanced", 60, false]), "Mora Boost profile does not directly alter hardware")
+assert(application_domains["payload_valid"]("desktop", ["audit", "session", "current-user", false, true]), "DAK Desktop audit stays in the current-user scope")
+assert(application_domains["payload_valid"]("mora-commons", [12, 20, "all"]), "Mora Commons query is bounded")
+
+assert(not application_domains["payload_valid"]("cockos", [48000, 2, 24, 512, false]), "Cockos rejects recording without consent")
+assert(not application_domains["payload_valid"]("abriganza", [64, 1024, 10, 2, true]), "Abriganza cannot turn inspection into archive extraction")
+assert(not application_domains["payload_valid"]("po-2", ["route-1", 4, true, true]), "Po-2 cannot enable GPS tracking")
+assert(not application_domains["payload_valid"]("exedotexe", ["pe", 2048, 512, 64, false]), "EXEdotEXE cannot authorize executable launch")
+assert(not application_domains["payload_valid"]("runtime", ["compat-1", "pe32+", "DABI64", true, true]), "Bridge cannot implicitly execute a compatibility target")
+emit "DAK_APPLICATION_DOMAIN_CONTRACTS_V1:PASS"
