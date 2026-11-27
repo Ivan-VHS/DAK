@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ivan-VHS/DuckOS/blob/main/schemas/deployment-plan.v1.schema.json",
-  "title": "DuckOS non-destructive deployment plan v1",
+  "$id": "https://github.com/Ivan-VHS/Dak/blob/main/schemas/deployment-plan.v1.schema.json",
+  "title": "Dak non-destructive deployment plan v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -18,7 +18,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "duckos.deployment-plan.v1"
+      "const": "dakos.deployment-plan.v1"
     },
     "system": {
       "type": "object",
@@ -85,12 +85,12 @@
         },
         "slots": {
           "const": [
-            "duck_system_a",
-            "duck_system_b"
+            "dak_system_a",
+            "dak_system_b"
           ]
         },
         "initial_active_slot": {
-          "const": "duck_system_a"
+          "const": "dak_system_a"
         },
         "rollback_policy": {
           "const": "native-bootloader-required"
@@ -163,7 +163,7 @@
               "minLength": 1
             },
             "manifest_verification_owner": {
-              "const": "native-duck-bootloader"
+              "const": "native-dak-bootloader"
             },
             "signature_enforcement_configured": {
               "const": false
