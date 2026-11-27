@@ -1,5 +1,20 @@
 # DuckOS implementation status
 
+
+## Native kernel integrity contracts — 2026-11-28
+
+- [x] Added Reaper primary-kernel admission policy requiring x86_64, DABI64-v1, freestanding ring-0 execution, qualified native Reaper code generation and disabled hosted fallback.
+- [x] Added immutable verification-model lifecycle with revision/digest/epoch snapshots; frozen/installing states reject mutation and installed snapshots are revised by creating a new draft.
+- [x] Added condition predictors bound to ruleset revision, install epoch and expiry; predictions cannot bypass fresh authoritative commit checks.
+- [x] Added an exact-set install barrier that rejects missing/duplicate operations and routes failed operations to recovery.
+- [x] Added unified application code-byte, page-aligned memory and bounded disk-sector contracts, including shared ruleset identity and non-overlap checks.
+- [x] Added regression assertions to `system_platform_tests.rpr`; the existing workflow checks DuckOS Reaper sources and runs tree-walk and VM contract suites.
+- [ ] Native Reaper freestanding code generation, atomic protected verification locks, actual predictor source revalidation, durable install transactions, physical page mapping and block-device writes remain pending.
+- [ ] The new policy layer is not yet wired into the Limine Stage 1 boot entry or a production installer; Stage 1's existing boot behavior remains unchanged.
+
+The primary-kernel admission contract intentionally rejects the current repository profile while `native_freestanding_codegen` remains `not-yet-qualified`. Contract completion is not native kernel completion. See [Native kernel integrity contracts v1](NATIVE_KERNEL_CORE_V1.md).
+
+
 Updated: 2026-11-25
 
 ## Ecosystem source and interface integration — 2026-11-25
