@@ -1,6 +1,6 @@
 # DAK Processor Control Plane v1
 
-**Status:** Reaper policy contracts plus bounded native C11 scheduler, x86_64 CPU probe and general-register context-switch primitive. The boot path does not yet run a complete SMP kernel.  
+**Status:** Reaper policy contracts plus a bounded native C11 scheduler, x86_64 CPU probe and general-register context-switch primitive. The boot path now probes the bootstrap CPU and marks only BSP 0 online in the scheduler. It still does not run a preemptive or SMP scheduler.  
 **Primary target:** x86_64, Intel and AMD. Elbrus remains a compatibility track, not a claimed boot target.
 
 ## Scope
@@ -38,7 +38,7 @@ The scheduler is a bounded native core, not yet a production preemptive SMP sche
 - Hosted C tests exercise scheduler admission, topology generations, selection, drain and the assembly context-switch primitive.
 - The Stage 1 ISO build script compiles and links the scheduler, CPU probe and context-switch objects. CMake exposes a native processor runtime target and corresponding tests.
 
-The context-switch primitive is integer-register + RFLAGS v1. It does not yet save/restore FPU/SSE/AVX state, debug registers, full interrupt frames or address-space state. The scheduler and context-switch primitive are not yet wired into `kernel/boot/entry.c`; compiling them into the ELF is not equivalent to running them. The current scheduler uses a bounded shared ready table protected by one spinlock; per-CPU run queues and lock-free/work-stealing paths remain future optimization work.
+The context-switch primitive is integer-register + RFLAGS v1. It does not yet save/restore FPU/SSE/AVX state, debug registers, full interrupt frames or address-space state. The bootstrap scheduler state and read-only CPUID probe are initialized from `kernel/boot/entry.c`; only one CPU descriptor is admitted (BSP 0). The scheduler does not yet dispatch boot tasks or perform a context switch from the boot path; compiling the switch primitive into the ELF is not equivalent to running it. The current scheduler uses a bounded shared ready table protected by one spinlock; per-CPU run queues and lock-free/work-stealing paths remain future optimization work.
 
 ## Processor ownership
 
@@ -72,7 +72,7 @@ The target lifecycle is:
 
 `firmware → bootstrap CPU → per-CPU resources → local APIC/timer → AP startup → scheduler admission → SMP operation`
 
-The native scheduler refuses to admit a secondary CPU until the bootstrap CPU is online and its startup evidence includes GDT, IDT, a unique stack, per-CPU data, local controller readiness and an AP trampoline. This is a readiness gate only: the current boot path does not yet discover ACPI MADT processor entries, map/configure the local APIC, send INIT/SIPI or execute a real AP trampoline. The callback route now connects scheduler state transitions to the tested stack-switch primitive, but there is not yet a boot-time caller or timer/IPI integration.
+The native scheduler refuses to admit a secondary CPU until the bootstrap CPU is online and its startup evidence includes GDT, IDT, a unique stack, per-CPU data, local controller readiness and an AP trampoline. This is a readiness gate only: the current boot path does not yet discover ACPI MADT processor entries, map/configure the local APIC, send INIT/SIPI or execute a real AP trampoline. The callback route connects scheduler state transitions to the tested stack-switch primitive, and boot now initializes the BSP scheduler descriptor. There is not yet a boot-time task-dispatch caller, AP startup, local APIC setup, timer interrupt or IPI integration.
 
 Core removal requires zero runnable/affinity-pinned work, active interrupt handlers, held locks, preemption depth and DMA leases. Hotplug increments the topology generation and invalidates stale snapshots.
 
