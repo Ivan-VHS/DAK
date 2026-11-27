@@ -4,6 +4,15 @@ on:
   pull_request:
     paths:
       - "mora/**"
+      - "duckos/gaming/**"
+      - "duckos/cli.py"
+      - "catalogs/game-performance-rules.v1.json"
+      - "tests/test_gaming_policy.py"
+      - "tests/test_gaming_detection.py"
+      - "docs/GAMING_POLICY_66.md"
+      - "docs/GAMING_PROCESS_DETECTION.md"
+      - "docs/GAMING_FEDERATION_CONTRACT.md"
+      - "examples/game-profiles.example.json"
       - "docs/GAMING_PERFORMANCE_INTEGRATION.md"
       - "scripts/validate_mora_gaming.py"
       - ".github/workflows/mora-gaming.yml"
@@ -12,6 +21,11 @@ on:
       - main
     paths:
       - "mora/**"
+      - "duckos/gaming/**"
+      - "duckos/cli.py"
+      - "catalogs/game-performance-rules.v1.json"
+      - "tests/test_gaming_policy.py"
+      - "docs/GAMING_POLICY_66.md"
       - "docs/GAMING_PERFORMANCE_INTEGRATION.md"
       - "scripts/validate_mora_gaming.py"
       - ".github/workflows/mora-gaming.yml"
@@ -31,3 +45,13 @@ jobs:
         run: python -m json.tool mora/contracts/oplague-gaming.v1.schema.json > /dev/null
       - name: Validate the gaming capability contract
         run: python scripts/validate_mora_gaming.py
+      - name: Test the 66-rule gaming policy
+        run: python -m unittest tests.test_gaming_policy -v
+      - name: Test read-only game process detection
+        run: python -m unittest tests.test_gaming_detection -v
+      - name: Smoke-test read-only game-process discovery
+        run: python -m duckos gaming-detect --profiles examples/game-profiles.example.json
+      - name: Smoke-test the gaming assessment CLI
+        run: python -m duckos gaming-assess
+      - name: Smoke-test the gaming lifecycle CLI
+        run: python -m duckos gaming-transition idle game_detected --profile-id smoke-test --process-identity smoke.exe
