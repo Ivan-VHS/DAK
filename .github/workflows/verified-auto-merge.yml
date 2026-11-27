@@ -168,6 +168,7 @@ jobs:
           pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
           pr_author="$(jq -r '.user.login' <<< "${pr}")"
 
+          # shellcheck disable=SC2016
           decision="$(gh pr view "${pr_url}" --json reviewDecision --jq '.reviewDecision // "UNKNOWN"')"
           case "${decision}" in
             APPROVED|UNKNOWN) ;;
