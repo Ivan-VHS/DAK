@@ -1,6 +1,6 @@
-# DuckOS repository federation
+# Dak repository federation
 
-DuckOS keeps the four specialist repositories as pinned Git submodules. This gives the OS workspace a real checkout of every source project while preserving each project's own Git history, release cadence, build system, contributors and licence notices.
+Dak keeps the four specialist repositories as pinned Git submodules. This gives the OS workspace a real checkout of every source project while preserving each project's own Git history, release cadence, build system, contributors and licence notices.
 
 ## Included repositories
 
@@ -11,17 +11,17 @@ DuckOS keeps the four specialist repositories as pinned Git submodules. This giv
 | `projects/oplague` | [OPlague](https://github.com/Ivan-VHS/OPlague) | read-only device and driver evidence workstation | Apache-2.0 |
 | `projects/ventusample` | [VentuSample](https://github.com/Ivan-VHS/VentuSample) | C++20 procedural audio and offline DSP | Apache-2.0 |
 
-DuckOS itself is the fifth repository and remains the superproject. It must not add itself as a submodule.
+Dak itself is the fifth repository and remains the superproject. It must not add itself as a submodule.
 
 ## First checkout
 
 ```sh
-git clone --recurse-submodules https://github.com/Ivan-VHS/DuckOS.git
-cd DuckOS
+git clone --recurse-submodules https://github.com/Ivan-VHS/Dak.git
+cd Dak
 python tools/federate_repositories.py status
 ```
 
-For an existing DuckOS clone:
+For an existing Dak clone:
 
 ```sh
 python tools/federate_repositories.py sync
@@ -41,22 +41,22 @@ The registry is machine-readable at `federation/repositories.v1.json`; its contr
 
 ## Native host workbench launch boundary
 
-The Qt host-native Mora shell provides explicit, per-launch entry points for the four federated workbenches. It uses a fixed ID allowlist and fixed relative executable/script locations beneath the validated DuckOS checkout. It does not execute manifest strings, build missing projects, use a shell command line or elevate privileges.
+The Qt host-native Mora shell provides explicit, per-launch entry points for the four federated workbenches. It uses a fixed ID allowlist and fixed relative executable/script locations beneath the validated Dak checkout. It does not execute manifest strings, build missing projects, use a shell command line or elevate privileges.
 
 - Reaper Studio and OPlague use an already installed host Python runtime to open their upstream user-space applications.
 - Pytyliki is launched only when its Windows GUI target exists; the portable C11 command-line utility is not represented as a GUI.
 - VentuSample is launched only when an existing Qt desktop executable is found; the workbench stays offline-first.
 
-Each launch is an explicit user action with a confirmation prompt. The bridge is a development/host integration only. It does not replace the missing DuckOS process model, syscall ABI, capability enforcement, service supervisor, native filesystem or compositor. Never use a successful host launch as evidence that a project runs inside the DuckOS kernel session.
+Each launch is an explicit user action with a confirmation prompt. The bridge is a development/host integration only. It does not replace the missing Dak process model, syscall ABI, capability enforcement, service supervisor, native filesystem or compositor. Never use a successful host launch as evidence that a project runs inside the Dak kernel session.
 
 ## How projects fit together
 
-- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. DuckOS should call narrow versioned interfaces or consume JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.
-- **Reaper** is the user-space language and toolchain. Its federation status is `native-workbench`: Duck Desktop and the `duckos reaper` CLI can launch Studio or request static checks through a bounded subprocess bridge. It can implement system policy and developer tools, but imported interpreters, plugins and programs never become kernel code.
+- **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. Dak should call narrow versioned interfaces or consume JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.
+- **Reaper** is the user-space language and toolchain. Its federation status is `native-workbench`: Dak Desktop and the `dakos reaper` CLI can launch Studio or request static checks through a bounded subprocess bridge. It can implement system policy and developer tools, but imported interpreters, plugins and programs never become kernel code.
 - **OPlague** provides read-only device, package and driver evidence. Device matches are candidates, not permission to install a driver.
 - **VentuSample** owns audio generation and offline DSP. Its CMake project supports an optional local Reaper source path; this is recorded as an optional dependency, not a mandatory boot dependency. Real-time audio and device access need a separate service design.
 
-Preferred integration order is versioned JSON first, narrow C ABI second, and IPC only after DuckOS has a process model, capabilities, resource quotas, cancellation and audit. Keep the upstream projects separate; use adapters under DuckOS rather than copying source files into kernel or Mora directories.
+Preferred integration order is versioned JSON first, narrow C ABI second, and IPC only after Dak has a process model, capabilities, resource quotas, cancellation and audit. Keep the upstream projects separate; use adapters under Dak rather than copying source files into kernel or Mora directories.
 
 ## Reproducibility and safety
 
@@ -64,7 +64,7 @@ Every superproject commit pins exact submodule commits. Update pins intentionall
 
 Before syncing, the tool refuses to proceed if an initialized top-level submodule has local modifications or untracked files. Commit or move local work first. Recursive submodules are included if an upstream project adds any later.
 
-Submodule initialization only downloads source. The federation tool never compiles or runs imported content. All entries have `auto_build=false` and `auto_execute=false`. A cloned repository is not thereby a DuckOS app, kernel driver, trusted package or bootable OS feature.
+Submodule initialization only downloads source. The federation tool never compiles or runs imported content. All entries have `auto_build=false` and `auto_execute=false`. A cloned repository is not thereby a Dak app, kernel driver, trusted package or bootable OS feature.
 
 Each upstream LICENSE and its notices remain in the original checkout. Pytyliki is MIT; Reaper, OPlague and VentuSample are Apache-2.0. Preserve both the top-level notices and any third-party attribution shipped by each project.
 
@@ -78,7 +78,7 @@ cmake -S projects/ventusample -B build/ventusample \
 cmake --build build/ventusample --parallel
 ```
 
-This is a developer build of those user-space projects; it is not part of DuckOS's boot chain and is not automatically invoked by the OS build.
+This is a developer build of those user-space projects; it is not part of Dak's boot chain and is not automatically invoked by the OS build.
 
 ## Cross-repository interface graph
 
@@ -90,6 +90,6 @@ npm run test:ecosystem
 npm test
 ```
 
-The graph distinguishes working Pytyliki ABI v1 and OPlague device-snapshot v1 interop, DuckOS hardware-inventory v1 read-only audit, a GPU policy adapter that still needs trusted ingest, and the specified-only VentuSample pack-v1 metadata edge.
+The graph distinguishes working Pytyliki ABI v1 and OPlague device-snapshot v1 interop, Dak hardware-inventory v1 read-only audit, a GPU policy adapter that still needs trusted ingest, and the specified-only VentuSample pack-v1 metadata edge.
 
 Do not flatten submodules into the kernel tree. Preserve provenance, pins and licenses. Do not upgrade maturity labels until consumer code, tests and runtime boundaries are verified.
