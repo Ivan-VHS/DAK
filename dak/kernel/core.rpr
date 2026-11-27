@@ -148,13 +148,13 @@ export craft passport_encode(passport, address_limit, alignment) {
 }
 
 export craft sector_create(app_id, kind, rule_id, base, byte_count, quota, address_limit) {
-    when app_id < 1 or app_id > 429496729 or kind < 1 or kind > 5 {
+    when app_id < 1 or app_id > 42949672 or kind < 1 or kind > 5 {
         yield ["ERR", "sector-identity-invalid"]
     }
     when quota < 1 or quota > byte_count or byte_count % 4096 != 0 {
         yield ["ERR", "sector-quota-or-size-invalid"]
     }
-    make sector_id := app_id * 10 + kind
+    make sector_id := app_id * 100 + kind
     when sector_id > 4294967295 { yield ["ERR", "sector-code-overflow"] }
     make passport := passport_create(30, 19, rule_id, sector_id, base, byte_count, 4096, address_limit)
     when passport[0] != "OK" { yield passport }
@@ -177,7 +177,7 @@ craft sector_with_state(sector, next_state) {
 }
 
 export craft application_create(app_id, descriptors, address_limit) {
-    when app_id < 1 or app_id > 429496729 or size(descriptors) != 5 {
+    when app_id < 1 or app_id > 42949672 or size(descriptors) != 5 {
         yield ["ERR", "application-shape-invalid"]
     }
 
