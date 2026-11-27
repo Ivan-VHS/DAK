@@ -1,0 +1,60 @@
+# DAK syscall ABI policy.
+# The kernel must derive the caller identity and grants from trusted task state.
+
+import "../security/capabilities.rpr" as capabilities
+
+# Descriptor: [number, name, argc_min, argc_max, capability, max_bytes, enabled].
+export craft descriptor_valid(descriptor) {
+    when size(descriptor) != 7 {
+        yield false
+    }
+    when descriptor[0] < 0 or descriptor[0] > 4095 or descriptor[1] == "" {
+        yield false
+    }
+    when descriptor[2] < 0 or descriptor[3] < descriptor[2] or descriptor[3] > 6 {
+        yield false
+    }
+    when descriptor[4] == "" or descriptor[5] < 0 or descriptor[5] > 1048576 {
+        yield false
+    }
+    yield descriptor[6] == true or descriptor[6] == false
+}
+
+export craft request_decision(descriptor, args, payload_bytes, caller_state, grants) {
+    when not descriptor_valid(descriptor) {
+        yield "deny-invalid-descriptor"
+    }
+    when not descriptor[6] {
+        yield "deny-disabled"
+    }
+    when caller_state != "running" {
+        yield "deny-caller-state"
+    }
+    when size(args) < descriptor[2] or size(args) > descriptor[3] {
+        yield "deny-argument-count"
+    }
+    when payload_bytes < 0 or payload_bytes > descriptor[5] {
+        yield "deny-payload-limit"
+    }
+    when not capabilities["permits"](grants, descriptor[4]) {
+        yield "deny-capability"
+    }
+    yield "dispatch-to-kernel-handler"
+}
+
+export craft result_valid(result, max_output_bytes) {
+    when size(result) != 3 or max_output_bytes < 0 {
+        yield false
+    }
+    when result[0] != "ok" and result[0] != "error" and result[0] != "interrupted" {
+        yield false
+    }
+    when result[2] < 0 or result[2] > max_output_bytes {
+        yield false
+    }
+    yield true
+}
+
+export craft abi_version_supported(version) {
+    yield version == 1
+}

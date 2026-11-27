@@ -1,0 +1,40 @@
+# Monotonic clock, timeout and deadline arithmetic contracts.
+# A platform clock adapter supplies the monotonic counter and sleep primitive.
+
+export craft timestamp_valid(timestamp_ns) {
+    yield timestamp_ns >= 0 and timestamp_ns <= 9223372036854775807
+}
+
+export craft deadline_after(now_ns, duration_ns) {
+    when not timestamp_valid(now_ns) or duration_ns < 0 {
+        yield ["invalid", -1]
+    }
+    when duration_ns > 9223372036854775807 - now_ns {
+        yield ["overflow", -1]
+    }
+    yield ["deadline", now_ns + duration_ns]
+}
+
+export craft deadline_reached(now_ns, deadline_ns) {
+    when not timestamp_valid(now_ns) or not timestamp_valid(deadline_ns) {
+        yield false
+    }
+    yield now_ns >= deadline_ns
+}
+
+export craft elapsed(now_ns, start_ns) {
+    when not timestamp_valid(now_ns) or not timestamp_valid(start_ns) or now_ns < start_ns {
+        yield ["invalid", 0]
+    }
+    yield ["elapsed", now_ns - start_ns]
+}
+
+export craft sleep_policy(duration_ns, maximum_ns, interruptible) {
+    when duration_ns < 0 or maximum_ns <= 0 or duration_ns > maximum_ns {
+        yield "deny-duration"
+    }
+    when interruptible != true and interruptible != false {
+        yield "deny-invalid-mode"
+    }
+    yield "arm-platform-timer"
+}

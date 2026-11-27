@@ -1,0 +1,38 @@
+name: Reaper system platform contracts
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reaper-system-platform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out DAK and its pinned Reaper runtime
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up the Reaper reference runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check all DAK Reaper source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' source; do
+            PYTHONPATH="$GITHUB_WORKSPACE/projects/reaper" python -m reaper --check "$source"
+          done < <(find "$GITHUB_WORKSPACE/duckos" -type f -name '*.rpr' -print0)
+
+      - name: Run system platform contracts with the reference engine
+        run: PYTHONPATH="$GITHUB_WORKSPACE/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/system_platform_tests.rpr"
+
+      - name: Run system platform contracts with the Reaper VM
+        run: PYTHONPATH="$GITHUB_WORKSPACE/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/system_platform_tests.rpr"

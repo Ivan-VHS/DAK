@@ -1,0 +1,35 @@
+# UDP datagram validation.
+
+export craft datagram_valid(segment) {
+    when size(segment) < 8 or size(segment) > 65535 {
+        yield false
+    }
+    each octet in segment {
+        when octet < 0 or octet > 255 {
+            yield false
+        }
+    }
+    make source_port := segment[0] * 256 + segment[1]
+    make destination_port := segment[2] * 256 + segment[3]
+    make declared_bytes := segment[4] * 256 + segment[5]
+    when source_port == 0 or destination_port == 0 {
+        yield false
+    }
+    when declared_bytes < 8 or declared_bytes != size(segment) {
+        yield false
+    }
+    yield true
+}
+
+export craft delivery_decision(segment, socket_bound, datagram_limit) {
+    when not datagram_valid(segment) {
+        yield "drop-invalid-datagram"
+    }
+    when not socket_bound {
+        yield "drop-no-listener"
+    }
+    when datagram_limit < 8 or size(segment) > datagram_limit {
+        yield "drop-size-limit"
+    }
+    yield "deliver-datagram"
+}

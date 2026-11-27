@@ -1,0 +1,97 @@
+# A/B update slot state machine and rollback policy.
+# Durable writes, signature verification and bootloader control must be performed by trusted services.
+
+# Update: [id, version, arch, bytes, digest, signature_valid, base_version].
+# Slots: [active_slot, candidate_slot, active_version, candidate_version, candidate_state].
+export craft update_valid(update, target_arch, current_version) {
+    when size(update) != 7 or update[0] == "" or update[2] != target_arch {
+        yield false
+    }
+    when not version_valid(update[1]) or not version_valid(update[6]) {
+        yield false
+    }
+    when update[3] <= 0 or update[4] == "" or update[5] != true {
+        yield false
+    }
+    yield version_compare(update[6], current_version) == "equal"
+}
+
+export craft version_valid(version) {
+    when size(version) != 3 {
+        yield false
+    }
+    yield version[0] >= 0 and version[1] >= 0 and version[2] >= 0
+}
+
+export craft version_compare(left, right) {
+    when not version_valid(left) or not version_valid(right) {
+        yield "invalid"
+    }
+    when left[0] > right[0] {
+        yield "newer"
+    }
+    when left[0] < right[0] {
+        yield "older"
+    }
+    when left[1] > right[1] {
+        yield "newer"
+    }
+    when left[1] < right[1] {
+        yield "older"
+    }
+    when left[2] > right[2] {
+        yield "newer"
+    }
+    when left[2] < right[2] {
+        yield "older"
+    }
+    yield "equal"
+}
+
+export craft stage_decision(update, target_arch, current_version, free_bytes, inactive_slot_writable) {
+    when not update_valid(update, target_arch, current_version) {
+        yield "deny-invalid-signature-or-base"
+    }
+    when update[3] > free_bytes or not inactive_slot_writable {
+        yield "deny-inactive-slot-unavailable"
+    }
+    yield "write-inactive-slot-then-verify"
+}
+
+export craft boot_decision(candidate_state, health_passed, attempts, attempt_limit) {
+    when attempts < 0 or attempt_limit <= 0 or attempts > attempt_limit {
+        yield "deny-invalid-attempt-counter"
+    }
+    when candidate_state != "verified" and candidate_state != "booting" {
+        yield "keep-current-slot"
+    }
+    when health_passed {
+        yield "mark-candidate-good-and-commit"
+    }
+    when attempts >= attempt_limit {
+        yield "rollback-to-last-known-good"
+    }
+    yield "retry-candidate-with-bounded-attempt"
+}
+
+export craft slot_transition(current, next) {
+    when current == "empty" and next == "staging" {
+        yield true
+    }
+    when current == "staging" and next == "verified" {
+        yield true
+    }
+    when current == "verified" and next == "booting" {
+        yield true
+    }
+    when current == "booting" and next == "good" {
+        yield true
+    }
+    when current == "booting" and next == "bad" {
+        yield true
+    }
+    when current == "bad" and next == "rollback" {
+        yield true
+    }
+    yield false
+}

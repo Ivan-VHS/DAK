@@ -1,0 +1,66 @@
+# Kernel thread lifecycle and affinity policy.
+# Context creation, stack mapping and register switching are privileged backend work.
+
+# Thread: [tid, pid, priority, state, stack_bytes, cpu_affinity].
+export craft descriptor_valid(thread, cpu_count) {
+    when size(thread) != 6 or cpu_count <= 0 {
+        yield false
+    }
+    when thread[0] <= 0 or thread[1] <= 0 or thread[2] < 0 or thread[2] > 255 {
+        yield false
+    }
+    when thread[4] < 16384 or thread[4] > 16777216 {
+        yield false
+    }
+    when thread[3] != "created" and thread[3] != "ready" and thread[3] != "running" and thread[3] != "blocked" and thread[3] != "zombie" {
+        yield false
+    }
+    when size(thread[5]) == 0 {
+        yield false
+    }
+    each cpu in thread[5] {
+        when cpu < 0 or cpu >= cpu_count {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft transition_valid(current, next) {
+    when current == "created" and next == "ready" {
+        yield true
+    }
+    when current == "ready" and (next == "running" or next == "zombie") {
+        yield true
+    }
+    when current == "running" and (next == "ready" or next == "blocked" or next == "zombie") {
+        yield true
+    }
+    when current == "blocked" and (next == "ready" or next == "zombie") {
+        yield true
+    }
+    yield false
+}
+
+export craft join_decision(state, caller_tid, target_tid) {
+    when caller_tid <= 0 or target_tid <= 0 or caller_tid == target_tid {
+        yield "deny-invalid-join"
+    }
+    when state == "zombie" {
+        yield "collect-exit-status"
+    }
+    when state == "detached" {
+        yield "deny-detached"
+    }
+    yield "block-until-exit"
+}
+
+export craft affinity_allows(affinity, cpu_id) {
+    vary allowed := false
+    each cpu in affinity {
+        when cpu == cpu_id {
+            change allowed := true
+        }
+    }
+    yield allowed
+}

@@ -1,0 +1,74 @@
+# Reproducible Reaper target/build graph contracts.
+# The host toolchain performs actual compilation, linking and artifact verification.
+
+# Target: [architecture, abi, pointer_bytes, page_bytes, endianness, profile].
+export craft target_valid(target) {
+    when size(target) != 6 {
+        yield false
+    }
+    when target[0] != "x86_64" and target[0] != "aarch64" and target[0] != "e2k" {
+        yield false
+    }
+    when target[1] == "" or target[2] != 8 or target[3] != 4096 {
+        yield false
+    }
+    when target[4] != "little" and target[4] != "big" {
+        yield false
+    }
+    yield target[5] == "hosted" or target[5] == "freestanding" or target[5] == "kernel" or target[5] == "driver"
+}
+
+# Component: [name, target, dependencies, output, enabled].
+export craft component_valid(component) {
+    when size(component) != 5 or component[0] == "" or component[1] == "" or component[3] == "" {
+        yield false
+    }
+    when size(component[2]) > 128 {
+        yield false
+    }
+    yield component[4] == true or component[4] == false
+}
+
+export craft build_order_valid(components, target) {
+    when not target_valid(target) or size(components) == 0 {
+        yield false
+    }
+    vary completed := []
+    each component in components {
+        when not component_valid(component) or component[1] != target[0] {
+            yield false
+        }
+        when not component[4] {
+            yield false
+        }
+        when component[0] == component[3] {
+            yield false
+        }
+        each dependency in component[2] {
+            vary found := false
+            each prior in completed {
+                when prior == dependency {
+                    change found := true
+                }
+            }
+            when not found {
+                yield false
+            }
+        }
+        change completed := push(completed, component[0])
+    }
+    yield true
+}
+
+export craft artifact_policy(digest, signature_valid, target_match, reproducible) {
+    when digest == "" or not signature_valid {
+        yield "reject-untrusted-artifact"
+    }
+    when not target_match {
+        yield "reject-target-mismatch"
+    }
+    when not reproducible {
+        yield "hold-for-reproducibility-review"
+    }
+    yield "admit-verified-artifact"
+}

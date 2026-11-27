@@ -1,0 +1,75 @@
+# Bounded dispatch queues for user services.
+# Queue execution, worker threads and wakeups are supplied by the kernel scheduler.
+
+# Job: [id, qos, deadline, payload_bytes, capability, state].
+export craft job_valid(job, payload_limit) {
+    when size(job) != 6 or payload_limit < 0 {
+        yield false
+    }
+    when job[0] == "" or job[1] < 0 or job[1] > 5 or job[2] < 0 {
+        yield false
+    }
+    when job[3] < 0 or job[3] > payload_limit or job[4] == "" {
+        yield false
+    }
+    yield job[5] == "pending" or job[5] == "running" or job[5] == "completed" or job[5] == "cancelled"
+}
+
+export craft submit(queue, capacity, job, payload_limit) {
+    when capacity <= 0 or not job_valid(job, payload_limit) {
+        yield ["invalid", queue]
+    }
+    when size(queue) >= capacity {
+        yield ["backpressure", queue]
+    }
+    each existing in queue {
+        when existing[0] == job[0] {
+            yield ["duplicate-job", queue]
+        }
+    }
+    yield ["queued", push(queue, job)]
+}
+
+export craft next_job(queue) {
+    vary found := false
+    vary selected := nothing
+    vary selected_qos := -1
+    vary selected_deadline := 9223372036854775807
+    each job in queue {
+        when size(job) == 6 and job[5] == "pending" {
+            when not found or job[1] > selected_qos or (job[1] == selected_qos and job[2] < selected_deadline) {
+                change found := true
+                change selected := job
+                change selected_qos := job[1]
+                change selected_deadline := job[2]
+            }
+        }
+    }
+    yield selected
+}
+
+export craft worker_admission(active_workers, worker_limit, requested_workers) {
+    when active_workers < 0 or worker_limit <= 0 or requested_workers <= 0 {
+        yield "invalid"
+    }
+    when active_workers > worker_limit {
+        yield "overcommitted"
+    }
+    when requested_workers > worker_limit - active_workers {
+        yield "backpressure"
+    }
+    yield "admit"
+}
+
+export craft cancellation_action(state) {
+    when state == "pending" {
+        yield "cancel-before-run"
+    }
+    when state == "running" {
+        yield "set-cancel-request"
+    }
+    when state == "completed" or state == "cancelled" {
+        yield "already-finished"
+    }
+    yield "reject-invalid-state"
+}

@@ -1,0 +1,103 @@
+# Bounded mutex, semaphore and event state transitions.
+# The scheduler supplies wait queues and performs wakeups after policy returns.
+
+# Mutex: [owner_tid, recursion_depth, waiters, waiter_limit, recursive].
+export craft mutex_valid(mutex) {
+    when size(mutex) != 5 or mutex[0] < 0 or mutex[1] < 0 {
+        yield false
+    }
+    when mutex[3] < 0 or size(mutex[2]) > mutex[3] {
+        yield false
+    }
+    yield mutex[4] == true or mutex[4] == false
+}
+
+export craft mutex_lock_action(mutex, tid) {
+    when not mutex_valid(mutex) or tid <= 0 {
+        yield ["invalid", mutex]
+    }
+    when mutex[0] == 0 {
+        yield ["acquired", [tid, 1, mutex[2], mutex[3], mutex[4] ] ]
+    }
+    when mutex[0] == tid {
+        when not mutex[4] {
+            yield ["deadlock", mutex]
+        }
+        yield ["acquired-recursive", [tid, mutex[1] + 1, mutex[2], mutex[3], mutex[4] ] ]
+    }
+    when size(mutex[2]) >= mutex[3] {
+        yield ["backpressure", mutex]
+    }
+    yield ["queued", [mutex[0], mutex[1], push(mutex[2], tid), mutex[3], mutex[4] ] ]
+}
+
+export craft mutex_unlock_action(mutex, tid) {
+    when not mutex_valid(mutex) or tid <= 0 or mutex[0] != tid {
+        yield ["deny-not-owner", mutex]
+    }
+    when mutex[1] > 1 {
+        yield ["decrement-recursion", [mutex[0], mutex[1] - 1, mutex[2], mutex[3], mutex[4] ] ]
+    }
+    when size(mutex[2]) == 0 {
+        yield ["released", [0, 0, [], mutex[3], mutex[4] ] ]
+    }
+    vary rest := []
+    each index in range(1, size(mutex[2])) {
+        change rest := push(rest, mutex[2][index])
+    }
+    yield ["handoff", [mutex[2][0], 1, rest, mutex[3], mutex[4] ] ]
+}
+
+# Semaphore: [count, maximum, waiters, waiter_limit].
+export craft semaphore_valid(semaphore) {
+    when size(semaphore) != 4 {
+        yield false
+    }
+    when semaphore[0] < 0 or semaphore[1] <= 0 or semaphore[0] > semaphore[1] {
+        yield false
+    }
+    yield semaphore[3] >= 0 and size(semaphore[2]) <= semaphore[3]
+}
+
+export craft semaphore_wait(semaphore, tid) {
+    when not semaphore_valid(semaphore) or tid <= 0 {
+        yield ["invalid", semaphore]
+    }
+    when semaphore[0] > 0 {
+        yield ["acquired", [semaphore[0] - 1, semaphore[1], semaphore[2], semaphore[3] ] ]
+    }
+    when size(semaphore[2]) >= semaphore[3] {
+        yield ["backpressure", semaphore]
+    }
+    yield ["queued", [0, semaphore[1], push(semaphore[2], tid), semaphore[3] ] ]
+}
+
+export craft semaphore_post(semaphore) {
+    when not semaphore_valid(semaphore) {
+        yield ["invalid", semaphore]
+    }
+    when size(semaphore[2]) > 0 {
+        vary rest := []
+        each index in range(1, size(semaphore[2])) {
+            change rest := push(rest, semaphore[2][index])
+        }
+        yield ["wake", [semaphore[0], semaphore[1], rest, semaphore[3] ], semaphore[2][0] ]
+    }
+    when semaphore[0] >= semaphore[1] {
+        yield ["overflow", semaphore]
+    }
+    yield ["posted", [semaphore[0] + 1, semaphore[1], semaphore[2], semaphore[3] ] ]
+}
+
+export craft event_wait(is_set, waiter_count, waiter_limit) {
+    when waiter_count < 0 or waiter_limit < 0 or waiter_count > waiter_limit {
+        yield "invalid"
+    }
+    when is_set {
+        yield "continue"
+    }
+    when waiter_count == waiter_limit {
+        yield "backpressure"
+    }
+    yield "queue-waiter"
+}

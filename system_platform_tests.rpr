@@ -1,0 +1,179 @@
+# DAK Reaper Native System Platform contracts.
+# Run this file with Reaper's tree-walk engine and VM; no privileged device is touched.
+
+import "duckos/kernel/atomic.rpr" as atomic
+import "duckos/kernel/syscall.rpr" as syscall
+import "duckos/kernel/handles.rpr" as handles
+import "duckos/kernel/threads.rpr" as threads
+import "duckos/kernel/synchronization.rpr" as synchronization
+import "duckos/kernel/arch/x86_64.rpr" as x86
+import "duckos/kernel/arch/aarch64.rpr" as aarch64
+import "duckos/drivers/mmio.rpr" as mmio
+import "duckos/drivers/dma.rpr" as dma
+import "duckos/network/ipv4.rpr" as ipv4
+import "duckos/network/udp.rpr" as udp
+import "duckos/network/tcp.rpr" as tcp
+import "duckos/network/dns.rpr" as dns
+import "duckos/storage/path.rpr" as path
+import "duckos/storage/journal.rpr" as journal
+import "duckos/runtime/foundation.rpr" as foundation
+import "duckos/runtime/data.rpr" as data
+import "duckos/runtime/clock.rpr" as clock
+import "duckos/services/dispatch.rpr" as dispatch
+import "duckos/system/installer.rpr" as installer
+import "duckos/system/package_manager.rpr" as packages
+import "duckos/system/updater.rpr" as updater
+import "duckos/system/build.rpr" as build
+import "duckos/system/utilities.rpr" as utilities
+
+# Atomics: invalid order pairs and unsupported 16-byte operations fail closed.
+assert(atomic["load_order_valid"]("acquire"), "acquire is a valid load order")
+assert(not atomic["load_order_valid"]("release"), "release is not a load order")
+assert(atomic["store_order_valid"]("release"), "release is a valid store order")
+assert(not atomic["store_order_valid"]("acquire"), "acquire is not a store order")
+assert(atomic["compare_exchange_orders_valid"]("acq_rel", "acquire"), "CAS failure order may be acquire")
+assert(not atomic["compare_exchange_orders_valid"]("release", "acquire"), "CAS failure order cannot exceed release success")
+assert(not atomic["compare_exchange_orders_valid"]("seq_cst", "release"), "CAS failure order cannot release")
+assert(atomic["atomic_width_valid"](8, 8, false), "native 64-bit atomics are aligned")
+assert(not atomic["atomic_width_valid"](16, 16, false), "wide atomics require an explicit CPU feature")
+
+# Syscall ABI and process-owned handles.
+make fs_open := [1, "fs.open", 2, 2, "fs.open", 4096, true]
+assert(syscall["descriptor_valid"](fs_open), "syscall descriptor is valid")
+assert(syscall["request_decision"](fs_open, ["/home/user/file", "read"], 32, "running", ["fs.open"]) == "dispatch-to-kernel-handler", "authorized syscall enters the kernel handler")
+assert(syscall["request_decision"](fs_open, ["/home/user/file", "read"], 32, "running", []) == "deny-capability", "missing syscall capability is denied")
+assert(syscall["request_decision"](fs_open, ["/home/user/file"], 8, "running", ["fs.open"]) == "deny-argument-count", "syscall argument count is checked")
+assert(syscall["request_decision"](fs_open, ["/home/user/file", "read"], 8192, "running", ["fs.open"]) == "deny-payload-limit", "syscall payload is bounded")
+assert(syscall["result_valid"](["ok", 1, 64], 1024), "bounded syscall result is valid")
+assert(not syscall["result_valid"](["ok", 1, 2048], 1024), "oversized syscall result is rejected")
+make file_handle := [7, 3, 42, "file", ["fs.read", "fs.write"], "open"]
+assert(handles["descriptor_valid"](file_handle), "opaque handle descriptor is valid")
+assert(handles["resolve_decision"](file_handle, 42, "file", "fs.read") == "resolve-host-table-entry", "owner with required right may resolve handle")
+assert(handles["resolve_decision"](file_handle, 43, "file", "fs.read") == "deny-cross-process-handle", "handle cannot cross process boundary")
+assert(handles["resolve_decision"](file_handle, 42, "socket", "fs.read") == "deny-handle-kind", "handle kind is checked")
+assert(handles["resolve_decision"](file_handle, 42, "file", "fs.admin") == "deny-handle-right", "handle rights are checked")
+
+# Threads, mutexes and semaphores.
+make thread := [11, 42, 8, "ready", 65536, [0, 1] ]
+assert(threads["descriptor_valid"](thread, 2), "thread descriptor and CPU affinity are valid")
+assert(not threads["descriptor_valid"](thread, 1), "thread cannot target an unavailable CPU")
+assert(threads["transition_valid"]("running", "blocked"), "running thread may block")
+assert(not threads["transition_valid"]("zombie", "running"), "zombie thread cannot restart")
+assert(threads["join_decision"]("zombie", 10, 11) == "collect-exit-status", "join collects terminated thread result")
+assert(threads["affinity_allows"]([0, 2], 2), "thread affinity admits selected CPU")
+make free_mutex := [0, 0, [], 4, false]
+assert(synchronization["mutex_lock_action"](free_mutex, 11) == ["acquired", [11, 1, [], 4, false] ], "mutex transfers ownership to first caller")
+make owned_mutex := [11, 1, [12], 4, false]
+assert(synchronization["mutex_unlock_action"](owned_mutex, 11) == ["handoff", [12, 1, [], 4, false] ], "mutex unlock hands ownership to a queued waiter")
+assert(synchronization["mutex_unlock_action"](owned_mutex, 12)[0] == "deny-not-owner", "non-owner cannot unlock mutex")
+make semaphore := [1, 3, [], 4]
+assert(synchronization["semaphore_wait"](semaphore, 11)[0] == "acquired", "semaphore consumes available count")
+assert(synchronization["semaphore_wait"]([0, 3, [], 4], 11)[0] == "queued", "semaphore queues when empty")
+assert(synchronization["semaphore_post"]([0, 3, [11], 4])[0] == "wake", "semaphore post wakes oldest waiter")
+assert(synchronization["semaphore_post"]([3, 3, [], 4])[0] == "overflow", "semaphore count cannot exceed maximum")
+
+# x86-64 is the primary target; AArch64 remains an explicit architecture seam.
+make intel_profile := ["intel", 7, true, true, true, true, true, true]
+assert(x86["cpu_profile_valid"](intel_profile), "Intel x86-64 profile shape is valid")
+assert(x86["boot_requirements_met"](intel_profile), "long mode, PAE and APIC satisfy baseline")
+assert(not x86["boot_requirements_met"](["generic", 1, false, true, true, true, true, true]), "missing long mode blocks x86-64 boot")
+assert(x86["page_mapping_valid"](4096, 8192, 8192, "rw"), "aligned page mapping is admitted")
+assert(not x86["page_mapping_valid"](4096, 8192, 4096, "rwx"), "writable executable mapping is denied")
+assert(x86["idt_gate_valid"]([32, 8, 14, 0, 0, true, true]), "present interrupt gate is valid")
+assert(not x86["idt_gate_valid"]([32, 8, 12, 0, 0, true, true]), "unsupported gate type is rejected")
+assert(x86["context_frame_valid"]([4096, 8192, 514, 27, 35, 12288]), "user context frame passes bounds")
+assert(not x86["context_frame_valid"]([140737488355328, 8192, 514, 27, 35, 12288]), "non-user instruction pointer is rejected")
+assert(aarch64["boot_profile_valid"]([2, 4096, true, 3, 100000000]), "AArch64 boot profile is structurally valid")
+assert(aarch64["memory_region_valid"]([4096, 8192, "ram", "normal"], 4096), "AArch64 RAM region is aligned")
+
+# MMIO and DMA require explicit capabilities, mappings and ownership transitions.
+make registers := [4096, 4096, 4, "rw", "little", "mmio.read", true]
+assert(mmio["region_valid"](registers), "MMIO region descriptor is valid")
+assert(mmio["access_valid"](registers, 12, 4, "read", ["mmio.read"]) == "call-trusted-mmio-adapter", "authorized MMIO read reaches adapter")
+assert(mmio["access_valid"](registers, 4094, 4, "read", ["mmio.read"]) == "deny-bounds-or-alignment", "MMIO access cannot cross region boundary")
+assert(mmio["write_pattern_valid"]("w1c", "direct-mask"), "W1C register requires direct mask write")
+assert(not mmio["write_pattern_valid"]("w1c", "read-modify-write"), "W1C read-modify-write is forbidden")
+make dma_buffer := [1, 8192, 4096, 4096, "to-device", 42, "allocated"]
+assert(dma["map_decision"](dma_buffer, 42, true) == "map-through-iommu", "DMA mapping requires owner and IOMMU")
+assert(dma["map_decision"](dma_buffer, 43, true) == "deny-ownership", "DMA buffer is process-owned")
+assert(dma["submit_transition"]([1, 8192, 4096, 4096, "to-device", 42, "mapped"])[0] == "sync-for-device-then-submit", "DMA submission transitions ownership")
+assert(dma["completion_transition"]([1, 8192, 4096, 4096, "to-device", 42, "device-owned"])[0] == "sync-for-cpu", "DMA completion returns buffer ownership")
+assert(dma["release_decision"]([1, 8192, 4096, 4096, "to-device", 42, "device-owned"]) == "deny-device-still-owns-buffer", "device-owned DMA buffer cannot be released")
+
+# IPv4 checksum structure, UDP lengths, TCP state and DNS labels.
+make ip_packet := [69, 0, 0, 20, 0, 0, 0, 0, 64, 17, 0, 0, 192, 168, 1, 1, 192, 168, 1, 2]
+assert(ipv4["packet_valid"](ip_packet, false), "well-formed IPv4 header is accepted")
+assert(not ipv4["header_checksum_valid"](ip_packet, 20), "invalid IPv4 checksum is rejected")
+assert(ipv4["fragment_policy"](ip_packet) == "deliver-to-transport", "unfragmented IPv4 packet reaches transport")
+make fragmented_ip_packet := [69, 0, 0, 20, 0, 0, 32, 0, 64, 17, 0, 0, 192, 168, 1, 1, 192, 168, 1, 2]
+assert(ipv4["fragment_policy"](fragmented_ip_packet) == "reassemble-before-transport", "IPv4 fragments are reassembled before transport")
+assert(not ipv4["packet_valid"]([69, 0, 0, 20], false), "truncated IPv4 header is rejected")
+make udp_segment := [0, 53, 0, 53, 0, 8, 0, 0]
+assert(udp["datagram_valid"](udp_segment), "minimum UDP datagram is valid")
+assert(not udp["datagram_valid"]([0, 53, 0, 53, 0, 9, 0, 0]), "UDP declared length must match frame")
+assert(udp["delivery_decision"](udp_segment, true, 1200) == "deliver-datagram", "valid UDP datagram reaches bound socket")
+assert(tcp["transition_valid"]("syn-sent", "syn-ack", "established"), "TCP handshake transition is valid")
+assert(not tcp["transition_valid"]("closed", "ack", "established"), "TCP invalid transition is denied")
+make tcp_segment := [12000, 443, 100, 0, 20, 65535, 512]
+assert(tcp["segment_valid"](tcp_segment), "TCP segment metadata is bounded")
+assert(tcp["receive_decision"](tcp_segment, "established", 100, 200, 1024) == "accept-and-advance", "in-window TCP data is admitted")
+assert(tcp["receive_decision"](tcp_segment, "established", 200, 300, 1024) == "ack-current-window", "out-of-window TCP data is not delivered")
+make dns_question := [7, ["www", "example", "com"], "A", "IN", true, 1232]
+assert(dns["question_valid"](dns_question), "DNS query name and bounds are valid")
+assert(not dns["labels_valid"](["valid", ""]), "empty DNS label is invalid")
+assert(dns["response_decision"](dns_question, 1, 1500, true) == "retry-over-tcp", "truncated DNS response retries over TCP")
+
+# Authorized VFS paths, crash journal and Foundation-like data/time helpers.
+assert(path["components_valid"](["home", "user", "documents"]), "ordinary path components are valid")
+assert(not path["components_valid"](["home", "..", "system"]), "parent traversal is rejected")
+assert(path["symlink_policy"](1, 2, false) == "deny-symlink-escape", "symlink cannot escape authorized root")
+make journal_entries := [[1, "create", "sha256:payload", "committed"], [2, "write", "sha256:update", "prepared"] ]
+assert(journal["journal_valid"](journal_entries), "journal sequence and records are valid")
+assert(journal["recovery_index"](journal_entries) == 0, "recovery stops at last committed record")
+assert(journal["append_decision"](journal_entries, "rename", "sha256:rename") == ["write-payload-then-prepare-record", 3], "journal append prepares the next sequence")
+assert(journal["commit_decision"](journal_entries[1], true, false) == "retry-metadata-flush", "commit marker waits for durable metadata")
+assert(foundation["version_compare"]([1, 2, 0], [1, 1, 9]) == "newer", "version comparison is numeric")
+assert(foundation["slice_valid"](100, 20, 80), "bounded slice ends at exclusive upper limit")
+make payload := [10, 20, 30, 40]
+assert(data["slice_copy"](payload, 1, 2) == ["ok", [20, 30] ], "data slice copies exact range")
+assert(data["append_bounded"]([1, 2], [3], 3) == ["ok", [1, 2, 3] ], "bounded byte append fits capacity")
+assert(data["append_bounded"]([1, 2], [3], 2)[0] == "full", "bounded byte append applies backpressure")
+assert(clock["deadline_after"](100, 50) == ["deadline", 150], "deadline arithmetic is monotonic")
+assert(clock["deadline_after"](9223372036854775800, 100)[0] == "overflow", "deadline overflow is rejected")
+assert(clock["deadline_reached"](200, 150), "expired deadline is observable")
+
+# Dispatch, installer, packages, updates and reproducible target build plans.
+make first_job := ["job-1", 4, 100, 64, "service.run", "pending"]
+make queued_jobs := dispatch["submit"]([], 4, first_job, 1024)
+assert(queued_jobs[0] == "queued", "dispatch accepts bounded work")
+assert(dispatch["next_job"](queued_jobs[1]) == first_job, "dispatch selects highest-priority pending job")
+assert(dispatch["submit"](queued_jobs[1], 1, ["job-2", 2, 200, 32, "service.run", "pending"], 1024)[0] == "backpressure", "dispatch queue is bounded")
+assert(dispatch["worker_admission"](2, 4, 2) == "admit", "dispatch respects worker capacity")
+make target := ["disk0", "x86_64", 100000, 90000, true, true, true]
+make image := ["dak-image", "x86_64", 64000, "sha256:image", true, [1, 0, 0] ]
+assert(installer["preflight"](target, image, true) == "ready-for-explicit-install", "signed compatible image passes installer preflight")
+assert(installer["step_transition"]("boot-entry-staged", "committed"), "installer commit follows staged boot entry")
+assert(installer["failure_action"]("written", true) == "restore-backup-and-old-boot-entry", "installer failure restores prior boot state")
+make package_manifest := ["base", [1, 0, 0], "x86_64", "sha256:package", true, ["libc"], 4096, ["fs.read"] ]
+assert(packages["manifest_valid"](package_manifest), "signed package manifest is valid")
+assert(packages["install_decision"](package_manifest, "x86_64", ["libc"], 8192, ["fs.read"]) == "stage-transaction", "package installation stages a bounded transaction")
+assert(packages["install_decision"](package_manifest, "x86_64", [], 8192, ["fs.read"]) == "deny-missing-dependency", "package dependency is required")
+assert(packages["transaction_transition"]("staged", "rolled-back"), "package transaction can roll back")
+make update := ["update-2", [1, 1, 0], "x86_64", 4096, "sha256:update", true, [1, 0, 0] ]
+assert(updater["update_valid"](update, "x86_64", [1, 0, 0]), "update is signed and based on current version")
+assert(updater["stage_decision"](update, "x86_64", [1, 0, 0], 8192, true) == "write-inactive-slot-then-verify", "update stages into inactive slot")
+assert(updater["boot_decision"]("booting", false, 3, 3) == "rollback-to-last-known-good", "failed update rolls back after finite attempts")
+assert(updater["slot_transition"]("booting", "good"), "healthy candidate slot can be committed")
+make target_profile := ["x86_64", "DABI64-v1", 8, 4096, "little", "kernel"]
+make build_components := [["base", "x86_64", [], "build/base.o", true], ["kernel", "x86_64", ["base"], "build/kernel.o", true] ]
+assert(build["target_valid"](target_profile), "kernel build target is explicit")
+assert(build["build_order_valid"](build_components, target_profile), "build graph is topologically ordered")
+assert(not build["build_order_valid"]([["kernel", "x86_64", ["base"], "build/kernel.o", true] ], target_profile), "build graph rejects unresolved dependencies")
+assert(build["artifact_policy"]("sha256:artifact", true, true, true) == "admit-verified-artifact", "verified reproducible artifact is admitted")
+make list_command := ["ls", ["-la"], "fs.read", false]
+assert(utilities["command_valid"](list_command), "system utility uses a structured argv vector")
+assert(utilities["dispatch_decision"](list_command, ["fs.read"], "running") == "spawn-with-argv-and-bounded-environment", "utility dispatch is capability-gated")
+assert(utilities["dispatch_decision"](list_command, [], "running") == "deny-capability", "utility cannot use ambient authority")
+assert(not utilities["environment_key_valid"]("LD_PRELOAD"), "dynamic loader injection variables are denied")
+
+emit "DAK Reaper Native System Platform: contract suite passed"

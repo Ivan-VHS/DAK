@@ -1,0 +1,54 @@
+# Small deterministic foundation primitives for system services.
+
+export craft slice_valid(total_bytes, start, length) {
+    when total_bytes < 0 or start < 0 or length < 0 or start > total_bytes {
+        yield false
+    }
+    yield length <= total_bytes - start
+}
+
+export craft bounded_append(buffer, capacity, value) {
+    when capacity < 0 or size(buffer) > capacity {
+        yield ["invalid", buffer]
+    }
+    when size(buffer) == capacity {
+        yield ["full", buffer]
+    }
+    yield ["appended", push(buffer, value)]
+}
+
+export craft version_valid(version) {
+    when size(version) != 3 {
+        yield false
+    }
+    yield version[0] >= 0 and version[1] >= 0 and version[2] >= 0
+}
+
+export craft version_compare(left, right) {
+    when not version_valid(left) or not version_valid(right) {
+        yield "invalid"
+    }
+    when left[0] > right[0] {
+        yield "newer"
+    }
+    when left[0] < right[0] {
+        yield "older"
+    }
+    when left[1] > right[1] {
+        yield "newer"
+    }
+    when left[1] < right[1] {
+        yield "older"
+    }
+    when left[2] > right[2] {
+        yield "newer"
+    }
+    when left[2] < right[2] {
+        yield "older"
+    }
+    yield "equal"
+}
+
+export craft timeout_valid(timeout_ms, maximum_ms) {
+    yield timeout_ms > 0 and maximum_ms > 0 and timeout_ms <= maximum_ms
+}
