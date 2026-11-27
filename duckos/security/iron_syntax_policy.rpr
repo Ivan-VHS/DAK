@@ -1,0 +1,34 @@
+# Pytyliki Iron Syntax v1 admission policy contract.
+#
+# This is an executable policy fixture for Reaper contract tests. It is not
+# wired into kernel admission yet. A successful result admits source metadata
+# only; it never grants hardware or process capabilities.
+
+craft iron_syntax_metadata_admission(schema, version, canonical_owner, execution_performed, record_count) {
+    when schema != "pytyliki.iron-syntax-ast.v1" {
+        yield "REJECT_SCHEMA"
+    }
+    when version != "1.0.0" {
+        yield "REJECT_VERSION"
+    }
+    when canonical_owner != "Pytyliki" {
+        yield "REJECT_OWNER"
+    }
+    when execution_performed == true {
+        yield "REJECT_EXECUTION"
+    }
+    when record_count < 1 {
+        yield "REJECT_EMPTY_DOCUMENT"
+    }
+    when record_count > 4096 {
+        yield "REJECT_RECORD_LIMIT"
+    }
+    yield "ACCEPT_METADATA_ONLY"
+}
+
+craft iron_syntax_effect_allowed(effect) {
+    when effect == "metadata_read" {
+        yield true
+    }
+    yield false
+}
