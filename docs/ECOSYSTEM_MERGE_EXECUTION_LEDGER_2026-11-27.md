@@ -51,7 +51,7 @@ DAK's SHA above is the verified post-merge main head after DAK #208.
 | #178 | #177 | Base SHA is stale versus current parent head |
 | #179 | #178 | Base SHA is stale versus current parent head |
 | #74 | #67 | Base SHA is stale versus current parent head |
-| #174 | `feat/mora-native-shell` | Parent branch exists, but no matching open parent PR was found |
+| #174 | #159 (merged) | Parent provenance verified; #159 merged to main |
 
 ### Reaper — 23 stacked PRs
 
@@ -88,7 +88,7 @@ DAK's SHA above is the verified post-merge main head after DAK #208.
 | #316 | #308 | Parent/head SHA matches |
 
 **Stale dependency edges requiring restack/revalidation:** DAK #8, #74, #178 and #179; Reaper #368, #370, #384, #353, #356 and #357.  
-**Unresolved parent provenance:** DAK #174. The parent ref exists, but the matching open PR was not found. Locate its merged/closed PR or establish its provenance before integrating the child.
+**Parent provenance:** DAK #174 is based on #159, which was merged to main on 2026-11-25. Its ancestry is known; restack and revalidate it against current main before merge.
 
 ## 4. Review-overlap clusters
 
@@ -161,7 +161,7 @@ These failures have not been repaired in this scan. No failed workflow was rerun
 
 ## 8. Next execution order
 
-1. Resolve DAK #174 parent provenance; restack the ten stale edges listed above without changing source semantics.
+1. Restack the ten stale edges listed above without changing source semantics. DAK #174's parent provenance is verified as merged PR #159.
 2. Fix the shared root failures first: DAK native bring-up, DAK tree-walk contract suite, Reaper self-hosted parser/runtime and native C test target.
 3. Reconcile the DAK desktop and framebuffer overlap clusters and the Reaper source-span cluster.
 4. Repair OPlague required assurance contexts before selecting OPlague merge candidates.
