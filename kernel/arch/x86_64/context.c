@@ -1,7 +1,6 @@
 #include "context.h"
 
 #include <limits.h>
-#include <string.h>
 
 _Static_assert(sizeof(duckos_x86_64_context_frame) == 8U * sizeof(uintptr_t),
                "context frame must match the x86_64 assembly save order");
@@ -30,8 +29,13 @@ int duckos_x86_64_context_frame_init(
 
     duckos_x86_64_context_frame *frame =
         (duckos_x86_64_context_frame *)frame_address;
-    memset(frame, 0, sizeof(*frame));
     frame->rdi = argument;
+    frame->r15 = 0U;
+    frame->r14 = 0U;
+    frame->r13 = 0U;
+    frame->r12 = 0U;
+    frame->rbp = 0U;
+    frame->rbx = 0U;
     frame->rip = entry;
     *(uintptr_t *)return_slot = exit_trampoline;
     *saved_stack_pointer = frame_address;
