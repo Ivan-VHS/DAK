@@ -1,6 +1,6 @@
-# DuckOS release and deployment tooling
+# Dak release and deployment tooling
 
-This document describes the release-packaging and deployment-planning tools added to the DuckOS repository.
+This document describes the release-packaging and deployment-planning tools added to the Dak repository.
 
 ## What is implemented
 
@@ -23,13 +23,13 @@ The toolchain does **not** currently write raw disks, install an operating syste
 Validate a system manifest and all referenced component files:
 
 ```sh
-python -m duckos validate-manifest system-manifest.json build/rootfs
+python -m dakos validate-manifest system-manifest.json build/rootfs
 ```
 
 Build an unsigned component bundle:
 
 ```sh
-python -m duckos build-release system-manifest.json build/rootfs DuckOS-0.2.0.tar.gz
+python -m dakos build-release system-manifest.json build/rootfs Dak-0.2.0.tar.gz
 ```
 
 Create an Ed25519 key pair for release signing. Keep the private key offline or in the release secret store; publish only the public key:
@@ -42,21 +42,21 @@ openssl pkey -in release-private.pem -pubout -out release-public.pem
 Build and verify a signed release:
 
 ```sh
-python -m duckos build-release system-manifest.json build/rootfs DuckOS-0.2.0.tar.gz --signing-key release-private.pem
-python -m duckos verify-release DuckOS-0.2.0.tar.gz --public-key release-public.pem
+python -m dakos build-release system-manifest.json build/rootfs Dak-0.2.0.tar.gz --signing-key release-private.pem
+python -m dakos verify-release Dak-0.2.0.tar.gz --public-key release-public.pem
 ```
 
 Generate a USB partition layout without touching a drive:
 
 ```sh
-python -m duckos deployment-plan system-manifest.json build/rootfs --target usb --output usb-layout.json
+python -m dakos deployment-plan system-manifest.json build/rootfs --target usb --output usb-layout.json
 ```
 
 Generate a network-boot handoff plan:
 
 ```sh
-python -m duckos deployment-plan system-manifest.json build/rootfs \
-  --target pxe --base-url https://boot.example.test/duckos --secure-boot \
+python -m dakos deployment-plan system-manifest.json build/rootfs \
+  --target pxe --base-url https://boot.example.test/dakos --secure-boot \
   --output pxe-plan.json
 ```
 
@@ -65,7 +65,7 @@ Generate a UEFI HTTP Boot/iPXE handoff plan by selecting `--target http`. Genera
 ## Release bundle structure
 
 ```text
-duckos-release/
+dakos-release/
 ├── manifest.json
 ├── release.json
 ├── release.json.sig       # only when --signing-key is supplied
@@ -82,12 +82,12 @@ The manifest is canonicalized before its SHA-256 digest is placed in `release.js
 The planner produces a GPT map with:
 
 - `efi`;
-- `duck_system_a`;
-- `duck_system_b`;
-- `duck_recovery`;
-- `duck_data`.
+- `dak_system_a`;
+- `dak_system_b`;
+- `dak_recovery`;
+- `dak_data`.
 
-This is a proposed layout, not an installer. The A/B labels reserve two system slots but do not yet switch boot entries, confirm a healthy boot, or perform rollback. Those actions require the native Duck Boot Manager, a real kernel/initramfs/root filesystem image, and target-specific integration tests.
+This is a proposed layout, not an installer. The A/B labels reserve two system slots but do not yet switch boot entries, confirm a healthy boot, or perform rollback. Those actions require the native Dak Boot Manager, a real kernel/initramfs/root filesystem image, and target-specific integration tests.
 
 For PXE and HTTP targets the planner emits an iPXE handoff script and the expected component/manifest URLs. It does not publish those files, configure a boot server, implement DHCP/TFTP, or perform cryptographic verification in a firmware boot chain. The plan explicitly assigns manifest verification to the future native bootloader. HTTPS transport is required when the plan requests secure network transport, but HTTPS alone is not UEFI Secure Boot.
 
@@ -107,4 +107,4 @@ The deployment tests cover reproducible bundles, payload tampering, Ed25519 sign
 
 ## Remaining native OS work
 
-A bootable production DuckOS still requires a freestanding Reaper compiler/backend or another explicitly selected native kernel toolchain, a native kernel entry point, firmware-facing bootloader, physical memory and interrupt setup, process/runtime enforcement, filesystem and init, compositor, signed driver loading, installer, image assembly and real UEFI/BIOS/VM/hardware testing. The release tools intentionally report these as unimplemented instead of producing misleading ISO/USB/Cloud artifacts.
+A bootable production Dak still requires a freestanding Reaper compiler/backend or another explicitly selected native kernel toolchain, a native kernel entry point, firmware-facing bootloader, physical memory and interrupt setup, process/runtime enforcement, filesystem and init, compositor, signed driver loading, installer, image assembly and real UEFI/BIOS/VM/hardware testing. The release tools intentionally report these as unimplemented instead of producing misleading ISO/USB/Cloud artifacts.
