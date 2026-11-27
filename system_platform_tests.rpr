@@ -259,3 +259,11 @@ assert(sectorization["sector_map_valid"]([app_extent, second_app_extent], 8192),
 assert(not sectorization["sector_map_valid"]([app_extent, overlapping_app_extent], 8192), "overlapping application sectors are rejected")
 assert(not sectorization["sector_map_valid"]([app_extent, ["com.duck.demo", 66, 1, 512, 5, 1, "sha256:rules-a"]], 8192), "one application cannot be assigned two independent extents")
 
+make different_ruleset_extent := ["com.duck.editor", 66, 2, 512, 700, 2, "sha256:rules-b"]
+make different_sector_size_extent := ["com.duck.editor", 66, 2, 4096, 700, 1, "sha256:rules-a"]
+make malformed_extent := ["com.duck.editor", 66]
+assert(not sectorization["sector_map_valid"]([app_extent, different_ruleset_extent], 8192), "one application map cannot mix verification revisions or digests")
+assert(not sectorization["sector_map_valid"]([app_extent, different_sector_size_extent], 8192), "one application map cannot mix logical sector sizes")
+assert(not sectorization["sector_map_valid"]([app_extent, malformed_extent], 8192), "malformed extent records are rejected before indexing")
+
+
