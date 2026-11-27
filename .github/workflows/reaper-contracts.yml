@@ -16,7 +16,7 @@ jobs:
       - name: Check out DuckOS and pinned specialist projects
         uses: actions/checkout@v4
         with:
-          path: DuckOS
+          path: DAK
           submodules: recursive
 
       - name: Set up Python
@@ -29,29 +29,37 @@ jobs:
         run: |
           set -euo pipefail
           while IFS= read -r -d '' source; do
-            PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$source"
-          done < <(find "$GITHUB_WORKSPACE/DuckOS/duckos" -type f -name '*.rpr' -print0)
+            PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper" python -m reaper --check "$source"
+          done < <(find "$GITHUB_WORKSPACE/DAK/duckos" "$GITHUB_WORKSPACE/DAK/dak" -type f -name '*.rpr' -print0)
 
       - name: Execute DABI64, capability and bounded IPC contracts
         run: |
           set -euo pipefail
-          export PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper"
-          python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/kernel/dabi64.rpr"
-          python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/security/capability_broker.rpr"
-          python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/services/ipc_contract.rpr"
+          export PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper"
+          python -m reaper "$GITHUB_WORKSPACE/DAK/duckos/kernel/dabi64.rpr"
+          python -m reaper "$GITHUB_WORKSPACE/DAK/duckos/security/capability_broker.rpr"
+          python -m reaper "$GITHUB_WORKSPACE/DAK/duckos/services/ipc_contract.rpr"
       - name: Run system contract suite with tree-walk engine
-        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DAK/contract_tests.rpr"
 
       - name: Run core MVP contract suite with tree-walk engine
         run: |
-          PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
-          PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
+          PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper" python -m reaper --check "$GITHUB_WORKSPACE/DAK/core_mvp_tests.rpr"
+          PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DAK/core_mvp_tests.rpr"
 
+
+      - name: Check and execute DAK kernel-integrity contracts with tree-walk and VM
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper"
+          python -m reaper --check "$GITHUB_WORKSPACE/DAK/kernel_integrity_tests.rpr"
+          python -m reaper "$GITHUB_WORKSPACE/DAK/kernel_integrity_tests.rpr"
+          python -m reaper --engine vm "$GITHUB_WORKSPACE/DAK/kernel_integrity_tests.rpr"
       - name: Run early-math pack invariants with Reaper
-        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/education/early_math_contract.rpr"
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DAK/duckos/education/early_math_contract.rpr"
 
       - name: Run system contract suite with VM engine
-        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DAK/contract_tests.rpr"
 
       - name: Run core MVP contract suite with VM engine
-        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DAK/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DAK/core_mvp_tests.rpr"
