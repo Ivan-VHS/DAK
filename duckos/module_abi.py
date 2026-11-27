@@ -8,6 +8,11 @@ SCHEMA = "duckos.driver-module.v1"
 MAX_MODULES = 1024
 MAX_DEPENDENCIES = 4096
 _ARCHITECTURES = {"x86_64", "aarch64", "riscv64", "i686"}
+_VERSION = re.compile(
+    r"^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)"
+    r"(?:-([0-9A-Za-z.-]+))?(?:[+]([0-9A-Za-z.-]+))?$"
+)
+_KERNEL_ABI = re.compile(r"^[a-z][a-z0-9_.-]{0,127}$")
 
 
 class ModuleABIError(ValueError):
@@ -25,15 +30,19 @@ def validate_module(manifest: Any, *, architecture: str, kernel_abi: str) -> dic
     entry = manifest.get("entry_symbol")
     if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", name):
         raise ModuleABIError("module name must be a lowercase identifier")
-    if not isinstance(version, str) or not version or len(version) > 64:
-        raise ModuleABIError("module version must be non-empty text")
+    if not isinstance(version, str) or len(version) > 64 or _VERSION.fullmatch(version) is None:
+        raise ModuleABIError("module version must be valid semantic version text")
     if not isinstance(entry, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,127}", entry):
         raise ModuleABIError("entry_symbol is not a valid symbol name")
     module_architecture = manifest.get("architecture")
     if not isinstance(module_architecture, str) or module_architecture not in _ARCHITECTURES or module_architecture != architecture:
         raise ModuleABIError("module architecture does not match the target")
-    if manifest.get("kernel_abi") != kernel_abi:
-        raise ModuleABIError("module kernel ABI does not match the target")
+    manifest_kernel_abi = manifest.get("kernel_abi")
+    if (not isinstance(kernel_abi, str) or _KERNEL_ABI.fullmatch(kernel_abi) is None
+            or not isinstance(manifest_kernel_abi, str)
+            or _KERNEL_ABI.fullmatch(manifest_kernel_abi) is None
+            or manifest_kernel_abi != kernel_abi):
+        raise ModuleABIError("module kernel ABI does not match a valid target ABI identifier")
     dependencies = manifest.get("dependencies")
     capabilities = manifest.get("capabilities")
     if not isinstance(dependencies, list) or len(dependencies) > MAX_DEPENDENCIES:
