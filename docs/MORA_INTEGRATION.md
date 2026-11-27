@@ -100,9 +100,22 @@ The local browser profile can be removed by clearing site data. The snapshot is 
 
 ## External application integration
 
-External projects may publish **integrations/mora/manifest.json** using **mora/app-manifest.schema.json**. The manifest describes an entry point; it does not install the app, confer trust or grant capabilities.
+The Qt host-native Mora shell now has explicit launch actions for the four pinned ecosystem workbenches. These are host-process handoffs, not DuckOS kernel processes:
 
-A native launcher must discover manifests only in trusted installation roots, validate the full schema, resolve paths without traversal, launch with an argument vector rather than a shell, show publisher and requested capabilities, require first-run approval and log failures. The current shell does not launch external processes.
+| Workbench | Native host launch path | Availability boundary |
+|---|---|---|
+| Reaper | **python -m reaper.desktop** from **projects/reaper** | Requires a locally installed Python interpreter and the pinned Reaper source |
+| Pytyliki | **pytyliki-gui.exe** | Windows-only upstream GUI; Mora does not present the C11 CLI as a desktop window |
+| OPlague | **projects/oplague/oplague_app.py** through the local Python interpreter | Requires Python and Tk; inspection remains read-only |
+| VentuSample | Existing **VentuSample** Qt executable | Requires a prebuilt host executable; audio remains offline-first |
+
+The launcher uses a fixed application-ID allowlist. It discovers the DuckOS root from the federation markers, resolves only hard-coded relative targets beneath that root, rejects symlinks and paths escaping the checkout, and starts programs with QProcess::startDetached plus an explicit argument list. It never interprets mora/apps.json panel strings or arbitrary manifest commands as executable instructions. Every launch requires a confirmation click; no project is built, installed or started automatically.
+
+For Reaper and OPlague, Mora detects an available python3, python, or Windows py -3 command. It does not install the interpreter, install project dependencies or verify the interpreter's minor version; use the upstream supported-version requirements. Pytyliki and VentuSample launch only when their expected native executable is already present. A missing build is reported as unavailable instead of being silently compiled.
+
+This bridge runs applications on the host operating system. It does not provide DuckOS process creation, syscall enforcement, capability isolation, a service manager, a package manager or kernel-level sandboxing. The separate manifest contract below remains the path for future signed, versioned app packages:
+
+External projects may publish **integrations/mora/manifest.json** using **mora/app-manifest.schema.json**. A manifest describes metadata; it does not install an app, confer trust or grant capabilities. A production package manager and launcher must still verify publisher identity, signatures, requested capabilities, installation roots, updates and rollback.
 
 ## Maturity vocabulary
 
