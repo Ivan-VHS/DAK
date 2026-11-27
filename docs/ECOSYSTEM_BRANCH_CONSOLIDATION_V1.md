@@ -79,7 +79,7 @@ Known open stacked chains:
   └─ #74 feat/mora-native-interaction-quality
 ```
 
-Two additional current base references need parent resolution before merge: #174 is based on `feat/mora-native-shell`; #74's base is `native-mora-desktop`, which must be confirmed against the intended parent history before restacking. Do not substitute a similarly named branch. Re-check all 12 stacked PRs, not only the edges shown above, immediately before execution.
+#174 is based on `feat/mora-native-shell`, which remains without a matching open-PR head or verified merged-PR parent in this live pass. #74 is based on `native-mora-desktop`, confirmed as the head branch of open PR #67; #67 must be resolved before #74 is advanced. Do not substitute the similarly named PR #133 branch. Re-check all 12 stacked PRs immediately before execution.
 
 ### Reaper
 
@@ -233,7 +233,7 @@ Known already-merged parents were resolved:
 One DAK base remains without a matching open-PR head or verified merged-PR parent in this live pass: `feat/mora-native-shell` (base of DAK #174). Its provenance must be established from branch/commit history before #174 is advanced.
 
 The complete live edge list is visible in the PR metadata; the key stacked chains remain:
-- DAK #1 → #5 → (#8 → #18, #98); #161 → (#167 → #168, #175); #177 → #178 → #179; #165 → #172; #133 → #74.
+- DAK #1 → #5 → (#8 → #18, #98); #161 → (#167 → #168, #175); #177 → #178 → #179; #165 → #172; #67 → #74.
 - Reaper #298 → #393 → #395; #338 → #368 → (#386, #387); #362 → #366 → #370 → #371 → #372 → #373 → #374 → #375 → #376 → #379 → #380 → #383 → #384 → #385; #358 → #364 → #382; #354 → #357; #333 → #356; #336 → #353 → #367; #308 → #316.
 
 ### Mainline rule-set and sampled CI findings
