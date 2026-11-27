@@ -24,6 +24,10 @@ static void scheduler_unlock(
         scheduler->platform.irq_restore(scheduler->platform.irq_context, state.irq_state);
 }
 
+static void scheduler_unlock_keep_interrupts(duckos_scheduler *scheduler) {
+    atomic_flag_clear_explicit(&scheduler->lock, memory_order_release);
+}
+
 static uint64_t valid_cpu_mask(uint32_t cpu_count) {
     return cpu_count == 64U ? UINT64_MAX : ((UINT64_C(1) << cpu_count) - UINT64_C(1));
 }
@@ -297,10 +301,6 @@ duckos_sched_status duckos_scheduler_transition_thread(
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_INVALID_STATE;
     }
-    if (thread->state == DUCKOS_THREAD_RUNNING &&
-        thread->cpu_id < scheduler->cpu_count &&
-        scheduler->cpus[thread->cpu_id].current_tid == tid)
-        scheduler->cpus[thread->cpu_id].current_tid = 0U;
     thread->state = next_state;
     scheduler_unlock(scheduler, lock_state);
     return DUCKOS_SCHED_OK;
@@ -391,6 +391,130 @@ duckos_sched_status duckos_scheduler_pick_next(
     return DUCKOS_SCHED_OK;
 }
 
+duckos_sched_status duckos_scheduler_switch(
+    duckos_scheduler *scheduler, uint32_t logical_id,
+    duckos_sched_thread *selected
+) {
+    if (scheduler == NULL || selected == NULL)
+        return DUCKOS_SCHED_INVALID_ARGUMENT;
+    if (scheduler->platform.context_switch == NULL ||
+        scheduler->platform.irq_save == NULL ||
+        scheduler->platform.irq_restore == NULL)
+        return DUCKOS_SCHED_CONTEXT_UNAVAILABLE;
+
+    duckos_sched_lock_state lock_state = scheduler_lock(scheduler);
+    duckos_cpu_local *cpu = cpu_at(scheduler, logical_id);
+    if (cpu == NULL || cpu->state != DUCKOS_CPU_ONLINE) {
+        scheduler_unlock(scheduler, lock_state);
+        return DUCKOS_SCHED_CPU_NOT_ONLINE;
+    }
+
+    const size_t old_index = cpu->current_tid == 0U
+        ? scheduler->thread_count
+        : find_thread(scheduler, cpu->current_tid);
+    if (old_index == scheduler->thread_count && cpu->current_tid != 0U) {
+        scheduler_unlock(scheduler, lock_state);
+        return DUCKOS_SCHED_INVALID_STATE;
+    }
+
+    uintptr_t *old_stack_pointer = &cpu->idle_stack_pointer;
+    duckos_thread_state old_state = DUCKOS_THREAD_CREATED;
+    if (old_index != scheduler->thread_count) {
+        duckos_sched_thread *old_thread = &scheduler->threads[old_index];
+        old_state = old_thread->state;
+        if (old_state == DUCKOS_THREAD_RUNNING) {
+            old_thread->state = DUCKOS_THREAD_READY;
+        } else if (old_state != DUCKOS_THREAD_BLOCKED &&
+                   old_state != DUCKOS_THREAD_SLEEPING &&
+                   old_state != DUCKOS_THREAD_ZOMBIE) {
+            scheduler_unlock(scheduler, lock_state);
+            return DUCKOS_SCHED_INVALID_STATE;
+        }
+        old_stack_pointer = &old_thread->saved_stack_pointer;
+    }
+
+    size_t chosen = scheduler->thread_count;
+    int32_t best_priority = INT32_MIN;
+    uint64_t best_deadline = UINT64_MAX;
+    uint64_t after_id = UINT64_MAX;
+    uint64_t wrap_id = UINT64_MAX;
+    for (size_t i = 0U; i < scheduler->thread_count; ++i) {
+        const duckos_sched_thread *thread = &scheduler->threads[i];
+        if (i == old_index || thread->state != DUCKOS_THREAD_READY ||
+            (thread->affinity_mask & (UINT64_C(1) << logical_id)) == 0U)
+            continue;
+        const uint64_t deadline = effective_deadline(thread->deadline_ns);
+        if (thread->priority > best_priority ||
+            (thread->priority == best_priority && deadline < best_deadline)) {
+            best_priority = thread->priority;
+            best_deadline = deadline;
+            chosen = scheduler->thread_count;
+            after_id = UINT64_MAX;
+            wrap_id = UINT64_MAX;
+        }
+        if (thread->priority != best_priority || deadline != best_deadline) continue;
+        if (thread->tid > scheduler->last_selected_tid[logical_id]) {
+            if (thread->tid < after_id) {
+                after_id = thread->tid;
+                chosen = i;
+            }
+        } else if (thread->tid < wrap_id) {
+            wrap_id = thread->tid;
+        }
+    }
+
+    if (chosen == scheduler->thread_count && wrap_id != UINT64_MAX) {
+        for (size_t i = 0U; i < scheduler->thread_count; ++i) {
+            const duckos_sched_thread *thread = &scheduler->threads[i];
+            if (i != old_index && thread->tid == wrap_id &&
+                thread->state == DUCKOS_THREAD_READY &&
+                (thread->affinity_mask & (UINT64_C(1) << logical_id)) != 0U) {
+                chosen = i;
+                break;
+            }
+        }
+    }
+
+    uintptr_t new_stack_pointer = 0U;
+    if (chosen != scheduler->thread_count) {
+        duckos_sched_thread *next = &scheduler->threads[chosen];
+        if (next->saved_stack_pointer == 0U) {
+            if (old_index != scheduler->thread_count)
+                scheduler->threads[old_index].state = old_state;
+            scheduler_unlock(scheduler, lock_state);
+            return DUCKOS_SCHED_CONTEXT_UNAVAILABLE;
+        }
+        next->state = DUCKOS_THREAD_RUNNING;
+        next->cpu_id = logical_id;
+        if (next->quantum_ticks == 0U) next->quantum_ticks = 4U;
+        cpu->current_tid = next->tid;
+        cpu->quantum_ticks = next->quantum_ticks;
+        cpu->reschedule_pending = 0U;
+        scheduler->last_selected_tid[logical_id] = next->tid;
+        *selected = *next;
+        new_stack_pointer = next->saved_stack_pointer;
+    } else if (old_index != scheduler->thread_count &&
+               cpu->idle_stack_pointer != 0U) {
+        cpu->current_tid = 0U;
+        cpu->quantum_ticks = 0U;
+        cpu->reschedule_pending = 0U;
+    } else {
+        if (old_index != scheduler->thread_count)
+            scheduler->threads[old_index].state = old_state;
+        scheduler_unlock(scheduler, lock_state);
+        return DUCKOS_SCHED_NO_RUNNABLE_THREAD;
+    }
+
+    scheduler_unlock_keep_interrupts(scheduler);
+    scheduler->platform.context_switch(
+        scheduler->platform.switch_context, old_stack_pointer, new_stack_pointer
+    );
+    scheduler->platform.irq_restore(
+        scheduler->platform.irq_context, lock_state.irq_state
+    );
+    return DUCKOS_SCHED_OK;
+}
+
 duckos_sched_status duckos_scheduler_tick(
     duckos_scheduler *scheduler, uint32_t logical_id,
     int *reschedule_required
@@ -427,6 +551,7 @@ const char *duckos_sched_status_name(duckos_sched_status status) {
     case DUCKOS_SCHED_CPU_BUSY: return "cpu-busy";
     case DUCKOS_SCHED_STARTUP_INCOMPLETE: return "startup-incomplete";
     case DUCKOS_SCHED_GENERATION_EXHAUSTED: return "generation-exhausted";
+    case DUCKOS_SCHED_CONTEXT_UNAVAILABLE: return "context-unavailable";
     }
     return "unknown";
 }
