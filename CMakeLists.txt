@@ -5,9 +5,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-option(DUCKOS_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+option(DAK_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
-add_library(duckos_boot_contract STATIC
+add_library(dakos_boot_contract STATIC
     foundation/boot_info.c
     foundation/boot_info.h
     foundation/frame_allocator.c
@@ -17,93 +17,93 @@ add_library(duckos_boot_contract STATIC
     foundation/gdt_descriptor.c
     foundation/gdt_descriptor.h
 )
-target_include_directories(duckos_boot_contract PUBLIC
+target_include_directories(dakos_boot_contract PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/foundation
 )
 
 if(MSVC)
-    target_compile_options(duckos_boot_contract PRIVATE /W4 /sdl)
+    target_compile_options(dakos_boot_contract PRIVATE /W4 /sdl)
 else()
-    target_compile_options(duckos_boot_contract PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(dakos_boot_contract PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-if(DUCKOS_ENABLE_SANITIZERS)
+if(DAK_ENABLE_SANITIZERS)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(duckos_boot_contract PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
-        target_link_options(duckos_boot_contract PUBLIC -fsanitize=address,undefined)
+        target_compile_options(dakos_boot_contract PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
+        target_link_options(dakos_boot_contract PUBLIC -fsanitize=address,undefined)
     else()
-        message(FATAL_ERROR "DUCKOS_ENABLE_SANITIZERS requires GCC or Clang")
+        message(FATAL_ERROR "DAK_ENABLE_SANITIZERS requires GCC or Clang")
     endif()
 endif()
 
 include(CTest)
 if(BUILD_TESTING)
-    add_executable(duckos_boot_info_tests tests/test_boot_info.c)
-    target_link_libraries(duckos_boot_info_tests PRIVATE duckos_boot_contract)
+    add_executable(dakos_boot_info_tests tests/test_boot_info.c)
+    target_link_libraries(dakos_boot_info_tests PRIVATE dakos_boot_contract)
     if(MSVC)
-        target_compile_options(duckos_boot_info_tests PRIVATE /W4 /sdl)
+        target_compile_options(dakos_boot_info_tests PRIVATE /W4 /sdl)
     else()
-        target_compile_options(duckos_boot_info_tests PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(dakos_boot_info_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
-    add_test(NAME duckos-boot-info-contract COMMAND duckos_boot_info_tests)
+    add_test(NAME dakos-boot-info-contract COMMAND dakos_boot_info_tests)
 
-    add_executable(duckos_frame_allocator_tests tests/test_frame_allocator.c)
-    target_link_libraries(duckos_frame_allocator_tests PRIVATE duckos_boot_contract)
+    add_executable(dakos_frame_allocator_tests tests/test_frame_allocator.c)
+    target_link_libraries(dakos_frame_allocator_tests PRIVATE dakos_boot_contract)
     if(MSVC)
-        target_compile_options(duckos_frame_allocator_tests PRIVATE /W4 /sdl)
+        target_compile_options(dakos_frame_allocator_tests PRIVATE /W4 /sdl)
     else()
-        target_compile_options(duckos_frame_allocator_tests PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(dakos_frame_allocator_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
-    add_test(NAME duckos-frame-allocator COMMAND duckos_frame_allocator_tests)
+    add_test(NAME dakos-frame-allocator COMMAND dakos_frame_allocator_tests)
 
-    add_executable(duckos_idt_tests tests/test_idt.c)
-    target_link_libraries(duckos_idt_tests PRIVATE duckos_boot_contract)
-    target_include_directories(duckos_idt_tests PRIVATE
+    add_executable(dakos_idt_tests tests/test_idt.c)
+    target_link_libraries(dakos_idt_tests PRIVATE dakos_boot_contract)
+    target_include_directories(dakos_idt_tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/kernel/arch/x86_64
     )
     if(MSVC)
-        target_compile_options(duckos_idt_tests PRIVATE /W4 /sdl)
+        target_compile_options(dakos_idt_tests PRIVATE /W4 /sdl)
     else()
-        target_compile_options(duckos_idt_tests PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(dakos_idt_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
-    add_test(NAME duckos-idt-contract COMMAND duckos_idt_tests)
+    add_test(NAME dakos-idt-contract COMMAND dakos_idt_tests)
 
-    add_executable(duckos_gdt_tests tests/test_gdt.c)
-    target_link_libraries(duckos_gdt_tests PRIVATE duckos_boot_contract)
+    add_executable(dakos_gdt_tests tests/test_gdt.c)
+    target_link_libraries(dakos_gdt_tests PRIVATE dakos_boot_contract)
     if(MSVC)
-        target_compile_options(duckos_gdt_tests PRIVATE /W4 /sdl)
+        target_compile_options(dakos_gdt_tests PRIVATE /W4 /sdl)
     else()
-        target_compile_options(duckos_gdt_tests PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(dakos_gdt_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
-    add_test(NAME duckos-x86-64-gdt-tss COMMAND duckos_gdt_tests)
+    add_test(NAME dakos-x86-64-gdt-tss COMMAND dakos_gdt_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
-    add_custom_target(duckos-boot-iso
+    add_custom_target(dakos-boot-iso
         COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/boot/build-iso.sh"
-            --work-dir "${CMAKE_BINARY_DIR}/duckos-boot"
-            --output "${CMAKE_BINARY_DIR}/DuckOS-Stage1-x86_64.iso"
+            --work-dir "${CMAKE_BINARY_DIR}/dakos-boot"
+            --output "${CMAKE_BINARY_DIR}/Dak-Stage1-x86_64.iso"
         BYPRODUCTS
-            "${CMAKE_BINARY_DIR}/DuckOS-Stage1-x86_64.iso"
-            "${CMAKE_BINARY_DIR}/DuckOS-Stage1-x86_64.iso.sha256"
+            "${CMAKE_BINARY_DIR}/Dak-Stage1-x86_64.iso"
+            "${CMAKE_BINARY_DIR}/Dak-Stage1-x86_64.iso.sha256"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         USES_TERMINAL
-        COMMENT "Building the DuckOS x86_64 BIOS/UEFI stage-1 ISO"
+        COMMENT "Building the Dak x86_64 BIOS/UEFI stage-1 ISO"
     )
 endif()
 
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
-    add_custom_target(duckos-release-iso
+    add_custom_target(dakos-release-iso
         COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/boot/build-release-iso.sh"
             --work-dir "${CMAKE_BINARY_DIR}/release"
-            --output "${CMAKE_BINARY_DIR}/DuckOS-Release-x86_64.iso"
+            --output "${CMAKE_BINARY_DIR}/Dak-Release-x86_64.iso"
         BYPRODUCTS
-            "${CMAKE_BINARY_DIR}/DuckOS-Release-x86_64.iso"
-            "${CMAKE_BINARY_DIR}/DuckOS-Release-x86_64.iso.sha256"
+            "${CMAKE_BINARY_DIR}/Dak-Release-x86_64.iso"
+            "${CMAKE_BINARY_DIR}/Dak-Release-x86_64.iso.sha256"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         USES_TERMINAL
-        COMMENT "Building the DuckOS ecosystem release ISO and testing federated projects"
+        COMMENT "Building the Dak ecosystem release ISO and testing federated projects"
     )
 endif()
 
