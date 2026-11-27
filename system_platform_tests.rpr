@@ -2,6 +2,10 @@
 # Run this file with Reaper's tree-walk engine and VM; no privileged device is touched.
 
 import "duckos/kernel/atomic.rpr" as atomic
+import "duckos/kernel/processor.rpr" as processor
+import "duckos/kernel/timing.rpr" as timing
+import "duckos/kernel/telemetry.rpr" as telemetry
+import "duckos/kernel/patch.rpr" as patch
 import "duckos/kernel/syscall.rpr" as syscall
 import "duckos/kernel/handles.rpr" as handles
 import "duckos/kernel/threads.rpr" as threads
@@ -52,6 +56,66 @@ assert(handles["resolve_decision"](file_handle, 42, "file", "fs.read") == "resol
 assert(handles["resolve_decision"](file_handle, 43, "file", "fs.read") == "deny-cross-process-handle", "handle cannot cross process boundary")
 assert(handles["resolve_decision"](file_handle, 42, "socket", "fs.read") == "deny-handle-kind", "handle kind is checked")
 assert(handles["resolve_decision"](file_handle, 42, "file", "fs.admin") == "deny-handle-right", "handle rights are checked")
+
+# CPU topology, ISA admission and deterministic placement.
+make cpu0 := [0, "x86_64", "generic", 0, "online", ["sse2", "avx"], 1000, 250]
+make cpu1 := [1, "x86_64", "generic", 1, "online", ["sse2"], 1000, 100]
+assert(processor["cpu_descriptor_valid"](cpu0), "valid CPU descriptor")
+assert(processor["topology_valid"]([cpu0, cpu1]), "two-CPU topology is valid")
+assert(not processor["topology_valid"]([cpu0, cpu0]), "duplicate logical CPU ID is rejected")
+assert(processor["cpu_admission"](cpu0, [0], ["sse2"], 100) == "admit-policy-only", "eligible CPU admitted")
+assert(processor["cpu_admission"](cpu1, [1], ["avx"], 100) == "deny-cpu-feature", "missing ISA feature is rejected")
+assert(processor["cpu_admission"](cpu0, [1], [], 100) == "deny-affinity", "CPU affinity is enforced")
+assert(processor["choose_cpu"]([cpu0, cpu1], [0, 1], ["sse2"], 100) == ["selected", 1, 200], "least-loaded eligible CPU selected deterministically")
+
+# Wrap-safe timebase, deadline and bounded IRQ execution decisions.
+make wrapped_tick := timing["elapsed_u32"](3, 4294967294)
+assert(wrapped_tick == ["OK", 5], "u32 timer wrap is calculated")
+assert(timing["elapsed_is_unambiguous"](wrapped_tick[1]), "short wrapped interval is unambiguous")
+assert(not timing["elapsed_is_unambiguous"](2147483648), "half-range timer ambiguity is rejected")
+assert(timing["jitter_abs"](95, 100) == ["OK", 5], "early release jitter measured")
+assert(timing["jitter_abs"](105, 100) == ["OK", 5], "late release jitter measured")
+assert(timing["deadline_decision"](100, 100) == "expired", "deadline expires at equality")
+assert(timing["deadline_decision"](120, 100) == ["remaining", 20], "future deadline remainder calculated")
+assert(timing["irq_budget_decision"](10, 100, 0) == "within-budget", "short IRQ remains inside budget")
+assert(timing["irq_budget_decision"](80, 100, 0) == "near-budget-defer-telemetry", "near-budget IRQ defers telemetry")
+assert(timing["irq_budget_decision"](100, 100, 0) == "deadline-miss", "IRQ budget overrun is visible")
+assert(timing["irq_budget_decision"](100, 100, 1) == "nested-overrun", "nested IRQ overrun is distinct")
+assert(timing["periodic_release_advance"](100, 10, 135) == ["OK", 140, 3], "periodic release catches up without drift")
+
+# Bounded telemetry, saturating counters and cooperative task quotas.
+assert(telemetry["saturating_add"](10, 5, 20) == ["OK", 15, false], "normal counter addition")
+assert(telemetry["saturating_add"](18, 9, 20) == ["OK", 20, true], "counter saturates at limit")
+assert(telemetry["pressure_action"](80, false) == "observe-and-record", "moderate pressure requests observation")
+assert(telemetry["pressure_action"](160, false) == "throttle-diagnostics", "high pressure throttles diagnostics")
+assert(telemetry["pressure_action"](260, false) == "degraded-shed-noncritical", "critical pressure sheds noncritical work")
+assert(telemetry["pressure_action"](10, true) == "safe-stop-required", "hardware fault takes precedence")
+make quota0 := [2, 0, 0]
+make quota1 := telemetry["quota_poll"](quota0)
+assert(quota1 == ["run", [2, 1, 0]], "quota grants first work unit")
+make quota2 := telemetry["quota_poll"](quota1[1])
+assert(quota2 == ["run", [2, 2, 0]], "quota grants final work unit")
+make quota3 := telemetry["quota_poll"](quota2[1])
+assert(quota3 == ["yield", [2, 0, 2]], "quota exhaustion yields")
+assert(telemetry["quota_poll"](quota3[1])[0] == "breathe", "cooperative breath is enforced")
+make trace1 := telemetry["trace_append"]([], 2, 0, [1, "irq", 100, 0])
+make trace2 := telemetry["trace_append"](trace1[1], 2, trace1[2], [2, "tick", 101, 1])
+make trace3 := telemetry["trace_append"](trace2[1], 2, trace2[2], [3, "fault", 102, 7])
+assert(trace3[0] == "OK" and trace3[1][0][0] == 2, "trace ring discards oldest event at capacity")
+assert(trace3[2] == 1, "trace overflow increments dropped counter")
+
+# Verified update admission requires integrity, signature, ABI and quiescence.
+make candidate_patch := [1, "duckos-kernel", "x86_64", 4096, 7, "sha256:payload", "DABI64-v1", "kernel", "staged"]
+assert(patch["descriptor_valid"](candidate_patch), "update descriptor is valid")
+assert(patch["verify_decision"](candidate_patch, true, true, true, true) == "verified-policy-only", "verified candidate admitted to policy state")
+make verified_patch := [1, "duckos-kernel", "x86_64", 4096, 7, "sha256:payload", "DABI64-v1", "kernel", "verified"]
+assert(patch["verify_decision"](candidate_patch, true, false, true, true) == "reject-signature", "unsigned candidate rejected")
+assert(patch["verify_decision"](candidate_patch, true, true, false, true) == "reject-abi", "incompatible ABI rejected")
+assert(patch["commit_decision"](verified_patch, false, 0, 0, true) == "defer-until-quiescent", "update cannot commit outside safe point")
+assert(patch["commit_decision"](verified_patch, true, 1, 0, true) == "defer-until-quiescent", "active interrupt defers update")
+assert(patch["commit_decision"](verified_patch, true, 0, 1, true) == "defer-until-quiescent", "device-owned DMA defers update")
+assert(patch["commit_decision"](verified_patch, true, 0, 0, true) == "eligible-for-trusted-backend-commit", "quiescent verified update reaches backend gate")
+assert(patch["rollback_decision"]("committed", false, 3, 3) == "request-last-known-good-rollback", "failed candidate requests rollback")
 
 # Threads, mutexes and semaphores.
 make thread := [11, 42, 8, "ready", 65536, [0, 1] ]

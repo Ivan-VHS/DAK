@@ -1,0 +1,66 @@
+# Monotonic timer, deadline and interrupt-budget contracts.
+# The u32 timebase must be sampled at least once per half-range interval.
+
+export craft tick_u32_valid(value) {
+    yield value >= 0 and value <= 4294967295
+}
+
+export craft elapsed_u32(now, previous) {
+    when not tick_u32_valid(now) or not tick_u32_valid(previous) {
+        yield ["ERR", "tick outside u32 range"]
+    }
+    when now >= previous { yield ["OK", now - previous] }
+    yield ["OK", 4294967296 - previous + now]
+}
+
+export craft elapsed_is_unambiguous(delta) {
+    yield delta >= 0 and delta <= 2147483647
+}
+
+export craft jitter_abs(actual, expected) {
+    when actual < 0 or expected < 0 { yield ["ERR", "negative duration"] }
+    when actual >= expected { yield ["OK", actual - expected] }
+    yield ["OK", expected - actual]
+}
+
+export craft deadline_valid(deadline, now) {
+    when deadline < 0 or now < 0 { yield false }
+    yield deadline <= 9223372036854775807 and now <= 9223372036854775807
+}
+
+export craft deadline_decision(deadline, now) {
+    when not deadline_valid(deadline, now) { yield "invalid" }
+    when now >= deadline { yield "expired" }
+    yield ["remaining", deadline - now]
+}
+
+export craft irq_budget_decision(execution_ticks, budget_ticks, nesting_depth) {
+    when execution_ticks < 0 or budget_ticks <= 0 or nesting_depth < 0 {
+        yield "invalid"
+    }
+    when nesting_depth > 0 and execution_ticks >= budget_ticks {
+        yield "nested-overrun"
+    }
+    when execution_ticks >= budget_ticks { yield "deadline-miss" }
+    when execution_ticks >= budget_ticks - (budget_ticks / 4) { yield "near-budget-defer-telemetry" }
+    yield "within-budget"
+}
+
+export craft periodic_release_advance(previous_release, period, now) {
+    when previous_release < 0 or period <= 0 or now < 0 {
+        yield ["ERR", "invalid release descriptor"]
+    }
+    when period > 9223372036854775807 - previous_release {
+        yield ["ERR", "release overflow"]
+    }
+    make next_release := previous_release + period
+    when next_release > now { yield ["OK", next_release, 0] }
+    make lateness := now - next_release
+    make completed_periods := lateness / period
+    when completed_periods == 9223372036854775807 { yield ["ERR", "missed-period counter overflow"] }
+    make missed := completed_periods + 1
+    when missed > (9223372036854775807 - next_release) / period {
+        yield ["ERR", "release catch-up overflow"]
+    }
+    yield ["OK", next_release + missed * period, missed]
+}

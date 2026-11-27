@@ -1,0 +1,105 @@
+# CPU topology and admission policy for DuckOS.
+# CPU descriptor: [logical_id, architecture, vendor, core_id, state, features, capacity, queued_cost].
+# This contract selects an eligible CPU; it does not program APIC/ACPI or migrate execution.
+
+export craft cpu_descriptor_valid(cpu) {
+    when size(cpu) != 8 { yield false }
+    when cpu[0] < 0 or cpu[3] < 0 { yield false }
+    when cpu[1] != "x86_64" and cpu[1] != "aarch64" and cpu[1] != "elbrus" {
+        yield false
+    }
+    when size(cpu[2]) == 0 { yield false }
+    when cpu[4] != "online" and cpu[4] != "offline" and cpu[4] != "disabled" {
+        yield false
+    }
+    when cpu[6] <= 0 or cpu[6] > 1000000000 { yield false }
+    when cpu[7] < 0 or cpu[7] > cpu[6] { yield false }
+    vary index := 0
+    loop while index < size(cpu[5]) {
+        when size(cpu[5][index]) == 0 { yield false }
+        vary previous := 0
+        loop while previous < index {
+            when cpu[5][previous] == cpu[5][index] { yield false }
+            change previous := previous + 1
+        }
+        change index := index + 1
+    }
+    yield true
+}
+
+export craft topology_valid(cpus) {
+    when size(cpus) == 0 { yield false }
+    vary index := 0
+    loop while index < size(cpus) {
+        when not cpu_descriptor_valid(cpus[index]) { yield false }
+        vary previous := 0
+        loop while previous < index {
+            when cpus[previous][0] == cpus[index][0] { yield false }
+            change previous := previous + 1
+        }
+        change index := index + 1
+    }
+    yield true
+}
+
+export craft feature_set_contains(available, required) {
+    vary index := 0
+    loop while index < size(required) {
+        vary found := false
+        vary candidate := 0
+        loop while candidate < size(available) {
+            when available[candidate] == required[index] {
+                change found := true
+            }
+            change candidate := candidate + 1
+        }
+        when not found { yield false }
+        change index := index + 1
+    }
+    yield true
+}
+
+export craft affinity_allows(affinity, logical_id) {
+    vary index := 0
+    loop while index < size(affinity) {
+        when affinity[index] == logical_id { yield true }
+        change index := index + 1
+    }
+    yield false
+}
+
+export craft cpu_admission(cpu, affinity, required_features, required_cost) {
+    when not cpu_descriptor_valid(cpu) or required_cost <= 0 {
+        yield "deny-invalid-descriptor"
+    }
+    when cpu[4] != "online" { yield "deny-cpu-offline" }
+    when not affinity_allows(affinity, cpu[0]) { yield "deny-affinity" }
+    when not feature_set_contains(cpu[5], required_features) { yield "deny-cpu-feature" }
+    when required_cost > cpu[6] - cpu[7] { yield "deny-capacity" }
+    yield "admit-policy-only"
+}
+
+export craft choose_cpu(cpus, affinity, required_features, required_cost) {
+    when not topology_valid(cpus) or required_cost <= 0 {
+        yield ["invalid", -1, 0]
+    }
+    vary found := false
+    vary selected_id := -1
+    vary selected_load := 0
+    vary selected_capacity := 1
+    vary index := 0
+    loop while index < size(cpus) {
+        make cpu := cpus[index]
+        when cpu_admission(cpu, affinity, required_features, required_cost) == "admit-policy-only" {
+            when not found or cpu[7] * selected_capacity < selected_load * cpu[6] or (cpu[7] * selected_capacity == selected_load * cpu[6] and cpu[0] < selected_id) {
+                change found := true
+                change selected_id := cpu[0]
+                change selected_load := cpu[7]
+                change selected_capacity := cpu[6]
+            }
+        }
+        change index := index + 1
+    }
+    when not found { yield ["backpressure", -1, 0] }
+    yield ["selected", selected_id, selected_load + required_cost]
+}
