@@ -1,4 +1,4 @@
-"""DuckOS offline build-contract, hardware-inventory and compatibility tools."""
+"""Dak offline build-contract, hardware-inventory and compatibility tools."""
 from __future__ import annotations
 
 import argparse
@@ -41,7 +41,7 @@ def _print_result(value: Any) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="duckos", description="DuckOS build, ABI, hardware-inventory and compatibility tools.")
+    parser = argparse.ArgumentParser(prog="dakos", description="Dak build, ABI, hardware-inventory and compatibility tools.")
     commands = parser.add_subparsers(dest="command", required=True)
 
     validate = commands.add_parser("validate-manifest", help="verify a system manifest and component hashes")
@@ -87,7 +87,7 @@ def main(argv: list[str] | None = None) -> int:
     desktop_commands = desktop.add_subparsers(dest="desktop_command", required=True)
     desktop_audit = desktop_commands.add_parser("audit", help="read-only desktop, startup and resource report")
     desktop_audit.add_argument("--item-limit", type=int, default=10)
-    desktop_commands.add_parser("gui", help="open the native Duck Desktop maintenance window")
+    desktop_commands.add_parser("gui", help="open the native Dak Desktop maintenance window")
     startup = desktop_commands.add_parser("startup", help="manage reversible per-user startup entries")
     startup_commands = startup.add_subparsers(dest="startup_command", required=True)
     startup_commands.add_parser("list", help="list current-user startup entries")
@@ -99,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
     gaming_detect = commands.add_parser(
         "gaming-detect", help="find game-process candidates from a local profile catalog"
     )
-    gaming_detect.add_argument("--profiles", type=Path, required=True, help="path to a duckos.game-profile-catalog.v1 JSON file")
+    gaming_detect.add_argument("--profiles", type=Path, required=True, help="path to a dakos.game-profile-catalog.v1 JSON file")
 
     gaming_assess = commands.add_parser(
         "gaming-assess", help="report evidence-backed readiness for the 66 gaming rules"
@@ -119,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     gaming_transition.add_argument("--snapshot-id")
 
     terminal = commands.add_parser(
-        "terminal", help="open the separate DuckOS extended terminal"
+        "terminal", help="open the separate Dak extended terminal"
     )
     terminal_actions = terminal.add_subparsers(dest="terminal_action")
     terminal_run = terminal_actions.add_parser(
@@ -151,7 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     deployment.add_argument("--secure-boot", action="store_true")
     deployment.add_argument(
         "--data-size-bytes", type=int, default=2 * 1024 * 1024 * 1024,
-        help="planned Duck Data partition size (default: 2 GiB)",
+        help="planned Dak Data partition size (default: 2 GiB)",
     )
     deployment.add_argument("--output", type=Path, help="write the JSON plan to this path")
 
@@ -270,7 +270,7 @@ def main(argv: list[str] | None = None) -> int:
             payload = _load(args.modules)
             items = payload.get("modules") if isinstance(payload, dict) else payload
             result = {
-                "schema": "duckos.module-order.v1",
+                "schema": "dakos.module-order.v1",
                 "load_order": resolve_load_order(items),
                 "modules_loaded": False,
             }
@@ -309,7 +309,7 @@ def main(argv: list[str] | None = None) -> int:
             result = audit_desktop(item_limit=args.item_limit)
         elif args.command == "desktop" and args.desktop_command == "startup" and args.startup_command == "list":
             result = {
-                "schema": "duckos.startup-list.v1",
+                "schema": "dakos.startup-list.v1",
                 "scope": "current_user",
                 "entries": DesktopService().startup.list_entries(),
                 "machine_wide_entries_included": False,
@@ -329,7 +329,7 @@ def main(argv: list[str] | None = None) -> int:
             elif args.reaper_command == "studio":
                 process = workbench.open_studio()
                 result = {
-                    "schema": "duckos.reaper-studio-launch.v1",
+                    "schema": "dakos.reaper-studio-launch.v1",
                     "started": True,
                     "pid": process.pid,
                     "repository": str(workbench.repository_root),
@@ -369,7 +369,7 @@ def main(argv: list[str] | None = None) -> int:
         _print_result(result)
         return 0
     except (OSError, TypeError, ValueError, RuntimeError, ImportError) as error:
-        parser.exit(2, f"DuckOS check failed: {error}\n")
+        parser.exit(2, f"Dak check failed: {error}\n")
 
 
 if __name__ == "__main__":
