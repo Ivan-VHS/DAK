@@ -33,7 +33,7 @@ else()
 endif()
 
 set(DUCKOS_HAS_X86_64_CONTEXT OFF)
-if(UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
     enable_language(ASM)
     target_sources(duckos_processor_runtime PRIVATE kernel/arch/x86_64/context.S)
     set(DUCKOS_HAS_X86_64_CONTEXT ON)
