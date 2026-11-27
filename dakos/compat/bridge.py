@@ -1,6 +1,6 @@
-"""Runtime discovery and dry-run orchestration for DuckOS compatibility tools.
+"""Runtime discovery and dry-run orchestration for Dak compatibility tools.
 
-DuckBridge reuses the bounded PE parser in duckos.compat.pe. It can inspect
+DakBridge reuses the bounded PE parser in dakos.compat.pe. It can inspect
 ELF headers and prepare argument-vector launch plans, but it never executes
 an inspected program or starts a compatibility runtime.
 """
@@ -16,8 +16,8 @@ from typing import Any, Iterable
 from .pe import PEFormatError, inspect_pe_file
 from .runtime import host_architecture
 
-SCHEMA_PLAN = "duckos.duckbridge-plan.v1"
-SCHEMA_RUNTIMES = "duckos.duckbridge-runtimes.v1"
+SCHEMA_PLAN = "dakos.dakbridge-plan.v1"
+SCHEMA_RUNTIMES = "dakos.dakbridge-runtimes.v1"
 MAX_ELF_HEADER_BYTES = 4096
 
 _ELF_MACHINES = {
@@ -43,7 +43,7 @@ _QEMU_COMMANDS = {
 }
 
 
-class DuckBridgeError(ValueError):
+class DakBridgeError(ValueError):
     """Raised when an inspection or launch-plan request is invalid."""
 
 
@@ -178,30 +178,30 @@ def detect_runtimes(*, search_path: str | None = None,
 
 def _inspect_elf_file(path: Path) -> dict[str, Any]:
     if path.is_symlink() or not path.is_file():
-        raise DuckBridgeError("ELF input must be a regular file, not a symbolic link")
+        raise DakBridgeError("ELF input must be a regular file, not a symbolic link")
     try:
         size = path.stat().st_size
         with path.open("rb") as stream:
             data = stream.read(MAX_ELF_HEADER_BYTES)
     except OSError as error:
-        raise DuckBridgeError(f"cannot read {path}: {error}") from error
+        raise DakBridgeError(f"cannot read {path}: {error}") from error
 
     if len(data) < 20 or data[:4] != b"\x7fELF":
-        raise DuckBridgeError("ELF identification or machine header is missing or incomplete")
+        raise DakBridgeError("ELF identification or machine header is missing or incomplete")
     elf_class, encoding, version = data[4], data[5], data[6]
     if elf_class not in (1, 2):
-        raise DuckBridgeError("unsupported ELF class")
+        raise DakBridgeError("unsupported ELF class")
     if encoding not in (1, 2):
-        raise DuckBridgeError("invalid ELF byte order")
+        raise DakBridgeError("invalid ELF byte order")
     if version != 1:
-        raise DuckBridgeError("unsupported ELF identification version")
+        raise DakBridgeError("unsupported ELF identification version")
 
     byte_order = "little" if encoding == 1 else "big"
     file_type = int.from_bytes(data[16:18], byte_order)
     machine = int.from_bytes(data[18:20], byte_order)
     architecture = _ELF_MACHINES.get(machine, "unknown")
     if file_type not in (2, 3):
-        raise DuckBridgeError("ELF file type is not an executable or position-independent executable")
+        raise DakBridgeError("ELF file type is not an executable or position-independent executable")
 
     return {
         "format": "ELF",
@@ -220,21 +220,21 @@ def inspect_binary(path: str | Path) -> dict[str, Any]:
     try:
         resolved = target.resolve(strict=True)
     except OSError as error:
-        raise DuckBridgeError(f"cannot resolve {target}: {error}") from error
+        raise DakBridgeError(f"cannot resolve {target}: {error}") from error
     if not resolved.is_file() or target.is_symlink():
-        raise DuckBridgeError("input must be a regular file, not a symbolic link")
+        raise DakBridgeError("input must be a regular file, not a symbolic link")
 
     try:
         with resolved.open("rb") as stream:
             magic = stream.read(4)
     except OSError as error:
-        raise DuckBridgeError(f"cannot read {resolved}: {error}") from error
+        raise DakBridgeError(f"cannot read {resolved}: {error}") from error
 
     if magic[:2] == b"MZ":
         try:
             pe = inspect_pe_file(resolved)
         except PEFormatError as error:
-            raise DuckBridgeError(str(error)) from error
+            raise DakBridgeError(str(error)) from error
         return {
             "path": str(resolved),
             "format": pe["format"],
@@ -313,20 +313,20 @@ def build_launch_plan(path: str | Path, *, purpose: str = "application",
                       host_machine: str | None = None) -> dict[str, Any]:
     """Prepare a reviewable argv/env plan. Does not start a runtime or target."""
     if purpose not in {"application", "game"}:
-        raise DuckBridgeError("purpose must be 'application' or 'game'")
+        raise DakBridgeError("purpose must be 'application' or 'game'")
     if backend not in {"auto", "wine", "proton", "crossover", "bottles"}:
-        raise DuckBridgeError("backend must be auto, wine, proton, crossover or bottles")
+        raise DakBridgeError("backend must be auto, wine, proton, crossover or bottles")
     extra_args = arguments or []
     if any(not isinstance(value, str) for value in extra_args):
-        raise DuckBridgeError("all target arguments must be strings")
+        raise DakBridgeError("all target arguments must be strings")
 
     target = Path(path).expanduser()
     try:
         resolved = target.resolve(strict=True)
     except OSError as error:
-        raise DuckBridgeError(f"cannot resolve {target}: {error}") from error
+        raise DakBridgeError(f"cannot resolve {target}: {error}") from error
     if not resolved.is_file() or target.is_symlink():
-        raise DuckBridgeError("target must be a regular file, not a symbolic link")
+        raise DakBridgeError("target must be a regular file, not a symbolic link")
 
     binary = inspect_binary(resolved)
     host = host_architecture(host_machine or platform.machine())
@@ -354,7 +354,7 @@ def build_launch_plan(path: str | Path, *, purpose: str = "application",
             plan.update({
                 "status": "ready", "backend": "native", "backend_available": True,
                 "argv": [str(resolved), *extra_args],
-                "warnings": ["Plan only: DuckBridge does not execute native ELF files."],
+                "warnings": ["Plan only: DakBridge does not execute native ELF files."],
             })
             return plan
 
@@ -455,7 +455,7 @@ def build_launch_plan(path: str | Path, *, purpose: str = "application",
         "environment": environment,
         "required_configuration": [],
         "warnings": [
-            "Plan only: DuckBridge does not execute the command or create a compatibility prefix.",
+            "Plan only: DakBridge does not execute the command or create a compatibility prefix.",
             "Runtime presence does not guarantee Win32 API, graphics, DRM or anti-cheat compatibility.",
         ],
     })
