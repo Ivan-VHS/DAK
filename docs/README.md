@@ -28,6 +28,10 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 - [BAV security bundle](BAV_SECURITY_BUNDLE_V1.md) — declarative format and planned security services; schema validation is not scanning or signature verification.
 - [Windows compatibility](WINDOWS_COMPATIBILITY.md) and [DAKBridge](DUCKBRIDGE.md) — offline inspection and dry-run plans, not target-process execution.
 
+## Education and learning
+
+- [Early mathematics through play](EARLY_MATH_FOR_PRESCHOOLERS.md) — parent/educator guide and the versioned local activity pack.
+
 ## Planning and evidence
 
 - [Project evolution ladder](PROJECT_EVOLUTION_LADDER.md) — cumulative evidence gates.
