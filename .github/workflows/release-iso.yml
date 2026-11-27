@@ -1,4 +1,4 @@
-name: DuckOS ecosystem release ISO
+name: Dak ecosystem release ISO
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: duckos-ecosystem-release-${{ github.event.pull_request.number || github.ref }}
+  group: dakos-ecosystem-release-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -82,7 +82,7 @@ jobs:
         run: |
           bash boot/build-release-iso.sh \
             --work-dir build/release \
-            --output build/DuckOS-Release-x86_64.iso
+            --output build/Dak-Release-x86_64.iso
 
       - name: Locate OVMF firmware
         run: |
@@ -103,7 +103,7 @@ jobs:
       - name: Verify release ISO in BIOS and UEFI
         run: |
           bash boot/test-qemu.sh \
-            --iso build/DuckOS-Release-x86_64.iso \
+            --iso build/Dak-Release-x86_64.iso \
             --output-dir build/release/qemu \
             --ovmf-code "$OVMF_CODE_PATH" \
             --ovmf-vars "$OVMF_VARS_PATH"
@@ -113,7 +113,7 @@ jobs:
           npm install --no-save playwright
           npx playwright install --with-deps chromium
           python3 -m http.server 8765 --bind 127.0.0.1 \
-            --directory build/release/payload/duckos > build/release/mora-http.log 2>&1 &
+            --directory build/release/payload/dakos > build/release/mora-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 40); do
@@ -127,12 +127,12 @@ jobs:
       - name: Publish release ISO, checksums and boot evidence
         uses: actions/upload-artifact@v4
         with:
-          name: DuckOS-Ecosystem-Release-x86_64
+          name: Dak-Ecosystem-Release-x86_64
           path: |
-            build/DuckOS-Release-x86_64.iso
-            build/DuckOS-Release-x86_64.iso.sha256
-            build/release/payload/duckos/SHA256SUMS
-            build/release/payload/duckos/release/BUILD-INFO.txt
+            build/Dak-Release-x86_64.iso
+            build/Dak-Release-x86_64.iso.sha256
+            build/release/payload/dakos/SHA256SUMS
+            build/release/payload/dakos/release/BUILD-INFO.txt
             build/release/qemu/*.log
             build/release/mora-http.log
           if-no-files-found: error
