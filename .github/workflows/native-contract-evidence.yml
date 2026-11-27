@@ -26,7 +26,7 @@ jobs:
       - name: Install ISO and boot tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build gcc binutils make curl xorriso mtools
+          sudo apt-get install -y build-essential cmake ninja-build binutils curl xorriso
       - name: Configure native contracts
         run: cmake -S . -B build-native -G Ninja -DBUILD_TESTING=ON -DDAK_BUILD_NATIVE_DESKTOP=OFF -DCMAKE_BUILD_TYPE=Release
       - name: Compile kernel contract targets
@@ -36,7 +36,9 @@ jobs:
       - name: Build BIOS/UEFI stage-1 ISO
         run: cmake --build build-native --target duckos-boot-iso --parallel 2
       - name: Verify ISO checksum
-        run: sha256sum --check build-native/DuckOS-Stage1-x86_64.iso.sha256
+        run: |
+          cd build-native
+          sha256sum --check DuckOS-Stage1-x86_64.iso.sha256
       - name: Publish ISO and test evidence
         if: always()
         uses: actions/upload-artifact@v7
