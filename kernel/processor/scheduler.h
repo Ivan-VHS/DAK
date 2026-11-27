@@ -36,7 +36,8 @@ typedef enum {
     DUCKOS_SCHED_CPU_NOT_ONLINE,
     DUCKOS_SCHED_CPU_BUSY,
     DUCKOS_SCHED_STARTUP_INCOMPLETE,
-    DUCKOS_SCHED_GENERATION_EXHAUSTED
+    DUCKOS_SCHED_GENERATION_EXHAUSTED,
+    DUCKOS_SCHED_CONTEXT_UNAVAILABLE
 } duckos_sched_status;
 
 typedef struct {
@@ -58,6 +59,7 @@ typedef struct {
     uint32_t preempt_depth;
     uint32_t dma_leases;
     uint32_t quantum_ticks;
+    uintptr_t idle_stack_pointer;
     uint8_t reschedule_pending;
 } duckos_cpu_local;
 
@@ -70,16 +72,22 @@ typedef struct {
     uint32_t quantum_ticks;
     int32_t priority;
     uint32_t cpu_id;
+    uintptr_t saved_stack_pointer;
     duckos_thread_state state;
 } duckos_sched_thread;
 
 typedef uint64_t (*duckos_irq_save_fn)(void *context);
 typedef void (*duckos_irq_restore_fn)(void *context, uint64_t state);
+typedef void (*duckos_context_switch_fn)(
+    void *context, uintptr_t *old_stack_pointer, uintptr_t new_stack_pointer
+);
 
 typedef struct {
     void *irq_context;
     duckos_irq_save_fn irq_save;
     duckos_irq_restore_fn irq_restore;
+    void *switch_context;
+    duckos_context_switch_fn context_switch;
 } duckos_sched_platform;
 
 typedef struct {
@@ -137,6 +145,11 @@ duckos_sched_status duckos_scheduler_transition_thread(
 duckos_sched_status duckos_scheduler_pick_next(
     duckos_scheduler *scheduler, uint32_t logical_id,
     int preempt_current, duckos_sched_thread *selected
+);
+
+duckos_sched_status duckos_scheduler_switch(
+    duckos_scheduler *scheduler, uint32_t logical_id,
+    duckos_sched_thread *selected
 );
 
 duckos_sched_status duckos_scheduler_tick(
