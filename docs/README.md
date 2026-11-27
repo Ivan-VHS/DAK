@@ -24,6 +24,7 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 
 - [Ecosystem integration](ECOSYSTEM_INTEGRATION.md) — peer repositories, source pins and adapters.
 - [Repository federation](REPOSITORY_FEDERATION.md) — repository-level integration record.
+- [Ecosystem branch consolidation](ECOSYSTEM_BRANCH_CONSOLIDATION_V1.md) — five-repository inventory, PR dependency order, main rulesets and controlled merge procedure.
 - [BAV security bundle](BAV_SECURITY_BUNDLE_V1.md) — declarative format and planned security services; schema validation is not scanning or signature verification.
 - [Windows compatibility](WINDOWS_COMPATIBILITY.md) and [DAKBridge](DUCKBRIDGE.md) — offline inspection and dry-run plans, not target-process execution.
 
