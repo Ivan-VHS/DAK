@@ -1,6 +1,21 @@
 #include "predictive_guard.h"
 
-#include <string.h>
+static void dak_bytes_clear(void *destination, size_t length) {
+    uint8_t *bytes = (uint8_t *)destination;
+    for (size_t index = 0u; index < length; ++index) bytes[index] = 0u;
+}
+
+static void dak_bytes_copy(void *destination, const void *source, size_t length) {
+    uint8_t *output = (uint8_t *)destination;
+    const uint8_t *input = (const uint8_t *)source;
+    for (size_t index = 0u; index < length; ++index) output[index] = input[index];
+}
+
+static int dak_bytes_equal(const uint8_t *left, const uint8_t *right, size_t length) {
+    uint8_t difference = 0u;
+    for (size_t index = 0u; index < length; ++index) difference |= (uint8_t)(left[index] ^ right[index]);
+    return difference == 0u;
+}
 
 static void predictor_lock(dak_predictor *predictor) {
     while (atomic_flag_test_and_set_explicit(&predictor->guard, memory_order_acquire)) {
@@ -23,7 +38,7 @@ static bool fingerprint_valid(const uint8_t *fingerprint) {
 
 void dak_predictor_init(dak_predictor *predictor) {
     if (predictor == NULL) return;
-    memset(predictor, 0, sizeof(*predictor));
+    dak_bytes_clear(predictor, sizeof(*predictor));
     atomic_flag_clear_explicit(&predictor->guard, memory_order_release);
 }
 
@@ -40,7 +55,7 @@ dak_guard_result dak_predictor_preflight(
         return DAK_GUARD_INVALID_ARGUMENT;
     }
 
-    memset(prediction, 0, sizeof(*prediction));
+    dak_bytes_clear(prediction, sizeof(*prediction));
     prediction->generation = lease->generation;
     predictor_lock(predictor);
     if (predictor->count > DAK_PREDICTOR_HISTORY_CAPACITY ||
@@ -52,7 +67,7 @@ dak_guard_result dak_predictor_preflight(
         const dak_predictor_observation *observation = &predictor->history[index];
         if (observation->generation == lease->generation &&
             observation->outcome == DAK_CHECK_DENY_COMPLETE &&
-            memcmp(observation->fingerprint, fingerprint, DAK_PREDICTOR_FINGERPRINT_BYTES) == 0) {
+            dak_bytes_equal(observation->fingerprint, fingerprint, DAK_PREDICTOR_FINGERPRINT_BYTES)) {
             ++prediction->repeated_denials;
         }
     }
@@ -100,7 +115,7 @@ dak_guard_result dak_predictor_authorize(
 
     predictor_lock(predictor);
     dak_predictor_observation *observation = &predictor->history[predictor->next];
-    memcpy(observation->fingerprint, fingerprint, DAK_PREDICTOR_FINGERPRINT_BYTES);
+    dak_bytes_copy(observation->fingerprint, fingerprint, DAK_PREDICTOR_FINGERPRINT_BYTES);
     observation->generation = lease->generation;
     observation->outcome = (uint8_t)outcome;
     predictor->next = (predictor->next + 1u) % DAK_PREDICTOR_HISTORY_CAPACITY;
