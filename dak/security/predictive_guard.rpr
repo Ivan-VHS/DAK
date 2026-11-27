@@ -1,0 +1,82 @@
+# DAK predictive protection guard.
+# Prediction is an early warning only. It may add a conservative denial, but
+# it never grants permission and never replaces the complete rule evaluation.
+
+import "../kernel/rule_epoch.rpr" as epochs
+
+export craft fingerprint_valid(fingerprint) {
+    yield size(fingerprint) == 64
+}
+
+# History item: [fingerprint, model_generation, outcome].
+export craft repeated_denials(history, fingerprint, generation) {
+    when not fingerprint_valid(fingerprint) or generation <= 0 {
+        yield -1
+    }
+    when size(history) > 32 {
+        yield -1
+    }
+    vary count := 0
+    each item in history {
+        when size(item) != 3 {
+            yield -1
+        }
+        when item[1] == generation and item[2] == "deny-complete" and item[0] == fingerprint {
+            change count := count + 1
+        }
+    }
+    yield count
+}
+
+export craft preflight(history, lease, fingerprint, request_bytes) {
+    when not epochs["lease_valid"](lease) or not fingerprint_valid(fingerprint) {
+        yield ["deny-invalid-preflight", "none", 0]
+    }
+    when request_bytes <= 0 or request_bytes > 65536 {
+        yield ["deny-request-bounds", "none", 0]
+    }
+    make denials := repeated_denials(history, fingerprint, lease[2])
+    when denials < 0 {
+        yield ["deny-invalid-history", "none", 0]
+    }
+    when denials >= 2 {
+        yield ["advisory-risk", "repeated-denial", denials]
+    }
+    yield ["advisory-neutral", "unknown", denials]
+}
+
+export craft must_execute_authoritative_checks(preflight_record) {
+    # Even a repeated-denial prediction does not skip any mandatory rule.
+    yield size(preflight_record) == 3 and
+        (preflight_record[0] == "advisory-risk" or preflight_record[0] == "advisory-neutral")
+}
+
+export craft final_decision(preflight_record, lease, model, authoritative_result, checks_completed) {
+    when not must_execute_authoritative_checks(preflight_record) {
+        yield "deny-invalid-prediction"
+    }
+    when not epochs["lease_matches_model"](lease, model) {
+        yield "deny-model-epoch-changed"
+    }
+    when not checks_completed {
+        yield "deny-incomplete-checks"
+    }
+    when authoritative_result != "allow-complete" and authoritative_result != "deny-complete" {
+        yield "deny-invalid-authoritative-result"
+    }
+    when preflight_record[1] == "repeated-denial" {
+        yield "deny-predictive-risk"
+    }
+    when authoritative_result == "allow-complete" {
+        yield "allow-policy-only"
+    }
+    yield "deny-authoritative"
+}
+
+export craft may_predictively_allow() {
+    yield false
+}
+
+export craft may_skip_rule_evaluation() {
+    yield false
+}

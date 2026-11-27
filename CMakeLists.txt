@@ -36,6 +36,29 @@ if(DUCKOS_ENABLE_SANITIZERS)
     endif()
 endif()
 
+
+# DAK native kernel-integrity core. CMake builds the host-testable library;
+# boot/build-iso.sh compiles the same sources freestanding into the Stage 1 ELF.
+option(DAK_BUILD_KERNEL_INTEGRITY_CORE "Build the DAK native integrity core" ON)
+if(DAK_BUILD_KERNEL_INTEGRITY_CORE)
+    add_library(dak_kernel_core STATIC
+        foundation/rule_epoch.c
+        foundation/rule_epoch.h
+        foundation/predictive_guard.c
+        foundation/predictive_guard.h
+        foundation/app_sector.c
+        foundation/app_sector.h
+    )
+    target_include_directories(dak_kernel_core PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/foundation
+    )
+    if(MSVC)
+        target_compile_options(dak_kernel_core PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(dak_kernel_core PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    endif()
+endif()
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(duckos_boot_info_tests tests/test_boot_info.c)
@@ -76,6 +99,19 @@ if(BUILD_TESTING)
         target_compile_options(duckos_gdt_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-x86-64-gdt-tss COMMAND duckos_gdt_tests)
+
+    if(DAK_BUILD_KERNEL_INTEGRITY_CORE)
+        foreach(test_name IN ITEMS rule_epoch predictive_guard app_sector)
+            add_executable(dak_test_${test_name} tests/test_${test_name}.c)
+            target_link_libraries(dak_test_${test_name} PRIVATE dak_kernel_core)
+            if(MSVC)
+                target_compile_options(dak_test_${test_name} PRIVATE /W4 /sdl)
+            else()
+                target_compile_options(dak_test_${test_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+            endif()
+            add_test(NAME dak-${test_name} COMMAND dak_test_${test_name})
+        endforeach()
+    endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")

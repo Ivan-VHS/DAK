@@ -1,0 +1,66 @@
+# DAK all-required-checks installation transaction.
+# The transaction consumes a pinned immutable model epoch and a validated
+# application sector table. It is a policy/state contract; actual media writes,
+# durable journals, signature verification and boot-entry updates are native
+# service responsibilities and must be independently enforced.
+
+import "../kernel/rule_epoch.rpr" as epochs
+import "../security/predictive_guard.rpr" as predictor
+import "application_sectors.rpr" as app_sectors
+
+export craft preflight(model, lease, app_id, sectors, image_bytes, history, fingerprint, request_bytes) {
+    when not epochs["model_valid"](model) {
+        yield ["deny-model-invalid", nothing]
+    }
+    when not epochs["lease_matches_model"](lease, model) {
+        yield ["deny-model-epoch-mismatch", nothing]
+    }
+    when not app_sectors["table_valid"](app_id, sectors, image_bytes) {
+        yield ["deny-sector-table", nothing]
+    }
+    make forecast := predictor["preflight"](history, lease, fingerprint, request_bytes)
+    when forecast[0] != "advisory-risk" and forecast[0] != "advisory-neutral" {
+        yield ["deny-predictor-preflight", forecast]
+    }
+    yield ["ready-for-complete-checks", forecast]
+}
+
+export craft install_checks_complete(required_steps, completed_steps, failed_step) {
+    when failed_step != "" {
+        yield false
+    }
+    yield epochs["complete_plan"](required_steps, completed_steps)
+}
+
+export craft commit_decision(preflight_record, lease, model, authoritative_result,
+    checks_completed, required_steps, completed_steps, failed_step) {
+    when preflight_record[0] != "ready-for-complete-checks" {
+        yield "deny-not-preflighted"
+    }
+    when not install_checks_complete(required_steps, completed_steps, failed_step) {
+        yield "deny-incomplete-or-failed-work"
+    }
+    make guarded := predictor["final_decision"](
+        preflight_record[1], lease, model, authoritative_result, checks_completed
+    )
+    when guarded != "allow-policy-only" {
+        yield guarded
+    }
+    yield "eligible-for-native-readback-and-atomic-commit"
+}
+
+export craft failure_action(write_started, backup_verified, journal_consistent) {
+    when not write_started {
+        yield "abort-without-mutation"
+    }
+    when backup_verified and journal_consistent {
+        yield "restore-previous-image-and-verify"
+    }
+    yield "stop-writes-preserve-evidence-enter-recovery"
+}
+
+export craft model_publication_allowed(active_install_count, current_generation, proposed_generation) {
+    yield epochs["publication_decision"](
+        active_install_count, current_generation, proposed_generation
+    ) == "stage-verify-and-publish"
+}

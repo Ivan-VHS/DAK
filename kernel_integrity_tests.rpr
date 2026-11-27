@@ -1,0 +1,133 @@
+# DAK immutable verification, predictive guard and app-sector contracts.
+# Executed by the existing Reaper tree-walk and VM contract jobs.
+
+import "dak/kernel/rule_epoch.rpr" as epochs
+import "dak/security/predictive_guard.rpr" as predictor
+import "dak/system/application_sectors.rpr" as sectors
+import "dak/system/secure_install.rpr" as install
+
+make model_v1 := [
+    "model.sha256.0001", 7,
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    128, 4096, "verified-sealed"
+]
+make lease_result := epochs["pin_for_install"](model_v1, "txn-0001", 1)
+make lease_v1 := lease_result[1]
+assert(lease_result[0] == "pinned", "a valid model snapshot can be pinned")
+assert(epochs["lease_valid"](lease_v1), "an install lease is structurally valid")
+assert(epochs["lease_matches_model"](lease_v1, model_v1), "lease is bound to its exact model epoch and digests")
+
+make model_v2 := [
+    "model.sha256.0002", 8,
+    "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    130, 4200, "verified-sealed"
+]
+assert(not epochs["lease_matches_model"](lease_v1, model_v2), "a pinned install cannot silently change models")
+assert(epochs["publication_decision"](1, 7, 8) == "deny-model-in-use", "model publication is frozen while an install holds the model")
+assert(epochs["publication_decision"](0, 7, 8) == "stage-verify-and-publish", "next model may publish after all install leases release")
+assert(epochs["publication_decision"](0, 7, 10) == "deny-nonconsecutive-generation", "model generations cannot skip")
+
+make required_steps := [
+    "model-pinned", "manifest-verified", "sector-table-verified",
+    "capabilities-verified", "target-preflight", "payload-written",
+    "readback-verified", "boot-record-staged"
+]
+make complete_steps := [
+    "model-pinned", "manifest-verified", "sector-table-verified",
+    "capabilities-verified", "target-preflight", "payload-written",
+    "readback-verified", "boot-record-staged"
+]
+make incomplete_steps := [
+    "model-pinned", "manifest-verified", "sector-table-verified",
+    "capabilities-verified", "target-preflight", "payload-written",
+    "readback-verified"
+]
+make duplicate_steps := [
+    "model-pinned", "manifest-verified", "sector-table-verified",
+    "capabilities-verified", "target-preflight", "payload-written",
+    "readback-verified", "readback-verified"
+]
+assert(epochs["complete_plan"](required_steps, complete_steps), "every finite required step is accounted for exactly once")
+assert(not epochs["complete_plan"](required_steps, incomplete_steps), "missing mandatory work prevents completion")
+assert(not epochs["complete_plan"](required_steps, duplicate_steps), "duplicate work cannot hide an omitted step")
+assert(epochs["plan_terminal_action"](required_steps, incomplete_steps, "") == "incomplete-do-not-commit", "incomplete plan cannot commit")
+assert(epochs["plan_terminal_action"](required_steps, complete_steps, "write-failed") == "abort-or-recover", "any failed step enters abort or recovery")
+
+make fingerprint := "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+make denied_history := [
+    [fingerprint, 7, "deny-complete"],
+    [fingerprint, 7, "deny-complete"]
+]
+make neutral_history := []
+make risk_forecast := predictor["preflight"](denied_history, lease_v1, fingerprint, 128)
+make neutral_forecast := predictor["preflight"](neutral_history, lease_v1, fingerprint, 128)
+assert(risk_forecast[0] == "advisory-risk", "repeated denial history raises an early protective signal")
+assert(predictor["must_execute_authoritative_checks"](risk_forecast), "predictive risk does not skip mandatory rule evaluation")
+assert(neutral_forecast[0] == "advisory-neutral", "unknown history remains neutral rather than predicted allow")
+assert(predictor["final_decision"](risk_forecast, lease_v1, model_v1, "allow-complete", true) == "deny-predictive-risk", "predictive risk can add a conservative deny")
+assert(predictor["final_decision"](neutral_forecast, lease_v1, model_v1, "allow-complete", true) == "allow-policy-only", "only complete authoritative allow can produce a policy allow")
+assert(predictor["final_decision"](neutral_forecast, lease_v1, model_v1, "allow-complete", false) == "deny-incomplete-checks", "partial verification is never accepted")
+assert(not predictor["may_predictively_allow"](), "predictor never grants permission")
+assert(not predictor["may_skip_rule_evaluation"](), "predictor never replaces rules")
+
+make app_id := 7001
+make manifest_sector := [
+    app_id, 1, "manifest", 0, 512, 8, "r",
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    1, "verified-sealed"
+]
+make code_sector := [
+    app_id, 2, "code", 4096, 4096, 4096, "rx",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    1, "verified-sealed"
+]
+make data_sector := [
+    app_id, 3, "writable-data", 8192, 2048, 4096, "rw",
+    "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    1, "verified-sealed"
+]
+make app_sector_table := [manifest_sector, code_sector, data_sector]
+assert(sectors["sector_valid"](manifest_sector, app_id, 12288), "manifest bytes are in range and read-only")
+assert(sectors["sector_valid"](code_sector, app_id, 12288), "code sector has RX permissions and verified metadata")
+assert(sectors["sector_valid"](data_sector, app_id, 12288), "writable data is non-executable")
+assert(sectors["table_valid"](app_id, app_sector_table, 12288), "application sectors are disjoint and complete")
+assert(not sectors["executable_write_allowed"](code_sector), "verified code cannot be written after seal")
+assert(not sectors["data_execute_allowed"](data_sector), "writable data cannot be executable")
+
+make overlap_sector := [
+    app_id, 4, "resource", 4096, 1024, 4096, "r",
+    "1111111111111111111111111111111111111111111111111111111111111111",
+    1, "verified-sealed"
+]
+assert(not sectors["table_valid"](app_id, [manifest_sector, code_sector, overlap_sector], 12288), "overlapping app sectors are rejected")
+make wx_sector := [
+    app_id, 4, "writable-data", 12288, 1024, 4096, "rwx",
+    "2222222222222222222222222222222222222222222222222222222222222222",
+    1, "verified-sealed"
+]
+assert(not sectors["sector_valid"](wx_sector, app_id, 16384), "W+X sector permissions are forbidden")
+
+make invalid_alignment_sector := [
+    app_id, 4, "resource", 12288, 512, 3, "r",
+    "3333333333333333333333333333333333333333333333333333333333333333",
+    1, "verified-sealed"
+]
+assert(not sectors["sector_valid"](invalid_alignment_sector, app_id, 16384), "non-power-of-two alignment is rejected")
+
+make install_preflight := install["preflight"](
+    model_v1, lease_v1, app_id, app_sector_table, 12288, neutral_history, fingerprint, 128
+)
+assert(install_preflight[0] == "ready-for-complete-checks", "valid transaction reaches the mandatory authoritative checks")
+assert(install["commit_decision"](
+    install_preflight, lease_v1, model_v1, "allow-complete", true,
+    required_steps, complete_steps, ""
+) == "eligible-for-native-readback-and-atomic-commit", "complete plan reaches only the native readback/commit gate")
+assert(install["commit_decision"](
+    install_preflight, lease_v1, model_v1, "allow-complete", true,
+    required_steps, incomplete_steps, ""
+) == "deny-incomplete-or-failed-work", "all required checks and steps are mandatory")
+assert(install["model_publication_allowed"](1, 7, 8) == false, "model cannot be replaced during installation")
+assert(install["failure_action"](false, false, false) == "abort-without-mutation", "failure before write has no side effects")
+assert(install["failure_action"](true, true, true) == "restore-previous-image-and-verify", "verified backup supports rollback")
