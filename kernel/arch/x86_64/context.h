@@ -1,6 +1,8 @@
 #ifndef DUCKOS_X86_64_CONTEXT_H
 #define DUCKOS_X86_64_CONTEXT_H
 
+#include "scheduler.h"
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -12,6 +14,7 @@ typedef struct {
     uintptr_t r12;
     uintptr_t rbp;
     uintptr_t rbx;
+    uintptr_t rflags;
     uintptr_t rip;
 } duckos_x86_64_context_frame;
 
@@ -25,6 +28,12 @@ int duckos_x86_64_context_frame_init(
 void duckos_x86_64_context_switch(
     uintptr_t *old_stack_pointer, uintptr_t new_stack_pointer
 );
+void duckos_x86_64_scheduler_context_switch(
+    void *context, uintptr_t *old_stack_pointer, uintptr_t new_stack_pointer
+);
+uint64_t duckos_x86_64_irq_save(void *context);
+void duckos_x86_64_irq_restore(void *context, uint64_t state);
+void duckos_x86_64_scheduler_platform(duckos_sched_platform *platform);
 #endif
 
 #endif
