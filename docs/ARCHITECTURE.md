@@ -39,6 +39,18 @@ The required sequence is:
 
 An out-of-order transition is rejected by the Reaper reference contract. The experimental native boot path validates firmware data, creates the owned bootstrap GDT/TSS and loads exception gates 0..31. Dedicated IST1/2/3 stacks are assigned to double fault, NMI and page fault. It still does not run the full phase sequence, enable external interrupts, create user address spaces, schedule tasks or start services.
 
+## Primary kernel integrity contracts
+
+[Native kernel integrity contracts v1](NATIVE_KERNEL_CORE_V1.md) adds a Reaper policy gate for the primary native kernel, immutable verification snapshots, advisory condition predictors, exact-set installation completion and a unified application code/byte/memory/sector layout.
+
+The verification record is `[model_id, version, revision, digest, state, epoch]`. It transitions from draft to frozen to installing to installed. Updates create a new monotonic draft; they do not mutate a frozen or installing snapshot. A failed installation can return to draft only after a matching snapshot and externally verified rollback are supplied.
+
+Predictors carry the ruleset revision, installation epoch and expiry tick. They are hints only: a fresh native check must still run at the commit boundary. Install completion is an exact set match, with duplicate, missing or failed operations rejected.
+
+The sectorization contract binds application manifests, `u8le-v1` executable bytes, page-aligned non-W+X memory regions and bounded 512/4096-byte storage extents to the same ruleset revision and digest.
+
+These modules run as Reaper reference contracts. The manifest continues to mark hardware execution false and freestanding Reaper code generation unqualified. No kernel lock, cryptographic digest, page mapping, block write, installer or process runtime is claimed until a native backend implements and verifies those boundaries.
+
 ## Memory habitats and SoA
 
 The memory contract uses an exclusive upper bound and validates ranges before a future native allocator may touch memory. The arena model stores:
