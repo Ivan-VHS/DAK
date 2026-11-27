@@ -9,7 +9,7 @@ on:
       - "tools/**"
       - ".github/workflows/application-build-matrix.yml"
   push:
-    branches: [main]
+    branches: [main, "build/**"]
     paths:
       - "federation/**"
       - "projects/**"
@@ -76,7 +76,7 @@ jobs:
       - name: Test OPlague read-only host workbench
         working-directory: projects/oplague
         run: |
-          python -m compileall -q oplague_app.py oplage_app.py oplague tests tools
+          python -m compileall -q oplague_app.py tests tools
           python -m unittest discover -s tests -v
 
       - name: Collect Linux host build outputs
@@ -136,7 +136,7 @@ jobs:
       - name: Build VentuSample DSP core
         shell: pwsh
         run: |
-          cmake -S projects/ventusample -B build/ventusample -A x64 -DVENTU_BUILD_DESKTOP=OFF -DVENTU_BUILD_TESTS=ON
+          cmake -S projects/ventusample -B build/ventusample -A x64 -DVENTU_BUILD_DESKTOP=OFF -DVENTU_BUILD_TESTS=ON -DREAPER_SOURCE_DIR="$env:GITHUB_WORKSPACE/projects/reaper"
           cmake --build build/ventusample --config Release --parallel 2
           ctest --test-dir build/ventusample -C Release --output-on-failure
 
