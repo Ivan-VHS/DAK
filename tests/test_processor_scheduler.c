@@ -77,6 +77,7 @@ static void test_core_drain_and_topology_generation(void) {
     duckos_sched_thread pinned = make_thread(81U, 20, 0U, UINT64_C(1) << 1U, DUCKOS_THREAD_CREATED);
     assert(duckos_scheduler_register_thread(&scheduler, &pinned) == DUCKOS_SCHED_OK);
     assert(duckos_scheduler_transition_thread(&scheduler, 81U, DUCKOS_THREAD_READY) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_transition_thread(&scheduler, 81U, DUCKOS_THREAD_RUNNING) == DUCKOS_SCHED_OK);
     assert(duckos_scheduler_transition_thread(&scheduler, 81U, DUCKOS_THREAD_BLOCKED) == DUCKOS_SCHED_OK);
     assert(duckos_scheduler_begin_cpu_drain(&scheduler, 1U) == DUCKOS_SCHED_OK);
     assert(!duckos_scheduler_core_offline_allowed(&scheduler, 1U));
