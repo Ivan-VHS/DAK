@@ -1,4 +1,4 @@
-"""Validated, explicit game launch profiles for DuckOS.
+"""Validated, explicit game launch profiles for Dak.
 
 This adapter can start a Windows executable only through an already-installed
 Wine-compatible host runtime. It does not emulate Windows, change a prefix,
@@ -17,7 +17,7 @@ from typing import Any, Callable
 
 from .pe import PEFormatError, inspect_pe_file
 
-SCHEMA = "duckos.game-launch-profile.v1"
+SCHEMA = "dakos.game-launch-profile.v1"
 MAX_PROFILE_BYTES = 1024 * 1024
 MAX_ARGUMENTS = 256
 MAX_ARGUMENT_LENGTH = 4096
@@ -217,7 +217,7 @@ def plan_game_launch(
             blockers.append("The selected directory is not an initialized Wine prefix (system.reg and drive_c are required).")
     argv = [runtime_path, str(executable), *clean["arguments"]] if runtime_path else []
     return {
-        "schema": "duckos.game-launch-plan.v1",
+        "schema": "dakos.game-launch-plan.v1",
         "game_id": clean["id"],
         "game_name": clean["name"],
         "target": "windows-xp-sp3",
@@ -263,7 +263,7 @@ def launch_game(
         start_new_session=(os.name == "posix"),
     )
     return {
-        "schema": "duckos.game-launch-result.v1",
+        "schema": "dakos.game-launch-result.v1",
         "game_id": clean["id"],
         "pid": int(process.pid),
         "started": True,
@@ -276,8 +276,8 @@ def launch_game(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="duckos-game", description="Inspect and launch games through an installed Wine runtime.")
-    parser.add_argument("profile", type=Path, help="versioned DuckOS game profile JSON")
+    parser = argparse.ArgumentParser(prog="dakos-game", description="Inspect and launch games through an installed Wine runtime.")
+    parser.add_argument("profile", type=Path, help="versioned Dak game profile JSON")
     actions = parser.add_mutually_exclusive_group(required=True)
     actions.add_argument("--validate", action="store_true", help="validate the profile only")
     actions.add_argument("--plan", action="store_true", help="show the argv-only launch plan")
@@ -287,7 +287,7 @@ def main(argv: list[str] | None = None) -> int:
         args = parser.parse_args(argv)
         profile = load_game_profile(args.profile)
         if args.validate:
-            result = {"schema": "duckos.game-profile-validation.v1", "valid": True, "game_id": profile["id"]}
+            result = {"schema": "dakos.game-profile-validation.v1", "valid": True, "game_id": profile["id"]}
         elif args.plan:
             result = plan_game_launch(profile, wine_binary=args.wine)
         else:
@@ -297,7 +297,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         return 1 if result.get("status") == "blocked" else 0
     except (GameProfileError, OSError, ValueError) as error:
-        print(f"duckos-game: {error}", file=sys.stderr)
+        print(f"dakos-game: {error}", file=sys.stderr)
         return 2
 
 
