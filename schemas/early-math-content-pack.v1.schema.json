@@ -108,7 +108,7 @@
           "properties": {
             "minimum": {
               "type": "integer",
-              "minimum": 12,
+              "minimum": 0,
               "maximum": 84
             },
             "maximum": {
@@ -248,7 +248,9 @@
                     "contains": {
                       "enum": [
                         "small_parts",
-                        "food_allergens"
+                        "food_allergens",
+                        "outdoor_materials",
+                        "household_objects"
                       ]
                     }
                   }
@@ -270,8 +272,35 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "safety": {
+                "properties": {
+                  "hazards": {
+                    "contains": {
+                      "const": "none_known"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "safety": {
+                "properties": {
+                  "hazards": {
+                    "maxItems": 1
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     }
-  }
+  },
+  "$comment": "Semantic importer invariants not expressible as portable JSON Schema: activity IDs must be unique across the activities array; age_months.minimum must not exceed age_months.maximum. Reject unknown versions and validate these invariants before rendering."
 }
