@@ -19,7 +19,7 @@ export craft u32_le(value) {
     loop while index < 4 {
         make octet := rest % 256
         change bytes := push(bytes, octet)
-        change rest := (rest - octet) / 256
+        change rest := (rest - octet) // 256
         change index := index + 1
     }
     yield ["OK", bytes]
@@ -33,7 +33,7 @@ export craft u63_le(value) {
     loop while index < 8 {
         make octet := rest % 256
         change bytes := push(bytes, octet)
-        change rest := (rest - octet) / 256
+        change rest := (rest - octet) // 256
         change index := index + 1
     }
     yield ["OK", bytes]
@@ -52,8 +52,8 @@ craft xor_u32(left, right) {
         make a_bit := a % 2
         make b_bit := b % 2
         when a_bit != b_bit { change result := result + bit_value }
-        change a := (a - a_bit) / 2
-        change b := (b - b_bit) / 2
+        change a := (a - a_bit) // 2
+        change b := (b - b_bit) // 2
         change bit_value := bit_value * 2
         change index := index + 1
     }
@@ -71,9 +71,9 @@ export craft crc32c(bytes) {
         vary bit_index := 0
         loop while bit_index < 8 {
             when crc % 2 == 1 {
-                change crc := xor_u32((crc - 1) / 2, 2197175160)
+                change crc := xor_u32((crc - 1) // 2, 2197175160)
             } otherwise {
-                change crc := (crc - (crc % 2)) / 2
+                change crc := (crc - (crc % 2)) // 2
             }
             change bit_index := bit_index + 1
         }
