@@ -4,6 +4,10 @@
 
 Start with the [project README](../README.md) for the current Stage 1 boot evidence, native DAK host application and release boundary. The [documentation map](INFORMATION_ARCHITECTURE.md) links the full catalogue.
 
+## NEXUS system architecture
+
+[NEXUS System Components and Internal Services v1](NEXUS_SYSTEM_SERVICES_V1.md) defines component ownership, the six internal service descriptors, cross-repository boundaries and implementation gates. Its machine-readable registry is `../catalogs/nexus-system-services.v1.json` and its schema is `../schemas/nexus-system-services.v1.schema.json`.
+
 ## Desktop and application interfaces
 
 - [DAK Desktop](DAK_DESKTOP.md) — native host shell, Reaper session policies and interactive HTML demo.

@@ -1,0 +1,394 @@
+{
+  "schema": "duckos.nexus-system-services.v1",
+  "version": 1,
+  "identity": {
+    "architecture": "NEXUS",
+    "operating_system": "DuckOS",
+    "systems_language": "Reaper",
+    "repository_identity_policy": "immutable",
+    "scope": "Technical component ownership and internal system-service contracts for the Ivan-VHS repository federation."
+  },
+  "components": [
+    {
+      "id": "kernel_core",
+      "name": "KernelCore",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "provider_repositories": [],
+      "maturity": "partial",
+      "current_scope": [
+        "Experimental x86_64 Stage 1 firmware handoff and Boot Info v1 validation.",
+        "Early 4 KiB physical-frame allocation and QEMU BIOS/UEFI boot checks."
+      ],
+      "missing_capabilities": [
+        "Reusable physical-memory manager, page tables and address-space management.",
+        "Interrupts, timers, preemptive scheduling, process model and syscall ABI.",
+        "Kernel-enforced capabilities, native IPC, device enumeration and driver runtime."
+      ],
+      "evidence": [
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/ARCHITECTURE.md"
+      ],
+      "interfaces": [
+        "Boot Info v1",
+        "Reaper reference policy contracts; native enforcement remains pending."
+      ]
+    },
+    {
+      "id": "nexus_shell",
+      "name": "NexusShell",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "provider_repositories": [],
+      "maturity": "partial",
+      "current_scope": [
+        "Mora local browser-host desktop, launcher, windows, preferences and application panels."
+      ],
+      "missing_capabilities": [
+        "Native shell session launched by the DuckOS kernel.",
+        "Native window server, input routing, compositor and kernel-backed application lifecycle."
+      ],
+      "evidence": [
+        "README.md",
+        "docs/MORA_INTEGRATION.md"
+      ],
+      "interfaces": [
+        "Mora local application registry and host-side integration contracts."
+      ]
+    },
+    {
+      "id": "audio_subsys",
+      "name": "AudioSubsys",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "provider_repositories": [
+        "Ivan-VHS/VentuSample"
+      ],
+      "maturity": "specified",
+      "current_scope": [
+        "VentuSample provides independent C++20 offline rendering, DSP, asset I/O and versioned pack/preset metadata."
+      ],
+      "missing_capabilities": [
+        "DuckOS audio-device discovery, native driver interface and session ownership.",
+        "Real-time callback scheduling, bounded device buffers and hardware-backed latency qualification."
+      ],
+      "evidence": [
+        "docs/IMPLEMENTATION_STATUS.md",
+        "../VentuSample/docs/ARCHITECTURE.md"
+      ],
+      "interfaces": [
+        "ventusample.pack.v1",
+        "ventusample.preset.v1",
+        "Offline render metadata; no real-time device ABI is published."
+      ]
+    },
+    {
+      "id": "security_module",
+      "name": "SecurityModule",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "provider_repositories": [
+        "Ivan-VHS/Reaper",
+        "Ivan-VHS/OPlague"
+      ],
+      "maturity": "partial",
+      "current_scope": [
+        "Reaper reference capability and trust-state policies.",
+        "DuckOS BAV declarative bundle v1 format and schema.",
+        "OPlague read-only device, package, Authenticode, hash and telemetry evidence."
+      ],
+      "missing_capabilities": [
+        "Kernel-enforced access control and protected event delivery.",
+        "Native bundle signature verification, endpoint scanner, quarantine store and enforcement broker.",
+        "Verified boot trust chain and key lifecycle."
+      ],
+      "evidence": [
+        "docs/ARCHITECTURE.md",
+        "docs/BAV_SECURITY_BUNDLE_V1.md"
+      ],
+      "interfaces": [
+        "bav-security-bundle.v1",
+        "oplage.device-snapshot.v1",
+        "oplage.gpu-telemetry.v1"
+      ]
+    },
+    {
+      "id": "network_stack",
+      "name": "NetworkStack",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "provider_repositories": [],
+      "maturity": "specified",
+      "current_scope": [
+        "Reaper reference contracts validate selected network policy inputs; they do not transmit packets."
+      ],
+      "missing_capabilities": [
+        "NIC drivers, packet buffers, IP/TCP/UDP, routes and socket API.",
+        "Firewall hooks, resolver, VPN transport and hardware-backed network telemetry."
+      ],
+      "evidence": [
+        "docs/ARCHITECTURE.md",
+        "docs/IMPLEMENTATION_STATUS.md"
+      ],
+      "interfaces": [
+        "No native DuckOS network-service ABI is published."
+      ]
+    },
+    {
+      "id": "graphics_engine",
+      "name": "GraphicsEngine",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "provider_repositories": [],
+      "maturity": "partial",
+      "current_scope": [
+        "Mora host-browser rendering and documented desktop interaction/design policies."
+      ],
+      "missing_capabilities": [
+        "Native GPU driver, resource handles, window server and compositor.",
+        "Display discovery, presentation scheduling and device-loss recovery."
+      ],
+      "evidence": [
+        "docs/ARCHITECTURE.md",
+        "README.md",
+        "docs/MORA_DESIGN_SYSTEM.md"
+      ],
+      "interfaces": [
+        "Mora design tokens and host-browser application surfaces; no native compositor ABI."
+      ]
+    },
+    {
+      "id": "build_toolchain",
+      "name": "BuildToolchain",
+      "owner_repository": "Ivan-VHS/Reaper",
+      "provider_repositories": [],
+      "maturity": "partial",
+      "current_scope": [
+        "Reaper language frontend, diagnostics, CLI/REPL, reference runtime and developer tools.",
+        "Experimental native C17 implementation with separate conformance maturity."
+      ],
+      "missing_capabilities": [
+        "Feature-equivalent native compiler and complete freestanding DuckOS backend.",
+        "Self-hosting bootstrap and reproducible native link/load pipeline."
+      ],
+      "evidence": [
+        "Reaper/README.md",
+        "Reaper/docs/ARCHITECTURE.md",
+        "Reaper/docs/NATIVE_COMPILER.md"
+      ],
+      "interfaces": [
+        "Reaper source and CLI contracts",
+        "Versioned C ABI v1 through an explicit trusted library path."
+      ]
+    },
+    {
+      "id": "ai_layer",
+      "name": "AILayer",
+      "owner_repository": "unassigned",
+      "provider_repositories": [],
+      "maturity": "reserved",
+      "current_scope": [],
+      "missing_capabilities": [
+        "No model runtime, inference contract, model provenance, data policy or resource governor is assigned."
+      ],
+      "evidence": [],
+      "interfaces": []
+    }
+  ],
+  "services": [
+    {
+      "id": "kernel_sentinel",
+      "name": "KERNEL_SENTINEL",
+      "service_type": "internal_system_service",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "maturity": "specified",
+      "runtime_state": "not_implemented",
+      "execution_model": "planned_user_space_service",
+      "readiness": "blocked_on_kernel_integrity_primitives",
+      "component_dependencies": [
+        "kernel_core",
+        "security_module"
+      ],
+      "project_dependencies": [
+        "Ivan-VHS/Reaper",
+        "Ivan-VHS/OPlague"
+      ],
+      "purpose": "Read-only integrity measurement and policy reporting for trusted system artifacts.",
+      "prerequisites": [
+        "Kernel-backed immutable measurement source and authenticated event stream.",
+        "Local trust store with key rotation, revocation and signature verification.",
+        "Bounded isolated scanner worker and audit-ready evidence reports."
+      ],
+      "outputs": [
+        "Versioned integrity report with object identity, digest, measurement source and verification state.",
+        "Explicit unknown, unsupported, stale and failed-verification states."
+      ],
+      "host_technology_options": [
+        "TPM 2.0 may be an optional provider after a DuckOS driver and trust chain exist.",
+        "Linux IMA and eBPF are host-adapter options, not native DuckOS APIs."
+      ],
+      "safety_boundary": "Read-only initially; process-memory scanning, injection prevention, quarantine, execution blocking and kernel enforcement are not implemented."
+    },
+    {
+      "id": "memory_forge",
+      "name": "MEMORY_FORGE",
+      "service_type": "internal_system_service",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "maturity": "specified",
+      "runtime_state": "not_implemented",
+      "execution_model": "planned_user_space_service",
+      "readiness": "blocked_on_kernel_memory_accounting",
+      "component_dependencies": [
+        "kernel_core"
+      ],
+      "project_dependencies": [
+        "Ivan-VHS/Pytyliki"
+      ],
+      "purpose": "Read-only memory-resource inventory and bounded diagnostics, with future advisory policies for memory pressure.",
+      "prerequisites": [
+        "Reusable frame allocator and page-table/address-space accounting.",
+        "Per-process memory ownership and page-state reporting.",
+        "Explicit RAM, swap and accelerator-memory provider contracts."
+      ],
+      "outputs": [
+        "Memory snapshots with provider, timestamp, units and validity.",
+        "Advisory resource reports and bounded compression/reclamation proposals."
+      ],
+      "host_technology_options": [
+        "malloc and mmap hooks do not replace kernel memory accounting.",
+        "Zstd/LZ4 page compression requires page ownership, backing storage, recovery and CPU/memory budgets.",
+        "VRAM data must come from a supported GPU provider; arbitrary device-memory mapping is prohibited."
+      ],
+      "safety_boundary": "Observational first; allocator replacement, page migration, swap mutation, memory reclamation and VRAM mapping remain disabled until native authorization and rollback tests exist."
+    },
+    {
+      "id": "vector_gateway",
+      "name": "VECTOR_GATEWAY",
+      "service_type": "internal_system_service",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "maturity": "specified",
+      "runtime_state": "not_implemented",
+      "execution_model": "planned_user_space_service",
+      "readiness": "blocked_on_native_network_stack",
+      "component_dependencies": [
+        "network_stack",
+        "security_module"
+      ],
+      "project_dependencies": [],
+      "purpose": "Local network-policy service for traffic visibility, explicit filtering rules and future encrypted transport integration.",
+      "prerequisites": [
+        "Real NIC driver, packet buffers and a network data path.",
+        "Versioned socket, route and packet-filter contracts.",
+        "Bounded parsing, queue/rate limits, audit and packet-path tests."
+      ],
+      "outputs": [
+        "Versioned network status and policy reports.",
+        "Dry-run rule plans until the native packet path exists."
+      ],
+      "host_technology_options": [
+        "nftables and XDP are Linux-host adapter options, not DuckOS kernel APIs.",
+        "WireGuard requires a separately reviewed protocol and cryptographic implementation.",
+        "DoH/DoT require a supported resolver and explicit trust policy."
+      ],
+      "safety_boundary": "No DDoS mitigation, firewall enforcement, VPN protection or packet prioritization is claimed before a real, tested network service exists."
+    },
+    {
+      "id": "pixel_pipeline",
+      "name": "PIXEL_PIPELINE",
+      "service_type": "internal_system_service",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "maturity": "specified",
+      "runtime_state": "not_implemented",
+      "execution_model": "planned_user_space_service",
+      "readiness": "blocked_on_native_graphics_backend",
+      "component_dependencies": [
+        "graphics_engine",
+        "kernel_core"
+      ],
+      "project_dependencies": [],
+      "purpose": "Native window composition, display presentation, input-to-frame coordination and frame diagnostics.",
+      "prerequisites": [
+        "Native window/session manager and input routing.",
+        "GPU discovery, driver ABI and validated resource handles.",
+        "Compositor API, display discovery and presentation/recovery tests."
+      ],
+      "outputs": [
+        "Composited frames through the native display interface.",
+        "Frame timing and presentation diagnostics with provider provenance."
+      ],
+      "host_technology_options": [
+        "Vulkan is optional after a supported DuckOS backend and driver exist.",
+        "Wayland is a protocol compatibility option, not an assumed DuckOS compositor.",
+        "DRM/KMS is a Linux host boundary, not a native DuckOS subsystem."
+      ],
+      "safety_boundary": "Applications receive validated graphics resources, not arbitrary VRAM mappings; Mora browser rendering is not native composition."
+    },
+    {
+      "id": "data_orchestrator",
+      "name": "DATA_ORCHESTRATOR",
+      "service_type": "internal_system_service",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "maturity": "specified",
+      "runtime_state": "not_implemented",
+      "execution_model": "planned_user_space_service",
+      "readiness": "blocked_on_process_model_and_ipc",
+      "component_dependencies": [
+        "kernel_core",
+        "nexus_shell"
+      ],
+      "project_dependencies": [
+        "Ivan-VHS/Reaper"
+      ],
+      "purpose": "Process and task lifecycle coordinator with bounded scheduling requests and observable service state.",
+      "prerequisites": [
+        "Process/thread model, address-space isolation and syscall ABI.",
+        "Preemptive scheduler, cancellation semantics and authenticated IPC.",
+        "Kernel-enforced capabilities, resource accounting and service lifecycle tests."
+      ],
+      "outputs": [
+        "Process/service inventory and lifecycle events.",
+        "Validated scheduling and resource-policy decisions."
+      ],
+      "host_technology_options": [
+        "cgroups v2, Linux namespaces and systemd are not native DuckOS dependencies.",
+        "A Linux compatibility adapter may be developed independently."
+      ],
+      "safety_boundary": "No process creation, priority mutation, container isolation or service supervision is exposed until the corresponding OS primitives are implemented and verified."
+    },
+    {
+      "id": "build_vanguard",
+      "name": "BUILD_VANGUARD",
+      "service_type": "internal_system_service",
+      "owner_repository": "Ivan-VHS/DuckOS",
+      "maturity": "specified",
+      "runtime_state": "not_implemented",
+      "execution_model": "planned_user_space_service",
+      "readiness": "user_space_build_service_specified",
+      "component_dependencies": [
+        "build_toolchain"
+      ],
+      "project_dependencies": [
+        "Ivan-VHS/Reaper"
+      ],
+      "purpose": "Explicitly configured build and validation coordinator for local projects and CI jobs.",
+      "prerequisites": [
+        "Versioned build-job manifest with allowlisted targets and resource limits.",
+        "Pinned toolchain identity, reproducible environment and artifact metadata.",
+        "Isolated execution backend for untrusted inputs, test and provenance collection."
+      ],
+      "outputs": [
+        "Reproducible build plans and per-target test reports.",
+        "Artifact inventory, digests and provenance records."
+      ],
+      "host_technology_options": [
+        "Existing GitHub Actions workflows remain the actual CI execution mechanism until a local service exists.",
+        "Reaper native compiler maturity is partial; external compilers require explicit project build contracts."
+      ],
+      "safety_boundary": "User-space only; no implicit shell execution, dependency download, signing-key access, untrusted builds or release publication."
+    }
+  ],
+  "integration_invariants": [
+    "DuckOS and Reaper remain canonical OS and language names; component labels never rename repositories or public products.",
+    "Reaper owns language and policy semantics; DuckOS owns privileged kernel operations, service lifecycle and native enforcement.",
+    "No service is a runnable microservice until process isolation, service lifecycle, authenticated IPC and kernel-enforced capabilities exist.",
+    "Cross-repository exchanges use existing versioned contracts or reviewed schemas with bounded payloads, provenance and typed failure states.",
+    "Missing, stale, unsupported or invalid providers remain explicit; measurements and execution results are never invented.",
+    "Default behavior is local-first and read-only; network access, process execution and privileged hardware actions require scoped authorization.",
+    "Linux-specific facilities are optional host adapters and do not silently become DuckOS kernel dependencies.",
+    "Source, tests, CI output and target verification determine maturity; catalogs and architecture documents do not prove runtime behavior."
+  ]
+}
