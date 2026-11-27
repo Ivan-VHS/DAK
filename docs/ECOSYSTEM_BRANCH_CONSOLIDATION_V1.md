@@ -230,7 +230,7 @@ Known already-merged parents were resolved:
 - DAK #167 and #175 are based on the head branch of merged PR #161. They still need a compatibility-aware restack/retarget onto the current mainline before merge.
 - Reaper #366 is based on the head branch of merged PR #362. Its descendants remain stacked and need sequential restacking after each accepted parent.
 
-One DAK base remains without a matching open-PR head or verified merged-PR parent in this live pass: `feat/mora-native-shell` (base of DAK #174). Its provenance must be established from branch/commit history before #174 is advanced.
+DAK #174's base `feat/mora-native-shell` is confirmed as the head branch of merged PR #159 (merge commit `c4b1e43df08a02f779dcee97d74c8f21411b67e9`). Its provenance is resolved; it still needs a compatibility-aware restack onto the current mainline.
 
 The complete live edge list is visible in the PR metadata; the key stacked chains remain:
 - DAK #1 → #5 → (#8 → #18, #98); #161 → (#167 → #168, #175); #177 → #178 → #179; #165 → #172; #67 → #74.
