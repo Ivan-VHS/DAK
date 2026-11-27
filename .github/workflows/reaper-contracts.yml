@@ -32,12 +32,14 @@ jobs:
             PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$source"
           done < <(find "$GITHUB_WORKSPACE/DuckOS/duckos" -type f -name '*.rpr' -print0)
 
-      - name: Execute DABI64, capability and bounded IPC contracts
+      - name: Execute DABI64, capability, neural admission and bounded IPC contracts
         run: |
           set -euo pipefail
           export PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper"
           python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/kernel/dabi64.rpr"
           python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/security/capability_broker.rpr"
+          python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/ai/neural_service.rpr" | tee neural-service.txt
+          grep -qx "DAK_REAPER_NEURAL_SERVICE:PASS" neural-service.txt
           python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/services/ipc_contract.rpr"
       - name: Run system contract suite with tree-walk engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
