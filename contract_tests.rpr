@@ -451,6 +451,7 @@ emit "DUCKOS_REAPER_CONTRACTS_OK"
 # DAK application catalog, aliases, request admission and lifecycle.
 import "applications/runtime.rpr" as applications
 import "applications/domain_contracts.rpr" as application_domains
+import "applications/workflows.rpr" as application_workflows
 
 assert(applications["catalog_valid"](), "the reconciled DAK application catalog contains 45 unique descriptors")
 assert(size(applications["app_catalog"]()) == 45, "all confirmed DAK application descriptors are registered")
@@ -543,3 +544,36 @@ assert(not application_domains["payload_valid"]("po-2", ["route-1", 4, true, tru
 assert(not application_domains["payload_valid"]("exedotexe", ["pe", 2048, 512, 64, false]), "EXEdotEXE cannot authorize executable launch")
 assert(not application_domains["payload_valid"]("runtime", ["compat-1", "pe32+", "DABI64", true, true]), "Bridge cannot implicitly execute a compatibility target")
 emit "DAK_APPLICATION_DOMAIN_CONTRACTS_V1:PASS"
+
+# Registered inter-app workflows preserve endpoints, action identity, bounds and consent.
+assert(application_workflows["workflow_catalog_valid"](), "all nine specified application workflows are unique and bounded")
+assert(size(application_workflows["workflow_catalog"]()) == 9, "all nine specified app-to-app workflows are registered")
+
+make budget_event := ["budget-1", "gloverty", "kabon", "prepare_weekly_budget_summary", 1024, true, "budget-idem-1", 1]
+make event_memory := ["memory-1", "cockos", "kavun", "add_to_event_slice", 4096, true, "memory-idem-1", 1]
+make browser_transfer := ["tabs-1", "po", "unify", "transfer_tabs_to_paired_device", 2048, true, "tabs-idem-1", 1]
+make clip_transfer := ["clip-1", "illidia", "unify", "transfer_clip_to_paired_device", 8192, true, "clip-idem-1", 1]
+make capture_to_orgze := ["capture-1", "poi", "orriganize", "add_capture_to_project_list", 512, true, "capture-idem-1", 1]
+make album_to_kavun := ["album-1", "olaab", "kavun", "open_selected_media_collection", 256, true, "album-idem-1", 1]
+make capture_to_card := ["card-1", "poi", "poi-2", "create_knowledge_card_from_selected_text", 1024, true, "card-idem-1", 1]
+make game_to_inspector := ["game-inspect-1", "gamecharager", "exedotexe", "request_read_only_executable_inspection", 512, true, "game-idem-1", 1]
+make rhythm_to_audio := ["rhythm-1", "concrete-thump", "cockos", "hand_off_bpm_and_swing_metadata", 128, true, "rhythm-idem-1", 1]
+
+assert(application_workflows["workflow_event_valid"]("automation.weekly-budget-summary.v1", budget_event), "Gloverty to Ka-bon workflow is valid")
+assert(application_workflows["workflow_event_valid"]("media.event-memory-assembly.v1", event_memory), "Cockos to Kavun workflow is valid")
+assert(application_workflows["workflow_event_valid"]("continuity.browser-tabs.v1", browser_transfer), "Po to Unify workflow is valid")
+assert(application_workflows["workflow_event_valid"]("continuity.game-clips.v1", clip_transfer), "Illidia to Unify workflow is valid")
+assert(application_workflows["workflow_event_valid"]("planning.poi-to-orriganize.v1", capture_to_orgze), "Poi to ORGze workflow is valid")
+assert(application_workflows["workflow_event_valid"]("media.olaab-to-kavun.v1", album_to_kavun), "Olaab to Kavun workflow is valid")
+assert(application_workflows["workflow_event_valid"]("knowledge.poi-to-poi-2.v1", capture_to_card), "Poi to Poi-2 workflow is valid")
+assert(application_workflows["workflow_event_valid"]("gaming.gamecharager-to-exedotexe.v1", game_to_inspector), "GameCharager to EXEdotEXE workflow is valid")
+assert(application_workflows["workflow_event_valid"]("audio.concrete-thump-to-cockos.v1", rhythm_to_audio), "Concrete Thump to Cockos workflow is valid")
+
+make unconsented_budget := ["budget-2", "gloverty", "kabon", "prepare_weekly_budget_summary", 1024, false, "budget-idem-2", 1]
+make misrouted_budget := ["budget-3", "gloverty", "unify", "prepare_weekly_budget_summary", 1024, true, "budget-idem-3", 1]
+make oversized_budget := ["budget-4", "gloverty", "kabon", "prepare_weekly_budget_summary", 8192, true, "budget-idem-4", 1]
+assert(not application_workflows["workflow_event_valid"]("automation.weekly-budget-summary.v1", unconsented_budget), "workflow rejects missing consent")
+assert(not application_workflows["workflow_event_valid"]("automation.weekly-budget-summary.v1", misrouted_budget), "workflow rejects an unexpected recipient")
+assert(not application_workflows["workflow_event_valid"]("automation.weekly-budget-summary.v1", oversized_budget), "workflow rejects payloads above its bound")
+assert(not application_workflows["workflow_event_valid"]("unknown.workflow.v1", budget_event), "unknown workflow IDs are rejected")
+emit "DAK_APPLICATION_WORKFLOWS_V1:PASS"
