@@ -6,6 +6,10 @@ DuckOS is a Reaper-first operating-system implementation. Reaper owns the source
 
 The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry bridge now provides the privileged firmware boundary needed for an experimental bootable stage-0 image; it translates Limine handoff data into the existing Boot Info v1 contract. It does not make the Reaper reference policies into a scheduler or kernel runtime.
 
+## Cross-repository integration graph
+
+The four peer repositories remain independent Git submodules pinned at exact commits. The machine-readable map is [integration-graph.v1.json](../federation/integration-graph.v1.json), validated by [validate_ecosystem.mjs](../tools/validate_ecosystem.mjs) in repository-federation CI. The graph distinguishes working host interoperability, a Reaper policy adapter that still requires trusted native ingestion, and documented interfaces without a consumer. A submodule checkout or release payload is not evidence of kernel integration.
+
 ## Layer model
 
 | Layer | Responsibility | Current state |
@@ -21,7 +25,7 @@ The policy layer remains Reaper-first. A narrow freestanding C11 x86_64 entry br
 | Service supervisor | finite restart budget | policy implemented; process manager pending |
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
-| Telemetry | bounded samples and threshold-based alerts | sample policy implemented; sensor collection pending |
+| Telemetry | bounded system samples plus an OPlague GPU telemetry policy adapter | normalized GPU records become device-labelled monotonic samples; trusted JSON ingest, native sensors and non-NVIDIA providers remain pending |
 | Desktop | Imperial Noir & Glass Mora tokens; Reaper-first window, taskbar, session, notification and sandbox policies; Qt 6 Widgets host-native shell | Qt host windows and Reaper reference policies are implemented; kernel-owned compositor/renderer and capability enforcement remain pending |
 
 ## Startup contract
