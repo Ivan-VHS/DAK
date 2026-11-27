@@ -32,7 +32,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
-      REQUIRED_WORKFLOWS: '["DuckOS CI","DuckOS bootstrap validation","CodeQL","Repository completeness gate","Reaper contract tests","Reaper system platform contracts","System capability profile","Prose quality"]'
+      REQUIRED_WORKFLOWS: '["Dak CI","Dak bootstrap validation","CodeQL","Repository completeness gate","Reaper contract tests","Reaper system platform contracts","System capability profile","Prose quality"]'
     steps:
       - name: Wait for every PR workflow on the exact head commit
         shell: bash
