@@ -32,6 +32,20 @@ DAK is an experimental Reaper-first operating-system project. Its current work i
 - The [interactive HTML demo](desktop/demo/index.html) runs locally; resource and device values are illustrative demo data.
 - Architecture and engineering direction: **Ivan-VHS**. See [DAK Desktop](docs/DAK_DESKTOP.md).
 
+## Contents
+
+- [System map](#system-map)
+- [What is included](#what-is-included)
+- [Federated workbenches](#federated-workbenches)
+- [Build and run native Mora](#build-and-run-native-mora)
+- [Browser reference preview](#browser-reference-preview)
+- [Build the release ISO](#build-the-release-iso)
+- [Kernel status and next layers](#kernel-status-and-next-layers)
+- [Architecture targets](#architecture-targets)
+- [Source federation and integrity](#source-federation-and-integrity)
+- [Licensing and attribution](#licensing-and-attribution)
+- [Engineering rule](#engineering-rule)
+
 ## System map
 
 ~~~mermaid
@@ -141,6 +155,12 @@ The implementation-status ledger, bootable-image guide and project evolution lad
 No LICENSE file or license declaration is present at the repository root. Do not assume MIT, Apache-2.0 or redistribution rights. A license must be selected and approved by the rights holder before distribution.
 
 Do not redistribute bundled or third-party materials outside the applicable license grants. A Git submodule pin records a source revision; it does not change ownership or license terms.
+
+## Licensing and attribution
+
+The federated workbenches remain independently licensed. Their declared license identifiers and pinned source revisions are recorded in [the repository federation manifest](federation/repositories.v1.json). Preserve each upstream repository's `LICENSE` file and applicable notices with its source; federation does not relicense or transfer ownership of those components.
+
+The DuckOS root repository currently has no root-level `LICENSE` file, so this README does not claim a single project-wide license for DuckOS-owned files or for the federated source. A root-project license remains an explicit governance decision and should be published before a common license grant is claimed.
 
 ## Engineering rule
 
