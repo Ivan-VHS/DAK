@@ -27,6 +27,7 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 ## Ecosystem and security
 
 - [Ecosystem integration](ECOSYSTEM_INTEGRATION.md) — peer repositories, source pins and adapters.
+- [Reaper neural-service admission policy v1](REAPER_NEURAL_SERVICE_POLICY_V1.md) — bounded user-space workload admission, explicit effects and the kernel-enforcement boundary.
 - [Repository federation](REPOSITORY_FEDERATION.md) — repository-level integration record.
 - [Ecosystem branch consolidation](ECOSYSTEM_BRANCH_CONSOLIDATION_V1.md) — five-repository inventory, PR dependency order, main rulesets and controlled merge procedure.
 - [BAV security bundle](BAV_SECURITY_BUNDLE_V1.md) — declarative format and planned security services; schema validation is not scanning or signature verification.
