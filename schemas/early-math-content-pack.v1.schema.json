@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ivan-VHS/DAK/blob/main/schemas/early-math-content-pack.v1.schema.json",
+  "title": "DAK early mathematics content pack v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "id",
+    "locale",
+    "title",
+    "description",
+    "activities"
+  ],
+  "properties": {
+    "schema": {
+      "const": "duckos.early-math-content-pack.v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 80
+    },
+    "locale": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$",
+      "maxLength": 16
+    },
+    "title": {
+      "$ref": "#/$defs/contentText",
+      "maxLength": 160
+    },
+    "description": {
+      "$ref": "#/$defs/contentText",
+      "maxLength": 600
+    },
+    "activities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 512,
+      "items": {
+        "$ref": "#/$defs/activity"
+      }
+    }
+  },
+  "$defs": {
+    "contentText": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!.*(?:https?://|javascript:|data:|<script)).*$"
+    },
+    "shortText": {
+      "$ref": "#/$defs/contentText",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "activity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "domain",
+        "age_months",
+        "objective",
+        "materials",
+        "setup",
+        "steps",
+        "prompts",
+        "adaptations",
+        "observations",
+        "duration_hint_minutes",
+        "safety"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 80
+        },
+        "title": {
+          "$ref": "#/$defs/contentText",
+          "maxLength": 160
+        },
+        "domain": {
+          "enum": [
+            "attributes_classification",
+            "counting_cardinality",
+            "number_relations",
+            "operations_part_whole",
+            "geometry",
+            "spatial_reasoning",
+            "measurement_time",
+            "patterns_logic"
+          ]
+        },
+        "age_months": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimum",
+            "maximum"
+          ],
+          "properties": {
+            "minimum": {
+              "type": "integer",
+              "minimum": 12,
+              "maximum": 84
+            },
+            "maximum": {
+              "type": "integer",
+              "minimum": 12,
+              "maximum": 84
+            }
+          }
+        },
+        "objective": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/$defs/shortText"
+          }
+        },
+        "materials": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/shortText"
+          }
+        },
+        "setup": {
+          "$ref": "#/$defs/shortText"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "$ref": "#/$defs/shortText"
+          }
+        },
+        "prompts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/shortText"
+          }
+        },
+        "adaptations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/shortText"
+          }
+        },
+        "observations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/shortText"
+          }
+        },
+        "duration_hint_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15
+        },
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "adult_supervision",
+            "hazards",
+            "notes"
+          ],
+          "properties": {
+            "adult_supervision": {
+              "enum": [
+                "none",
+                "nearby",
+                "direct",
+                "constant"
+              ]
+            },
+            "hazards": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "none_known",
+                  "small_parts",
+                  "water",
+                  "food_allergens",
+                  "outdoor_materials",
+                  "household_objects"
+                ]
+              }
+            },
+            "notes": {
+              "$ref": "#/$defs/shortText"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "safety": {
+                "properties": {
+                  "hazards": {
+                    "contains": {
+                      "const": "water"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "safety": {
+                "properties": {
+                  "adult_supervision": {
+                    "const": "constant"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "safety": {
+                "properties": {
+                  "hazards": {
+                    "contains": {
+                      "enum": [
+                        "small_parts",
+                        "food_allergens"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "safety": {
+                "properties": {
+                  "adult_supervision": {
+                    "enum": [
+                      "direct",
+                      "constant"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
