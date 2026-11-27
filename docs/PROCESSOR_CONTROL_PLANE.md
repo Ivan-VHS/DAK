@@ -1,6 +1,6 @@
 # DAK Processor Control Plane v1
 
-**Status:** Reaper policy contracts plus a bounded native C11 scheduler, x86_64 CPU probe and general-register context-switch primitive. The boot path now probes the bootstrap CPU and marks only BSP 0 online in the scheduler. It still does not run a preemptive or SMP scheduler.  
+**Status:** Reaper policy contracts plus a bounded native C11 scheduler, x86_64 CPU probe and general-register context-switch primitive. Stage 1 ISO has passed QEMU BIOS and UEFI boot checks; boot initializes and probes only BSP 0. It still does not run a preemptive or SMP scheduler.  
 **Primary target:** x86_64, Intel and AMD. Elbrus remains a compatibility track, not a claimed boot target.
 
 ## Scope
@@ -36,7 +36,7 @@ The scheduler is a bounded native core, not yet a production preemptive SMP sche
 - `kernel/arch/x86_64/context.S` provides a real x86_64 context-switch primitive, saving/restoring the ABI-preserved integer registers, RFLAGS and stack pointer.
 - `duckos_x86_64_scheduler_platform` supplies the x86_64 scheduler callbacks for interrupt save/restore and the assembly context switch. Its interrupt helpers are privileged and are intended for ring 0 only.
 - Hosted C tests exercise scheduler admission, topology generations, selection, drain and the assembly context-switch primitive.
-- The Stage 1 ISO build script compiles and links the scheduler, CPU probe and context-switch objects. CMake exposes a native processor runtime target and corresponding tests.
+- The Stage 1 ISO build script compiles and links the scheduler, CPU probe and context-switch objects. The bootstrap path initializes the bounded scheduler for BSP 0 and prints the read-only CPUID profile. QEMU validated the produced Stage 1 image through both BIOS and UEFI; this is boot validation, not SMP qualification. CMake exposes a native processor runtime target and corresponding tests.
 
 The context-switch primitive is integer-register + RFLAGS v1. It does not yet save/restore FPU/SSE/AVX state, debug registers, full interrupt frames or address-space state. The bootstrap scheduler state and read-only CPUID probe are initialized from `kernel/boot/entry.c`; only one CPU descriptor is admitted (BSP 0). The scheduler does not yet dispatch boot tasks or perform a context switch from the boot path; compiling the switch primitive into the ELF is not equivalent to running it. The current scheduler uses a bounded shared ready table protected by one spinlock; per-CPU run queues and lock-free/work-stealing paths remain future optimization work.
 
@@ -88,7 +88,7 @@ The intended live-update pipeline is immutable build â†’ static/type/IR checks â
 
 ## Current implementation boundary
 
-The existing Stage 1 boot path validates Limine handoff data, early memory and bootstrap GDT/TSS/exception gates. The new processor objects are compiled and linked into the x86_64 ELF by the ISO script, but the boot entry still does not initialize the scheduler or start application processors. There is no production SMP execution, preemptive context switching, FPU/XSAVE context preservation, APIC/IPI route, kernel PMU or power driver, hardware debug engine or live kernel patch implementation.
+The existing Stage 1 boot path validates Limine handoff data, early memory and bootstrap GDT/TSS/exception gates. The boot entry now initializes one scheduler descriptor for BSP 0 and runs a read-only CPUID probe. The produced ISO has passed QEMU BIOS and UEFI boot checks. The boot entry still does not dispatch a task or start application processors. There is no production SMP execution, timer-driven preemptive scheduling, FPU/XSAVE context preservation, APIC/IPI route, kernel PMU or power driver, hardware debug engine or live kernel patch implementation.
 
 ## Acceptance gates
 
