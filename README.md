@@ -1,153 +1,117 @@
-# DAK — Reaper-first operating-system project
+# Duck — Reaper-first operating-system project
 
 [English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)
 
-> Experimental x86_64 system foundation: a QEMU-verified Stage 1 boot path, Reaper policy contracts and a separate host-native desktop shell.
+[![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native desktop](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20desktop)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
-**Specification**
+> An experimental x86_64 system foundation: a QEMU-verified Stage 1 boot path, Reaper policy contracts and a separate host-native desktop shell.
 
-| Field | Current record |
-|---|---|
-| Repository | [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK) |
-| Project status | Experimental; Stage 1 foundation |
-| Product version | No unified DAK release version declared |
-| Native boot target | x86_64, Linux build host, Limine BIOS/UEFI image |
-| Policy language | Reaper; reference contracts, native enforcement incomplete |
-| Boot bridge | C11 freestanding platform boundary |
-| Host desktop | C++17 / optional Qt 6 Widgets 6.4+ |
-| Tooling | CMake 3.21+, Python 3.10+, Node.js 22+ |
-| License | No root LICENSE file; redistribution terms are not declared |
-| Code of Conduct | Not published (no root `CODE_OF_CONDUCT.md`) |
-| Last documentation review | 2026-11-26 |
+**Project record:** Experimental · Stage 1 boot foundation · x86_64 / Limine BIOS+UEFI · Reaper-first architecture direction · host shell C++17 / optional Qt 6 Widgets 6.4+ · no unified OS release version · **Documentation reviewed:** 2026-11-27 UTC
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system and desktop architecture overview" width="100%"></p>
-
-## Contents
-
-- [Purpose and scope](#purpose-and-scope)
-- [Architecture](#architecture-and-data-flow)
-- [Current implementation](#implementation-status)
-- [Build and verification](#build-and-verification)
-- [Interfaces and ecosystem](#interfaces-and-ecosystem)
-- [Limitations and trust boundaries](#limitations-and-trust-boundaries)
-- [Documentation and governance](#documentation-and-governance)
-- [History and licensing](#history-and-licensing)
+<p align="center"><img src="assets/readme/duckos-overview.svg" alt="Duck system and host desktop architecture overview" width="100%"></p>
 
 ## Purpose and scope
 
-DAK is an experimental operating-system project with three distinct execution surfaces: a freestanding x86_64 Stage 1 kernel foundation, Reaper reference policy contracts, and a host-native desktop prototype. They are not yet one integrated operating-system session.
+Duck is an experimental operating-system project, not yet a complete installable desktop OS. Three execution surfaces must be kept distinct:
 
-The current boot path validates the firmware handoff and Boot Info v1, allocates and clears one early 4 KiB physical frame, prints a serial success marker and halts. The desktop shell runs as an application on the host OS; it is not started by the kernel.
+1. **Kernel Stage 1:** a freestanding x86_64 boot foundation that validates the Limine handoff and Boot Info v1, exercises early physical-frame allocation and reports its boot marker before halting.
+2. **Reaper policy track:** reference subsystem contracts and executable policy tests. Native kernel enforcement and a freestanding Reaper compiler/backend are not yet delivered.
+3. **Host desktop:** a separate C++17 / Qt 6 Widgets application whose windows are managed by the host operating system. It is not launched by the Stage 1 kernel.
 
-## Architecture and data flow
+The current boot bridge is a narrow C11 freestanding platform boundary. Reaper remains the intended first-class language and policy layer; reference-runtime success does not prove native compiler support, kernel privilege or hardware access.
 
-```mermaid
-flowchart TB
-  subgraph BOOT["Native x86_64 Stage 1"]
-    F["Limine BIOS / UEFI handoff"] --> V["Boot Info v1 validation"]
-    V --> A["Early 4 KiB frame allocation"]
-    A --> H["Serial marker and halt"]
-  end
-  subgraph POLICY["Reaper policy layer"]
-    R["Reference subsystem contracts"] --> T["Contract tests"]
-    T -.-> K["Native kernel enforcement pending"]
-  end
-  subgraph HOST["Separate host application"]
-    Q["C++17 / optional Qt 6 shell"] --> W["Host-managed windows"]
-    B["Browser reference preview"]
-  end
-  BOOT -.->|"OS session integration pending"| HOST
-```
+## Current implementation
 
-The native boot bridge is deliberately narrow. Reaper owns the policy/reference layer; host tools and companion applications remain separate processes and repositories until the kernel has process, syscall, filesystem and capability enforcement.
+### Boot and kernel foundation
 
-## Implementation status
+- x86_64 Stage 1 uses the pinned Limine v12.11.1 BIOS/UEFI path and validates Boot Info v1.
+- The early physical-frame allocator selects validated usable memory, allocates and clears one 4 KiB frame through the HHDM, then emits `DUCKOS_BOOT_OK stage=1`.
+- The exception foundation includes IDT vectors 0–31, normalized assembly stubs and fatal serial/framebuffer diagnostics. It does not enable maskable interrupts.
+- GDT/TSS/IST bootstrap structures and host contract tests are present; per-CPU setup, application-processor startup and complete interrupt/runtime integration remain unfinished.
+- Reaper currently provides 40 Core Subsystem MVP reference contracts. Native kernel enforcement is pending.
 
-| Capability | Maturity | Evidence boundary |
-|---|---|---|
-| Limine handoff and Boot Info v1 validation | Verified at Stage 1 | BIOS and UEFI QEMU checks |
-| Early physical-frame allocation | Implemented at Stage 1 | One 4 KiB frame; monotonic, no free path |
-| CPU exception IDT | Partial / QEMU marker verified | Vectors 0–31; not full interrupt routing |
-| Reaper subsystem policies | Implemented as reference contracts | Tests do not imply kernel enforcement |
-| Host-native desktop shell | Partial | Qt application; independent host windows |
-| Browser desktop preview | Reference implementation | Not a native compositor |
-| Process model, syscall ABI, virtual memory | Planned | No user process session |
-| Filesystem, service supervisor, package manager, installer | Planned | No kernel service lifecycle |
-| Driver runtime, GPU compositor, audio stack | Planned | No physical device control |
+The boot image has passed QEMU BIOS and UEFI Stage 1 checks. It still halts before starting a process or user session.
 
-The authoritative capability ledger is [Implementation Status](docs/IMPLEMENTATION_STATUS.md). The [project evolution ladder](docs/PROJECT_EVOLUTION_LADDER.md) defines evidence gates; stage names are not release certification.
+### Host-native desktop
 
-## Build and verification
+- The optional C++17 application uses Qt 6 Widgets 6.4+ and creates real top-level windows owned by the host OS.
+- The local catalogue is a discovery surface; the native launcher does not execute manifest command strings or grant device privileges.
+- Current surfaces include local draft persistence, a user-selected read-only folder view and a visual-only VentuSample waveform panel. The waveform panel does not play audio or invoke VentuSample DSP.
+- The browser preview at [`desktop/demo/index.html`](desktop/demo/index.html) is a reference prototype, not the kernel compositor or a WebView-based implementation.
 
-### Host contract tests
+### Kernel work still pending
 
-Requirements: CMake 3.21+ and a C11 compiler.
+| Area | Current boundary |
+|---|---|
+| Memory | One early frame allocation; reusable allocator/free path and page tables pending |
+| Interrupts | Exception diagnostics only; external IRQ routing and timer scheduling pending |
+| Processes | Process model, Ring 3 execution and syscall ABI pending |
+| Security | Kernel-enforced capabilities and isolated driver runtime pending |
+| Storage and services | Filesystem, package manager, init/service supervisor and installer pending |
+| Desktop hardware | Kernel-owned compositor, GPU and audio stack pending |
 
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
-cmake --build build --parallel
-ctest --test-dir build --output-on-failure
-```
+There is no complete scheduler, process isolation, persistent user session, filesystem, networking stack or kernel driver loader. Policy contracts and host application features do not substitute for these OS services.
 
-### Stage 1 boot image
+## Build and verify
 
-Build on Linux x86_64 with GCC/binutils, Git, curl, tar, xorriso and sha256sum available:
+The native build is intended for Linux x86_64. The optional host desktop needs a C++17 compiler and Qt 6 Widgets 6.4+. The release-image workflow additionally uses Git/submodules, CMake, C and C++ compilers, Python 3 build tools, Node.js 22, xorriso, curl, tar, QEMU and OVMF.
 
-```sh
-boot/build-iso.sh --work-dir build/dak-boot --output dist/DAK-Stage1-x86_64.iso
-```
+Build the native desktop when Qt is available:
 
-QEMU BIOS/UEFI verification and serial-log requirements are documented in [Bootable Image](docs/BOOTABLE_IMAGE.md). A successful Stage 1 boot is not a usable OS session.
+~~~sh
+cmake -S . -B build/dak-native -DCMAKE_BUILD_TYPE=Release -DDAK_BUILD_NATIVE_DESKTOP=ON
+cmake --build build/dak-native --target dak_desktop_native --parallel
+ctest --test-dir build/dak-native --output-on-failure
+~~~
 
-### Optional host desktop and browser preview
+Run the browser reference preview and its tests:
 
-The Qt 6 host shell is optional and requires a C++17 compiler plus Qt 6 Widgets 6.4 or newer:
-
-```sh
-cmake -S . -B build/desktop -DDAK_BUILD_NATIVE_DESKTOP=ON
-cmake --build build/desktop --parallel
-```
-
-The browser reference surface has its own Node test suite:
-
-```sh
+~~~sh
+./scripts/run-mora.sh
 npm test
-```
+npm run validate:ecosystem
+npm run test:ecosystem
+~~~
 
-The current package manifest requires Node.js 18+, while the maintained contributor/CI workflow uses Node.js 22+. None of these host commands boots the kernel into a desktop session.
+Windows PowerShell preview launcher:
 
-## Interfaces and ecosystem
+~~~powershell
+.\scripts\run-mora.ps1
+npm test
+~~~
 
-- [Boot Info v1](docs/BOOT_INFO_V1.md) — firmware handoff data and validation boundary.
-- [Core subsystem MVP](docs/CORE_MVP_V1.md) — Reaper reference contracts and native-enforcement status.
-- [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md) — pinned peer repositories and versioned interchange.
-- [Release edition](docs/RELEASE_EDITION.md) — source/tool packaging boundary; not an installable OS release.
+Build the federated Stage 1 release image:
 
-Peer projects retain their own repositories, licenses and release cycles: [Reaper](https://github.com/Ivan-VHS/Reaper), [Pytyliki](https://github.com/Ivan-VHS/Pytyliki), [OPlague](https://github.com/Ivan-VHS/OPlague), and [VentuSample](https://github.com/Ivan-VHS/VentuSample). A submodule pin or host binary is not kernel integration.
+~~~sh
+bash boot/build-release-iso.sh --work-dir build/release --output dist/Duck-Stage1-x86_64.iso
+~~~
 
-## Limitations and trust boundaries
+The release pipeline validates pinned sources, builds/tests host workbenches, packages source and notices and records SHA-256 checksums. The resulting ISO is a source-and-tools preview, not a complete installable operating system. A checksum is not a publisher signature.
 
-> **Important:** DAK is not yet a general-purpose, installable operating system. Stage 1 halts after boot validation and early frame allocation.
+## Ecosystem and interfaces
 
-Page tables, reusable memory management, process isolation, syscall dispatch, preemptive scheduling, filesystem access, service supervision, kernel-enforced capabilities, production driver loading and a native compositor are not complete. The current Reaper-native compiler is not yet a freestanding kernel compiler.
+The repository pins four independent upstream projects as submodules. Initialize the exact recorded revisions:
 
-Hardware, firmware, driver and package operations remain unimplemented or reference-only unless a specific reviewed contract says otherwise. A caller-supplied “signature verified” field is not cryptographic verification. SHA-256 checksums detect byte changes but do not authenticate a publisher.
+~~~sh
+git submodule update --init --recursive
+~~~
 
-The repository has no root LICENSE or SECURITY.md as reviewed on 2026-11-26. Do not assume redistribution rights or interpret the absence of a security policy as a security guarantee. See [Contributing](CONTRIBUTING.md) and the [documentation control policy](docs/DOCUMENTATION_CONTROL.md).
+- [Reaper](https://github.com/Ivan-VHS/Reaper) — language, reference runtime and policy contracts.
+- [Pytyliki](https://github.com/Ivan-VHS/Pytyliki) — processor inventory, bounded measurements and C ABI v1.
+- [OPlague](https://github.com/Ivan-VHS/OPlague) — read-only device/package evidence and versioned telemetry snapshots.
+- [VentuSample](https://github.com/Ivan-VHS/VentuSample) — offline audio generation and versioned sample packs.
 
-## Documentation and governance
+Reaper consumes Pytyliki C ABI v1 only through an explicit trusted library path and validates OPlague snapshot/report contracts for read-only analysis. A normalized OPlague GPU telemetry policy adapter exists; trusted native JSON ingestion and publisher/build provenance verification remain pending. A VentuSample pack-v1 consumer remains specified-only. Peer workbenches are user-space projects, not kernel modules or programs that Stage 1 can start.
 
-Start at [Documentation Index](docs/README.md) and [Information Architecture](docs/INFORMATION_ARCHITECTURE.md). The implementation-status ledger, boot guide, architecture and versioned schemas are the primary technical references.
+## Documentation and trust boundaries
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
-- [Bootable Stage 1 image](docs/BOOTABLE_IMAGE.md)
-- [Build contracts](docs/BUILD_CONTRACTS.md)
-- [Unified documentation standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md)
-- [Documentation rebaseline plan](docs/superpowers/plans/2026-11-26-documentation-rebaseline.md)
+- [Implementation status](docs/IMPLEMENTATION_STATUS.md) · [Documentation index](docs/README.md)
+- [Bootable Stage 1 image](docs/BOOTABLE_IMAGE.md) · [x86_64 exception handling](docs/X86_64_EXCEPTION_HANDLING.md)
+- [Core subsystem MVP contracts](docs/CORE_MVP_V1.md) · [Ecosystem integration](docs/ECOSYSTEM_INTEGRATION.md)
+- [Desktop architecture](docs/DAK_DESKTOP.md) · [Unified documentation standard](docs/UNIFIED_DOCUMENTATION_STANDARD.md)
+- [Project evolution ladder](docs/PROJECT_EVOLUTION_LADDER.md) · [Engineering roadmap](docs/IMPLEMENTATION_ROADMAP.md)
 
-## History and licensing
+Never treat a reference policy, a host desktop feature or an initialized submodule as kernel enforcement, native OS integration or hardware access. Imported projects keep their own history, maintainers and upstream licenses. The repository root currently has no `LICENSE` file and does not declare redistribution terms; third-party notices do not grant additional rights.
 
-The current repository records an experimental Stage 1 boot milestone and separate host-desktop work. There is no unified semantic-version release history declared for DAK; component package versions must not be mistaken for a DAK OS release. Exact build evidence and source revisions belong in the implementation ledger and release artifacts.
-
-Third-party bootloader and peer-project notices remain governed by their own upstream licenses. The release packaging workflow carries notices and source pins; it does not grant additional redistribution rights. A root project license must be selected by the rights holder before distribution terms can be stated.
+---
+<p align="center"><sub>Duck · repository: Ivan-VHS/DAK · README review 2026-11-27 UTC</sub></p>
