@@ -1,0 +1,145 @@
+# RFS-01 Duck OS adapter.
+# Records are positional, immutable snapshots. These helpers do not grant
+# process, memory, driver, device-register, filesystem, or network privileges.
+#
+# Node:   [id, layer, pressure, load_limit, integrity, noise_db, core_seed, active]
+# Link:   [id, origin, target, channel, blocked, weight]
+# Signal: [sequence, origin, payload, trusted, manufactured]
+
+export craft rfs01_node_valid(node) {
+    when size(node) != 8 {
+        yield false
+    }
+    when node[1] != "Basement" and node[1] != "Corridor" and node[1] != "Gate" and node[1] != "Skyline" and node[1] != "Horizon" {
+        yield false
+    }
+    when node[2] < 0 or node[3] <= 0 or node[4] < 0 or node[4] > 1 {
+        yield false
+    }
+    when node[5] < -160 or node[5] > 24 or node[6] == nothing {
+        yield false
+    }
+    when node[7] != true and node[7] != false {
+        yield false
+    }
+    yield true
+}
+
+export craft rfs01_link_valid(link) {
+    when size(link) != 6 {
+        yield false
+    }
+    when link[1] == nothing or link[2] == nothing or link[0] == nothing {
+        yield false
+    }
+    when link[3] != "Wire" and link[3] != "Rail" and link[3] != "Beat" and link[3] != "Current" and link[3] != "Bridge" {
+        yield false
+    }
+    when link[4] != true and link[4] != false {
+        yield false
+    }
+    when link[5] < 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft rfs01_signal_valid(signal) {
+    when size(signal) != 5 {
+        yield false
+    }
+    when signal[0] < 0 or signal[1] == nothing or size(signal[2]) > 4096 {
+        yield false
+    }
+    when signal[3] != true and signal[3] != false {
+        yield false
+    }
+    when signal[4] != true and signal[4] != false {
+        yield false
+    }
+    yield true
+}
+
+export craft rfs01_signal_is_clean(signal) {
+    yield rfs01_signal_valid(signal) and signal[3] == true and signal[4] == false
+}
+
+export craft rfs01_phase_open(node, maximum_pressure, minimum_integrity) {
+    when not rfs01_node_valid(node) {
+        yield false
+    }
+    yield node[2] <= maximum_pressure and node[4] >= minimum_integrity
+}
+
+# Diagnostic reserve index, not a physical material-strength estimate.
+export craft rfs01_pressure_reserve(node) {
+    when not rfs01_node_valid(node) {
+        yield ["err", 0]
+    }
+    make load_ratio := node[2] / node[3]
+    when load_ratio >= 1 {
+        yield ["ok", 0]
+    }
+    yield ["ok", node[4] * (1 - load_ratio)]
+}
+
+# Returns a plan; the caller commits state only after validating the result.
+export craft rfs01_pressure_forward(source, target, link) {
+    when not rfs01_node_valid(source) or not rfs01_node_valid(target) or not rfs01_link_valid(link) {
+        yield ["err", target]
+    }
+    when link[4] == true or link[1] != source[0] or link[2] != target[0] {
+        yield ["blocked", target]
+    }
+    make next_pressure := target[2] + source[2] * link[5]
+    when next_pressure > target[3] {
+        yield ["load-limit", target]
+    }
+    yield ["ok", [target[0], target[1], next_pressure, target[3], target[4], target[5], target[6], true]]
+}
+
+# dBFS attenuation for amplitude ratio 0.6: 20 * log10(0.6).
+export craft rfs01_attenuate_noise(noise_db) {
+    make next_noise := noise_db - 4.436974992327127
+    when next_noise < -160 {
+        yield -160
+    }
+    yield next_noise
+}
+
+export craft rfs01_signal_forward(source, target, link, signal) {
+    when not rfs01_node_valid(source) or not rfs01_node_valid(target) or not rfs01_link_valid(link) or not rfs01_signal_valid(signal) {
+        yield ["err", target]
+    }
+    when link[4] == true or link[1] != source[0] or link[2] != target[0] {
+        yield ["blocked", target]
+    }
+    when signal[1] != source[0] or not rfs01_signal_is_clean(signal) {
+        yield ["rejected", target]
+    }
+    yield ["ok", [target[0], target[1], target[2], target[3], target[4], rfs01_attenuate_noise(target[5]), target[6], true]]
+}
+
+# <-root restores the supplied immutable boot snapshot in full.
+export craft rfs01_restore_root(root_snapshot) {
+    when not rfs01_node_valid(root_snapshot) {
+        yield ["err", nothing]
+    }
+    yield ["ok", root_snapshot]
+}
+
+# ^core restores only the seed; all other fields remain unchanged.
+export craft rfs01_restore_core(current, root_snapshot) {
+    when not rfs01_node_valid(current) or not rfs01_node_valid(root_snapshot) {
+        yield ["err", nothing]
+    }
+    yield ["ok", [current[0], current[1], current[2], current[3], current[4], current[5], root_snapshot[6], current[7]]]
+}
+
+export craft rfs01_runtime_limits_valid(node_count, link_count, frame_count, cycles) {
+    yield node_count >= 1 and node_count <= 4096 and link_count >= 0 and link_count <= 16384 and frame_count >= 0 and frame_count <= 65536 and cycles >= 1 and cycles <= 108
+}
+
+export craft rfs01_contract_version() {
+    yield "rfs-01.duckos.v1"
+}
