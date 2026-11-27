@@ -1,0 +1,11 @@
+import "duckos/runtime/rfs01.rpr" as rfs
+
+make basement := ["basement", "Basement", 40, 100, 0.92, -18, "core:basement", false]
+make corridor := ["corridor", "Corridor", 4, 80, 0.88, -12, "core:corridor", false]
+make bridge := ["bridge-01", "basement", "corridor", "Bridge", false, 0.1]
+make clean_signal := [1, "basement", "block pulse", true, false]
+
+emit rfs["rfs01_node_valid"](basement)
+emit rfs["rfs01_link_valid"](bridge)
+emit rfs["rfs01_signal_forward"](basement, corridor, bridge, clean_signal)
+emit rfs["rfs01_pressure_reserve"](basement)
