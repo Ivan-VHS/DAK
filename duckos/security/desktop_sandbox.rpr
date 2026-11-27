@@ -1,0 +1,110 @@
+# Application admission policy for the native desktop.
+# Manifest: [app_id, version, signer_id, sandbox_id, install_state, memory_limit_bytes, cpu_quota_percent, network_mode, requested_capabilities].
+# Signature and catalog booleans must come from independent native verifiers; this file does not verify cryptography.
+
+export craft manifest_valid(manifest) {
+    when kind(manifest) != "list" or size(manifest) != 9 {
+        yield false
+    }
+    when kind(manifest[0]) != "text" or kind(manifest[1]) != "text" or kind(manifest[2]) != "text" or kind(manifest[3]) != "text" or kind(manifest[4]) != "text" {
+        yield false
+    }
+    when kind(manifest[5]) != "number" or kind(manifest[6]) != "number" or kind(manifest[7]) != "text" or kind(manifest[8]) != "list" {
+        yield false
+    }
+    when manifest[0] == "" or manifest[1] == "" or manifest[2] == "" or manifest[3] == "" {
+        yield false
+    }
+    when manifest[4] != "installed" and manifest[4] != "staged" and manifest[4] != "revoked" {
+        yield false
+    }
+    when manifest[5] < 1048576 or manifest[5] > 1073741824 {
+        yield false
+    }
+    when manifest[6] < 1 or manifest[6] > 100 {
+        yield false
+    }
+    when manifest[7] != "disabled" and manifest[7] != "brokered" {
+        yield false
+    }
+    yield size(manifest[8]) <= 64
+}
+
+export craft capability_subset(requested, granted) {
+    when kind(requested) != "list" or kind(granted) != "list" or size(requested) > 64 or size(granted) > 128 {
+        yield false
+    }
+    each requested_capability in requested {
+        vary found := false
+        each granted_capability in granted {
+            when requested_capability == granted_capability {
+                change found := true
+            }
+        }
+        when not found {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft has_capability(capabilities, requested) {
+    when kind(capabilities) != "list" or kind(requested) != "text" or requested == "" {
+        yield false
+    }
+    vary found := false
+    each capability in capabilities {
+        when capability == requested {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft admission(manifest, catalog_verified, signature_verified, sandbox_ready, granted_capabilities) {
+    when not manifest_valid(manifest) {
+        yield "deny-invalid-manifest"
+    }
+    when catalog_verified != true {
+        yield "deny-unverified-catalog"
+    }
+    when signature_verified != true {
+        yield "deny-unverified-signature"
+    }
+    when manifest[4] != "installed" {
+        yield "deny-not-installed"
+    }
+    when sandbox_ready != true {
+        yield "deny-sandbox-unavailable"
+    }
+    when not capability_subset(manifest[8], granted_capabilities) {
+        yield "deny-capability-escalation"
+    }
+    when has_capability(manifest[8], "net.access") and manifest[7] != "brokered" {
+        yield "deny-network-policy"
+    }
+    yield "admit-policy-only"
+}
+
+export craft permission_decision(permission, granted_capabilities, explicit_approval) {
+    when kind(permission) != "text" or kind(explicit_approval) != "boolean" {
+        yield "deny-invalid-permission-request"
+    }
+    when kind(granted_capabilities) != "list" {
+        yield "deny-invalid-grant-set"
+    }
+    when permission == "" {
+        yield "deny-invalid-permission"
+    }
+    when has_capability(granted_capabilities, permission) {
+        yield "allow-existing-grant"
+    }
+    when explicit_approval == true {
+        yield "approval-requires-broker-commit"
+    }
+    yield "deny-ungranted"
+}
+
+export craft child_grants_valid(parent_grants, child_grants) {
+    yield capability_subset(child_grants, parent_grants)
+}

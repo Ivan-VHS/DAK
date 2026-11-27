@@ -1,0 +1,89 @@
+# Bounded desktop notification policy.
+# Notification: [id, owner_pid, priority, created_us, ttl_us, title, body, system].
+# The sender role must come from authenticated host process identity, never from this record.
+
+export craft descriptor_valid(notification) {
+    when kind(notification) != "list" or size(notification) != 8 {
+        yield false
+    }
+    when kind(notification[0]) != "number" or kind(notification[1]) != "number" or kind(notification[2]) != "number" or kind(notification[3]) != "number" or kind(notification[4]) != "number" {
+        yield false
+    }
+    when kind(notification[5]) != "text" or kind(notification[6]) != "text" or kind(notification[7]) != "boolean" {
+        yield false
+    }
+    when notification[0] <= 0 or notification[1] <= 0 or notification[2] < 0 or notification[2] > 3 {
+        yield false
+    }
+    when notification[3] <= 0 or notification[4] <= 0 or notification[4] > 120000000 {
+        yield false
+    }
+    when notification[5] == "" or size(notification[5]) > 120 or size(notification[6]) > 2048 {
+        yield false
+    }
+    yield notification[7] == true or notification[7] == false
+}
+
+export craft admission(notification, sender_is_system, notifications_granted) {
+    when not descriptor_valid(notification) {
+        yield "deny-invalid-notification"
+    }
+    when kind(sender_is_system) != "boolean" or kind(notifications_granted) != "boolean" {
+        yield "deny-invalid-authority-evidence"
+    }
+    when notifications_granted != true {
+        yield "deny-capability"
+    }
+    when kind(sender_is_system) != "boolean" {
+        yield "deny-invalid-authority-evidence"
+    }
+    when notification[7] == true and sender_is_system != true {
+        yield "deny-system-spoof"
+    }
+    when notification[7] != sender_is_system {
+        yield "deny-origin-mismatch"
+    }
+    when notification[2] == 3 and sender_is_system != true {
+        yield "deny-system-priority"
+    }
+    yield "admit-policy-only"
+}
+
+export craft layer(notification, sender_is_system) {
+    when not descriptor_valid(notification) {
+        yield "invalid"
+    }
+    when notification[7] != sender_is_system {
+        yield "deny-origin-mismatch"
+    }
+    when notification[2] == 3 and sender_is_system != true {
+        yield "deny-system-priority"
+    }
+    when notification[7] == true and notification[2] == 3 and sender_is_system == true {
+        yield "system-reserved"
+    }
+    when notification[2] >= 2 {
+        yield "attention-layer"
+    }
+    yield "notification-layer"
+}
+
+export craft expired(notification, now_us) {
+    when not descriptor_valid(notification) or kind(now_us) != "number" or now_us < notification[3] {
+        yield false
+    }
+    yield now_us - notification[3] >= notification[4]
+}
+
+export craft queue_decision(queue_size, queue_capacity) {
+    when kind(queue_size) != "number" or kind(queue_capacity) != "number" {
+        yield "invalid"
+    }
+    when queue_size < 0 or queue_capacity <= 0 or queue_size > queue_capacity {
+        yield "invalid"
+    }
+    when queue_size == queue_capacity {
+        yield "backpressure"
+    }
+    yield "accept"
+}

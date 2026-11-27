@@ -26,7 +26,7 @@ The four peer repositories remain independent Git submodules pinned at exact com
 | Semantic store | graph-reference checks, journal sequence and deterministic LWW register | contract implemented; BLAKE3 and persistent CRDT graph pending |
 | Three media | choose CPU, accelerator or node-mesh policy | deterministic selector implemented; execution backends pending |
 | Telemetry | bounded system samples plus an OPlague GPU telemetry policy adapter | normalized GPU records become device-labelled monotonic samples; trusted JSON ingest, native sensors and non-NVIDIA providers remain pending |
-| Desktop | Black/white/yellow Mora design contract, Reaper UI policies and a Qt 6 Widgets host-native shell | host-native app windows are separate from the still-pending DuckOS compositor/renderer |
+| Desktop | Imperial Noir & Glass Mora tokens; Reaper-first window, taskbar, session, notification and sandbox policies; Qt 6 Widgets host-native shell | Qt host windows and Reaper reference policies are implemented; kernel-owned compositor/renderer and capability enforcement remain pending |
 
 ## Startup contract
 

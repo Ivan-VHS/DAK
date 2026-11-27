@@ -53,7 +53,7 @@ The Qt application is native to the host OS. It is not a kernel-owned DuckOS com
 - [x] Deterministic last-writer-wins register merge.
 - [x] CPU / accelerator / node-mesh policy selector and thermal profile.
 - [x] Bounded telemetry history and warning/critical classification.
-- [x] Tri-Color Duck palette, reduced-motion policy and frame-budget classification.
+- [x] Imperial Noir & Glass semantic palette, reduced-motion policy and frame-budget classification.
 - [x] Reaper contract suite for tree-walk and VM execution, wired into GitHub Actions.
 
 ## Partial or external boundaries
@@ -167,10 +167,27 @@ The native Tk tool is a user-space utility. It is not a compositor, a boot-time 
 
 The shared [Engineering Evolution and Capability Completeness Standard](ENGINEERING_EVOLUTION_FRAMEWORK.md) applies to every Mora and DuckOS capability. A feature is complete only for its explicitly declared scope and only when source, tests, CI and documentation agree.
 
-- Mora browser-shell behavior, local preferences and catalog entries are tracked separately from native DuckOS services.
+- Mora now has a Qt 6 Widgets host-native adapter and retains the browser preview separately; neither is a kernel-owned desktop session. The Reaper native bridge is a policy-only event envelope pending freestanding runtime, DABI64/IPC transport and kernel service integration.
 - User-space maintenance utilities are not kernel services, a compositor, a bootloader, a driver manager or proof of a bootable operating-system image.
 - Catalogued applications and proposed DAK services remain specifications until executable implementations and integration tests exist.
 - Kernel, boot, process, filesystem, compositor, driver and capability-enforcement work stays partial or planned until the relevant native code and target-platform tests are present.
 - Each release review must trace requirement → design → source → tests → CI → documentation → versioned contract and retain rollback or recovery evidence for risky changes.
 
 The existing implemented/partial boundary list above remains authoritative. This standard does not promote any partial or planned subsystem automatically.
+
+
+
+## Duck Desktop policy core — 2026-11-25
+
+- [x] Deterministic Reaper window records, geometry bounds, modal-focus rules, reserved z-order layers, resize policy and bounded tile metrics.
+- [x] Taskbar entry validation, system-process hiding, pinned/running visibility, per-app window grouping and workspace-aware activation decisions.
+- [x] Desktop session lifecycle, workspace-switch authorization and snapshot restore admission policy.
+- [x] Notification admission, anti-spoofing, system-priority separation, expiry and bounded queue/backpressure rules.
+- [x] App sandbox admission policy with catalog/signature evidence gates, capability-subset checks, network broker requirement and explicit permission approval boundary.
+- [x] Replaced the earlier flat palette tokens with the Imperial Noir & Glass semantic palette and status roles; reduced-motion behavior remains policy-controlled.
+- [x] Reaper contract tests added to the existing tree-walk and VM CI suite.
+- [ ] Native DABI64/IPC host adapter, trusted capability broker and process-backed window lifecycle.
+- [ ] Boot-time desktop session, compositor, input dispatch, notification service, persistent profiles and real Jora launch adapter.
+- [ ] Software framebuffer presentation and GPU compositor, hotplug recovery, accessibility bridge and target-hardware qualification.
+
+The new policy core is executable through the Reaper reference runtime, but it is not yet a native desktop session. Signature/catalog verification booleans must be produced by independent native verifiers; policy functions do not perform cryptography or enforce address-space isolation. Stage 1 still halts before process and service startup. See the Reaper-first desktop policy architecture document.
