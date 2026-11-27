@@ -1,6 +1,6 @@
-# DuckOS Imperial Noir & Glass design-token policy.
-# Surfaces stay monochrome; yellow is the semantic brand accent.
-# Green, red and blue are reserved for status meaning.
+# DAK single-palette design contract — Ivan-VHS.
+# Imperial Noir & Glass: black canvas, white information, restrained warm gold.
+# Status meaning remains separate: green, red and blue.
 
 export craft palette_ratios() {
     yield [65, 25, 10]
@@ -18,23 +18,26 @@ export craft role_valid(role) {
 }
 
 export craft palette_color(role) {
+    when role == "alert" {
+        yield "#FFD700"
+    }
     when not role_valid(role) {
         yield ""
     }
-    when role == "canvas" {
+    when role == "canvas" or role == "page" {
         yield "#050505"
     }
-    when role == "shell" or role == "page" {
+    when role == "shell" {
         yield "#070707"
     }
     when role == "surface" {
-        yield "#111111"
+        yield "#101010"
     }
     when role == "elevated" {
-        yield "#1B1B1B"
+        yield "#171717"
     }
     when role == "border" {
-        yield "#333333"
+        yield "#343434"
     }
     when role == "text-primary" {
         yield "#FFFFFF"
@@ -46,7 +49,7 @@ export craft palette_color(role) {
         yield "#FFD700"
     }
     when role == "focus" {
-        yield "#FFE45C"
+        yield "#FFE6A3"
     }
     when role == "on-accent" {
         yield "#050505"
@@ -71,7 +74,7 @@ export craft status_color(status) {
     when status == "info" {
         yield "#3B82F6"
     }
-    yield "#FFFFFF"
+    yield ""
 }
 
 export craft theme_mode_valid(mode) {
@@ -114,5 +117,5 @@ export craft motion_profile(reduced_motion) {
     when reduced_motion {
         yield "static"
     }
-    yield "spring-with-frame-budget"
+    yield "fluid"
 }
