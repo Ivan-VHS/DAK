@@ -1,0 +1,41 @@
+# DAK processor policy conformance tests.
+# These fixtures validate policy only; they do not start application processors.
+
+import "processor.rpr" as processor
+
+make digest := "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+make snapshot := [
+    "dak.processor-snapshot.v1", "fixture/dak-cpu", "x86_64", "genuineIntel",
+    1, 1, 8, 16, 16, 1, ["sse2", "avx2"], "fixture://cpu"
+]
+make core := [0, 0, 0, 0, "performance", "online", 2, [0, 1], "core-rev-1", 1]
+make thread := [11, 3, 120, 0, 32768, "ready", [0, 1], 1]
+make block := ["core0.vector", 0, "vector", 256, "available", "core-rev-1", 1]
+make workers := [
+    [0, "online", 4200, 20, 1],
+    [1, "online", 1800, 10, 1],
+    [2, "offline", 0, 0, 1]
+]
+make evidence := ["scheduler", 64, 64, 0, 9700, 1200, digest, "dak-ci"]
+make active := ["scheduler", 1, 0, 0, "base", digest, 1, 10, "active"]
+make candidate := ["scheduler", 1, 1, 0, "base", digest, 1, 11, "staged"]
+
+assert(processor["processor_snapshot_valid"](snapshot), "processor snapshot must be valid")
+assert(processor["core_descriptor_valid"](core, 8, 16), "online core must expose logical threads")
+assert(processor["thread_descriptor_valid"](thread, 16), "thread descriptor must pass")
+assert(processor["block_descriptor_valid"](block, 8), "execution block must be typed and bounded")
+assert(not processor["affinity_valid"]([0, 0], 16), "affinity must not contain duplicates")
+assert(processor["core_transition_valid"]("offline", "starting"), "offline core must start through startup state")
+assert(not processor["core_transition_valid"]("offline", "online"), "direct offline-to-online transition is forbidden")
+assert(processor["core_release_allowed"]([0, 0, 0, 0, "performance", "draining", 0, [], "rev", 1], 0, 0, 0, 0), "core release needs quiescence")
+assert(processor["least_loaded_cpu"](workers, [0, 1, 2]) == 1, "scheduler must choose least-loaded eligible online CPU")
+assert(processor["split_work"](100, 6) == [17, 17, 17, 17, 16, 16], "work split must conserve and balance items")
+assert(processor["ap_startup_admission"](true, false, true, true, true, true) == "reject-local-controller", "AP startup must wait for local controller")
+assert(processor["ap_startup_admission"](true, true, true, true, true, true) == "admit-native-ap-startup", "all AP startup prerequisites must be present")
+assert(processor["interrupt_route_valid"]([48, 1, "fixed", false, 1], 16), "valid interrupt destination must be accepted")
+assert(processor["verification_evidence_valid"](evidence), "complete passing evidence must be accepted")
+assert(processor["live_update_admission"](active, candidate, evidence, true, true, true, true) == "admit-stage-only", "update must stage only after all safety gates pass")
+assert(processor["live_update_admission"](active, candidate, evidence, false, true, true, true) == "defer-quiescence", "update must wait for quiescence")
+assert(processor["power_change_admission"]("frequency-cap", 3000, 800, 5000, "none") == "admit-preview-only", "unprivileged power request is preview only")
+
+emit "DAK_PROCESSOR_POLICY:PASS"
