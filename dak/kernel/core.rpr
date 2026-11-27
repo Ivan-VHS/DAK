@@ -249,6 +249,17 @@ export craft model_create(model_id, version, rule_ids, digest) {
         yield ["ERR", "model-descriptor-invalid"]
     }
     when size(digest) != 71 { yield ["ERR", "model-digest-must-be-sha256-labelled"] }
+    when digest[0] != "s" or digest[1] != "h" or digest[2] != "a" or digest[3] != "2" or digest[4] != "5" or digest[5] != "6" or digest[6] != ":" {
+        yield ["ERR", "model-digest-prefix-invalid"]
+    }
+    vary digest_index := 7
+    loop while digest_index < 71 {
+        make digit := digest[digest_index]
+        when digit != "0" and digit != "1" and digit != "2" and digit != "3" and digit != "4" and digit != "5" and digit != "6" and digit != "7" and digit != "8" and digit != "9" and digit != "a" and digit != "b" and digit != "c" and digit != "d" and digit != "e" and digit != "f" {
+            yield ["ERR", "model-digest-hex-invalid"]
+        }
+        change digest_index := digest_index + 1
+    }
     each rule_id in rule_ids {
         when rule_id < 1 or rule_id > 4294967295 { yield ["ERR", "model-rule-id-invalid"] }
     }
