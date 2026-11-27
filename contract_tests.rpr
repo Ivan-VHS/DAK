@@ -577,3 +577,4 @@ assert(not application_workflows["workflow_event_valid"]("automation.weekly-budg
 assert(not application_workflows["workflow_event_valid"]("automation.weekly-budget-summary.v1", oversized_budget), "workflow rejects payloads above its bound")
 assert(not application_workflows["workflow_event_valid"]("unknown.workflow.v1", budget_event), "unknown workflow IDs are rejected")
 emit "DAK_APPLICATION_WORKFLOWS_V1:PASS"
+assert(not application_domains["payload_valid"]("dak.files", ["read", 2, 128, false, false]), "Files rejects a source that the user did not select")
