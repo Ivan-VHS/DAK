@@ -17,6 +17,28 @@ add_library(duckos_boot_contract STATIC
     foundation/gdt_descriptor.c
     foundation/gdt_descriptor.h
 )
+add_library(duckos_processor_runtime STATIC
+    kernel/processor/scheduler.c
+    kernel/arch/x86_64/context.c
+    kernel/arch/x86_64/cpu.c
+)
+target_include_directories(duckos_processor_runtime PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/kernel/processor
+    ${CMAKE_CURRENT_SOURCE_DIR}/kernel/arch/x86_64
+)
+if(MSVC)
+    target_compile_options(duckos_processor_runtime PRIVATE /W4 /sdl /experimental:c11atomics)
+else()
+    target_compile_options(duckos_processor_runtime PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+set(DUCKOS_HAS_X86_64_CONTEXT OFF)
+if(UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+    enable_language(ASM)
+    target_sources(duckos_processor_runtime PRIVATE kernel/arch/x86_64/context.S)
+    set(DUCKOS_HAS_X86_64_CONTEXT ON)
+endif()
+
 target_include_directories(duckos_boot_contract PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/foundation
 )
@@ -76,6 +98,22 @@ if(BUILD_TESTING)
         target_compile_options(duckos_gdt_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-x86-64-gdt-tss COMMAND duckos_gdt_tests)
+
+    add_executable(duckos_processor_scheduler_tests tests/test_processor_scheduler.c)
+    target_link_libraries(duckos_processor_scheduler_tests PRIVATE duckos_processor_runtime)
+    add_test(NAME duckos-processor-scheduler COMMAND duckos_processor_scheduler_tests)
+
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+        add_executable(duckos_x86_64_cpu_tests tests/test_x86_64_cpu.c)
+        target_link_libraries(duckos_x86_64_cpu_tests PRIVATE duckos_processor_runtime)
+        add_test(NAME duckos-x86-64-cpu-probe COMMAND duckos_x86_64_cpu_tests)
+    endif()
+
+    if(DUCKOS_HAS_X86_64_CONTEXT)
+        add_executable(duckos_x86_64_context_tests tests/test_x86_64_context.c)
+        target_link_libraries(duckos_x86_64_context_tests PRIVATE duckos_processor_runtime)
+        add_test(NAME duckos-x86-64-context-switch COMMAND duckos_x86_64_context_tests)
+    endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
