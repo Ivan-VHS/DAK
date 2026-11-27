@@ -1,4 +1,4 @@
-"""Bounded, read-only PE32/PE32+ inspection for DuckOS compatibility tooling.
+"""Bounded, read-only PE32/PE32+ inspection for Dak compatibility tooling.
 
 This module parses file metadata only. It does not map executable images into
 memory, resolve imports, or execute untrusted code.
@@ -12,7 +12,7 @@ import struct
 from pathlib import Path
 from typing import Any
 
-SCHEMA = "duckos.pe-inspection.v1"
+SCHEMA = "dakos.pe-inspection.v1"
 MAX_FILE_BYTES = 256 * 1024 * 1024
 MAX_SECTIONS = 96
 MAX_IMPORTS = 4096
