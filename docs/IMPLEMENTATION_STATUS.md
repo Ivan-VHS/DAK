@@ -49,7 +49,7 @@ The Qt application is native to the host OS. It is not a kernel-owned DuckOS com
 ## DAK compact atomic core — 2026-11-28
 
 - [x] Added the compact Reaper core module at `dak/kernel/core.rpr`, composing the existing memory, VM, process, atomic-order and scheduler contracts.
-- [x] Added fixed little-endian passport serialization, CRC32C integrity checks, bounded model lifecycle, predictor guard, five-sector application preparation, explicit inter-sector grants, mandatory-step commit barrier and non-overwriting bounded journal.
+- [x] Added fixed 34-byte little-endian passports, CRC32C integrity checks, AtomicRule-to-passport binding, bounded model lifecycle, dual load/risk predictor guard, five-sector application preparation, cross-application range/ID admission, explicit inter-sector grants, terminal mandatory-step commit barrier and non-overwriting bounded journal.
 - [x] Added `dak_kernel_tests.rpr` with positive and negative contract cases and connected it to the Reaper reference-tree-walk and VM CI paths.
 - [ ] Run and review the new CI checks before marking the Reaper contract suite verified.
 - [ ] Connect passport ownership and sector ranges to the real physical frame allocator and page tables.
