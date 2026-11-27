@@ -30,180 +30,35 @@
     "claim_rule": "A Reaper policy contract is not proof of a privileged backend or hardware implementation."
   },
   "components": [
-    {
-      "id": "atomic-ordering",
-      "path": "duckos/kernel/atomic.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "syscall-abi-policy",
-      "path": "duckos/kernel/syscall.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "opaque-process-handles",
-      "path": "duckos/kernel/handles.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "thread-lifecycle",
-      "path": "duckos/kernel/threads.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "synchronization",
-      "path": "duckos/kernel/synchronization.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "x86_64-architecture",
-      "path": "duckos/kernel/arch/x86_64.rpr",
-      "contract": "implemented",
-      "backend": "partial"
-    },
-    {
-      "id": "aarch64-architecture-seam",
-      "path": "duckos/kernel/arch/aarch64.rpr",
-      "contract": "implemented",
-      "backend": "planned"
-    },
-    {
-      "id": "mmio-policy",
-      "path": "duckos/drivers/mmio.rpr",
-      "contract": "implemented",
-      "backend": "partial"
-    },
-    {
-      "id": "dma-lifecycle",
-      "path": "duckos/drivers/dma.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "ipv4-parser",
-      "path": "duckos/network/ipv4.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "udp-parser",
-      "path": "duckos/network/udp.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "tcp-state-machine",
-      "path": "duckos/network/tcp.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "dns-question-policy",
-      "path": "duckos/network/dns.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "path-policy",
-      "path": "duckos/storage/path.rpr",
-      "contract": "implemented",
-      "backend": "partial"
-    },
-    {
-      "id": "crash-journal-policy",
-      "path": "duckos/storage/journal.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "foundation-primitives",
-      "path": "duckos/runtime/foundation.rpr",
-      "contract": "implemented",
-      "backend": "partial"
-    },
-    {
-      "id": "bounded-data",
-      "path": "duckos/runtime/data.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "monotonic-clock-policy",
-      "path": "duckos/runtime/clock.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "service-dispatch",
-      "path": "duckos/services/dispatch.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "installer-preflight",
-      "path": "duckos/system/installer.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "package-transactions",
-      "path": "duckos/system/package_manager.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "ab-updater",
-      "path": "duckos/system/updater.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "build-graph-contract",
-      "path": "duckos/system/build.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "system-utilities",
-      "path": "duckos/system/utilities.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "primary-native-kernel-gate",
-      "path": "duckos/kernel/core.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "immutable-verification-snapshot",
-      "path": "duckos/kernel/verification.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "predictive-condition-guard",
-      "path": "duckos/kernel/predictor.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "mandatory-install-completion",
-      "path": "duckos/kernel/execution.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    },
-    {
-      "id": "application-code-memory-sectorization",
-      "path": "duckos/storage/sectorization.rpr",
-      "contract": "implemented",
-      "backend": "pending"
-    }
+    {"id":"atomic-ordering","path":"duckos/kernel/atomic.rpr","contract":"implemented","backend":"pending"},
+    {"id":"syscall-abi-policy","path":"duckos/kernel/syscall.rpr","contract":"implemented","backend":"pending"},
+    {"id":"opaque-process-handles","path":"duckos/kernel/handles.rpr","contract":"implemented","backend":"pending"},
+    {"id":"thread-lifecycle","path":"duckos/kernel/threads.rpr","contract":"implemented","backend":"pending"},
+    {"id":"synchronization","path":"duckos/kernel/synchronization.rpr","contract":"implemented","backend":"pending"},
+    {"id":"x86_64-architecture","path":"duckos/kernel/arch/x86_64.rpr","contract":"implemented","backend":"partial"},
+    {"id":"aarch64-architecture-seam","path":"duckos/kernel/arch/aarch64.rpr","contract":"implemented","backend":"planned"},
+    {"id":"mmio-policy","path":"duckos/drivers/mmio.rpr","contract":"implemented","backend":"partial"},
+    {"id":"dma-lifecycle","path":"duckos/drivers/dma.rpr","contract":"implemented","backend":"pending"},
+    {"id":"ipv4-parser","path":"duckos/network/ipv4.rpr","contract":"implemented","backend":"pending"},
+    {"id":"udp-parser","path":"duckos/network/udp.rpr","contract":"implemented","backend":"pending"},
+    {"id":"tcp-state-machine","path":"duckos/network/tcp.rpr","contract":"implemented","backend":"pending"},
+    {"id":"dns-question-policy","path":"duckos/network/dns.rpr","contract":"implemented","backend":"pending"},
+    {"id":"path-policy","path":"duckos/storage/path.rpr","contract":"implemented","backend":"partial"},
+    {"id":"crash-journal-policy","path":"duckos/storage/journal.rpr","contract":"implemented","backend":"pending"},
+    {"id":"foundation-primitives","path":"duckos/runtime/foundation.rpr","contract":"implemented","backend":"partial"},
+    {"id":"bounded-data","path":"duckos/runtime/data.rpr","contract":"implemented","backend":"pending"},
+    {"id":"monotonic-clock-policy","path":"duckos/runtime/clock.rpr","contract":"implemented","backend":"pending"},
+    {"id":"service-dispatch","path":"duckos/services/dispatch.rpr","contract":"implemented","backend":"pending"},
+    {"id":"installer-preflight","path":"duckos/system/installer.rpr","contract":"implemented","backend":"pending"},
+    {"id":"package-transactions","path":"duckos/system/package_manager.rpr","contract":"implemented","backend":"pending"},
+    {"id":"ab-updater","path":"duckos/system/updater.rpr","contract":"implemented","backend":"pending"},
+    {"id":"build-graph-contract","path":"duckos/system/build.rpr","contract":"implemented","backend":"pending"},
+    {"id":"system-utilities","path":"duckos/system/utilities.rpr","contract":"implemented","backend":"pending"},
+    {"id":"primary-native-kernel-gate","path":"duckos/kernel/core.rpr","contract":"implemented","backend":"pending"},
+    {"id":"immutable-verification-snapshot","path":"duckos/kernel/verification.rpr","contract":"implemented","backend":"pending"},
+    {"id":"predictive-condition-guard","path":"duckos/kernel/predictor.rpr","contract":"implemented","backend":"pending"},
+    {"id":"mandatory-install-completion","path":"duckos/kernel/execution.rpr","contract":"implemented","backend":"pending"},
+    {"id":"application-code-memory-sectorization","path":"duckos/storage/sectorization.rpr","contract":"implemented","backend":"pending"}
   ],
   "verification": {
     "source_check": "all .rpr under duckos/",
