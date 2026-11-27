@@ -7,6 +7,9 @@
 #include "limine.h"
 #include "interrupts.h"
 #include "gdt.h"
+#include "rule_epoch.h"
+#include "predictive_guard.h"
+#include "app_sector.h"
 
 #define SERIAL_PORT 0x3f8u
 #define MAX_BOOT_REGIONS DUCKOS_BOOT_MAX_MEMORY_REGIONS
@@ -69,6 +72,8 @@ static volatile uint64_t requests_end[2] = LIMINE_REQUESTS_END_MARKER;
 static duckos_memory_region boot_regions[MAX_BOOT_REGIONS];
 static struct limine_framebuffer *active_framebuffer;
 static duckos_frame_allocator early_frame_allocator;
+static dak_rule_registry active_rule_models;
+static dak_predictor install_predictor;
 static uint64_t first_frame_phys;
 
 static inline void port_out8(uint16_t port, uint8_t value) {
@@ -411,6 +416,14 @@ static int initialize_early_memory(uint32_t memory_region_count) {
     return 1;
 }
 
+
+static int initialize_kernel_integrity_core(void) {
+    /* No model is active at cold boot; install remains denied until verified publication. */
+    dak_rule_registry_init(&active_rule_models);
+    dak_predictor_init(&install_predictor);
+    return 1;
+}
+
 static void boot_failure(const char *reason) __attribute__((noreturn));
 static void boot_failure(const char *reason) {
     serial_write("DUCKOS_BOOT_ERROR ");
@@ -522,6 +535,9 @@ void _start(void) {
     if (!initialize_early_memory(info.memory_region_count)) {
         boot_failure("bootstrap physical frame allocation failed");
     }
+    if (!initialize_kernel_integrity_core()) {
+        boot_failure("native kernel-integrity core initialization failed");
+    }
 
     serial_write("firmware=");
     serial_decimal(info.flags);
@@ -532,6 +548,8 @@ void _start(void) {
     serial_write(" kernel_bytes=");
     serial_decimal(info.kernel_size);
     serial_write("\n");
+
+    serial_write("dak-kernel-integrity=initialized rule-model=empty predictor=ready DAKS=v1\n");
 
     serial_write("memory=early-frame-allocator page_size=4096 usable_pages=");
     serial_decimal(early_frame_allocator.total_pages);
