@@ -1,4 +1,4 @@
-# DuckDriver Core descriptor and resource-conflict policy.
+# DakDriver Core descriptor and resource-conflict policy.
 # Descriptors are metadata only; this module never installs or starts a driver.
 
 import "abi.rpr" as abi
