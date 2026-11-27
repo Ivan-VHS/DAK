@@ -44,6 +44,7 @@ int duckos_x86_64_context_frame_init(
     return 1;
 }
 
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
 void duckos_x86_64_scheduler_context_switch(
     void *context, uintptr_t *old_stack_pointer, uintptr_t new_stack_pointer
 ) {
@@ -53,7 +54,7 @@ void duckos_x86_64_scheduler_context_switch(
 
 uint64_t duckos_x86_64_irq_save(void *context) {
     (void)context;
-#if (defined(__x86_64__) || defined(__i386__)) && (defined(__GNUC__) || defined(__clang__))
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
     uint64_t flags;
     __asm__ volatile ("pushfq; popq %0; cli" : "=r"(flags) : : "memory");
     return flags;
@@ -82,3 +83,5 @@ void duckos_x86_64_scheduler_platform(duckos_sched_platform *platform) {
     platform->switch_context = NULL;
     platform->context_switch = duckos_x86_64_scheduler_context_switch;
 }
+
+#endif
