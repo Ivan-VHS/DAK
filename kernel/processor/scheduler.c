@@ -126,7 +126,9 @@ duckos_sched_status duckos_scheduler_begin_cpu_start(
     if (scheduler == NULL) return DUCKOS_SCHED_INVALID_ARGUMENT;
     duckos_sched_lock_state lock_state = scheduler_lock(scheduler);
     duckos_cpu_local *cpu = cpu_at(scheduler, logical_id);
-    if (cpu == NULL || !core_transition_valid(cpu->state, DUCKOS_CPU_STARTING)) {
+    if (cpu == NULL || logical_id == 0U ||
+        scheduler->cpus[0].state != DUCKOS_CPU_ONLINE ||
+        !core_transition_valid(cpu->state, DUCKOS_CPU_STARTING)) {
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_INVALID_STATE;
     }
@@ -149,7 +151,9 @@ duckos_sched_status duckos_scheduler_complete_cpu_start(
 
     duckos_sched_lock_state lock_state = scheduler_lock(scheduler);
     duckos_cpu_local *cpu = cpu_at(scheduler, logical_id);
-    if (cpu == NULL || cpu->state != DUCKOS_CPU_STARTING) {
+    if (cpu == NULL || logical_id == 0U ||
+        scheduler->cpus[0].state != DUCKOS_CPU_ONLINE ||
+        cpu->state != DUCKOS_CPU_STARTING) {
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_INVALID_STATE;
     }
@@ -193,10 +197,10 @@ duckos_sched_status duckos_scheduler_update_cpu_critical(
     return DUCKOS_SCHED_OK;
 }
 
-int duckos_scheduler_core_offline_allowed(
+static int core_offline_allowed_locked(
     const duckos_scheduler *scheduler, uint32_t logical_id
 ) {
-    if (scheduler == NULL || logical_id >= scheduler->cpu_count) return 0;
+    if (logical_id >= scheduler->cpu_count) return 0;
     const duckos_cpu_local *cpu = &scheduler->cpus[logical_id];
     if (cpu->state != DUCKOS_CPU_DRAINING || cpu->current_tid != 0U ||
         cpu->interrupt_depth != 0U || cpu->lock_depth != 0U ||
@@ -206,11 +210,23 @@ int duckos_scheduler_core_offline_allowed(
     const uint64_t cpu_bit = UINT64_C(1) << logical_id;
     for (size_t i = 0U; i < scheduler->thread_count; ++i) {
         const duckos_sched_thread *thread = &scheduler->threads[i];
-        if (thread->state == DUCKOS_THREAD_READY &&
-            thread->affinity_mask == cpu_bit)
-            return 0;
+        const int terminal = thread->state == DUCKOS_THREAD_ZOMBIE;
+        const int exclusively_pinned =
+            (thread->affinity_mask & cpu_bit) != 0U &&
+            (thread->affinity_mask & ~cpu_bit) == 0U;
+        if (!terminal && exclusively_pinned) return 0;
     }
     return 1;
+}
+
+int duckos_scheduler_core_offline_allowed(
+    duckos_scheduler *scheduler, uint32_t logical_id
+) {
+    if (scheduler == NULL || logical_id >= scheduler->cpu_count) return 0;
+    duckos_sched_lock_state lock_state = scheduler_lock(scheduler);
+    const int allowed = core_offline_allowed_locked(scheduler, logical_id);
+    scheduler_unlock(scheduler, lock_state);
+    return allowed;
 }
 
 duckos_sched_status duckos_scheduler_release_cpu(
@@ -223,7 +239,7 @@ duckos_sched_status duckos_scheduler_release_cpu(
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_INVALID_STATE;
     }
-    if (!duckos_scheduler_core_offline_allowed(scheduler, logical_id)) {
+    if (!core_offline_allowed_locked(scheduler, logical_id)) {
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_CPU_BUSY;
     }
