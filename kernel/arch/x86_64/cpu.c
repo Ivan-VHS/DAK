@@ -92,6 +92,10 @@ int duckos_x86_64_cpu_probe(duckos_x86_64_cpu_info *out) {
 
         if ((d & (UINT32_C(1) << 26)) != 0U)
             out->features |= DUCKOS_CPU_FEATURE_SSE2;
+        if ((d & (UINT32_C(1) << 7)) != 0U)
+            out->features |= DUCKOS_CPU_FEATURE_MCE;
+        if ((d & (UINT32_C(1) << 14)) != 0U)
+            out->features |= DUCKOS_CPU_FEATURE_MCA;
         if ((c & (UINT32_C(1) << 20)) != 0U)
             out->features |= DUCKOS_CPU_FEATURE_SSE42;
         if ((c & (UINT32_C(1) << 25)) != 0U)
