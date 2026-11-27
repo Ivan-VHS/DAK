@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 #define CHECK(expression) do { \
     if (!(expression)) { \
@@ -88,6 +87,25 @@ static int test_rejects_invalid_allocate_arguments(void) {
 }
 
 
+static int same_allocator(
+    const duckos_frame_allocator *left,
+    const duckos_frame_allocator *right
+) {
+    if (left->range_count != right->range_count ||
+        left->active_range != right->active_range ||
+        left->total_pages != right->total_pages ||
+        left->allocated_pages != right->allocated_pages) {
+        return 0;
+    }
+    for (uint32_t index = 0u; index < DUCKOS_FRAME_ALLOCATOR_MAX_RANGES; ++index) {
+        if (left->ranges[index].next != right->ranges[index].next ||
+            left->ranges[index].end != right->ranges[index].end) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static int test_failed_reinitialization_preserves_existing_allocator(void) {
     const duckos_memory_region valid[] = {
         {0x00100000u, 0x00003000u, DUCKOS_MEMORY_USABLE, 0u}
@@ -112,7 +130,7 @@ static int test_failed_reinitialization_preserves_existing_allocator(void) {
     before = allocator;
     CHECK(duckos_frame_allocator_init(&allocator, invalid_after_usable, 2u, 0u) ==
         DUCKOS_FRAME_ALLOCATOR_INVALID_MEMORY_MAP);
-    CHECK(memcmp(&allocator, &before, sizeof(allocator)) == 0);
+    CHECK(same_allocator(&allocator, &before));
 
     CHECK(duckos_frame_allocator_allocate(&allocator, &page) ==
         DUCKOS_FRAME_ALLOCATOR_OK);
