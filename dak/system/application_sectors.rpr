@@ -6,6 +6,18 @@ export craft digest_valid(digest) {
     yield size(digest) == 64
 }
 
+export craft alignment_valid(alignment) {
+    make supported := [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024,
+        2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144,
+        524288, 1048576]
+    each candidate in supported {
+        when candidate == alignment {
+            yield true
+        }
+    }
+    yield false
+}
+
 export craft permission_valid(kind, permissions) {
     when kind == "manifest" or kind == "read-only-data" or kind == "resource" or kind == "policy" {
         yield permissions == "r"
@@ -31,7 +43,7 @@ export craft sector_valid(sector, app_id, image_bytes) {
     when sector[3] < 0 or sector[4] <= 0 or sector[5] <= 0 {
         yield false
     }
-    when sector[5] > 1048576 or sector[3] % sector[5] != 0 {
+    when not alignment_valid(sector[5]) or sector[3] % sector[5] != 0 {
         yield false
     }
     when sector[3] > 9223372036854775807 - sector[4] {
