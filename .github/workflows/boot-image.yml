@@ -41,6 +41,14 @@ jobs:
 
       - name: Install native image and emulator tools
         run: |
+          # Third-party repositories are not required for these Ubuntu archive packages.
+          # Disable an unavailable Microsoft source so it cannot block the pinned ISO toolchain.
+          shopt -s nullglob
+          for source in /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if sudo grep -q "packages.microsoft.com" "$source"; then
+              sudo mv "$source" "$source.disabled"
+            fi
+          done
           sudo apt-get update
           sudo apt-get install -y build-essential binutils curl xorriso qemu-system-x86 ovmf
 
