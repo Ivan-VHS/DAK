@@ -17,18 +17,18 @@ export craft mutex_lock_action(mutex, tid) {
         yield ["invalid", mutex]
     }
     when mutex[0] == 0 {
-        yield ["acquired", [tid, 1, mutex[2], mutex[3], mutex[4] ]]
+        yield ["acquired", [tid, 1, mutex[2], mutex[3], mutex[4] ] ]
     }
     when mutex[0] == tid {
         when not mutex[4] {
             yield ["deadlock", mutex]
         }
-        yield ["acquired-recursive", [tid, mutex[1] + 1, mutex[2], mutex[3], mutex[4] ]]
+        yield ["acquired-recursive", [tid, mutex[1] + 1, mutex[2], mutex[3], mutex[4] ] ]
     }
     when size(mutex[2]) >= mutex[3] {
         yield ["backpressure", mutex]
     }
-    yield ["queued", [mutex[0], mutex[1], push(mutex[2], tid), mutex[3], mutex[4] ]]
+    yield ["queued", [mutex[0], mutex[1], push(mutex[2], tid), mutex[3], mutex[4] ] ]
 }
 
 export craft mutex_unlock_action(mutex, tid) {
@@ -36,16 +36,16 @@ export craft mutex_unlock_action(mutex, tid) {
         yield ["deny-not-owner", mutex]
     }
     when mutex[1] > 1 {
-        yield ["decrement-recursion", [mutex[0], mutex[1] - 1, mutex[2], mutex[3], mutex[4] ]]
+        yield ["decrement-recursion", [mutex[0], mutex[1] - 1, mutex[2], mutex[3], mutex[4] ] ]
     }
     when size(mutex[2]) == 0 {
-        yield ["released", [0, 0, [], mutex[3], mutex[4] ]]
+        yield ["released", [0, 0, [], mutex[3], mutex[4] ] ]
     }
     vary rest := []
     each index in range(1, size(mutex[2])) {
         change rest := push(rest, mutex[2][index])
     }
-    yield ["handoff", [mutex[2][0], 1, rest, mutex[3], mutex[4] ]]
+    yield ["handoff", [mutex[2][0], 1, rest, mutex[3], mutex[4] ] ]
 }
 
 # Semaphore: [count, maximum, waiters, waiter_limit].
@@ -64,12 +64,12 @@ export craft semaphore_wait(semaphore, tid) {
         yield ["invalid", semaphore]
     }
     when semaphore[0] > 0 {
-        yield ["acquired", [semaphore[0] - 1, semaphore[1], semaphore[2], semaphore[3] ]]
+        yield ["acquired", [semaphore[0] - 1, semaphore[1], semaphore[2], semaphore[3] ] ]
     }
     when size(semaphore[2]) >= semaphore[3] {
         yield ["backpressure", semaphore]
     }
-    yield ["queued", [0, semaphore[1], push(semaphore[2], tid), semaphore[3] ]]
+    yield ["queued", [0, semaphore[1], push(semaphore[2], tid), semaphore[3] ] ]
 }
 
 export craft semaphore_post(semaphore) {
@@ -86,7 +86,7 @@ export craft semaphore_post(semaphore) {
     when semaphore[0] >= semaphore[1] {
         yield ["overflow", semaphore]
     }
-    yield ["posted", [semaphore[0] + 1, semaphore[1], semaphore[2], semaphore[3] ]]
+    yield ["posted", [semaphore[0] + 1, semaphore[1], semaphore[2], semaphore[3] ] ]
 }
 
 export craft event_wait(is_set, waiter_count, waiter_limit) {
