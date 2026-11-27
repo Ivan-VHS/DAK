@@ -1,0 +1,52 @@
+# Predictive preflight for installation conditions.
+# Predictions are hints only; a fresh authoritative check is still mandatory at commit.
+
+import "duckos/kernel/verification.rpr" as verification
+
+# [condition_id, ruleset_revision, install_epoch, expires_at_tick, expected_value]
+export craft descriptor_valid(predictor) {
+    when size(predictor) != 5 {
+        yield false
+    }
+    yield predictor[0] != "" and predictor[1] > 0 and
+        predictor[2] >= 0 and predictor[3] >= 0 and predictor[4] != ""
+}
+
+export craft candidate_valid(predictor, model, now_tick) {
+    when not descriptor_valid(predictor) or not verification["descriptor_valid"](model) {
+        yield false
+    }
+    when model[4] != "frozen" and model[4] != "installing" {
+        yield false
+    }
+    when predictor[1] != model[2] or predictor[2] != model[5] {
+        yield false
+    }
+    when now_tick < 0 or now_tick > predictor[3] {
+        yield false
+    }
+    yield true
+}
+
+export craft preflight_action(predictor, model, now_tick, observed_value) {
+    when not candidate_valid(predictor, model, now_tick) {
+        yield "discard-stale-prediction"
+    }
+    when predictor[4] != observed_value {
+        yield "condition-changed-recompute"
+    }
+    yield "candidate-requires-live-revalidation"
+}
+
+export craft commit_guard(predictor, model, now_tick, observed_value, live_check_passed) {
+    when not candidate_valid(predictor, model, now_tick) {
+        yield "deny-stale-predictor"
+    }
+    when not live_check_passed {
+        yield "deny-no-authoritative-check"
+    }
+    when predictor[4] != observed_value {
+        yield "deny-condition-changed"
+    }
+    yield "allow-commit"
+}
