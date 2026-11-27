@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="520" viewBox="0 0 1440 520" role="img" aria-labelledby="title desc">
-<title id="title">DuckOS — Reaper-first operating-system project</title>
+<title id="title">DAKOS — Reaper-first operating-system project</title>
 <desc id="desc">A black and gold technical overview separating the experimental x86-64 Stage 1 boot path, Reaper reference policies, and the Mora host-browser desktop shell.</desc>
 <defs>
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#050505"/><stop offset=".55" stop-color="#10100D"/><stop offset="1" stop-color="#1B1708"/></linearGradient>
@@ -26,7 +26,7 @@
 <path d="M0 458C230 394 385 519 610 444S1060 399 1440 469" fill="none" stroke="url(#gold)" stroke-width="1" opacity=".15"/>
 <rect x="58" y="70" width="4" height="310" rx="2" fill="url(#gold)"/>
 <text x="88" y="108" class="eyebrow">REAPER-FIRST  /  LOCAL-FIRST  /  X86_64</text>
-<text x="80" y="206" class="brand">DuckOS</text>
+<text x="80" y="206" class="brand">DAKOS</text>
 <text x="88" y="249" class="tag">OPERATING SYSTEM • ECOSYSTEM • MORA SHELL</text>
 <text x="88" y="294" class="body">A transparent view of what runs today,</text>
 <text x="88" y="315" class="body">what is validated in QEMU, and what remains planned.</text>
@@ -59,5 +59,5 @@
   <text x="42" y="89" class="cardbody">Runs separately on the host • not launched by the Stage 1 kernel</text>
   <text x="682" y="42" class="number" text-anchor="end">HOST APP</text>
 </g>
-<text x="1368" y="492" class="tiny" text-anchor="end">IVAN-VHS / DUCKOS</text>
+<text x="1368" y="492" class="tiny" text-anchor="end">IVAN-VHS / DAKOS</text>
 </svg>

@@ -1,13 +1,13 @@
-# Duck Desktop optimization
+# DAK Desktop optimization
 
 **Status:** partial native user-space implementation.  
 **Author/developer:** Ivan-VHS.
 
-Duck Desktop adds a native maintenance utility to the existing Mora workspace. Mora remains the visual shell; the new Python/Tk window is a host-side utility and is not a compositor, window manager or kernel subsystem.
+DAK Desktop adds a native maintenance utility to the existing Mora workspace. Mora remains the visual shell; the new Python/Tk window is a host-side utility and is not a compositor, window manager or kernel subsystem.
 
 ## Commands
 
-Install DuckOS build tools in a Python 3.10+ environment:
+Install DAKOS build tools in a Python 3.10+ environment:
 
 ~~~sh
 python -m pip install -e .
@@ -16,26 +16,26 @@ python -m pip install -e .
 Run a read-only diagnostic:
 
 ~~~sh
-duckos desktop audit
+dakos desktop audit
 ~~~
 
 Open the native maintenance window:
 
 ~~~sh
-duckos desktop gui
+dakos desktop gui
 ~~~
 
 Inspect the current user's startup entries:
 
 ~~~sh
-duckos desktop startup list
+dakos desktop startup list
 ~~~
 
 Disable and later restore a specific entry using its exact ID from the list:
 
 ~~~sh
-duckos desktop startup disable folder:example.desktop
-duckos desktop startup restore folder:example.desktop
+dakos desktop startup disable folder:example.desktop
+dakos desktop startup restore folder:example.desktop
 ~~~
 
 On Windows, registry IDs use the \`registry:\` prefix; on Linux, user autostart files use \`folder:\`. Quote IDs in shells when they contain spaces or special characters.
@@ -47,7 +47,7 @@ On Windows, registry IDs use the \`registry:\` prefix; on Linux, user autostart 
 - Safe, explicitly confirmed movement of selected regular files into \`~/Inbox\`. Existing names are never overwritten; collisions receive a numbered suffix.
 - Symbolic links and folders are excluded from the move action.
 - Current-user startup folder inventory on Windows and Linux.
-- Reversible enable/disable of user startup-folder entries by moving the entry into a DuckOS backup folder.
+- Reversible enable/disable of user startup-folder entries by moving the entry into a DAKOS backup folder.
 - On Windows, reversible control of \`HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\` values. Original value and registry type are written to an atomic per-user backup before the value is removed.
 - A bounded process/memory snapshot. Linux reads \`/proc\`; Windows uses \`tasklist\` and \`GlobalMemoryStatusEx\`. When \`psutil\` is installed, it supplies richer CPU and process readings.
 - Native Tk maintenance window with overview, file organization, startup controls, process view and explicit safety boundaries.
@@ -62,7 +62,7 @@ The diagnostic is read-only. Moving files and changing startup state are separat
 
 ## Native desktop boundary
 
-This is a native user-space application, not yet a native DuckOS desktop session. The current repository does not have a production compositor, window manager, process manager, syscall ABI, capability broker or bootable distribution. Consequently:
+This is a native user-space application, not yet a native DAKOS desktop session. The current repository does not have a production compositor, window manager, process manager, syscall ABI, capability broker or bootable distribution. Consequently:
 
 - The utility can inspect the host user's files and selected startup mechanisms.
 - It cannot create or switch OS virtual desktops.
@@ -80,4 +80,4 @@ Python tests cover read-only audit, naming hints, collision-safe movement, path 
 python -m unittest discover -s tests -v
 ~~~
 
-The Reaper source file \`duckos/ui/desktop.rpr\` records the ten-item threshold and allowed action policy. Its contract tests are in \`contract_tests.rpr\`. Passing a Reaper contract verifies the policy on the Reaper reference runtime; it is not evidence of a booted compositor or kernel enforcement.
+The Reaper source file \`dakos/ui/desktop.rpr\` records the ten-item threshold and allowed action policy. Its contract tests are in \`contract_tests.rpr\`. Passing a Reaper contract verifies the policy on the Reaper reference runtime; it is not evidence of a booted compositor or kernel enforcement.
