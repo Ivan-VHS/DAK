@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from duckos.compat.game_profile import (
+from dakos.compat.game_profile import (
     GameProfileError, plan_game_launch, launch_game, validate_game_profile,
 )
 
@@ -31,7 +31,7 @@ def fixture(folder: Path) -> dict:
     (folder / "prefix" / "drive_c").mkdir(parents=True)
     (folder / "prefix" / "system.reg").write_text("WINE REGISTRY Version 2\\n", encoding="utf-8")
     return {
-        "schema": "duckos.game-launch-profile.v1",
+        "schema": "dakos.game-launch-profile.v1",
         "id": "sample-game",
         "name": "Sample Game",
         "executable": "game.exe",
@@ -65,7 +65,7 @@ class GameLaunchProfileTests(unittest.TestCase):
             outside.write_bytes(minimal_pe64())
             (root / "prefix").mkdir()
             payload = {
-                "schema": "duckos.game-launch-profile.v1",
+                "schema": "dakos.game-launch-profile.v1",
                 "id": "sample-game", "name": "Sample Game",
                 "executable": "../outside.exe", "working_directory": ".",
                 "runtime": {"backend": "wine", "executable": "wine", "prefix": "prefix"},
@@ -127,7 +127,7 @@ class GameLaunchProfileTests(unittest.TestCase):
             def fake_popen(argv, **kwargs):
                 calls.append((argv, kwargs))
                 return Process()
-            with patch("duckos.compat.game_profile.shutil.which", return_value="/usr/bin/wine"):
+            with patch("dakos.compat.game_profile.shutil.which", return_value="/usr/bin/wine"):
                 result = launch_game(profile, popen=fake_popen)
             argv, kwargs = calls[0]
             self.assertTrue(result["started"])

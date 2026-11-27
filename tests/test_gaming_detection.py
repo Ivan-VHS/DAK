@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from duckos.gaming.detection import (
+from dakos.gaming.detection import (
     GamingDetectionError,
     detect_game_processes,
     load_game_profiles,
@@ -15,7 +15,7 @@ from duckos.gaming.detection import (
 class GamingDetectionTests(unittest.TestCase):
     def catalog(self):
         return {
-            "schema": "duckos.game-profile-catalog.v1",
+            "schema": "dakos.game-profile-catalog.v1",
             "profiles": [
                 {
                     "id": "sample-game",
@@ -69,7 +69,7 @@ class GamingDetectionTests(unittest.TestCase):
             path = Path(folder) / "profiles.json"
             path.write_text(json.dumps(self.catalog()), encoding="utf-8")
             loaded = load_game_profiles(path)
-            self.assertEqual(loaded["schema"], "duckos.game-profile-catalog.v1")
+            self.assertEqual(loaded["schema"], "dakos.game-profile-catalog.v1")
             with self.assertRaises(GamingDetectionError):
                 load_game_profiles(Path(folder) / "missing.json")
 

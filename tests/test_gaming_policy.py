@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from duckos.gaming import (
+from dakos.gaming import (
     GamingPolicyError,
     assess_capabilities,
     load_rule_catalog,
@@ -22,7 +22,7 @@ class GamingPolicyTests(unittest.TestCase):
 
     def test_package_catalog_matches_the_repository_catalog(self):
         root = Path(__file__).resolve().parents[1] / "catalogs" / "game-performance-rules.v1.json"
-        packaged = Path(__file__).resolve().parents[1] / "duckos" / "gaming" / "game-performance-rules.v1.json"
+        packaged = Path(__file__).resolve().parents[1] / "dakos" / "gaming" / "game-performance-rules.v1.json"
         self.assertEqual(packaged.read_bytes(), root.read_bytes())
 
     def test_rejects_duplicate_or_missing_rule_numbers(self):
@@ -42,9 +42,9 @@ class GamingPolicyTests(unittest.TestCase):
         self.assertFalse(report["system_settings_changed"])
 
     def test_accepts_federated_oplage_evidence_document(self):
-        from duckos.gaming import assess_capability_document
+        from dakos.gaming import assess_capability_document
         report = assess_capability_document({
-            "schema": "oplague.duckos-gaming-evidence.v1",
+            "schema": "oplague.dakos-gaming-evidence.v1",
             "system_mutations_performed": False,
             "providers": {
                 "process_catalog": {
@@ -59,9 +59,9 @@ class GamingPolicyTests(unittest.TestCase):
         self.assertFalse(report["system_settings_changed"])
 
     def test_accepts_pytyliki_provider_evidence_document(self):
-        from duckos.gaming import assess_capability_document
+        from dakos.gaming import assess_capability_document
         report = assess_capability_document({
-            "schema": "duckos.gaming-provider-evidence.v1",
+            "schema": "dakos.gaming-provider-evidence.v1",
             "system_mutations_performed": False,
             "evidence_scope": "whole_host",
             "capabilities": {
@@ -89,18 +89,18 @@ class GamingPolicyTests(unittest.TestCase):
             assess_capabilities({"process_catalog": {"available": "yes"}})
 
     def test_builds_the_session_profile_expected_by_reaper(self):
-        from duckos.gaming import build_session_profile
+        from dakos.gaming import build_session_profile
         profile = build_session_profile(
             "sample-game", engine="directx12", worker_count=8,
             multithreaded=True, audio_enabled=True,
         )
-        self.assertEqual(profile["schema"], "duckos.gaming-session-profile.v1")
+        self.assertEqual(profile["schema"], "dakos.gaming-session-profile.v1")
         self.assertEqual(profile["worker_count"], 8)
         self.assertFalse(profile["execution_performed"])
         self.assertIn("GPR-13", profile["source_rules"])
 
     def test_session_profile_builder_rejects_unsafe_inputs(self):
-        from duckos.gaming import build_session_profile
+        from dakos.gaming import build_session_profile
         with self.assertRaises(GamingPolicyError):
             build_session_profile("../escape")
         with self.assertRaises(GamingPolicyError):
