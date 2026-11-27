@@ -1,4 +1,4 @@
-# Duck Desktop optimization policy.
+# DAK Desktop optimization policy.
 # This file defines policy only; filesystem changes are implemented in user space.
 
 export craft item_limit() {
