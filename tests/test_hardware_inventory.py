@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from duckos.hardware_inventory import HardwareInventoryError, collect_host_inventory
+from dakos.hardware_inventory import HardwareInventoryError, collect_host_inventory
 
 
 class HardwareInventoryTests(unittest.TestCase):
@@ -52,7 +52,7 @@ class HardwareInventoryTests(unittest.TestCase):
             report = collect_host_inventory(
                 sysfs_root=sysfs, platform_name="Linux", architecture="x86_64"
             )
-        self.assertEqual(report["schema"], "duckos.hardware-inventory.v1")
+        self.assertEqual(report["schema"], "dakos.hardware-inventory.v1")
         self.assertEqual(report["summary"], {
             "total_devices": 3, "driver_bound": 2,
             "driver_missing": 1, "device_problem": 0,
@@ -71,8 +71,8 @@ class HardwareInventoryTests(unittest.TestCase):
         ).encode("utf-8")
         self.assertEqual(digest, hashlib.sha256(canonical).hexdigest())
 
-    @patch("duckos.hardware_inventory.shutil.which", return_value="powershell.exe")
-    @patch("duckos.hardware_inventory.subprocess.run")
+    @patch("dakos.hardware_inventory.shutil.which", return_value="powershell.exe")
+    @patch("dakos.hardware_inventory.subprocess.run")
     def test_windows_pnp_inventory_hashes_instance_ids(self, run, _which):
         run.return_value = subprocess.CompletedProcess(
             args=["powershell.exe"], returncode=0,
