@@ -1,16 +1,16 @@
 .section .text
-.global duckos_x86_gdt_load
-.type duckos_x86_gdt_load, @function
-duckos_x86_gdt_load:
+.global dakos_x86_gdt_load
+.type dakos_x86_gdt_load, @function
+dakos_x86_gdt_load:
     lgdt (%rdi)
 
     /* Reload CS through a far return before installing the new data selectors. */
     pushq $0x08
-    leaq .Lduckos_gdt_cs_reload(%rip), %rax
+    leaq .Ldakos_gdt_cs_reload(%rip), %rax
     pushq %rax
     lretq
 
-.Lduckos_gdt_cs_reload:
+.Ldakos_gdt_cs_reload:
     movw $0x10, %ax
     movw %ax, %ds
     movw %ax, %es
@@ -22,6 +22,6 @@ duckos_x86_gdt_load:
     movw %si, %ax
     ltr %ax
     ret
-.size duckos_x86_gdt_load, .-duckos_x86_gdt_load
+.size dakos_x86_gdt_load, .-dakos_x86_gdt_load
 
 .section .note.GNU-stack,"",@progbits
