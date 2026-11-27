@@ -1,43 +1,43 @@
-# DuckOS integration contract suite.
+# DAKOS integration contract suite.
 # Run with Reaper's tree-walk engine and VM.
 
-import "duckos/kernel/boot.rpr" as boot
-import "duckos/kernel/memory.rpr" as memory
-import "duckos/kernel/arena.rpr" as arena
-import "duckos/kernel/scheduler.rpr" as scheduler
-import "duckos/kernel/flock.rpr" as flock
-import "duckos/kernel/ipc.rpr" as ipc
-import "duckos/kernel/zero_copy_bus.rpr" as bus
-import "duckos/security/capabilities.rpr" as capabilities
-import "duckos/security/trust.rpr" as trust
-import "duckos/drivers/abi.rpr" as drivers
-import "duckos/drivers/orchestrator.rpr" as orchestrator
-import "duckos/services/supervisor.rpr" as supervisor
-import "duckos/storage/hypergraph.rpr" as storage
-import "duckos/storage/crdt.rpr" as crdt
-import "duckos/system/three_media.rpr" as media
-import "duckos/system/telemetry.rpr" as telemetry
-import "duckos/gpu/oplage_bridge.rpr" as oplage_gpu
-import "duckos/ui/theme.rpr" as theme
-import "duckos/ui/motion.rpr" as motion
-import "duckos/storage/history.rpr" as history
-import "duckos/ui/workspace.rpr" as workspace
-import "duckos/system/prefetch.rpr" as prefetch
-import "duckos/ui/config.rpr" as config
-import "duckos/system/recovery.rpr" as recovery
-import "duckos/ui/physics.rpr" as physics
-import "duckos/ui/command_palette.rpr" as palette
-import "duckos/security/plugin_sandbox.rpr" as plugin_sandbox
-import "duckos/ui/canvas.rpr" as canvas
-import "duckos/input/spatial.rpr" as spatial_input
-import "duckos/ui/desktop.rpr" as desktop
-import "duckos/ui/shell_policy.rpr" as shell_policy
-import "duckos/ui/window_manager.rpr" as window_manager
-import "duckos/ui/taskbar.rpr" as taskbar
-import "duckos/ui/notifications.rpr" as notifications
-import "duckos/ui/session.rpr" as session
-import "duckos/security/desktop_sandbox.rpr" as desktop_sandbox
-import "duckos/ui/native_bridge.rpr" as native_bridge
+import "dakos/kernel/boot.rpr" as boot
+import "dakos/kernel/memory.rpr" as memory
+import "dakos/kernel/arena.rpr" as arena
+import "dakos/kernel/scheduler.rpr" as scheduler
+import "dakos/kernel/flock.rpr" as flock
+import "dakos/kernel/ipc.rpr" as ipc
+import "dakos/kernel/zero_copy_bus.rpr" as bus
+import "dakos/security/capabilities.rpr" as capabilities
+import "dakos/security/trust.rpr" as trust
+import "dakos/drivers/abi.rpr" as drivers
+import "dakos/drivers/orchestrator.rpr" as orchestrator
+import "dakos/services/supervisor.rpr" as supervisor
+import "dakos/storage/hypergraph.rpr" as storage
+import "dakos/storage/crdt.rpr" as crdt
+import "dakos/system/three_media.rpr" as media
+import "dakos/system/telemetry.rpr" as telemetry
+import "dakos/gpu/oplage_bridge.rpr" as oplage_gpu
+import "dakos/ui/theme.rpr" as theme
+import "dakos/ui/motion.rpr" as motion
+import "dakos/storage/history.rpr" as history
+import "dakos/ui/workspace.rpr" as workspace
+import "dakos/system/prefetch.rpr" as prefetch
+import "dakos/ui/config.rpr" as config
+import "dakos/system/recovery.rpr" as recovery
+import "dakos/ui/physics.rpr" as physics
+import "dakos/ui/command_palette.rpr" as palette
+import "dakos/security/plugin_sandbox.rpr" as plugin_sandbox
+import "dakos/ui/canvas.rpr" as canvas
+import "dakos/input/spatial.rpr" as spatial_input
+import "dakos/ui/desktop.rpr" as desktop
+import "dakos/ui/shell_policy.rpr" as shell_policy
+import "dakos/ui/window_manager.rpr" as window_manager
+import "dakos/ui/taskbar.rpr" as taskbar
+import "dakos/ui/notifications.rpr" as notifications
+import "dakos/ui/session.rpr" as session
+import "dakos/security/desktop_sandbox.rpr" as desktop_sandbox
+import "dakos/ui/native_bridge.rpr" as native_bridge
 
 make phases := ["reset", "firmware", "memory", "interrupts", "scheduler", "ipc", "drivers", "services", "desktop"]
 assert(boot["sequence_valid"](phases), "boot phases must remain ordered")
@@ -446,4 +446,4 @@ assert(not native_bridge["event_valid"](bridge_oversized), "native bridge reject
 make bridge_unknown := [1, 4, 9004, 77, 0, "shell.execute", 8, 1700000003]
 assert(not native_bridge["event_valid"](bridge_unknown), "native bridge rejects unknown operations")
 
-emit "DUCKOS_REAPER_CONTRACTS_OK"
+emit "DAKOS_REAPER_CONTRACTS_OK"

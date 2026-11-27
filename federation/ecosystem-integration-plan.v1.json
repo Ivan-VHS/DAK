@@ -1,10 +1,10 @@
 {
-  "schema": "duckos.ecosystem-integration-plan.v1",
+  "schema": "dakos.ecosystem-integration-plan.v1",
   "version": 1,
-  "host": "DuckOS",
+  "host": "DAKOS",
   "principles": {
     "preserve_upstream_identity": true,
-    "reaper_is_primary_for_new_duckos_native_code": true,
+    "reaper_is_primary_for_new_dakos_native_code": true,
     "offline_first": true,
     "auto_advance_source_pins": false,
     "auto_build_imported_sources": false,
@@ -19,11 +19,11 @@
   ],
   "workstreams": [
     {
-      "id": "reaper-duck-foundation",
+      "id": "reaper-dak-foundation",
       "wave": 1,
       "projects": [
         "Reaper",
-        "DuckOS"
+        "DAKOS"
       ],
       "scope": [
         "typed IR",
@@ -40,7 +40,7 @@
         "BAV",
         "Kontexa",
         "Mora",
-        "DuckOS"
+        "DAKOS"
       ],
       "scope": [
         "capability broker",
@@ -55,7 +55,7 @@
       "projects": [
         "Pytyliki",
         "OPlague",
-        "DuckOS"
+        "DAKOS"
       ],
       "scope": [
         "versioned C ABI",
@@ -69,7 +69,7 @@
       "projects": [
         "VentuSample",
         "Reaper",
-        "DuckOS"
+        "DAKOS"
       ],
       "scope": [
         "C++20 DSP ABI",
@@ -83,7 +83,7 @@
       "projects": [
         "Jora",
         "Mora",
-        "DuckOS"
+        "DAKOS"
       ],
       "scope": [
         "app manifests",
@@ -97,8 +97,8 @@
       "wave": 6,
       "projects": [
         "ORGze",
-        "DuckBridge",
-        "DuckDriver OmniCore",
+        "DAKBridge",
+        "DAKDriver OmniCore",
         "Reaper Studio",
         "SAMBU",
         "MOST",
@@ -116,37 +116,37 @@
   "edges": [
     {
       "from": "Reaper",
-      "to": "DuckOS",
+      "to": "DAKOS",
       "contract": "typed IR + Span + DABI64 + boot-info"
     },
     {
       "from": "BAV",
-      "to": "DuckOS/Mora",
+      "to": "DAKOS/Mora",
       "contract": "capability and security-event API"
     },
     {
       "from": "Kontexa",
-      "to": "DuckOS/Mora",
+      "to": "DAKOS/Mora",
       "contract": "offline document/index API"
     },
     {
       "from": "Pytyliki",
-      "to": "DuckOS/OPlague",
+      "to": "DAKOS/OPlague",
       "contract": "versioned C ABI + diagnostic schema"
     },
     {
       "from": "OPlague",
-      "to": "DuckOS",
+      "to": "DAKOS",
       "contract": "read-only device/driver evidence"
     },
     {
       "from": "VentuSample",
-      "to": "Reaper/DuckOS",
+      "to": "Reaper/DAKOS",
       "contract": "C++20 DSP ABI + offline render manifest"
     },
     {
       "from": "Jora",
-      "to": "Mora/DuckOS",
+      "to": "Mora/DAKOS",
       "contract": "app manifest + package lifecycle API"
     }
   ],

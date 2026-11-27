@@ -1,5 +1,5 @@
 {
-  "schema": "duckos.mora-workbenches.v1",
+  "schema": "dakos.mora-workbenches.v1",
   "version": 1,
   "policy": {
     "browser_launch": "panel-only",

@@ -1,8 +1,8 @@
 {
   "schema": "ivan-vhs.ecosystem-cloud-adapter.v1",
   "version": 1,
-  "project": "duckos",
-  "project_key": "duckos",
+  "project": "dakos",
+  "project_key": "dakos",
   "shared_contract": "ivan-vhs.ecosystem-cloud.v1",
   "shared_contract_version": 1,
   "status": "contract-only",
@@ -38,7 +38,7 @@
     "conflicts": "preference-specific-explicit-resolution"
   },
   "compatibility": {
-    "native_os_runtime": "Reaper-driven-DuckOS",
+    "native_os_runtime": "Reaper-driven-DAKOS",
     "sdk_dependency": false,
     "boot_and_shell_offline": true
   }
