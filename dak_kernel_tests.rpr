@@ -51,9 +51,9 @@ make app := core["application_create"](21, [
     [5, 3005, 20480, 4096, 2048]
 ], 32768)
 assert(app[0] == "OK" and size(app[1][3]) == 5, "application is prepared as one five-sector transaction")
-make app_registry := core["application_register"](app[1], [])
+make app_registry := core["application_register"](app[1], [], 32768)
 assert(app_registry[0] == "OK" and size(app_registry[1]) == 1, "validated application is registered atomically")
-assert(core["application_register"](app[1], app_registry[1])[0] == "ERR", "duplicate application identity is rejected")
+assert(core["application_register"](app[1], app_registry[1], 32768)[0] == "ERR", "duplicate application identity is rejected")
 make overlapping_app := core["application_create"](22, [
     [1, 4001, 4096, 4096, 4096],
     [2, 4002, 8192, 4096, 4096],
@@ -62,7 +62,7 @@ make overlapping_app := core["application_create"](22, [
     [5, 4005, 20480, 4096, 4096]
 ], 32768)
 assert(overlapping_app[0] == "OK", "second application can be staged independently")
-assert(core["application_register"](overlapping_app[1], app_registry[1])[0] == "ERR", "cross-application range overlap is rejected before publication")
+assert(core["application_register"](overlapping_app[1], app_registry[1], 32768)[0] == "ERR", "cross-application range overlap is rejected before publication")
 assert(core["application_create"](22, [
     [1, 3001, 4096, 4096, 4096],
     [2, 3002, 8192, 4096, 4096],
@@ -70,10 +70,10 @@ assert(core["application_create"](22, [
     [4, 3004, 16384, 4096, 4096],
     [5, 3005, 16384, 4096, 4096]
 ], 32768)[0] == "ERR", "overlapping sectors abort the whole preparation")
-make active_app := core["application_activate"](app[1], [[2101, true], [2102, true], [2103, true], [2104, true], [2105, true]])
+make active_app := core["application_activate"](app[1], [[2101, true], [2102, true], [2103, true], [2104, true], [2105, true]], 32768)
 assert(active_app[0] == "OK", "all five verified sectors activate together")
-assert(core["sector_ipc_decision"](active_app[1], 2101, 2102, "send", [[2101, 2102, "send"]]) == "allow-policy-only", "explicit inter-sector grant is admitted")
-assert(core["sector_ipc_decision"](active_app[1], 2101, 2102, "send", []) == "deny-missing-explicit-grant", "inter-sector IPC denies by default")
+assert(core["sector_ipc_decision"](active_app[1], 2101, 2102, "send", [[2101, 2102, "send"]], 32768) == "allow-policy-only", "explicit inter-sector grant is admitted")
+assert(core["sector_ipc_decision"](active_app[1], 2101, 2102, "send", [], 32768) == "deny-missing-explicit-grant", "inter-sector IPC denies by default")
 
 make rule := core["rule_create"](3001, 250, true, 2101, 24576, 64, 32768)
 assert(rule[0] == "OK" and core["rule_valid"](rule[1], 32768), "mandatory AtomicRule record and passport validate")
