@@ -1,7 +1,7 @@
 """Compatibility diagnostics and dry-run launch planning.
 
 The current milestone deliberately stops before process creation. This keeps a
-PE file from being mistaken for a loadable Windows process until DuckOS has a
+PE file from being mistaken for a loadable Windows process until Dak has a
 real NT/Win32 runtime and kernel process ABI.
 """
 from __future__ import annotations
@@ -13,7 +13,7 @@ from typing import Any
 from .pe import inspect_pe_file
 from .prefix import read_prefix
 
-SCHEMA = "duckos.windows-compat-report.v1"
+SCHEMA = "dakos.windows-compat-report.v1"
 
 _NATIVE_REQUIREMENTS = [
     "pe-image-loader",
@@ -102,7 +102,7 @@ def diagnose_binary(binary: str | Path, prefix_path: str | Path | None = None) -
 def plan_launch(binary: str | Path, prefix_path: str | Path | None = None) -> dict[str, Any]:
     """Describe blockers for a future launch without ever starting the file."""
     report = diagnose_binary(binary, prefix_path)
-    blockers = ["DuckOS does not yet contain a native NT/Win32 process runtime."]
+    blockers = ["Dak does not yet contain a native NT/Win32 process runtime."]
     if report["binary"]["architecture"] == "unknown":
         blockers.append("The PE machine type is not supported by the compatibility profile.")
     if report["imports"]["missing_from_search_paths"]:
@@ -116,7 +116,7 @@ def plan_launch(binary: str | Path, prefix_path: str | Path | None = None) -> di
         if not compatible_prefix:
             blockers.append("The selected prefix architecture does not match the executable.")
     return {
-        "schema": "duckos.windows-launch-plan.v1",
+        "schema": "dakos.windows-launch-plan.v1",
         "binary": str(Path(binary).expanduser()),
         "prefix": report["prefix"]["path"] if report["prefix"] else None,
         "status": "blocked_native_runtime_unavailable",
@@ -129,7 +129,7 @@ def plan_launch(binary: str | Path, prefix_path: str | Path | None = None) -> di
 
 def compatibility_status() -> dict[str, Any]:
     return {
-        "schema": "duckos.windows-compat-status.v1",
+        "schema": "dakos.windows-compat-status.v1",
         "implemented": [
             "bounded PE32/PE32+ header and section inspection",
             "static import-DLL inventory",
