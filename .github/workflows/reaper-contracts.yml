@@ -32,6 +32,9 @@ jobs:
             PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$source"
           done < <(find "$GITHUB_WORKSPACE/DuckOS/duckos" -type f -name '*.rpr' -print0)
 
+      - name: Execute RFS-01 Duck OS adapter smoke contract
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/rfs01-duckos-smoke.rpr"
+
       - name: Execute DABI64, capability and bounded IPC contracts
         run: |
           set -euo pipefail

@@ -44,7 +44,6 @@ jobs:
             exit 1
           fi
 
-          pr_url="https://github.com/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
           pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
           pr_state="$(jq -r '.state' <<< "${pr}")"
           if [[ "${pr_state}" != "open" ]]; then
@@ -55,7 +54,6 @@ jobs:
           head_repo="$(jq -r '.head.repo.full_name // ""' <<< "${pr}")"
           base_ref="$(jq -r '.base.ref' <<< "${pr}")"
           is_draft="$(jq -r '.draft' <<< "${pr}")"
-          pr_author="$(jq -r '.user.login' <<< "${pr}")"
           pr_head_sha="$(jq -r '.head.sha' <<< "${pr}")"
 
           if [[ "${head_repo}" != "${GITHUB_REPOSITORY}" || "${base_ref}" != "main" || "${is_draft}" != "false" ]]; then
@@ -170,6 +168,7 @@ jobs:
           pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
           pr_author="$(jq -r '.user.login' <<< "${pr}")"
 
+          # shellcheck disable=SC2016
           decision="$(gh pr view "${pr_url}" --json reviewDecision --jq '.reviewDecision // "UNKNOWN"')"
           case "${decision}" in
             APPROVED|UNKNOWN) ;;
@@ -208,6 +207,7 @@ jobs:
 
           owner="${GITHUB_REPOSITORY%%/*}"
           repo_name="${GITHUB_REPOSITORY#*/}"
+          # shellcheck disable=SC2016
           threads_query='query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
             repository(owner: $owner, name: $name) {
               pullRequest(number: $number) {
