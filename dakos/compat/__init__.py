@@ -1,4 +1,4 @@
-"""DuckOS Windows compatibility foundation (inspection and prefix tooling)."""
+"""DAKOS Windows compatibility foundation (inspection and prefix tooling)."""
 
 from .pe import PEFormatError, inspect_pe_bytes, inspect_pe_file
 from .prefix import PrefixError, create_prefix, read_prefix

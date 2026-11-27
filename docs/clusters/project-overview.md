@@ -1,12 +1,12 @@
-# DuckOS project overview
+# DAKOS project overview
 
 [Project README](../../README.md) · [Documentation home](../README.md) · [Information architecture](../INFORMATION_ARCHITECTURE.md)
 
 ## Product role
 
-DuckOS is the operating-system project. Mora is its unified desktop and system-control shell. The product suite defines seven first-party applications: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Six system tools extend the same desktop: Mora AI, Sentinel, Restore, Bridge, Control and Proof.
+DAKOS is the operating-system project. Mora is its unified desktop and system-control shell. The product suite defines seven first-party applications: Cockos, Kavun, Ka-bon, Gloverty, Po, Illidia and Unify. Six system tools extend the same desktop: Mora AI, Sentinel, Restore, Bridge, Control and Proof.
 
-The browser shell is a usable interface and local contract prototype. It is not evidence that DuckOS already boots as a complete native operating system.
+The browser shell is a usable interface and local contract prototype. It is not evidence that DAKOS already boots as a complete native operating system.
 
 ## Current implementation boundary
 
