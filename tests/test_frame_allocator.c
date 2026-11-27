@@ -139,7 +139,7 @@ static int test_failed_reinitialization_preserves_existing_allocator(void) {
     before = allocator;
     CHECK(duckos_frame_allocator_init(&allocator, no_usable, 1u, 0u) ==
         DUCKOS_FRAME_ALLOCATOR_NO_USABLE_MEMORY);
-    CHECK(memcmp(&allocator, &before, sizeof(allocator)) == 0);
+    CHECK(same_allocator(&allocator, &before));
     return 1;
 }
 
