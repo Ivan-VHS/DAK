@@ -47,6 +47,9 @@ jobs:
           PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --check "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
           PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/core_mvp_tests.rpr"
 
+      - name: Run early-math pack invariants with Reaper
+        run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper "$GITHUB_WORKSPACE/DuckOS/duckos/education/early_math_contract.rpr"
+
       - name: Run system contract suite with VM engine
         run: PYTHONPATH="$GITHUB_WORKSPACE/DuckOS/projects/reaper" python -m reaper --engine vm "$GITHUB_WORKSPACE/DuckOS/contract_tests.rpr"
 

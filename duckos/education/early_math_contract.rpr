@@ -1,0 +1,74 @@
+# Reaper contract smoke test for the local early-math activity pack.
+# The activities remain adult-guided, child-paced and offline.
+
+craft same_quantity(left, right) {
+    yield size(left) == size(right)
+}
+
+craft count_objects(values) {
+    yield size(values)
+}
+
+craft balanced(shares) {
+    when size(shares) == 0 {
+        yield false
+    }
+    make ordered := sorted(shares)
+    make smallest := first(ordered)
+    make largest := first(reverse(ordered))
+    yield largest - smallest <= 1
+}
+
+craft distribution_valid(total, group_count) {
+    when total < 0 {
+        yield false
+    }
+    when group_count < 1 {
+        yield false
+    }
+    make shares := distribute(total, group_count)
+    yield size(shares) == group_count and sum(shares) == total and balanced(shares)
+}
+
+craft makes_number(left, right, target) {
+    when left < 0 or right < 0 or target < 0 {
+        yield false
+    }
+    yield left + right == target
+}
+
+make pack := read_json("DuckOS/duckos/education/early_math_pack.v1.json")
+assert(pack["schema"] == "dak.education.early-math-pack.v1", "pack schema is stable")
+assert(size(pack["stages"]) == 4, "four flexible age bands are present")
+assert(pack["session_policy"]["adult_guided"], "an adult guides the play")
+assert(pack["session_policy"]["child_paced"], "the child controls the pace")
+assert(pack["session_policy"]["timed"] == false, "activities are not timed")
+assert(pack["session_policy"]["scored"] == false, "activities are not scored")
+assert(pack["session_policy"]["personal_data_collection"] == false, "no child data is collected")
+assert(pack["session_policy"]["network_required"] == false, "the pack works offline")
+
+make row := [1, 2, 3, 4, 5]
+make scattered := [5, 3, 1, 4, 2]
+assert(same_quantity(row, scattered), "rearranging five objects does not change their quantity")
+
+make toys := ["bear", "hare", "fox", "cat", "dog"]
+make piles := partition(toys, 3)
+assert(size(piles) == 3, "partition creates the requested number of groups")
+assert(size(flatten(piles)) == size(toys), "partition neither loses nor duplicates objects")
+make pile_sizes := map(piles, count_objects)
+assert(balanced(pile_sizes), "balanced groups differ by at most one object")
+
+make ten_for_three := distribute(10, 3)
+assert(ten_for_three == [4, 3, 3], "ten objects shared by three recipients preserves the total")
+assert(distribution_valid(12, 3), "twelve objects can be shared evenly by three recipients")
+assert(distribution_valid(-1, 3) == false, "negative object counts are rejected")
+
+make bonds_to_ten := [[1, 9], [2, 8], [3, 7], [4, 6], [5, 5]]
+assert(makes_number(-1, 1, 0) == false, "number parts cannot be negative")
+
+each bond in bonds_to_ten {
+    assert(size(bond) == 2, "a number bond contains two parts")
+    assert(makes_number(bond[0], bond[1], 10), "each displayed pair makes ten")
+}
+
+emit "DAK_EARLY_MATH_PACK_CONTRACT:PASS"
