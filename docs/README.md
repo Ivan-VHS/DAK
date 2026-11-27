@@ -11,11 +11,15 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 ## Desktop and application interfaces
 
 - [DAK Desktop](DAK_DESKTOP.md) — native host shell, Reaper session policies and interactive HTML demo.
-
 - [DAK native integration](MORA_INTEGRATION.md) — host-native Qt 6 application, top-level windows and native-service boundary.
 - [DAK Commons](MORA_COMMONS.md) — local app-discovery hub and catalogue responsibilities.
 - [DAK design system](../MORA_DESIGN_SYSTEM.md) — versioned interface tokens and visual language.
 - [Browser reference preview](../mora/index.html) — retained browser prototype, not a native compositor.
+
+## Learning and family experience
+
+- [Early mathematics encyclopedia (RU)](EARLY_MATHEMATICS_ENCYCLOPEDIA_RU.md) — family-facing guide from infancy to school entry, including counting, geometry, measurement, patterns, games and safety.
+- [Early mathematics experience v1](EARLY_MATHEMATICS_EXPERIENCE_V1.md) — age-flexible product principles, safety rules, activity content contract and cross-repository responsibilities. This is a specification, not a shipped app.
 
 ## Native boot and kernel
 
