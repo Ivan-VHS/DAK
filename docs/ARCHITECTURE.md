@@ -16,7 +16,7 @@ The four peer repositories remain independent Git submodules pinned at exact com
 |---|---|---|
 | Reaper language core | system policy, service logic, deterministic decisions | executable on reference runtime |
 | Boot contract | ordered startup phases and recovery transitions | Reaper reference contract; stage-0 firmware handoff also exists |
-| Memory contract | range validation, 64-byte arenas, frame reset and SoA sizing | Reaper policy plus C Boot Info v1 range/map validation; not a physical allocator or page-table manager |
+| Memory contract | range validation, physical frames, virtual mappings, 64-byte arenas and SoA sizing | C11 boot-info/frame allocator and a host-tested four-level 4 KiB x86-64 page-table manager; the new tables are not yet activated with CR3 |
 | Scheduler policy | stable priority/deadline choice and least-loaded worker selection | implemented as Reaper contract; no context switch or work stealing |
 | IPC and UDB bus | bounded queues, byte accounting and explicit backpressure | implemented as Reaper contract; no shared-page mapping |
 | Capability and trust layer | explicit grants, attenuation, validation and quarantine | implemented as Reaper contract; kernel enforcement pending |
@@ -44,7 +44,7 @@ The memory contract uses an exclusive upper bound and validates ranges before a 
 
 A new frame or event transaction reserves aligned spans and resets the cursor as one state transition. The current policy uses a 64-byte alignment boundary, matching the source specification's cache-line target. SoA layout computes padding to a supplied lane width and checks the resulting byte budget.
 
-These are arithmetic and lifecycle contracts, not physical page allocation. Page tables, MMIO mapping, DMA pinning, NUMA allocation, static ownership analysis, FBIP reuse and actual reclamation remain native-backend work.
+Reaper continues to own the mapping policy. The C11 architecture boundary now provides four-level 4 KiB page-table construction, mapping, translation and unmapping with canonical-address, user/kernel split and W^X validation. The mapper receives physical allocation and HHDM resolution callbacks; it does not load CR3, replace Limine's active mappings, service page faults or reclaim intermediate tables. Huge pages, MMIO mapping, DMA pinning, NUMA allocation, SMP-safe mutation and active TLB shootdown remain later native-backend work.
 
 ## Scheduling, flock and flow control
 
