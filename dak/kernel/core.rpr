@@ -12,7 +12,7 @@ export craft identity() {
 }
 
 export craft u32_le(value) {
-    when value < 0 or value > 4294967295 { yield ["ERR", "u32-range"] }
+    when value < 0 or value > 4294967295 or value % 1 != 0 { yield ["ERR", "u32-range"] }
     vary rest := value
     vary bytes := []
     vary index := 0
@@ -26,7 +26,7 @@ export craft u32_le(value) {
 }
 
 export craft u63_le(value) {
-    when value < 0 or value > 9223372036854775807 { yield ["ERR", "u63-range"] }
+    when value < 0 or value > 9223372036854775807 or value % 1 != 0 { yield ["ERR", "u63-range"] }
     vary rest := value
     vary bytes := []
     vary index := 0
@@ -348,7 +348,12 @@ export craft rule_valid(rule, address_limit) {
     when rule[2] < 0 or rule[2] > 255 or rule[5] < 0 or rule[5] > 4294967295 {
         yield false
     }
-    yield passport_valid(rule[9], address_limit, 64) and rule[9][2] == 10 and rule[9][4] == rule[1] and rule[9][5] == rule[5]
+    when rule[4] != true and rule[4] != false { yield false }
+    make expected_flags := 19
+    when rule[4] { change expected_flags := expected_flags + 8 }
+    when rule[8] != expected_flags { yield false }
+    when not passport_valid(rule[9], address_limit, 64) { yield false }
+    yield rule[9][2] == 10 and rule[9][3] == rule[8] and rule[9][4] == rule[1] and rule[9][5] == rule[5] and rule[9][6] == rule[6] and rule[9][7] == rule[7]
 }
 
 export craft rule_admit(passport_ok, ownership_ok, sector_ok, model_state, signature_ok, mandatory_checks_ok) {
