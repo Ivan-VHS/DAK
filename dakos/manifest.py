@@ -1,4 +1,4 @@
-"""Validation for DuckOS system-build manifests and local component artifacts."""
+"""Validation for DAKOS system-build manifests and local component artifacts."""
 from __future__ import annotations
 
 import hashlib
@@ -8,7 +8,7 @@ import re
 import stat
 from typing import Any
 
-SCHEMA = "duckos.system-manifest.v1"
+SCHEMA = "dakos.system-manifest.v1"
 MAX_COMPONENTS = 64
 MAX_COMPONENT_BYTES = 8 * 1024 * 1024 * 1024
 MAX_TOTAL_BYTES = 32 * 1024 * 1024 * 1024
@@ -152,7 +152,7 @@ def validate_manifest(manifest: Any, root: str | Path, *, verify_files: bool = T
     if not _REQUIRED <= seen:
         raise ManifestError("required boot components are missing")
     return {
-        "schema": "duckos.manifest-validation.v1",
+        "schema": "dakos.manifest-validation.v1",
         "valid": True,
         "architecture": architecture,
         "kernel_abi": kernel_abi,
