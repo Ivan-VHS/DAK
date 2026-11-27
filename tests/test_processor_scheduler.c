@@ -7,6 +7,7 @@
 static void test_scheduler_lifecycle_and_startup(void) {
     duckos_scheduler scheduler;
     assert(duckos_scheduler_init(&scheduler, 4U, 1U, NULL) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_begin_cpu_start(&scheduler, 1U) == DUCKOS_SCHED_INVALID_STATE);
     assert(duckos_scheduler_bootstrap_cpu(&scheduler, 0U) == DUCKOS_SCHED_OK);
     assert(duckos_scheduler_begin_cpu_start(&scheduler, 1U) == DUCKOS_SCHED_OK);
     duckos_ap_startup_evidence missing = {1U, 1U, 1U, 1U, 0U, 1U};
@@ -73,9 +74,15 @@ static void test_core_drain_and_topology_generation(void) {
     assert(duckos_scheduler_begin_cpu_start(&scheduler, 1U) == DUCKOS_SCHED_OK);
     duckos_ap_startup_evidence ready = {1U, 1U, 1U, 1U, 1U, 1U};
     assert(duckos_scheduler_complete_cpu_start(&scheduler, 1U, &ready) == DUCKOS_SCHED_OK);
+    duckos_sched_thread pinned = make_thread(81U, 20, 0U, UINT64_C(1) << 1U, DUCKOS_THREAD_CREATED);
+    assert(duckos_scheduler_register_thread(&scheduler, &pinned) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_transition_thread(&scheduler, 81U, DUCKOS_THREAD_READY) == DUCKOS_SCHED_OK);
+    assert(duckos_scheduler_transition_thread(&scheduler, 81U, DUCKOS_THREAD_BLOCKED) == DUCKOS_SCHED_OK);
     assert(duckos_scheduler_begin_cpu_drain(&scheduler, 1U) == DUCKOS_SCHED_OK);
     assert(!duckos_scheduler_core_offline_allowed(&scheduler, 1U));
     assert(duckos_scheduler_update_cpu_critical(&scheduler, 1U, 0U, 0U, 0U, 0U) == DUCKOS_SCHED_OK);
+    assert(!duckos_scheduler_core_offline_allowed(&scheduler, 1U));
+    scheduler.threads[0].affinity_mask |= UINT64_C(1);
     assert(duckos_scheduler_core_offline_allowed(&scheduler, 1U));
     assert(duckos_scheduler_release_cpu(&scheduler, 1U) == DUCKOS_SCHED_OK);
     assert(scheduler.generation == 8U);
