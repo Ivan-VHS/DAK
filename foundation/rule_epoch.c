@@ -1,6 +1,15 @@
 #include "rule_epoch.h"
 
-#include <string.h>
+static void dak_bytes_clear(void *destination, size_t length) {
+    uint8_t *bytes = (uint8_t *)destination;
+    for (size_t index = 0u; index < length; ++index) bytes[index] = 0u;
+}
+
+static void dak_bytes_copy(void *destination, const void *source, size_t length) {
+    uint8_t *output = (uint8_t *)destination;
+    const uint8_t *input = (const uint8_t *)source;
+    for (size_t index = 0u; index < length; ++index) output[index] = input[index];
+}
 
 static void registry_lock(dak_rule_registry *registry) {
     while (atomic_flag_test_and_set_explicit(&registry->guard, memory_order_acquire)) {
@@ -34,7 +43,7 @@ static bool model_descriptor_valid(const dak_rule_model_v1 *model, size_t payloa
 
 void dak_rule_registry_init(dak_rule_registry *registry) {
     if (registry == NULL) return;
-    memset(registry, 0, sizeof(*registry));
+    dak_bytes_clear(registry, sizeof(*registry));
     atomic_flag_clear_explicit(&registry->guard, memory_order_release);
     registry->active_slot = DAK_RULE_SLOT_NONE;
     for (uint32_t index = 0u; index < DAK_RULE_SLOT_COUNT; ++index) {
@@ -84,9 +93,9 @@ dak_rule_epoch_status dak_rule_registry_publish(
     slot->model.generation = registry->generation + 1u;
     slot->model.flags = 0u;
     slot->pin_count = 0u;
-    memcpy(slot->payload, payload, payload_bytes);
+    dak_bytes_copy(slot->payload, payload, payload_bytes);
     if (payload_bytes < DAK_RULE_MODEL_MAX_PAYLOAD_BYTES) {
-        memset(slot->payload + payload_bytes, 0,
+        dak_bytes_clear(slot->payload + payload_bytes,
             DAK_RULE_MODEL_MAX_PAYLOAD_BYTES - payload_bytes);
     }
     registry_unlock(registry);
@@ -96,8 +105,8 @@ dak_rule_epoch_status dak_rule_registry_publish(
 
     registry_lock(registry);
     if (!verified) {
-        memset(&slot->model, 0, sizeof(slot->model));
-        memset(slot->payload, 0, sizeof(slot->payload));
+        dak_bytes_clear(&slot->model, sizeof(slot->model));
+        dak_bytes_clear(slot->payload, sizeof(slot->payload));
         slot->state = DAK_RULE_SLOT_EMPTY;
         registry->publishing = 0u;
         registry_unlock(registry);
@@ -129,7 +138,7 @@ dak_rule_epoch_status dak_rule_registry_pin(
     dak_rule_lease *lease
 ) {
     if (registry == NULL || lease == NULL) return DAK_RULE_EPOCH_INVALID_ARGUMENT;
-    memset(lease, 0, sizeof(*lease));
+    dak_bytes_clear(lease, sizeof(*lease));
 
     registry_lock(registry);
     if (registry->publishing != 0u) {
@@ -181,11 +190,11 @@ dak_rule_epoch_status dak_rule_registry_unpin(
     --slot->pin_count;
     if (slot->pin_count == 0u && slot->state == DAK_RULE_SLOT_RETIRED) {
         slot->state = DAK_RULE_SLOT_EMPTY;
-        memset(&slot->model, 0, sizeof(slot->model));
-        memset(slot->payload, 0, sizeof(slot->payload));
+        dak_bytes_clear(&slot->model, sizeof(slot->model));
+        dak_bytes_clear(slot->payload, sizeof(slot->payload));
     }
     registry_unlock(registry);
-    memset(lease, 0, sizeof(*lease));
+    dak_bytes_clear(lease, sizeof(*lease));
     return DAK_RULE_EPOCH_OK;
 }
 
