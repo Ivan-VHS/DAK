@@ -12,9 +12,9 @@ Mora currently runs as a static browser/PWA shell. A web page cannot safely enum
 
 ## Native bridge contract
 
-The JSON Schema at ../mora/contracts/oplague-gaming.v1.schema.json defines the request/response envelope for a future DuckOS native host service. It includes narrowly-scoped capabilities for hardware reads, snapshots, temporary power-plan sessions, benchmark comparison and manually validated profile writes.
+The JSON Schema at ../mora/contracts/oplague-gaming.v1.schema.json defines the request/response envelope for a future DAKOS native host service. It includes narrowly-scoped capabilities for hardware reads, snapshots, temporary power-plan sessions, benchmark comparison and manually validated profile writes.
 
-A production bridge must be implemented by the DuckOS native service layer, not by a web page. Before enabling it, the host must:
+A production bridge must be implemented by the DAKOS native service layer, not by a web page. Before enabling it, the host must:
 
 1. Bind requests to the active local OS user and an authenticated Mora origin; never expose an unauthenticated localhost HTTP endpoint.
 2. Validate the schema, request expiry, nonce/replay protection and capability-to-consent mapping.

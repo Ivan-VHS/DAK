@@ -1,14 +1,14 @@
-# DuckOS native implementation roadmap
+# DAKOS native implementation roadmap
 
 **Reviewed:** 2026-11-25  
-**Product:** DuckOS operating-system foundation; Mora has a browser reference preview and a host-native Qt 6 Widgets desktop application.  
+**Product:** DAKOS operating-system foundation; Mora has a browser reference preview and a host-native Qt 6 Widgets desktop application.  
 **Source of truth:** native source, Reaper contracts, tests, CMake targets, CI and the versioned system-capability profile.
 
 ## Product maturity contract
 
-DuckOS currently combines three distinct surfaces. They must never be conflated:
+DAKOS currently combines three distinct surfaces. They must never be conflated:
 
-1. **Mora host surfaces:** a Qt 6 Widgets host-native application plus a retained browser reference preview. The native app uses host OS top-level windows but cannot enforce DuckOS kernel privileges or start DuckOS processes.
+1. **Mora host surfaces:** a Qt 6 Widgets host-native application plus a retained browser reference preview. The native app uses host OS top-level windows but cannot enforce DAKOS kernel privileges or start DAKOS processes.
 2. **Reaper reference contracts:** executable policy models for boot sequencing, memory arithmetic, scheduling decisions, IPC admission, capabilities, service restart and telemetry classification. Passing these tests proves policy behavior on the Reaper reference runtime only.
 3. **Native foundation:** a host-buildable C11 boot-handoff validation library plus an experimental x86_64 freestanding Stage 1 kernel and reproducible Limine BIOS/UEFI ISO pipeline. The Stage 1 target is not yet a process runtime, scheduler, driver stack or bootable desktop OS.
 
@@ -29,7 +29,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 | Boot handoff | Versioned Boot Info v1, Limine BIOS/UEFI handoff and native kernel entry | Limine is a pinned third-party bootloader; no in-house UEFI loader or Secure Boot policy |
 | Validation and early memory | Boot Info and memory-map validation; monotonic 4 KiB allocator over validated USABLE regions, allocating and clearing one HHDM-mapped frame | No free/reclaim, page tables, heap or virtual-memory manager |
 | Reaper contracts | Boot phases, resource budgets, scheduling/IPC policies, capabilities and service restart decisions | Reference-runtime policy, not kernel enforcement |
-| Mora | Qt 6 Widgets host-native shell, local app catalogue, native host windows and a retained browser reference preview | Not yet a kernel-launched DuckOS desktop or privileged shell |
+| Mora | Qt 6 Widgets host-native shell, local app catalogue, native host windows and a retained browser reference preview | Not yet a kernel-launched DAKOS desktop or privileged shell |
 | Release tooling | Deterministic component archive, SHA-256 inventory, optional Ed25519 manifest signature, non-destructive deployment planning and an experimental x86_64 Stage 1 ISO pipeline | No disk installer, production image, verified boot chain or supported hardware matrix |
 
 ## Native implementation sequence
@@ -54,7 +54,7 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 - The Limine loader remains an attributed, pinned third-party component; this milestone does not implement an in-house UEFI application or bootloader.
 - Secure Boot signing/enrolment, verified boot policy, AP startup and other firmware services remain separate future work.
 
-**Stage-1 boot evidence: passed.** The freestanding kernel and ISO build, host Boot Info and frame-allocator CTests, ISO checksum, and pinned QEMU BIOS plus OVMF UEFI runs all succeeded. Both serial logs contain `DUCKOS_BOOT_OK stage=1`; see [verified workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45527148367). The wider D1 milestone remains partial until reusable memory management, page tables, interrupt/timer setup and a supported freestanding Reaper target are implemented and verified.
+**Stage-1 boot evidence: passed.** The freestanding kernel and ISO build, host Boot Info and frame-allocator CTests, ISO checksum, and pinned QEMU BIOS plus OVMF UEFI runs all succeeded. Both serial logs contain `DAKOS_BOOT_OK stage=1`; see [verified workflow run](https://github.com/Ivan-VHS/DAKOS/actions/runs/45527148367). The wider D1 milestone remains partial until reusable memory management, page tables, interrupt/timer setup and a supported freestanding Reaper target are implemented and verified.
 
 ### D2 — Physical memory and virtual address spaces
 
@@ -130,16 +130,16 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 ### D8 — Native desktop, input, graphics and audio
 
-**Status: Planned for the DuckOS kernel session. A separate host-native Qt 6 Widgets Mora application now exists; its build gate is pending CI evidence.**
+**Status: Planned for the DAKOS kernel session. A separate host-native Qt 6 Widgets Mora application now exists; its build gate is pending CI evidence.**
 
 - Keep the host-native Mora application as a separate delivery surface while the kernel session is unavailable. It uses host OS top-level windows and must not be packaged or described as a kernel service.
 - Preserve the Figma composition: compact system top bar, left navigation rail, black radial/folded workspace, restrained yellow selection, application catalogue and bottom dock. Application windows remain independently movable and focusable host windows.
-- Do not route shell launch actions through manifest command strings. A later DuckOS launcher must resolve installed trusted binaries and obtain capabilities through the native broker.
+- Do not route shell launch actions through manifest command strings. A later DAKOS launcher must resolve installed trusted binaries and obtain capabilities through the native broker.
 - Choose a native display and windowing architecture for the initial hardware target.
 - Implement graphics buffer ownership, input event routing, focus, accessibility and display-mode failure recovery.
 - Add font shaping and text input only with a defined Unicode and fallback policy.
 - Treat audio engine/device scheduling as a separate bounded subsystem.
-- Apply [DuckOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) to Mora and native apps: keyboard-complete primary workflows, visible focus, semantic accessibility tree, text scaling, reduced motion, recoverable dialogs, saved workspace geometry and safe display migration.
+- Apply [DAKOS interaction and ergonomics standard](ERGONOMICS_AND_INTERACTION_STANDARD.md) to Mora and native apps: keyboard-complete primary workflows, visible focus, semantic accessibility tree, text scaling, reduced motion, recoverable dialogs, saved workspace geometry and safe display migration.
 - Keep the Mora visual system as a design reference, not as proof of compositor or GPU implementation.
 
 **Exit evidence:** emulator screenshot capture; keyboard and assistive-technology conformance tests; display-loss and DPI-change recovery; touch/pointer target tests; reduced-motion and text-scaling tests; P50/P95/P99 input-to-feedback and frame-time measurements on named targets; supported hardware matrix.
@@ -148,20 +148,20 @@ A policy model, browser preference, catalogue entry, manifest, generated archive
 
 **Status: Partial — experimental x86_64 hybrid ISO build and emulator boot gate; installer and production qualification remain planned.**
 
-- Build a reproducible x86_64 BIOS/UEFI Stage 1 ISO from the pinned Limine bootloader, DuckOS ELF entry and explicit boot configuration; attach a SHA-256 sidecar.
+- Build a reproducible x86_64 BIOS/UEFI Stage 1 ISO from the pinned Limine bootloader, DAKOS ELF entry and explicit boot configuration; attach a SHA-256 sidecar.
 - Boot-test the image in QEMU BIOS and OVMF UEFI in CI, retaining serial logs and the ISO artifact.
 - Add a native installer, disk writes and USB provisioning only behind explicit operator approval and destructive-operation preview.
 - Add verified boot only after signing identity, key custody, revocation and recovery policy are implemented.
 - Implement A/B slot update, boot-success confirmation and recovery only after filesystem and boot stages are qualified.
 - Keep cloud targets out of the release matrix until a real format conversion and target boot test exist.
 
-**Stage-1 image exit evidence: passed.** A reproducible ISO, SHA-256 verification, BIOS and UEFI emulator boot, and QEMU serial logs are published in the [verified Stage 1 workflow run](https://github.com/Ivan-VHS/DuckOS/actions/runs/45527148367). Production release additionally requires USB/installer qualification, a supported hardware matrix, verified signing policy, installation rollback and recovery drill.
+**Stage-1 image exit evidence: passed.** A reproducible ISO, SHA-256 verification, BIOS and UEFI emulator boot, and QEMU serial logs are published in the [verified Stage 1 workflow run](https://github.com/Ivan-VHS/DAKOS/actions/runs/45527148367). Production release additionally requires USB/installer qualification, a supported hardware matrix, verified signing policy, installation rollback and recovery drill.
 
 ### D10 — BAV malware inspection and policy service
 
 **Status: Planned; the .bav v1 bundle contract and JSON Schema are specified only.**
 
-- Reserve the .bav extension exclusively for Beelzebub AV signed declarative security bundles. The earlier OS(2).txt buffer-allocation proposal must use the distinct .bufspec extension; update Reaper's registry only in a separate reviewed change. Reaper's existing duckos.bav.defense-context.v1 identifier and defense-context.v1.tsv file are a metadata vocabulary, not .bav bundle files.
+- Reserve the .bav extension exclusively for Beelzebub AV signed declarative security bundles. The earlier OS(2).txt buffer-allocation proposal must use the distinct .bufspec extension; update Reaper's registry only in a separate reviewed change. Reaper's existing dakos.bav.defense-context.v1 identifier and defense-context.v1.tsv file are a metadata vocabulary, not .bav bundle files.
 - Preserve Reaper's existing Beelzebul 66-rule read-only repository scanner as a separate developer/supply-chain assurance tool. Its report must not be represented as a host endpoint scan. Sensitive-context tags from the TSV taxonomy must never affect malware verdicts or privileged response actions.
 - Implement a trust verifier using a device-owner-controlled trust root, Ed25519 signatures over RFC 8785 canonical JSON, signer revocation, expiry checks and monotonic per-publisher/channel sequence tracking.
 - Implement a read-only user-space scan worker with bounded file sizes, parse depth, archive expansion, time, memory and concurrency. Treat unsupported or incomplete inspection as unknown, never as clean.
@@ -188,8 +188,8 @@ Every native stage must have:
 
 ## Current non-goals
 
-A hosted web service, remote orchestration control plane, automatic driver installation, arbitrary shell execution, unattended destructive disk writes and unsupported cloud deployment are not implied by the current DuckOS product. Add them only through an explicit product decision, threat model, owner and acceptance plan.
+A hosted web service, remote orchestration control plane, automatic driver installation, arbitrary shell execution, unattended destructive disk writes and unsupported cloud deployment are not implied by the current DAKOS product. Add them only through an explicit product decision, threat model, owner and acceptance plan.
 
 ## Release rule
 
-Do not claim DuckOS is a complete or usable desktop operating system until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. The x86_64 Stage 1 image now boots in QEMU BIOS and UEFI, but it halts after validated Boot Info v1 handoff and does not yet run a scheduler, processes, services or Mora.
+Do not claim DAKOS is a complete or usable desktop operating system until D1 through D9 prerequisites for the declared target have passed their target-specific acceptance gates. The x86_64 Stage 1 image now boots in QEMU BIOS and UEFI, but it halts after validated Boot Info v1 handoff and does not yet run a scheduler, processes, services or Mora.

@@ -1,17 +1,17 @@
 # Mora desktop shell and native system integration
 
-## Role in DuckOS
+## Role in DAKOS
 
-DuckOS is the operating-system project; Mora is its unified desktop shell. Mora now ships a Qt 6 Widgets host-native application with real top-level host windows, plus the previous browser shell retained as a reference preview. Neither surface is yet launched by the Stage 1 DuckOS kernel, and the host-native adapter is not the future kernel-owned compositor.
+DAKOS is the operating-system project; Mora is its unified desktop shell. Mora now ships a Qt 6 Widgets host-native application with real top-level host windows, plus the previous browser shell retained as a reference preview. Neither surface is yet launched by the Stage 1 DAKOS kernel, and the host-native adapter is not the future kernel-owned compositor.
 
-Mora follows the fixed DuckOS black/white/yellow visual identity: deep black structural surfaces, white content, graphite depth and a single yellow accent for selection, focus and primary actions. The Figma composition uses a radial workspace, restrained vertical folds, glass-like surfaces, a compact top status area, left navigation, application catalogue and bottom dock. The canonical semantic tokens live in mora/theme.json; the palette is not user-switchable.
+Mora follows the fixed DAKOS black/white/yellow visual identity: deep black structural surfaces, white content, graphite depth and a single yellow accent for selection, focus and primary actions. The Figma composition uses a radial workspace, restrained vertical folds, glass-like surfaces, a compact top status area, left navigation, application catalogue and bottom dock. The canonical semantic tokens live in mora/theme.json; the palette is not user-switchable.
 
 ## Shell components
 
 | Surface | Responsibility | Current boundary |
 |---|---|---|
 | Desktop | Clock, status bar, home workspace, application catalogue and dock | Qt 6 Widgets host-native shell; browser preview retained separately |
-| App windows | Focus, move, close, title, host input and native window decoration | Separate top-level Qt windows managed by the host OS; not a DuckOS kernel window manager |
+| App windows | Focus, move, close, title, host input and native window decoration | Separate top-level Qt windows managed by the host OS; not a DAKOS kernel window manager |
 | Mora AI | Parse safe local intents, preview plan, request approval | Browser preview only; native agent and approval broker not connected |
 | Sentinel | Show and store capability preferences | Browser preview only; no native process enforcement |
 | Restore | Save/restore shell settings and preview an update sequence | Browser preview only; no OS image update/rollback |
@@ -32,16 +32,16 @@ Build with Qt 6 Widgets using the root CMake target.
 
 Linux:
 ```sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
-./build/mora-native/duckos_mora_native
+cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDAKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --target dakos_mora_native --parallel
+./build/mora-native/dakos_mora_native
 ```
 
 Windows (Qt 6 Widgets and its CMake package configured):
 ```powershell
-cmake -S . -B build/mora-native -A x64 -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --config Release --target duckos_mora_native
-.\build\mora-native\Release\duckos_mora_native.exe
+cmake -S . -B build/mora-native -A x64 -DDAKOS_BUILD_NATIVE_MORA=ON
+cmake --build build/mora-native --config Release --target dakos_mora_native
+.\build\mora-native\Release\dakos_mora_native.exe
 ```
 
 The native host app reads mora/apps.json and does not execute manifest commands. Poi drafts use host-local QSettings; Abriganza only lists metadata after the user explicitly selects a folder; the VentuSample waveform is a visual sample, not an audio engine. Other catalogue entries open descriptive placeholder windows until their native applications are integrated.
@@ -64,7 +64,7 @@ A future agent service must return a typed action plan with versioned schemas, t
 
 Sentinel stores only six shell preferences: microphone, camera, location, personal files, network and clipboard. All begin denied. A switch changes the local Mora preference object; it does not grant or revoke permission in the browser, kernel or another process.
 
-The future DuckOS-native design must use deny-by-default capabilities, short-lived grants, per-app identity, path and device scoping, revocation, resource limits and audit events. The current Qt host application does not start external applications or enforce a DuckOS sandbox; apps must run inside a real process/capability boundary before any UI can be represented as an enforcement surface.
+The future DAKOS-native design must use deny-by-default capabilities, short-lived grants, per-app identity, path and device scoping, revocation, resource limits and audit events. The current Qt host application does not start external applications or enforce a DAKOS sandbox; apps must run inside a real process/capability boundary before any UI can be represented as an enforcement surface.
 
 ## Recovery and atomic updates
 
@@ -86,11 +86,11 @@ The Mora shell publishes a web manifest for installation in supported browsers.
 
 The Mora shell publishes a web manifest for installation in supported browsers. Its service worker is limited to the `mora/` directory, precaches only the shell HTML, CSS, JavaScript, catalogue, policy and icon files, and removes only obsolete caches with the `mora-shell-` prefix. It does not clear other applications' caches or cache cross-origin requests.
 
-The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser preview normalizes legacy theme preferences to the single Duck palette; the host-native Qt adapter uses the same semantic color roles.
+The shared palette and design constraints are defined by [Mora Design System](../MORA_DESIGN_SYSTEM.md) and [mora/theme.json](../mora/theme.json). The browser preview normalizes legacy theme preferences to the single DAK palette; the host-native Qt adapter uses the same semantic color roles.
 
 ## Responsive workspace and accessibility
 
-The browser preview supports a responsive layout and reduced-motion preference. The host-native Qt shell uses host-native keyboard focus, pointer input, window decorations and DPI handling. Its current workspace is a single host window with independently managed app windows; DuckOS-native virtual workspaces, compositor-level display migration, XR, voice/gesture input, high-contrast profiles, VRR and hardware resource scheduling require dedicated kernel/user-session services and platform accessibility testing.
+The browser preview supports a responsive layout and reduced-motion preference. The host-native Qt shell uses host-native keyboard focus, pointer input, window decorations and DPI handling. Its current workspace is a single host window with independently managed app windows; DAKOS-native virtual workspaces, compositor-level display migration, XR, voice/gesture input, high-contrast profiles, VRR and hardware resource scheduling require dedicated kernel/user-session services and platform accessibility testing.
 
 ## Data handling
 
@@ -100,7 +100,7 @@ The local browser profile can be removed by clearing site data. The snapshot is 
 
 ## External application integration
 
-The Qt host-native Mora shell now has explicit launch actions for the four pinned ecosystem workbenches. These are host-process handoffs, not DuckOS kernel processes:
+The Qt host-native Mora shell now has explicit launch actions for the four pinned ecosystem workbenches. These are host-process handoffs, not DAKOS kernel processes:
 
 | Workbench | Native host launch path | Availability boundary |
 |---|---|---|
@@ -109,11 +109,11 @@ The Qt host-native Mora shell now has explicit launch actions for the four pinne
 | OPlague | **projects/oplague/oplague_app.py** through the local Python interpreter | Requires Python and Tk; inspection remains read-only |
 | VentuSample | Existing **VentuSample** Qt executable | Requires a prebuilt host executable; audio remains offline-first |
 
-The launcher uses a fixed application-ID allowlist. It discovers the DuckOS root from the federation markers, resolves only hard-coded relative targets beneath that root, rejects symlinks and paths escaping the checkout, and starts programs with QProcess::startDetached plus an explicit argument list. It never interprets mora/apps.json panel strings or arbitrary manifest commands as executable instructions. Every launch requires a confirmation click; no project is built, installed or started automatically.
+The launcher uses a fixed application-ID allowlist. It discovers the DAKOS root from the federation markers, resolves only hard-coded relative targets beneath that root, rejects symlinks and paths escaping the checkout, and starts programs with QProcess::startDetached plus an explicit argument list. It never interprets mora/apps.json panel strings or arbitrary manifest commands as executable instructions. Every launch requires a confirmation click; no project is built, installed or started automatically.
 
 For Reaper and OPlague, Mora detects an available python3, python, or Windows py -3 command. It does not install the interpreter, install project dependencies or verify the interpreter's minor version; use the upstream supported-version requirements. Pytyliki and VentuSample launch only when their expected native executable is already present. A missing build is reported as unavailable instead of being silently compiled.
 
-This bridge runs applications on the host operating system. It does not provide DuckOS process creation, syscall enforcement, capability isolation, a service manager, a package manager or kernel-level sandboxing. The separate manifest contract below remains the path for future signed, versioned app packages:
+This bridge runs applications on the host operating system. It does not provide DAKOS process creation, syscall enforcement, capability isolation, a service manager, a package manager or kernel-level sandboxing. The separate manifest contract below remains the path for future signed, versioned app packages:
 
 External projects may publish **integrations/mora/manifest.json** using **mora/app-manifest.schema.json**. A manifest describes metadata; it does not install an app, confer trust or grant capabilities. A production package manager and launcher must still verify publisher identity, signatures, requested capabilities, installation roots, updates and rollback.
 
@@ -128,22 +128,22 @@ External projects may publish **integrations/mora/manifest.json** using **mora/a
 Never promote a feature to native/verified status because its UI panel exists.
 
 
-## Duck Desktop integration
+## DAK Desktop integration
 
-Mora exposes Duck Desktop as a system tool, but the browser panel is informational. It gives the user the `duckos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DuckOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
+Mora exposes DAK Desktop as a system tool, but the browser panel is informational. It gives the user the `dakos desktop gui` launch command and does not request browser access to local directories or claim to manage host processes. The native utility is installed with the DAKOS Python package and owns desktop auditing, safe Inbox moves and reversible current-user startup operations.
 
-Its boundaries and CLI are documented in [Duck Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.
+Its boundaries and CLI are documented in [DAK Desktop optimization](DESKTOP_OPTIMIZATION.md). It does not replace the native compositor, window manager or system service manager.
 
 
 ## Red Sparrow creative workspace
 
-The first-party **Red Sparrow / 赤雀** workspace is a creative production panel inside Mora, not a second desktop shell. It keeps the DuckOS black/white/yellow system identity; restrained crimson and emerald motifs are scoped to this application's own window. The panel covers screen Wuxia, stage-safe choreography, Emerald Nightmare visual language and UK Grime rhythm references. It is a fictional creative workspace, not a historical martial-arts school or a real combat manual.
+The first-party **Red Sparrow / 赤雀** workspace is a creative production panel inside Mora, not a second desktop shell. It keeps the DAKOS black/white/yellow system identity; restrained crimson and emerald motifs are scoped to this application's own window. The panel covers screen Wuxia, stage-safe choreography, Emerald Nightmare visual language and UK Grime rhythm references. It is a fictional creative workspace, not a historical martial-arts school or a real combat manual.
 
 The workspace is registered in `mora/apps.json`, launched through the existing Mora window manager and included in the scoped service-worker cache. The internal app identifier is `red-sparrow`. Creative notes use the local document store: IndexedDB is preferred, with a bounded localStorage fallback. No network upload or cross-device synchronization is implemented.
 
 ## Separate locale profile
 
-Control supports a persistent `ru-RU` / `zh-CN` locale selection under `duckos.mora.locale.v1`. The Simplified Chinese profile uses Mandarin-oriented UI wording and the `zh-CN` locale for date/time formatting. It is a presentation preference: it does not rename repositories, translate source code or change Reaper/compiler contracts. The desktop chrome, Control panel and Red Sparrow workspace are localized; legacy application panels are not yet fully translated and this capability remains partial.
+Control supports a persistent `ru-RU` / `zh-CN` locale selection under `dakos.mora.locale.v1`. The Simplified Chinese profile uses Mandarin-oriented UI wording and the `zh-CN` locale for date/time formatting. It is a presentation preference: it does not rename repositories, translate source code or change Reaper/compiler contracts. The desktop chrome, Control panel and Red Sparrow workspace are localized; legacy application panels are not yet fully translated and this capability remains partial.
 
 ## Local-first document storage
 
