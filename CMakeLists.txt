@@ -34,6 +34,17 @@ if(DUCKOS_ENABLE_SANITIZERS)
     endif()
 endif()
 
+add_library(duckos_desktop_host STATIC
+    foundation/desktop_ipc.c
+    foundation/desktop_capability.c
+)
+target_include_directories(duckos_desktop_host PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/foundation)
+if(MSVC)
+    target_compile_options(duckos_desktop_host PRIVATE /W4 /sdl)
+else()
+    target_compile_options(duckos_desktop_host PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+endif()
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(duckos_boot_info_tests tests/test_boot_info.c)
@@ -53,6 +64,14 @@ if(BUILD_TESTING)
         target_compile_options(duckos_frame_allocator_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-frame-allocator COMMAND duckos_frame_allocator_tests)
+
+    add_executable(duckos_desktop_ipc_tests tests/test_desktop_ipc.c)
+    target_link_libraries(duckos_desktop_ipc_tests PRIVATE duckos_desktop_host)
+    add_test(NAME duckos-desktop-ipc COMMAND duckos_desktop_ipc_tests)
+
+    add_executable(duckos_desktop_broker_tests tests/test_desktop_capability.c)
+    target_link_libraries(duckos_desktop_broker_tests PRIVATE duckos_desktop_host)
+    add_test(NAME duckos-desktop-capability-broker COMMAND duckos_desktop_broker_tests)
 
     add_executable(duckos_idt_tests tests/test_idt.c)
     target_link_libraries(duckos_idt_tests PRIVATE duckos_boot_contract)

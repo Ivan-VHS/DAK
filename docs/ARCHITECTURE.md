@@ -114,3 +114,8 @@ This is a native host application, not yet the native DuckOS desktop session. It
 10. Installer, production image qualification and recovery.
 
 Each gate needs a conformance suite and target hardware or emulator evidence. Do not skip a gate by relabelling a reference-runtime test as a hardware test.
+
+
+## DABI64 Desktop Host v1
+
+The host-side foundation now has a C11 DIPC v1 framing/sequence validator, bounded event ring and peer-identity-bound capability-broker core. Native integration is deliberately incomplete: the process model and user address spaces are a separate gate, and the trusted peer-identity callback must be implemented by a kernel endpoint or OS credential adapter. See DABI64_DESKTOP_HOST_V1.md.
