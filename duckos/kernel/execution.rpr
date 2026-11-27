@@ -1,0 +1,81 @@
+# Exact-set execution barrier for mandatory kernel/install operations.
+# This module verifies completion; it does not pretend to execute privileged work.
+
+import "duckos/kernel/verification.rpr" as verification
+
+export craft step_names_valid(items) {
+    when size(items) == 0 {
+        yield false
+    }
+    vary valid := true
+    each item in items {
+        when item == "" {
+            change valid := false
+        }
+    }
+    yield valid
+}
+
+export craft unique_steps(items) {
+    when not step_names_valid(items) {
+        yield false
+    }
+    vary valid := true
+    each item in items {
+        vary occurrences := 0
+        each candidate in items {
+            when candidate == item {
+                change occurrences := occurrences + 1
+            }
+        }
+        when occurrences != 1 {
+            change valid := false
+        }
+    }
+    yield valid
+}
+
+export craft exact_completion(required, completed) {
+    when not unique_steps(required) or not unique_steps(completed) {
+        yield false
+    }
+    when size(required) != size(completed) {
+        yield false
+    }
+
+    vary complete := true
+    each required_step in required {
+        vary found := false
+        each completed_step in completed {
+            when required_step == completed_step {
+                change found := true
+            }
+        }
+        when not found {
+            change complete := false
+        }
+    }
+    yield complete
+}
+
+export craft barrier_decision(model, candidate, required, completed, failed) {
+    when not verification["descriptor_valid"](model) {
+        yield "deny-invalid-model"
+    }
+    when model[4] != "installing" {
+        yield "deny-model-not-locked"
+    }
+    when not verification["snapshot_matches"](model, candidate) {
+        yield "deny-snapshot-drift"
+    }
+    when size(failed) > 0 {
+        yield "recovery-required"
+    }
+    when not unique_steps(required) or not unique_steps(completed) {
+        yield "deny-invalid-execution-plan"
+    }
+    when not exact_completion(required, completed) {
+        yield "deny-incomplete-execution"
+    }
+    yield "allow-commit"
+}
