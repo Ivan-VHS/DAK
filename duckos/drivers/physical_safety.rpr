@@ -1,0 +1,235 @@
+# Политика тепловой, электрической и химической безопасности устройств.
+# Значения поступают от доверенного драйвера; этот модуль не обращается к датчикам напрямую.
+
+export craft thermal_action(temperature_millic, warning_millic, critical_millic) {
+    when warning_millic >= critical_millic or warning_millic < -100000 or temperature_millic < -100000 or temperature_millic > 250000 or critical_millic > 250000 {
+        yield "invalid-sensor-profile"
+    }
+    when temperature_millic >= critical_millic {
+        yield "emergency-throttle"
+    }
+    when temperature_millic >= warning_millic {
+        yield "throttle-and-disable-boost"
+    }
+    yield "normal"
+}
+
+export craft thermal_balance_valid(current_millic, next_millic, maximum_step_millic, interval_ns) {
+    when current_millic < -100000 or current_millic > 250000 or next_millic < -100000 or next_millic > 250000 or maximum_step_millic <= 0 or interval_ns <= 0 {
+        yield false
+    }
+    make difference := current_millic - next_millic
+    when difference < 0 {
+        change difference := 0 - difference
+    }
+    yield difference <= maximum_step_millic
+}
+
+# Одноузловая тепловая модель: ΔTмК = (Pвх − Pвых)мВт × Δtнс / (CмДж/°C × 1 000 000).
+# Это оценка для регулирования; пределы датчиков и реальные задержки задаёт драйвер.
+export craft thermal_model_prediction(current_temp_millic, heat_in_mw, heat_out_mw, thermal_capacity_mj_per_c, duration_ns) {
+    make maximum := 9223372036854775807
+    when current_temp_millic < -100000 or current_temp_millic > 250000 or heat_in_mw < 0 or heat_out_mw < 0 or thermal_capacity_mj_per_c <= 0 or duration_ns <= 0 {
+        yield [-1, false]
+    }
+    when thermal_capacity_mj_per_c > maximum / 1000000 {
+        yield [-1, false]
+    }
+    make divisor := thermal_capacity_mj_per_c * 1000000
+    vary heating := heat_in_mw >= heat_out_mw
+    vary net_power_mw := heat_in_mw - heat_out_mw
+    when not heating {
+        change net_power_mw := heat_out_mw - heat_in_mw
+    }
+    when net_power_mw > 0 and duration_ns > maximum / net_power_mw {
+        yield [-1, false]
+    }
+    make energy_scaled := net_power_mw * duration_ns
+    make delta_millic := energy_scaled / divisor
+    when heating {
+        when delta_millic > 250000 - current_temp_millic {
+            yield [-1, false]
+        }
+        yield [current_temp_millic + delta_millic, true]
+    }
+    when delta_millic > current_temp_millic + 100000 {
+        yield [-1, false]
+    }
+    yield [current_temp_millic - delta_millic, true]
+}
+
+export craft frequency_step_valid(current_khz, requested_khz, maximum_step_khz) {
+    when current_khz <= 0 or requested_khz <= 0 or maximum_step_khz <= 0 {
+        yield false
+    }
+    make difference := current_khz - requested_khz
+    when difference < 0 {
+        change difference := 0 - difference
+    }
+    yield difference <= maximum_step_khz
+}
+
+export craft power_budget_valid(active_mw, reserved_mw, supply_limit_mw) {
+    when active_mw < 0 or reserved_mw < 0 or supply_limit_mw <= 0 {
+        yield false
+    }
+    when active_mw > 9223372036854775807 - reserved_mw {
+        yield false
+    }
+    yield active_mw + reserved_mw <= supply_limit_mw
+}
+
+export craft voltage_current_budget_valid(voltage_mv, current_ma, limit_mw) {
+    make maximum := 9223372036854775807
+    when voltage_mv <= 0 or current_ma < 0 or limit_mw <= 0 {
+        yield false
+    }
+    when current_ma > 0 and voltage_mv > maximum / current_ma {
+        yield false
+    }
+    yield (voltage_mv * current_ma) / 1000 <= limit_mw
+}
+
+export craft spike_filter(previous_load, sampled_load, window, escalation_threshold) {
+    when previous_load < 0 or sampled_load < 0 or window <= 0 or escalation_threshold < 0 {
+        yield ["invalid", previous_load]
+    }
+    make filtered := previous_load
+    when sampled_load >= previous_load {
+        change filtered := previous_load + (sampled_load - previous_load) / window
+    } otherwise {
+        change filtered := previous_load - (previous_load - sampled_load) / window
+    }
+    when filtered >= escalation_threshold {
+        yield ["escalate", filtered]
+    }
+    yield ["hold", filtered]
+}
+
+export craft timer_jitter_valid(actual_ns, expected_ns, maximum_jitter_ns) {
+    when actual_ns < 0 or expected_ns < 0 or maximum_jitter_ns < 0 {
+        yield false
+    }
+    make difference := actual_ns - expected_ns
+    when difference < 0 {
+        change difference := 0 - difference
+    }
+    yield difference <= maximum_jitter_ns
+}
+
+export craft polling_rate_valid(poll_rate_hz, channel_capacity_hz) {
+    yield poll_rate_hz > 0 and channel_capacity_hz > 0 and poll_rate_hz <= channel_capacity_hz
+}
+
+export craft acoustic_profile_action(temperature_millic, safe_limit_millic, requested_fan_percent, quiet_limit_percent) {
+    when temperature_millic >= safe_limit_millic {
+        yield "cooling-priority"
+    }
+    when requested_fan_percent < 0 or requested_fan_percent > 100 or quiet_limit_percent < 0 or quiet_limit_percent > 100 {
+        yield "invalid-profile"
+    }
+    when requested_fan_percent > quiet_limit_percent {
+        yield "cap-fan-to-quiet-limit"
+    }
+    yield "quiet-profile"
+}
+
+export craft cooling_failure_action(previous_millic, current_millic, throttle_active, emergency_limit_millic) {
+    when previous_millic < -100000 or previous_millic > 250000 or current_millic < -100000 or current_millic > 250000 or emergency_limit_millic <= -100000 or emergency_limit_millic > 250000 {
+        yield "invalid-thermal-reading"
+    }
+    when current_millic < previous_millic or current_millic < emergency_limit_millic {
+        yield "continue-monitoring"
+    }
+    when throttle_active {
+        yield "deep-idle-or-safe-shutdown"
+    }
+    yield "enable-throttle"
+}
+
+export craft ambient_limit(warning_limit_millic, ambient_millic, nominal_ambient_millic, minimum_limit_millic) {
+    when warning_limit_millic <= minimum_limit_millic or ambient_millic < -100000 or ambient_millic > 250000 or nominal_ambient_millic < -100000 or nominal_ambient_millic > 250000 {
+        yield -1
+    }
+    make excess := ambient_millic - nominal_ambient_millic
+    when excess < 0 {
+        change excess := 0
+    }
+    when excess >= warning_limit_millic - minimum_limit_millic {
+        yield minimum_limit_millic
+    }
+    yield warning_limit_millic - excess
+}
+
+export craft battery_charge_current(temp_millic, normal_current_ma, hot_limit_millic, cold_limit_millic, hot_percent) {
+    when temp_millic < -100000 or temp_millic > 250000 or normal_current_ma < 0 or cold_limit_millic >= hot_limit_millic or hot_percent < 0 or hot_percent > 100 {
+        yield ["invalid", 0]
+    }
+    when hot_percent > 0 and normal_current_ma > 9223372036854775807 / hot_percent {
+        yield ["invalid", 0]
+    }
+    when temp_millic < cold_limit_millic {
+        yield ["charge-disabled-cold", 0]
+    }
+    when temp_millic >= hot_limit_millic {
+        yield ["charge-limited-hot", (normal_current_ma * hot_percent) / 100]
+    }
+    yield ["normal", normal_current_ma]
+}
+
+export craft battery_voltage_limit(temp_millic, normal_limit_mv, hot_limit_millic, reduced_limit_mv) {
+    when temp_millic < -100000 or temp_millic > 250000 or normal_limit_mv <= 0 or reduced_limit_mv <= 0 or reduced_limit_mv > normal_limit_mv {
+        yield -1
+    }
+    when temp_millic >= hot_limit_millic {
+        yield reduced_limit_mv
+    }
+    yield normal_limit_mv
+}
+
+export craft wear_level_choice(write_counts) {
+    when size(write_counts) == 0 {
+        yield -1
+    }
+    vary selected := 0
+    vary minimum := write_counts[0]
+    when minimum < 0 {
+        yield -1
+    }
+    each index in range(1, size(write_counts)) {
+        when write_counts[index] < 0 {
+            yield -1
+        }
+        when write_counts[index] < minimum {
+            change minimum := write_counts[index]
+            change selected := index
+        }
+    }
+    yield selected
+}
+
+export craft low_battery_action(charge_percent, critical_percent) {
+    when charge_percent < 0 or charge_percent > 100 or critical_percent < 0 or critical_percent > 100 {
+        yield "invalid-battery-state"
+    }
+    when charge_percent <= critical_percent {
+        yield "preserve-critical-state-and-minimize-power"
+    }
+    yield "normal-power-profile"
+}
+
+export craft storage_io_action(temperature_millic, safe_limit_millic, background_write_rate, maximum_background_rate) {
+    when temperature_millic < -100000 or temperature_millic > 250000 or safe_limit_millic < -100000 or safe_limit_millic > 250000 {
+        yield "invalid-storage-temperature"
+    }
+    when temperature_millic >= safe_limit_millic {
+        yield "pause-background-writes"
+    }
+    when background_write_rate < 0 or maximum_background_rate <= 0 {
+        yield "invalid-storage-rate"
+    }
+    when background_write_rate > maximum_background_rate {
+        yield "throttle-background-writes"
+    }
+    yield "allow-background-writes"
+}

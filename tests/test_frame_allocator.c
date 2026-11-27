@@ -1,4 +1,5 @@
 #include "frame_allocator.h"
+#include "invariants.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -24,6 +25,9 @@ static int test_allocates_only_usable_aligned_pages(void) {
     CHECK(duckos_frame_allocator_init(&allocator, regions, 4u, 0x00100000u) ==
         DUCKOS_FRAME_ALLOCATOR_OK);
     CHECK(allocator.total_pages == 5u);
+    CHECK(allocator.reserved_pages == 257u);
+    CHECK(allocator.managed_pages == 262u);
+    CHECK(duckos_frame_allocator_accounting_valid(&allocator));
 
     const uint64_t expected[] = {
         0x00100000u, 0x00101000u, 0x00102000u, 0x00104000u, 0x00105000u
@@ -34,7 +38,14 @@ static int test_allocates_only_usable_aligned_pages(void) {
         CHECK((page % DUCKOS_FRAME_PAGE_SIZE) == 0u);
     }
     CHECK(allocator.allocated_pages == 5u);
+    CHECK(allocator.reserved_pages == 257u);
+    CHECK(allocator.managed_pages == 262u);
+    CHECK(duckos_frame_allocator_accounting_valid(&allocator));
     CHECK(duckos_frame_allocator_allocate(&allocator, &page) == DUCKOS_FRAME_ALLOCATOR_EXHAUSTED);
+    CHECK(allocator.reserved_pages == 257u);
+    CHECK(allocator.managed_pages == 262u);
+    CHECK(duckos_frame_allocator_accounting_valid(&allocator));
+    CHECK(duckos_kernel_memory_accounting_valid(262u, 0u, 5u, 257u) == 1);
     return 1;
 }
 
@@ -48,8 +59,13 @@ static int test_minimum_address_and_partial_pages(void) {
     CHECK(duckos_frame_allocator_init(&allocator, regions, 1u, 0x00001001u) ==
         DUCKOS_FRAME_ALLOCATOR_OK);
     CHECK(allocator.total_pages == 1u);
+    CHECK(allocator.reserved_pages == 2u);
+    CHECK(allocator.managed_pages == 3u);
+    CHECK(duckos_frame_allocator_accounting_valid(&allocator));
     CHECK(duckos_frame_allocator_allocate(&allocator, &page) == DUCKOS_FRAME_ALLOCATOR_OK);
     CHECK(page == 0x00002000u);
+    CHECK(allocator.allocated_pages == 1u);
+    CHECK(duckos_frame_allocator_accounting_valid(&allocator));
     return 1;
 }
 
@@ -94,7 +110,9 @@ static int same_allocator(
     if (left->range_count != right->range_count ||
         left->active_range != right->active_range ||
         left->total_pages != right->total_pages ||
-        left->allocated_pages != right->allocated_pages) {
+        left->allocated_pages != right->allocated_pages ||
+        left->reserved_pages != right->reserved_pages ||
+        left->managed_pages != right->managed_pages) {
         return 0;
     }
     for (uint32_t index = 0u; index < DUCKOS_FRAME_ALLOCATOR_MAX_RANGES; ++index) {

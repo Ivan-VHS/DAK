@@ -1,0 +1,102 @@
+# Политика взаимодействия с человеком, экраном и гражданским временем.
+# Монотонные интервалы остаются исключительно в ядре; местное время передаёт служба сеанса.
+
+export craft interactive_priority(base_priority, is_foreground, maximum_priority, boost) {
+    when base_priority < 0 or maximum_priority > 255 or maximum_priority < base_priority or boost < 0 {
+        yield -1
+    }
+    when not is_foreground {
+        yield base_priority
+    }
+    when boost > maximum_priority - base_priority {
+        yield maximum_priority
+    }
+    yield base_priority + boost
+}
+
+export craft frame_budget_valid(refresh_hz, frame_budget_ns) {
+    when refresh_hz <= 0 or refresh_hz > 1000 or frame_budget_ns <= 0 {
+        yield false
+    }
+    yield frame_budget_ns <= 1000000000 / refresh_hz
+}
+
+export craft blue_light_policy(local_minute, night_start_minute, night_end_minute, warm_level) {
+    when local_minute < 0 or local_minute >= 1440 or night_start_minute < 0 or night_start_minute >= 1440 or night_end_minute < 0 or night_end_minute >= 1440 or warm_level < 0 or warm_level > 100 {
+        yield "invalid-profile"
+    }
+    vary is_night := false
+    when night_start_minute <= night_end_minute {
+        change is_night := local_minute >= night_start_minute and local_minute < night_end_minute
+    } otherwise {
+        change is_night := local_minute >= night_start_minute or local_minute < night_end_minute
+    }
+    when is_night {
+        yield ["warm-spectrum", warm_level]
+    }
+    yield ["day-spectrum", 0]
+}
+
+export craft notification_action(is_active_input, is_critical) {
+    when is_critical {
+        yield "deliver-critical"
+    }
+    when is_active_input {
+        yield "defer-noncritical"
+    }
+    yield "deliver-normal"
+}
+
+export craft resume_phase_action(phase) {
+    when phase == 0 {
+        yield "restore-input-and-clock"
+    }
+    when phase == 1 {
+        yield "restore-display-and-audio"
+    }
+    when phase == 2 {
+        yield "restore-essential-services"
+    }
+    when phase == 3 {
+        yield "schedule-background-verification"
+    }
+    yield "reject-invalid-resume-phase"
+}
+
+export craft timezone_offset_valid(offset_minutes) {
+    yield offset_minutes >= -840 and offset_minutes <= 840
+}
+
+export craft wall_clock_adjustment_action(offset_seconds) {
+    when offset_seconds < -604800 or offset_seconds > 604800 {
+        yield "reject-unbounded-adjustment"
+    }
+    yield "adjust-wall-clock-only"
+}
+
+export craft external_time_sync_action(monotonic_now, wall_time, received_wall_time) {
+    when monotonic_now < 0 or wall_time < 0 or received_wall_time < 0 {
+        yield "reject-invalid-time"
+    }
+    yield "update-wall-clock-preserve-monotonic-deadlines"
+}
+
+export craft maintenance_action(low_activity, power_margin_valid, thermal_margin_valid) {
+    when low_activity and power_margin_valid and thermal_margin_valid {
+        yield "run-bounded-maintenance"
+    }
+    yield "defer-maintenance"
+}
+
+export craft environment_profile(temperature_millic, thermal_limit_millic, battery_percent, critical_battery_percent, is_night) {
+    when temperature_millic >= thermal_limit_millic {
+        yield "thermal-protection"
+    }
+    when battery_percent <= critical_battery_percent {
+        yield "low-power"
+    }
+    when is_night {
+        yield "night-comfort"
+    }
+    yield "balanced"
+}

@@ -1,0 +1,235 @@
+# Проверки ядра: математические инварианты и безопасность переходов.
+
+export craft monotonic_step_valid(previous, current) {
+    yield previous >= 0 and current >= previous
+}
+
+export craft memory_accounting_valid(total_pages, free_pages, allocated_pages, reserved_pages) {
+    make maximum := 9223372036854775807
+    when total_pages <= 0 or free_pages < 0 or allocated_pages < 0 or reserved_pages < 0 {
+        yield false
+    }
+    when free_pages > maximum - allocated_pages {
+        yield false
+    }
+    when free_pages + allocated_pages > maximum - reserved_pages {
+        yield false
+    }
+    yield free_pages + allocated_pages + reserved_pages == total_pages
+}
+
+export craft resource_valid(value, upper_bound) {
+    yield value >= 0 and upper_bound >= 0 and value <= upper_bound
+}
+
+export craft percentage_valid(value) {
+    yield value >= 0 and value <= 100
+}
+
+export craft wait_graph_preflight(node_count, edges) {
+    when node_count < 0 or node_count > 64 or size(edges) > 256 {
+        yield false
+    }
+    each edge in edges {
+        when size(edge) != 2 or edge[0] < 0 or edge[0] >= node_count or edge[1] < 0 or edge[1] >= node_count {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft smoothed_step(previous, sample, window) {
+    when previous < 0 or sample < 0 or window <= 0 {
+        yield [-1, false]
+    }
+    when sample >= previous {
+        yield [previous + (sample - previous) / window, true]
+    }
+    yield [previous - (previous - sample) / window, true]
+}
+
+export craft table_rebuild_required(occupied, capacity, threshold_percent) {
+    when occupied < 0 or capacity <= 0 or occupied > capacity or threshold_percent < 50 or threshold_percent > 95 {
+        yield "invalid"
+    }
+    make whole := (capacity / 100) * threshold_percent
+    make remainder := ((capacity % 100) * threshold_percent + 99) / 100
+    when occupied >= whole + remainder {
+        yield "rebuild-or-dampen"
+    }
+    yield "continue"
+}
+
+export craft queue_admission(length, capacity) {
+    when length < 0 or capacity <= 0 or length > capacity {
+        yield "invalid"
+    }
+    when length == capacity {
+        yield "backpressure"
+    }
+    yield "admit"
+}
+
+export craft active_set_subset(active_ids, registered_ids) {
+    each active in active_ids {
+        vary found := false
+        each registered in registered_ids {
+            when active == registered {
+                change found := true
+            }
+        }
+        when not found {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft alignment_valid(address, bytes, alignment) {
+    when address < 0 or bytes <= 0 or alignment <= 0 {
+        yield false
+    }
+    vary reduced := alignment
+    each step in range(0, 63) {
+        when reduced > 1 and reduced % 2 == 0 {
+            change reduced := reduced / 2
+        }
+    }
+    when reduced != 1 {
+        yield false
+    }
+    yield address % alignment == 0 and bytes % alignment == 0
+}
+
+export craft transition_action(current, expected, next) {
+    when current == next {
+        yield "already-applied"
+    }
+    when current == expected {
+        yield "apply"
+    }
+    yield "reject-stale-transition"
+}
+
+export craft retry_allowed(attempts, maximum_attempts) {
+    yield attempts >= 0 and maximum_attempts > 0 and attempts < maximum_attempts
+}
+
+export craft exact_counter_valid(value, upper_bound) {
+    yield value >= 0 and upper_bound >= 0 and value <= upper_bound
+}
+
+export craft transition_invariants_valid(total, free, allocated, reserved, queue_length, queue_limit) {
+    when not memory_accounting_valid(total, free, allocated, reserved) {
+        yield false
+    }
+    yield queue_length >= 0 and queue_limit > 0 and queue_length <= queue_limit
+}
+
+export craft identifier_unique(candidate, active_ids) {
+    when candidate <= 0 {
+        yield false
+    }
+    each identifier in active_ids {
+        when identifier == candidate {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft interrupt_action(in_interrupt, operation_may_wait) {
+    when in_interrupt and operation_may_wait {
+        yield "reject-blocking-operation"
+    }
+    yield "allow-nonblocking-operation"
+}
+
+export craft watchdog_action(last_heartbeat, now, timeout, restart_count, restart_limit) {
+    when now < last_heartbeat or timeout <= 0 or restart_count < 0 or restart_limit < 0 {
+        yield "clock-or-state-error"
+    }
+    when now - last_heartbeat < timeout {
+        yield "healthy"
+    }
+    when restart_count < restart_limit {
+        yield "bounded-restart"
+    }
+    yield "isolate"
+}
+
+export craft cacheline_separated(left_address, right_address, line_bytes) {
+    when left_address < 0 or right_address < 0 or line_bytes <= 0 {
+        yield false
+    }
+    yield left_address / line_bytes != right_address / line_bytes
+}
+
+export craft capability_subset(requested, granted) {
+    each right in requested {
+        vary found := false
+        each allowed in granted {
+            when right == allowed {
+                change found := true
+            }
+        }
+        when not found {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft slice_valid(total_bytes, offset, length) {
+    when total_bytes < 0 or offset < 0 or length < 0 or offset > total_bytes {
+        yield false
+    }
+    yield length <= total_bytes - offset
+}
+
+export craft release_action(state) {
+    when state == "open" {
+        yield "begin-release"
+    }
+    when state == "closing" {
+        yield "finish-release"
+    }
+    when state == "released" {
+        yield "already-released"
+    }
+    yield "reject-invalid-resource-state"
+}
+
+export craft user_range_valid(base, bytes, user_limit) {
+    when base <= 0 or bytes <= 0 or user_limit <= 0 or base > user_limit {
+        yield false
+    }
+    yield bytes <= user_limit - base
+}
+
+export craft failure_action(is_critical, restart_allowed) {
+    when is_critical {
+        yield "halt-or-panic"
+    }
+    when restart_allowed {
+        yield "restart-isolated-component"
+    }
+    yield "quarantine-component"
+}
+
+export craft checksum_match(expected, observed) {
+    yield expected >= 0 and observed >= 0 and expected == observed
+}
+
+export craft configuration_action(current_generation, candidate_generation, candidate_valid) {
+    when current_generation < 0 or candidate_generation < 0 {
+        yield "reject-invalid-generation"
+    }
+    when candidate_generation <= current_generation {
+        yield "reject-stale-generation"
+    }
+    when candidate_valid {
+        yield "commit-new-configuration"
+    }
+    yield "rollback-to-previous-configuration"
+}
