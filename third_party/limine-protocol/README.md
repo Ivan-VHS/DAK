@@ -6,4 +6,4 @@
 - Upstream blob: `7fc9df9f358cf98f5f5a97e7c6daa5a9054df015`
 - SPDX-License-Identifier: 0BSD
 
-The header is reproduced without modification. Its copyright and license notices are retained. It is an external boot-protocol interface, not DuckOS-owned code.
+The header is reproduced without modification. Its copyright and license notices are retained. It is an external boot-protocol interface, not DAKOS-owned code.

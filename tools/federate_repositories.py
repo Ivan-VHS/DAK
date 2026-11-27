@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and initialize DuckOS's pinned Ivan-VHS project submodules."""
+"""Validate and initialize DAKOS's pinned Ivan-VHS project submodules."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,7 @@ import sys
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping, Sequence
 
-SCHEMA = "duckos.repository-federation.v1"
+SCHEMA = "dakos.repository-federation.v1"
 EXPECTED_PROJECTS = {
     "pytyliki": ("Ivan-VHS/Pytyliki", "MIT"),
     "reaper": ("Ivan-VHS/Reaper", "Apache-2.0"),
@@ -36,7 +36,7 @@ def validate_manifest(data: Any) -> list[str]:
         return ["repository registry must be a JSON object"]
     required = {
         "schema": SCHEMA, "version": 1, "owner": "Ivan-VHS",
-        "integration_host": "DuckOS", "checkout_strategy": "git-submodules",
+        "integration_host": "DAKOS", "checkout_strategy": "git-submodules",
         "projects_root": "projects",
     }
     errors = [f"{key}: expected {value!r}, got {data.get(key)!r}"
@@ -236,7 +236,7 @@ def _git(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProc
 
 def validate_gitlinks(root: Path, projects: Sequence[Mapping[str, Any]]) -> list[str]:
     if _git(root, "rev-parse", "--show-toplevel", check=False).returncode:
-        return ["DuckOS source directory is not a Git working tree"]
+        return ["DAKOS source directory is not a Git working tree"]
     errors = []
     for project in projects:
         result = _git(root, "ls-tree", "HEAD", project["path"], check=False)
@@ -285,7 +285,7 @@ def _submodule_states(root: Path, projects: Sequence[Mapping[str, Any]]) -> list
 def status_report(root: Path, registry: Mapping[str, Any]) -> dict[str, Any]:
     result = _git(root, "submodule", "status", "--recursive", check=False)
     return {
-        "schema": "duckos.repository-federation-status.v1",
+        "schema": "dakos.repository-federation-status.v1",
         "root": str(root),
         "repositories": _submodule_states(root, registry["repositories"]),
         "recursive_submodule_status": result.stdout.splitlines(),
@@ -330,7 +330,7 @@ def run_action(root: Path, action: str, *, jobs: int = 4) -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("validate", "status", "sync"))
-    parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="DuckOS checkout root")
+    parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="DAKOS checkout root")
     parser.add_argument("--jobs", type=int, default=4, help="parallel submodule jobs for sync (1..16)")
     parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     args = parser.parse_args(argv)
@@ -339,7 +339,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.json:
             print(json.dumps(report, ensure_ascii=False, indent=2))
         else:
-            print(f"DuckOS repository federation: {args.action}")
+            print(f"DAKOS repository federation: {args.action}")
             for item in report["repositories"]:
                 print(f"{item['state']:28} {item['id']:12} {item['actual_commit'] or 'not cloned'}")
             print("Pinned-source validation: passed")
@@ -347,10 +347,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1 if args.action == "status" and incomplete else 0
     except (FederationError, OSError, ValueError) as error:
         if args.json:
-            print(json.dumps({"schema": "duckos.repository-federation-error.v1", "error": str(error)},
+            print(json.dumps({"schema": "dakos.repository-federation-error.v1", "error": str(error)},
                              ensure_ascii=False, indent=2), file=sys.stderr)
         else:
-            print(f"DuckOS repository federation: {error}", file=sys.stderr)
+            print(f"DAKOS repository federation: {error}", file=sys.stderr)
         return 2
 
 

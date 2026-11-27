@@ -1,30 +1,30 @@
 # DAK Reaper Native System Platform contracts.
 # Run this file with Reaper's tree-walk engine and VM; no privileged device is touched.
 
-import "duckos/kernel/atomic.rpr" as atomic
-import "duckos/kernel/syscall.rpr" as syscall
-import "duckos/kernel/handles.rpr" as handles
-import "duckos/kernel/threads.rpr" as threads
-import "duckos/kernel/synchronization.rpr" as synchronization
-import "duckos/kernel/arch/x86_64.rpr" as x86
-import "duckos/kernel/arch/aarch64.rpr" as aarch64
-import "duckos/drivers/mmio.rpr" as mmio
-import "duckos/drivers/dma.rpr" as dma
-import "duckos/network/ipv4.rpr" as ipv4
-import "duckos/network/udp.rpr" as udp
-import "duckos/network/tcp.rpr" as tcp
-import "duckos/network/dns.rpr" as dns
-import "duckos/storage/path.rpr" as path
-import "duckos/storage/journal.rpr" as journal
-import "duckos/runtime/foundation.rpr" as foundation
-import "duckos/runtime/data.rpr" as data
-import "duckos/runtime/clock.rpr" as clock
-import "duckos/services/dispatch.rpr" as dispatch
-import "duckos/system/installer.rpr" as installer
-import "duckos/system/package_manager.rpr" as packages
-import "duckos/system/updater.rpr" as updater
-import "duckos/system/build.rpr" as build
-import "duckos/system/utilities.rpr" as utilities
+import "dakos/kernel/atomic.rpr" as atomic
+import "dakos/kernel/syscall.rpr" as syscall
+import "dakos/kernel/handles.rpr" as handles
+import "dakos/kernel/threads.rpr" as threads
+import "dakos/kernel/synchronization.rpr" as synchronization
+import "dakos/kernel/arch/x86_64.rpr" as x86
+import "dakos/kernel/arch/aarch64.rpr" as aarch64
+import "dakos/drivers/mmio.rpr" as mmio
+import "dakos/drivers/dma.rpr" as dma
+import "dakos/network/ipv4.rpr" as ipv4
+import "dakos/network/udp.rpr" as udp
+import "dakos/network/tcp.rpr" as tcp
+import "dakos/network/dns.rpr" as dns
+import "dakos/storage/path.rpr" as path
+import "dakos/storage/journal.rpr" as journal
+import "dakos/runtime/foundation.rpr" as foundation
+import "dakos/runtime/data.rpr" as data
+import "dakos/runtime/clock.rpr" as clock
+import "dakos/services/dispatch.rpr" as dispatch
+import "dakos/system/installer.rpr" as installer
+import "dakos/system/package_manager.rpr" as packages
+import "dakos/system/updater.rpr" as updater
+import "dakos/system/build.rpr" as build
+import "dakos/system/utilities.rpr" as utilities
 
 # Atomics: invalid order pairs and unsupported 16-byte operations fail closed.
 assert(atomic["load_order_valid"]("acquire"), "acquire is a valid load order")
