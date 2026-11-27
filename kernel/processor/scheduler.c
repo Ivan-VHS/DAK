@@ -172,7 +172,8 @@ duckos_sched_status duckos_scheduler_begin_cpu_drain(
     if (scheduler == NULL) return DUCKOS_SCHED_INVALID_ARGUMENT;
     duckos_sched_lock_state lock_state = scheduler_lock(scheduler);
     duckos_cpu_local *cpu = cpu_at(scheduler, logical_id);
-    if (cpu == NULL || !core_transition_valid(cpu->state, DUCKOS_CPU_DRAINING)) {
+    if (cpu == NULL || logical_id == 0U ||
+        !core_transition_valid(cpu->state, DUCKOS_CPU_DRAINING)) {
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_INVALID_STATE;
     }
@@ -226,7 +227,7 @@ static int core_offline_allowed_locked(
 int duckos_scheduler_core_offline_allowed(
     duckos_scheduler *scheduler, uint32_t logical_id
 ) {
-    if (scheduler == NULL || logical_id >= scheduler->cpu_count) return 0;
+    if (scheduler == NULL || logical_id == 0U || logical_id >= scheduler->cpu_count) return 0;
     duckos_sched_lock_state lock_state = scheduler_lock(scheduler);
     const int allowed = core_offline_allowed_locked(scheduler, logical_id);
     scheduler_unlock(scheduler, lock_state);
@@ -239,7 +240,7 @@ duckos_sched_status duckos_scheduler_release_cpu(
     if (scheduler == NULL) return DUCKOS_SCHED_INVALID_ARGUMENT;
     duckos_sched_lock_state lock_state = scheduler_lock(scheduler);
     duckos_cpu_local *cpu = cpu_at(scheduler, logical_id);
-    if (cpu == NULL || cpu->state != DUCKOS_CPU_DRAINING) {
+    if (cpu == NULL || logical_id == 0U || cpu->state != DUCKOS_CPU_DRAINING) {
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_INVALID_STATE;
     }
@@ -278,6 +279,18 @@ duckos_sched_status duckos_scheduler_register_thread(
     if (find_thread(scheduler, thread->tid) != scheduler->thread_count) {
         scheduler_unlock(scheduler, lock_state);
         return DUCKOS_SCHED_DUPLICATE_ID;
+    }
+    int online_target = 0;
+    for (uint32_t cpu_id = 0U; cpu_id < scheduler->cpu_count; ++cpu_id) {
+        if (scheduler->cpus[cpu_id].state == DUCKOS_CPU_ONLINE &&
+            (thread->affinity_mask & (UINT64_C(1) << cpu_id)) != 0U) {
+            online_target = 1;
+            break;
+        }
+    }
+    if (!online_target) {
+        scheduler_unlock(scheduler, lock_state);
+        return DUCKOS_SCHED_CPU_NOT_ONLINE;
     }
     scheduler->threads[scheduler->thread_count++] = *thread;
     scheduler_unlock(scheduler, lock_state);
