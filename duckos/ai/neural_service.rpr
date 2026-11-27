@@ -1,0 +1,143 @@
+# DuckOS Reaper neural service admission contract v1.
+# User-space policy only. No kernel scheduling, device or network operation.
+
+make REQUEST_SCHEMA := "dak.neural-service-request.v1"
+make MAX_MODEL_BYTES := 16777216
+make MAX_STEP_BUDGET := 65536
+make MAX_VECTOR_WIDTH := 512
+
+craft valid_integer(value, minimum, maximum) {
+    yield kind(value) == "number" and value % 1 == 0 and value >= minimum and value <= maximum
+}
+
+craft validate_request(request) {
+    when kind(request) != "list" or size(request) != 10 {
+        yield "DAK-NN-REQ-0001: request must contain 10 fields"
+    }
+    when request[0] != REQUEST_SCHEMA {
+        yield "DAK-NN-REQ-0002: unsupported request schema"
+    }
+    when kind(request[1]) != "text" or size(request[1]) == 0 {
+        yield "DAK-NN-REQ-0003: request identity is required"
+    }
+    when request[2] != "reaper.neural-network.v1" {
+        yield "DAK-NN-REQ-0004: model schema is not supported"
+    }
+    when not contains(["inference", "offline_batch"], request[3]) {
+        yield "DAK-NN-REQ-0005: only inference and bounded offline batch are admitted"
+    }
+    when request[4] != "user_cpu" {
+        yield "DAK-NN-REQ-0006: only unprivileged user CPU execution is admitted"
+    }
+    when not valid_integer(request[5], 1, MAX_VECTOR_WIDTH) or
+        not valid_integer(request[6], 1, MAX_VECTOR_WIDTH) {
+        yield "DAK-NN-REQ-0007: input and output widths must be in 1..512"
+    }
+    when not valid_integer(request[7], 1, MAX_MODEL_BYTES) {
+        yield "DAK-NN-REQ-0008: model memory request exceeds 16 MiB"
+    }
+    when not valid_integer(request[8], 1, MAX_STEP_BUDGET) {
+        yield "DAK-NN-REQ-0009: step budget must be in 1..65536"
+    }
+    when kind(request[9]) != "list" {
+        yield "DAK-NN-REQ-0010: effects must be an explicit list"
+    }
+    each effect in request[9] {
+        when effect != "compute" {
+            yield "DAK-NN-REQ-0011: non-compute effect is denied: " ++ text(effect)
+        }
+    }
+    yield ""
+}
+
+craft admit_request(request) {
+    make failure := validate_request(request)
+    when failure != "" {
+        yield ["DENY", failure]
+    }
+    yield ["ALLOW", text(request[7]), text(request[8]), "user_cpu", "no_privileged_effects"]
+}
+
+make valid_inference := [
+    REQUEST_SCHEMA,
+    "task-001",
+    "reaper.neural-network.v1",
+    "inference",
+    "user_cpu",
+    16,
+    4,
+    1048576,
+    8192,
+    ["compute"]
+]
+make valid_batch := [
+    REQUEST_SCHEMA,
+    "task-002",
+    "reaper.neural-network.v1",
+    "offline_batch",
+    "user_cpu",
+    8,
+    2,
+    2097152,
+    32768,
+    ["compute", "compute"]
+]
+make kernel_request := [
+    REQUEST_SCHEMA,
+    "task-003",
+    "reaper.neural-network.v1",
+    "inference",
+    "kernel",
+    16,
+    4,
+    1048576,
+    8192,
+    ["compute"]
+]
+make network_request := [
+    REQUEST_SCHEMA,
+    "task-004",
+    "reaper.neural-network.v1",
+    "offline_batch",
+    "user_cpu",
+    16,
+    4,
+    1048576,
+    8192,
+    ["compute", "network"]
+]
+make oversized_request := [
+    REQUEST_SCHEMA,
+    "task-005",
+    "reaper.neural-network.v1",
+    "offline_batch",
+    "user_cpu",
+    16,
+    4,
+    33554432,
+    8192,
+    ["compute"]
+]
+make excessive_steps := [
+    REQUEST_SCHEMA,
+    "task-006",
+    "reaper.neural-network.v1",
+    "inference",
+    "user_cpu",
+    16,
+    4,
+    1048576,
+    999999,
+    ["compute"]
+]
+
+make inference_result := admit_request(valid_inference)
+assert(inference_result[0] == "ALLOW", "valid inference should be admitted")
+assert(inference_result[3] == "user_cpu", "admission target must remain user mode")
+assert(admit_request(valid_batch)[0] == "ALLOW", "bounded offline batch should be admitted")
+assert(admit_request(kernel_request)[0] == "DENY", "kernel execution must be denied")
+assert(admit_request(network_request)[0] == "DENY", "network effect must be denied")
+assert(admit_request(oversized_request)[0] == "DENY", "oversized memory request must be denied")
+assert(admit_request(excessive_steps)[0] == "DENY", "excessive work request must be denied")
+
+emit "DAK_REAPER_NEURAL_SERVICE:PASS"
