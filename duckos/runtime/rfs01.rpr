@@ -7,11 +7,17 @@
 # Signal: [sequence, origin, payload, trusted, manufactured]
 
 export craft rfs01_number_finite(value) {
-    yield kind(value) == "number" and value - value == 0
+    when kind(value) != "number" {
+        yield false
+    }
+    yield value - value == 0
 }
 
 export craft rfs01_text_bounded(value, maximum_characters) {
-    yield kind(value) == "text" and size(value) <= maximum_characters
+    when kind(value) != "text" {
+        yield false
+    }
+    yield size(value) <= maximum_characters
 }
 
 export craft rfs01_node_valid(node) {
