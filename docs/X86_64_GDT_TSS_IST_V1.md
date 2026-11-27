@@ -1,6 +1,6 @@
 # x86-64 GDT, TSS and IST bootstrap v1
 
-**Status:** the bootstrap CPU now loads a DuckOS-owned GDT and 64-bit TSS before installing the CPU exception IDT. This is an architecture bring-up step, not a completed process or interrupt subsystem.
+**Status:** the bootstrap CPU now loads a Dak-owned GDT and 64-bit TSS before installing the CPU exception IDT. This is an architecture bring-up step, not a completed process or interrupt subsystem.
 
 ## GDT layout
 
