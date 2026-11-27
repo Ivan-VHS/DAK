@@ -189,3 +189,77 @@ Only run the tests appropriate to a PR's touched subsystems, but required rulese
 **Merges performed by this inventory pass:** none. No PR was merged or branch deleted without its own review and passing required checks.
 
 The next safe action is to finish the 35 stacked-PR graph and review the main-based candidates in small groups, starting with protection/CI gaps. This page must be updated with each merge commit SHA, CI run, restack and branch cleanup so it remains an auditable execution ledger rather than a static promise.
+
+
+## 9. Live rescan addendum — 2026-11-27
+
+This section supersedes the 2026-11-26 inventory counts for planning. The original table above remains a historical snapshot.
+
+### Current open-PR inventory
+
+| Repository | Open PRs | Draft PRs | Open PRs based on non-main refs |
+|---|---:|---:|---:|
+| DAK | 128 | 2 | 12 |
+| Reaper | 187 | 9 | 25 |
+| Pytyliki | 83 | 2 | 0 |
+| OPlague | 62 | 2 | 0 |
+| VentuSample | 62 | 2 | 0 |
+| **Total** | **522** | **17** | **37** |
+
+The live scan paginated the GitHub REST pull-request and branch collections. Branch enumeration returned at least 1,106 branch rows across the five repositories; the collection shifted during pagination, so a freeze-and-rescan is required before treating the branch count as an immutable exact total. Do not delete any branch based on this count.
+
+Repository metadata reported zero forks for each of the five repositories at scan time. Tag/release enumeration found one DAK tag and one published release, `duckos-4gib-2026-11-25`, targeting commit `ece161fb9998ab7a5c50e966e6e02893ba6986b2`. No tags or releases were returned for the other four repositories in that scan.
+
+GitHub does not expose local `git stash` entries. No local worktree/stash inventory was available to this scan; operators must preserve and inspect all local worktrees separately before any branch cleanup.
+
+### Current mainline SHAs
+
+| Repository | Main SHA observed on 2026-11-27 |
+|---|---|
+| DAK | `2185ffd4cc5a8d32fa183c12b0d8dc22834ba5b8` |
+| Reaper | `913deccc3edfc7376526e815b5e4a21dd1216cc2` |
+| Pytyliki | `0ff3b951cb6398a43d1bd199c9200d95b4c7bb18` |
+| OPlague | `ade43bbbd6b7e36d873d338c2dd14de48201c869` |
+| VentuSample | `34466959cd4d06eacbbc23cfad8781387c26ea45` |
+
+### Dependency graph refresh
+
+The live graph contains **37** open PRs based on non-main refs: 12 in DAK and 25 in Reaper. No non-main-base open PRs were found in Pytyliki, OPlague or VentuSample.
+
+Known already-merged parents were resolved:
+- DAK #167 and #175 are based on the head branch of merged PR #161. They still need a compatibility-aware restack/retarget onto the current mainline before merge.
+- Reaper #366 is based on the head branch of merged PR #362. Its descendants remain stacked and need sequential restacking after each accepted parent.
+
+One DAK base remains without a matching open-PR head or verified merged-PR parent in this live pass: `feat/mora-native-shell` (base of DAK #174). Its provenance must be established from branch/commit history before #174 is advanced.
+
+The complete live edge list is visible in the PR metadata; the key stacked chains remain:
+- DAK #1 → #5 → (#8 → #18, #98); #161 → (#167 → #168, #175); #177 → #178 → #179; #165 → #172; #133 → #74.
+- Reaper #298 → #393 → #395; #338 → #368 → (#386, #387); #362 → #366 → #370 → #371 → #372 → #373 → #374 → #375 → #376 → #379 → #380 → #383 → #384 → #385; #358 → #364 → #382; #354 → #357; #333 → #356; #336 → #353 → #367; #308 → #316.
+
+### Mainline rule-set and sampled CI findings
+
+All five repositories have active rulesets for `main` and allow squash-only merges. The rulesets currently require zero approving reviews and do not require Code Owner review. OPlague's required status contexts remain only `README` and `LICENSE`; that is not an adequate compile/test/security gate for a broad merge campaign.
+
+Representative current checks:
+- DAK #211: still queued/pending/in progress across required and additional workflows when inspected; not eligible to merge.
+- Reaper #270: its sampled workflow runs reported `action_required`; not eligible to merge.
+- Pytyliki #265: sampled checks succeeded, but the PR is still Draft; not eligible to merge.
+- VentuSample #183: `VentuSample CI` and `Reaper native C17 integration` failed; not eligible to merge.
+- OPlague #213: sampled workflow runs reported `action_required`; not eligible to merge.
+
+These are representative checks, not a campaign-wide CI audit. A per-PR status and patch review remains mandatory.
+
+### Current completion status
+
+- Open-PR inventory: **enumerated, 522 open PRs**.
+- Non-main dependency inventory: **enumerated, 37 edges**; one DAK parent provenance item remains unresolved.
+- Draft PRs: **17 identified; not merge candidates until made ready and reviewed**.
+- Branches without an open-PR head: numerous; they are **unclassified**, not automatically stale or safe to delete.
+- Forks: repository metadata reported zero for all five repositories.
+- Tags/releases: one DAK tag/release recorded; preserve it.
+- Local stashes: **not observable through GitHub; not inspected**.
+- Full diff/duplicate/security review of all 522 open PRs: **not complete**.
+- Campaign-wide CI and cross-repository integration: **not established**.
+- Merges or branch deletions performed by this rescan: **none**.
+
+The scan is a read-only baseline. Proceed only by reviewed, bounded PRs, topological restacking, required green CI and verified rollback; never disable repository protections or rewrite `main`.
