@@ -150,3 +150,7 @@ git submodule update --init --recursive
 ## 参与贡献
 
 修改代码、契约或文档前，请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。保持更改可审查，运行相关检查，并准确说明实现证据。
+
+## 相关数学研究
+
+[维尤年科 K3 理论 v0.4.0 提案](https://github.com/Ivan-VHS/Kaskad/pull/36)记录了基数 1000 完备化的 CRT 分解及唯一的无限位置系数序列。这只是外部数学参考；不会改变 DAK 内核、启动协议、Reaper 策略契约、主机桌面、应用目录、ABI、发布镜像或项目许可状态。详见[本地研究说明](docs/VYUNENKO_K3_RESEARCH_REFERENCE.md)。
