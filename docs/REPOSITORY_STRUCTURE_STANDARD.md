@@ -121,7 +121,7 @@ The current implementation maps the logical layers as follows:
 | Reaper | `reaper/`, `language/`, `src/`, `include/`, `stdlib/`, `frameworks/` | `tests/`, `schemas/`, versioned language registries | Language semantics, canonical IR, VM/compiler, DABI64 and tooling |
 | OPlague | `oplague/`, `crates/`, `tools/` | `tests/`, `schemas/`, package/device fixtures | Read-only inspection, device/package evidence, security and federation |
 | VentuSample | `src/`, `src/compat/` | `tests/`, `schemas/`, `examples/` | Offline audio, DSP, presets, pack exchange and asset provenance |
-| DAK | `duckos/`, `kernel/`, `core/`, `boot/`, `desktop/` | `tests/`, `schemas/`, `catalogs/`, `manifests/` | Reaper-native system contracts, boot/kernel, native desktop and application boundaries |
+| DAK | `duckos/`, `kernel/`, `boot/`, `foundation/`, `desktop/` | `tests/`, `schemas/`, `catalogs/`, `manifests/` | Reaper-native system contracts, boot/kernel, native desktop and application boundaries |
 | Kaskad | `src/kaskad_k3/` for supporting exact computation; mathematical canon in `docs/` | `tests/vectors/`, `schemas/`, `CITATION.*`; formal checker only when adopted | Vyunenko Theory, K3 foundations, proofs/evidence, extensions and applied mathematical models |
 
 Each repository's local profile is authoritative for precise paths and exceptions:
