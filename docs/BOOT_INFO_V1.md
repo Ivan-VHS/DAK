@@ -1,11 +1,11 @@
-# DuckOS Boot Handoff Contract v1
+# DAK Boot Handoff Contract v1
 
 **Author / project direction:** Ivan-VHS  
 **Implementation status:** host-testable C11 boot/allocator/IDT contracts and an experimental x86_64 Limine Stage 1 kernel with CPU exception diagnostics. The image is firmware-bootable when the BIOS/UEFI QEMU gate passes; it is not a complete kernel or usable desktop OS.
 
 ## Purpose
 
-The first foundation component defines the data boundary between a future bootloader and the DuckOS kernel. The handoff uses fixed-width integer fields and carries a version and structure size. The physical memory map is passed separately so the record contains no native pointer whose width or layout changes across targets.
+The first foundation component defines the data boundary between a future bootloader and the DAK kernel. The handoff uses fixed-width integer fields and carries a version and structure size. The physical memory map is passed separately so the record contains no native pointer whose width or layout changes across targets.
 
 Implemented files:
 
@@ -29,24 +29,25 @@ are:
 
 | Type | Field | Offset | Width |
 |---|---|---:|---:|
-| `duckos_boot_info_v1` | `struct_size` | 0 | 4 |
-| `duckos_boot_info_v1` | `version` | 4 | 4 |
-| `duckos_boot_info_v1` | `flags` | 8 | 8 |
-| `duckos_boot_info_v1` | `kernel_phys_base` | 16 | 8 |
-| `duckos_boot_info_v1` | `initramfs_phys_base` | 32 | 8 |
-| `duckos_boot_info_v1` | `framebuffer_phys_base` | 48 | 8 |
-| `duckos_boot_info_v1` | `framebuffer_width` | 64 | 4 |
-| `duckos_boot_info_v1` | `memory_region_count` | 80 | 4 |
-| `duckos_boot_info_v1` | `reserved` | 84 | 4 |
-| `duckos_memory_region` | `type` | 16 | 4 |
-| `duckos_memory_region` | `flags` | 20 | 4 |
+| `dak_boot_info_v1` | `struct_size` | 0 | 4 |
+| `dak_boot_info_v1` | `version` | 4 | 4 |
+| `dak_boot_info_v1` | `flags` | 8 | 8 |
+| `dak_boot_info_v1` | `kernel_phys_base` | 16 | 8 |
+| `dak_boot_info_v1` | `initramfs_phys_base` | 32 | 8 |
+| `dak_boot_info_v1` | `framebuffer_phys_base` | 48 | 8 |
+| `dak_boot_info_v1` | `framebuffer_width` | 64 | 4 |
+| `dak_boot_info_v1` | `memory_region_count` | 80 | 4 |
+| `dak_boot_info_v1` | `reserved` | 84 | 4 |
+| `dak_memory_region` | `type` | 16 | 4 |
+| `dak_memory_region` | `flags` | 20 | 4 |
 
 A compatible extension appends fields after the complete 88-byte v1 prefix and
 sets `struct_size` to the actual accessible allocation size. The v1 validator
-reads only the known prefix and does not modify caller memory. It cannot prove
-the allocation size from a pointer: the caller remains responsible for passing
-at least the number of bytes it declares. Changes to existing offsets, widths,
-or alignment require a new ABI version.
+reads only the known 88-byte prefix, requires the v1 reserved word to be zero,
+and does not modify caller memory. It cannot prove the allocation size from a
+pointer: the caller remains responsible for passing at least the number of
+bytes it declares. Changes to existing offsets, widths, or alignment require a
+new ABI version.
 
 ## Handoff record
 
@@ -74,8 +75,9 @@ The validator rejects:
 7. unsupported framebuffer depth, undersized pitch or undersized framebuffer extent;
 8. empty, oversized, unsorted, overlapping or malformed memory maps;
 9. unknown memory-region types;
-10. a kernel or initramfs range not fully covered by reserved memory-map entries;
-11. a framebuffer range not fully covered by MMIO memory-map entries.
+10. non-zero reserved fields in the v1 handoff record;
+11. a kernel or initramfs range not fully covered by reserved memory-map entries;
+12. a framebuffer range not fully covered by MMIO memory-map entries.
 
 Memory-map entries must be sorted by ascending base and must not overlap. Gaps are allowed. The caller must map the handoff record and array before calling the validator; stored physical addresses are validated but never dereferenced by this routine.
 
@@ -117,3 +119,8 @@ ctest --test-dir build-sanitize --output-on-failure
 ## Bootable stage-0 image
 
 The native adapter is built into the experimental x86_64 ISO using the instructions in [BOOTABLE_IMAGE.md](BOOTABLE_IMAGE.md). Limine is pinned by version and SHA-256, and the upstream protocol header retains its 0BSD notice. The adapter rejects unsupported Limine base revision, missing required responses, malformed map data, reserved-range violations and framebuffer/MMIO inconsistencies. It reports the handoff and then halts; it does not transfer into an init process or claim that the remaining kernel subsystems exist.
+
+
+## Canonical DAK naming
+
+The public API now exposes `dak_boot_info_v1`, `dak_memory_region`, `dak_boot_info_validate` and `dak_boot_info_status_name`. The previous `duckos_*` typedefs, constants and function symbols remain as compatibility aliases/wrappers; the v1 binary record layout is unchanged. The new reserved-field error is an appended status value and does not change the structure ABI.
