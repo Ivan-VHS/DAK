@@ -44,3 +44,6 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 - [Engineering evolution framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — completeness and acceptance criteria.
 
 Describe behavior from source, build configuration, schemas, tests and CI. Mark future work as planned; never present a host prototype or a policy contract as native kernel enforcement.
+
+- [Documentation control](DOCUMENTATION_CONTROL.md) — ownership, lifecycle, review and archival rules.
+- [Documentation rebaseline plan](superpowers/plans/2026-11-26-documentation-rebaseline.md) — staged inventory and migration plan.

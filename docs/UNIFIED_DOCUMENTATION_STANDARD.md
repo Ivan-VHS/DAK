@@ -219,3 +219,36 @@ A documentation-only change does not change implementation maturity. A source ch
 ---
 
 **Attribution:** Preserve the authorship and copyright notices already present in each repository. Attribute Ivan-VHS as project author/developer where appropriate; do not replace the authorship of other contributors or third-party works.
+
+
+## 12. README and documentation publication standard
+
+This section adopts the repository's 50-point GitHub README checklist as the shared publication contract for all Ivan-VHS repositories. The local `docs/DOCUMENTATION_CONTROL.md` file supplies the checklist in each repository; the README and information map are the public entry points.
+
+### 12.1 First screen and repository identity
+
+A root README MUST begin with the canonical project name and a one-sentence technical description. A compact specification table MUST identify the repository, version or stage, development status, license state, supported runtime/desktop platforms and main toolchain. A missing value MUST be stated as undeclared rather than inferred from a package version. A real architecture diagram or product screenshot SHOULD appear near the top and MUST identify its actual environment and revision when known.
+
+### 12.2 History and release provenance
+
+Release chronology MUST be based on Git tags, published releases, migration files or other reviewable artifacts. Stable, nightly, experimental, archived, deprecated and EOL labels MUST NOT be invented. The README MUST distinguish repository-level product versions from library/package versions and component-specific protocol versions. Breaking changes MUST identify the affected contract, rationale and migration route.
+
+### 12.3 Architecture and implementation status
+
+Every multi-component product MUST document data flow, ownership, integration boundaries and meaningful design trade-offs. Normative specification, current implementation, partial implementation and planned work MUST be visibly separate. Use the canonical maturity identifiers from Section 3; `verified` requires an implemented capability plus test evidence tied to a named environment and revision. A catalogue, screenshot, prototype or roadmap MUST NOT upgrade maturity.
+
+### 12.4 Limitations, security and compatibility
+
+README and relevant technical documents MUST identify unsupported platforms/architectures, host and toolchain dependencies, privilege requirements, untrusted-input boundaries, resource limits, known integration gaps and material performance constraints. Security-sensitive claims MUST distinguish checksums from signatures, metadata from verification, candidate matching from certification, and policy validation from runtime enforcement. Breaking changes and data-loss risks MUST be prominent and accompanied by safe migration guidance where available.
+
+### 12.5 Evidence, metrics and third-party material
+
+Performance claims MUST link reproducible workloads, build configuration, processor/OS details, sample counts, statistical method and raw or derived artifacts. API, ABI, schemas, architecture, examples, RFCs and external standards SHOULD have separate navigation destinations. Audits and certifications require an issuer, scope, date and evidence link. External code, algorithms, assets and copied protocol headers MUST preserve attribution and license notices.
+
+### 12.6 Navigation, localization and change propagation
+
+A long or multi-subsystem README SHOULD include a table of contents. The information-architecture map MUST catalog all maintained documentation pages and provide contextual topic hubs; important contracts SHOULD have at least two meaningful inbound paths. Internal links MUST use valid repository-relative paths; cross-repository links MUST use canonical HTTPS URLs. Localized READMEs MUST preserve section order, commands, maturity, limits and legal status. Changes to CLI flags, environment variables, schemas, APIs, build instructions or support matrices MUST update the README and affected docs in the same pull request.
+
+### 12.7 Release readiness
+
+Before publication, maintainers MUST check each command in a clean environment or provide an explicit reason it cannot be exercised. They MUST verify all changed local links, release/version claims, license references, third-party notices, platform claims and locale parity. Do not claim a security review, CI pass, benchmark, production deployment or feature completion without its corresponding current evidence.
