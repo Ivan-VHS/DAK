@@ -1,14 +1,18 @@
-# 🦆 Duck — Reaper 优先的操作系统项目
+# 🦆 DAK — Reaper 优先的操作系统项目
 
 <p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
+
+> **Psychoporter 666** — 架构的精确 × 探索的能量 × 可追溯的证据。[共享文档规范](https://github.com/Ivan-VHS/DAK/blob/main/docs/PSYCHOPORTER_DOCUMENTATION_STYLE_V1.md)。  
+> **编辑修订 · 2026-11-28：** 更新了文档呈现与导航；保留原有作者身份、许可证条款及第三方归属信息。
+
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native Mora](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20Mora)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
 > **以 Reaper 为核心的系统基础、本机桌面外壳和本地优先工具生态；每条实现边界都清晰可见。**
 
-**项目状态:** 实验阶段 · x86_64 Stage 1 已通过 QEMU 验证 · **版本:** Stage 1 boot foundation · **README 标准:** Psychoporter 666 v1.0 · **审阅日期:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
+**项目状态:** 实验阶段 · x86_64 Stage 1 已通过 QEMU 验证 · **版本:** Stage 1 boot foundation · **README 标准:** Psychoporter 666 v1.1 · **审阅日期:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="Duck system architecture overview" width="100%"></p>
+<p align="center"><img src="assets/readme/dak-overview.svg" alt="DAK system architecture overview" width="100%"></p>
 
 ## 快速导航
 
@@ -16,11 +20,11 @@
 
 ## 目标与范围
 
-Duck 是一个以 Reaper 为优先的实验性操作系统项目。当前工作刻意分为内核启动基础、Reaper 策略契约和面向主机操作系统的 Mora 原生桌面应用三个独立方向。
+DAK 是一个以 Reaper 为优先的实验性操作系统项目。当前工作刻意分为内核启动基础、Reaper 策略契约和面向主机操作系统的 Mora 原生桌面应用三个独立方向。
 
 ## 功能
 
-- x86_64 Stage 1 路径验证 Limine 固件交接和 Boot Info v1，分配早期 4 KiB 物理帧，输出 DUCKOS_BOOT_OK stage=1 后停机。QEMU BIOS 与 UEFI 检查均已通过。
+- x86_64 Stage 1 路径验证 Limine 固件交接和 Boot Info v1，分配早期 4 KiB 物理帧，输出 Stage 1 成功标记后停机。QEMU BIOS 与 UEFI 检查均已通过。
 - Reaper 提供参考策略契约路线，包括 40 项 Core Subsystem MVP 契约。内核原生强制执行仍待实现。
 - Mora 具有基于 Qt 6 Widgets 的本机桌面应用，窗口由主机操作系统管理，并带有本地应用目录。Stage 1 内核不会启动它。
 - mora/index.html 保留为浏览器参考预览。它不是原生合成器，也不是内核桌面。
@@ -50,9 +54,9 @@ flowchart TB
 发布镜像构建面向 Linux x86_64，需要 Git/子模块、GCC/G++、CMake、作为构建工具的 Python 3、Node.js 22、Qt 6 Widgets、xorriso、curl、tar、QEMU 和 OVMF。
 
 ~~~sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
-ctest --test-dir build/mora-native --output-on-failure
+cmake -S . -B build/dak-native -DCMAKE_BUILD_TYPE=Release -DDAK_BUILD_NATIVE_DESKTOP=ON
+cmake --build build/dak-native --target dak_desktop_native --parallel
+ctest --test-dir build/dak-native --output-on-failure
 ~~~
 
 Qt 桌面目标为可选项；未检测到 Qt 6 Widgets 时将跳过。Mora 作为宿主操作系统的原生应用运行，不由 Stage 1 内核启动。
@@ -75,7 +79,7 @@ npm test
 ## 构建发布镜像
 
 ~~~sh
-bash boot/build-release-iso.sh --work-dir build/release --output dist/Duck-Release-x86_64.iso
+bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Release-x86_64.iso
 ~~~
 
 发布管线验证仓库固定版本，运行项目构建和测试，生成 SHA-256 清单并组装 BIOS/UEFI 混合 ISO。该 ISO 是源码与工具预览，不是完整可安装操作系统。
