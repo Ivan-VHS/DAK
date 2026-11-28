@@ -2,13 +2,17 @@
 
 <p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
 
+> **Psychoporter 666** — architectural precision × exploratory energy × traceable evidence. [Shared documentation style](https://github.com/Ivan-VHS/DAK/blob/main/docs/PSYCHOPORTER_DOCUMENTATION_STYLE_V1.md).  
+> **Editorial revision · 2026-11-28:** presentation and navigation updated; original authorship, license terms and third-party attribution are retained.
+
+
 [![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native DAK](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20DAK)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
 > **A Reaper-first system foundation, a native host desktop and a federated local-first toolchain — with every boundary visible.**
 
-**State:** Experimental · x86_64 Stage 1 QEMU-verified · **Version:** Stage 1 boot foundation · **README standard:** Psychoporter 666 v1.0 · **Last reviewed:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
+**State:** Experimental · x86_64 Stage 1 QEMU-verified · **Version:** Stage 1 boot foundation · **README standard:** Psychoporter 666 v1.1 · **Last reviewed:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
+<p align="center"><img src="assets/readme/dak-overview.svg" alt="DAK system architecture overview" width="100%"></p>
 
 ## Quick navigation
 
@@ -20,7 +24,7 @@ DAK is an experimental Reaper-first operating-system project. Its current work i
 
 ## Capabilities
 
-- The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, emits DUCKOS_BOOT_OK stage=1 and halts. QEMU BIOS and UEFI checks pass.
+- The x86_64 Stage 1 path validates the Limine firmware handoff and Boot Info v1, allocates an early 4 KiB frame, emits the Stage 1 serial success marker and halts. QEMU BIOS and UEFI checks pass.
 - Reaper provides a reference policy-contract track, including 40 Core Subsystem MVP contracts. Native kernel enforcement remains pending.
 - DAK has a Qt 6 Widgets host-native desktop application with host-managed windows and a local app catalogue. It is not launched by the Stage 1 kernel.
 - desktop/demo/index.html remains available as a browser reference preview. It is not a native compositor or the kernel desktop.
@@ -160,7 +164,7 @@ Do not redistribute bundled or third-party materials outside the applicable lice
 
 The federated workbenches remain independently licensed. Their declared license identifiers and pinned source revisions are recorded in [the repository federation manifest](federation/repositories.v1.json). Preserve each upstream repository's `LICENSE` file and applicable notices with its source; federation does not relicense or transfer ownership of those components.
 
-The DuckOS root repository currently has no root-level `LICENSE` file, so this README does not claim a single project-wide license for DuckOS-owned files or for the federated source. A root-project license remains an explicit governance decision and should be published before a common license grant is claimed.
+The DAK root repository currently has no root-level `LICENSE` file, so this README does not claim a single project-wide license for DAK-owned files or for the federated source. A root-project license remains an explicit governance decision and should be published before a common license grant is claimed.
 
 ## Engineering rule
 
@@ -173,3 +177,7 @@ Describe behavior from source, tests, schemas, build output and CI evidence. A c
 ## Contributing
 
 Read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before changing code, contracts or documentation. Keep changes reviewable, run the affected checks and describe implementation evidence accurately.
+
+## Related mathematical research
+
+The [Vyunenko Theory K3 v0.4.0 proposal](https://github.com/Ivan-VHS/Kaskad/pull/36) documents CRT splitting of the radix-1000 completion and unique infinite positional coefficient sequences. This is an external mathematical reference only; it does not change DAK's kernel, boot protocol, Reaper policy contracts, host desktop, app catalogue, ABI, release image or project licensing. See [the local research note](docs/VYUNENKO_K3_RESEARCH_REFERENCE.md).

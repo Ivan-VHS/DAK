@@ -1,14 +1,18 @@
-# 🦆 Duck — операційна система з пріоритетом Reaper
+# 🦆 DAK — операційна система з пріоритетом Reaper
 
 <p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
+
+> **Psychoporter 666** — точність архітектора × енергія дослідника × простежувані докази. [Спільний стандарт документації](https://github.com/Ivan-VHS/DAK/blob/main/docs/PSYCHOPORTER_DOCUMENTATION_STYLE_V1.md).  
+> **Редакційна редакція · 2026-11-28:** оновлено подачу й навігацію; авторство, умови ліцензій і сторонню атрибуцію збережено.
+
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native Mora](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20Mora)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
 > **Системна основа з пріоритетом Reaper, нативна desktop-оболонка хоста й локальна екосистема інструментів — із явними межами кожної підсистеми.**
 
-**Стан:** Експериментальний проєкт · Stage 1 x86_64 перевірено в QEMU · **Версія:** Stage 1 boot foundation · **Стандарт README:** Psychoporter 666 v1.0 · **Дата перевірки:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
+**Стан:** Експериментальний проєкт · Stage 1 x86_64 перевірено в QEMU · **Версія:** Stage 1 boot foundation · **Стандарт README:** Psychoporter 666 v1.1 · **Дата перевірки:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="Duck system architecture overview" width="100%"></p>
+<p align="center"><img src="assets/readme/dak-overview.svg" alt="DAK system architecture overview" width="100%"></p>
 
 ## Швидка навігація
 
@@ -16,11 +20,11 @@
 
 ## Призначення та межі
 
-Duck — експериментальний проєкт ОС із пріоритетом Reaper. Поточну роботу навмисно розділено на завантажувальну основу ядра, policy-контракти Reaper і нативний desktop-застосунок Mora для хостової ОС.
+DAK — експериментальний проєкт ОС із пріоритетом Reaper. Поточну роботу навмисно розділено на завантажувальну основу ядра, policy-контракти Reaper і нативний desktop-застосунок Mora для хостової ОС.
 
 ## Можливості
 
-- Шлях x86_64 Stage 1 перевіряє передавання керування від Limine та Boot Info v1, виділяє ранній кадр 4 KiB, виводить DUCKOS_BOOT_OK stage=1 і зупиняється. QEMU-перевірки BIOS та UEFI проходять.
+- Шлях x86_64 Stage 1 перевіряє передавання керування від Limine та Boot Info v1, виділяє ранній кадр 4 KiB, виводить маркер успішного проходження Stage 1 і зупиняється. QEMU-перевірки BIOS та UEFI проходять.
 - Reaper надає еталонний напрям policy-контрактів, зокрема 40 контрактів Core Subsystem MVP. Нативне enforcement ядром ще не реалізовано.
 - Mora має нативний host-застосунок Qt 6 Widgets із вікнами під керуванням хостової ОС та локальним каталогом застосунків. Stage 1 kernel його не запускає.
 - mora/index.html збережено як браузерне reference preview. Це не нативний compositor і не desktop ядра.
@@ -50,9 +54,9 @@ flowchart TB
 Збирання release-образу орієнтоване на Linux x86_64 і потребує Git із submodules, GCC/G++, CMake, Python 3 як інструмент збирання, Node.js 22, Qt 6 Widgets, xorriso, curl, tar, QEMU та OVMF.
 
 ~~~sh
-cmake -S . -B build/mora-native -DCMAKE_BUILD_TYPE=Release -DDUCKOS_BUILD_NATIVE_MORA=ON
-cmake --build build/mora-native --target duckos_mora_native --parallel
-ctest --test-dir build/mora-native --output-on-failure
+cmake -S . -B build/dak-native -DCMAKE_BUILD_TYPE=Release -DDAK_BUILD_NATIVE_DESKTOP=ON
+cmake --build build/dak-native --target dak_desktop_native --parallel
+ctest --test-dir build/dak-native --output-on-failure
 ~~~
 
 Ціль Qt Desktop необов’язкова й пропускається, якщо Qt 6 Widgets не знайдено. Mora працює як нативний застосунок хостової ОС і не запускається ядром Stage 1.
@@ -75,7 +79,7 @@ npm test
 ## Збирання release-образу
 
 ~~~sh
-bash boot/build-release-iso.sh --work-dir build/release --output dist/Duck-Release-x86_64.iso
+bash boot/build-release-iso.sh --work-dir build/release --output dist/DAK-Release-x86_64.iso
 ~~~
 
 Release-конвеєр перевіряє pins репозиторіїв, запускає збирання й тести проєктів, створює SHA-256 inventory та збирає гібридний BIOS/UEFI ISO. ISO — preview вихідного коду й інструментів, а не повноцінна встановлювана ОС.
@@ -146,3 +150,7 @@ git submodule update --init --recursive
 ## Участь у розробці
 
 Перед зміною коду, контрактів або документації ознайомтеся з [CONTRIBUTING.md](CONTRIBUTING.md). Робіть зміни перевірними, запускайте відповідні перевірки та точно описуйте докази реалізації.
+
+## Пов'язане математичне дослідження
+
+[Пропозиція Теорії В'юненка K3 v0.4.0](https://github.com/Ivan-VHS/Kaskad/pull/36) документує CRT-розклад поповнення з основою 1000 та єдині нескінченні позиційні послідовності коефіцієнтів. Це зовнішнє математичне посилання: воно не змінює ядро DAK, протокол завантаження, політики Reaper, desktop-оболонку, каталог застосунків, ABI, образ випуску або ліцензійний статус проєкту. Докладніше — [у локальній довідці](docs/VYUNENKO_K3_RESEARCH_REFERENCE.md).

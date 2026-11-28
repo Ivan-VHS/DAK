@@ -2,13 +2,17 @@
 
 <p align="center">[English](README.md) · [Українська](README.uk.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)</p>
 
+> **Psychoporter 666** — точность архитектора × энергия исследователя × прослеживаемые доказательства. [Общий стандарт документации](https://github.com/Ivan-VHS/DAK/blob/main/docs/PSYCHOPORTER_DOCUMENTATION_STYLE_V1.md).  
+> **Редакционная редакция · 2026-11-28:** обновлены подача и навигация; авторство, условия лицензий и сторонняя атрибуция сохранены.
+
+
 [![CI](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/ci.yml?branch=main&label=CI)](https://github.com/Ivan-VHS/DAK/actions/workflows/ci.yml) [![Boot image](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/boot-image.yml?branch=main&label=Boot%20image)](https://github.com/Ivan-VHS/DAK/actions/workflows/boot-image.yml) [![Native DAK](https://img.shields.io/github/actions/workflow/status/Ivan-VHS/DAK/native-mora.yml?branch=main&label=Native%20DAK)](https://github.com/Ivan-VHS/DAK/actions/workflows/native-mora.yml)
 
 > **Системная основа с приоритетом Reaper, нативная desktop-оболочка хоста и локальная экосистема инструментов — с явными границами каждой подсистемы.**
 
-**Состояние:** Экспериментальный проект · Stage 1 x86_64 проверен в QEMU · **Версия:** Stage 1 boot foundation · **Стандарт README:** Psychoporter 666 v1.0 · **Дата проверки:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
+**Состояние:** Экспериментальный проект · Stage 1 x86_64 проверен в QEMU · **Версия:** Stage 1 boot foundation · **Стандарт README:** Psychoporter 666 v1.1 · **Дата проверки:** 2026-11-25 UTC · **Source:** [Ivan-VHS/DAK](https://github.com/Ivan-VHS/DAK)
 
-<p align="center"><img src="assets/readme/duckos-overview.svg" alt="DAK system architecture overview" width="100%"></p>
+<p align="center"><img src="assets/readme/dak-overview.svg" alt="DAK system architecture overview" width="100%"></p>
 
 ## Быстрая навигация
 
@@ -20,7 +24,7 @@ DAK — экспериментальный проект ОС с приорите
 
 ## Возможности
 
-- Путь x86_64 Stage 1 проверяет передачу управления от Limine и Boot Info v1, выделяет ранний кадр 4 KiB, выводит DUCKOS_BOOT_OK stage=1 и останавливается. QEMU-проверки BIOS и UEFI проходят.
+- Путь x86_64 Stage 1 проверяет передачу управления от Limine и Boot Info v1, выделяет ранний кадр 4 KiB, выводит маркер успешного прохождения Stage 1 и останавливается. QEMU-проверки BIOS и UEFI проходят.
 - Reaper предоставляет эталонное направление policy-контрактов, включая 40 контрактов Core Subsystem MVP. Нативное enforcement ядром ещё не реализовано.
 - У DAK есть нативное хост-приложение Qt 6 Widgets с окнами под управлением хостовой ОС и локальным каталогом приложений. Stage 1 kernel его не запускает.
 - desktop/demo/index.html сохранён как браузерное reference preview. Это не нативный compositor и не desktop ядра.
@@ -153,3 +157,7 @@ git submodule update --init --recursive
 ## Участие в разработке
 
 Перед изменением кода, контрактов или документации прочитайте [CONTRIBUTING.md](CONTRIBUTING.md). Сохраняйте изменения проверяемыми, запускайте соответствующие проверки и точно описывайте доказательства реализации.
+
+## Связанное математическое исследование
+
+[Предложение Теории Вьюненко K3 v0.4.0](https://github.com/Ivan-VHS/Kaskad/pull/36) документирует CRT-разложение пополнения с основанием 1000 и единственные бесконечные позиционные последовательности коэффициентов. Это внешняя математическая ссылка: она не меняет ядро DAK, протокол загрузки, политики Reaper, desktop-оболочку, каталог приложений, ABI, образ выпуска или лицензионный статус проекта. Подробнее — [в локальной справке](docs/VYUNENKO_K3_RESEARCH_REFERENCE.md).

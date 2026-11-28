@@ -1,5 +1,9 @@
 # DAK documentation
 
+> **Editorial revision · 2026-11-28:** Documentation navigation and editorial presentation refreshed; existing authorship and project-specific legal notices remain unchanged.
+> **Shared editorial profile:** [Psychoporter 666 Documentation Style v1.1](PSYCHOPORTER_DOCUMENTATION_STYLE_V1.md) — the DAK product identity remains black, white and yellow; the shared profile does not change its UI palette.
+
+
 > **Psychoporter 666 documentation profile v1.0** · Reviewed 2026-11-25 (UTC)
 
 Start with the [project README](../README.md) for the current Stage 1 boot evidence, native DAK host application and release boundary. The [documentation map](INFORMATION_ARCHITECTURE.md) links the full catalogue.
@@ -44,3 +48,7 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 - [Engineering evolution framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — completeness and acceptance criteria.
 
 Describe behavior from source, build configuration, schemas, tests and CI. Mark future work as planned; never present a host prototype or a policy contract as native kernel enforcement.
+
+## Related mathematical research
+
+- [Vyunenko Theory K3 v0.4.0 — external research reference](VYUNENKO_K3_RESEARCH_REFERENCE.md) — mathematical context only; no DAK kernel, boot or desktop dependency.
