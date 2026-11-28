@@ -219,3 +219,12 @@ A documentation-only change does not change implementation maturity. A source ch
 ---
 
 **Attribution:** Preserve the authorship and copyright notices already present in each repository. Attribute Ivan-VHS as project author/developer where appropriate; do not replace the authorship of other contributors or third-party works.
+
+
+## 16. Psychoporter 666 documentation presentation
+
+**Shared editorial profile:** [Psychoporter 666 — Documentation Style v1.1](PSYCHOPORTER_DOCUMENTATION_STYLE_V1.md).
+
+This profile applies to READMEs, technical documentation, diagrams, indexes and research records across the Ivan-VHS repositories. It defines shared editorial voices, visual grammar, GitHub Markdown constraints, document anatomy, localization and rights-preservation rules.
+
+The profile controls presentation only. It does not change project architecture, source-of-truth order, implementation maturity, schemas, API/ABI contracts, product-specific palettes, licenses or ownership. Each repository retains its own technical identity and legal notices. A design motif or narrative persona is not psychological or clinical evidence.
