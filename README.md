@@ -177,3 +177,7 @@ Describe behavior from source, tests, schemas, build output and CI evidence. A c
 ## Contributing
 
 Read the [CONTRIBUTING.md](CONTRIBUTING.md) guide before changing code, contracts or documentation. Keep changes reviewable, run the affected checks and describe implementation evidence accurately.
+
+## Related mathematical research
+
+The [Vyunenko Theory K3 v0.4.0 proposal](https://github.com/Ivan-VHS/Kaskad/pull/36) documents CRT splitting of the radix-1000 completion and unique infinite positional coefficient sequences. This is an external mathematical reference only; it does not change DAK's kernel, boot protocol, Reaper policy contracts, host desktop, app catalogue, ABI, release image or project licensing. See [the local research note](docs/VYUNENKO_K3_RESEARCH_REFERENCE.md).
