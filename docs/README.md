@@ -44,3 +44,8 @@ Start with the [project README](../README.md) for the current Stage 1 boot evide
 - [Engineering evolution framework](ENGINEERING_EVOLUTION_FRAMEWORK.md) — completeness and acceptance criteria.
 
 Describe behavior from source, build configuration, schemas, tests and CI. Mark future work as planned; never present a host prototype or a policy contract as native kernel enforcement.
+
+## Repository structure
+
+- [Repository structure standard](REPOSITORY_STRUCTURE_STANDARD.md) — shared logical architecture and adoption requirements for the Ivan-VHS repositories.
+- [DAK repository profile](REPOSITORY_STRUCTURE_PROFILE.md) — maps the standard to the Reaper-native OS, kernel, desktop and test layout.
