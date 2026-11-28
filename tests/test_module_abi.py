@@ -50,6 +50,29 @@ class ModuleABITests(unittest.TestCase):
         self.assertEqual(result[0], "m0000")
         self.assertEqual(result[-1], "m1023")
 
+    def test_module_version_must_be_semver(self):
+        manifest = {
+            "schema": SCHEMA, "name": "usb", "version": "latest",
+            "architecture": "x86_64", "kernel_abi": "abi-1",
+            "entry_symbol": "usb_init", "dependencies": [], "capabilities": [],
+        }
+        with self.assertRaisesRegex(ModuleABIError, "semantic version"):
+            validate_module(manifest, architecture="x86_64", kernel_abi="abi-1")
+        manifest["version"] = "01.2.3"
+        with self.assertRaisesRegex(ModuleABIError, "semantic version"):
+            validate_module(manifest, architecture="x86_64", kernel_abi="abi-1")
+        manifest["version"] = "1.2.3-rc.1+build.5"
+        self.assertTrue(validate_module(manifest, architecture="x86_64", kernel_abi="abi-1")["valid"])
+
+    def test_kernel_abi_identifiers_must_be_valid_and_match(self):
+        manifest = {
+            "schema": SCHEMA, "name": "usb", "version": "1.0.0",
+            "architecture": "x86_64", "kernel_abi": "../abi",
+            "entry_symbol": "usb_init", "dependencies": [], "capabilities": [],
+        }
+        with self.assertRaisesRegex(ModuleABIError, "valid target ABI"):
+            validate_module(manifest, architecture="x86_64", kernel_abi="../abi")
+
     def test_duplicate_capabilities_are_rejected(self):
         manifest = {
             "schema": SCHEMA, "name": "usb", "version": "1.0.0",
