@@ -66,8 +66,11 @@ static duckos_boot_info_v1 valid_info(void) {
 }
 
 static void test_valid_handoff(void) {
-    duckos_boot_info_v1 info = valid_info();
+    dak_boot_info_v1 info = valid_info();
 
+    assert(dak_boot_info_validate(
+        &info, valid_regions, sizeof(valid_regions) / sizeof(valid_regions[0])
+    ) == DAK_BOOT_INFO_OK);
     assert(duckos_boot_info_validate(
         &info, valid_regions, sizeof(valid_regions) / sizeof(valid_regions[0])
     ) == DUCKOS_BOOT_INFO_OK);
@@ -193,6 +196,19 @@ static void test_memory_map_order_overlap_and_count(void) {
            DUCKOS_BOOT_INFO_INVALID_MEMORY_MAP);
 }
 
+static void test_reserved_fields_fail_closed(void) {
+    dak_boot_info_v1 info = valid_info();
+
+    info.reserved = 1u;
+    assert(dak_boot_info_validate(&info, valid_regions, 3u) ==
+           DAK_BOOT_INFO_INVALID_RESERVED_FIELDS);
+    assert(duckos_boot_info_validate(&info, valid_regions, 3u) ==
+           DUCKOS_BOOT_INFO_INVALID_RESERVED_FIELDS);
+    assert(strcmp(dak_boot_info_status_name(
+        DAK_BOOT_INFO_INVALID_RESERVED_FIELDS
+    ), "reserved boot-info fields must be zero") == 0);
+}
+
 static void test_version_and_arguments_fail_closed(void) {
     duckos_boot_info_v1 info = valid_info();
 
@@ -235,6 +251,7 @@ int main(void) {
     test_reserved_and_mmio_ownership();
     test_framebuffer_contract();
     test_memory_map_order_overlap_and_count();
+    test_reserved_fields_fail_closed();
     test_version_and_arguments_fail_closed();
     test_v1_prefix_accepts_appended_compatible_extension();
     return 0;
