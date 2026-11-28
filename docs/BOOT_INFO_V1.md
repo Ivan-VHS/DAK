@@ -43,10 +43,11 @@ are:
 
 A compatible extension appends fields after the complete 88-byte v1 prefix and
 sets `struct_size` to the actual accessible allocation size. The v1 validator
-reads only the known prefix and does not modify caller memory. It cannot prove
-the allocation size from a pointer: the caller remains responsible for passing
-at least the number of bytes it declares. Changes to existing offsets, widths,
-or alignment require a new ABI version.
+reads only the known 88-byte prefix, requires the v1 reserved word to be zero,
+and does not modify caller memory. It cannot prove the allocation size from a
+pointer: the caller remains responsible for passing at least the number of
+bytes it declares. Changes to existing offsets, widths, or alignment require a
+new ABI version.
 
 ## Handoff record
 
