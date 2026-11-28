@@ -28,7 +28,7 @@ def minimal_pe64() -> bytes:
 
 def fixture(folder: Path) -> dict:
     (folder / "game.exe").write_bytes(minimal_pe64())
-    (folder / "prefix" / "drive_c").mkdir(parents=True)
+    (folder / "prefix" / "drive_c").mkdir(parents=True, exist_ok=True)
     (folder / "prefix" / "system.reg").write_text("WINE REGISTRY Version 2\\n", encoding="utf-8")
     return {
         "schema": "duckos.game-launch-profile.v1",
