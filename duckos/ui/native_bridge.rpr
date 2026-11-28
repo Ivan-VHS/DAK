@@ -1,0 +1,123 @@
+# Reaper-first event envelope for the future native DuckOS desktop bridge.
+# Policy only: this module does not implement DABI64, IPC transport or process authentication.
+# Event: [version, sequence, request_id, sender_pid, workspace_id, event_name, payload_bytes, timestamp_us].
+
+export craft event_name_valid(event_name) {
+    when kind(event_name) != "text" {
+        yield false
+    }
+    yield event_name == "window.open" or event_name == "window.close" or event_name == "window.focus" or event_name == "window.resize" or event_name == "workspace.switch" or event_name == "notification.post" or event_name == "system.notification.post" or event_name == "launcher.resolve" or event_name == "theme.resolve" or event_name == "settings.validate"
+}
+
+export craft event_valid(event) {
+    when kind(event) != "list" or size(event) != 8 {
+        yield false
+    }
+    when kind(event[0]) != "number" or kind(event[1]) != "number" or kind(event[2]) != "number" or kind(event[3]) != "number" {
+        yield false
+    }
+    when kind(event[4]) != "number" or kind(event[5]) != "text" or kind(event[6]) != "number" or kind(event[7]) != "number" {
+        yield false
+    }
+    when event[0] != 1 or event[1] <= 0 or event[2] <= 0 or event[3] <= 0 {
+        yield false
+    }
+    when event[4] < 0 or event[4] > 15 {
+        yield false
+    }
+    when not event_name_valid(event[5]) {
+        yield false
+    }
+    when event[6] < 0 or event[6] > 65536 or event[7] <= 0 {
+        yield false
+    }
+    yield true
+}
+
+export craft next_sequence(previous_sequence, next_sequence) {
+    when kind(previous_sequence) != "number" or kind(next_sequence) != "number" {
+        yield false
+    }
+    when previous_sequence < 0 or next_sequence <= 0 {
+        yield false
+    }
+    yield next_sequence == previous_sequence + 1
+}
+
+export craft required_capability(event_name) {
+    when not event_name_valid(event_name) {
+        yield ""
+    }
+    when event_name == "window.open" or event_name == "window.close" or event_name == "window.focus" or event_name == "window.resize" {
+        yield "ui.window.manage"
+    }
+    when event_name == "workspace.switch" {
+        yield "ui.workspace.switch"
+    }
+    when event_name == "notification.post" {
+        yield "ui.notification.post"
+    }
+    when event_name == "system.notification.post" {
+        yield "ui.notification.system"
+    }
+    when event_name == "launcher.resolve" {
+        yield "ui.app.resolve"
+    }
+    when event_name == "theme.resolve" {
+        yield "ui.theme.read"
+    }
+    when event_name == "settings.validate" {
+        yield "ui.settings.validate"
+    }
+    yield ""
+}
+
+export craft capability_present(granted_capabilities, required) {
+    when kind(granted_capabilities) != "list" or size(granted_capabilities) > 64 or kind(required) != "text" or required == "" {
+        yield false
+    }
+    vary found := false
+    each capability in granted_capabilities {
+        when kind(capability) != "text" {
+            yield false
+        }
+        when capability == required {
+            change found := true
+        }
+    }
+    yield found
+}
+
+export craft route_decision(event, sender_is_system, granted_capabilities) {
+    when not event_valid(event) {
+        yield "deny-invalid-event"
+    }
+    when kind(sender_is_system) != "boolean" or kind(granted_capabilities) != "list" {
+        yield "deny-invalid-authority-evidence"
+    }
+    when event[5] == "system.notification.post" and sender_is_system != true {
+        yield "deny-system-origin"
+    }
+    when not capability_present(granted_capabilities, required_capability(event[5])) {
+        yield "deny-capability"
+    }
+    when event[5] == "window.open" or event[5] == "window.close" or event[5] == "window.focus" or event[5] == "window.resize" {
+        yield "route-window-manager-policy"
+    }
+    when event[5] == "workspace.switch" {
+        yield "route-session-policy"
+    }
+    when event[5] == "notification.post" or event[5] == "system.notification.post" {
+        yield "route-notification-policy"
+    }
+    when event[5] == "launcher.resolve" {
+        yield "route-app-admission-policy"
+    }
+    when event[5] == "theme.resolve" {
+        yield "route-theme-policy"
+    }
+    when event[5] == "settings.validate" {
+        yield "route-config-policy"
+    }
+    yield "deny-unsupported-event"
+}

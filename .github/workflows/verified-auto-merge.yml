@@ -1,0 +1,327 @@
+name: Verified Mainline Auto-Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: verified-mainline-auto-merge-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  verify-and-enable:
+    name: Verify all checks, review and merge eligibility
+    if: >
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+      REQUIRED_WORKFLOWS: '["DuckOS CI","DuckOS bootstrap validation","CodeQL","Repository completeness gate","Reaper contract tests","Reaper system platform contracts","System capability profile","Prose quality"]'
+    steps:
+      - name: Wait for every PR workflow on the exact head commit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "${PR_NUMBER}" =~ ^[0-9]+$ ]]; then
+            echo "::error::A valid pull request number is required."
+            exit 1
+          fi
+
+          pr_url="https://github.com/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
+          pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          pr_state="$(jq -r '.state' <<< "${pr}")"
+          if [[ "${pr_state}" != "open" ]]; then
+            echo "::notice::PR #${PR_NUMBER} is not open; no merge action is needed."
+            exit 0
+          fi
+
+          head_repo="$(jq -r '.head.repo.full_name // ""' <<< "${pr}")"
+          base_ref="$(jq -r '.base.ref' <<< "${pr}")"
+          is_draft="$(jq -r '.draft' <<< "${pr}")"
+          pr_author="$(jq -r '.user.login' <<< "${pr}")"
+          pr_head_sha="$(jq -r '.head.sha' <<< "${pr}")"
+
+          if [[ "${head_repo}" != "${GITHUB_REPOSITORY}" || "${base_ref}" != "main" || "${is_draft}" != "false" ]]; then
+            echo "::notice::PR is not an eligible same-repository, non-draft PR targeting main."
+            exit 0
+          fi
+
+          if [[ -n "${EXPECTED_HEAD_SHA}" && "${pr_head_sha}" != "${EXPECTED_HEAD_SHA}" ]]; then
+            echo "::error::PR head changed before verification started; refusing stale validation."
+            exit 1
+          fi
+
+          PR_HEAD_SHA="${pr_head_sha}"
+          echo "VERIFIED_PR_HEAD_SHA=${PR_HEAD_SHA}" >> "$GITHUB_ENV"
+          echo "Verifying PR #${PR_NUMBER} at ${PR_HEAD_SHA}"
+
+          ready_streak=0
+          last_fingerprint=""
+          ready=false
+
+          for attempt in $(seq 1 90); do
+            current_pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+            current_state="$(jq -r '.state' <<< "${current_pr}")"
+            current_head="$(jq -r '.head.sha' <<< "${current_pr}")"
+            current_base="$(jq -r '.base.ref' <<< "${current_pr}")"
+            current_repo="$(jq -r '.head.repo.full_name // ""' <<< "${current_pr}")"
+            current_draft="$(jq -r '.draft' <<< "${current_pr}")"
+
+            if [[ "${current_state}" != "open" ]]; then
+              echo "::notice::PR #${PR_NUMBER} closed while checks were running."
+              exit 0
+            fi
+            if [[ "${current_head}" != "${PR_HEAD_SHA}" || "${current_base}" != "main" || "${current_repo}" != "${GITHUB_REPOSITORY}" || "${current_draft}" != "false" ]]; then
+              echo "::error::PR eligibility or head SHA changed during verification."
+              exit 1
+            fi
+
+            runs="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${PR_HEAD_SHA}&per_page=100")"
+            state="$(jq -r \
+              --arg self "${GITHUB_WORKFLOW}" \
+              --arg sha "${PR_HEAD_SHA}" \
+              --argjson required "${REQUIRED_WORKFLOWS}" '
+                [.workflow_runs[]
+                  | select((.event == "pull_request" or .event == "push") and .head_sha == $sha and .name != $self)] as $current
+                | ($current | sort_by(.updated_at) | group_by(.name) | map(.[-1])) as $latest
+                | [ $required[] | . as $name
+                    | select(([$latest[] | select(.name == $name)] | length) == 0)] as $missing
+                | [ $required[] | . as $name
+                    | select(
+                        ([$latest[] | select(.name == $name and .status == "completed" and .conclusion == "success")] | length) == 0
+                        and ([$latest[] | select(.name == $name and .status == "completed")] | length) > 0
+                      )] as $required_failed
+                | [$latest[] | select(.status == "completed"
+                    and (.conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral"))] as $failed
+                | [$latest[] | select(.status != "completed")] as $pending
+                | if ($failed | length) > 0 then "failed"
+                  elif ($required_failed | length) > 0 then "required-failed"
+                  elif ($missing | length) > 0 then "missing"
+                  elif ($pending | length) > 0 then "pending"
+                  else "ready"
+                  end
+              ' <<< "${runs}")"
+
+            echo "PR #${PR_NUMBER} assurance attempt ${attempt}/90: ${state}"
+
+            case "${state}" in
+              failed:*|required-failed:*)
+                echo "::error::A PR workflow failed on the validated head: ${state}"
+                exit 1
+                ;;
+              ready)
+                fingerprint="$(jq -c --arg self "${GITHUB_WORKFLOW}" --arg sha "${PR_HEAD_SHA}" '
+                  [.workflow_runs[]
+                    | select((.event == "pull_request" or .event == "push") and .head_sha == $sha and .name != $self)
+                    | {id, name, status, conclusion, updated_at}]
+                  | sort_by(.name)
+                ' <<< "${runs}")"
+                if [[ "${fingerprint}" == "${last_fingerprint}" ]]; then
+                  ready_streak=$((ready_streak + 1))
+                else
+                  last_fingerprint="${fingerprint}"
+                  ready_streak=1
+                fi
+                echo "Stable complete workflow set: ${ready_streak}/3"
+                if (( ready_streak >= 3 )); then
+                  ready=true
+                  break
+                fi
+                ;;
+              *)
+                ready_streak=0
+                last_fingerprint=""
+                ;;
+            esac
+
+            sleep 10
+          done
+
+          if [[ "${ready}" != "true" ]]; then
+            echo "::error::Timed out before all required PR workflows reached a stable successful state."
+            exit 1
+          fi
+
+          echo "All required and all triggered PR workflows passed for ${PR_HEAD_SHA}."
+
+      - name: Require a current human approval and resolved review threads
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          pr_url="https://github.com/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
+          pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          pr_author="$(jq -r '.user.login' <<< "${pr}")"
+
+          decision="$(gh pr view "${pr_url}" --json reviewDecision --jq '.reviewDecision // "UNKNOWN"')"
+          case "${decision}" in
+            APPROVED|UNKNOWN) ;;
+            *)
+              echo "::error::GitHub review decision is ${decision}; approval is not complete."
+              exit 1
+              ;;
+          esac
+
+          reviews="$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/reviews?per_page=100" | jq 'add')"
+          review_state="$(jq -r --arg author "${pr_author}" '
+            [
+              .[]
+              | select(.submitted_at != null)
+              | {
+                  login: (.user.login // ""),
+                  state: (.state // ""),
+                  submitted_at: .submitted_at
+                }
+            ]
+            | sort_by(.submitted_at)
+            | group_by(.login)
+            | map(.[-1]) as $latest
+            | if any($latest[]; .login != $author and .state == "CHANGES_REQUESTED" and ((.login | endswith("[bot]")) | not)) then
+                "changes-requested"
+              elif any($latest[]; .login != $author and .state == "APPROVED" and ((.login | endswith("[bot]")) | not)) then
+                "approved"
+              else "missing-human-approval"
+              end
+          ' <<< "${reviews}")"
+
+          if [[ "${review_state}" != "approved" ]]; then
+            echo "::error::A non-author human approval is required; current review state: ${review_state}."
+            exit 1
+          fi
+
+          owner="${GITHUB_REPOSITORY%%/*}"
+          repo_name="${GITHUB_REPOSITORY#*/}"
+          threads_query='query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
+            repository(owner: $owner, name: $name) {
+              pullRequest(number: $number) {
+                reviewThreads(first: 100, after: $cursor) {
+                  nodes { isResolved }
+                  pageInfo { hasNextPage endCursor }
+                }
+              }
+            }
+          }'
+
+          cursor=""
+          unresolved=0
+          while true; do
+            if [[ -n "${cursor}" ]]; then
+              page="$(gh api graphql -f query="${threads_query}" -F owner="${owner}" -F name="${repo_name}" -F number="${PR_NUMBER}" -F cursor="${cursor}")"
+            else
+              page="$(gh api graphql -f query="${threads_query}" -F owner="${owner}" -F name="${repo_name}" -F number="${PR_NUMBER}")"
+            fi
+
+            page_unresolved="$(jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length' <<< "${page}")"
+            unresolved=$((unresolved + page_unresolved))
+            has_next="$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage' <<< "${page}")"
+            if [[ "${has_next}" != "true" ]]; then
+              break
+            fi
+            cursor="$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.endCursor' <<< "${page}")"
+            if [[ -z "${cursor}" || "${cursor}" == "null" ]]; then
+              echo "::error::Could not paginate review threads safely."
+              exit 1
+            fi
+          done
+
+          if (( unresolved > 0 )); then
+            echo "::error::${unresolved} unresolved review thread(s) remain."
+            exit 1
+          fi
+
+          echo "Review decision: ${decision}; one current non-author human approval found; all review threads resolved."
+
+      - name: Revalidate PR head, mergeability and review before enabling auto-merge
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          pr_url="https://github.com/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
+          mergeable="unknown"
+
+          for attempt in $(seq 1 10); do
+            pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+            state="$(jq -r '.state' <<< "${pr}")"
+            merged="$(jq -r '.merged' <<< "${pr}")"
+            head="$(jq -r '.head.sha' <<< "${pr}")"
+            base="$(jq -r '.base.ref' <<< "${pr}")"
+            head_repo="$(jq -r '.head.repo.full_name // ""' <<< "${pr}")"
+            draft="$(jq -r '.draft' <<< "${pr}")"
+            mergeable="$(jq -r '.mergeable // "unknown"' <<< "${pr}")"
+
+            if [[ "${merged}" == "true" ]]; then
+              echo "::notice::PR #${PR_NUMBER} is already merged."
+              exit 0
+            fi
+            if [[ "${state}" != "open" || "${head}" != "${VERIFIED_PR_HEAD_SHA}" || "${base}" != "main" || "${head_repo}" != "${GITHUB_REPOSITORY}" || "${draft}" != "false" ]]; then
+              echo "::error::PR changed or is no longer eligible; refusing auto-merge."
+              exit 1
+            fi
+
+            if [[ "${mergeable}" == "true" ]]; then
+              break
+            fi
+            if [[ "${mergeable}" == "false" ]]; then
+              echo "::error::GitHub reports the PR is not mergeable; resolve conflicts first."
+              exit 1
+            fi
+
+            echo "Waiting for GitHub mergeability calculation (${attempt}/10)."
+            sleep 5
+          done
+
+          if [[ "${mergeable}" != "true" ]]; then
+            echo "::error::GitHub did not confirm mergeability."
+            exit 1
+          fi
+
+          # Recheck the approval after all asynchronous validation has completed.
+          pr_author="$(jq -r '.user.login' <<< "${pr}")"
+          reviews="$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/reviews?per_page=100" | jq 'add')"
+          approved="$(jq -r --arg author "${pr_author}" '
+            [
+              .[]
+              | select(.submitted_at != null)
+              | {login: (.user.login // ""), state: (.state // ""), submitted_at: .submitted_at}
+            ]
+            | sort_by(.submitted_at)
+            | group_by(.login)
+            | map(.[-1]) as $latest
+            | any($latest[]; .login != $author and .state == "APPROVED" and ((.login | endswith("[bot]")) | not))
+          ' <<< "${reviews}")"
+          changes_requested="$(jq -r --arg author "${pr_author}" '
+            [
+              .[]
+              | select(.submitted_at != null)
+              | {login: (.user.login // ""), state: (.state // ""), submitted_at: .submitted_at}
+            ]
+            | sort_by(.submitted_at)
+            | group_by(.login)
+            | map(.[-1]) as $latest
+            | any($latest[]; .login != $author and .state == "CHANGES_REQUESTED" and ((.login | endswith("[bot]")) | not))
+          ' <<< "${reviews}")"
+
+          if [[ "${approved}" != "true" || "${changes_requested}" == "true" ]]; then
+            echo "::error::Review state changed during final validation."
+            exit 1
+          fi
+
+          gh pr merge "${pr_url}" --auto --squash --delete-branch
+          echo "GitHub accepted the verified squash auto-merge request for PR #${PR_NUMBER}."

@@ -1,0 +1,56 @@
+# Crash-consistent append journal policy.
+# Storage backend is responsible for ordered flushes and durable media semantics.
+
+export craft entry_valid(entry, expected_sequence) {
+    when size(entry) != 4 or expected_sequence <= 0 {
+        yield false
+    }
+    when entry[0] != expected_sequence or entry[1] == "" or entry[2] == "" {
+        yield false
+    }
+    yield entry[3] == "prepared" or entry[3] == "committed"
+}
+
+export craft journal_valid(entries) {
+    vary expected := 1
+    each entry in entries {
+        when not entry_valid(entry, expected) {
+            yield false
+        }
+        change expected := expected + 1
+    }
+    yield true
+}
+
+export craft append_decision(entries, kind, digest) {
+    when not journal_valid(entries) or kind == "" or digest == "" {
+        yield ["deny", -1]
+    }
+    yield ["write-payload-then-prepare-record", size(entries) + 1]
+}
+
+export craft commit_decision(entry, payload_flushed, metadata_flushed) {
+    when size(entry) != 4 or entry[3] != "prepared" {
+        yield "deny-invalid-entry"
+    }
+    when not payload_flushed {
+        yield "retry-payload-flush"
+    }
+    when not metadata_flushed {
+        yield "retry-metadata-flush"
+    }
+    yield "persist-commit-marker"
+}
+
+export craft recovery_index(entries) {
+    when not journal_valid(entries) {
+        yield -1
+    }
+    vary latest := -1
+    each index in range(0, size(entries)) {
+        when entries[index][3] == "committed" {
+            change latest := index
+        }
+    }
+    yield latest
+}

@@ -1,0 +1,49 @@
+# Safe system command and utility dispatch contracts.
+# Execution must use an argv vector; shell interpretation is never implicit.
+
+# Command: [name, argv, required_capability, privileged].
+export craft command_valid(command) {
+    when size(command) != 4 or command[0] == "" or size(command[0]) > 64 {
+        yield false
+    }
+    when size(command[1]) > 32 or command[2] == "" {
+        yield false
+    }
+    yield command[3] == true or command[3] == false
+}
+
+export craft dispatch_decision(command, grants, caller_state) {
+    when not command_valid(command) {
+        yield "deny-invalid-command"
+    }
+    when caller_state != "running" {
+        yield "deny-caller-state"
+    }
+    when command[3] {
+        yield "require-reviewed-privileged-service"
+    }
+    vary granted := false
+    each capability in grants {
+        when capability == command[2] {
+            change granted := true
+        }
+    }
+    when not granted {
+        yield "deny-capability"
+    }
+    yield "spawn-with-argv-and-bounded-environment"
+}
+
+export craft utility_output_valid(bytes, limit, exit_code) {
+    when bytes < 0 or limit < 0 or bytes > limit {
+        yield false
+    }
+    yield exit_code >= -255 and exit_code <= 255
+}
+
+export craft environment_key_valid(key) {
+    when key == "" or size(key) > 128 {
+        yield false
+    }
+    yield key != "LD_PRELOAD" and key != "DYLD_INSERT_LIBRARIES"
+}

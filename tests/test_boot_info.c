@@ -6,7 +6,45 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <string.h>
+
+_Static_assert(sizeof(duckos_memory_region) == 24u,
+               "memory-region v1 size must remain stable");
+_Static_assert(_Alignof(duckos_memory_region) == 8u,
+               "memory-region v1 alignment must remain stable");
+_Static_assert(offsetof(duckos_memory_region, type) == 16u,
+               "memory-region type offset must remain stable");
+_Static_assert(offsetof(duckos_memory_region, flags) == 20u,
+               "memory-region flags offset must remain stable");
+
+_Static_assert(sizeof(duckos_boot_info_v1) == 88u,
+               "boot-info v1 size must remain stable");
+_Static_assert(_Alignof(duckos_boot_info_v1) == 8u,
+               "boot-info v1 alignment must remain stable");
+_Static_assert(offsetof(duckos_boot_info_v1, flags) == 8u,
+               "boot-info flags offset must remain stable");
+_Static_assert(offsetof(duckos_boot_info_v1, kernel_phys_base) == 16u,
+               "boot-info kernel base offset must remain stable");
+_Static_assert(offsetof(duckos_boot_info_v1, initramfs_phys_base) == 32u,
+               "boot-info initramfs base offset must remain stable");
+_Static_assert(offsetof(duckos_boot_info_v1, framebuffer_phys_base) == 48u,
+               "boot-info framebuffer base offset must remain stable");
+_Static_assert(offsetof(duckos_boot_info_v1, framebuffer_width) == 64u,
+               "boot-info framebuffer width offset must remain stable");
+_Static_assert(offsetof(duckos_boot_info_v1, memory_region_count) == 80u,
+               "boot-info memory-map count offset must remain stable");
+_Static_assert(offsetof(duckos_boot_info_v1, reserved) == 84u,
+               "boot-info reserved offset must remain stable");
+
+typedef struct duckos_boot_info_v1_extended {
+    duckos_boot_info_v1 v1;
+    uint8_t extension[16];
+} duckos_boot_info_v1_extended;
+
+_Static_assert(offsetof(duckos_boot_info_v1_extended, extension) ==
+                   sizeof(duckos_boot_info_v1),
+               "boot-info v1 extensions must append after the stable prefix");
 
 static const duckos_memory_region valid_regions[] = {
     {0x1000u, 0x9f000u, DUCKOS_MEMORY_USABLE, 0u},
@@ -172,6 +210,24 @@ static void test_version_and_arguments_fail_closed(void) {
            DUCKOS_BOOT_INFO_UNSUPPORTED_VERSION);
 }
 
+
+static void test_v1_prefix_accepts_appended_compatible_extension(void) {
+    duckos_boot_info_v1_extended extended;
+    uint8_t expected_extension[sizeof(extended.extension)];
+
+    memset(&extended, 0xa5, sizeof(extended));
+    memset(expected_extension, 0xa5, sizeof(expected_extension));
+    extended.v1 = valid_info();
+    extended.v1.struct_size = (uint32_t)sizeof(extended);
+
+    assert(duckos_boot_info_validate(
+        &extended.v1, valid_regions,
+        sizeof(valid_regions) / sizeof(valid_regions[0])
+    ) == DUCKOS_BOOT_INFO_OK);
+    assert(memcmp(extended.extension, expected_extension,
+                  sizeof(expected_extension)) == 0);
+}
+
 int main(void) {
     test_valid_handoff();
     test_initramfs_is_optional_but_must_be_consistent();
@@ -180,5 +236,6 @@ int main(void) {
     test_framebuffer_contract();
     test_memory_map_order_overlap_and_count();
     test_version_and_arguments_fail_closed();
+    test_v1_prefix_accepts_appended_compatible_extension();
     return 0;
 }

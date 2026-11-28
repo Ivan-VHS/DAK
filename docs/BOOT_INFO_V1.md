@@ -19,6 +19,35 @@ Implemented files:
 - `kernel/linker.ld` — high-half ELF layout with separate read-only, executable and writable load segments.
 - `boot/build-iso.sh` — pinned hybrid BIOS/UEFI ISO build; `boot/test-qemu.sh` — serial-marker boot test.
 
+
+## Canonical binary layout
+
+The C11 x86-64 handoff ABI is pinned by compile-time assertions in
+`tests/test_boot_info.c`. The v1 record is 88 bytes with 8-byte alignment;
+the memory-region entry is 24 bytes with 8-byte alignment. The stable offsets
+are:
+
+| Type | Field | Offset | Width |
+|---|---|---:|---:|
+| `duckos_boot_info_v1` | `struct_size` | 0 | 4 |
+| `duckos_boot_info_v1` | `version` | 4 | 4 |
+| `duckos_boot_info_v1` | `flags` | 8 | 8 |
+| `duckos_boot_info_v1` | `kernel_phys_base` | 16 | 8 |
+| `duckos_boot_info_v1` | `initramfs_phys_base` | 32 | 8 |
+| `duckos_boot_info_v1` | `framebuffer_phys_base` | 48 | 8 |
+| `duckos_boot_info_v1` | `framebuffer_width` | 64 | 4 |
+| `duckos_boot_info_v1` | `memory_region_count` | 80 | 4 |
+| `duckos_boot_info_v1` | `reserved` | 84 | 4 |
+| `duckos_memory_region` | `type` | 16 | 4 |
+| `duckos_memory_region` | `flags` | 20 | 4 |
+
+A compatible extension appends fields after the complete 88-byte v1 prefix and
+sets `struct_size` to the actual accessible allocation size. The v1 validator
+reads only the known prefix and does not modify caller memory. It cannot prove
+the allocation size from a pointer: the caller remains responsible for passing
+at least the number of bytes it declares. Changes to existing offsets, widths,
+or alignment require a new ABI version.
+
 ## Handoff record
 
 The v1 record contains:

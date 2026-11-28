@@ -1,0 +1,98 @@
+# Signed package manifest, dependency and transaction contracts.
+# Archive extraction and filesystem mutation belong to the package service backend.
+
+# Manifest: [name, version, arch, digest, signature_valid, dependencies, bytes, permissions].
+export craft manifest_valid(manifest) {
+    when size(manifest) != 8 or manifest[0] == "" or manifest[2] == "" or manifest[3] == "" {
+        yield false
+    }
+    when not version_valid(manifest[1]) or manifest[4] != true or manifest[6] <= 0 {
+        yield false
+    }
+    when size(manifest[5]) > 256 or size(manifest[7]) > 64 {
+        yield false
+    }
+    each dependency in manifest[5] {
+        when dependency == "" or dependency == manifest[0] {
+            yield false
+        }
+    }
+    each permission in manifest[7] {
+        when permission == "" {
+            yield false
+        }
+    }
+    yield true
+}
+
+export craft version_valid(version) {
+    when size(version) != 3 {
+        yield false
+    }
+    yield version[0] >= 0 and version[1] >= 0 and version[2] >= 0
+}
+
+export craft dependency_set_present(required, available) {
+    vary present := true
+    each dependency in required {
+        vary found := false
+        each package_name in available {
+            when dependency == package_name {
+                change found := true
+            }
+        }
+        when not found {
+            change present := false
+        }
+    }
+    yield present
+}
+
+export craft install_decision(manifest, target_arch, available_packages, free_bytes, grants) {
+    when not manifest_valid(manifest) {
+        yield "deny-invalid-or-unsigned-package"
+    }
+    when manifest[2] != target_arch {
+        yield "deny-target-architecture"
+    }
+    when manifest[6] > free_bytes {
+        yield "deny-insufficient-space"
+    }
+    when not dependency_set_present(manifest[5], available_packages) {
+        yield "deny-missing-dependency"
+    }
+    each permission in manifest[7] {
+        vary granted := false
+        each capability in grants {
+            when capability == permission {
+                change granted := true
+            }
+        }
+        when not granted {
+            yield "deny-permission-escalation"
+        }
+    }
+    yield "stage-transaction"
+}
+
+export craft transaction_transition(current, next) {
+    when current == "new" and next == "verified" {
+        yield true
+    }
+    when current == "verified" and next == "staged" {
+        yield true
+    }
+    when current == "staged" and next == "committed" {
+        yield true
+    }
+    when current == "new" and next == "aborted" {
+        yield true
+    }
+    when current == "verified" and next == "aborted" {
+        yield true
+    }
+    when current == "staged" and next == "rolled-back" {
+        yield true
+    }
+    yield false
+}

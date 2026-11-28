@@ -139,6 +139,25 @@ gcc -std=c11 -O2 -Wall -Wextra -Werror \
     -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
     -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
     -mgeneral-regs-only \
+    -I "$ROOT/foundation" \
+    -c "$ROOT/foundation/gdt_descriptor.c" -o "$WORK_DIR/objects/gdt-descriptor.o"
+
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
+    -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" \
+    -c "$ROOT/kernel/arch/x86_64/gdt.c" -o "$WORK_DIR/objects/gdt.o"
+
+gcc -m64 -mcmodel=kernel -mno-red-zone -fno-pic -fno-pie \
+    -c "$ROOT/kernel/arch/x86_64/segments.S" -o "$WORK_DIR/objects/segments.o"
+
+gcc -std=c11 -O2 -Wall -Wextra -Werror \
+    -ffreestanding -fno-stack-protector -fno-pic -fno-pie \
+    -fno-builtin -fno-asynchronous-unwind-tables -fno-unwind-tables \
+    -fno-omit-frame-pointer -m64 -mcmodel=kernel -mno-red-zone \
+    -mgeneral-regs-only \
     -I "$ROOT/foundation" -I "$ROOT/kernel/arch/x86_64" \
     -c "$ROOT/kernel/arch/x86_64/interrupts.c" -o "$WORK_DIR/objects/interrupts.o"
 
@@ -151,6 +170,9 @@ ld -nostdlib -static -z max-page-size=0x1000 \
     "$WORK_DIR/objects/boot-info.o" \
     "$WORK_DIR/objects/frame-allocator.o" \
     "$WORK_DIR/objects/idt.o" \
+    "$WORK_DIR/objects/gdt-descriptor.o" \
+    "$WORK_DIR/objects/gdt.o" \
+    "$WORK_DIR/objects/segments.o" \
     "$WORK_DIR/objects/interrupts.o" \
     "$WORK_DIR/objects/exceptions.o" \
     -o "$WORK_DIR/duckos.elf"

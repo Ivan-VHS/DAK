@@ -1,0 +1,37 @@
+# AArch64 boot and memory-profile contracts.
+# This keeps an architecture seam without claiming a qualified ARM64 port.
+
+export craft boot_profile_valid(profile) {
+    # [exception_level, granule_bytes, mmu_enabled, gic_version, counter_frequency].
+    when size(profile) != 5 {
+        yield false
+    }
+    when profile[0] != 1 and profile[0] != 2 {
+        yield false
+    }
+    when profile[1] != 4096 and profile[1] != 16384 {
+        yield false
+    }
+    when profile[3] < 2 or profile[3] > 4 or profile[4] <= 0 {
+        yield false
+    }
+    yield profile[2] == true or profile[2] == false
+}
+
+export craft memory_region_valid(region, granule_bytes) {
+    # [base, bytes, kind, cache_policy].
+    when size(region) != 4 or granule_bytes <= 0 {
+        yield false
+    }
+    when region[0] < 0 or region[1] <= 0 or region[0] % granule_bytes != 0 or region[1] % granule_bytes != 0 {
+        yield false
+    }
+    when region[2] != "ram" and region[2] != "reserved" and region[2] != "device" {
+        yield false
+    }
+    yield region[3] == "normal" or region[3] == "device-nGnRnE" or region[3] == "device-nGnRE"
+}
+
+export craft exception_level_allows_mmio(level) {
+    yield level == 1 or level == 2
+}

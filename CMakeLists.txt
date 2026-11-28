@@ -14,6 +14,8 @@ add_library(duckos_boot_contract STATIC
     foundation/frame_allocator.h
     foundation/idt.c
     foundation/idt.h
+    foundation/gdt_descriptor.c
+    foundation/gdt_descriptor.h
 )
 target_include_directories(duckos_boot_contract PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/foundation
@@ -65,6 +67,15 @@ if(BUILD_TESTING)
         target_compile_options(duckos_idt_tests PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME duckos-idt-contract COMMAND duckos_idt_tests)
+
+    add_executable(duckos_gdt_tests tests/test_gdt.c)
+    target_link_libraries(duckos_gdt_tests PRIVATE duckos_boot_contract)
+    if(MSVC)
+        target_compile_options(duckos_gdt_tests PRIVATE /W4 /sdl)
+    else()
+        target_compile_options(duckos_gdt_tests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME duckos-x86-64-gdt-tss COMMAND duckos_gdt_tests)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")

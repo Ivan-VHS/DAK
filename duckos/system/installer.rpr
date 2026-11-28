@@ -1,0 +1,70 @@
+# DAK installer preflight and reversible deployment plan.
+# Disk writes, partitioning and boot-entry changes require a privileged installer backend.
+
+# Target: [device_id, arch, total_bytes, free_bytes, removable, trusted, secure_boot_ready].
+# Image: [manifest_id, arch, bytes, digest, signature_valid, version].
+export craft preflight(target, image, secure_boot_required) {
+    when size(target) != 7 or size(image) != 6 {
+        yield "deny-invalid-descriptor"
+    }
+    when target[0] == "" or target[1] == "" or target[2] <= 0 or target[3] < 0 or target[3] > target[2] {
+        yield "deny-invalid-target"
+    }
+    when (target[4] != true and target[4] != false) or (target[5] != true and target[5] != false) or (target[6] != true and target[6] != false) {
+        yield "deny-invalid-target-flags"
+    }
+    when image[0] == "" or image[1] != target[1] or image[2] <= 0 or image[3] == "" {
+        yield "deny-image-mismatch"
+    }
+    when size(image[5]) != 3 or image[5][0] < 0 or image[5][1] < 0 or image[5][2] < 0 {
+        yield "deny-image-version"
+    }
+    when target[5] != true {
+        yield "deny-untrusted-target"
+    }
+    when image[4] != true {
+        yield "deny-image-signature"
+    }
+    when secure_boot_required and not target[6] {
+        yield "deny-secure-boot"
+    }
+    when image[2] > target[3] {
+        yield "deny-insufficient-space"
+    }
+    yield "ready-for-explicit-install"
+}
+
+export craft step_transition(current, next) {
+    when current == "planned" and next == "verified" {
+        yield true
+    }
+    when current == "verified" and next == "backed-up" {
+        yield true
+    }
+    when current == "backed-up" and next == "written" {
+        yield true
+    }
+    when current == "written" and next == "boot-entry-staged" {
+        yield true
+    }
+    when current == "boot-entry-staged" and next == "committed" {
+        yield true
+    }
+    when current == "written" and next == "rolled-back" {
+        yield true
+    }
+    when current == "boot-entry-staged" and next == "rolled-back" {
+        yield true
+    }
+    yield false
+}
+
+export craft failure_action(step, backup_valid) {
+    when step == "planned" or step == "verified" {
+        yield "abort-without-writing"
+    }
+    when backup_valid {
+        yield "restore-backup-and-old-boot-entry"
+    }
+    yield "stop-and-preserve-target-for-recovery"
+}

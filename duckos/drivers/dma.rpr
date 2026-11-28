@@ -1,0 +1,62 @@
+# DMA buffer ownership and cache-maintenance lifecycle.
+# Physical pinning, IOMMU mapping and cache instructions belong to the driver backend.
+
+# Buffer: [id, physical_base, bytes, alignment, direction, owner_pid, state].
+export craft buffer_valid(buffer) {
+    when size(buffer) != 7 {
+        yield false
+    }
+    when buffer[0] <= 0 or buffer[1] < 4096 or buffer[2] <= 0 or buffer[3] <= 0 {
+        yield false
+    }
+    when buffer[1] % buffer[3] != 0 or buffer[2] % buffer[3] != 0 {
+        yield false
+    }
+    when buffer[4] != "to-device" and buffer[4] != "from-device" and buffer[4] != "bidirectional" {
+        yield false
+    }
+    when buffer[5] <= 0 {
+        yield false
+    }
+    yield buffer[6] == "allocated" or buffer[6] == "mapped" or buffer[6] == "device-owned" or buffer[6] == "cpu-owned" or buffer[6] == "released"
+}
+
+export craft map_decision(buffer, caller_pid, iommu_available) {
+    when not buffer_valid(buffer) {
+        yield "deny-invalid-buffer"
+    }
+    when buffer[6] != "allocated" or buffer[5] != caller_pid {
+        yield "deny-ownership"
+    }
+    when not iommu_available {
+        yield "deny-no-isolation"
+    }
+    yield "map-through-iommu"
+}
+
+export craft submit_transition(buffer) {
+    when not buffer_valid(buffer) or buffer[6] != "mapped" {
+        yield ["reject", buffer]
+    }
+    yield ["sync-for-device-then-submit", [buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], "device-owned"] ]
+}
+
+export craft completion_transition(buffer) {
+    when not buffer_valid(buffer) or buffer[6] != "device-owned" {
+        yield ["reject", buffer]
+    }
+    yield ["sync-for-cpu", [buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], "cpu-owned"] ]
+}
+
+export craft release_decision(buffer) {
+    when not buffer_valid(buffer) {
+        yield "deny-invalid-buffer"
+    }
+    when buffer[6] == "device-owned" {
+        yield "deny-device-still-owns-buffer"
+    }
+    when buffer[6] == "released" {
+        yield "already-released"
+    }
+    yield "unmap-and-release"
+}

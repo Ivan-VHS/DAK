@@ -1,0 +1,50 @@
+# Atomic ordering contracts for SMP-safe kernel primitives.
+# These rules validate requests; compiler and CPU backends perform the atomics.
+
+export craft order_valid(order) {
+    yield order == "relaxed" or order == "acquire" or order == "release" or order == "acq_rel" or order == "seq_cst"
+}
+
+export craft load_order_valid(order) {
+    yield order == "relaxed" or order == "acquire" or order == "seq_cst"
+}
+
+export craft store_order_valid(order) {
+    yield order == "relaxed" or order == "release" or order == "seq_cst"
+}
+
+export craft compare_exchange_orders_valid(success, failure) {
+    when not order_valid(success) or not order_valid(failure) {
+        yield false
+    }
+    when failure == "release" or failure == "acq_rel" {
+        yield false
+    }
+    when success == "relaxed" or success == "release" {
+        yield failure == "relaxed"
+    }
+    when success == "acquire" or success == "acq_rel" {
+        yield failure == "relaxed" or failure == "acquire"
+    }
+    when success == "seq_cst" {
+        yield failure == "relaxed" or failure == "acquire" or failure == "seq_cst"
+    }
+    yield false
+}
+
+export craft fence_valid(order, scope) {
+    when not order_valid(order) {
+        yield false
+    }
+    yield scope == "thread" or scope == "system" or scope == "device"
+}
+
+export craft atomic_width_valid(width, alignment, cmpxchg16b) {
+    when width != 1 and width != 2 and width != 4 and width != 8 and width != 16 {
+        yield false
+    }
+    when width == 16 and not cmpxchg16b {
+        yield false
+    }
+    yield alignment >= width and alignment % width == 0
+}

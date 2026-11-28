@@ -10,13 +10,20 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: duckos-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   python-3-10:
     name: Python 3.10
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.10"
       - run: python -m pip install --upgrade pip jsonschema pyyaml
@@ -27,9 +34,12 @@ jobs:
   python-3-11:
     name: Python 3.11
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.11"
       - run: python -m pip install --upgrade pip jsonschema pyyaml
@@ -40,9 +50,12 @@ jobs:
   python-3-12:
     name: Python 3.12
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.12"
       - run: python -m pip install --upgrade pip jsonschema pyyaml
@@ -53,9 +66,12 @@ jobs:
   mora-node:
     name: Mora shell tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: "22"
       - run: npm test
@@ -63,8 +79,11 @@ jobs:
   native-c:
     name: Native C
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Build native targets when present
         shell: bash
         run: |

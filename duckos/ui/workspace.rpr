@@ -1,4 +1,5 @@
-# Task-oriented workspace layout policy; the native host owns actual widgets.
+# Task-oriented workspace composition policy.
+# Native workspace services own persistence and display transactions.
 
 export craft layout_for(context) {
     when context == "log.anomaly" {
@@ -32,6 +33,51 @@ export craft panels_for(context) {
     yield ["navigation", "workspace", "inspector"]
 }
 
+export craft layout_mode_valid(mode) {
+    yield mode == "tiling" or mode == "floating" or mode == "stack" or mode == "automatic"
+}
+
+export craft descriptor_valid(workspace) {
+    when kind(workspace) != "list" or size(workspace) != 7 {
+        yield false
+    }
+    when kind(workspace[0]) != "number" or kind(workspace[1]) != "number" or kind(workspace[2]) != "text" or kind(workspace[3]) != "text" or kind(workspace[4]) != "number" or kind(workspace[5]) != "number" or kind(workspace[6]) != "number" {
+        yield false
+    }
+    when workspace[0] <= 0 or workspace[1] <= 0 {
+        yield false
+    }
+    when not layout_mode_valid(workspace[2]) {
+        yield false
+    }
+    when workspace[3] == "" or workspace[4] < 0 or workspace[5] < 0 or workspace[5] > 256 {
+        yield false
+    }
+    yield workspace[6] > 0
+}
+
 export craft focus_valid(context, focused_item) {
     yield context != "" and focused_item != ""
+}
+
+export craft window_limit(count) {
+    when count < 0 or count > 256 {
+        yield false
+    }
+    yield true
+}
+
+export craft panel_visible(panel_id, enabled_panels) {
+    when kind(panel_id) != "text" or kind(enabled_panels) != "list" {
+        yield false
+    }
+    when panel_id == "" {
+        yield false
+    }
+    each candidate in enabled_panels {
+        when candidate == panel_id {
+            yield true
+        }
+    }
+    yield false
 }

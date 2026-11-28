@@ -39,6 +39,16 @@ python -m unittest tests.test_repository_federation -v
 
 The registry is machine-readable at `federation/repositories.v1.json`; its contract is in `schemas/repository-federation.v1.schema.json`. The existing `manifests/ivan-vhs-program-adoption.v1.json` remains the authority for the disjoint 1,000-entry catalogue allocation. The repository federation registry is the authority for source URLs, checkout paths, commit pins, licences and runtime boundaries.
 
+## Native host workbench launch boundary
+
+The Qt host-native Mora shell provides explicit, per-launch entry points for the four federated workbenches. It uses a fixed ID allowlist and fixed relative executable/script locations beneath the validated DuckOS checkout. It does not execute manifest strings, build missing projects, use a shell command line or elevate privileges.
+
+- Reaper Studio and OPlague use an already installed host Python runtime to open their upstream user-space applications.
+- Pytyliki is launched only when its Windows GUI target exists; the portable C11 command-line utility is not represented as a GUI.
+- VentuSample is launched only when an existing Qt desktop executable is found; the workbench stays offline-first.
+
+Each launch is an explicit user action with a confirmation prompt. The bridge is a development/host integration only. It does not replace the missing DuckOS process model, syscall ABI, capability enforcement, service supervisor, native filesystem or compositor. Never use a successful host launch as evidence that a project runs inside the DuckOS kernel session.
+
 ## How projects fit together
 
 - **Pytyliki** provides processor inventory and bounded benchmark/profile evidence. DuckOS should call narrow versioned interfaces or consume JSON reports; it must not silently change clocks, voltage, affinity, fan curves or firmware.

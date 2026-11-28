@@ -1,0 +1,79 @@
+# Taskbar and launcher policy.
+# Entry: [app_id, owner_pid, workspace_id, pinned, running, system, window_count, attention].
+
+export craft entry_valid(entry) {
+    when size(entry) != 8 or entry[0] == "" or entry[1] <= 0 or entry[2] < 0 or entry[2] > 15 {
+        yield false
+    }
+    when entry[3] != true and entry[3] != false {
+        yield false
+    }
+    when entry[4] != true and entry[4] != false {
+        yield false
+    }
+    when entry[5] != true and entry[5] != false {
+        yield false
+    }
+    when entry[6] < 0 or entry[6] > 256 {
+        yield false
+    }
+    yield entry[7] == true or entry[7] == false
+}
+
+export craft visibility(entry) {
+    when not entry_valid(entry) {
+        yield "invalid"
+    }
+    when entry[5] == true {
+        yield "hidden-system"
+    }
+    when entry[3] == true or entry[4] == true {
+        yield "visible"
+    }
+    yield "hidden-idle"
+}
+
+export craft window_count(app_id, window_app_ids) {
+    when kind(app_id) != "text" or kind(window_app_ids) != "list" or size(window_app_ids) > 256 {
+        yield -1
+    }
+    vary count := 0
+    each candidate in window_app_ids {
+        when candidate == app_id {
+            change count := count + 1
+        }
+    }
+    yield count
+}
+
+export craft activation_decision(entry, active_workspace) {
+    when not entry_valid(entry) or kind(active_workspace) != "number" or active_workspace < 0 or active_workspace > 15 {
+        yield "deny-invalid-entry"
+    }
+    when entry[5] == true {
+        yield "deny-system-entry"
+    }
+    when entry[2] != active_workspace {
+        yield "switch-workspace-and-focus"
+    }
+    when entry[4] == true {
+        yield "focus-running-app"
+    }
+    when entry[3] == true {
+        yield "jora-compose-request"
+    }
+    yield "deny-not-pinned-or-running"
+}
+
+export craft attention_decision(entry) {
+    when not entry_valid(entry) {
+        yield "invalid"
+    }
+    when entry[5] == true {
+        yield "none"
+    }
+    when entry[7] == true {
+        yield "attention"
+    }
+    yield "normal"
+}
