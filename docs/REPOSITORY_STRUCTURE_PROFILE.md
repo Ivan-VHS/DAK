@@ -11,7 +11,7 @@ This profile maps the shared logical structure to DAK's Reaper-native operating-
 | Project entry and policy | `README*.md`, `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE` | Product scope, supported targets, release boundaries and governance |
 | Architecture and status | `docs/README.md`, `docs/ARCHITECTURE.md`, `docs/FOUNDATION_ARCHITECTURE.md`, `docs/IMPLEMENTATION_STATUS.md` | Layer ownership, implementation maturity and navigation |
 | Reaper-native OS contracts | `duckos/` — especially `kernel/`, `drivers/`, `runtime/`, `graphics/`, `network/`, `security/` | Canonical DAK subsystem and hardware-facing Reaper source |
-| Kernel and boot | `kernel/`, `boot/`, `core/`, `foundation/` | Boot/runtime primitives, native core and system foundations |
+| Kernel and boot | `kernel/`, `boot/`, `foundation/` | Boot/runtime primitives, native core and system foundations |
 | Desktop and applications | `desktop/`, `projects/`, `catalogs/`, `manifests/` | Native host, application ownership, catalogues and release manifests |
 | Verification | `tests/`, `contract_tests.rpr`, `core_mvp_tests.rpr`, `system_platform_tests.rpr` | Native contracts, platform checks and host-side integration tests |
 | Machine contracts | `schemas/`, `catalogs/`, `manifests/`, `federation/` | Versioned system, device, application, deployment and federation formats |
